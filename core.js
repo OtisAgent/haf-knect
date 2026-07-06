@@ -9,6 +9,7 @@ var S = {
 // ─── Gate ──────────────────────────────────────────────────────────────────
 (function(){
   if(sessionStorage.getItem('knect_access')==='1'){KNECT_MASTER=sessionStorage.getItem('knect_master')==='1';unlock();}
+  else{render('book-delivery');}
 })();
 
 var KNECT_MASTER=false;
@@ -33,9 +34,18 @@ function gateAttempt(){
 document.getElementById('gate-user').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('gate-input').focus();});
 document.getElementById('gate-input').addEventListener('keydown',function(e){if(e.key==='Enter')gateAttempt();});
 
+function showGate(){
+  document.getElementById('gate-user').value='';
+  document.getElementById('gate-input').value='';
+  document.getElementById('gate-err').style.display='none';
+  document.getElementById('gate').style.display='flex';
+  setTimeout(function(){document.getElementById('gate-user').focus();},100);
+}
+
 function unlock(){
   document.getElementById('gate').style.display='none';
-  document.getElementById('shell').style.display='block';
+  document.getElementById('topbar-login').style.display='none';
+  document.getElementById('topbar-signout').style.display='inline-flex';
   if(KNECT_MASTER){S.role='admin';render('dash-admin');}else{render('select-role');}
 }
 
@@ -45,11 +55,10 @@ function signOut(){
   KNECT_MASTER=false;
   S={role:null,username:null,name:null,step:'select-role'};
   document.getElementById('role-chip').style.display='none';
-  document.getElementById('topbar-product').textContent='Select role';
-  document.getElementById('gate').style.display='flex';
-  document.getElementById('shell').style.display='none';
-  document.getElementById('gate-user').value='';
-  document.getElementById('gate-input').value='';
+  document.getElementById('topbar-product').textContent='';
+  document.getElementById('topbar-login').style.display='inline-flex';
+  document.getElementById('topbar-signout').style.display='none';
+  render('book-delivery');
 }
 
 // ─── Router ────────────────────────────────────────────────────────────────
