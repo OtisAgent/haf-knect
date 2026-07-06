@@ -65,7 +65,7 @@ function screenDashCustomer(){
 function screenBookDelivery(){
   return `
   <div style="max-width:560px;margin:0 auto;padding:28px 20px;">
-    <div class="back-link" onclick="render('dash-customer')">← Dashboard</div>
+    ${S.role==='customer'?'<div class="back-link" onclick="render(\'dash-customer\')">← Dashboard</div>':''}
     <div class="step-head">
       <div class="step-tag">Book a delivery</div>
       <div class="step-title">Tell us about your job</div>
