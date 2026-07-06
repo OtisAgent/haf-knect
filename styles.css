@@ -26,7 +26,7 @@ a{color:inherit;text-decoration:none;}
 #vbadge{position:fixed;top:12px;right:14px;background:var(--orange);color:#fff;font-size:10px;font-weight:800;letter-spacing:.5px;padding:3px 8px;border-radius:20px;z-index:9999;pointer-events:none;}
 
 /* GATE */
-#gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9990;}
+#gate{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:9990;}
 .gate-box{background:var(--panel);border:1.5px solid var(--line);border-radius:var(--r);padding:44px 48px;text-align:center;max-width:380px;width:92%;}
 .gate-logo{font-size:32px;font-weight:900;color:var(--orange);letter-spacing:-1.5px;margin-bottom:4px;}
 .gate-title{font-size:17px;font-weight:700;margin-bottom:6px;}
@@ -38,7 +38,9 @@ a{color:inherit;text-decoration:none;}
 .gate-err{color:var(--red);font-size:12px;margin-top:10px;}
 
 /* SHELL */
-#shell{display:none;min-height:100vh;}
+#shell{display:block;min-height:100vh;}
+.login-btn{font-size:12px;color:var(--orange);background:none;border:1px solid var(--orange);border-radius:var(--rsm);padding:6px 14px;font-weight:700;}
+.login-btn:hover{background:var(--orange);color:#fff;}
 .topbar{background:var(--panel);border-bottom:1px solid var(--line);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
 .topbar-left{display:flex;align-items:center;gap:12px;}
 .topbar-logo{font-size:20px;font-weight:900;color:var(--orange);letter-spacing:-0.8px;}
