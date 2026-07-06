@@ -18,7 +18,7 @@
   <div class="gate-box">
     <div class="gate-logo">HAF</div>
     <div class="gate-title">KNECT Platform</div>
-    <div class="gate-sub">Enter your HAF credentials to continue.</div>
+    <div class="gate-sub">Business accounts, drivers and ops — log in below.</div>
     <input id="gate-user" class="gate-input" type="text" placeholder="Username" autocomplete="username" style="margin-bottom:10px;letter-spacing:normal;text-align:left;"/>
     <input id="gate-input" class="gate-input" type="password" placeholder="Password" autocomplete="current-password" />
     <button class="gate-btn" onclick="gateAttempt()">Continue →</button>
@@ -35,7 +35,8 @@
     </div>
     <div class="topbar-right">
       <div class="role-chip" id="role-chip" style="display:none"></div>
-      <button class="signout-btn" onclick="signOut()">Sign out</button>
+      <button class="login-btn" id="topbar-login" onclick="showGate()">Login →</button>
+      <button class="signout-btn" id="topbar-signout" onclick="signOut()" style="display:none">Sign out</button>
     </div>
   </div>
   <div id="content"></div>
