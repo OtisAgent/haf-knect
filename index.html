@@ -404,7 +404,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 </head>
 <body>
 
-<div class="vbadge">v3.6.2</div>
+<div class="vbadge">v3.6.3</div>
 
 
 <!-- ══ LANDING ════════════════════════════════════════════════════ -->
@@ -687,6 +687,17 @@ textarea.fi2{resize:vertical;min-height:70px}
               </div>
               <button class="btn btn-or btn-wide" onclick="closeInlineFlow()">Done</button>
             </div>
+          </div>
+
+          <!-- ── DEMO GATE — replaces confirmation in demo mode ── -->
+          <div id="demo-gate" style="display:none;text-align:center;padding:1.2rem 0 .8rem">
+            <div style="width:52px;height:52px;border-radius:50%;background:var(--or-d);border:2px solid var(--or-g);display:flex;align-items:center;justify-content:center;margin:0 auto .9rem">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div style="font-family:var(--dp);font-weight:900;font-size:1.15rem;letter-spacing:-.04em;margin-bottom:.4rem">Demo only — booking not placed</div>
+            <p style="font-size:.84rem;color:var(--mu);line-height:1.7;margin-bottom:1.4rem;max-width:300px;margin-left:auto;margin-right:auto">This is a live demo. Your details have been captured but no real booking has been made. Contact HAF to arrange your actual delivery.</p>
+            <button class="btn btn-or btn-wide" style="margin-bottom:.5rem" onclick="window.location='tel:+441234567890'">Call HAF to book for real →</button>
+            <button class="btn btn-gh btn-wide" onclick="closeInlineFlow()">&#8592; Back to start</button>
           </div>
 
         </div><!-- /calc-box -->
@@ -1148,9 +1159,11 @@ function openFlow(type){
 function closeInlineFlow(){
   document.body.classList.remove('tile-focus');
   document.getElementById('inline-flow').style.display='none';
+  const gate=document.getElementById('demo-gate');if(gate)gate.style.display='none';
   ['fast','repeat','pick'].forEach(t=>{
     const wrap=document.getElementById('if-'+t);
     if(!wrap)return;
+    wrap.style.display='none';
     wrap.querySelectorAll('.fstep').forEach(s=>s.classList.remove('on'));
     const first=wrap.querySelector('.fstep');
     if(first)first.classList.add('on');
@@ -1248,11 +1261,7 @@ function fqShowPrice(){
   document.getElementById('fq-pr-basis').textContent=r.v.n+' · '+r.fr+' → '+r.to+' · ~'+r.miles+' mi · '+r.u.n;
   fqStep(6);
 }
-function fqBook(){
-  const ref='HAF-'+(Math.floor(Math.random()*9000)+1000);
-  document.getElementById('fq-ref').textContent=ref;
-  fqStep('done');
-}
+function fqBook(){openDemoGate();}
 
 /* REPEAT ORDER */
 const RO_DB={'HAF-2847':{route:'Manchester M1 → Leeds LS1',van:'Long wheelbase',date:'5 Jul 2026',amount:'£94'},'KN-471293':{route:'Sheffield S9 → Nottingham NG1',van:'Short wheelbase',date:'2 Jul 2026',amount:'£67'}};
@@ -1267,11 +1276,7 @@ function roLookup(){
   document.getElementById('ro-found').innerHTML='<strong>'+ref+'</strong><br>'+d.route+'<br>'+d.van+' · '+d.date+' · '+d.amount;
   roStep(2);
 }
-function roBook(){
-  const ref='HAF-'+(Math.floor(Math.random()*9000)+1000);
-  document.getElementById('ro-newref').textContent=ref;
-  roStep('done');
-}
+function roBook(){openDemoGate();}
 
 /* HAF PICK */
 const hpData={};
@@ -1298,10 +1303,14 @@ function hpEstimate(){
   document.getElementById('hp-pr-basis').textContent=fr+' → '+to+' · est. '+miles+' mi';
   hpStep(4);
 }
-function hpBook(){
-  const ref='HAF-'+(Math.floor(Math.random()*9000)+1000);
-  document.getElementById('hp-ref').textContent=ref;
-  hpStep('done');
+function hpBook(){openDemoGate();}
+function openDemoGate(){
+  document.getElementById('if-title').textContent='Demo only';
+  ['fast','repeat','pick'].forEach(t=>{
+    const w=document.getElementById('if-'+t);if(w)w.style.display='none';
+  });
+  const gate=document.getElementById('demo-gate');
+  if(gate)gate.style.display='block';
 }
 
 /* ── LOGIN ── */
