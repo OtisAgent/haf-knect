@@ -154,7 +154,12 @@ body.tile-focus #tiles-wrap{display:none!important}
 body.tile-focus #side-talk{display:none!important}
 body.tile-focus .land-main>.calc-box{display:none!important}
 body.tile-focus .land-side{display:flex!important}
-@media(max-width:860px){body.tile-focus .land-body{display:flex;flex-direction:column}body.tile-focus .land-side{display:flex!important;order:2}}
+/* stretch flow panel to match login card height */
+body.tile-focus .land-body{align-items:stretch}
+body.tile-focus .land-main{display:flex;flex-direction:column}
+body.tile-focus #inline-flow{flex:1;display:flex;flex-direction:column}
+body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column}
+@media(max-width:860px){body.tile-focus .land-body{display:flex;flex-direction:column}body.tile-focus .land-side{display:flex!important;order:2}body.tile-focus #inline-flow{flex:none}}
 
 /* STEP ERROR MESSAGE */
 .fstep-err{display:none;font-size:.72rem;color:var(--rd);font-weight:600;margin:.45rem 0 -.15rem}
