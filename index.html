@@ -42,12 +42,12 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 /* ── VERSION ─── */
 .vbadge{position:fixed;bottom:14px;right:14px;z-index:9999;background:var(--or);color:#0e1113;font-family:var(--dp);font-weight:900;font-size:.6rem;letter-spacing:.08em;padding:.18rem .5rem;border-radius:var(--pill);pointer-events:none}
 
-/* ── DEMO BAR ── */
-.demo-bar{background:#0a0c0e;border-bottom:1px solid rgba(255,255,255,.08);padding:.35rem 1.2rem;display:flex;align-items:center;gap:.45rem;overflow-x:auto;flex-shrink:0}
-.demo-lbl{font-size:.62rem;font-weight:700;letter-spacing:.1em;color:#4f5a62;text-transform:uppercase;white-space:nowrap;margin-right:.3rem}
-.dp{font-size:.68rem;font-weight:600;padding:.22rem .7rem;border-radius:var(--pill);border:1px solid rgba(255,255,255,.12);color:#8a9298;white-space:nowrap;cursor:pointer;transition:all .14s}
-.dp:hover{border-color:var(--or);color:var(--or)}
-.dp.on{background:var(--or);color:#0e1113;border-color:var(--or)}
+/* ── DEMO REQUEST FORM ── */
+.dr-form{margin-top:.85rem}
+.dr-success{display:none;text-align:center;padding:1.2rem 0}
+.dr-success-ic{font-size:1.6rem;margin-bottom:.4rem;color:var(--or)}
+.dr-success-h{font-weight:700;font-size:.9rem;margin-bottom:.3rem}
+.dr-success-p{font-size:.74rem;color:var(--mu);line-height:1.55}
 
 /* ── BUTTONS ── */
 .btn{display:inline-flex;align-items:center;gap:.35rem;font-weight:700;font-size:.82rem;letter-spacing:.01em;border-radius:var(--pill);padding:.52rem 1.25rem;transition:all .14s;cursor:pointer;line-height:1;white-space:nowrap}
@@ -382,18 +382,6 @@ textarea.fi2{resize:vertical;min-height:70px}
 
 <div class="vbadge">v3.6</div>
 
-<!-- DEMO BAR -->
-<div class="demo-bar" id="demo-bar">
-  <span class="demo-lbl">Demo:</span>
-  <button class="dp" onclick="demoLogin('customer')">Customer</button>
-  <button class="dp" onclick="demoLogin('business')">Business</button>
-  <button class="dp" onclick="demoLogin('freight')">Freight Forwarder</button>
-  <button class="dp" onclick="demoLogin('driver-pending')">Driver (Pending)</button>
-  <button class="dp" onclick="demoLogin('driver-active')">Driver (Active)</button>
-  <button class="dp" onclick="demoLogin('biz-freight')">Biz + Freight</button>
-  <button class="dp" onclick="demoLogin('admin')">Admin</button>
-  <button class="dp" onclick="goLanding()" style="margin-left:auto">Back to landing</button>
-</div>
 
 <!-- ══ LANDING ════════════════════════════════════════════════════ -->
 <div id="landing">
@@ -704,7 +692,7 @@ textarea.fi2{resize:vertical;min-height:70px}
           <span class="sc-lbl">Password</span>
           <input class="sc-inp" id="sc-pass" placeholder="Password" type="password">
         </div>
-        <div class="sc-err" id="sc-err">Use a demo account button above to try the platform.</div>
+        <div class="sc-err" id="sc-err"></div>
         <button class="btn btn-or btn-wide" onclick="scLogin()" style="margin-top:.3rem">Log in →</button>
         <p class="sc-foot">No account? <a href="https://clever.usehaf.co.uk" target="_blank">Create one via CleverPay</a></p>
       </div>
@@ -719,6 +707,23 @@ textarea.fi2{resize:vertical;min-height:70px}
             <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             WhatsApp HAF
           </a>
+        </div>
+        <div class="dr-form">
+          <div style="height:1px;background:var(--ln);margin:.9rem 0"></div>
+          <div class="sc-title" style="margin-bottom:.3rem">Request a demo</div>
+          <p style="font-size:.74rem;color:var(--mu);margin-bottom:.9rem;line-height:1.55">See KNECT in action. We'll walk you through the platform live.</p>
+          <div id="dr-form-fields">
+            <div class="sc-fi"><span class="sc-lbl">Your name</span><input class="sc-inp" id="dr-name" placeholder="Jane Smith" autocomplete="name"></div>
+            <div class="sc-fi"><span class="sc-lbl">Company</span><input class="sc-inp" id="dr-company" placeholder="Acme Logistics"></div>
+            <div class="sc-fi"><span class="sc-lbl">Email</span><input class="sc-inp" id="dr-email" type="email" placeholder="jane@company.com" autocomplete="email"></div>
+            <div class="sc-err" id="dr-err" style="display:none"></div>
+            <button class="btn btn-or btn-wide" onclick="submitDemoReq()" style="margin-top:.5rem">Request a demo →</button>
+          </div>
+          <div class="dr-success" id="dr-success">
+            <div class="dr-success-ic">✓</div>
+            <div class="dr-success-h">Request received</div>
+            <p class="dr-success-p">We'll be in touch shortly to arrange your walkthrough.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -738,7 +743,7 @@ textarea.fi2{resize:vertical;min-height:70px}
     <p>Enter your HAF username and password to access your account.</p>
     <div class="of"><label class="ol">HAF username</label><input class="oi" id="l-user" placeholder="e.g. JW012390" autocomplete="off"></div>
     <div class="of"><label class="ol">Password</label><input class="oi" id="l-pass" placeholder="Password" type="password"></div>
-    <div class="oe" id="l-err">Use the demo buttons at the top to log in as any account type.</div>
+    <div class="oe" id="l-err"></div>
     <button class="btn btn-or btn-wide" onclick="doLogin()">Sign in →</button>
     <p style="font-size:.72rem;color:var(--mu);text-align:center;margin-top:.8rem">No account? <a href="https://clever.usehaf.co.uk" target="_blank">Create one via CleverPay</a></p>
   </div>
@@ -1186,40 +1191,27 @@ function signOut(){goLanding()}
 function toggleSb(){document.getElementById('sidebar').classList.toggle('open')}
 function toggleAvail(){document.getElementById('avail-lbl').textContent=document.getElementById('avail-tog').checked?'Available — Taking jobs':'Offline — Not taking jobs'}
 
-/* ── ACCOUNTS ── */
-const ACCS={
-  customer:{n:'Jordan Williams',u:'JW012390',i:'JW',r:'Customer',rc:'cb',
-    tabs:[{id:'d-status',l:'My Status',ico:'<circle cx="12" cy="12" r="3"/>',s:'OVERVIEW'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'}],def:'d-status',cp:'green'},
-  business:{n:'Apex Logistics Ltd',u:'AL448793',i:'AL',r:'Business',rc:'co',
-    tabs:[{id:'b-book',l:'Book a Courier',ico:'<path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16"/>',s:'BOOKINGS'},{id:'b-del',l:'My Deliveries',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',s:'BOOKINGS'},{id:'b-spend',l:'Spend & Rebate',ico:'<line x1="12" y1="1" x2="12" y2="23"/>',s:'ACCOUNT'},{id:'b-saved',l:'Saved Addresses',ico:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>',s:'ACCOUNT'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'}],def:'b-book',cp:'green'},
-  freight:{n:'NorthFreight UK',u:'NF992190',i:'NF',r:'Freight Forwarder',rc:'cb',
-    tabs:[{id:'f-post',l:'Post a Load',ico:'<line x1="12" y1="5" x2="12" y2="19"/>',s:'FREIGHT'},{id:'f-cap',l:'Network Capacity',ico:'<circle cx="12" cy="12" r="10"/>',s:'FREIGHT'},{id:'f-lanes',l:'Lane Pricing',ico:'<line x1="12" y1="1" x2="12" y2="23"/>',s:'FREIGHT'},{id:'f-loads',l:'Active Loads',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',s:'FREIGHT'},{id:'f-cover',l:'Coverage Board',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',s:'FREIGHT'},{id:'f-account',l:'Account Controls',ico:'<rect x="2" y="7" width="20" height="14" rx="2"/>',s:'ACCOUNT'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'}],def:'f-post',cp:'green'},
-  'driver-pending':{n:'Alex Johnson',u:'AJ449291',i:'AJ',r:'Driver (Pending)',rc:'ca',
-    tabs:[{id:'d-status',l:'My Status',ico:'<circle cx="12" cy="12" r="3"/>',s:'DRIVER'},{id:'d-comp',l:'Compliance',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',s:'DRIVER'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'}],def:'d-comp',cp:'amber'},
-  'driver-active':{n:'Marcus Reid',u:'MR668793',i:'MR',r:'Driver (Active)',rc:'cg',
-    tabs:[{id:'d-status',l:'My Status',ico:'<circle cx="12" cy="12" r="3"/>',s:'DRIVER'},{id:'d-invites',l:'Job Invites',ico:'<path d="M22 16.92v3"/>',s:'DRIVER',badge:'2'},{id:'d-jobs',l:'Available Jobs',ico:'<circle cx="12" cy="12" r="10"/>',s:'DRIVER'},{id:'d-empty',l:'Empty Miles',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',s:'DRIVER'},{id:'d-earn',l:'Earnings',ico:'<line x1="12" y1="1" x2="12" y2="23"/>',s:'DRIVER'},{id:'d-comp',l:'Compliance',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',s:'DRIVER'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'}],def:'d-status',cp:'green'},
-  'biz-freight':{n:'Castle Distribution',u:'CD771292',i:'CD',r:'Biz + Freight',rc:'co',
-    tabs:[{id:'b-book',l:'Book a Courier',ico:'<path d="M20 7H4"/>',s:'BOOKINGS'},{id:'b-del',l:'My Deliveries',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',s:'BOOKINGS'},{id:'f-post',l:'Post a Load',ico:'<line x1="12" y1="5" x2="12" y2="19"/>',s:'FREIGHT'},{id:'f-loads',l:'Active Loads',ico:'<circle cx="12" cy="12" r="10"/>',s:'FREIGHT'},{id:'f-lanes',l:'Lane Pricing',ico:'<line x1="12" y1="1" x2="12" y2="23"/>',s:'FREIGHT'},{id:'b-spend',l:'Spend & Rebate',ico:'<line x1="12" y1="1" x2="12" y2="23"/>',s:'ACCOUNT'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'}],def:'b-book',cp:'green'},
-  admin:{n:'Brent Ford',u:'BF638793',i:'BF',r:'Admin',rc:'cr2',
-    tabs:[{id:'d-status',l:'My Status',ico:'<circle cx="12" cy="12" r="3"/>',s:'DRIVER'},{id:'d-jobs',l:'Available Jobs',ico:'<circle cx="12" cy="12" r="10"/>',s:'DRIVER'},{id:'b-book',l:'Book a Courier',ico:'<path d="M20 7H4"/>',s:'BOOKINGS'},{id:'b-del',l:'My Deliveries',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',s:'BOOKINGS'},{id:'f-post',l:'Post a Load',ico:'<line x1="12" y1="5" x2="12" y2="19"/>',s:'FREIGHT'},{id:'f-cap',l:'Network Capacity',ico:'<circle cx="12" cy="12" r="10"/>',s:'FREIGHT'},{id:'f-loads',l:'Active Loads',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',s:'FREIGHT'},{id:'f-cover',l:'Coverage Board',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',s:'FREIGHT'},{id:'d-comp',l:'Compliance',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',s:'COMPLIANCE'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'},{id:'admin',l:'OTIS Control',ico:'<circle cx="12" cy="12" r="3"/>',s:'ADMIN'}],def:'admin',cp:'green'}
-};
-
-function demoLogin(key){
-  const a=ACCS[key];if(!a)return;
-  document.querySelectorAll('.dp').forEach(p=>p.classList.remove('on'));
-  const pills=document.querySelectorAll('.dp');
-  const map={customer:0,business:1,freight:2,'driver-pending':3,'driver-active':4,'biz-freight':5,admin:6};
-  if(map[key]!==undefined)pills[map[key]].classList.add('on');
-  document.getElementById('tb-user').textContent=a.u;
-  document.getElementById('tb-av').textContent=a.i;
-  const rc=document.getElementById('tb-role');
-  rc.className='role-chip chip '+a.rc;rc.textContent=a.r;
-  setComp(a.cp,a.u);
-  buildNav(a.tabs);
-  document.getElementById('landing').style.display='none';
-  document.getElementById('login-ov').classList.remove('open');
-  document.getElementById('app').classList.add('open');
-  switchTab('pane-'+a.def);
+/* ── DEMO REQUEST ── */
+function submitDemoReq(){
+  const name=document.getElementById('dr-name').value.trim();
+  const email=document.getElementById('dr-email').value.trim();
+  const company=document.getElementById('dr-company').value.trim();
+  const err=document.getElementById('dr-err');
+  if(!name||!email){err.textContent='Please enter your name and email.';err.style.display='block';return;}
+  err.style.display='none';
+  window._mcDemoReq=function(data){
+    if(data.result==='success'){
+      document.getElementById('dr-form-fields').style.display='none';
+      document.getElementById('dr-success').style.display='block';
+    }else{
+      err.textContent=(data.msg||'Something went wrong — please try again.').replace(/<[^>]+>/g,'');
+      err.style.display='block';
+    }
+  };
+  const p=new URLSearchParams({u:'e74ba6ad9a8846214c9d6aad4',id:'79da7debac',EMAIL:email,FNAME:name,MMERGE6:company,MMERGE7:'Demo Request',c:'_mcDemoReq'});
+  const s=document.createElement('script');
+  s.src='https://usehaf.us3.list-manage.com/subscribe/post-json?'+p;
+  document.head.appendChild(s);
 }
 function setComp(s,u){
   const sp=document.getElementById('d-comp-sp');if(!sp)return;
