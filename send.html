@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAF KNECT — Courier Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="k3-s1.css">
+<link rel="stylesheet" href="k3-s2.css">
+<link rel="stylesheet" href="k3-s3.css">
+<link rel="stylesheet" href="k3-s4.css">
+<style>
+#vbadge{position:fixed;bottom:12px;right:14px;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--muted);background:var(--panel-2);border:1px solid var(--line-strong);border-radius:6px;padding:3px 8px;z-index:999;pointer-events:none}
+.hn{display:flex;justify-content:space-between;align-items:center;padding:18px 32px;position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:50}
+.hn-logo{font-family:var(--display);font-weight:800;font-size:17px;letter-spacing:-.02em;color:var(--text)}
+.hn-logo span{color:var(--orange)}
+.hw{max-width:860px;margin:0 auto;padding:72px 32px 100px}
+.hbadge{display:inline-flex;align-items:center;gap:8px;background:rgba(241,142,0,.1);border:1px solid rgba(241,142,0,.28);border-radius:var(--pill);padding:5px 16px;font-size:11px;font-weight:700;color:var(--orange);letter-spacing:.06em;text-transform:uppercase;margin-bottom:32px}
+.ht{font-family:var(--display);font-size:clamp(2.2rem,5.5vw,3.8rem);font-weight:800;line-height:1.08;letter-spacing:-.03em;color:var(--text);margin-bottom:20px}
+.ht span{color:var(--orange)}
+.hs{font-size:1.05rem;color:var(--muted);line-height:1.68;max-width:520px;margin-bottom:48px}
+.hpills{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:52px}
+.hpill{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line-strong);border-radius:var(--radius-xs);padding:10px 16px;font-size:13px;color:var(--text)}
+.hpill-dot{width:6px;height:6px;border-radius:50%;background:var(--orange);flex-shrink:0}
+.hfooter{border-top:1px solid var(--line);padding-top:28px;margin-top:80px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.hft{font-size:11px;color:var(--muted)}
+.hft a{color:var(--muted);text-decoration:underline}
+@media(max-width:600px){.hn{padding:16px 20px}.hw{padding:48px 20px 80px}}
+</style>
+</head>
+<body>
+<nav class="hn">
+  <div class="hn-logo">HAF <span>KNECT</span></div>
+  <a class="btn btn-primary" href="login.html">Log in →</a>
+</nav>
+<div class="hw">
+  <div class="hbadge">V3.5.5 · Private Pilot</div>
+  <h1 class="ht">The courier platform<br>for freight <span>professionals</span></h1>
+  <p class="hs">Post a job, get a live price, get matched to the right driver. KNECT connects businesses, drivers and freight forwarders across the UK in one network.</p>
+  <div class="hpills">
+    <div class="hpill"><div class="hpill-dot"></div>Live pricing — no phone calls</div>
+    <div class="hpill"><div class="hpill-dot"></div>Matched drivers, same day</div>
+    <div class="hpill"><div class="hpill-dot"></div>Driver availability via PLNA</div>
+    <div class="hpill"><div class="hpill-dot"></div>Full compliance via CleverPay</div>
+  </div>
+  <a class="btn btn-primary" style="font-size:15px;padding:14px 28px" href="login.html">Log in to Command Centre →</a>
+  <div class="hfooter">
+    <div class="hft">HAF KNECT is in private pilot · Access by invitation only</div>
+    <div class="hft">© 2026 HAF Logistics Ltd · <a href="https://usehaf.co.uk" target="_blank">usehaf.co.uk</a></div>
+  </div>
+</div>
+<div id="vbadge">v3.5.5</div>
+</body>
+</html>
