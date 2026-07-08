@@ -149,6 +149,14 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 .tr-status{font-family:var(--dp);font-weight:900;font-size:1rem;margin-bottom:.15rem}
 .tr-route{font-size:.77rem;color:var(--mu)}
 
+/* TILE FOCUS MODE — only inline-flow + login card visible */
+body.tile-focus .land-hero{display:none}
+body.tile-focus .calc-box{display:none!important}
+body.tile-focus #tiles-wrap{display:none!important}
+body.tile-focus #side-talk{display:none!important}
+body.tile-focus .land-side{display:flex!important}
+@media(max-width:860px){body.tile-focus .land-body{grid-template-columns:1fr}body.tile-focus .land-side{display:flex!important}}
+
 /* SECONDARY ACTIONS */
 .sec-acts{display:flex;align-items:center;gap:1.2rem;padding:.3rem 0}
 .sec-link{font-size:.8rem;font-weight:600;color:var(--mu);cursor:pointer;transition:color .14s}
@@ -705,7 +713,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         <button class="btn btn-or btn-wide" onclick="scLogin()" style="margin-top:.3rem">Log in →</button>
         <p class="sc-foot">No account? <a href="https://clever.usehaf.co.uk" target="_blank">Create one via CleverPay</a></p>
       </div>
-      <div class="side-card">
+      <div class="side-card" id="side-talk">
         <div class="sc-title">Talk to HAF</div>
         <div class="sc-btns">
           <a href="tel:+441234567890" class="sc-contact-btn">
@@ -1106,17 +1114,17 @@ function doTrack(){
 /* ── CUSTOMER FLOWS (inline, no modal) ── */
 const FLOW_TITLES={fast:'Fast Quote',repeat:'Repeat an order',pick:'HAF Pick'};
 function openFlow(type){
-  document.getElementById('tiles-wrap').style.display='none';
+  document.body.classList.add('tile-focus');
   document.getElementById('inline-flow').style.display='block';
   ['fast','repeat','pick'].forEach(t=>{
     document.getElementById('if-'+t).style.display=t===type?'block':'none';
   });
   document.getElementById('if-title').textContent=FLOW_TITLES[type]||'';
-  document.getElementById('inline-flow').scrollIntoView({behavior:'smooth',block:'nearest'});
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 function closeInlineFlow(){
+  document.body.classList.remove('tile-focus');
   document.getElementById('inline-flow').style.display='none';
-  document.getElementById('tiles-wrap').style.display='block';
   ['fast','repeat','pick'].forEach(t=>{
     const wrap=document.getElementById('if-'+t);
     if(!wrap)return;
