@@ -2,52 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HAF KNECT</title>
-<link rel="stylesheet" href="styles.css">
+<meta http-equiv="refresh" content="0; url=send.html">
 </head>
 <body>
-</head>
-<body>
-
-<!-- VERSION BADGE -->
-<div id="vbadge">v2.0</div>
-
-<!-- ACCESS GATE -->
-<div id="gate">
-  <div class="gate-box">
-    <div class="gate-logo">HAF</div>
-    <div class="gate-title">KNECT Platform</div>
-    <div class="gate-sub">Business accounts, drivers and ops — log in below.</div>
-    <input id="gate-user" class="gate-input" type="text" placeholder="Username" autocomplete="username" style="margin-bottom:10px;letter-spacing:normal;text-align:left;"/>
-    <input id="gate-input" class="gate-input" type="password" placeholder="Password" autocomplete="current-password" />
-    <button class="gate-btn" onclick="gateAttempt()">Continue →</button>
-    <div id="gate-err" class="gate-err" style="display:none">Incorrect credentials. Try again.</div>
-  </div>
-</div>
-
-<!-- MAIN SHELL -->
-<div id="shell">
-  <div class="topbar">
-    <div class="topbar-left">
-      <div class="topbar-logo">HAF KNECT</div>
-      <div class="topbar-product" id="topbar-product">Select role</div>
-    </div>
-    <div class="topbar-right">
-      <div class="role-chip" id="role-chip" style="display:none"></div>
-      <button class="login-btn" id="topbar-login" onclick="showGate()">Login →</button>
-      <button class="signout-btn" id="topbar-signout" onclick="signOut()" style="display:none">Sign out</button>
-    </div>
-  </div>
-  <div id="content"></div>
-</div>
-<script src="core.js"></script>
-<script src="screens-a.js"></script>
-<script src="screens-b.js"></script>
-<script src="biz-a.js"></script>
-<script src="biz-b.js"></script>
-<script src="biz-c.js"></script>
-<script src="biz-d.js"></script>
-<script src="biz-e.js"></script>
+<script>window.location.replace('send.html');</script>
 </body>
 </html>
