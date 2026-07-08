@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache">
-<title>HAF KNECT — Send a delivery</title>
+<title>HAF KNECT — Platform Demo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
@@ -41,6 +41,27 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 
 /* ── VERSION ─── */
 .vbadge{position:fixed;bottom:14px;right:14px;z-index:9999;background:var(--or);color:#0e1113;font-family:var(--dp);font-weight:900;font-size:.6rem;letter-spacing:.08em;padding:.18rem .5rem;border-radius:var(--pill);pointer-events:none}
+
+/* ── PLAN BADGE ── */
+.plan-badge{display:inline-flex;align-items:center;padding:.12rem .55rem;border-radius:var(--pill);font-size:.6rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.pb-free{background:rgba(155,160,168,.14);color:var(--mu);border:1px solid rgba(155,160,168,.22)}
+.pb-starter{background:var(--bl-d);color:var(--bl);border:1px solid rgba(61,125,202,.22)}
+.pb-plus{background:var(--or-d);color:var(--or);border:1px solid var(--or-g)}
+.pb-pro{background:rgba(139,92,246,.12);color:#7c3aed;border:1px solid rgba(139,92,246,.25)}
+.pb-ent{background:var(--gn-d);color:var(--gn);border:1px solid rgba(45,171,96,.22)}
+.pb-founder{background:rgba(217,146,11,.12);color:#8a5e00;border:1px solid rgba(217,146,11,.28)}
+.pb-lite{background:rgba(155,160,168,.1);color:var(--su);border:1px solid rgba(155,160,168,.18)}
+/* locked feature overlay */
+.feat-locked{position:relative}
+.feat-locked::after{content:'Upgrade to unlock';position:absolute;inset:0;background:rgba(var(--bg-rgb,245,243,239),.82);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--mu);border-radius:var(--rx);cursor:default}
+.lock-wrap{position:relative;border-radius:var(--rx);overflow:hidden}
+.lock-cover{position:absolute;inset:0;background:rgba(245,243,239,.88);backdrop-filter:blur(4px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;z-index:10;border-radius:inherit}
+[data-theme=dark] .lock-cover{background:rgba(14,17,19,.88)}
+.lock-cover .lc-msg{font-size:.78rem;font-weight:700;color:var(--mu)}
+.lock-cover .lc-plan{font-size:.68rem;color:var(--su);margin-top:-.2rem}
+/* demo mode notice */
+.demo-notice{background:rgba(61,125,202,.08);border:1px solid rgba(61,125,202,.18);border-radius:var(--rx);padding:.6rem 1rem;font-size:.74rem;color:var(--bl);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.demo-notice svg{flex-shrink:0;width:13px;height:13px;stroke:var(--bl);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 /* ── DEMO BAR ── */
 .demo-bar{background:#0a0c0e;border-bottom:1px solid rgba(255,255,255,.08);padding:.35rem 1.2rem;display:flex;align-items:center;gap:.45rem;overflow-x:auto;flex-shrink:0}
@@ -380,19 +401,18 @@ textarea.fi2{resize:vertical;min-height:70px}
 </head>
 <body>
 
-<div class="vbadge">v3.6</div>
+<div class="vbadge">Demo</div>
 
 <!-- DEMO BAR -->
 <div class="demo-bar" id="demo-bar">
-  <span class="demo-lbl">Demo:</span>
+  <span class="demo-lbl">Try a view:</span>
   <button class="dp" onclick="demoLogin('customer')">Customer</button>
-  <button class="dp" onclick="demoLogin('business')">Business</button>
-  <button class="dp" onclick="demoLogin('freight')">Freight Forwarder</button>
-  <button class="dp" onclick="demoLogin('driver-pending')">Driver (Pending)</button>
-  <button class="dp" onclick="demoLogin('driver-active')">Driver (Active)</button>
-  <button class="dp" onclick="demoLogin('biz-freight')">Biz + Freight</button>
-  <button class="dp" onclick="demoLogin('admin')">Admin</button>
-  <button class="dp" onclick="goLanding()" style="margin-left:auto">Back to landing</button>
+  <button class="dp" onclick="demoLogin('biz-pro')">Business — Pro</button>
+  <button class="dp" onclick="demoLogin('freight-pro')">Freight — Pro</button>
+  <button class="dp" onclick="demoLogin('plna-plus')">PLNA Driver — Plus</button>
+  <button class="dp" onclick="demoLogin('knect-free')">KNECT — Free</button>
+  <button class="dp" onclick="demoLogin('knect-founder')">KNECT — Founder</button>
+  <button class="dp" onclick="goLanding()" style="margin-left:auto">Back to home</button>
 </div>
 
 <!-- ══ LANDING ════════════════════════════════════════════════════ -->
@@ -759,6 +779,7 @@ textarea.fi2{resize:vertical;min-height:70px}
     <div class="tb-r">
       <span class="tb-user" id="tb-user">—</span>
       <span class="role-chip chip" id="tb-role">—</span>
+      <span class="plan-badge" id="tb-plan" style="display:none">—</span>
       <button class="ib" title="Toggle theme" onclick="toggleTheme()">
         <svg id="app-theme-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
       </button>
@@ -977,6 +998,59 @@ textarea.fi2{resize:vertical;min-height:70px}
         </div>
       </div>
 
+      <!-- CUSTOMER: Track Delivery -->
+      <div class="tp" id="pane-cust-track">
+        <h1 class="pt">Track Your Delivery</h1><p class="ps">Enter your reference number to see live status.</p>
+        <div class="card" style="max-width:480px">
+          <div class="ct">Track a delivery</div>
+          <div style="display:flex;gap:.5rem;margin-bottom:.85rem">
+            <input class="fi2" id="ct-ref" placeholder="e.g. HAF-2847" style="flex:1">
+            <button class="btn btn-or btn-sm" onclick="ctLookup()">Track →</button>
+          </div>
+          <div id="ct-result" style="display:none;padding:.85rem 1rem;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln)">
+            <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;color:var(--or);text-transform:uppercase;margin-bottom:.3rem" id="ct-refout">—</div>
+            <div style="font-family:var(--dp);font-weight:900;font-size:1rem;margin-bottom:.15rem" id="ct-status">—</div>
+            <div style="font-size:.77rem;color:var(--mu)" id="ct-route">—</div>
+            <div style="margin-top:.85rem;display:flex;gap:.45rem">
+              <button class="btn btn-or btn-sm" onclick="switchTab('pane-cust-pod')">View POD →</button>
+              <button class="btn btn-gh btn-sm" onclick="window.open('https://wa.me/441234567890','_blank')">WhatsApp HAF</button>
+            </div>
+          </div>
+          <p style="font-size:.7rem;color:var(--su);margin-top:.55rem;line-height:1.55">Try: HAF-2847 · HAF-2831 · HAF-2853</p>
+        </div>
+      </div>
+
+      <!-- CUSTOMER: Proof of Delivery -->
+      <div class="tp" id="pane-cust-pod">
+        <h1 class="pt">Proof of Delivery</h1><p class="ps">Signed PODs and delivery photos for your orders.</p>
+        <div class="card"><div class="ct">Recent PODs</div><table class="dt"><thead><tr><th>Ref</th><th>Route</th><th>Delivered</th><th>Signed by</th><th>POD</th></tr></thead><tbody>
+          <tr><td>HAF-2847</td><td>Manchester → Leeds</td><td>5 Jul 14:22</td><td>J. Smith (Reception)</td><td><button class="btn btn-gh btn-xs">View</button></td></tr>
+          <tr><td>HAF-2819</td><td>Sheffield → Derby</td><td>3 Jul 11:05</td><td>T. Brown (Warehouse)</td><td><button class="btn btn-gh btn-xs">View</button></td></tr>
+          <tr><td>HAF-2804</td><td>Liverpool → Chester</td><td>1 Jul 15:48</td><td>Auto-signed</td><td><button class="btn btn-gh btn-xs">View</button></td></tr>
+        </tbody></table></div>
+        <div class="card" style="max-width:380px">
+          <div class="ct">POD detail — HAF-2847</div>
+          <div style="background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);height:120px;display:flex;align-items:center;justify-content:center;margin-bottom:.85rem;color:var(--su);font-size:.8rem;font-weight:600">Delivery photo stored securely</div>
+          <div class="cr"><span class="ck">Delivered</span><span class="cv">5 Jul 2026 · 14:22</span></div>
+          <div class="cr"><span class="ck">Signed by</span><span class="cv">J. Smith — Reception</span></div>
+          <div class="cr"><span class="ck">Location</span><span class="cv">LS1 2AB</span></div>
+          <div class="cr"><span class="ck">Driver</span><span class="cv">HAF Verified Driver</span></div>
+          <button class="btn btn-gh btn-sm" style="margin-top:.85rem">Download PDF</button>
+        </div>
+      </div>
+
+      <!-- CUSTOMER: My Orders -->
+      <div class="tp" id="pane-cust-orders">
+        <h1 class="pt">My Orders</h1><p class="ps">Deliveries you've booked with HAF.</p>
+        <div class="card"><table class="dt"><thead><tr><th>Ref</th><th>Route</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead><tbody>
+          <tr><td>HAF-2847</td><td>Manchester → Leeds</td><td>5 Jul</td><td>£94</td><td><span class="chip cg">Delivered</span></td></tr>
+          <tr><td>HAF-2831</td><td>Birmingham → Nottingham</td><td>8 Jul</td><td>£67</td><td><span class="chip cb">In transit</span></td></tr>
+          <tr><td>HAF-2819</td><td>Sheffield → Derby</td><td>3 Jul</td><td>£112</td><td><span class="chip cg">Delivered</span></td></tr>
+          <tr><td>HAF-2804</td><td>Liverpool → Chester</td><td>1 Jul</td><td>£48</td><td><span class="chip cg">Delivered</span></td></tr>
+        </tbody></table></div>
+        <button class="btn btn-or btn-sm">Book new delivery →</button>
+      </div>
+
       <!-- ADMIN -->
       <div class="tp" id="pane-admin">
         <h1 class="pt">OTIS Control</h1><p class="ps">Full platform view. Admin only.</p>
@@ -1188,32 +1262,32 @@ function toggleAvail(){document.getElementById('avail-lbl').textContent=document
 
 /* ── ACCOUNTS ── */
 const ACCS={
-  customer:{n:'Jordan Williams',u:'JW012390',i:'JW',r:'Customer',rc:'cb',
-    tabs:[{id:'d-status',l:'My Status',ico:'<circle cx="12" cy="12" r="3"/>',s:'OVERVIEW'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'}],def:'d-status',cp:'green'},
-  business:{n:'Apex Logistics Ltd',u:'AL448793',i:'AL',r:'Business',rc:'co',
+  customer:{n:'Jordan Williams',u:'JW012390',i:'JW',r:'Customer',rc:'cb',plan:null,planClass:null,
+    tabs:[{id:'cust-track',l:'Track Delivery',ico:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',s:'DELIVERY'},{id:'cust-pod',l:'Proof of Delivery',ico:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',s:'DELIVERY'},{id:'cust-orders',l:'My Orders',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'}],def:'cust-track',cp:'green'},
+  'biz-pro':{n:'Apex Logistics Ltd',u:'AL448793',i:'AL',r:'Business Account',rc:'co',plan:'Pro',planClass:'pb-pro',
     tabs:[{id:'b-book',l:'Book a Courier',ico:'<path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16"/>',s:'BOOKINGS'},{id:'b-del',l:'My Deliveries',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',s:'BOOKINGS'},{id:'b-spend',l:'Spend & Rebate',ico:'<line x1="12" y1="1" x2="12" y2="23"/>',s:'ACCOUNT'},{id:'b-saved',l:'Saved Addresses',ico:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>',s:'ACCOUNT'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'}],def:'b-book',cp:'green'},
-  freight:{n:'NorthFreight UK',u:'NF992190',i:'NF',r:'Freight Forwarder',rc:'cb',
+  'freight-pro':{n:'NorthFreight UK',u:'NF992190',i:'NF',r:'Freight Forwarder',rc:'cb',plan:'Pro',planClass:'pb-pro',
     tabs:[{id:'f-post',l:'Post a Load',ico:'<line x1="12" y1="5" x2="12" y2="19"/>',s:'FREIGHT'},{id:'f-cap',l:'Network Capacity',ico:'<circle cx="12" cy="12" r="10"/>',s:'FREIGHT'},{id:'f-lanes',l:'Lane Pricing',ico:'<line x1="12" y1="1" x2="12" y2="23"/>',s:'FREIGHT'},{id:'f-loads',l:'Active Loads',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',s:'FREIGHT'},{id:'f-cover',l:'Coverage Board',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',s:'FREIGHT'},{id:'f-account',l:'Account Controls',ico:'<rect x="2" y="7" width="20" height="14" rx="2"/>',s:'ACCOUNT'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'}],def:'f-post',cp:'green'},
-  'driver-pending':{n:'Alex Johnson',u:'AJ449291',i:'AJ',r:'Driver (Pending)',rc:'ca',
-    tabs:[{id:'d-status',l:'My Status',ico:'<circle cx="12" cy="12" r="3"/>',s:'DRIVER'},{id:'d-comp',l:'Compliance',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',s:'DRIVER'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'}],def:'d-comp',cp:'amber'},
-  'driver-active':{n:'Marcus Reid',u:'MR668793',i:'MR',r:'Driver (Active)',rc:'cg',
+  'plna-plus':{n:'Marcus Reid',u:'MR668793',i:'MR',r:'PLNA Driver',rc:'cg',plan:'PLNA Plus',planClass:'pb-plus',
     tabs:[{id:'d-status',l:'My Status',ico:'<circle cx="12" cy="12" r="3"/>',s:'DRIVER'},{id:'d-invites',l:'Job Invites',ico:'<path d="M22 16.92v3"/>',s:'DRIVER',badge:'2'},{id:'d-jobs',l:'Available Jobs',ico:'<circle cx="12" cy="12" r="10"/>',s:'DRIVER'},{id:'d-empty',l:'Empty Miles',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',s:'DRIVER'},{id:'d-earn',l:'Earnings',ico:'<line x1="12" y1="1" x2="12" y2="23"/>',s:'DRIVER'},{id:'d-comp',l:'Compliance',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',s:'DRIVER'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'}],def:'d-status',cp:'green'},
-  'biz-freight':{n:'Castle Distribution',u:'CD771292',i:'CD',r:'Biz + Freight',rc:'co',
-    tabs:[{id:'b-book',l:'Book a Courier',ico:'<path d="M20 7H4"/>',s:'BOOKINGS'},{id:'b-del',l:'My Deliveries',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',s:'BOOKINGS'},{id:'f-post',l:'Post a Load',ico:'<line x1="12" y1="5" x2="12" y2="19"/>',s:'FREIGHT'},{id:'f-loads',l:'Active Loads',ico:'<circle cx="12" cy="12" r="10"/>',s:'FREIGHT'},{id:'f-lanes',l:'Lane Pricing',ico:'<line x1="12" y1="1" x2="12" y2="23"/>',s:'FREIGHT'},{id:'b-spend',l:'Spend & Rebate',ico:'<line x1="12" y1="1" x2="12" y2="23"/>',s:'ACCOUNT'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'}],def:'b-book',cp:'green'},
-  admin:{n:'Brent Ford',u:'BF638793',i:'BF',r:'Admin',rc:'cr2',
-    tabs:[{id:'d-status',l:'My Status',ico:'<circle cx="12" cy="12" r="3"/>',s:'DRIVER'},{id:'d-jobs',l:'Available Jobs',ico:'<circle cx="12" cy="12" r="10"/>',s:'DRIVER'},{id:'b-book',l:'Book a Courier',ico:'<path d="M20 7H4"/>',s:'BOOKINGS'},{id:'b-del',l:'My Deliveries',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',s:'BOOKINGS'},{id:'f-post',l:'Post a Load',ico:'<line x1="12" y1="5" x2="12" y2="19"/>',s:'FREIGHT'},{id:'f-cap',l:'Network Capacity',ico:'<circle cx="12" cy="12" r="10"/>',s:'FREIGHT'},{id:'f-loads',l:'Active Loads',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',s:'FREIGHT'},{id:'f-cover',l:'Coverage Board',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',s:'FREIGHT'},{id:'d-comp',l:'Compliance',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',s:'COMPLIANCE'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'},{id:'admin',l:'OTIS Control',ico:'<circle cx="12" cy="12" r="3"/>',s:'ADMIN'}],def:'admin',cp:'green'}
+  'knect-free':{n:'Sam Patel',u:'SP881291',i:'SP',r:'KNECT Member',rc:'cb',plan:'Free',planClass:'pb-free',
+    tabs:[{id:'b-book',l:'Book a Courier',ico:'<path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16"/>',s:'BOOKINGS'},{id:'b-del',l:'My Deliveries',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',s:'BOOKINGS'},{id:'cust-track',l:'Track Delivery',ico:'<circle cx="12" cy="12" r="10"/>',s:'BOOKINGS'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'}],def:'b-book',cp:'green'},
+  'knect-founder':{n:'Rachel Moore',u:'RM449082',i:'RM',r:'KNECT Founder',rc:'co',plan:'Founder',planClass:'pb-founder',
+    tabs:[{id:'b-book',l:'Priority Booking',ico:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>',s:'BOOKINGS'},{id:'b-del',l:'My Deliveries',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',s:'BOOKINGS'},{id:'cust-track',l:'Track Delivery',ico:'<circle cx="12" cy="12" r="10"/>',s:'BOOKINGS'},{id:'cust-pod',l:'Proof of Delivery',ico:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>',s:'BOOKINGS'},{id:'b-saved',l:'Saved Addresses',ico:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>',s:'ACCOUNT'},{id:'b-spend',l:'Spend & Analytics',ico:'<line x1="12" y1="1" x2="12" y2="23"/>',s:'ACCOUNT'},{id:'billing',l:'Payments',ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',s:'ACCOUNT'},{id:'support',l:'Support',ico:'<circle cx="12" cy="12" r="10"/>',s:'ACCOUNT'}],def:'b-book',cp:'green'}
 };
 
 function demoLogin(key){
   const a=ACCS[key];if(!a)return;
   document.querySelectorAll('.dp').forEach(p=>p.classList.remove('on'));
   const pills=document.querySelectorAll('.dp');
-  const map={customer:0,business:1,freight:2,'driver-pending':3,'driver-active':4,'biz-freight':5,admin:6};
+  const map={customer:0,'biz-pro':1,'freight-pro':2,'plna-plus':3,'knect-free':4,'knect-founder':5};
   if(map[key]!==undefined)pills[map[key]].classList.add('on');
   document.getElementById('tb-user').textContent=a.u;
   document.getElementById('tb-av').textContent=a.i;
   const rc=document.getElementById('tb-role');
   rc.className='role-chip chip '+a.rc;rc.textContent=a.r;
+  const pb=document.getElementById('tb-plan');
+  if(pb&&a.plan){pb.className='plan-badge '+a.planClass;pb.textContent=a.plan;pb.style.display='';}
   setComp(a.cp,a.u);
   buildNav(a.tabs);
   document.getElementById('landing').style.display='none';
@@ -1248,6 +1322,17 @@ function switchTab(id){
   const n=document.getElementById('ni-'+id.replace('pane-',''));if(n)n.classList.add('on');
   ct=id;
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
+}
+
+/* ── CUSTOMER TRACK ── */
+const CT_DB={'HAF-2847':{status:'Delivered',route:'Manchester M1 → Leeds LS1 · 5 Jul 2026 · 14:22'},'HAF-2831':{status:'In transit',route:'Birmingham B1 → Nottingham NG1 · ETA 16:30 today'},'HAF-2853':{status:'Driver assigned — collecting soon',route:'Manchester M1 → Salford M50 · Today'}};
+function ctLookup(){
+  const ref=(document.getElementById('ct-ref').value||'HAF-2847').trim().toUpperCase();
+  const d=CT_DB[ref]||{status:'No delivery found',route:'Check the reference and try again.'};
+  document.getElementById('ct-refout').textContent=ref;
+  document.getElementById('ct-status').textContent=d.status;
+  document.getElementById('ct-route').textContent=d.route;
+  document.getElementById('ct-result').style.display='block';
 }
 
 // Boot in day mode
