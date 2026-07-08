@@ -1128,12 +1128,16 @@ function doTrack(){
 const FLOW_TITLES={fast:'Fast Quote',repeat:'Repeat an order',pick:'HAF Pick'};
 function openFlow(type){
   document.body.classList.add('tile-focus');
-  document.getElementById('inline-flow').style.display='block';
+  const flow=document.getElementById('inline-flow');
+  flow.style.display='block';
   ['fast','repeat','pick'].forEach(t=>{
     document.getElementById('if-'+t).style.display=t===type?'block':'none';
   });
   document.getElementById('if-title').textContent=FLOW_TITLES[type]||'';
-  window.scrollTo({top:0,behavior:'smooth'});
+  /* reset fqData so a returning user starts fresh */
+  if(type==='fast'){for(const k in fqData)delete fqData[k];document.querySelectorAll('#if-fast .oopt').forEach(b=>b.classList.remove('sel'));}
+  /* scroll so the flow panel is visible below the calculator */
+  setTimeout(()=>flow.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
 }
 function closeInlineFlow(){
   document.body.classList.remove('tile-focus');
