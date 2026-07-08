@@ -42,12 +42,21 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 /* ── VERSION ─── */
 .vbadge{position:fixed;bottom:14px;right:14px;z-index:9999;background:var(--or);color:#0e1113;font-family:var(--dp);font-weight:900;font-size:.6rem;letter-spacing:.08em;padding:.18rem .5rem;border-radius:var(--pill);pointer-events:none}
 
-/* ── DEMO REQUEST FORM ── */
-.dr-form{margin-top:.85rem}
-.dr-success{display:none;text-align:center;padding:1.2rem 0}
-.dr-success-ic{font-size:1.6rem;margin-bottom:.4rem;color:var(--or)}
-.dr-success-h{font-weight:700;font-size:.9rem;margin-bottom:.3rem}
-.dr-success-p{font-size:.74rem;color:var(--mu);line-height:1.55}
+/* ── DEMO REQUEST MODAL ── */
+.dr-btn{display:flex;align-items:center;justify-content:center;gap:.45rem;width:100%;padding:.65rem .9rem;border-radius:var(--rx);background:var(--or);color:#0e1113;font-size:.82rem;font-weight:800;cursor:pointer;border:none;transition:opacity .14s;margin-top:.75rem}
+.dr-btn:hover{opacity:.88}
+.dr-btn svg{width:14px;height:14px;fill:none;stroke:#0e1113;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.dr-ov{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:1.2rem}
+.dr-ov.open{display:flex}
+.dr-box{background:var(--p);border:1px solid var(--lns);border-radius:16px;width:100%;max-width:400px;padding:1.8rem 1.6rem;position:relative;box-shadow:0 12px 48px rgba(0,0,0,.18)}
+.dr-box-close{position:absolute;top:.85rem;right:.85rem;width:28px;height:28px;border-radius:50%;background:var(--p2);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;color:var(--mu);font-size:.95rem;cursor:pointer;line-height:1}
+.dr-box h2{font-family:var(--dp);font-weight:900;font-size:1.15rem;letter-spacing:-.04em;margin-bottom:.25rem}
+.dr-box-sub{font-size:.78rem;color:var(--mu);margin-bottom:1.2rem;line-height:1.55}
+.dr-select{width:100%;padding:.58rem .75rem;border-radius:var(--rx);border:1px solid var(--lns);background:var(--p2);color:var(--tx);font-size:.82rem;font-weight:500;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7580' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center;padding-right:2rem}
+.dr-success{display:none;text-align:center;padding:.8rem 0}
+.dr-success-ic{font-size:2rem;margin-bottom:.5rem;color:var(--or)}
+.dr-success-h{font-family:var(--dp);font-weight:900;font-size:1.05rem;margin-bottom:.3rem}
+.dr-success-p{font-size:.78rem;color:var(--mu);line-height:1.55}
 
 /* ── BUTTONS ── */
 .btn{display:inline-flex;align-items:center;gap:.35rem;font-weight:700;font-size:.82rem;letter-spacing:.01em;border-radius:var(--pill);padding:.52rem 1.25rem;transition:all .14s;cursor:pointer;line-height:1;white-space:nowrap}
@@ -708,26 +717,47 @@ textarea.fi2{resize:vertical;min-height:70px}
             WhatsApp HAF
           </a>
         </div>
-        <div class="dr-form">
-          <div style="height:1px;background:var(--ln);margin:.9rem 0"></div>
-          <div class="sc-title" style="margin-bottom:.3rem">Request a demo</div>
-          <p style="font-size:.74rem;color:var(--mu);margin-bottom:.9rem;line-height:1.55">See KNECT in action. We'll walk you through the platform live.</p>
-          <div id="dr-form-fields">
-            <div class="sc-fi"><span class="sc-lbl">Your name</span><input class="sc-inp" id="dr-name" placeholder="Jane Smith" autocomplete="name"></div>
-            <div class="sc-fi"><span class="sc-lbl">Company</span><input class="sc-inp" id="dr-company" placeholder="Acme Logistics"></div>
-            <div class="sc-fi"><span class="sc-lbl">Email</span><input class="sc-inp" id="dr-email" type="email" placeholder="jane@company.com" autocomplete="email"></div>
-            <div class="sc-err" id="dr-err" style="display:none"></div>
-            <button class="btn btn-or btn-wide" onclick="submitDemoReq()" style="margin-top:.5rem">Request a demo →</button>
-          </div>
-          <div class="dr-success" id="dr-success">
-            <div class="dr-success-ic">✓</div>
-            <div class="dr-success-h">Request received</div>
-            <p class="dr-success-p">We'll be in touch shortly to arrange your walkthrough.</p>
-          </div>
-        </div>
+        <div style="height:1px;background:var(--ln);margin:.9rem 0"></div>
+        <button class="dr-btn" onclick="openDemoReq()">
+          <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+          Request a demo
+        </button>
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ══ DEMO REQUEST OVERLAY ═══════════════════════════════════════ -->
+<div class="dr-ov" id="dr-ov" onclick="if(event.target===this)closeDemoReq()">
+  <div class="dr-box">
+    <button class="dr-box-close" onclick="closeDemoReq()">×</button>
+    <h2>Request a demo</h2>
+    <p class="dr-box-sub">We'll walk you through the KNECT platform live — just fill in your details and we'll be in touch.</p>
+    <div id="dr-form-fields">
+      <div class="sc-fi" style="margin-bottom:.45rem"><span class="sc-lbl">Your name</span><input class="sc-inp" id="dr-name" placeholder="Jane Smith" autocomplete="name"></div>
+      <div class="sc-fi" style="margin-bottom:.45rem"><span class="sc-lbl">Email</span><input class="sc-inp" id="dr-email" type="email" placeholder="jane@company.com" autocomplete="email"></div>
+      <div class="sc-fi" style="margin-bottom:.45rem"><span class="sc-lbl">Business name</span><input class="sc-inp" id="dr-company" placeholder="Acme Logistics"></div>
+      <div class="sc-fi" style="margin-bottom:.8rem">
+        <span class="sc-lbl">Account type I'm interested in</span>
+        <select class="dr-select" id="dr-actype">
+          <option value="">Select an account type…</option>
+          <option value="KNECT Free">KNECT — Free</option>
+          <option value="KNECT Founder">KNECT — Founder</option>
+          <option value="Business Account">Business Account</option>
+          <option value="Freight Forwarding">Freight Forwarding</option>
+          <option value="PLNA Driver">PLNA Driver</option>
+          <option value="Not sure yet">Not sure yet</option>
+        </select>
+      </div>
+      <div class="sc-err" id="dr-err" style="display:none;margin-bottom:.5rem"></div>
+      <button class="btn btn-or btn-wide" onclick="submitDemoReq()">Request a demo →</button>
+    </div>
+    <div class="dr-success" id="dr-success">
+      <div class="dr-success-ic">✓</div>
+      <div class="dr-success-h">Request received</div>
+      <p class="dr-success-p">We'll be in touch shortly to arrange your walkthrough.</p>
+    </div>
   </div>
 </div>
 
@@ -1192,10 +1222,13 @@ function toggleSb(){document.getElementById('sidebar').classList.toggle('open')}
 function toggleAvail(){document.getElementById('avail-lbl').textContent=document.getElementById('avail-tog').checked?'Available — Taking jobs':'Offline — Not taking jobs'}
 
 /* ── DEMO REQUEST ── */
+function openDemoReq(){document.getElementById('dr-ov').classList.add('open');document.getElementById('dr-name').focus();}
+function closeDemoReq(){document.getElementById('dr-ov').classList.remove('open');}
 function submitDemoReq(){
   const name=document.getElementById('dr-name').value.trim();
   const email=document.getElementById('dr-email').value.trim();
   const company=document.getElementById('dr-company').value.trim();
+  const actype=document.getElementById('dr-actype').value;
   const err=document.getElementById('dr-err');
   if(!name||!email){err.textContent='Please enter your name and email.';err.style.display='block';return;}
   err.style.display='none';
@@ -1208,7 +1241,7 @@ function submitDemoReq(){
       err.style.display='block';
     }
   };
-  const p=new URLSearchParams({u:'e74ba6ad9a8846214c9d6aad4',id:'79da7debac',EMAIL:email,FNAME:name,MMERGE6:company,MMERGE7:'Demo Request',c:'_mcDemoReq'});
+  const p=new URLSearchParams({u:'e74ba6ad9a8846214c9d6aad4',id:'79da7debac',EMAIL:email,FNAME:name,MMERGE6:company,MMERGE7:actype||'Demo Request',c:'_mcDemoReq'});
   const s=document.createElement('script');
   s.src='https://usehaf.us3.list-manage.com/subscribe/post-json?'+p;
   document.head.appendChild(s);
