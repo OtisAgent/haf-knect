@@ -149,9 +149,10 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 .tr-status{font-family:var(--dp);font-weight:900;font-size:1rem;margin-bottom:.15rem}
 .tr-route{font-size:.77rem;color:var(--mu)}
 
-/* TILE FOCUS MODE — remove tile grid, expand flow in its place */
+/* TILE FOCUS MODE — show only the step flow + login card */
 body.tile-focus #tiles-wrap{display:none!important}
 body.tile-focus #side-talk{display:none!important}
+body.tile-focus .land-main>.calc-box{display:none!important}
 body.tile-focus .land-side{display:flex!important}
 @media(max-width:860px){body.tile-focus .land-body{display:flex;flex-direction:column}body.tile-focus .land-side{display:flex!important;order:2}}
 
