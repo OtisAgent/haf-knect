@@ -1,145 +1,1232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HAF KNECT — Demo</title>
-<link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex,nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet" />
+<title>HAF KNECT Courier — Early Access</title>
 <style>
-#dl{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9990;}
-.dlw{text-align:center;max-width:640px;width:94%;padding:0 16px;}
-.dle{font-size:11px;font-weight:800;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;}
-.dll{font-size:44px;font-weight:900;color:var(--orange);letter-spacing:-2px;margin-bottom:6px;}
-.dls{font-size:14px;color:var(--muted);margin-bottom:34px;}
-.dlg{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px;text-align:left;margin-bottom:28px;}
-.dlt{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:22px 18px;cursor:pointer;transition:border-color .15s;width:100%;}
-.dlt:hover{border-color:var(--orange);}
-.dli{font-size:28px;margin-bottom:10px;}
-.dln{font-size:13px;font-weight:800;margin-bottom:4px;}
-.dld{font-size:11px;color:var(--muted);line-height:1.5;}
-.dla{font-size:11px;color:var(--sub);background:none;border:none;cursor:pointer;text-decoration:underline;font-family:inherit;}
-#am{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:9995;}
-.amc{background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:40px;max-width:360px;width:90%;text-align:center;position:relative;}
-.amx{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;font-family:inherit;}
-.ami{width:100%;padding:11px 13px;font-size:14px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);color:var(--text);outline:none;font-family:inherit;margin-bottom:12px;}
-.ami:focus{border-color:var(--orange);}
-.amb{width:100%;padding:12px;background:var(--orange);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+:root{
+  --brand-orange:#f18e00; --brand-grey:#2f373e;
+  --bg:#f4f1eb; --panel:#fbfaf7; --panel-2:#ffffff; --text:#1e252b; --muted:#6f777d;
+  --line:rgba(47,55,62,.12); --shadow:0 28px 80px rgba(22,25,27,.12);
+  --soft-shadow:0 14px 35px rgba(22,25,27,.08); --radius:28px; --radius-sm:18px;
+  --green:#4f7f58; --amber:#b98530;
+  /* type scale — one consistent ladder used across the page */
+  --fs-h2:21px; --fs-h3:17px;
+  --fs-body:14.5px; --fs-sm:13px; --fs-xs:11.5px; --fs-label:10.5px;
+  /* spacing scale — 8-point rhythm so gaps & padding line up */
+  --sp-1:8px; --sp-2:16px; --sp-3:24px; --sp-4:32px;
+  /* shared desktop content width */
+  --maxw:1120px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Inter","Avenir Next",Arial,sans-serif;
+  background:radial-gradient(circle at top left,rgba(241,142,0,.12),transparent 34%),var(--bg);
+  color:var(--text);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  font-size:15px;line-height:1.5;
+}
+h1,h2,h3{font-family:"Montserrat","Inter",Arial,sans-serif;letter-spacing:-.03em;margin:0}
+a{color:inherit}
+button{font-family:inherit}
+
+/* top bar */
+.topbar{max-width:var(--maxw);margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 28px}
+.wordmark{display:inline-flex;align-items:center;gap:9px;font-family:"Montserrat","Inter",Arial,sans-serif;font-weight:800;font-size:20px;letter-spacing:-.02em;color:var(--text);text-decoration:none}
+.wordmark svg{width:28px;height:28px;flex:none}
+.wordmark b{color:var(--brand-orange)}
+.signin{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;font-size:13.5px;color:var(--text);background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:10px 18px;box-shadow:var(--soft-shadow);transition:.15s ease;white-space:nowrap}
+.signin:hover{border-color:rgba(241,142,0,.5);color:var(--brand-orange)}
+.driver-join{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;font-size:13.5px;color:#fff;background:var(--brand-orange);border:1px solid var(--brand-orange);border-radius:999px;padding:10px 18px;box-shadow:0 2px 8px rgba(241,142,0,.28);transition:.15s ease;white-space:nowrap}
+.driver-join:hover{background:#d97800;border-color:#d97800}
+.tb-actions{display:flex;align-items:center;gap:10px}
+.tb-guide{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;font-size:13.5px;color:var(--brand-orange);background:rgba(241,142,0,.08);border:1px solid rgba(241,142,0,.32);border-radius:999px;padding:10px 16px;transition:.15s ease}
+.tb-guide:hover{background:rgba(241,142,0,.15);border-color:rgba(241,142,0,.5)}
+.tb-guide svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.9;fill:none;flex:none}
+@media(max-width:560px){.tb-guide span{display:none}.tb-guide{padding:10px}.topbar{padding:18px 16px}.shell{padding-left:16px;padding-right:16px}}
+@media(max-width:560px){.driver-join{display:none}}@media(max-width:380px){.wordmark{font-size:17px}.wordmark svg{width:24px;height:24px}.signin{padding:9px 14px;font-size:12.5px}}
+
+/* shell */
+.shell{max-width:var(--maxw);margin:0 auto;padding:14px 28px 60px}
+
+/* hero */
+.hero{text-align:center;max-width:720px;margin:30px auto 34px}
+.hero .eyebrow{display:inline-block;font-size:var(--fs-label);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800;border:1px solid var(--line);background:var(--panel-2);border-radius:999px;padding:7px 14px;margin-bottom:18px}
+.hero h1{font-size:clamp(34px,6vw,52px);line-height:1.04}
+.hero p{margin:16px auto 0;max-width:540px;color:var(--muted);font-size:16px;line-height:1.6}
+
+/* layout */
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:var(--sp-3);align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+
+.card{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--sp-4)}
+.card h2{font-size:var(--fs-h2);margin-bottom:4px}
+.card .lede{color:var(--muted);font-size:var(--fs-sm);margin:0 0 var(--sp-3);line-height:1.5}
+
+/* lane chooser cards */
+.lane-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.lane-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:6px}
+@media(max-width:760px){.lane-cards{grid-template-columns:1fr}}
+.lane-card{position:relative;text-align:left;background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--soft-shadow);padding:24px;cursor:pointer;transition:.18s ease;display:flex;flex-direction:column;gap:10px}
+.lane-card:hover{border-color:rgba(241,142,0,.55);box-shadow:var(--shadow);transform:translateY(-3px)}
+.lane-card .lc-ico{width:48px;height:48px;border-radius:14px;border:1px solid var(--line);background:var(--panel-2);display:grid;place-items:center;color:var(--brand-orange);box-shadow:var(--soft-shadow)}
+.lane-card .lc-ico svg{width:23px;height:23px;stroke:currentColor;stroke-width:1.7;fill:none}
+.lane-card h3{font-size:var(--fs-h3);line-height:1.2}
+.lane-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+.lane-card .lc-go{margin-top:auto;display:inline-flex;align-items:center;gap:7px;color:var(--brand-orange);font-weight:800;font-size:13px;padding-top:4px}
+.lane-card .lc-go svg{width:15px;height:15px;stroke:currentColor;stroke-width:2.2;fill:none}
+
+/* lane switch affordance (persistent on lane screens) */
+.lane-switch{display:inline-flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;transition:.15s ease}
+.lane-switch:hover{border-color:rgba(241,142,0,.5);color:var(--brand-orange)}
+.lane-switch svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.2;fill:none}
+.lane-title{display:flex;align-items:center;gap:11px;margin-bottom:2px}
+.lane-title .lt-badge{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--brand-orange);font-weight:800;border:1px solid rgba(241,142,0,.4);background:rgba(241,142,0,.08);border-radius:999px;padding:5px 11px}
+
+/* form */
+.field{display:flex;flex-direction:column;gap:7px;margin-bottom:var(--sp-2)}
+.field label{font-size:var(--fs-label);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.field .hint{font-size:var(--fs-xs);color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;margin-top:-2px}
+.field input,.field select{
+  font-family:inherit;font-size:var(--fs-body);color:var(--text);background:var(--panel-2);
+  border:1px solid var(--line);border-radius:14px;padding:13px 15px;width:100%;
+  -webkit-appearance:none;appearance:none;transition:.15s ease;
+}
+.field input:disabled{background:rgba(47,55,62,.05);color:var(--muted);cursor:not-allowed}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236f777d' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:18px;padding-right:42px}
+.field input:focus,.field select:focus{outline:2px solid rgba(241,142,0,.32);outline-offset:1px;border-color:var(--brand-orange)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:520px){.row2{grid-template-columns:1fr}}
+.section-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800;margin:var(--sp-3) 0 12px;opacity:.85;display:flex;align-items:center;gap:10px}
+.section-label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* "When do you need it" chooser pills */
+.choice-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+@media(max-width:520px){.choice-row{grid-template-columns:1fr}}
+.choice{display:flex;flex-direction:column;gap:3px;text-align:left;border:1px solid var(--line);background:var(--panel-2);border-radius:16px;padding:13px 15px;cursor:pointer;transition:.15s ease}
+.choice:hover{border-color:rgba(241,142,0,.5)}
+.choice.on{border-color:var(--brand-orange);background:rgba(241,142,0,.06);box-shadow:0 0 0 2px rgba(241,142,0,.18) inset}
+.choice .ch-t{font-size:14px;font-weight:800;color:var(--text)}
+.choice .ch-s{font-size:11.5px;color:var(--muted);font-weight:600}
+
+/* preset chooser (lane B) */
+.preset-row{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:8px}
+.preset{border:1px solid var(--line);background:var(--panel-2);border-radius:999px;padding:9px 15px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;transition:.15s ease}
+.preset:hover{border-color:rgba(241,142,0,.5)}
+.preset.on{border-color:var(--brand-orange);background:rgba(241,142,0,.08);color:var(--brand-orange)}
+
+/* recommendation banner (lane B) */
+.recommend{border:1px solid rgba(79,127,88,.4);background:rgba(79,127,88,.08);border-radius:18px;padding:16px 18px;margin:4px 0 18px;display:flex;gap:13px;align-items:flex-start}
+.recommend .rc-ico{width:38px;height:38px;border-radius:11px;background:rgba(79,127,88,.16);color:var(--green);display:grid;place-items:center;flex:none}
+.recommend .rc-ico svg{width:19px;height:19px;stroke:currentColor;stroke-width:1.9;fill:none}
+.recommend .rc-t{font-size:14px;font-weight:800;color:var(--text)}
+.recommend .rc-s{font-size:12.5px;color:var(--muted);font-weight:600;margin-top:2px;line-height:1.45}
+
+/* checkbox row */
+.checkrow{display:flex;flex-wrap:wrap;gap:16px;margin:2px 0 16px}
+.checkbox{display:inline-flex;align-items:center;gap:9px;font-size:13.5px;font-weight:600;color:var(--text);cursor:pointer;user-select:none}
+.checkbox input{width:18px;height:18px;accent-color:var(--brand-orange);cursor:pointer;flex:none}
+
+/* collapsible */
+.disclosure{border:1px solid var(--line);border-radius:18px;background:var(--panel-2);margin:6px 0 6px;overflow:hidden}
+.disclosure>summary{list-style:none;cursor:pointer;padding:15px 18px;font-size:13.5px;font-weight:700;color:var(--text);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.disclosure>summary::-webkit-details-marker{display:none}
+.disclosure>summary .ds-plus{color:var(--brand-orange);font-weight:800;font-size:18px;transition:.15s ease}
+.disclosure[open]>summary .ds-plus{transform:rotate(45deg)}
+.disclosure .ds-body{padding:4px 18px 18px}
+
+/* conditional reveal */
+.hidden{display:none !important}
+
+.cta{width:100%;border:0;border-radius:16px;background:var(--brand-orange);color:#fff;font-family:"Montserrat","Inter",Arial,sans-serif;font-weight:800;font-size:15.5px;letter-spacing:.01em;padding:16px;cursor:pointer;transition:.15s ease;margin-top:6px}
+.cta:hover{filter:brightness(1.05)}
+.cta.secondary{background:var(--brand-grey)}
+.cta.ghost{background:var(--panel-2);color:var(--text);border:1px solid var(--line);box-shadow:var(--soft-shadow)}
+.cta.ghost:hover{border-color:rgba(241,142,0,.5);color:var(--brand-orange);filter:none}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+@media(max-width:520px){.btn-row{grid-template-columns:1fr}}
+
+/* postcode lookup status */
+.pc-status{font-size:11.5px;font-weight:600;margin-top:-1px;display:flex;align-items:center;gap:7px;min-height:15px;color:var(--muted)}
+.pc-status .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.pc-status.ok{color:var(--green)}
+.pc-status.ok .dot{background:var(--green)}
+.pc-status.bad{color:var(--amber)}
+.pc-status.bad .dot{background:var(--amber)}
+/* auto-distance route confirmation line */
+.route-confirm{font-size:12px;font-weight:700;margin-top:6px;display:flex;align-items:center;gap:7px;color:var(--brand-orange)}
+.route-confirm .dot{width:8px;height:8px;border-radius:50%;background:var(--brand-orange);flex:none}
+.miles-edit{color:var(--brand-orange);font-weight:700;text-decoration:underline;cursor:pointer}
+
+/* result panel */
+.result-wrap{position:sticky;top:14px}
+.result{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--sp-4);text-align:center;min-height:260px;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.result .placeholder{color:var(--muted);font-size:14px;line-height:1.6;max-width:300px;margin:0 auto}
+.result .placeholder .ph-ico{width:54px;height:54px;border-radius:16px;border:1px solid var(--line);background:var(--panel-2);display:grid;place-items:center;color:var(--brand-orange);margin:0 auto 16px;box-shadow:var(--soft-shadow)}
+.result .placeholder .ph-ico svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.7;fill:none}
+.price-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.price-big{font-family:"Montserrat","Inter",Arial,sans-serif;font-size:46px;font-weight:800;letter-spacing:-.04em;color:var(--brand-orange);line-height:1;margin:4px 0 2px}
+.price-sub{font-size:13px;color:var(--muted)}
+.price-lines{margin:18px auto 0;display:flex;flex-direction:column;gap:8px;width:100%;max-width:300px;text-align:left}
+.price-line{display:flex;align-items:center;justify-content:space-between;font-size:13.5px;border:1px solid var(--line);background:var(--panel-2);border-radius:12px;padding:11px 14px}
+.price-line .pl-l{color:var(--muted);font-weight:600}
+.price-line .pl-v{font-weight:700;font-family:"Montserrat","Inter",Arial,sans-serif}
+.manual-note{margin:6px auto 0;max-width:320px;border:1px solid rgba(185,133,48,.45);background:rgba(185,133,48,.1);color:var(--amber);border-radius:14px;padding:16px 18px;font-size:13.5px;font-weight:600;line-height:1.5}
+.manual-note .mn-ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;margin:0 auto 12px;background:rgba(185,133,48,.16)}
+.manual-note .mn-ico svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none}
+.route-chip{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:600;border:1px solid var(--line);background:var(--panel-2);border-radius:999px;padding:7px 13px;margin:0 auto 14px}
+.confirm{text-align:center;display:flex;flex-direction:column;gap:6px}
+.confirm .cf-ico{width:58px;height:58px;border-radius:18px;background:rgba(79,127,88,.12);color:var(--green);display:grid;place-items:center;margin:0 auto 14px}
+.confirm .cf-ico svg{width:28px;height:28px;stroke:currentColor;stroke-width:1.8;fill:none}
+.confirm h3{font-size:20px}
+.confirm p{color:var(--muted);font-size:14px;line-height:1.6;margin:8px auto 0;max-width:300px}
+
+/* reorder summary card */
+.reorder{border:1px solid rgba(241,142,0,.4);background:rgba(241,142,0,.06);border-radius:20px;padding:22px;margin:4px 0 4px}
+.reorder h3{font-size:18px;margin-bottom:4px}
+.reorder .ro-route{font-size:13.5px;color:var(--muted);font-weight:600;margin:6px 0 14px;line-height:1.5}
+.reorder .ro-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.reorder .ro-cell{border:1px solid var(--line);background:var(--panel-2);border-radius:12px;padding:11px 13px}
+.reorder .ro-cell .roc-l{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.reorder .ro-cell .roc-v{font-size:14.5px;font-weight:800;color:var(--text);font-family:"Montserrat","Inter",Arial,sans-serif;margin-top:3px}
+
+/* footer */
+.foot{max-width:var(--maxw);margin:40px auto 0;padding:24px 28px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.foot .fl{font-size:12.5px;color:var(--muted)}
+.foot a.waitlink{font-size:12.5px;color:var(--muted);text-decoration:none;font-weight:600}
+.foot a.waitlink:hover{color:var(--brand-orange)}
+/* van size guide (PDF) link/pill */
+.guide-link{display:inline-flex;align-items:center;gap:8px;font-size:var(--fs-sm);font-weight:700;color:var(--brand-orange);background:rgba(241,142,0,.08);border:1px solid rgba(241,142,0,.32);border-radius:999px;padding:9px 15px;text-decoration:none;transition:.15s ease}
+.guide-link:hover{background:rgba(241,142,0,.15);border-color:rgba(241,142,0,.5)}
+.guide-link svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.9;fill:none;flex:none}
+.foot .guide-link{font-size:12.5px;padding:8px 14px}
 </style>
 </head>
 <body>
-
-<div id="vbadge">v3.0</div>
-
-<!-- DEMO LANDING -->
-<div id="dl">
-  <div class="dlw">
-    <div class="dle">HAF Ecosystem</div>
-    <div class="dll">KNECT</div>
-    <div class="dls">Pick an account type to explore the platform — each view shows only what that user sees.</div>
-    <div class="dlg">
-      <button class="dlt" onclick="launchDemo('driver','Driver &mdash; Active','var(--green)','dash-driver')">
-        <div class="dli">🚚</div>
-        <div class="dln">Driver — Active</div>
-        <div class="dld">Green CleverPay. Jobs unlocked, PLNA Pro tier active.</div>
-      </button>
-      <button class="dlt" onclick="launchDemo('business','Business Account','var(--purple)','dash-business')">
-        <div class="dli">🏢</div>
-        <div class="dln">Business Account</div>
-        <div class="dld">Moving own goods. Business dashboard and rebate pricing.</div>
-      </button>
-      <button class="dlt" onclick="launchDemo('freight','Freight Forwarder','var(--amber)','dash-freight')">
-        <div class="dli">🚛</div>
-        <div class="dln">Freight Forwarder</div>
-        <div class="dld">Third-party loads. Post a Load and network fee management.</div>
-      </button>
-    </div>
-    <button class="dla" onclick="document.getElementById('am').style.display='flex'">Admin sign in →</button>
+<!-- TOP BAR -->
+<header class="topbar">
+  <span class="wordmark"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="HAF"><polygon fill="#2E3338" points="96,50 73,10.2 27,10.2 4,50 27,89.8 73,89.8"/><polygon fill="none" stroke="#fff" stroke-width="2" points="92,50 70.5,13.6 29.5,13.6 8,50 29.5,86.4 70.5,86.4"/><rect x="22" y="23" width="13" height="55" fill="#fff" rx="1.5"/><rect x="46" y="40" width="13" height="38" fill="#fff" rx="1.5"/><path d="M35,40C35,24,46,24,46,40Q40.5,44,35,40Z" fill="#fff"/><circle cx="59" cy="25" r="7" fill="#F5A623"/><polygon fill="#F5A623" points="52.5,28.5 65.5,28.5 59,40"/><circle cx="59" cy="24.5" r="2.5" fill="#2E3338"/></svg>HAF <b>KNECT</b></span>
+  <div class="tb-actions">
+    <a class="tb-guide" href="./van-size-guide.html" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M3 17h2l1-2h6l1 2h2M5 15V9a2 2 0 0 1 2-2h6l3 3v5M7.5 17a1.5 1.5 0 1 0 0 .01M16.5 17a1.5 1.5 0 1 0 0 .01"/></svg>
+      <span>Van size guide</span>
+    </a>
+    <a class="driver-join" href="https://clever.usehaf.co.uk" target="_blank" rel="noopener">Join as driver</a><a class="signin" href="https://plna.usehaf.co.uk/login.html" target="_blank" rel="noopener">Driver sign in</a>
   </div>
-</div>
+</header>
 
-<!-- ADMIN MODAL -->
-<div id="am">
-  <div class="amc">
-    <button class="amx" onclick="document.getElementById('am').style.display='none'">✕</button>
-    <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">HAF Admin</div>
-    <div style="font-size:26px;font-weight:900;color:var(--orange);margin-bottom:24px;">KNECT</div>
-    <div style="text-align:left;">
-      <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;">Username</label>
-      <input id="au" class="ami" type="text" placeholder="BF638793" autocomplete="username" autocapitalize="characters"/>
-      <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;">Password</label>
-      <input id="ap" class="ami" type="password" placeholder="••••••••" autocomplete="current-password" style="margin-bottom:16px;"/>
-    </div>
-    <button class="amb" onclick="adminSignIn()">Sign in →</button>
-    <div id="ae" style="display:none;color:var(--red);font-size:12px;margin-top:10px;">Incorrect credentials.</div>
+<main class="shell">
+  <!-- HERO -->
+  <section class="hero">
+    <span class="eyebrow">HAF KNECT Courier — Early Access</span>
+    <h1>KNECT Courier</h1>
+    <p>The courier platform for freight professionals. Post a job, get a live price, get matched to the right driver.</p>
+  </section>
+
+  <div class="grid">
+    <!-- LEFT COLUMN: lane chooser + lane panels -->
+    <section class="card" id="leftCard">
+
+      <!-- PASSWORD GATE -->
+      <div id="screen-waitlist">
+        <div style="text-align:center;margin-bottom:28px">
+          <div style="width:56px;height:56px;border-radius:18px;border:1px solid var(--line);background:var(--panel-2);display:grid;place-items:center;color:var(--brand-orange);margin:0 auto 20px;box-shadow:var(--soft-shadow)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="22" height="22"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h2 style="font-size:20px;margin-bottom:8px">KNECT Courier — Pilot Access</h2>
+          <p class="lede">This platform is in private pilot. Enter your access code to continue.</p>
+        </div>
+        <div class="field">
+          <label for="pw-input">Access code</label>
+          <input type="password" id="pw-input" placeholder="Enter code" autocomplete="current-password" />
+          <span id="pw-error" class="hidden" style="color:var(--amber);font-size:12.5px;font-weight:600;margin-top:6px;display:block">Incorrect code — please try again.</span>
+        </div>
+        <button type="button" class="cta" data-act="unlock">Continue &rarr;</button>
+      </div>
+
+      <!-- OPENING: lane chooser (accessible via sign-in once platform launches) -->
+      <div id="screen-choose" class="hidden">
+        <h2>How would you like to start?</h2>
+        <p class="lede">Three quick ways in — they all reach the same live price.</p>
+        <div class="lane-cards">
+          <button type="button" class="lane-card" data-lane="A">
+            <span class="lc-ico"><svg viewBox="0 0 24 24"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg></span>
+            <h3>I know what I need</h3>
+            <p>Route, van and timing — get a price in seconds.</p>
+            <span class="lc-go">Start<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </button>
+          <button type="button" class="lane-card" data-lane="B">
+            <span class="lc-ico"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span>
+            <h3>Help me choose the van</h3>
+            <p>Tell us the load — we'll recommend the right vehicle.</p>
+            <span class="lc-go">Start<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </button>
+          <button type="button" class="lane-card" data-lane="C">
+            <span class="lc-ico"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></span>
+            <h3>Repeat order</h3>
+            <p>Have a reference? Pull up a past job and re-send it.</p>
+            <span class="lc-go">Start<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- LANE A: I know what I need -->
+      <div id="screen-A" class="hidden">
+        <div class="lane-head">
+          <div class="lane-title"><span class="lt-badge">Fast path</span></div>
+          <button type="button" class="lane-switch" data-act="restart"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Start over</button>
+        </div>
+        <h2>I know what I need</h2>
+        <p class="lede">Route, van and when you need it — that's all we need to price it.</p>
+
+        <div class="section-label">Route</div>
+        <div class="row2">
+          <div class="field">
+            <label for="a-pickup">Collection postcode</label>
+            <input type="text" id="a-pickup" placeholder="e.g. M1 1AE" autocomplete="postal-code" />
+            <span class="pc-status" id="pc-status-a-pickup" aria-live="polite"></span>
+          </div>
+          <div class="field">
+            <label for="a-delivery">Delivery postcode</label>
+            <input type="text" id="a-delivery" placeholder="e.g. LS1 4DY" autocomplete="postal-code" />
+            <span class="pc-status" id="pc-status-a-delivery" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="a-miles">Distance (loaded miles)</label>
+          <input type="number" id="a-miles" min="0" step="1" placeholder="e.g. 84" />
+          <span class="hint" id="a-miles-status">Enter approx miles — we'll confirm exact distance.</span>
+        </div>
+
+        <div class="section-label">Vehicle</div>
+        <div class="field">
+          <label for="a-vehicle">Which van?</label>
+          <select id="a-vehicle"></select>
+          <a class="guide-link" href="./van-size-guide.html" target="_blank" rel="noopener" style="margin-top:10px">
+            <svg viewBox="0 0 24 24"><path d="M3 17h2l1-2h6l1 2h2M5 15V9a2 2 0 0 1 2-2h6l3 3v5M7.5 17a1.5 1.5 0 1 0 0 .01M16.5 17a1.5 1.5 0 1 0 0 .01"/></svg>
+            Not sure which van? View the size guide
+          </a>
+        </div>
+
+        <div class="section-label">When do you need it?</div>
+        <div class="choice-row" id="a-when"></div>
+
+        <details class="disclosure">
+          <summary>Add load &amp; timing details (optional)<span class="ds-plus">+</span></summary>
+          <div class="ds-body" data-load-block="A"></div>
+        </details>
+
+        <button type="button" class="cta" data-act="price" data-lane="A">Get my price</button>
+      </div>
+
+      <!-- LANE B: Help me choose the van -->
+      <div id="screen-B" class="hidden">
+        <div class="lane-head">
+          <div class="lane-title"><span class="lt-badge">We recommend</span></div>
+          <button type="button" class="lane-switch" data-act="restart"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Start over</button>
+        </div>
+        <h2>Help me choose the van</h2>
+        <p class="lede">Tell us what you're sending and we'll recommend the right vehicle.</p>
+
+        <a class="guide-link" href="./van-size-guide.html" target="_blank" rel="noopener" style="margin-bottom:6px">
+          <svg viewBox="0 0 24 24"><path d="M3 17h2l1-2h6l1 2h2M5 15V9a2 2 0 0 1 2-2h6l3 3v5M7.5 17a1.5 1.5 0 1 0 0 .01M16.5 17a1.5 1.5 0 1 0 0 .01"/></svg>
+          Van size guide — view &amp; download
+        </a>
+
+        <div class="section-label">What are you sending?</div>
+        <div class="preset-row" id="b-presets"></div>
+        <div class="row2">
+          <div class="field">
+            <label for="b-items">Number of items / pallets</label>
+            <input type="number" id="b-items" min="0" step="1" placeholder="e.g. 2" />
+          </div>
+          <div class="field">
+            <label for="b-weight">Total weight (kg)</label>
+            <input type="number" id="b-weight" min="0" step="1" placeholder="e.g. 350" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Biggest item dimensions (cm)</label>
+          <div class="row3">
+            <input type="number" id="b-dl" min="0" step="1" placeholder="L" />
+            <input type="number" id="b-dw" min="0" step="1" placeholder="W" />
+            <input type="number" id="b-dh" min="0" step="1" placeholder="H" />
+          </div>
+          <span class="hint">Optional — helps us size the van. Or pick a preset above.</span>
+        </div>
+
+        <div class="recommend hidden" id="b-recommend">
+          <div class="rc-ico"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <div>
+            <div class="rc-t" id="b-rec-title">We recommend a van</div>
+            <div class="rc-s" id="b-rec-why">Tell us the load and we'll size it.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="b-vehicle">Recommended vehicle (you can change this)</label>
+          <select id="b-vehicle"></select>
+        </div>
+
+        <div class="section-label">Route</div>
+        <div class="row2">
+          <div class="field">
+            <label for="b-pickup">Collection postcode</label>
+            <input type="text" id="b-pickup" placeholder="e.g. M1 1AE" autocomplete="postal-code" />
+            <span class="pc-status" id="pc-status-b-pickup" aria-live="polite"></span>
+          </div>
+          <div class="field">
+            <label for="b-delivery">Delivery postcode</label>
+            <input type="text" id="b-delivery" placeholder="e.g. LS1 4DY" autocomplete="postal-code" />
+            <span class="pc-status" id="pc-status-b-delivery" aria-live="polite"></span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="b-miles">Distance (loaded miles)</label>
+          <input type="number" id="b-miles" min="0" step="1" placeholder="e.g. 84" />
+          <span class="hint" id="b-miles-status">Enter approx miles — we'll confirm exact distance.</span>
+        </div>
+
+        <div class="section-label">When do you need it?</div>
+        <div class="choice-row" id="b-when"></div>
+
+        <button type="button" class="cta" data-act="price" data-lane="B">Get my price</button>
+      </div>
+
+      <!-- LANE C: Repeat order -->
+      <div id="screen-C" class="hidden">
+        <div class="lane-head">
+          <div class="lane-title"><span class="lt-badge">Repeat order</span></div>
+          <button type="button" class="lane-switch" data-act="restart"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Start over</button>
+        </div>
+        <h2>Repeat order</h2>
+        <p class="lede">Pull up a past job by reference and re-send it in one tap.</p>
+
+        <div class="row2">
+          <div class="field">
+            <label for="c-ref">Reference</label>
+            <input type="text" id="c-ref" placeholder="e.g. KN-10001" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="c-email">Email on the order</label>
+            <input type="email" id="c-email" placeholder="you@company.co.uk" autocomplete="email" />
+          </div>
+        </div>
+        <button type="button" class="cta" data-act="lookup">Find my order</button>
+        <div id="c-result" style="margin-top:18px"></div>
+      </div>
+
+      <!-- SHARED: contact + booking step (revealed after price) -->
+      <div id="screen-contact" class="hidden">
+        <div class="lane-head">
+          <div class="lane-title"><span class="lt-badge">Last step</span></div>
+          <button type="button" class="lane-switch" data-act="restart"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Start over</button>
+        </div>
+        <h2>Where shall we send confirmation?</h2>
+        <p class="lede">Your price is locked in on the right. Just your details to book it.</p>
+
+        <div class="row2">
+          <div class="field">
+            <label for="q-ctype">Customer type</label>
+            <select id="q-ctype">
+              <option value="individual">Individual</option>
+              <option value="business">Business</option>
+              <option value="load_poster">Load poster</option>
+            </select>
+          </div>
+          <div class="field hidden" id="company-field">
+            <label for="q-company">Company name</label>
+            <input type="text" id="q-company" placeholder="Company name" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="q-name">Name</label>
+          <input type="text" id="q-name" placeholder="Full name" autocomplete="name" />
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="q-email">Email</label>
+            <input type="email" id="q-email" placeholder="you@company.co.uk" autocomplete="email" />
+          </div>
+          <div class="field">
+            <label for="q-phone">Phone</label>
+            <input type="tel" id="q-phone" placeholder="07000 000000" autocomplete="tel" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="q-notes">Anything else we should know?</label>
+          <input type="text" id="q-notes" placeholder="Access, references, special requirements…" />
+        </div>
+        <button type="button" class="cta" data-act="book">Request this booking</button>
+      </div>
+
+    </section>
+
+    <!-- RIGHT COLUMN: result -->
+    <aside class="result-wrap">
+      <div class="result" id="resultPanel">
+        <div class="placeholder" id="resultPlaceholder">
+          <span class="ph-ico"><svg viewBox="0 0 24 24"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg></span>
+          KNECT Courier is launching soon. Live courier prices, matched to the right driver.
+        </div>
+      </div>
+    </aside>
   </div>
-</div>
+</main>
 
-<!-- GATE (hidden — required by core.js event listeners) -->
-<div id="gate" style="display:none">
-  <input id="gate-user" type="text"/>
-  <input id="gate-input" type="password"/>
-  <div id="gate-err" style="display:none"></div>
-</div>
+<!-- FOOTER -->
+<footer class="foot">
+  <span class="fl">&copy; 2026 HAF Logistics Ltd.</span>
+  <a class="guide-link" href="./van-size-guide.html" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24"><path d="M3 17h2l1-2h6l1 2h2M5 15V9a2 2 0 0 1 2-2h6l3 3v5M7.5 17a1.5 1.5 0 1 0 0 .01M16.5 17a1.5 1.5 0 1 0 0 .01"/></svg>
+    Van size guide
+  </a>
+  <a class="waitlink" href="https://launch.usehaf.co.uk">Join the launch waiting list</a>
+</footer>
 
-<!-- MAIN SHELL -->
-<div id="shell" style="display:none">
-  <div class="topbar">
-    <div class="topbar-left">
-      <div class="topbar-logo">HAF KNECT</div>
-      <div class="topbar-product" id="topbar-product"></div>
-    </div>
-    <div class="topbar-right">
-      <div class="role-chip" id="role-chip" style="display:none"></div>
-      <button class="login-btn" id="topbar-login" style="display:none">Login →</button>
-      <button class="signout-btn" id="topbar-signout" onclick="goBack()" style="display:inline-flex;display:none">← Demo</button>
-    </div>
-  </div>
-  <div id="content"></div>
-</div>
-
-<script src="core.js"></script>
-<script src="screens-a.js"></script>
-<script src="screens-b.js"></script>
-<script src="biz-a.js"></script>
-<script src="biz-b.js"></script>
-<script src="biz-c.js"></script>
-<script src="biz-d.js"></script>
-<script src="biz-e.js"></script>
+<!-- The ONE pricing brain — shared with the dashboard + PLNA. Do not reimplement. -->
+<script src="./haf-model.js"></script>
+<script src="./pricing-engine.js"></script>
 <script>
-function launchDemo(role,label,color,screen){
-  setRole(role,label,color);
-  KNECT_MASTER=false;
-  document.getElementById('dl').style.display='none';
-  document.getElementById('shell').style.display='block';
-  document.getElementById('topbar-signout').style.display='inline-flex';
-  render(screen);
-}
-function adminSignIn(){
-  var u=document.getElementById('au').value.trim().toUpperCase();
-  var p=document.getElementById('ap').value.trim();
-  if(u==='BF638793'&&p==='Harps0641!'){
-    KNECT_MASTER=true;
-    document.getElementById('am').style.display='none';
-    document.getElementById('dl').style.display='none';
-    document.getElementById('shell').style.display='block';
-    document.getElementById('topbar-signout').style.display='inline-flex';
-    S.role='admin';
-    render('dash-admin');
-  } else {
-    document.getElementById('ae').style.display='block';
-    document.getElementById('ap').value='';
+(function(){
+  "use strict";
+  var P = window.HAFPricing;
+  var $ = function(id){return document.getElementById(id);};
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
   }
-}
-document.addEventListener('DOMContentLoaded',function(){
-  document.getElementById('ap').addEventListener('keydown',function(e){if(e.key==='Enter')adminSignIn();});
-});
-function goBack(){
-  document.getElementById('shell').style.display='none';
-  document.getElementById('dl').style.display='flex';
-  document.getElementById('topbar-signout').style.display='none';
-  KNECT_MASTER=false;
-  S={role:null,username:null,name:null,step:'select-role'};
-}
+  function money(n){
+    return "£" + (Math.round((Number(n)+Number.EPSILON)*100)/100).toFixed(2);
+  }
+
+  // --- Supabase (browser writes via public anon key; RLS allows anon INSERT) ---
+  var SB_URL = "https://jsdwvogsxlnczzbefwgp.supabase.co";
+  var SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzZHd2b2dzeGxuY3p6YmVmd2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODgyMzYsImV4cCI6MjA5Njk2NDIzNn0.pxqM-Oh4f_3PlqCbKIKvcKZnNRUZ1ASKqqdNg78M_4M";
+  function sbHeaders(){
+    return { apikey: SB_ANON, Authorization: "Bearer " + SB_ANON, "Content-Type": "application/json" };
+  }
+
+  // --- "When do you need it?" → job_type_code mapping (shared lanes A & B) ---
+  var WHEN_OPTIONS = [
+    { code:"TIME_CRITICAL",  t:"Urgent — today",  s:"Time critical" },
+    { code:"SAMEDAY_DIRECT", t:"Same day",        s:"Direct, today" },
+    { code:"SAMEDAY_FLEX",   t:"Flexible",        s:"Cheapest same-day" },
+    { code:"GROUPAGE",       t:"Economy",         s:"Groupage / pooled" }
+  ];
+  var WHEN_DEFAULT = "SAMEDAY_DIRECT";
+
+  // --- Vehicle presets (lane B chooser) → {volM3, weightKg} ---
+  var LOAD_PRESETS = [
+    { key:"boxes",     label:"A few boxes",       volM3:0.3,  weightKg:60 },
+    { key:"pallet1",   label:"1 pallet",          volM3:1.0,  weightKg:400 },
+    { key:"pallet23",  label:"2–3 pallets",       volM3:2.6,  weightKg:900 },
+    { key:"furniture", label:"Single furniture",  volM3:3.5,  weightKg:500 },
+    { key:"bulky",     label:"Long / bulky load", volM3:7.0,  weightKg:1000 }
+  ];
+
+  // ----- STATE -----
+  var state = {
+    lane: null,                 // "A" | "B" | "C"
+    when: { A: WHEN_DEFAULT, B: WHEN_DEFAULT },
+    preset: null,               // lane B selected preset key
+    pc: { "a-pickup":null,"a-delivery":null,"b-pickup":null,"b-delivery":null },
+    lastQuote: null,            // priced quote object
+    quoteCtx: null,             // {lane, pickup, delivery, miles, vehicleCode, jobTypeCode, load{...}}
+    reorderOf: null             // ref string if Lane C confirm path
+  };
+
+  // ===== POSTCODE LOOKUP (postcodes.io, keyless) =====
+  async function resolvePostcode(pc){
+    var clean=(pc||'').trim(); if(!clean) return null;
+    try{ var r=await fetch('https://api.postcodes.io/postcodes/'+encodeURIComponent(clean));
+      if(!r.ok) return null; var j=await r.json(); if(j.status!==200||!j.result) return null;
+      var x=j.result; return {postcode:x.postcode,lat:x.latitude,lng:x.longitude,town:[x.admin_ward,x.admin_district].filter(Boolean).join(', ')};
+    }catch(e){return null;}
+  }
+  function wirePostcode(inputId, statusId){
+    var inp=$(inputId), st=$(statusId);
+    if(!inp||!st) return;
+    inp.addEventListener("blur", async function(){
+      var val=inp.value.trim();
+      if(!val){ st.className="pc-status"; st.textContent=""; state.pc[inputId]=null; return; }
+      st.className="pc-status"; st.innerHTML='<span class="dot"></span>Looking up…';
+      var res=await resolvePostcode(val);
+      if(res){
+        state.pc[inputId]=res;
+        st.className="pc-status ok";
+        st.innerHTML='<span class="dot"></span>Confirmed: '+escapeHtml(res.town||res.postcode)+' ('+escapeHtml(res.postcode)+')';
+        maybeEnrichDistance(inputId);
+      } else {
+        state.pc[inputId]=null;
+        st.className="pc-status bad";
+        st.innerHTML='<span class="dot"></span>Postcode not found — please check.';
+      }
+    });
+  }
+
+  // ===== DISTANCE ENRICHMENT (server proxy, graceful fallback) =====
+  // Calls /api/enrich?from=&to= → { miles, minutes, pickup{lat,lng,w3w,...}, delivery{...} }.
+  // The server holds the Google Maps key (never shipped to the browser). On a
+  // good response we auto-fill + lock the distance and merge the richer pickup/
+  // delivery facts (lat/lng/w3w) into state.pc so the submit carries them.
+  // If it 404s/fails or returns miles:null, the manual field stays editable.
+  var ENRICH_URL = 'https://jsdwvogsxlnczzbefwgp.supabase.co/functions/v1/enrich';
+  var ENRICH_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzZHd2b2dzeGxuY3p6YmVmd2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODgyMzYsImV4cCI6MjA5Njk2NDIzNn0.pxqM-Oh4f_3PlqCbKIKvcKZnNRUZ1ASKqqdNg78M_4M';
+  async function enrichRoute(fromPc, toPc){
+    try{
+      var r = await fetch(ENRICH_URL+'?from='+encodeURIComponent(fromPc)+'&to='+encodeURIComponent(toPc), {
+        headers: { 'apikey': ENRICH_ANON, 'Authorization': 'Bearer '+ENRICH_ANON }
+      });
+      if(!r.ok) return null;
+      return await r.json();
+    }catch(e){ return null; }
+  }
+  // short town label for the confirmation line (first segment, e.g. "Sheffield")
+  function shortTown(loc){
+    if(!loc) return null;
+    var t = loc.town || loc.display_name || loc.postcode || "";
+    var first = String(t).split(",")[0].trim();
+    return first || (loc.postcode||null);
+  }
+  function setMilesAuto(pre, miles){
+    var milesInput = $(pre+"miles"); var milesStatus = $(pre+"miles-status");
+    if(!milesInput) return;
+    var m = Math.round(miles);
+    milesInput.value = m;
+    milesInput.disabled = true;
+    milesInput.dataset.auto = "1";
+    if(milesStatus){
+      milesStatus.innerHTML = "≈ "+m+" mi (auto) · <a href=\"#\" class=\"miles-edit\" data-pre=\""+pre+"\">edit</a>";
+    }
+  }
+  function unlockMiles(pre){
+    var milesInput = $(pre+"miles"); var milesStatus = $(pre+"miles-status");
+    if(!milesInput) return;
+    milesInput.disabled = false;
+    delete milesInput.dataset.auto;
+    milesInput.focus();
+    if(milesStatus) milesStatus.textContent = "Enter approx miles — we'll confirm exact distance.";
+  }
+  // subtle route confirmation line, e.g. "Sheffield ↔ Birmingham · 92 mi"
+  function showRouteConfirm(pre, p, d, miles){
+    var host = $(pre+"route-confirm");
+    if(!host){
+      var anchor = $(pre+"miles-status");
+      if(anchor && anchor.parentNode){
+        host = document.createElement("div");
+        host.id = pre+"route-confirm";
+        host.className = "route-confirm";
+        anchor.parentNode.insertBefore(host, anchor.nextSibling);
+      }
+    }
+    if(!host) return;
+    var a = shortTown(p), b = shortTown(d);
+    if(a && b && isFinite(miles)){
+      host.innerHTML = '<span class="dot"></span>'+escapeHtml(a)+' ↔ '+escapeHtml(b)+' · '+Math.round(miles)+' mi';
+      host.style.display = "";
+    } else {
+      host.style.display = "none";
+    }
+  }
+  function maybeEnrichDistance(changedInputId){
+    var lane = state.lane;
+    if(lane!=="A" && lane!=="B") return;
+    var pre = lane==="A" ? "a-" : "b-";
+    var pPc = state.pc[pre+"pickup"], dPc = state.pc[pre+"delivery"];
+    if(!pPc || !dPc) return;
+    var milesInput = $(pre+"miles");
+    if(!milesInput) return;
+    enrichRoute(pPc.postcode, dPc.postcode).then(function(j){
+      if(!j) return;
+      // merge richer location facts (lat/lng/w3w) onto the resolved postcodes
+      if(j.pickup){ state.pc[pre+"pickup"] = Object.assign({}, state.pc[pre+"pickup"]||{}, {
+        postcode: j.pickup.postcode || pPc.postcode, lat: j.pickup.lat, lng: j.pickup.lng,
+        town: j.pickup.town || pPc.town, w3w: j.pickup.w3w || null, w3wUrl: j.pickup.w3wUrl || null }); }
+      if(j.delivery){ state.pc[pre+"delivery"] = Object.assign({}, state.pc[pre+"delivery"]||{}, {
+        postcode: j.delivery.postcode || dPc.postcode, lat: j.delivery.lat, lng: j.delivery.lng,
+        town: j.delivery.town || dPc.town, w3w: j.delivery.w3w || null, w3wUrl: j.delivery.w3wUrl || null }); }
+      var miles = (j && isFinite(Number(j.miles)) && Number(j.miles)>0) ? Number(j.miles) : null;
+      if(miles){
+        setMilesAuto(pre, miles);
+        showRouteConfirm(pre, state.pc[pre+"pickup"], state.pc[pre+"delivery"], miles);
+        // AUTO-PRICE: distance is now known — if van + service are set, price now.
+        autoPrice(lane);
+      }
+    });
+  }
+
+  // ===== AUTO-PRICE (reactive) =====
+  // Recompute + render the price without a button press, but ONLY once we have a
+  // usable distance. Safe to call any time: it no-ops until distance is present.
+  function autoPrice(lane){
+    if(lane!=="A" && lane!=="B") return;
+    var pre = lane==="A" ? "a-" : "b-";
+    var milesEl = $(pre+"miles");
+    var miles = milesEl ? parseFloat(milesEl.value) : NaN;
+    if(!isFinite(miles) || miles<=0) return;     // wait for distance
+    if(!P || !P.quote) return;
+    priceLane(lane);
+  }
+
+  // ===== VAN RECOMMENDER (transparent, editable) =====
+  // Take the HIGHER of volume-implied and weight-implied van.
+  function recommendVehicle(load){
+    // load: { volM3, weightKg, longestCm }
+    var vol = Number(load.volM3)||0, kg = Number(load.weightKg)||0, longest = Number(load.longestCm)||0;
+    // Thresholds mirror the HAF van guide (internal capacity + payload).
+    // 0 Small · 1 SWB · 2 MWB · 3 LWB · 4 XLWB · 5 Luton.
+    function byVol(v){
+      if(v<=1.8) return 0;            // Small  1.4×1.2×1.1
+      if(v<=3.5) return 1;            // SWB    2.0×1.25×1.4
+      if(v<=5.0) return 2;            // MWB    2.6×1.3×1.6
+      if(v<=6.9) return 3;            // LWB    3.0×1.35×1.7
+      if(v<=9.2) return 4;            // XLWB   4.0×1.35×1.7
+      return 5;                       // Luton  4.0×2.0×1.8
+    }
+    function byWeight(w){
+      if(w<=400)  return 0;
+      if(w<=800)  return 1;
+      if(w<=900)  return 2;           // MWB
+      if(w<=1000) return 3;           // LWB / XLWB share a ~1000 kg ceiling
+      return 4;                       // over 1000 kg → XLWB (largest standard)
+    }
+    var tier = Math.max(byVol(vol), byWeight(kg));
+    // Long single item bumps up by length.
+    if(longest>300 && tier<4) tier = 4;   // over 3.0 m → XLWB
+    if(longest>260 && tier<3) tier = 3;   // over 2.6 m → LWB
+    if(longest>200 && tier<2) tier = 2;   // over 2.0 m → MWB
+    var codes = ["SMALL_VAN","SWB_VAN","MWB_VAN","LWB_VAN","XLWB_VAN","LUTON"];
+    var whys = [
+      "documents, parcels & small boxes — 1 pallet, up to ~400 kg",
+      "single items or small furniture — 2 pallets, up to ~800 kg",
+      "bulky single items or a couple of pallets — 2 pallets, up to ~900 kg",
+      "larger or multiple items — 3 pallets, up to ~1000 kg",
+      "long or bulky loads — 4 pallets, up to ~1000 kg",
+      "box body with tail-lift — 6 pallets, large palletised or heavy goods"
+    ];
+    return { code: codes[tier], why: whys[tier] };
+  }
+
+  // ===== ENGINE CONFIG HELPERS =====
+  function fillVehicleSelect(sel, defCode){
+    if(!sel || !P || !P.config) return;
+    sel.innerHTML = "";
+    P.config.vehicles.forEach(function(v){
+      var o=document.createElement("option");
+      o.value=v.code; o.textContent=v.name;
+      if(defCode && v.code===defCode) o.selected=true;
+      sel.appendChild(o);
+    });
+  }
+
+  // ===== "When do you need it?" chooser builder =====
+  function buildWhen(containerId, lane){
+    var c = $(containerId); if(!c) return;
+    c.innerHTML = "";
+    WHEN_OPTIONS.forEach(function(opt){
+      var b = document.createElement("button");
+      b.type="button"; b.className="choice"+(state.when[lane]===opt.code?" on":"");
+      b.setAttribute("data-code", opt.code);
+      b.innerHTML = '<span class="ch-t">'+escapeHtml(opt.t)+'</span><span class="ch-s">'+escapeHtml(opt.s)+'</span>';
+      b.addEventListener("click", function(){
+        state.when[lane] = opt.code;
+        Array.prototype.forEach.call(c.children, function(ch){ ch.classList.remove("on"); });
+        b.classList.add("on");
+        // service (timing) changed — re-price live if route+van already known
+        autoPrice(lane);
+      });
+      c.appendChild(b);
+    });
+  }
+
+  // ===== Optional load+timing block (lane A disclosure) =====
+  function loadBlockHtml(pre){
+    return ''+
+    '<div class="row2">'+
+      '<div class="field"><label>Number of items / pallets</label><input type="number" id="'+pre+'items" min="0" step="1" placeholder="e.g. 2" /></div>'+
+      '<div class="field"><label>Total weight (kg)</label><input type="number" id="'+pre+'weight" min="0" step="1" placeholder="e.g. 350" /></div>'+
+    '</div>'+
+    '<div class="field"><label>Goods description</label><input type="text" id="'+pre+'goods" placeholder="What\'s being moved?" /></div>'+
+    '<div class="checkrow">'+
+      '<label class="checkbox"><input type="checkbox" id="'+pre+'fragile" /> Fragile</label>'+
+      '<label class="checkbox"><input type="checkbox" id="'+pre+'hazardous" /> Hazardous</label>'+
+    '</div>'+
+    '<div class="row2">'+
+      '<div class="field"><label>Collection date</label><input type="date" id="'+pre+'cdate" /></div>'+
+      '<div class="field"><label>Ready-from time</label><input type="time" id="'+pre+'rtime" /></div>'+
+    '</div>'+
+    '<div class="row2">'+
+      '<div class="field"><label>Delivery deadline date</label><input type="date" id="'+pre+'ddate" /></div>'+
+      '<div class="field"><label>Deadline time</label><input type="time" id="'+pre+'dtime" /></div>'+
+    '</div>'+
+    '<div class="field"><label>Loading help</label><select id="'+pre+'loading">'+
+      '<option value="None">None</option><option value="Tail lift needed">Tail lift needed</option>'+
+      '<option value="One person">One person</option><option value="Two people">Two people</option>'+
+    '</select></div>';
+  }
+
+  // ===== PASSWORD GATE =====
+  var GATE_KEY = "knect_pilot";
+  var GATE_CODE = "Otis247";
+
+  function checkGate(){
+    if(sessionStorage.getItem(GATE_KEY) === "1") show("screen-choose");
+  }
+
+  function unlock(){
+    var val = ($("pw-input").value||"").trim();
+    var err = $("pw-error");
+    if(val === GATE_CODE){
+      sessionStorage.setItem(GATE_KEY, "1");
+      show("screen-choose");
+    } else {
+      err.classList.remove("hidden");
+      $("pw-input").value = ""; $("pw-input").focus();
+    }
+  }
+
+  // Also allow Enter key on the password field
+  (function(){
+    var inp = $("pw-input"); if(!inp) return;
+    inp.addEventListener("keydown", function(e){ if(e.key==="Enter") unlock(); });
+  })();
+
+  // ===== SCREEN ROUTING =====
+  var SCREENS = ["screen-waitlist","screen-choose","screen-A","screen-B","screen-C","screen-contact"];
+  function show(screenId){
+    SCREENS.forEach(function(s){ var el=$(s); if(el) el.classList.toggle("hidden", s!==screenId); });
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  function resetResult(msg){
+    $("resultPanel").innerHTML =
+      '<div class="placeholder"><span class="ph-ico"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span>'+
+      (msg||"Choose how you'd like to start, and we'll show your live network price here.")+'</div>';
+  }
+  function restart(){
+    state.lane=null; state.lastQuote=null; state.quoteCtx=null; state.reorderOf=null; state.preset=null;
+    resetResult();
+    show("screen-choose");
+  }
+
+  // Lane open
+  function openLane(lane){
+    state.lane = lane;
+    if(lane==="A"){
+      // build a fresh load block (so ids exist) only once
+      var lb = document.querySelector('[data-load-block="A"]');
+      if(lb && !lb.dataset.built){ lb.innerHTML = loadBlockHtml("a-"); lb.dataset.built="1"; }
+      buildWhen("a-when","A");
+      show("screen-A");
+    } else if(lane==="B"){
+      buildWhen("b-when","B");
+      show("screen-B");
+    } else if(lane==="C"){
+      $("c-result").innerHTML="";
+      show("screen-C");
+    }
+    resetResult("Fill in the details and choose <b>Get my price</b> to see your live network quote.");
+  }
+
+  // ===== LANE B: recompute recommendation =====
+  function laneBLoad(){
+    var items = parseFloat($("b-items").value)||0;
+    var kg = parseFloat($("b-weight").value)||0;
+    var L=parseFloat($("b-dl").value)||0, W=parseFloat($("b-dw").value)||0, H=parseFloat($("b-dh").value)||0;
+    var dimVol = (L>0&&W>0&&H>0) ? (L/100)*(W/100)*(H/100) : 0;  // cm→m³
+    var longest = Math.max(L,W,H);
+    var preset = state.preset ? LOAD_PRESETS.find(function(p){return p.key===state.preset;}) : null;
+    // volume: prefer measured dims, else preset; weight: prefer entered, else preset
+    var volM3 = dimVol>0 ? dimVol : (preset ? preset.volM3 : 0);
+    var weightKg = kg>0 ? kg : (preset ? preset.weightKg : 0);
+    return { volM3:volM3, weightKg:weightKg, longestCm:longest, items:items };
+  }
+  function refreshRecommendation(){
+    var load = laneBLoad();
+    if(load.volM3<=0 && load.weightKg<=0){
+      $("b-recommend").classList.add("hidden");
+      return;
+    }
+    var rec = recommendVehicle(load);
+    var vName = (P.config.vehicles.find(function(v){return v.code===rec.code;})||{}).name || rec.code;
+    $("b-recommend").classList.remove("hidden");
+    $("b-rec-title").textContent = "We recommend: "+vName;
+    $("b-rec-why").textContent = "Looks like "+rec.why+". You can change this below.";
+    // pre-set the select (only if user hasn't manually overridden after a rec)
+    var sel = $("b-vehicle");
+    if(sel && !sel.dataset.userTouched) sel.value = rec.code;
+  }
+
+  // ===== PRICE =====
+  function laneContext(lane){
+    var pre = lane==="A" ? "a-" : "b-";
+    var pickup = ($(pre+"pickup").value||"").trim();
+    var delivery = ($(pre+"delivery").value||"").trim();
+    var milesEl = $(pre+"miles");
+    var miles = milesEl ? parseFloat(milesEl.value) : NaN;
+    var vehicleCode = (lane==="A") ? $("a-vehicle").value : $("b-vehicle").value;
+    var jobTypeCode = state.when[lane] || WHEN_DEFAULT;
+    var load = (lane==="B") ? laneBLoad() : {
+      items: parseFloat(($("a-items")||{}).value)||0,
+      weightKg: parseFloat(($("a-weight")||{}).value)||0
+    };
+    return { lane:lane, pre:pre, pickup:pickup, delivery:delivery, miles:miles, vehicleCode:vehicleCode, jobTypeCode:jobTypeCode, load:load };
+  }
+
+  function priceLane(lane){
+    var ctx = laneContext(lane);
+    state.quoteCtx = ctx;
+    var panel = $("resultPanel");
+    if(!P || !P.quote){
+      panel.innerHTML = '<div class="placeholder">The pricing engine could not load. Please refresh and try again.</div>';
+      return;
+    }
+    if(!isFinite(ctx.miles) || ctx.miles<=0){
+      panel.innerHTML = '<div class="placeholder">Enter the <b>collection &amp; delivery postcodes</b>; if we can\'t auto-calculate distance, add approx <b>loaded miles</b> to get a live price.</div>';
+      state.lastQuote=null;
+      return;
+    }
+    var q = P.quote({
+      pickup: ctx.pickup, delivery: ctx.delivery, loadedMiles: ctx.miles,
+      vehicleCode: ctx.vehicleCode, jobTypeCode: ctx.jobTypeCode,
+      demand:{}, supply:{available:1}, recoveryCode:"NORMAL", directionCode:"NORMAL"
+    });
+    state.lastQuote = q;
+    renderPrice(q, ctx);
+  }
+
+  function renderPrice(q, ctx){
+    var panel = $("resultPanel");
+    var routeLabel = (ctx.pickup||"Collection") + " → " + (ctx.delivery||"Delivery");
+    var routeChip = '<div class="route-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'+escapeHtml(routeLabel)+'</div>';
+    if(q.manualApprovalRequired){
+      var isSpecialist = (q.vehicle && q.vehicle.code === "SPECIALIST") || (ctx && ctx.vehicleCode === "SPECIALIST");
+      var noteMsg = isSpecialist
+        ? "Specialist consignments — house removals, oversized or multi-van loads — are arranged on request. Send your details and we'll connect you directly with the courier to agree the job and the price."
+        : "We'll confirm this quote — a HAF specialist will price this route and come back to you.";
+      var noteBtn = isSpecialist ? "Request a specialist quote" : "Continue to booking";
+      panel.innerHTML =
+        routeChip +
+        '<div class="manual-note">'+
+          '<div class="mn-ico"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>'+
+          noteMsg+
+        '</div>'+
+        '<button type="button" class="cta secondary" data-act="to-contact" style="margin-top:18px">'+noteBtn+'</button>';
+    } else {
+      panel.innerHTML =
+        routeChip +
+        '<div class="price-label">Your price</div>'+
+        '<div class="price-big">'+money(q.customerPriceIncVat)+'</div>'+
+        '<div class="price-sub">inc VAT</div>'+
+        '<div class="price-lines">'+
+          '<div class="price-line"><span class="pl-l">Price (ex VAT)</span><span class="pl-v">'+money(q.customerPriceExVat)+'</span></div>'+
+          '<div class="price-line"><span class="pl-l">VAT</span><span class="pl-v">'+money(q.vatAmount)+'</span></div>'+
+        '</div>'+
+        '<button type="button" class="cta" data-act="to-contact" style="margin-top:20px">Continue to booking</button>';
+    }
+  }
+
+  // ===== CONTACT step toggle =====
+  (function(){
+    var ctype=$("q-ctype"), cf=$("company-field");
+    function sync(){ if(!ctype||!cf) return;
+      var show=(ctype.value==="business"||ctype.value==="load_poster");
+      cf.classList.toggle("hidden", !show);
+    }
+    if(ctype){ ctype.addEventListener("change", sync); sync(); }
+  })();
+
+  // ===== BUILD THE QUOTES ROW =====
+  function v(id){ var el=$(id); return el ? (el.value||"").trim() : ""; }
+  function chk(id){ var el=$(id); return !!(el && el.checked); }
+
+  function buildRow(){
+    var ctx = state.quoteCtx, q = state.lastQuote;
+    var pre = ctx.pre;
+    var pcP = state.pc[pre+"pickup"], pcD = state.pc[pre+"delivery"];
+    var ctype = v("q-ctype");
+    var name=v("q-name"), email=v("q-email"), phone=v("q-phone"), notes=v("q-notes");
+
+    var details = {
+      entry_lane: state.reorderOf ? "repeat" : ctx.lane,
+      company_name: v("q-company") || null,
+      pickup_town: pcP ? pcP.town : null,
+      delivery_town: pcD ? pcD.town : null,
+      pickup_w3w: pcP ? (pcP.w3w || null) : null,
+      delivery_w3w: pcD ? (pcD.w3w || null) : null,
+      pickup_w3w_url: pcP ? (pcP.w3wUrl || null) : null,
+      delivery_w3w_url: pcD ? (pcD.w3wUrl || null) : null,
+      source_referrer: document.referrer,
+      page_url: location.href,
+      user_agent: navigator.userAgent,
+      submitted_at: new Date().toISOString()
+    };
+    if(state.reorderOf) details.reorder_of = state.reorderOf;
+
+    // lane A optional load/timing enrichment (only if the disclosure ids exist)
+    if(ctx.lane==="A"){
+      details.item_count = parseInt(v("a-items"),10) || null;
+      details.total_weight_kg = parseFloat(v("a-weight")) || null;
+      details.goods_description = v("a-goods") || null;
+      details.fragile = chk("a-fragile");
+      details.hazardous = chk("a-hazardous");
+      details.collection_date = v("a-cdate") || null;
+      details.ready_time = v("a-rtime") || null;
+      details.deadline_date = v("a-ddate") || null;
+      details.deadline_time = v("a-dtime") || null;
+      details.loading_help = v("a-loading") || null;
+    }
+    if(ctx.lane==="B"){
+      details.item_count = (ctx.load.items||null);
+      details.total_weight_kg = (ctx.load.weightKg||null);
+      details.volume_m3 = (ctx.load.volM3||null);
+      details.preset = state.preset || null;
+      details.vehicle_recommended = ctx.vehicleCode;
+    }
+
+    return {
+      source: "knect",
+      status: "quoted",
+      pickup_postcode: pcP ? pcP.postcode : (ctx.pickup || null),
+      pickup_lat: pcP ? pcP.lat : null,
+      pickup_lng: pcP ? pcP.lng : null,
+      delivery_postcode: pcD ? pcD.postcode : (ctx.delivery || null),
+      delivery_lat: pcD ? pcD.lat : null,
+      delivery_lng: pcD ? pcD.lng : null,
+      distance_miles: parseFloat(ctx.miles) || null,
+      vehicle_code: ctx.vehicleCode,
+      job_type_code: ctx.jobTypeCode,
+      customer_price_inc_vat: q.customerPriceIncVat,
+      customer_price_ex_vat: q.customerPriceExVat,
+      vat_amount: q.vatAmount,
+      driver_target_pay: q.driverTargetPay,
+      haf_gross_fee: q.hafGrossFee,
+      haf_margin_pct: q.hafMarginPct,
+      network_fee_pct: q.networkFeePct,
+      manual_approval_required: !!q.manualApprovalRequired,
+      reason_codes: q.reasonCodes || [],
+      reason_text: q.reasonText || null,
+      customer_name: name || null,
+      customer_email: email || null,
+      customer_phone: phone || null,
+      customer_type: ctype || null,
+      notes: notes || null,
+      details: details
+    };
+  }
+
+  async function submitBooking(btn){
+    if(!state.lastQuote || !state.quoteCtx) return;
+    if(btn){ btn.disabled=true; btn.textContent="Sending…"; btn.style.opacity=".7"; }
+    var row = buildRow();
+    var ctype = v("q-ctype");
+    var isBusiness = (ctype==="business" || ctype==="load_poster");
+    var lead = {
+      source: "quote_form",
+      name: v("q-name") || null,
+      email: v("q-email") || null,
+      phone: v("q-phone") || null,
+      lead_type: isBusiness ? "business" : "customer",
+      postcode: row.pickup_postcode,
+      message: v("q-notes") || null,
+      details: { vehicle_code: row.vehicle_code, job_type_code: row.job_type_code, entry_lane: row.details.entry_lane }
+    };
+    var panel = $("resultPanel");
+    try{
+      var resp = await fetch(SB_URL + "/rest/v1/rpc/knect_submit_quote", {
+        method:"POST", headers: sbHeaders(),
+        body: JSON.stringify({ quote: row, lead: lead })
+      });
+      if(!resp.ok){ throw new Error("rpc knect_submit_quote " + resp.status + " " + (await resp.text())); }
+      var ref = await resp.json();
+      if(typeof ref !== "string") ref = (ref && ref.ref) ? ref.ref : null;
+      var manual = !!state.lastQuote.manualApprovalRequired;
+      panel.innerHTML =
+        '<div class="confirm">'+
+          '<div class="cf-ico"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>'+
+          '<h3>Thanks — your booking request is in.</h3>'+
+          '<p>'+(ref ? 'Reference <b>'+escapeHtml(ref)+'</b>. ' : '')+
+          'HAF will confirm shortly.'+
+          (manual ? ' A specialist will price this route and come back to you.' : '')+
+          '</p>'+
+        '</div>';
+    }catch(err){
+      console.error("KNECT booking submit failed:", err);
+      if(btn){ btn.disabled=false; btn.textContent="Request this booking"; btn.style.opacity="1"; }
+      var existing = panel.querySelector(".submit-error");
+      if(existing) existing.remove();
+      var note = document.createElement("div");
+      note.className="manual-note submit-error"; note.style.marginTop="16px";
+      note.textContent="We couldn't submit that just now — please try again.";
+      panel.appendChild(note);
+    }
+  }
+
+  // ===== LANE C: lookup + reorder =====
+  async function lookupOrder(btn){
+    var ref = v("c-ref"), email = v("c-email");
+    var out = $("c-result");
+    if(!ref || !email){ out.innerHTML='<div class="manual-note">Enter both your reference and the email used on the order.</div>'; return; }
+    if(btn){ btn.disabled=true; btn.textContent="Finding…"; btn.style.opacity=".7"; }
+    try{
+      var resp = await fetch(SB_URL + "/rest/v1/rpc/knect_lookup_quote", {
+        method:"POST", headers: sbHeaders(),
+        body: JSON.stringify({ p_ref: ref, p_email: email })
+      });
+      if(!resp.ok){ throw new Error("rpc knect_lookup_quote " + resp.status + " " + (await resp.text())); }
+      var data = await resp.json();
+      if(btn){ btn.disabled=false; btn.textContent="Find my order"; btn.style.opacity="1"; }
+      if(!data){
+        out.innerHTML='<div class="manual-note">We couldn\'t find an order with that reference and email — please check, or start a new quote.</div>';
+        return;
+      }
+      var vName = (P.config.vehicles.find(function(x){return x.code===data.vehicle_code;})||{}).name || data.vehicle_code || "Van";
+      var sName = (P.config.jobTypes.find(function(x){return x.code===data.job_type_code;})||{}).name || data.job_type_code || "Service";
+      out.innerHTML =
+        '<div class="reorder">'+
+          '<h3>Found your order '+escapeHtml(data.ref||ref)+'</h3>'+
+          '<div class="ro-route">'+escapeHtml(data.pickup_postcode||"—")+' → '+escapeHtml(data.delivery_postcode||"—")+'</div>'+
+          '<div class="ro-grid">'+
+            '<div class="ro-cell"><div class="roc-l">Vehicle</div><div class="roc-v">'+escapeHtml(vName)+'</div></div>'+
+            '<div class="ro-cell"><div class="roc-l">Service</div><div class="roc-v">'+escapeHtml(sName)+'</div></div>'+
+            '<div class="ro-cell"><div class="roc-l">Last quoted</div><div class="roc-v">'+(data.customer_price_inc_vat!=null?money(data.customer_price_inc_vat):"—")+'</div></div>'+
+            '<div class="ro-cell"><div class="roc-l">Name</div><div class="roc-v">'+escapeHtml(data.customer_name||"—")+'</div></div>'+
+          '</div>'+
+          '<div class="btn-row" style="margin-top:16px">'+
+            '<button type="button" class="cta" data-act="reorder-confirm">Confirm &amp; send</button>'+
+            '<button type="button" class="cta ghost" data-act="reorder-change">Change something</button>'+
+          '</div>'+
+        '</div>';
+      out._order = data;
+    }catch(err){
+      console.error("KNECT lookup failed:", err);
+      if(btn){ btn.disabled=false; btn.textContent="Find my order"; btn.style.opacity="1"; }
+      out.innerHTML='<div class="manual-note">We couldn\'t look that up just now — please try again.</div>';
+    }
+  }
+
+  // Re-price the found order live and submit a NEW row (details.reorder_of)
+  function reorderConfirm(){
+    var data = $("c-result")._order; if(!data) return;
+    state.reorderOf = data.ref;
+    var vehicleCode = data.vehicle_code || "SWB_VAN";
+    var jobTypeCode = data.job_type_code || WHEN_DEFAULT;
+    // The lookup now returns the stored distance_miles, so a repeat order can
+    // re-price LIVE to a firm number — reference → confirm & send, no manual step.
+    var storedMiles = parseFloat(data.distance_miles);
+    var haveMiles = isFinite(storedMiles) && storedMiles > 0;
+    state.quoteCtx = {
+      lane:"C", pre:"c-", pickup:data.pickup_postcode, delivery:data.delivery_postcode,
+      miles: haveMiles ? storedMiles : NaN, vehicleCode:vehicleCode, jobTypeCode:jobTypeCode, load:{}
+    };
+    state.pc["c-pickup"]=null; state.pc["c-delivery"]=null;
+    // Re-price live on the stored route distance. Only the engine itself decides
+    // whether this needs manual approval — we never force it just because it's a reorder.
+    var q = P.quote({
+      pickup:data.pickup_postcode, delivery:data.delivery_postcode,
+      loadedMiles: haveMiles ? storedMiles : 0,
+      vehicleCode:vehicleCode, jobTypeCode:jobTypeCode,
+      demand:{}, supply:{available:1}, recoveryCode:"NORMAL", directionCode:"NORMAL"
+    });
+    // Older rows with no stored distance can't be firm-priced — keep the graceful
+    // "we'll confirm this quote" route to manual approval.
+    if(!haveMiles) q.manualApprovalRequired = true;
+    state.lastQuote = q;
+    // Pre-fill contact email from the lookup
+    if(data.customer_name) $("q-name").value = data.customer_name;
+    $("q-email").value = v("c-email");
+    if(data.customer_type){ var ct=$("q-ctype"); if(ct){ ct.value=data.customer_type; ct.dispatchEvent(new Event("change")); } }
+    renderPrice(q, state.quoteCtx);
+    show("screen-contact");
+  }
+
+  // "Change something" → drop into Lane A pre-filled from the found order
+  function reorderChange(){
+    var data = $("c-result")._order; if(!data) return;
+    state.reorderOf = data.ref;
+    openLane("A");
+    if(data.pickup_postcode){ $("a-pickup").value=data.pickup_postcode; $("a-pickup").dispatchEvent(new Event("blur")); }
+    if(data.delivery_postcode){ $("a-delivery").value=data.delivery_postcode; $("a-delivery").dispatchEvent(new Event("blur")); }
+    if(data.vehicle_code){ var sel=$("a-vehicle"); if(sel) sel.value=data.vehicle_code; }
+    if(data.job_type_code && state.when){ state.when.A=data.job_type_code; buildWhen("a-when","A"); }
+  }
+
+  // ===== INIT: populate selects, wire postcodes, delegate clicks =====
+  fillVehicleSelect($("a-vehicle"), "SWB_VAN");
+  fillVehicleSelect($("b-vehicle"), "SWB_VAN");
+
+  wirePostcode("a-pickup","pc-status-a-pickup");
+  wirePostcode("a-delivery","pc-status-a-delivery");
+  wirePostcode("b-pickup","pc-status-b-pickup");
+  wirePostcode("b-delivery","pc-status-b-delivery");
+
+  // Lane B presets
+  (function(){
+    var c=$("b-presets"); if(!c) return;
+    LOAD_PRESETS.forEach(function(p){
+      var b=document.createElement("button");
+      b.type="button"; b.className="preset"; b.textContent=p.label; b.setAttribute("data-preset",p.key);
+      b.addEventListener("click", function(){
+        state.preset = (state.preset===p.key) ? null : p.key;
+        Array.prototype.forEach.call(c.children, function(ch){ ch.classList.toggle("on", ch.getAttribute("data-preset")===state.preset); });
+        refreshRecommendation();
+      });
+      c.appendChild(b);
+    });
+  })();
+  ["b-items","b-weight","b-dl","b-dw","b-dh"].forEach(function(id){
+    var el=$(id); if(el) el.addEventListener("input", refreshRecommendation);
+  });
+
+  // ===== REACTIVE AUTO-PRICE: re-price live when the van or service changes =====
+  (function(){
+    var av=$("a-vehicle"); if(av) av.addEventListener("change", function(){ autoPrice("A"); });
+    var bv=$("b-vehicle"); if(bv) bv.addEventListener("change", function(){ bv.dataset.userTouched="1"; autoPrice("B"); });
+  })();
+  // If the user manually overrides the distance, re-price as they type.
+  ["a-miles","b-miles"].forEach(function(id){
+    var el=$(id); if(!el) return;
+    el.addEventListener("input", function(){ autoPrice(id.charAt(0)==="a"?"A":"B"); });
+  });
+
+  // Lane chooser cards
+  Array.prototype.forEach.call(document.querySelectorAll(".lane-card"), function(card){
+    card.addEventListener("click", function(){ openLane(card.getAttribute("data-lane")); });
+  });
+
+  // If already authed this session, skip the gate
+  checkGate();
+
+  // "edit" link on an auto-filled distance → unlock the manual miles field
+  document.addEventListener("click", function(e){
+    var ed = e.target.closest(".miles-edit"); if(!ed) return;
+    e.preventDefault();
+    unlockMiles(ed.getAttribute("data-pre"));
+  });
+
+  // Delegated actions
+  document.addEventListener("click", function(e){
+    var t = e.target.closest("[data-act]"); if(!t) return;
+    var act = t.getAttribute("data-act");
+    if(act==="unlock"){ unlock(); }
+    else if(act==="restart"){ restart(); }
+    else if(act==="price"){ priceLane(t.getAttribute("data-lane")); }
+    else if(act==="to-contact"){ show("screen-contact"); }
+    else if(act==="book"){ submitBooking(t); }
+    else if(act==="lookup"){ lookupOrder(t); }
+    else if(act==="reorder-confirm"){ reorderConfirm(); }
+    else if(act==="reorder-change"){ reorderChange(); }
+  });
+})();
 </script>
+<!-- HAF Analytics — anonymous page + funnel tracking into the HAF-owned store -->
+<script defer src="/haf-analytics.js"></script>
 </body>
 </html>
