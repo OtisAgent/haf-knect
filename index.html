@@ -149,11 +149,15 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 .tr-status{font-family:var(--dp);font-weight:900;font-size:1rem;margin-bottom:.15rem}
 .tr-route{font-size:.77rem;color:var(--mu)}
 
-/* TILE FOCUS MODE — swap tile grid for flow panel, keep calc + login visible */
+/* TILE FOCUS MODE — hide calc + tile grid, show flow + login panel */
+body.tile-focus .calc-box{display:none!important}
 body.tile-focus #tiles-wrap{display:none!important}
 body.tile-focus #side-talk{display:none!important}
 body.tile-focus .land-side{display:flex!important}
 @media(max-width:860px){body.tile-focus .land-body{display:flex;flex-direction:column}body.tile-focus .land-side{display:flex!important;order:2}}
+
+/* STEP ERROR MESSAGE */
+.fstep-err{display:none;font-size:.72rem;color:var(--rd);font-weight:600;margin:.45rem 0 -.15rem}
 
 /* SECONDARY ACTIONS */
 .sec-acts{display:flex;align-items:center;gap:1.2rem;padding:.3rem 0}
@@ -509,7 +513,8 @@ textarea.fi2{resize:vertical;min-height:70px}
                 <button class="oopt" onclick="fqSel(this,'van','lwb')">Full van<span class="oopt-sub">up to 1,200 kg, 3 pallets</span></button>
                 <button class="oopt" onclick="fqSel(this,'van','luton')">XL Van or Special<span class="oopt-sub">Luton + tail-lift, 6 pallets</span></button>
               </div>
-              <div class="fnav"><button class="btn btn-or btn-sm" onclick="fqStep(2)">Next &#8594;</button></div>
+              <div class="fstep-err" id="fq-err-1"></div>
+              <div class="fnav"><button class="btn btn-or btn-sm" onclick="fqNext(2)">Next &#8594;</button></div>
             </div>
             <div class="fstep" id="fq-2">
               <div class="slbl">Step 2 of 8 &#8212; Approx weight</div>
@@ -519,7 +524,8 @@ textarea.fi2{resize:vertical;min-height:70px}
                 <button class="oopt" onclick="fqSel(this,'weight','250')">Up to 250 kg<span class="oopt-sub">half a van load</span></button>
                 <button class="oopt" onclick="fqSel(this,'weight','500')">250 kg+<span class="oopt-sub">heavy or full van</span></button>
               </div>
-              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(1)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqStep(3)">Next &#8594;</button></div>
+              <div class="fstep-err" id="fq-err-2"></div>
+              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(1)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqNext(3)">Next &#8594;</button></div>
             </div>
             <div class="fstep" id="fq-3">
               <div class="slbl">Step 3 of 8 &#8212; Loading and handling</div>
@@ -533,7 +539,8 @@ textarea.fi2{resize:vertical;min-height:70px}
               <div class="slbl">Step 4 of 8 &#8212; Collection and delivery</div>
               <div class="of" style="margin-bottom:.55rem"><label class="ol">Collection postcode</label><input class="oi" id="fq-from" placeholder="e.g. S9 1AA" maxlength="8" autocomplete="off"></div>
               <div class="of"><label class="ol">Delivery postcode</label><input class="oi" id="fq-to" placeholder="e.g. M1 1AA" maxlength="8" autocomplete="off"></div>
-              <div class="fnav" style="margin-top:1rem"><button class="btn btn-gh btn-sm" onclick="fqStep(3)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqStep(5)">Next &#8594;</button></div>
+              <div class="fstep-err" id="fq-err-4"></div>
+              <div class="fnav" style="margin-top:.6rem"><button class="btn btn-gh btn-sm" onclick="fqStep(3)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqNext(5)">Next &#8594;</button></div>
             </div>
             <div class="fstep" id="fq-5">
               <div class="slbl">Step 5 of 8 &#8212; How soon?</div>
@@ -543,7 +550,8 @@ textarea.fi2{resize:vertical;min-height:70px}
                 <button class="oopt" onclick="fqSel(this,'urg','flex')">Flexible<span class="oopt-sub">best value</span></button>
                 <button class="oopt" onclick="fqSel(this,'urg','timed')">Pre-book<span class="oopt-sub">specific window</span></button>
               </div>
-              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(4)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqShowPrice()">See price &#8594;</button></div>
+              <div class="fstep-err" id="fq-err-5"></div>
+              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(4)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqShowPriceV()">See price &#8594;</button></div>
             </div>
             <div class="fstep" id="fq-6">
               <div class="slbl">Step 6 of 8 &#8212; Your guide price</div>
@@ -562,7 +570,8 @@ textarea.fi2{resize:vertical;min-height:70px}
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Email</label><input class="oi" id="fq-email" placeholder="your@email.co.uk" type="email" autocomplete="email"></div>
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Mobile</label><input class="oi" id="fq-mobile" placeholder="07xxx xxxxxx" type="tel" autocomplete="tel"></div>
               <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.73rem;font-weight:600;color:var(--mu)"><input type="checkbox" id="fq-wa" checked style="accent-color:var(--or)"> Send updates via WhatsApp</label>
-              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(6)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqStep(8)">Next &#8594;</button></div>
+              <div class="fstep-err" id="fq-err-7"></div>
+              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(6)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqNext(8)">Next &#8594;</button></div>
             </div>
             <div class="fstep" id="fq-8">
               <div class="slbl">Step 8 of 8 &#8212; Addresses</div>
@@ -570,7 +579,8 @@ textarea.fi2{resize:vertical;min-height:70px}
               <div class="of" style="margin-bottom:.48rem"><label class="ol">what3words (optional)</label><input class="oi" id="fq-cw3w" placeholder="///lamp.tiger.road"></div>
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Full delivery address</label><input class="oi" id="fq-daddr" placeholder="Street, town, postcode" autocomplete="off"></div>
               <div class="of"><label class="ol">what3words (optional)</label><input class="oi" id="fq-dw3w" placeholder="///bench.grass.cloud"></div>
-              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(7)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqBook()">Confirm and book &#8594;</button></div>
+              <div class="fstep-err" id="fq-err-8"></div>
+              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(7)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqBookV()">Confirm and book &#8594;</button></div>
             </div>
             <div class="fstep" id="fq-done">
               <div style="text-align:center;padding:.6rem 0 .9rem">
@@ -587,7 +597,8 @@ textarea.fi2{resize:vertical;min-height:70px}
             <div class="fstep on" id="ro-1">
               <div class="slbl">Enter your reference</div>
               <div class="of" style="margin-bottom:.9rem"><label class="ol">Order reference</label><input class="oi" id="ro-ref" placeholder="e.g. HAF-2847 or KN-471293" autocomplete="off"></div>
-              <button class="btn btn-or btn-wide" onclick="roLookup()">Find order &#8594;</button>
+              <div class="fstep-err" id="ro-err-1"></div>
+              <button class="btn btn-or btn-wide" onclick="roLookupV()">Find order &#8594;</button>
               <p style="font-size:.71rem;color:var(--su);margin-top:.65rem;line-height:1.55">Try: HAF-2847 or KN-471293</p>
             </div>
             <div class="fstep" id="ro-2">
@@ -599,7 +610,8 @@ textarea.fi2{resize:vertical;min-height:70px}
               <div class="slbl">Confirm contact</div>
               <p style="font-size:.77rem;color:var(--mu);margin-bottom:.85rem;line-height:1.6">Confirm your mobile number to receive delivery updates.</p>
               <div class="of" style="margin-bottom:.85rem"><label class="ol">Mobile</label><input class="oi" id="ro-mobile" placeholder="07xxx xxxxxx" type="tel" autocomplete="tel"></div>
-              <button class="btn btn-or btn-wide" onclick="roBook()">Confirm rebook &#8594;</button>
+              <div class="fstep-err" id="ro-err-3"></div>
+              <button class="btn btn-or btn-wide" onclick="roBookV()">Confirm rebook &#8594;</button>
               <button class="btn btn-gh btn-wide" onclick="roStep(2)" style="margin-top:.4rem">&#8592; Back</button>
             </div>
             <div class="fstep" id="ro-done">
@@ -622,7 +634,8 @@ textarea.fi2{resize:vertical;min-height:70px}
                 <button class="oopt" onclick="hpSel(this,'load','big')">Big items<span class="oopt-sub">furniture or appliances</span></button>
                 <button class="oopt" onclick="hpSel(this,'load','pallet')">Pallet or lots<span class="oopt-sub">heavy or palletised</span></button>
               </div>
-              <div class="fnav"><button class="btn btn-or btn-sm" onclick="hpStep(2)">Next &#8594;</button></div>
+              <div class="fstep-err" id="hp-err-1"></div>
+              <div class="fnav"><button class="btn btn-or btn-sm" onclick="hpNext(2)">Next &#8594;</button></div>
             </div>
             <div class="fstep" id="hp-2">
               <div class="slbl">Step 2 of 5 &#8212; When?</div>
@@ -632,13 +645,15 @@ textarea.fi2{resize:vertical;min-height:70px}
                 <button class="oopt" onclick="hpSel(this,'when','best')">Best price<span class="oopt-sub">we pick the optimal slot</span></button>
                 <button class="oopt" onclick="hpSel(this,'when','urg')">Urgent<span class="oopt-sub">next driver available now</span></button>
               </div>
-              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="hpStep(1)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="hpStep(3)">Next &#8594;</button></div>
+              <div class="fstep-err" id="hp-err-2"></div>
+              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="hpStep(1)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="hpNext(3)">Next &#8594;</button></div>
             </div>
             <div class="fstep" id="hp-3">
               <div class="slbl">Step 3 of 5 &#8212; Postcodes</div>
               <div class="of" style="margin-bottom:.55rem"><label class="ol">Collection postcode</label><input class="oi" id="hp-from" placeholder="e.g. S9 1AA" maxlength="8" autocomplete="off"></div>
               <div class="of"><label class="ol">Delivery postcode</label><input class="oi" id="hp-to" placeholder="e.g. M1 1AA" maxlength="8" autocomplete="off"></div>
-              <div class="fnav" style="margin-top:1rem"><button class="btn btn-gh btn-sm" onclick="hpStep(2)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="hpEstimate()">See estimate &#8594;</button></div>
+              <div class="fstep-err" id="hp-err-3"></div>
+              <div class="fnav" style="margin-top:.6rem"><button class="btn btn-gh btn-sm" onclick="hpStep(2)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="hpEstimateV()">See estimate &#8594;</button></div>
             </div>
             <div class="fstep" id="hp-4">
               <div class="slbl">Step 4 of 5 &#8212; HAF recommendation</div>
@@ -655,7 +670,8 @@ textarea.fi2{resize:vertical;min-height:70px}
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Full name</label><input class="oi" id="hp-name" placeholder="Your name" autocomplete="name"></div>
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Email</label><input class="oi" id="hp-email" placeholder="your@email.co.uk" type="email" autocomplete="email"></div>
               <div class="of"><label class="ol">Mobile</label><input class="oi" id="hp-mobile" placeholder="07xxx xxxxxx" type="tel" autocomplete="tel"></div>
-              <button class="btn btn-or btn-wide" onclick="hpBook()" style="margin-top:.85rem">Confirm and book &#8594;</button>
+              <div class="fstep-err" id="hp-err-5"></div>
+              <button class="btn btn-or btn-wide" onclick="hpBookV()" style="margin-top:.85rem">Confirm and book &#8594;</button>
               <button class="btn btn-gh btn-wide" onclick="hpStep(4)" style="margin-top:.4rem">&#8592; Back</button>
             </div>
             <div class="fstep" id="hp-done">
@@ -1144,6 +1160,68 @@ function fqSel(el,key,val){
   el.classList.add('sel');fqData[key]=val;
 }
 function fqToggle(el,key){el.classList.toggle('sel');fqData[key]=el.classList.contains('sel');}
+
+/* ── FLOW VALIDATION ── */
+function fErr(id,msg){const el=document.getElementById(id);if(!el)return;el.textContent=msg||'';el.style.display=msg?'block':'none';}
+
+function fqNext(toStep){
+  if(toStep===2){if(!fqData.van){fErr('fq-err-1','Please select a van size to continue.');return;}fErr('fq-err-1','');}
+  if(toStep===3){if(!fqData.weight){fErr('fq-err-2','Please select a weight to continue.');return;}fErr('fq-err-2','');}
+  if(toStep===5){
+    const fr=document.getElementById('fq-from').value.trim(),to=document.getElementById('fq-to').value.trim();
+    if(!fr||!to){fErr('fq-err-4','Please enter both a collection and delivery postcode.');return;}
+    fErr('fq-err-4','');
+  }
+  if(toStep===8){
+    const n=document.getElementById('fq-name').value.trim(),e=document.getElementById('fq-email').value.trim(),m=document.getElementById('fq-mobile').value.trim();
+    if(!n||!e||!m){fErr('fq-err-7','Please fill in your name, email, and mobile number.');return;}
+    fErr('fq-err-7','');
+  }
+  fqStep(toStep);
+}
+function fqShowPriceV(){
+  if(!fqData.urg){fErr('fq-err-5','Please select how soon you need this delivery.');return;}
+  fErr('fq-err-5','');
+  fqShowPrice();
+}
+function fqBookV(){
+  const ca=document.getElementById('fq-caddr').value.trim(),da=document.getElementById('fq-daddr').value.trim();
+  if(!ca||!da){fErr('fq-err-8','Please enter both the full collection and delivery addresses.');return;}
+  fErr('fq-err-8','');
+  fqBook();
+}
+
+function roLookupV(){
+  const ref=document.getElementById('ro-ref').value.trim();
+  if(!ref){fErr('ro-err-1','Please enter your order reference number.');return;}
+  fErr('ro-err-1','');
+  roLookup();
+}
+function roBookV(){
+  const m=document.getElementById('ro-mobile').value.trim();
+  if(!m){fErr('ro-err-3','Please enter your mobile number to receive updates.');return;}
+  fErr('ro-err-3','');
+  roBook();
+}
+
+function hpNext(toStep){
+  if(toStep===2){if(!hpData.load){fErr('hp-err-1','Please select what you are moving.');return;}fErr('hp-err-1','');}
+  if(toStep===3){if(!hpData.when){fErr('hp-err-2','Please select a delivery timescale.');return;}fErr('hp-err-2','');}
+  hpStep(toStep);
+}
+function hpEstimateV(){
+  const fr=document.getElementById('hp-from').value.trim(),to=document.getElementById('hp-to').value.trim();
+  if(!fr||!to){fErr('hp-err-3','Please enter both postcodes.');return;}
+  fErr('hp-err-3','');
+  hpEstimate();
+}
+function hpBookV(){
+  const n=document.getElementById('hp-name').value.trim(),e=document.getElementById('hp-email').value.trim(),m=document.getElementById('hp-mobile').value.trim();
+  if(!n||!e||!m){fErr('hp-err-5','Please fill in your name, email, and mobile number.');return;}
+  fErr('hp-err-5','');
+  hpBook();
+}
+
 function fqCalcPrice(){
   const fr=(document.getElementById('fq-from').value||'M1').trim().toUpperCase();
   const to=(document.getElementById('fq-to').value||'LS1').trim().toUpperCase();
