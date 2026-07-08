@@ -149,13 +149,11 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 .tr-status{font-family:var(--dp);font-weight:900;font-size:1rem;margin-bottom:.15rem}
 .tr-route{font-size:.77rem;color:var(--mu)}
 
-/* TILE FOCUS MODE — only inline-flow + login card visible */
-body.tile-focus .land-hero{display:none}
-body.tile-focus .calc-box{display:none!important}
+/* TILE FOCUS MODE — swap tile grid for flow panel, keep calc + login visible */
 body.tile-focus #tiles-wrap{display:none!important}
 body.tile-focus #side-talk{display:none!important}
 body.tile-focus .land-side{display:flex!important}
-@media(max-width:860px){body.tile-focus .land-body{grid-template-columns:1fr}body.tile-focus .land-side{display:flex!important}}
+@media(max-width:860px){body.tile-focus .land-body{display:flex;flex-direction:column}body.tile-focus .land-side{display:flex!important;order:2}}
 
 /* SECONDARY ACTIONS */
 .sec-acts{display:flex;align-items:center;gap:1.2rem;padding:.3rem 0}
