@@ -42,6 +42,25 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 /* ── VERSION ─── */
 .vbadge{position:fixed;bottom:14px;right:14px;z-index:9999;background:var(--or);color:#0e1113;font-family:var(--dp);font-weight:900;font-size:.6rem;letter-spacing:.08em;padding:.18rem .5rem;border-radius:var(--pill);pointer-events:none}
 
+/* ── ACCESS GATE ─── */
+#access-gate{position:fixed;inset:0;z-index:8000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:1.5rem}
+#ag-box{background:var(--p);border:1.5px solid var(--lns);border-radius:20px;padding:2.8rem 2.2rem 2.4rem;width:100%;max-width:380px;text-align:center;box-shadow:0 8px 48px rgba(0,0,0,.12)}
+#ag-logo{display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:1.6rem}
+#ag-logo-icon{width:36px;height:36px;background:var(--or);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:1.05rem;color:#0e1113}
+#ag-logo-text{font-family:var(--dp);font-weight:900;font-size:1.1rem;letter-spacing:-.04em;color:var(--tx)}
+#ag-logo-text span{color:var(--or)}
+#ag-h{font-family:var(--dp);font-weight:900;font-size:1.5rem;letter-spacing:-.04em;margin-bottom:.35rem}
+#ag-sub{font-size:.88rem;color:var(--mu);margin-bottom:1.5rem;line-height:1.6}
+#ag-inp-wrap{display:flex;gap:.5rem;margin-bottom:.5rem}
+#ag-code{flex:1;background:var(--p2);border:1.5px solid var(--lns);border-radius:var(--rx);padding:.62rem .9rem;font-size:.9rem;font-weight:600;color:var(--tx);letter-spacing:.08em;text-transform:uppercase;transition:border-color .14s}
+#ag-code:focus{border-color:var(--or)}
+#ag-code::placeholder{letter-spacing:0;font-weight:400;text-transform:none}
+#ag-submit{background:var(--or);color:#0e1113;font-weight:800;font-size:.88rem;border-radius:var(--rx);padding:.62rem 1.1rem;cursor:pointer;white-space:nowrap;transition:opacity .14s}
+#ag-submit:hover{opacity:.88}
+#ag-err{font-size:.78rem;color:var(--rd);font-weight:600;margin-bottom:.5rem;display:none}
+#ag-foot{font-size:.76rem;color:var(--su);margin-top:1.2rem;line-height:1.6}
+#ag-foot a{color:var(--or)}
+
 /* ── DEMO REQUEST MODAL ── */
 .dr-btn{display:flex;align-items:center;justify-content:center;gap:.45rem;width:100%;padding:.65rem .9rem;border-radius:var(--rx);background:var(--or);color:#0e1113;font-size:.82rem;font-weight:800;cursor:pointer;border:none;transition:opacity .14s;margin-top:.75rem}
 .dr-btn:hover{opacity:.88}
@@ -404,8 +423,25 @@ textarea.fi2{resize:vertical;min-height:70px}
 </head>
 <body>
 
-<div class="vbadge">v3.6.3</div>
+<div class="vbadge">v3.6.4</div>
 
+<!-- ══ ACCESS GATE ════════════════════════════════════════════════ -->
+<div id="access-gate">
+  <div id="ag-box">
+    <div id="ag-logo">
+      <div id="ag-logo-icon">K</div>
+      <div id="ag-logo-text">HAF <span>KNECT</span></div>
+    </div>
+    <div id="ag-h">Platform preview</div>
+    <p id="ag-sub">Enter your access code to explore the platform. Not ready for public launch yet.</p>
+    <div id="ag-inp-wrap">
+      <input id="ag-code" type="text" placeholder="Access code" maxlength="20" autocomplete="off" autocapitalize="characters" onkeydown="if(event.key==='Enter')checkGate()">
+      <button id="ag-submit" onclick="checkGate()">Enter &#8594;</button>
+    </div>
+    <div id="ag-err">Incorrect code — try again.</div>
+    <p id="ag-foot">Want access? <a href="mailto:hello@usehaf.co.uk">Contact HAF</a></p>
+  </div>
+</div>
 
 <!-- ══ LANDING ════════════════════════════════════════════════════ -->
 <div id="landing">
@@ -1073,6 +1109,30 @@ const PC={M:[53.48,-2.24],LS:[53.80,-1.55],S:[53.38,-1.47],B:[52.48,-1.90],L:[53
 function pcArea(s){return(s.trim().match(/^[A-Z]+/i)||['M'])[0].toUpperCase()}
 function pcDist(a,b){const ca=PC[pcArea(a)]||[52.5,-1.5],cb=PC[pcArea(b)]||[53.0,-1.0];const R=3959,dLa=(cb[0]-ca[0])*Math.PI/180,dLo=(cb[1]-ca[1])*Math.PI/180;const x=Math.sin(dLa/2)**2+Math.cos(ca[0]*Math.PI/180)*Math.cos(cb[0]*Math.PI/180)*Math.sin(dLo/2)**2;return Math.round(2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)))||28;}
 function zoneMult(m){return m<30?1:m<80?1.04:m<150?1.08:1.12}
+
+/* ── ACCESS GATE ── */
+const GATE_CODE='HAFLAUNCH';
+function checkGate(){
+  const v=(document.getElementById('ag-code').value||'').trim().toUpperCase();
+  if(v===GATE_CODE){
+    localStorage.setItem('haf-knect-access','1');
+    const g=document.getElementById('access-gate');
+    g.style.opacity='0';g.style.transition='opacity .3s';
+    setTimeout(()=>{g.style.display='none';},300);
+  }else{
+    document.getElementById('ag-err').style.display='block';
+    document.getElementById('ag-code').value='';
+    document.getElementById('ag-code').focus();
+  }
+}
+(function(){
+  if(localStorage.getItem('haf-knect-access')==='1'){
+    const g=document.getElementById('access-gate');
+    if(g)g.style.display='none';
+  }else{
+    setTimeout(()=>{const c=document.getElementById('ag-code');if(c)c.focus();},120);
+  }
+})();
 
 /* ── THEME ── */
 function toggleTheme(){
