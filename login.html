@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAF KNECT — Log in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="k3-s1.css">
+<link rel="stylesheet" href="k3-s2.css">
+<link rel="stylesheet" href="k3-s3.css">
+<link rel="stylesheet" href="k3-s4.css">
+<style>
+html.day{--bg:#f4f1eb;--panel:#ffffff;--panel-2:#ece9e3;--text:#1a1a1a;--muted:#6b7280;--line:rgba(0,0,0,.08);--line-strong:rgba(0,0,0,.15);--shadow:0 28px 80px rgba(0,0,0,.12);--soft-shadow:0 10px 30px rgba(0,0,0,.08)}
+#vbadge{position:fixed;bottom:12px;right:14px;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--muted);background:var(--panel-2);border:1px solid var(--line-strong);border-radius:6px;padding:3px 8px;z-index:999;pointer-events:none}
+.lo{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative}
+.lb{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--line-strong);border-radius:var(--radius);padding:36px 32px;box-shadow:var(--shadow)}
+.ll{font-family:var(--display);font-weight:800;font-size:15px;letter-spacing:-.01em;color:var(--muted);margin-bottom:28px}
+.ll span{color:var(--orange)}
+.lt{font-family:var(--display);font-weight:700;font-size:1.45rem;color:var(--text);margin-bottom:6px}
+.ls{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.55}
+.lf{margin-bottom:14px}
+.lf label{display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px}
+.li{width:100%;background:var(--panel-2);border:1px solid var(--line-strong);border-radius:var(--radius-xs);padding:11px 14px;font-size:14px;color:var(--text);transition:border-color 160ms ease}
+.li:focus{border-color:var(--orange)}
+.le{font-size:13px;color:#b4483f;margin:10px 0 0;display:none}
+.lbw{margin-top:20px}
+.lback{display:block;font-size:12px;color:var(--muted);margin-top:20px;text-align:center}
+.lback:hover{color:var(--text)}
+.dt{position:absolute;top:20px;right:20px;background:var(--panel);border:1px solid var(--line-strong);border-radius:var(--pill);padding:6px 14px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:color 160ms}
+.dt:hover{color:var(--text)}
+@media(max-width:440px){.lb{padding:28px 22px}}
+</style>
+</head>
+<body>
+<div class="lo">
+  <button class="dt" onclick="toggleDay()" id="day-btn">Day</button>
+  <div class="lb">
+    <div class="ll">HAF <span>KNECT</span></div>
+    <div class="lt">Command Centre</div>
+    <div class="ls">Business accounts, drivers and ops — sign in below.</div>
+    <div class="lf">
+      <label>Username</label>
+      <input class="li" id="gate-user" type="text" placeholder="HAF username" autocomplete="username">
+    </div>
+    <div class="lf">
+      <label>Password / Access code</label>
+      <input class="li" id="gate-input" type="password" placeholder="Enter code or password" autocomplete="current-password">
+    </div>
+    <div class="le" id="gate-err">Incorrect credentials — try again.</div>
+    <div class="lbw">
+      <button class="btn btn-primary" style="width:100%" onclick="gateAttempt()">Continue →</button>
+    </div>
+    <a class="lback" href="send.html">← Back to KNECT</a>
+  </div>
+</div>
+<div id="vbadge">v3.5.5</div>
+<script>
+var DARK=true;
+function toggleDay(){
+  DARK=!DARK;
+  document.documentElement.classList.toggle('day',!DARK);
+  document.getElementById('day-btn').textContent=DARK?'Day':'Night';
+  localStorage.setItem('knect_theme',DARK?'night':'day');
+}
+(function(){
+  if(localStorage.getItem('knect_theme')==='day'){DARK=false;document.documentElement.classList.add('day');document.getElementById('day-btn').textContent='Night';}
+})();
+
+function gateAttempt(){
+  var u=document.getElementById('gate-user').value.trim().toUpperCase();
+  var v=document.getElementById('gate-input').value.trim();
+  var err=document.getElementById('gate-err');
+  err.style.display='none';
+  if(u==='BF638793'&&v==='Harps0641!'){
+    sessionStorage.setItem('knect_access','1');
+    sessionStorage.setItem('knect_master','1');
+    window.location.href='dashboard.html?role=admin';
+  } else if(v.toUpperCase()==='OTIS247'){
+    sessionStorage.setItem('knect_access','1');
+    sessionStorage.removeItem('knect_master');
+    window.location.href='dashboard.html';
+  } else {
+    err.style.display='block';
+    document.getElementById('gate-input').value='';
+    document.getElementById('gate-input').focus();
+  }
+}
+document.addEventListener('keydown',function(e){if(e.key==='Enter')gateAttempt();});
+</script>
+</body>
+</html>
