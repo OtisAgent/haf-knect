@@ -1,0 +1,197 @@
+n',e=>{if(e.key==='Enter')calcLivePrice();});
+
+function toggleTrack(){
+  const p=document.getElementById('track-panel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open'))document.getElementById('track-ref').focus();
+}
+const TRACK={'HAF-2847':{status:'Delivered',route:'Manchester → Leeds · 5 Jul 2026'},'HAF-2831':{status:'In transit',route:'Birmingham → Nottingham · 8 Jul 2026'},'HAF-2853':{status:'Driver assigned',route:'Manchester M1 → Salford M50 · Today'}};
+function doTrack(){
+  const ref=document.getElementById('track-ref').value.trim().toUpperCase();
+  const d=TRACK[ref];
+  const r=document.getElementById('track-result');
+  document.getElementById('tr-ref').textContent=ref||'No reference entered';
+  document.getElementById('tr-status').textContent=d?d.status:'No delivery found';
+  document.getElementById('tr-route').textContent=d?d.route:'Check the reference and try again.';
+  r.classList.add('show');
+}
+
+/* ── CUSTOMER FLOWS (inline, no modal) ── */
+const FLOW_TITLES={fast:'Fast Quote',repeat:'Repeat an order',pick:'HAF Pick'};
+function openFlow(type){
+  document.getElementById('tiles-wrap').style.display='none';
+  document.getElementById('inline-flow').style.display='block';
+  ['fast','repeat','pick'].forEach(t=>{
+    document.getElementById('if-'+t).style.display=t===type?'block':'none';
+  });
+  document.getElementById('if-title').textContent=FLOW_TITLES[type]||'';
+  document.getElementById('inline-flow').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function closeInlineFlow(){
+  document.getElementById('inline-flow').style.display='none';
+  document.getElementById('tiles-wrap').style.display='block';
+  ['fast','repeat','pick'].forEach(t=>{
+    const wrap=document.getElementById('if-'+t);
+    if(!wrap)return;
+    wrap.querySelectorAll('.fstep').forEach(s=>s.classList.remove('on'));
+    const first=wrap.querySelector('.fstep');
+    if(first)first.classList.add('on');
+  });
+}
+
+/* FAST QUOTE */
+const fqData={};
+function fqStep(n){
+  document.querySelectorAll('#if-fast .fstep').forEach(s=>s.classList.remove('on'));
+  const el=document.getElementById('fq-'+n);if(el)el.classList.add('on');
+}
+function fqSel(el,key,val){
+  const g=el.closest('.ogrid');
+  if(g)g.querySelectorAll('.oopt').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');fqData[key]=val;
+}
+function fqToggle(el,key){el.classList.toggle('sel');fqData[key]=el.classList.contains('sel');}
+function fqCalcPrice(){
+  const fr=(document.getElementById('fq-from').value||'M1').trim().toUpperCase();
+  const to=(document.getElementById('fq-to').value||'LS1').trim().toUpperCase();
+  const vk=fqData.van||'lwb';
+  const uk=fqData.urg||'flex';
+  const v=VAN[vk]||VAN.lwb;
+  const u=URG[uk]||URG.flex;
+  const miles=pcDist(fr,to);
+  const base=Math.max(v.min,miles*v.ppm*u.m*zoneMult(miles));
+  return{lo:Math.round(base*.9),hi:Math.round(base*1.1),miles,v,u,fr,to};
+}
+function fqShowPrice(){
+  const r=fqCalcPrice();
+  document.getElementById('fq-pr-range').textContent='£'+r.lo+'–£'+r.hi;
+  document.getElementById('fq-pr-basis').textContent=r.v.n+' · '+r.fr+' → '+r.to+' · ~'+r.miles+' mi · '+r.u.n;
+  fqStep(6);
+}
+function fqBook(){
+  const ref='HAF-'+(Math.floor(Math.random()*9000)+1000);
+  document.getElementById('fq-ref').textContent=ref;
+  fqStep('done');
+}
+
+/* REPEAT ORDER */
+const RO_DB={'HAF-2847':{route:'Manchester M1 → Leeds LS1',van:'Long wheelbase',date:'5 Jul 2026',amount:'£94'},'KN-471293':{route:'Sheffield S9 → Nottingham NG1',van:'Short wheelbase',date:'2 Jul 2026',amount:'£67'}};
+function roStep(n){
+  document.querySelectorAll('#if-repeat .fstep').forEach(s=>s.classList.remove('on'));
+  const el=document.getElementById('ro-'+n);if(el)el.classList.add('on');
+}
+function roLookup(){
+  const inp=document.getElementById('ro-ref').value.trim().toUpperCase();
+  const ref=inp||'HAF-2847';
+  const d=RO_DB[ref]||RO_DB['HAF-2847'];
+  document.getElementById('ro-found').innerHTML='<strong>'+ref+'</strong><br>'+d.route+'<br>'+d.van+' · '+d.date+' · '+d.amount;
+  roStep(2);
+}
+function roBook(){
+  const ref='HAF-'+(Math.floor(Math.random()*9000)+1000);
+  document.getElementById('ro-newref').textContent=ref;
+  roStep('done');
+}
+
+/* HAF PICK */
+const hpData={};
+const LOAD_VAN={boxes:'small',van:'lwb',big:'swb',pallet:'luton'};
+function hpStep(n){
+  document.querySelectorAll('#if-pick .fstep').forEach(s=>s.classList.remove('on'));
+  const el=document.getElementById('hp-'+n);if(el)el.classList.add('on');
+}
+function hpSel(el,key,val){
+  const g=el.closest('.ogrid');
+  if(g)g.querySelectorAll('.oopt').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');hpData[key]=val;
+}
+function hpEstimate(){
+  const fr=(document.getElementById('hp-from').value||'M1').trim().toUpperCase();
+  const to=(document.getElementById('hp-to').value||'LS1').trim().toUpperCase();
+  const vk=LOAD_VAN[hpData.load||'van']||'lwb';
+  const v=VAN[vk];
+  const miles=pcDist(fr,to);
+  const base=Math.max(v.min,miles*v.ppm*zoneMult(miles));
+  const lo=Math.round(base*.9),hi=Math.round(base*1.1);
+  document.getElementById('hp-van-rec').textContent=v.n+' — HAF recommended';
+  document.getElementById('hp-pr-range').textContent='£'+lo+'–£'+hi;
+  document.getElementById('hp-pr-basis').textContent=fr+' → '+to+' · est. '+miles+' mi';
+  hpStep(4);
+}
+function hpBook(){
+  const ref='HAF-'+(Math.floor(Math.random()*9000)+1000);
+  document.getElementById('hp-ref').textContent=ref;
+  hpStep('done');
+}
+
+/* ── LOGIN ── */
+function openLogin(){document.getElementById('login-ov').classList.add('open')}
+function closeLogin(){document.getElementById('login-ov').classList.remove('open')}
+function doLogin(){document.getElementById('l-err').style.display='block'}
+function scLogin(){document.getElementById('sc-err').style.display='block'}
+function goLanding(){document.getElementById('app').classList.remove('open');document.getElementById('landing').style.display='flex'}
+function signOut(){goLanding()}
+function toggleSb(){document.getElementById('sidebar').classList.toggle('open')}
+function toggleAvail(){document.getElementById('avail-lbl').textContent=document.getElementById('avail-tog').checked?'Available — Taking jobs':'Offline — Not taking jobs'}
+function plnaQuote(){const o=document.getElementById('qq-out');if(o)o.style.display='block'}
+function plnaDay(b){const on=b.classList.contains('btn-or');b.classList.toggle('btn-or',!on);b.classList.toggle('btn-gh',on)}
+function plnaReq(id,ok){const e=document.getElementById(id);if(e)e.innerHTML=ok?'<span class="chip cg">Accepted — demo</span>':'<span class="chip ca">Declined — demo</span>'}
+
+/* ── PLNA: customer booking flow demo, rendered per tier (mirrors live /book page) ── */
+function plnaCustSvc(el){el.closest('.jl').querySelectorAll('.jacts button').forEach(b=>{b.className='btn btn-gh btn-xs';b.textContent='Select'});el.className='btn btn-or btn-xs';el.textContent='Selected'}
+function plnaCustDay(el){el.parentNode.querySelectorAll('button').forEach(b=>{b.classList.remove('btn-or');b.classList.add('btn-gh')});el.classList.remove('btn-gh');el.classList.add('btn-or')}
+function plnaCustBook(){const w=document.getElementById('plna-cust-confirm');if(w)w.innerHTML='<div style="background:rgba(241,142,0,.12);border:1px solid var(--or);border-radius:var(--rx);padding:.85rem 1rem;font-size:.8rem;font-weight:700;color:var(--or)">Demo only — no booking placed. On the live page this saves the booking and alerts the driver instantly.</div>'}
+function renderPlnaCust(tier){
+  const el=document.getElementById('plna-cust-body');if(!el)return;
+  const n=tier==='lite'?1:4;
+  const svcRows=PLNA_SVCS.slice(0,n).map((s,i)=>`<div class="jc"><div class="jdot" style="background:var(--or)"></div><div class="jm"><div class="jref">${s.p}</div><div class="jroute">${s.n}</div><div class="jdet">${s.d}</div></div><div class="jacts"><button class="btn ${i===0?'btn-or':'btn-gh'} btn-xs" onclick="plnaCustSvc(this)">${i===0?'Selected':'Select'}</button></div></div>`).join('');
+  const dayStep=(tier==='lite')
+    ?`<div class="card" style="max-width:560px"><div class="ct">Step 2 — When</div>
+       <div style="font-size:.78rem;font-weight:700">Same-day only</div>
+       <div style="font-size:.7rem;color:var(--mu);margin-top:.3rem">On PLNA Lite your customers book for today. The availability calendar unlocks on Plus.</div></div>`
+    :`<div class="card" style="max-width:560px"><div class="ct">Step 2 — Pick a day</div>
+       <div style="display:flex;gap:.45rem;flex-wrap:wrap">
+         <button class="btn btn-or btn-xs" onclick="plnaCustDay(this)">Today</button><button class="btn btn-gh btn-xs" onclick="plnaCustDay(this)">Fri</button><button class="btn btn-gh btn-xs" onclick="plnaCustDay(this)">Mon</button><button class="btn btn-gh btn-xs" onclick="plnaCustDay(this)">Tue</button><button class="btn btn-gh btn-xs" onclick="plnaCustDay(this)">Wed</button>
+       </div>
+       <div style="font-size:.7rem;color:var(--mu);margin-top:.6rem">Only days the driver marked available are shown · past days locked</div></div>`;
+  el.innerHTML=`
+    <div class="card" style="max-width:560px">
+      <div style="display:flex;align-items:center;gap:.7rem">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900">MR</div>
+        <div><div style="font-weight:800;font-size:.92rem">Marcus Reid</div><div style="font-size:.7rem;color:var(--mu)">Full van · Manchester</div></div>
+        <div style="margin-left:auto;display:flex;gap:.35rem"><span class="chip cg">Clever Checked</span>${tier==='pro'?'<span class="chip co">Pro driver</span>':''}</div>
+      </div>
+      <div style="font-size:.7rem;color:var(--mu);margin-top:.6rem">Your customer opens plna.usehaf.co.uk/book?driver=MR668793 and books in three steps — no account, no app.</div>
+    </div>
+    <div class="card" style="max-width:560px"><div class="ct">Step 1 — Choose a service${tier==='lite'?' (1 on Lite)':''}</div><div class="jl">${svcRows}</div></div>
+    ${dayStep}
+    <div class="card" style="max-width:560px"><div class="ct">Step 3 — Their details</div>
+      <div class="fr"><div class="fg"><label class="fl">Name</label><input class="fi2" placeholder="Customer name"></div><div class="fg"><label class="fl">Phone</label><input class="fi2" placeholder="07xxx"></div></div>
+      <div class="fr"><div class="fg"><label class="fl">Collection postcode</label><input class="fi2" placeholder="e.g. SK1 3XE"></div><div class="fg"><label class="fl">Delivery postcode</label><input class="fi2" placeholder="e.g. M4 6DE"></div></div>
+      <div id="plna-cust-confirm" style="margin-top:.5rem"><button class="btn btn-or btn-sm btn-wide" onclick="plnaCustBook()">Confirm and book</button></div>
+    </div>`;
+}
+
+/* ── PLNA: booking page pane, rendered per tier (mirrors live PLNA v5 plans) ── */
+const PLNA_SVCS=[
+  {n:'Same-day delivery', d:'Collect and deliver within hours · full or half van', p:'From £45'},
+  {n:'Multi-stop route',  d:'Up to 8 stops · optimised order',                     p:'From £75'},
+  {n:'Man & van',         d:'House moves · furniture · heavy items',               p:'From £90'},
+  {n:'Pallet / luton',    d:'Tail lift available · pallet network',                p:'From £110'},
+];
+function renderPlnaBook(tier){
+  const el=document.getElementById('plna-book-body');if(!el)return;
+  const link='plna.usehaf.co.uk/book?driver=MR668793';
+  const linkCard=`<div class="card" style="max-width:560px"><div class="ct">My booking link</div>
+    <div style="font-size:.82rem;color:var(--or);font-weight:700;word-break:break-all">${link}</div>
+    <div style="font-size:.7rem;color:var(--mu);margin-top:.35rem">Share it anywhere — WhatsApp, socials, your van. Customers book without an app.</div></div>`;
+  const svcCards=n=>PLNA_SVCS.slice(0,n).map(s=>`<div class="cr"><span class="ck">${s.n}<br><span style="font-size:.68rem;color:var(--mu);font-weight:400">${s.d}</span></span><span class="cv">${s.p}</span></div>`).join('');
+  const capCard=(used,cap)=>{const pct=Math.min(used/cap*100,100);return `<div class="card" style="max-width:560px"><div class="ct">Confirmed bookings this month</div>
+    <div style="font-size:.8rem;font-weight:800">${used} of ${cap} used</div>
+    <div class="reb-bar-wrap" style="margin-top:.5rem"><div class="reb-bar-fill" style="width:${pct}%"></div></div>
+    <div style="font-size:.68rem;color:var(--mu);margin-top:.35rem">Cancelled bookings don't count toward your limit · resets monthly</div></div>`};
+  if(tier==='lite'){
+    el.innerHTML=linkCard+capCard(3,10)+
+      `<div class="card" style="max-width:560px"><div class="ct">Services on your page — 1 of 4 (Lite)</div>${svcCards(1)}</div>
+      <div class="card" style="max-width:560px"><div class="ct">Unlock full booking features</div>
+        <div style="font-size:.76rem;color:var(--mu);margin-bottom:.75rem">Customer c

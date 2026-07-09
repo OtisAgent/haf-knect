@@ -1,0 +1,204 @@
+
+.reb-bar-fill{height:100%;background:var(--or);border-radius:var(--pill);transition:width .4s}
+
+/* PLAN CARDS */
+.plg{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.85rem;margin-bottom:1.2rem}
+.plc{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:1.3rem;box-shadow:var(--sd)}
+.plc.feat{border-color:var(--or)}
+.pl-n{font-family:var(--dp);font-weight:900;font-size:.88rem;letter-spacing:-.02em;margin-bottom:.25rem}
+.pl-p{font-family:var(--dp);font-weight:900;font-size:1.7rem;letter-spacing:-.05em;margin-bottom:.2rem}
+.pl-p span{font-size:.78rem;font-weight:600;color:var(--mu)}
+.pl-fs{margin:.85rem 0;display:flex;flex-direction:column;gap:.32rem}
+.pl-f{font-size:.73rem;color:var(--mu);display:flex;align-items:center;gap:.35rem}
+.pl-f::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gn);flex-shrink:0}
+
+/* INT CARDS */
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:.85rem;margin-bottom:1.2rem}
+.ic{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--rs);padding:1rem;text-decoration:none;color:var(--tx);transition:all .17s;display:block;box-shadow:var(--sd)}
+.ic:hover{border-color:var(--or);transform:translateY(-2px)}
+.ic-l{font-size:.6rem;font-weight:700;letter-spacing:.1em;color:var(--mu);text-transform:uppercase;margin-bottom:.2rem}
+.ic-n{font-family:var(--dp);font-weight:900;font-size:.88rem;letter-spacing:-.02em}
+.ic-s{font-size:.68rem;color:var(--gn);font-weight:600;margin-top:.2rem}
+
+/* ── CALC BOX ─────────────────────────────────────────────── */
+.calc-box{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:1.5rem;box-shadow:var(--sd)}
+.calc-box .pc-row{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1rem}
+@media(max-width:500px){.calc-box .pc-row{grid-template-columns:1fr}}
+.van-lbl{font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--mu);text-transform:uppercase;margin-bottom:.45rem}
+.van-pills{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.vp{background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--pill);padding:.42rem .9rem;font-size:.76rem;font-weight:600;color:var(--mu);cursor:pointer;transition:all .14s;flex:1;min-width:80px;text-align:center;line-height:1.35}
+.vp:hover{border-color:var(--or);color:var(--tx)}
+.vp.sel{background:var(--or);border-color:var(--or);color:#0e1113}
+.vp-sub{font-size:.62rem;font-weight:400;color:var(--su);display:block}
+.vp.sel .vp-sub{color:rgba(14,17,19,.65)}
+.lp-box{border-radius:var(--rx);padding:.9rem 1.1rem;margin-bottom:.85rem;display:flex;align-items:flex-start;gap:.65rem;min-height:52px;transition:background .2s,border-color .2s}
+.lp-box.hint{background:var(--p2);border:1.5px dashed var(--ln)}
+.lp-box.priced{background:var(--or-d);border:1.5px solid var(--or-g)}
+.lp-hint-txt{font-size:.82rem;color:var(--su);line-height:1.55;padding-top:.14rem}
+.lp-priced{flex:1}
+.lp-range-row{display:flex;align-items:baseline;gap:.38rem}
+.lp-range{font-family:var(--dp);font-weight:900;font-size:1.55rem;letter-spacing:-.05em}
+.lp-vat{font-size:.74rem;font-weight:600;color:var(--mu)}
+.lp-info{font-size:.72rem;color:var(--mu);margin-top:.18rem}
+
+/* ── PATH TILES ───────────────────────────────────────────── */
+.path-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem}
+@media(max-width:680px){.path-tiles{grid-template-columns:1fr}}
+.ptile{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:1.1rem 1.15rem 1rem;cursor:pointer;transition:all .17s;box-shadow:var(--sd)}
+.ptile:hover{border-color:var(--or);transform:translateY(-2px);box-shadow:var(--sd-h)}
+.ptile-icon{width:30px;height:30px;border-radius:var(--rx);background:var(--or-d);display:flex;align-items:center;justify-content:center;margin-bottom:.6rem}
+.ptile-icon svg{width:13px;height:13px;stroke:var(--or);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ptile-h{font-family:var(--dp);font-weight:800;font-size:.84rem;letter-spacing:-.02em;margin-bottom:.22rem}
+.ptile-p{font-size:.72rem;color:var(--mu);line-height:1.5;margin-bottom:.6rem}
+.ptile-arr{font-size:.76rem;color:var(--or);font-weight:700}
+
+/* ── FLOW OVERLAY ─────────────────────────────────────────── */
+.fbox{background:var(--p);border:1px solid var(--lns);border-radius:var(--r);padding:1.8rem;width:100%;max-width:430px;position:relative;max-height:88vh;overflow-y:auto}
+.fbox-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem}
+.fbox-title{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em}
+.fstep{display:none}.fstep.on{display:block}
+.slbl{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:var(--or);text-transform:uppercase;margin-bottom:.6rem}
+.ogrid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.85rem}
+.oopt{background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.6rem .75rem;font-size:.79rem;font-weight:600;text-align:left;cursor:pointer;transition:all .14s;line-height:1.4}
+.oopt:hover,.oopt.sel{border-color:var(--or);background:var(--or-d);color:var(--or)}
+.oopt-sub{font-size:.64rem;color:var(--mu);display:block;margin-top:.08rem}
+.oopt.sel .oopt-sub{color:inherit;opacity:.75}
+.fnav{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.85rem}
+.booked-hero{text-align:center;padding:.5rem 0 .8rem}
+.booked-ref{font-family:var(--dp);font-weight:900;font-size:1.65rem;letter-spacing:-.04em;color:var(--or);margin:.5rem 0 .4rem}
+.booked-sub{font-size:.8rem;color:var(--mu);line-height:1.65}
+
+/* ── ACCESS GATE ── */
+#access-gate{position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.gate-box{background:var(--p);border:1px solid var(--lns);border-radius:16px;padding:2.4rem 2rem;width:100%;max-width:360px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.08)}
+.gate-logo{display:flex;align-items:center;justify-content:center;gap:.55rem;margin-bottom:1.6rem}
+.gate-logo-m{width:38px;height:38px;background:var(--or);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:1.2rem;color:#0e1113}
+.gate-logo-t{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em;color:var(--tx)}
+.gate-logo-t span{color:var(--or)}
+.gate-h{font-family:var(--dp);font-weight:900;font-size:1.35rem;letter-spacing:-.04em;margin-bottom:.4rem;color:var(--tx)}
+.gate-sub{font-size:.8rem;color:var(--mu);line-height:1.6;margin-bottom:1.5rem}
+.gate-inp{width:100%;padding:.72rem 1rem;border-radius:10px;border:1.5px solid var(--lns);background:var(--p2);font-size:1.1rem;font-weight:700;letter-spacing:.22em;text-align:center;text-transform:uppercase;color:var(--tx);margin-bottom:.6rem;outline:none;transition:border .14s;box-sizing:border-box}
+.gate-inp:focus{border-color:var(--or)}
+.gate-inp.shake{animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.gate-err{font-size:.75rem;color:#e05252;margin-bottom:.7rem;min-height:1rem}
+.gate-btn{width:100%;padding:.72rem;border-radius:10px;background:var(--or);color:#0e1113;font-family:var(--dp);font-weight:800;font-size:.9rem;letter-spacing:.01em;cursor:pointer;border:none;transition:opacity .14s}
+.gate-btn:hover{opacity:.88}
+.gate-footer{font-size:.7rem;color:var(--su);margin-top:1.2rem}
+</style>
+</head>
+<body>
+
+<!-- ACCESS GATE -->
+<div id="access-gate">
+  <div class="gate-box">
+    <div class="gate-logo">
+      <div class="gate-logo-m">K</div>
+      <div class="gate-logo-t">HAF <span>KNECT</span></div>
+    </div>
+    <div class="gate-h">Demo Access</div>
+    <p class="gate-sub">This is a private product demo.<br>Enter your access code to continue.</p>
+    <input class="gate-inp" id="gate-inp" type="text" maxlength="10" placeholder="ACCESS CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" onkeydown="if(event.key==='Enter')gateSubmit()">
+    <div class="gate-err" id="gate-err"></div>
+    <button class="gate-btn" onclick="gateSubmit()">Enter demo →</button>
+    <p class="gate-footer">Need a code? Contact the HAF team.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  if(sessionStorage.getItem('haf-demo-auth')==='1'){
+    document.getElementById('access-gate').style.display='none';
+  }
+  window.gateSubmit=function(){
+    const v=document.getElementById('gate-inp').value.trim().toUpperCase();
+    if(v==='HAF247'){
+      sessionStorage.setItem('haf-demo-auth','1');
+      document.getElementById('access-gate').style.display='none';
+    }else{
+      const inp=document.getElementById('gate-inp');
+      document.getElementById('gate-err').textContent='Incorrect code — please try again.';
+      inp.classList.remove('shake');
+      void inp.offsetWidth;
+      inp.classList.add('shake');
+      inp.value='';inp.focus();
+    }
+  };
+})();
+</script>
+
+<div class="vbadge">Demo</div>
+
+<!-- DEMO BAR -->
+<div class="demo-bar" id="demo-bar">
+  <span class="demo-lbl">Try a view:</span>
+  <button class="dp" onclick="demoLogin('customer')">Customer</button>
+  <button class="dp" onclick="demoLogin('biz-pro')">Business — Pro</button>
+  <button class="dp" onclick="demoLogin('freight-pro')">Freight — Pro</button>
+  <button class="dp" onclick="demoLogin('plna-plus')">PLNA Driver — Plus</button>
+  <button class="dp" onclick="demoLogin('knect-free')">KNECT — Free</button>
+  <button class="dp" onclick="demoLogin('knect-founder')">KNECT — Founder</button>
+  <button class="dp" onclick="goLanding()" style="margin-left:auto">Back to home</button>
+</div>
+
+<!-- TIER BAR -->
+<div class="tier-bar" id="tier-bar">
+  <span class="tier-lbl">Switch tier:</span>
+  <div id="tier-pills"></div>
+</div>
+
+<!-- ══ LANDING ════════════════════════════════════════════════════ -->
+<div id="landing">
+  <nav class="land-nav">
+    <a class="llogo" href="#">
+      <div class="llogo-m">K</div>
+      <div class="llogo-t">HAF <span>KNECT</span></div>
+    </a>
+    <div class="nav-r">
+      <button class="track-btn" onclick="toggleTrack()">Track delivery</button>
+      <button class="btn btn-gh btn-sm" onclick="openLogin()">Log in →</button>
+      <button class="theme-btn" onclick="toggleTheme()" title="Toggle day / night">
+        <svg id="theme-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO HEADING — sits above both columns -->
+  <div class="land-hero">
+    <div class="land-kicker">UK courier, on demand</div>
+    <h1 class="land-h1">Send anything.<br>Anywhere in the UK.</h1>
+    <p class="land-sub">What do you need moving?</p>
+  </div>
+
+  <div class="land-body">
+
+    <!-- LEFT: Main -->
+    <div class="land-main">
+
+      <!-- ALWAYS-ON PRICE CALCULATOR -->
+      <div class="calc-box">
+        <div class="pc-row">
+          <div class="fi">
+            <span class="fi-lbl">From postcode</span>
+            <input class="fi-inp" id="pc-from" placeholder="e.g. S9 1AA" maxlength="8" autocomplete="off" oninput="onPcInput()">
+          </div>
+          <div class="fi">
+            <span class="fi-lbl">To postcode</span>
+            <input class="fi-inp" id="pc-to" placeholder="e.g. M1 1AA" maxlength="8" autocomplete="off" oninput="onPcInput()">
+          </div>
+        </div>
+        <div class="van-lbl">Van size</div>
+        <div class="van-pills" id="van-pills">
+          <button class="vp" onclick="selVan(this,'small')">Small box<span class="vp-sub">up to 400 kg</span></button>
+          <button class="vp" onclick="selVan(this,'swb')">Half van<span class="vp-sub">up to 800 kg</span></button>
+          <button class="vp sel" onclick="selVan(this,'lwb')">Full van<span class="vp-sub">up to 1,200 kg</span></button>
+          <button class="vp" onclick="selVan(this,'luton')">XL Van or Special<span class="vp-sub">Luton + tail-lift</span></button>
+        </div>
+        <!-- LIVE PRICE DISPLAY -->
+        <div class="lp-box hint" id="lp-box">
+          <div id="lp-hint-txt" class="lp-hint-txt">Enter both postcodes to see your guide price</div>
+          <div id="lp-priced" class="lp-priced" style="display:none">
+            <div class="lp-range-row">
+              <span class="lp-range" id="lp-range"></span>
+              <span class="lp-vat">+ VAT</span>
+    

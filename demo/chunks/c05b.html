@@ -1,0 +1,44 @@
+t</button></div></div>
+            <div class="jc"><div class="jdot" style="background:var(--bl)"></div><div class="jm"><div class="jref">HAF-2856 · Tomorrow 09:00</div><div class="jroute">Trafford WA14 → Manchester M60</div><div class="jdet">LWB · 720 kg · 22 miles</div></div><div class="jacts"><div class="jamt">£87</div><button class="btn btn-gh btn-xs">View</button></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRIVER: Calendar -->
+      <div class="tp" id="pane-d-cal">
+        <h1 class="pt">Calendar</h1><p class="ps">Tap a day to switch between available and off. Customers see this on your booking page.</p>
+        <div class="card" style="max-width:560px"><div class="ct">This week</div>
+          <div style="display:flex;gap:.45rem;flex-wrap:wrap">
+            <button class="btn btn-or btn-xs" onclick="plnaDay(this)">Mon</button><button class="btn btn-or btn-xs" onclick="plnaDay(this)">Tue</button><button class="btn btn-or btn-xs" onclick="plnaDay(this)">Wed</button><button class="btn btn-or btn-xs" onclick="plnaDay(this)">Thu</button><button class="btn btn-or btn-xs" onclick="plnaDay(this)">Fri</button><button class="btn btn-gh btn-xs" onclick="plnaDay(this)">Sat</button><button class="btn btn-gh btn-xs" onclick="plnaDay(this)">Sun</button>
+          </div>
+          <div style="font-size:.7rem;color:var(--mu);margin-top:.65rem">Orange = available · grey = off. Past days lock automatically on your live booking page.</div>
+        </div>
+        <div class="card" style="max-width:560px"><div class="ct">Upcoming bookings</div>
+          <div class="cr"><span class="ck">Fri · Stockport SK1 → Manchester M4</span><span class="cv"><span class="chip cg">Confirmed</span></span></div>
+          <div class="cr"><span class="ck">Mon · Leeds LS1 → York YO1</span><span class="cv"><span class="chip ca">Pending</span></span></div>
+        </div>
+      </div>
+
+      <!-- DRIVER: My Booking Page (content per tier — rendered by renderPlnaBook) -->
+      <div class="tp" id="pane-d-book">
+        <h1 class="pt">My Booking Page</h1><p class="ps">Your public link — customers book you directly, no app needed.</p>
+        <div id="plna-book-body"></div>
+        <div class="card"><div class="ct">Booking requests</div>
+          <div class="jl">
+            <div class="jc"><div class="jdot" style="background:var(--or)"></div><div class="jm"><div class="jref">REQUEST · Today 16:40</div><div class="jroute">Stockport SK1 → Manchester M4</div><div class="jdet">Same-day delivery · Fri · from your booking page</div></div><div class="jacts"><div class="jamt">£54</div><span id="plna-req1"><button class="btn btn-or btn-xs" onclick="plnaReq('plna-req1',1)">Accept</button><button class="btn btn-gh btn-xs" onclick="plnaReq('plna-req1',0)">Decline</button></span></div></div>
+            <div class="jc"><div class="jdot" style="background:var(--or)"></div><div class="jm"><div class="jref">REQUEST · Yesterday 19:12</div><div class="jroute">Leeds LS1 → York YO1</div><div class="jdet">Multi-stop route · Mon · from your booking page</div></div><div class="jacts"><div class="jamt">£110</div><span id="plna-req2"><button class="btn btn-or btn-xs" onclick="plnaReq('plna-req2',1)">Accept</button><button class="btn btn-gh btn-xs" onclick="plnaReq('plna-req2',0)">Decline</button></span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRIVER: Booking System (customer view — rendered per tier) -->
+      <div class="tp" id="pane-d-cust">
+        <h1 class="pt">Booking System</h1><p class="ps">This is what your customers see when they open your booking link — try it.</p>
+        <div id="plna-cust-body"></div>
+      </div>
+
+      <!-- DRIVER: Budget & Profit -->
+      <div class="tp" id="pane-d-budget">
+        <h1 class="pt">Budget &amp; Profit</h1><p class="ps">Earnings, running costs and what you actually keep.</p>
+        <div class="kg"><div class="kc"><div class="kc-l">This week</div><div class="kc-v or">£642</div><div class="kc-d pos">+18% vs last week</div></div><div class="kc"><div class="kc-l">Costs</div><div class="kc-v">£126</div></div><div class="kc"><div class="kc-l">Profit</div><div class="kc-v gn">£516</div></div><div class="kc"><div class="kc-l">Jobs</div><div class="kc-v">28</div></div></div>
+        <div class="card"><div class="ct">Recent jobs</div><table class="dt"><

@@ -1,0 +1,35 @@
+
+      <div class="tp" id="pane-d-home">
+        <h1 class="pt">Home</h1><p class="ps">Your day at a glance — the PLNA driver dashboard.</p>
+        <div class="avail-card">
+          <div class="avail-top"><div class="avail-lbl" id="avail-lbl">Available — Taking jobs</div><label class="toggle"><input type="checkbox" id="avail-tog" checked onchange="toggleAvail()"><span class="toggle-sl"></span></label></div>
+          <div style="font-size:.74rem;color:var(--mu)">Visible on the KNECT exchange · 3 jobs near you</div>
+        </div>
+        <div class="kg"><div class="kc"><div class="kc-l">Today's pay</div><div class="kc-v or">£187</div></div><div class="kc"><div class="kc-l">Jobs done</div><div class="kc-v">2</div></div><div class="kc"><div class="kc-l">Miles</div><div class="kc-v">84</div></div><div class="kc"><div class="kc-l">Rating</div><div class="kc-v gn">4.9</div></div></div>
+        <div class="card" style="max-width:560px"><div class="ct">Quick job quote</div>
+          <div class="fr"><div class="fg"><label class="fl">From postcode</label><input class="fi2" value="M1 1AA"></div><div class="fg"><label class="fl">To postcode</label><input class="fi2" value="LS1 4DY"></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Van size</label><select class="fi2"><option>Small van</option><option selected>Full van</option><option>Luton / pallet</option></select></div><div class="fg"><label class="fl" style="visibility:hidden">Go</label><button class="btn btn-or btn-sm btn-wide" onclick="plnaQuote(this)">Get guide price</button></div></div>
+          <div id="qq-out" style="display:none;margin-top:.5rem;font-size:.92rem;font-weight:800;color:var(--or)">Guide price: £96 · HAF pricing engine (demo)</div>
+        </div>
+        <div class="card"><div class="ct">KNECT exchange — live jobs near you</div>
+          <div class="jl">
+            <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2853 · 2.1 mi away · 14:00</div><div class="jroute">Manchester M1 → Salford M50</div><div class="jdet">Small van · 180 kg · 12 miles</div></div><div class="jacts"><div class="jamt">£38</div><button class="btn btn-or btn-xs">Accept</button></div></div>
+            <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2855 · 4.7 mi away · 15:30</div><div class="jroute">Manchester M4 → Stockport SK1</div><div class="jdet">Medium van · 340 kg · 18 miles</div></div><div class="jacts"><div class="jamt">£54</div><button class="btn btn-or btn-xs">Accept</button></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRIVER: Today -->
+      <div class="tp" id="pane-d-today">
+        <h1 class="pt">Today</h1><p class="ps">Your active job and what's next.</p>
+        <div class="card" style="max-width:560px"><div class="ct">Active job</div>
+          <div class="cr"><span class="ck">Ref</span><span class="cv">HAF-2848</span></div>
+          <div class="cr"><span class="ck">Route</span><span class="cv">Manchester M1 → Leeds LS1</span></div>
+          <div class="cr"><span class="ck">Load</span><span class="cv">420 kg · LWB · collect 14:30</span></div>
+          <div class="cr"><span class="ck">Status</span><span class="cv"><span class="chip cb">In transit</span></span></div>
+          <div style="margin-top:.7rem;display:flex;gap:.45rem"><button class="btn btn-or btn-xs">Mark delivered</button><button class="btn btn-gh btn-xs">Add note</button></div>
+        </div>
+        <div class="card"><div class="ct">Available jobs nearby</div>
+          <div class="jl">
+            <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2853 · 2.1 mi away · 14:00</div><div class="jroute">Manchester M1 → Salford M50</div><div class="jdet">Small van · 180 kg · 12 miles</div></div><div class="jacts"><div class="jamt">£38</div><button class="btn btn-or btn-xs">Accept</button></div></div>
+            <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2855 · 4.7 mi away · 15:30</div><div class="jroute">Manchester M4 → Stockport SK1</div><div class="jdet">Medium van · 340 kg · 18 miles</div></div><div class="jacts"><div class="jamt">£54</div><button class="btn btn-or btn-xs">Accep

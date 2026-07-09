@@ -1,0 +1,189 @@
+alendar, all 4 services, WhatsApp alerts and 50 bookings a month on PLNA Plus — £10/mo.</div>
+        <button class="btn btn-or btn-sm" onclick="showUpgrade('Full booking features')">Upgrade to Plus</button></div>`;
+  }else if(tier==='plus'){
+    el.innerHTML=linkCard+capCard(12,50)+
+      `<div class="card" style="max-width:560px"><div class="ct">Services on your page — all 4</div>${svcCards(4)}</div>
+      <div class="card" style="max-width:560px"><div class="ct">Booking page features</div>
+        <div class="cr"><span class="ck">Customer calendar</span><span class="cv"><span class="chip cg">Active</span></span></div>
+        <div class="cr"><span class="ck">WhatsApp alerts</span><span class="cv"><span class="chip cg">Active</span></span></div>
+        <div class="cr"><span class="ck">Page analytics</span><span class="cv"><span class="chip ca">Pro only</span></span></div>
+        <div class="cr"><span class="ck">Your own branding</span><span class="cv"><span class="chip ca">Pro only</span></span></div></div>`;
+  }else{
+    el.innerHTML=linkCard+
+      `<div class="card" style="max-width:560px"><div class="ct">Confirmed bookings this month</div>
+        <div class="cr"><span class="ck">This month</span><span class="cv">21 confirmed</span></div>
+        <div class="cr"><span class="ck">Monthly limit</span><span class="cv"><span class="chip cg">Unlimited — Pro</span></span></div></div>
+      <div class="card" style="max-width:560px"><div class="ct">Services on your page — all 4</div>${svcCards(4)}</div>
+      <div class="card" style="max-width:560px"><div class="ct">Page analytics (Pro)</div>
+        <div class="cr"><span class="ck">Page views this week</span><span class="cv">214</span></div>
+        <div class="cr"><span class="ck">Booking requests</span><span class="cv">11</span></div>
+        <div class="cr"><span class="ck">Confirmed</span><span class="cv" style="color:var(--gn);font-weight:800">9</span></div>
+        <div class="cr"><span class="ck">Your own branding</span><span class="cv"><span class="chip cg">Available</span></span></div></div>`;
+  }
+}
+
+/* ── TAB REGISTRY ── */
+const TAB_REG={
+  'b-book':    {l:'Book a Courier',    ico:'<path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16"/>',       s:'BOOKINGS'},
+  'b-del':     {l:'My Deliveries',     ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',             s:'BOOKINGS'},
+  'b-spend':   {l:'Spend & Rebate',    ico:'<line x1="12" y1="1" x2="12" y2="23"/>',                       s:'ACCOUNT'},
+  'b-saved':   {l:'Saved Addresses',   ico:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>',  s:'ACCOUNT'},
+  'billing':   {l:'Payments',          ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',             s:'ACCOUNT'},
+  'support':   {l:'Support',           ico:'<circle cx="12" cy="12" r="10"/>',                              s:'ACCOUNT'},
+  'd-home':    {l:'Home',              ico:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',   s:'DRIVER'},
+  'd-today':   {l:'Today',             ico:'<circle cx="12" cy="12" r="10"/>',                              s:'DRIVER', badge:'1'},
+  'd-cal':     {l:'Calendar',          ico:'<rect x="3" y="4" width="18" height="17" rx="2"/>',             s:'DRIVER'},
+  'd-book':    {l:'My Booking Page',   ico:'<path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16"/>',        s:'DRIVER', badge:'2'},
+  'd-cust':    {l:'Booking System',    ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>', s:'DRIVER'},
+  'd-budget':  {l:'Budget & Profit',   ico:'<line x1="12" y1="1" x2="12" y2="23"/>',                       s:'DRIVER'},
+  'd-comp':    {l:'Compliance',        ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',     s:'DRIVER'},
+  'f-post':    {l:'Post a Load',       ico:'<line x1="12" y1="5" x2="12" y2="19"/>',                       s:'FREIGHT'},
+  'f-cap':     {l:'Network Capacity',  ico:'<circle cx="12" cy="12" r="10"/>',                              s:'FREIGHT'},
+  'f-lanes':   {l:'Lane Pricing',      ico:'<line x1="12" y1="1" x2="12" y2="23"/>',                       s:'FREIGHT'},
+  'f-loads':   {l:'Active Loads',      ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',             s:'FREIGHT'},
+  'f-cover':   {l:'Coverage Board',    ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',     s:'FREIGHT'},
+  'f-account': {l:'Account Controls',  ico:'<rect x="2" y="7" width="20" height="14" rx="2"/>',             s:'ACCOUNT'},
+  'cust-track':{l:'Track Delivery',    ico:'<circle cx="12" cy="12" r="10"/>',                              s:'DELIVERY'},
+  'cust-pod':  {l:'Proof of Delivery', ico:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>',s:'DELIVERY'},
+  'cust-orders':{l:'My Orders',        ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',             s:'ACCOUNT'},
+};
+
+/* ── TIER DEFINITIONS ── */
+const TIER_DEFS={
+  business:[
+    {key:'free',    label:'Free',    cls:'pb-free',    plan:'Free',      next:'Plus',
+     unlock:['b-book','b-del','billing','support']},
+    {key:'plus',    label:'Plus',    cls:'pb-plus',    plan:'Plus',      next:'Pro',
+     unlock:['b-book','b-del','b-saved','billing','support']},
+    {key:'pro',     label:'Pro',     cls:'pb-pro',     plan:'Pro',       next:null,
+     unlock:['b-book','b-del','b-saved','b-spend','billing','support']},
+  ],
+  freight:[
+    {key:'free',    label:'Free',    cls:'pb-free',    plan:'Free',      next:'Plus',
+     unlock:['f-post','f-loads','billing','support']},
+    {key:'plus',    label:'Plus',    cls:'pb-plus',    plan:'Plus',      next:'Pro',
+     unlock:['f-post','f-cap','f-loads','f-lanes','billing','support']},
+    {key:'pro',     label:'Pro',     cls:'pb-pro',     plan:'Pro',       next:null,
+     unlock:['f-post','f-cap','f-lanes','f-loads','f-cover','f-account','billing','support']},
+  ],
+  plna:[
+    {key:'lite',    label:'Lite',    cls:'pb-lite',    plan:'PLNA Lite', next:'Plus',
+     unlock:['d-home','d-book','d-cust','d-comp','billing','support']},
+    {key:'plus',    label:'Plus',    cls:'pb-plus',    plan:'PLNA Plus', next:'Pro',
+     unlock:['d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support']},
+    {key:'pro',     label:'Pro',     cls:'pb-pro',     plan:'PLNA Pro',  next:null,
+     unlock:['d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support']},
+  ],
+  knect:[
+    {key:'free',    label:'Free',    cls:'pb-free',    plan:'Free',      next:'Founder',
+     unlock:['b-book','b-del','cust-track','billing','support']},
+    {key:'founder', label:'Founder', cls:'pb-founder', plan:'Founder',   next:null,
+     unlock:['b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support']},
+  ],
+};
+
+/* ── ACCOUNTS ── */
+const ACCS={
+  customer:      {n:'Jordan Williams',  u:'JW012390',i:'JW',r:'Customer',         rc:'cb',tierGroup:null,      initTier:null,
+    tabIds:['cust-track','cust-pod','cust-orders','support'],def:'cust-track',cp:'green'},
+  'biz-pro':     {n:'Apex Logistics Ltd',u:'AL448793',i:'AL',r:'Business Account',rc:'co',tierGroup:'business',initTier:'pro',
+    tabIds:['b-book','b-del','b-spend','b-saved','billing','support'],def:'b-book',cp:'green'},
+  'freight-pro': {n:'NorthFreight UK',  u:'NF992190',i:'NF',r:'Freight Forwarder',rc:'cb',tierGroup:'freight', initTier:'pro',
+    tabIds:['f-post','f-cap','f-lanes','f-loads','f-cover','f-account','billing','support'],def:'f-post',cp:'green'},
+  'plna-plus':   {n:'Marcus Reid',      u:'MR668793',i:'MR',r:'PLNA Driver',      rc:'cg',tierGroup:'plna',    initTier:'plus',
+    tabIds:['d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support'],def:'d-home',cp:'green'},
+  'knect-free':  {n:'Sam Patel',        u:'SP881291',i:'SP',r:'KNECT Member',      rc:'cb',tierGroup:'knect',   initTier:'free',
+    tabIds:['b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support'],def:'b-book',cp:'green'},
+  'knect-founder':{n:'Rachel Moore',    u:'RM449082',i:'RM',r:'KNECT Founder',     rc:'co',tierGroup:'knect',   initTier:'founder',
+    tabIds:['b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support'],def:'b-book',cp:'green'},
+};
+
+let currentAcc=null;
+
+function demoLogin(key){
+  const a=ACCS[key];if(!a)return;
+  currentAcc=a;
+  document.querySelectorAll('.dp').forEach(p=>p.classList.remove('on'));
+  const pills=document.querySelectorAll('.dp');
+  const map={customer:0,'biz-pro':1,'freight-pro':2,'plna-plus':3,'knect-free':4,'knect-founder':5};
+  if(map[key]!==undefined)pills[map[key]].classList.add('on');
+  document.getElementById('tb-user').textContent=a.u;
+  document.getElementById('tb-av').textContent=a.i;
+  const rc=document.getElementById('tb-role');
+  rc.className='role-chip chip '+a.rc;rc.textContent=a.r;
+  setComp(a.cp,a.u);
+  document.getElementById('landing').style.display='none';
+  document.getElementById('login-ov').classList.remove('open');
+  document.getElementById('app').classList.add('open');
+  const tierBar=document.getElementById('tier-bar');
+  const tierPills=document.getElementById('tier-pills');
+  if(a.tierGroup&&TIER_DEFS[a.tierGroup]){
+    const tiers=TIER_DEFS[a.tierGroup];
+    tierPills.innerHTML=tiers.map(t=>`<button class="tp-btn" id="tp-${t.key}" onclick="switchTier('${t.key}')">${t.label}</button>`).join('');
+    tierBar.classList.add('show');
+    switchTier(a.initTier);
+  } else {
+    tierBar.classList.remove('show');
+    const pb=document.getElementById('tb-plan');if(pb)pb.style.display='none';
+    const tabs=a.tabIds.map(id=>{const t=TAB_REG[id];return t?{...t,id,locked:false}:null}).filter(Boolean);
+    buildNav(tabs);
+    switchTab('pane-'+a.def);
+  }
+}
+
+function switchTier(tierKey){
+  if(!currentAcc||!currentAcc.tierGroup)return;
+  const tiers=TIER_DEFS[currentAcc.tierGroup];
+  const tier=tiers.find(t=>t.key===tierKey);if(!tier)return;
+  document.querySelectorAll('.tp-btn').forEach(b=>b.classList.remove('on'));
+  const tp=document.getElementById('tp-'+tierKey);if(tp)tp.classList.add('on');
+  const pb=document.getElementById('tb-plan');
+  if(pb){pb.className='plan-badge '+tier.cls;pb.textContent=tier.plan;pb.style.display='';}
+  const unlockSet=new Set(tier.unlock);
+  const tabs=currentAcc.tabIds.map(id=>{const t=TAB_REG[id];return t?{...t,id,locked:!unlockSet.has(id)}:null}).filter(Boolean);
+  buildNav(tabs);
+  const first=tabs.find(t=>!t.locked);
+  if(first)switchTab('pane-'+first.id);
+  window._nextTier=tier.next;
+  if(currentAcc.tierGroup==='plna'){renderPlnaBook(tierKey);renderPlnaCust(tierKey);}
+}
+
+function showUpgrade(feat){
+  const f=document.getElementById('upg-feat');if(f)f.textContent=feat;
+  const n=document.getElementById('upg-next');if(n)n.textContent=window._nextTier||'the next plan';
+  switchTab('pane-upgrade');
+}
+
+function setComp(s,u){
+  const sp=document.getElementById('d-comp-sp');if(!sp)return;
+  sp.className='sp '+s;
+  const titles={green:'Green — Approved to work',amber:'Amber — Review in progress'};
+  const descs={green:'All documents verified. You are cleared for HAF jobs.',amber:'One or more documents are under review. You cannot accept jobs until cleared.'};
+  document.getElementById('d-comp-title').textContent=titles[s]||'—';
+  document.getElementById('d-comp-desc').textContent=descs[s]||'—';
+  const v='<span class="chip cg">Verified</span>',p='<span class="chip ca">Pending upload</span>';
+  if(s==='green'){['dc-lic','dc-mot','dc-ins','dc-git','dc-rtw'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=v});}
+  else{['dc-lic','dc-mot','dc-ins','dc-rtw'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=v});const g=document.getElementById('dc-git');if(g)g.innerHTML=p;}
+  const un=document.getElementById('dc-uname');if(un)un.textContent=u;
+}
+
+function buildNav(tabs){
+  const LOCK_ICO='<svg class="lock-ic" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+  let h='',cs='';
+  tabs.forEach(t=>{
+    if(t.s!==cs){if(cs)h+='<hr class="sdiv">';h+=`<div class="nav-sec">${t.s}</div>`;cs=t.s;}
+    if(t.locked){
+      h+=`<div class="ni locked" onclick="showUpgrade('${t.l}')"><svg class="ni-ic" viewBox="0 0 24 24">${t.ico}</svg>${t.l}${LOCK_ICO}</div>`;
+    } else {
+      h+=`<div class="ni" id="ni-${t.id}" onclick="switchTab('pane-${t.id}')"><svg class="ni-ic" viewBox="0 0 24 24">${t.ico}</svg>${t.l}${t.badge?`<span class="nb">${t.badge}</span>`:''}</div>`;
+    }
+  });
+  document.getElementById('nav-list').innerHTML=h;
+}
+let ct=null;
+function switchTab(id){
+  if(ct){document.getElementById(ct).classList.remove('on');const n=document.getElementById('ni-'+ct.replace('pane-',''));if(n)n.classList.remove('on');}
+  const p=document.getElementById(id);if(p)p.classList.add('on');
+  const n=document.getElementById('ni-'+id.replace('pane-',''));if(n)n.classList.add('on');
+  ct=id;
+  if(window.innerWidth<=768)document.getElementById('s

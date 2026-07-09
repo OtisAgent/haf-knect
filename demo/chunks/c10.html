@@ -1,0 +1,20 @@
+idebar').classList.remove('open');
+}
+
+/* ── CUSTOMER TRACK ── */
+const CT_DB={'HAF-2847':{status:'Delivered',route:'Manchester M1 → Leeds LS1 · 5 Jul 2026 · 14:22'},'HAF-2831':{status:'In transit',route:'Birmingham B1 → Nottingham NG1 · ETA 16:30 today'},'HAF-2853':{status:'Driver assigned — collecting soon',route:'Manchester M1 → Salford M50 · Today'}};
+function ctLookup(){
+  const ref=(document.getElementById('ct-ref').value||'HAF-2847').trim().toUpperCase();
+  const d=CT_DB[ref]||{status:'No delivery found',route:'Check the reference and try again.'};
+  document.getElementById('ct-refout').textContent=ref;
+  document.getElementById('ct-status').textContent=d.status;
+  document.getElementById('ct-route').textContent=d.route;
+  document.getElementById('ct-result').style.display='block';
+}
+
+// Boot in day mode
+document.documentElement.removeAttribute('data-theme');
+document.getElementById('landing').style.display='flex';
+</script>
+</body>
+</html>
