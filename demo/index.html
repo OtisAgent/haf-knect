@@ -1499,8 +1499,18 @@ async function pcLookup(raw){
   return out;
 }
 function hav(a,b){const R=3959,dLa=(b.lat-a.lat)*Math.PI/180,dLo=(b.lng-a.lng)*Math.PI/180;const x=Math.sin(dLa/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLo/2)**2;return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
-/* 1.25 road factor: straight-line to typical UK driving distance */
+/* Distance engine order: HAF gateway (Google driving matrix, shared by every
+   quote section) -> postcodes.io straight-line x1.25 -> offline area table */
+const DMX='https://haf-distance.pages.dev/';
 async function pcDistReal(a,b){
+  try{
+    const g=await fetch(DMX+'?from='+encodeURIComponent(a.trim())+'&to='+encodeURIComponent(b.trim()));
+    if(g.ok){
+      const d=await g.json();
+      if(d.ok)return{miles:Math.max(1,Math.round(d.miles)),mins:d.mins,exact:true,google:true,
+        from:{area:d.from},to:{area:d.to}};
+    }
+  }catch(e){}
   const [pa,pb]=await Promise.all([pcLookup(a),pcLookup(b)]);
   if(pa==='ERR'||pb==='ERR')return{miles:pcDist(a,b),exact:false,from:undefined,to:undefined};
   if(!pa||!pb)return{miles:pcDist(a,b),exact:false,from:pa,to:pb};
@@ -1558,10 +1568,11 @@ async function calcLivePrice(){
   const miles=r.miles;
   const base=Math.max(v.min,miles*v.ppm*zoneMult(miles));
   const lo=Math.round(base*.9),hi=Math.round(base*1.1);
-  const fa=r.from&&r.from.area?r.from.area+' ('+fr+')':fr;
-  const ta=r.to&&r.to.area?r.to.area+' ('+to+')':to;
+  const fa=r.from&&r.from.area?(r.google?r.from.area:r.from.area+' ('+fr+')'):fr;
+  const ta=r.to&&r.to.area?(r.google?r.to.area:r.to.area+' ('+to+')'):to;
+  const dt=r.google&&r.mins?(r.mins>=60?Math.floor(r.mins/60)+'h '+(r.mins%60)+'m':r.mins+' min')+' drive · ':'';
   document.getElementById('lp-range').textContent='£'+lo+'–£'+hi;
-  document.getElementById('lp-info').textContent=(VAN_LABELS[selVanKey]||v.n)+' · '+fa+' → '+ta+' · ~'+miles+' mi road est. · ±10%';
+  document.getElementById('lp-info').textContent=(VAN_LABELS[selVanKey]||v.n)+' · '+fa+' → '+ta+' · '+miles+' mi'+(r.google?'':' road est.')+' · '+dt+'±10%';
   box.className='lp-box priced';
   hint.style.display='none';
   priced.style.display='flex';
