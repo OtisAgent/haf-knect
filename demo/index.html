@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 /* ── TOKENS ─────────────────────────────────────────────────── */
 :root{
@@ -481,6 +483,9 @@ textarea.fi2{resize:vertical;min-height:70px}
 .wn-fk{font-weight:700;color:var(--mu);margin-right:.35rem}
 .wn-fv{color:var(--tx)}
 .wn-actions{display:flex;gap:.4rem;margin-top:.65rem;flex-wrap:wrap;align-items:center}
+.cap-pill{padding:.28rem .7rem;border:1.5px solid var(--ln);border-radius:20px;background:var(--p2);font-size:.7rem;font-weight:700;color:var(--mu);cursor:pointer;transition:all .12s;white-space:nowrap}
+.cap-pill:hover{border-color:var(--or);color:var(--or)}
+.cap-pill.active{border-color:var(--or);background:var(--or-d);color:var(--or)}
 </style>
 </head>
 <body>
@@ -1140,18 +1145,40 @@ textarea.fi2{resize:vertical;min-height:70px}
         </div>
       </div>
 
-      <!-- FREIGHT: Network Capacity -->
+      <!-- FREIGHT: Network Map -->
       <div class="tp" id="pane-f-cap">
-        <h1 class="pt">Network Capacity</h1><p class="ps">Live driver availability across the HAF network.</p>
-        <div class="cap-grid">
-          <div class="cap-card"><div class="cap-area">Manchester</div><div class="cap-avail hi">14</div><div class="cap-sub">available now</div></div>
-          <div class="cap-card"><div class="cap-area">Leeds</div><div class="cap-avail hi">9</div><div class="cap-sub">available now</div></div>
-          <div class="cap-card"><div class="cap-area">Sheffield</div><div class="cap-avail med">5</div><div class="cap-sub">available now</div></div>
-          <div class="cap-card"><div class="cap-area">Birmingham</div><div class="cap-avail hi">11</div><div class="cap-sub">available now</div></div>
-          <div class="cap-card"><div class="cap-area">Liverpool</div><div class="cap-avail med">6</div><div class="cap-sub">available now</div></div>
-          <div class="cap-card"><div class="cap-area">Nottingham</div><div class="cap-avail lo">2</div><div class="cap-sub">available now</div></div>
-          <div class="cap-card"><div class="cap-area">London</div><div class="cap-avail med">8</div><div class="cap-sub">available now</div></div>
-          <div class="cap-card"><div class="cap-area">Bristol</div><div class="cap-avail lo">3</div><div class="cap-sub">available now</div></div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:.8rem">
+          <div>
+            <h1 class="pt" style="margin-bottom:.2rem">Network Map</h1>
+            <p class="ps" style="margin:0">83 drivers live · 4 active jobs · tap any zone for detail</p>
+          </div>
+          <label style="display:flex;align-items:center;gap:.35rem;font-size:.73rem;font-weight:600;cursor:pointer;white-space:nowrap;padding:.32rem .6rem;border:1.5px solid var(--ln);border-radius:20px;background:var(--p2);margin-top:.15rem">
+            <input type="checkbox" id="cap-relay" onchange="capFilter()" style="cursor:pointer;accent-color:var(--or)"> Relay hubs
+          </label>
+        </div>
+        <div style="display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;margin-bottom:.75rem">
+          <button id="cpill-" class="cap-pill active" onclick="capSetVeh('')">All</button>
+          <button id="cpill-van" class="cap-pill" onclick="capSetVeh('van')">Van</button>
+          <button id="cpill-lwb" class="cap-pill" onclick="capSetVeh('lwb')">LWB</button>
+          <button id="cpill-luton" class="cap-pill" onclick="capSetVeh('luton')">Luton</button>
+          <button id="cpill-artic" class="cap-pill" onclick="capSetVeh('artic')">Artic</button>
+          <button id="cpill-fridge" class="cap-pill" onclick="capSetVeh('fridge')">Fridge</button>
+          <span style="margin-left:auto;font-size:.72rem;color:var(--mu);white-space:nowrap">Rate: <strong id="cap-rate-lbl" style="color:var(--or)">£1.80–£2.40/mi</strong> · 9% network fee</span>
+        </div>
+        <div style="border-radius:var(--r);overflow:hidden;border:1.5px solid var(--ln);margin-bottom:1rem;position:relative">
+          <div id="cap-map" style="height:460px;width:100%;background:var(--bg)"></div>
+          <div style="position:absolute;top:10px;right:10px;z-index:1000;background:rgba(14,17,19,.82);border-radius:20px;padding:.3rem .7rem;font-size:.63rem;display:flex;align-items:center;gap:.6rem;box-shadow:0 1px 6px rgba(0,0,0,.3);backdrop-filter:blur(4px)">
+            <span style="display:flex;align-items:center;gap:.28rem;color:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#2dab60;display:inline-block"></span>High</span>
+            <span style="display:flex;align-items:center;gap:.28rem;color:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#e88c00;display:inline-block"></span>Med</span>
+            <span style="display:flex;align-items:center;gap:.28rem;color:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#cc3333;display:inline-block"></span>Low</span>
+            <span style="display:flex;align-items:center;gap:.28rem;color:#ff7800"><span style="width:8px;height:8px;border-radius:50%;background:#ff7800;display:inline-block"></span>Live job</span>
+          </div>
+        </div>
+        <div class="kg">
+          <div class="kc"><div class="kc-l">Drivers live</div><div class="kc-v or">83</div><div class="kc-d">on network now</div></div>
+          <div class="kc"><div class="kc-l">Active jobs</div><div class="kc-v co">4</div><div class="kc-d">en route</div></div>
+          <div class="kc"><div class="kc-l">High zones</div><div class="kc-v gn">3</div><div class="kc-d">Mcr · Leeds · Bham</div></div>
+          <div class="kc"><div class="kc-l">Avg job rate</div><div class="kc-v">£1.80–£2.40</div><div class="kc-d">per mile · van / LWB</div></div>
         </div>
       </div>
 
@@ -1680,7 +1707,7 @@ const TAB_REG={
   'd-budget':  {l:'Budget & Profit',   ico:'<line x1="12" y1="1" x2="12" y2="23"/>',                       s:'DRIVER'},
   'd-comp':    {l:'Compliance',        ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',     s:'DRIVER'},
   'f-post':    {l:'Post a Load',       ico:'<line x1="12" y1="5" x2="12" y2="19"/>',                       s:'FREIGHT'},
-  'f-cap':     {l:'Network Capacity',  ico:'<circle cx="12" cy="12" r="10"/>',                              s:'FREIGHT'},
+  'f-cap':     {l:'Network Map',  ico:'<circle cx="12" cy="12" r="10"/>',                              s:'FREIGHT'},
   'f-lanes':   {l:'Lane Pricing',      ico:'<line x1="12" y1="1" x2="12" y2="23"/>',                       s:'FREIGHT'},
   'f-loads':   {l:'Active Loads',      ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',             s:'FREIGHT'},
   'f-cover':   {l:'Coverage Board',    ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',     s:'FREIGHT'},
@@ -1842,14 +1869,77 @@ function buildNav(tabs){
   });
   document.getElementById('nav-list').innerHTML=h;
 }
+/* ── NETWORK MAP ── */
+let capMap=null,_capVeh='';
+function capSetVeh(v){
+  _capVeh=v;
+  document.querySelectorAll('.cap-pill').forEach(p=>p.classList.remove('active'));
+  const a=document.getElementById('cpill-'+v);if(a)a.classList.add('active');
+  capFilter();
+}
+function capFilter(){
+  const relay=document.getElementById('cap-relay')&&document.getElementById('cap-relay').checked;
+  if(capMap&&capMap._relayLayers){
+    capMap._relayLayers.forEach(m=>{if(relay){m.addTo(capMap);}else{try{capMap.removeLayer(m);}catch(e){}}});
+  }
+  const RATES={van:'£1.60–£2.00',lwb:'£1.80–£2.40',luton:'£2.00–£2.70',artic:'£2.80–£3.80',fridge:'£2.60–£3.50'};
+  const rateEl=document.getElementById('cap-rate-lbl');
+  if(rateEl)rateEl.textContent=(RATES[_capVeh]||'£1.80–£2.40')+'/mi';
+}
+function initCapMap(){
+  const el=document.getElementById('cap-map');
+  if(!el||typeof L==='undefined')return;
+  if(capMap){capMap.invalidateSize();return;}
+  capMap=L.map('cap-map',{zoomControl:true,scrollWheelZoom:false}).setView([52.8,-1.8],6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18,opacity:.7}).addTo(capMap);
+  const ZONES=[
+    {lat:53.48,lng:-2.24,city:'Manchester',n:14,r:28000,tier:'hi',reward:true, bonus:'+0.5% rebate this week'},
+    {lat:53.80,lng:-1.55,city:'Leeds',      n:9, r:22000,tier:'hi',reward:false},
+    {lat:52.49,lng:-1.89,city:'Birmingham', n:11,r:26000,tier:'hi',reward:true, bonus:'+0.5% rebate this week'},
+    {lat:53.41,lng:-2.99,city:'Liverpool',  n:6, r:20000,tier:'med',reward:false},
+    {lat:53.38,lng:-1.47,city:'Sheffield',  n:5, r:18000,tier:'med',reward:false},
+    {lat:51.51,lng:-0.09,city:'London',     n:8, r:32000,tier:'med',reward:true, bonus:'+1% rebate this week'},
+    {lat:52.95,lng:-1.15,city:'Nottingham', n:2, r:16000,tier:'lo', reward:false},
+    {lat:51.45,lng:-2.60,city:'Bristol',    n:3, r:17000,tier:'lo', reward:false},
+    {lat:54.98,lng:-1.62,city:'Newcastle',  n:7, r:20000,tier:'med',reward:false},
+    {lat:55.86,lng:-4.25,city:'Glasgow',    n:5, r:22000,tier:'med',reward:false},
+  ];
+  const TC={hi:{fill:'#2dab60',stroke:'#1e7a45'},med:{fill:'#e88c00',stroke:'#b36b00'},lo:{fill:'#cc3333',stroke:'#992222'}};
+  ZONES.forEach(z=>{
+    const c=TC[z.tier];
+    L.circle([z.lat,z.lng],{radius:z.r,fillColor:c.fill,color:c.stroke,weight:1.5,fillOpacity:.18}).addTo(capMap);
+    const rb=z.reward?`<br><span style="background:#ff7800;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px">★ ${z.bonus}</span>`:'';
+    L.marker([z.lat,z.lng],{icon:L.divIcon({className:'',html:`<div style="text-align:center"><div style="background:${c.fill};color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;border:2px solid ${c.stroke};white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.3)">${z.city}${z.reward?' ★':''}</div><div style="font-size:9px;color:${c.stroke};font-weight:700;margin-top:1px">${z.n} drivers</div></div>`,iconSize:[90,36],iconAnchor:[45,10]})})
+      .addTo(capMap).bindPopup(`<strong>${z.city}</strong><br>${z.n} drivers · <b style="color:${c.fill}">${z.tier==='hi'?'High':z.tier==='med'?'Medium':'Low'} capacity</b>${rb}`);
+  });
+  [{lat:52.92,lng:-1.48,ref:'JB-0218',route:'Manchester → Birmingham',driver:'MW015291',step:'En route – M6'},
+   {lat:52.30,lng:-0.88,ref:'JB-0201',route:'Leeds → London',driver:'JH029483',step:'En route – A1(M)'},
+   {lat:53.44,lng:-2.18,ref:'JB-0196',route:'Liverpool → Sheffield',driver:'KP041872',step:'Collected – M62'},
+   {lat:51.72,lng:-1.08,ref:'JB-0189',route:'Bristol → London',driver:'TD018392',step:'En route – M40'},
+  ].forEach(j=>{
+    L.circleMarker([j.lat,j.lng],{radius:8,fillColor:'#ff7800',color:'#fff',weight:2,fillOpacity:.95})
+     .addTo(capMap).bindPopup(`<strong style="color:#ff7800">${j.ref}</strong><br><b>${j.route}</b><br>Driver: ${j.driver}<br><span style="color:#ff7800">● ${j.step}</span>`);
+  });
+  const RELAY=[
+    {lat:52.63,lng:-1.70,name:'Tamworth Relay Hub',road:'M42/A5',note:'Central UK — ideal North↔South split'},
+    {lat:53.52,lng:-1.12,name:'Doncaster Relay Hub',road:'M18/A1',note:'Yorkshire — N↔S and E↔W'},
+    {lat:52.04,lng:-0.76,name:'Milton Keynes Hub',road:'M1 J13',note:'South Midlands — North↔London split'},
+    {lat:52.80,lng:-2.12,name:'Stafford Hub',road:'M6 J14',note:'West Midlands — M6 corridor midpoint'},
+    {lat:51.56,lng:-1.78,name:'Swindon Hub',road:'M4 J15',note:'South West — M4/M5 interchange'},
+  ];
+  const ri=L.divIcon({className:'',html:`<div style="width:14px;height:14px;background:#5b3de8;transform:rotate(45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,iconSize:[14,14],iconAnchor:[7,7]});
+  capMap._relayLayers=[];
+  RELAY.forEach(r=>{capMap._relayLayers.push(L.marker([r.lat,r.lng],{icon:ri}).bindPopup(`<strong style="color:#5b3de8">◆ ${r.name}</strong><br>${r.road}<br><span style="color:#666;font-size:11px">${r.note}</span>`));});
+}
+
 let ct=null;
 function switchTab(id){
   if(ct){document.getElementById(ct).classList.remove('on');const n=document.getElementById('ni-'+ct.replace('pane-',''));if(n)n.classList.remove('on');}
   const p=document.getElementById(id);if(p)p.classList.add('on');
   const ni=document.getElementById('ni-'+id.replace('pane-',''));if(ni)ni.classList.add('on');
   ct=id;
+  if(id==='pane-f-cap')setTimeout(initCapMap,80);
   if(id==='pane-feedback'){fbPrefill();fbLoad();}
-  // When visiting What's New, remove the orange dot from the nav item
   if(id==='pane-whats-new'){
     wnRead.add('whats-new');
     const dot=ni?.querySelector('.upd-dot');if(dot)dot.remove();
