@@ -52,6 +52,11 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 .pb-pro{background:rgba(139,92,246,.12);color:#7c3aed;border:1px solid rgba(139,92,246,.25)}
 .pb-ent{background:var(--gn-d);color:var(--gn);border:1px solid rgba(45,171,96,.22)}
 .pb-founder{background:rgba(217,146,11,.12);color:#8a5e00;border:1px solid rgba(217,146,11,.28)}
+/* ── FOUNDER GOLD IDENTITY ── */
+#app.founder::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;border:3px solid #d9a520}
+#app.founder .topbar{border-bottom:2px solid #d9a520;background:linear-gradient(180deg,rgba(217,165,32,.07),var(--p) 60%)}
+.av.founder{box-shadow:0 0 0 2px var(--p),0 0 0 4px #d9a520}
+.founder-tag{display:inline-flex;align-items:center;gap:.3rem;background:linear-gradient(135deg,#b8860b,#e8b923);color:#241a00;font-family:var(--dp);font-weight:900;font-size:.58rem;letter-spacing:.1em;padding:.18rem .6rem;border-radius:var(--pill);text-transform:uppercase;white-space:nowrap}
 .pb-lite{background:rgba(155,160,168,.1);color:var(--su);border:1px solid rgba(155,160,168,.18)}
 /* locked feature overlay */
 .feat-locked{position:relative}
@@ -1915,6 +1920,7 @@ function demoLogin(key){
     const tabs=a.tabIds.map(id=>{const t=TAB_REG[id];return t?{...t,id,locked:false}:null}).filter(Boolean);
     buildNav(tabs);
     switchTab('pane-'+a.def);
+    applyFounder(false);
   }
   setTimeout(wnShow,400);
 }
@@ -1933,7 +1939,18 @@ function switchTier(tierKey){
   const first=tabs.find(t=>!t.locked);
   if(first)switchTab('pane-'+first.id);
   window._nextTier=tier.next;
+  applyFounder(currentAcc.tierGroup==='knect'&&tierKey==='founder');
   if(currentAcc.tierGroup==='plna'){renderPlnaBook(tierKey);renderPlnaCust(tierKey);}
+}
+
+function applyFounder(on){
+  document.getElementById('app').classList.toggle('founder',!!on);
+  document.getElementById('tb-av').classList.toggle('founder',!!on);
+  let ft=document.getElementById('founder-tag');
+  if(on){
+    if(!ft){ft=document.createElement('span');ft.id='founder-tag';ft.className='founder-tag';ft.textContent='\u2605 Founder';
+      document.getElementById('tb-user').after(ft);}
+  }else if(ft){ft.remove();}
 }
 
 function showUpgrade(feat){
