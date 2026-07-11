@@ -825,8 +825,7 @@ textarea.fi2{resize:vertical;min-height:70px}
           <option value="">Select an account type…</option>
           <option value="Business Account">Business Account — send your own goods (free)</option>
           <option value="Freight Solutions Lite">Freight Solutions Lite — forward for others (free to start)</option>
-          <option value="Freight Solutions Plus">Freight Solutions Plus — £99/mo · 10% fee</option>
-          <option value="Freight Solutions Pro">Freight Solutions Pro — £299/mo · 7% fee</option>
+          <option value="Freight Solutions Pro">Freight Solutions Pro — £100/mo · rebate credit model</option>
           <option value="PLNA Driver">PLNA Driver — join the courier network</option>
           <option value="Not sure yet">Not sure yet</option>
         </select>
@@ -1068,14 +1067,14 @@ textarea.fi2{resize:vertical;min-height:70px}
 
       <!-- FREIGHT: Solutions tier banner (reusable) -->
       <div id="ff-tier-banner" style="background:var(--or-d);border:1.5px solid var(--or-g);border-radius:var(--rx);padding:.65rem 1rem;font-size:.78rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:1rem">
-        <div><span style="font-weight:800;color:var(--or)">Solutions Plus</span> <span style="color:var(--mu)">· 10% network fee · Net 14 payment terms</span></div>
-        <button class="btn btn-or btn-xs" onclick="switchTab('pane-f-plans')">Upgrade plan →</button>
+        <div><span style="font-weight:800;color:var(--or)">Solutions Lite</span> <span style="color:var(--mu)">· 12% network fee · Upgrade to Pro to earn rebate credits</span></div>
+        <button class="btn btn-or btn-xs" onclick="switchTab('pane-f-plans')">Go Pro →</button>
       </div>
 
       <!-- FREIGHT: Post a Load -->
       <div class="tp" id="pane-f-post">
         <h1 class="pt">Post a Load</h1><p class="ps">List freight for your clients on the HAF KNECT network.</p>
-        <div id="ff-tier-post" style="background:var(--or-d);border:1px solid var(--or-g);border-radius:var(--rx);padding:.55rem .9rem;font-size:.75rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.9rem"><span style="font-weight:700;color:var(--or)">Solutions Plus</span><span style="color:var(--mu)">10% network fee on this load</span></div>
+        <div id="ff-tier-post" style="background:var(--or-d);border:1px solid var(--or-g);border-radius:var(--rx);padding:.55rem .9rem;font-size:.75rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.9rem"><span style="font-weight:700;color:var(--or)">Solutions Lite</span><span style="color:var(--mu)">12% network fee on this load</span></div>
         <div class="card" style="max-width:580px">
           <div class="ct">Load details</div>
           <div class="fg"><label class="fl">Customer reference</label><input class="fi2" placeholder="Your client's job ref"></div>
@@ -1139,7 +1138,7 @@ textarea.fi2{resize:vertical;min-height:70px}
       <!-- FREIGHT: Solutions Plans -->
       <div class="tp" id="pane-f-plans">
         <h1 class="pt">Solutions Plans</h1><p class="ps">Your HAF KNECT Freight Solutions tier and what it includes.</p>
-        <div class="plg">
+        <div class="plg" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr))">
           <div class="plc">
             <div class="pl-n">Solutions Lite</div>
             <div class="pl-p">Free<span style="font-size:.78rem;font-weight:500;color:var(--mu)"> to start</span></div>
@@ -1151,40 +1150,28 @@ textarea.fi2{resize:vertical;min-height:70px}
               <div class="pl-f" style="opacity:.45">Priority matching</div>
               <div class="pl-f" style="opacity:.45">Lane pricing tools</div>
               <div class="pl-f" style="opacity:.45">Coverage board</div>
+              <div class="pl-f" style="opacity:.45">Rebate credit model</div>
               <div class="pl-f" style="opacity:.45">Dedicated account manager</div>
             </div>
             <button class="btn btn-gh btn-sm btn-wide">Current plan</button>
           </div>
           <div class="plc feat">
-            <div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;color:var(--or);text-transform:uppercase;margin-bottom:.35rem">Most popular</div>
-            <div class="pl-n">Solutions Plus</div>
-            <div class="pl-p">£99<span>/mo</span></div>
+            <div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;color:var(--or);text-transform:uppercase;margin-bottom:.35rem">Best value</div>
+            <div class="pl-n">Solutions Pro</div>
+            <div class="pl-p">£100<span>/mo</span></div>
             <div class="pl-fs">
               <div class="pl-f">Post unlimited loads</div>
-              <div class="pl-f"><strong>10% network fee</strong> per job</div>
+              <div class="pl-f">12% network fee per job</div>
+              <div class="pl-f"><strong>3% rebate credited back per job</strong></div>
+              <div class="pl-f">Credit offsets future invoices</div>
               <div class="pl-f">Live driver tracking per load</div>
               <div class="pl-f">Priority load matching</div>
-              <div class="pl-f">Lane pricing &amp; demand data</div>
-              <div class="pl-f">Coverage board</div>
-              <div class="pl-f">Net 14 payment terms</div>
-              <div class="pl-f" style="opacity:.45">Dedicated account manager</div>
-            </div>
-            <button class="btn btn-or btn-sm btn-wide">Upgrade to Plus</button>
-          </div>
-          <div class="plc">
-            <div class="pl-n">Solutions Pro</div>
-            <div class="pl-p">£299<span>/mo</span></div>
-            <div class="pl-fs">
-              <div class="pl-f">Post unlimited loads</div>
-              <div class="pl-f"><strong>7% network fee</strong> per job</div>
-              <div class="pl-f">Live driver tracking per load</div>
-              <div class="pl-f">Highest-priority matching</div>
               <div class="pl-f">Full lane pricing suite</div>
               <div class="pl-f">Coverage board + auto-chase</div>
-              <div class="pl-f">Net 30 payment terms</div>
               <div class="pl-f">Dedicated account manager</div>
             </div>
-            <button class="btn btn-gh btn-sm btn-wide">Upgrade to Pro</button>
+            <div style="margin:.7rem 0;padding:.55rem .7rem;border-radius:6px;background:rgba(255,120,0,.07);font-size:.68rem;color:var(--mu);line-height:1.4">The more you ship, the more credit you build — use it against any future invoice.</div>
+            <button class="btn btn-or btn-sm btn-wide">Upgrade to Pro</button>
           </div>
         </div>
       </div>
@@ -1193,10 +1180,10 @@ textarea.fi2{resize:vertical;min-height:70px}
       <div class="tp" id="pane-f-account">
         <h1 class="pt">Account Controls</h1><p class="ps">Your commercial terms, credit limit and compliance rules.</p>
         <div class="g2">
-          <div class="card"><div class="ct">Solutions account</div><div class="cr"><span class="ck">Plan</span><span class="cv"><span class="chip co">Solutions Plus</span></span></div><div class="cr"><span class="ck">Network fee</span><span class="cv" style="font-weight:700;color:var(--gn)">10% per job</span></div><div class="cr"><span class="ck">Payment terms</span><span class="cv">Net 14</span></div><div class="cr"><span class="ck">Credit limit</span><span class="cv">£25,000</span></div><div class="cr"><span class="ck">Active loads</span><span class="cv">Unlimited</span></div><div class="cr"><span class="ck">SLA status</span><span class="cv"><span class="chip cg">On track</span></span></div></div>
+          <div class="card"><div class="ct">Solutions account</div><div class="cr"><span class="ck">Plan</span><span class="cv"><span class="chip co">Solutions Pro</span></span></div><div class="cr"><span class="ck">Network fee</span><span class="cv" style="font-weight:700;color:var(--mu)">12% per job</span></div><div class="cr"><span class="ck">Rebate rate</span><span class="cv" style="font-weight:700;color:var(--gn)">3% per job → account credit</span></div><div class="cr"><span class="ck">Active loads</span><span class="cv">Unlimited</span></div><div class="cr"><span class="ck">SLA status</span><span class="cv"><span class="chip cg">On track</span></span></div></div>
           <div class="card"><div class="ct">Compliance rules</div><div class="cr"><span class="ck">Approved lanes</span><span class="cv">All UK</span></div><div class="cr"><span class="ck">Min GIT insurance</span><span class="cv">£50,000</span></div><div class="cr"><span class="ck">Cancellation rate</span><span class="cv"><span class="chip cg">1.2%</span></span></div><div class="cr"><span class="ck">Disputes (90d)</span><span class="cv">1 — resolved</span></div><div class="cr"><span class="ck">Third-party freight</span><span class="cv"><span class="chip cg">Permitted</span></span></div></div>
         </div>
-        <div style="margin-top:.5rem;padding:.7rem .9rem;border-radius:var(--rx);border:1px solid var(--or-g);background:var(--or-d);font-size:.76rem;color:var(--mu)">Upgrade to <strong style="color:var(--or)">Solutions Pro</strong> to reduce your network fee to 7% and unlock a dedicated account manager. <button class="btn btn-or btn-xs" onclick="switchTab('pane-f-plans')" style="margin-left:.4rem">See plans →</button></div>
+        <div class="card" style="margin-top:.5rem"><div class="ct">Rebate credit balance</div><div class="cr"><span class="ck">Available credit</span><span class="cv" style="font-size:1.25rem;font-weight:900;color:var(--gn)">£47.20</span></div><div class="cr"><span class="ck">Earned this month</span><span class="cv">£18.60</span></div><div class="cr"><span class="ck">Applied to last invoice</span><span class="cv">£28.60</span></div><table class="dt" style="margin-top:.6rem"><thead><tr><th>Job ref</th><th>Job value</th><th>3% rebate</th><th>Date</th></tr></thead><tbody><tr><td>JB-0218</td><td>£620</td><td style="color:var(--gn);font-weight:700">+£18.60</td><td>10 Jul</td></tr><tr><td>JB-0201</td><td>£410</td><td style="color:var(--gn);font-weight:700">+£12.30</td><td>3 Jul</td></tr><tr><td>JB-0196</td><td>£540</td><td style="color:var(--gn);font-weight:700">+£16.20</td><td>28 Jun</td></tr></tbody></table><div style="margin-top:.6rem;font-size:.72rem;color:var(--mu)">Rebate credits are applied automatically to your next invoice. The more you ship, the more credit you build.</div></div>
       </div>
 
       <!-- SHARED: Payments -->
@@ -1224,10 +1211,10 @@ textarea.fi2{resize:vertical;min-height:70px}
           <div class="kc"><div class="kc-l">Active jobs</div><div class="kc-v gn">14</div></div>
           <div class="kc"><div class="kc-l">Pending compliance</div><div class="kc-v am">22</div></div>
           <div class="kc"><div class="kc-l">Business accounts</div><div class="kc-v">128</div><div class="kc-d">free · own goods only</div></div>
-          <div class="kc"><div class="kc-l">Freight Solutions</div><div class="kc-v">22</div><div class="kc-d">Lite · Plus · Pro</div></div>
+          <div class="kc"><div class="kc-l">Freight Solutions</div><div class="kc-v">22</div><div class="kc-d">Lite · Pro</div></div>
         </div>
         <div class="g2">
-          <div class="card"><div class="ct">Freight Solutions breakdown</div><div class="cr"><span class="ck">Solutions Lite</span><span class="cv">11 accounts · 12% fee</span></div><div class="cr"><span class="ck">Solutions Plus</span><span class="cv">8 accounts · 10% fee</span></div><div class="cr"><span class="ck">Solutions Pro</span><span class="cv">3 accounts · 7% fee</span></div></div>
+          <div class="card"><div class="ct">Freight Solutions breakdown</div><div class="cr"><span class="ck">Solutions Lite</span><span class="cv">19 accounts · 12% fee · no rebate</span></div><div class="cr"><span class="ck">Solutions Pro</span><span class="cv">3 accounts · 12% fee · 3% rebate credit</span></div><div class="cr"><span class="ck">Total rebate credits issued</span><span class="cv" style="color:var(--gn)">£312.40 this month</span></div></div>
           <div class="card"><div class="ct">System connections</div><div class="cr"><span class="ck">HAF PLNA</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">CleverPay</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">HAF Launch</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">Supabase DB</span><span class="cv"><span class="chip ca">Schema pending</span></span></div></div>
         </div>
         <div class="card"><div class="ct">Quick links</div><div style="display:flex;gap:.45rem;flex-wrap:wrap"><a href="https://plna.usehaf.co.uk/dashboard.html" target="_blank" class="btn btn-gh btn-sm">PLNA</a><a href="https://clever.usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">CleverPay</a><a href="https://launch.usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">Launch site</a><a href="https://usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">usehaf.co.uk</a></div></div>
