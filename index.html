@@ -1383,23 +1383,48 @@ textarea.fi2{resize:vertical;min-height:70px}
 
       <!-- BUSINESS: Book (own goods only — free) -->
       <div class="tp" id="pane-b-book">
-        <h1 class="pt">Book a Courier</h1><p class="ps">Send your own business goods via the HAF network.</p>
-        <div style="background:var(--bl-d);border:1.5px solid rgba(61,125,202,.28);border-radius:var(--rx);padding:.8rem 1rem;font-size:.78rem;color:var(--bl);margin-bottom:1.1rem;display:flex;align-items:flex-start;gap:.6rem">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:.1rem"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <div><strong>Business Account — own goods only.</strong> This account lets you ship your own stock and products. You cannot post loads on behalf of other companies — that requires a Freight Forwarder account. <a href="#" onclick="openDemoReq()" style="color:var(--bl);font-weight:700;text-decoration:underline">Apply for a Freight Solutions account →</a></div>
-        </div>
-        <div class="card" style="max-width:560px">
-          <div class="ct">Delivery details</div>
+        <h1 class="pt">Post a Job</h1><p class="ps">Move your own stock and goods via the HAF KNECT network. Your own registered drivers can also pick this up.</p>
+        <div class="card" style="max-width:580px;margin-bottom:.85rem">
+          <div class="ct">Job details</div>
           <div class="fr"><div class="fg"><label class="fl">Collection address</label><input class="fi2" placeholder="Full address or postcode"></div><div class="fg"><label class="fl">Delivery address</label><input class="fi2" placeholder="Full address or postcode"></div></div>
           <div class="fr"><div class="fg"><label class="fl">Your reference</label><input class="fi2" placeholder="Internal order or PO ref"></div><div class="fg"><label class="fl">Goods description</label><input class="fi2" placeholder="e.g. Retail stock, tools"></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 200"></div><div class="fg"><label class="fl">Urgency</label><select class="fi2"><option>Flexible</option><option>Same-day</option><option>Urgent</option><option>Timed window</option></select></div></div>
-          <div class="fr" style="margin-top:.4rem"><button class="btn btn-gh btn-sm">Save draft</button><button class="btn btn-or btn-sm">Find a driver →</button></div>
+          <div class="fr"><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 200"></div><div class="fg"><label class="fl">Vehicle needed</label><select class="fi2"><option>Any</option><option>Small van</option><option>Short wheelbase</option><option>Long wheelbase</option><option>Luton / tail-lift</option></select></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Date</label><input class="fi2" type="date"></div><div class="fg"><label class="fl">Urgency</label><select class="fi2"><option>Flexible</option><option>Same-day</option><option>Urgent</option><option>Timed window</option></select></div></div>
         </div>
-        <div class="card" style="max-width:560px">
-          <div class="ct">Available on the network (guide)</div>
+        <!-- Acceptance rules -->
+        <div class="card" style="max-width:580px;margin-bottom:.85rem">
+          <div class="ct">Who can accept this job?</div>
+          <div style="display:flex;flex-direction:column;gap:.55rem">
+            <label style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.55rem .7rem;background:var(--p2);border-radius:var(--rx);border:1.5px solid var(--or-g)">
+              <input type="radio" name="b-accept" value="mydriver" checked style="accent-color:var(--or)">
+              <div><div style="font-weight:700;font-size:.82rem">My registered drivers first</div><div style="font-size:.7rem;color:var(--mu)">Offered to your team first — goes to the open network after 30 minutes if not accepted</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.55rem .7rem;background:var(--p2);border-radius:var(--rx)">
+              <input type="radio" name="b-accept" value="myonly" style="accent-color:var(--or)">
+              <div><div style="font-weight:700;font-size:.82rem">My drivers only</div><div style="font-size:.7rem;color:var(--mu)">Only drivers registered to your business account can accept — never goes to the open network</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.55rem .7rem;background:var(--p2);border-radius:var(--rx)">
+              <input type="radio" name="b-accept" value="network" style="accent-color:var(--or)">
+              <div><div style="font-weight:700;font-size:.82rem">Open network</div><div style="font-size:.7rem;color:var(--mu)">Any Clever Checked driver on HAF KNECT can accept immediately</div></div>
+            </label>
+          </div>
+          <div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--ln)">
+            <div style="font-size:.72rem;font-weight:700;color:var(--mu);margin-bottom:.45rem;text-transform:uppercase;letter-spacing:.06em">Additional requirements</div>
+            <div style="display:flex;flex-wrap:wrap;gap:.45rem">
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--or)"> Clever Checked only</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--or)"> GIT insurance required</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--or)"> Local drivers only (50 mi)</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--or)"> Tail-lift required</label>
+            </div>
+          </div>
+        </div>
+        <div class="fr" style="max-width:580px;margin:0"><button class="btn btn-gh btn-sm">Save draft</button><button class="btn btn-or btn-sm">Post job →</button></div>
+        <!-- Available drivers -->
+        <div class="card" style="max-width:580px;margin-top:.85rem">
+          <div class="ct">Network options right now</div>
           <div class="jl">
-            <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">FASTEST</div><div class="jroute">LWB courier available now</div><div class="jdet">Estimated collection: 45 min · Clever Checked</div></div><button class="btn btn-or btn-xs">Select</button></div>
-            <div class="jc"><div class="jdot" style="background:var(--am)"></div><div class="jm"><div class="jref">BEST VALUE</div><div class="jroute">Return route courier · This afternoon</div><div class="jdet">Estimated collection: 2h · Clever Checked</div></div><button class="btn btn-gh btn-xs">Select</button></div>
+            <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">YOUR DRIVER · Registered</div><div class="jroute">AB12 CDE — LWB · Sheffield S9 · James</div><div class="jdet">Available now · Clever Checked · Est. 30 min</div></div><button class="btn btn-or btn-xs">Assign</button></div>
+            <div class="jc"><div class="jdot" style="background:var(--am)"></div><div class="jm"><div class="jref">NETWORK DRIVER · Backload</div><div class="jroute">LWB courier heading your way — return route</div><div class="jdet">Est. collection: 2h · Clever Checked</div></div><button class="btn btn-gh btn-xs">Select</button></div>
           </div>
         </div>
       </div>
@@ -1419,8 +1444,12 @@ textarea.fi2{resize:vertical;min-height:70px}
       <div class="tp" id="pane-b-usage">
         <h1 class="pt">Usage &amp; Activity</h1><p class="ps">Your monthly shipping activity — Business Account is free, no tiers.</p>
         <div class="kg"><div class="kc"><div class="kc-l">Deliveries this month</div><div class="kc-v or">38</div><div class="kc-d pos">+12% vs last month</div></div><div class="kc"><div class="kc-l">Spend this month</div><div class="kc-v">£4,820</div></div><div class="kc"><div class="kc-l">On-time rate</div><div class="kc-v gn">97%</div></div><div class="kc"><div class="kc-l">Account type</div><div class="kc-v" style="font-size:1rem">Free</div></div></div>
-        <div class="card"><div class="ct">Account summary</div><div class="cr"><span class="ck">Plan</span><span class="cv"><span class="chip cb">Business Account — Free</span></span></div><div class="cr"><span class="ck">Goods type</span><span class="cv">Your own stock and products only</span></div><div class="cr"><span class="ck">Third-party freight</span><span class="cv"><span class="chip cr2">Not permitted</span></span></div><div class="cr"><span class="ck">Fleet on network</span><span class="cv"><span class="chip cg">Enabled</span></span></div></div>
-        <div style="border:1.5px solid var(--or-g);border-radius:var(--rs);padding:1rem;background:var(--or-d)"><div style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Want to forward goods for other businesses?</div><p style="font-size:.78rem;color:var(--mu);margin-bottom:.7rem">Upgrade to a Freight Solutions account to post loads on behalf of third parties, access lane pricing, and unlock volume-based network fee reductions.</p><button class="btn btn-or btn-sm" onclick="openDemoReq()">Apply for Freight Solutions →</button></div>
+        <div class="card"><div class="ct">Account summary</div><div class="cr"><span class="ck">Plan</span><span class="cv"><span class="chip cb">Business Account — Free</span></span></div><div class="cr"><span class="ck">Goods type</span><span class="cv">Your own stock and products only</span></div><div class="cr"><span class="ck">Registered drivers</span><span class="cv"><span class="chip cg">2 active · on PLNA</span></span></div><div class="cr"><span class="ck">Fleet on network</span><span class="cv"><span class="chip cg">Enabled</span></span></div><div class="cr"><span class="ck">Job acceptance rules</span><span class="cv"><span class="chip cg">My drivers first</span></span></div></div>
+        <div style="border:1.5px solid rgba(45,171,96,.25);border-radius:var(--rs);padding:1rem;background:var(--gn-d)">
+          <div style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Your drivers can earn on backloads</div>
+          <p style="font-size:.78rem;color:var(--mu);margin-bottom:.7rem">Any driver registered to your account gets their own PLNA profile. After completing your deliveries, they can accept return-route backloads from the network — earning extra on journeys they're already making.</p>
+          <button class="btn btn-or btn-sm" onclick="switchTab('pane-b-drivers')">Manage my drivers →</button>
+        </div>
       </div>
 
       <!-- BUSINESS: My Fleet -->
@@ -1434,6 +1463,74 @@ textarea.fi2{resize:vertical;min-height:70px}
           <button class="btn btn-or btn-sm">Add vehicle</button>
         </div>
         <div class="card"><div class="ct">Registered fleet</div><div class="cr"><span class="ck">AB12 CDE — LWB · Sheffield S9</span><span class="cv"><span class="chip cg">On network</span></span></div><div class="cr"><span class="ck">XY64 FGH — Small van · Sheffield S9</span><span class="cv"><span class="chip ca">Off network</span></span></div></div>
+      </div>
+
+      <!-- BUSINESS: My Drivers -->
+      <div class="tp" id="pane-b-drivers">
+        <h1 class="pt">My Drivers</h1>
+        <p class="ps">Register your drivers so they appear first when you post a job — and they can earn on backloads via their own PLNA account between your deliveries.</p>
+        <div style="background:var(--gn-d);border:1.5px solid rgba(45,171,96,.25);border-radius:var(--rx);padding:.75rem 1rem;font-size:.76rem;margin-bottom:1rem;line-height:1.6">
+          <strong>How it works:</strong> each driver gets their own HAF username and a PLNA driver account. Your jobs are offered to them first. When they've delivered your goods, they can accept backloads from the open network on the return run — earning for themselves, costing you nothing.
+        </div>
+        <!-- Registered drivers -->
+        <div class="card" style="margin-bottom:.85rem">
+          <div class="ct">Registered drivers</div>
+          <!-- Driver 1 — has PLNA -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--ln)">
+            <div>
+              <div style="font-weight:700;font-size:.84rem">James Worthington</div>
+              <div style="font-size:.71rem;color:var(--mu);margin-top:.1rem">JW012390 · LWB · Sheffield S9 · AB12 CDE</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;justify-content:flex-end">
+              <span class="chip cg">PLNA active</span>
+              <span class="chip cb">On network</span>
+              <a href="https://plna.usehaf.co.uk" target="_blank" class="btn btn-gh btn-xs">View PLNA →</a>
+            </div>
+          </div>
+          <!-- Driver 2 — has PLNA, currently on a job -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--ln)">
+            <div>
+              <div style="font-weight:700;font-size:.84rem">Karen Price</div>
+              <div style="font-size:.71rem;color:var(--mu);margin-top:.1rem">KP041872 · LWB · Sheffield S1 · XY64 FGH</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;justify-content:flex-end">
+              <span class="chip cg">PLNA active</span>
+              <span class="chip co">On a job</span>
+              <a href="https://plna.usehaf.co.uk" target="_blank" class="btn btn-gh btn-xs">View PLNA →</a>
+            </div>
+          </div>
+          <!-- Driver 3 — no PLNA yet -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem 0">
+            <div>
+              <div style="font-weight:700;font-size:.84rem">Mark Denton</div>
+              <div style="font-size:.71rem;color:var(--mu);margin-top:.1rem">No HAF username yet · Small van · Leeds LS9</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;justify-content:flex-end">
+              <span class="chip ca">No PLNA account</span>
+              <button class="btn btn-or btn-xs">Invite to PLNA →</button>
+            </div>
+          </div>
+        </div>
+        <!-- Add a driver -->
+        <div class="card" style="max-width:540px;margin-bottom:.85rem">
+          <div class="ct">Add a driver</div>
+          <div class="fr" style="margin:0 0 .6rem">
+            <div class="fg"><label class="fl">Driver name</label><input class="fi2" placeholder="Full name"></div>
+            <div class="fg"><label class="fl">Mobile number</label><input class="fi2" placeholder="07xxx xxxxxx" type="tel"></div>
+          </div>
+          <div class="fr" style="margin:0 0 .6rem">
+            <div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>Short wheelbase</option><option selected>Long wheelbase</option><option>Extra LWB</option><option>Luton / tail-lift</option></select></div>
+            <div class="fg"><label class="fl">Vehicle registration</label><input class="fi2" placeholder="e.g. AB12 CDE" style="text-transform:uppercase"></div>
+          </div>
+          <div class="fg" style="margin-bottom:.7rem"><label class="fl">Base postcode</label><input class="fi2" placeholder="e.g. S9 1AA" style="max-width:160px"></div>
+          <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.76rem;font-weight:600;color:var(--mu);margin:.1rem 0 .75rem"><input type="checkbox" checked style="accent-color:var(--or)"> Send PLNA invite by WhatsApp — driver creates their own account</label>
+          <button class="btn btn-or btn-sm">Add driver →</button>
+        </div>
+        <!-- Insurance note -->
+        <div style="border:1.5px solid var(--am-d);border-radius:var(--rx);padding:.8rem 1rem;background:var(--am-d);font-size:.76rem;display:flex;align-items:flex-start;gap:.6rem">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--am)" stroke-width="2" style="flex-shrink:0;margin-top:.1rem"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div><strong style="color:var(--am)">Gap insurance — pending.</strong> HAF is working with an insurance provider to cover goods-in-transit gaps for business account deliveries made by registered drivers on backloads. Your goods are carried by Clever Checked, insured drivers — but check your own goods-in-transit cover in the meantime.</div>
+        </div>
       </div>
 
       <!-- BUSINESS: Saved Addresses -->
@@ -2069,6 +2166,7 @@ const BUSINESS_NAV=[
   {id:'b-book',l:'Book a Courier',s:'Send Goods',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'b-del',l:'My Deliveries',s:'Send Goods',ico:'<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'},
   {id:'b-fleet',l:'My Fleet',s:'Send Goods',ico:'<path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="1"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>'},
+  {id:'b-drivers',l:'My Drivers',s:'Send Goods',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'b-saved',l:'Saved Addresses',s:'Send Goods',ico:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'},
   {id:'b-usage',l:'Usage &amp; Activity',s:'Account',ico:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'},
   {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
