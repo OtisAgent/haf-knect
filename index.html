@@ -862,22 +862,9 @@ textarea.fi2{resize:vertical;min-height:70px}
         <div class="sc-err" id="sc-err"></div>
         <button class="btn btn-or btn-wide" onclick="scLogin()" style="margin-top:.3rem">Log in →</button>
         <p class="sc-foot">No account? <a href="https://clever.usehaf.co.uk" target="_blank">Create one via CleverPay</a></p>
-        <div style="border-top:1px solid var(--ln);padding-top:.7rem;margin-top:.7rem">
-          <div style="font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-bottom:.45rem">Try a demo — no login</div>
-          <div style="display:flex;gap:.3rem">
-            <button onclick="demoLogin('DEMO-DRV')" class="demo-tile" style="font-size:.6rem">
-              <div class="demo-tile-name" style="font-size:.66rem">Driver</div>
-              <div class="demo-tile-desc" style="font-size:.57rem">Job exchange</div>
-            </button>
-            <button onclick="demoLogin('DEMO-PRO')" class="demo-tile" style="font-size:.6rem">
-              <div class="demo-tile-name" style="font-size:.66rem">Freight Pro</div>
-              <div class="demo-tile-desc" style="font-size:.57rem">Post loads</div>
-            </button>
-            <button onclick="demoLogin('DEMO-BIZ')" class="demo-tile" style="font-size:.6rem">
-              <div class="demo-tile-name" style="font-size:.66rem">Business</div>
-              <div class="demo-tile-desc" style="font-size:.57rem">Send goods</div>
-            </button>
-          </div>
+        <div style="border-top:1px solid var(--ln);padding-top:.7rem;margin-top:.7rem;text-align:center">
+          <a href="https://demo.knect.usehaf.co.uk" target="_blank" class="btn btn-or btn-wide" style="display:inline-flex;align-items:center;justify-content:center;gap:.4rem;font-size:.72rem;text-decoration:none">Try a live demo →</a>
+          <p style="margin:.45rem 0 0;font-size:.58rem;color:var(--mu)">No login needed · Driver, Freight &amp; Business views</p>
         </div>
       </div>
       <div class="side-card" id="side-talk">
@@ -951,25 +938,9 @@ textarea.fi2{resize:vertical;min-height:70px}
     <div class="of"><label class="ol">PIN or password</label><input class="oi" id="l-pass" placeholder="4–6 digit PIN or password" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div class="oe" id="l-err"></div>
     <button class="btn btn-or btn-wide" onclick="doLogin()">Sign in →</button>
-    <div style="margin-top:1.1rem;border-top:1px solid var(--ln);padding-top:.9rem">
-      <div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-bottom:.55rem;text-align:center">No login needed — try a live demo</div>
-      <div style="display:flex;gap:.4rem">
-        <button onclick="demoLogin('DEMO-DRV')" class="demo-tile">
-          <svg class="demo-tile-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-          <div class="demo-tile-name">Driver</div>
-          <div class="demo-tile-desc">Job exchange &amp; open loads</div>
-        </button>
-        <button onclick="demoLogin('DEMO-PRO')" class="demo-tile">
-          <svg class="demo-tile-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-          <div class="demo-tile-name">Freight Pro</div>
-          <div class="demo-tile-desc">Post loads, find drivers</div>
-        </button>
-        <button onclick="demoLogin('DEMO-BIZ')" class="demo-tile">
-          <svg class="demo-tile-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          <div class="demo-tile-name">Business</div>
-          <div class="demo-tile-desc">Send goods, manage fleet</div>
-        </button>
-      </div>
+    <div style="margin-top:1.1rem;border-top:1px solid var(--ln);padding-top:.9rem;text-align:center">
+      <a href="https://demo.knect.usehaf.co.uk" target="_blank" class="btn btn-or btn-wide" style="display:inline-flex;align-items:center;justify-content:center;gap:.4rem;text-decoration:none">Try a live demo →</a>
+      <p style="margin:.5rem 0 0;font-size:.62rem;color:var(--mu)">No login needed · Driver, Freight &amp; Business views</p>
     </div>
   </div>
 </div>
