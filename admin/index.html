@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="day">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>HAF KNECT — Network Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--dp:Montserrat,sans-serif;--bd:Inter,system-ui,sans-serif;--or:#f18e00;--r:14px}
+[data-theme="day"]{--bg:#f4f1eb;--p:#ffffff;--p2:#faf8f4;--tx:#1c2226;--mu:#6b7378;--ln:#e5e0d6;--lns:#ece7dd;--rd:#c0392b;--gn:#3f7d51;--sb:#2f373e}
+[data-theme="night"]{--bg:#14181b;--p:#1c2226;--p2:#232a2f;--tx:#f0ede7;--mu:#8b949a;--ln:#2c343a;--lns:#283036;--rd:#e06b5c;--gn:#5db87a;--sb:#0e1113}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);font-family:var(--bd);font-size:15px;min-height:100vh}
+a{color:var(--or)}
+.wrap{max-width:1180px;margin:0 auto;padding:1.2rem}
+/* ── header ── */
+.top{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.4rem 0 1.1rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.55rem}
+.brand .k{width:34px;height:34px;background:var(--or);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:1.05rem;color:#0e1113}
+.brand .t{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em}
+.brand .t span{color:var(--or)}
+.brand .sub{font-size:.72rem;color:var(--mu);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-top:.1rem}
+.top-r{display:flex;align-items:center;gap:.5rem}
+.chip{font-size:.74rem;color:var(--mu);background:var(--p);border:1px solid var(--ln);border-radius:999px;padding:.32rem .7rem;font-weight:600}
+.ibtn{width:34px;height:34px;border-radius:9px;background:var(--p);border:1px solid var(--ln);color:var(--tx);cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center}
+.obtn{font-size:.78rem;font-weight:700;background:var(--p);border:1px solid var(--ln);color:var(--tx);border-radius:9px;padding:.45rem .8rem;cursor:pointer}
+/* ── cards / grid ── */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;margin-bottom:.9rem}
+.kpi{background:var(--p);border:1px solid var(--lns);border-radius:var(--r);padding:.95rem 1rem}
+.kpi .n{font-family:var(--dp);font-weight:900;font-size:1.75rem;letter-spacing:-.04em;line-height:1.1}
+.kpi .l{font-size:.7rem;color:var(--mu);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-top:.25rem}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:.9rem;align-items:start}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--p);border:1px solid var(--lns);border-radius:var(--r);padding:1.05rem 1.1rem;margin-bottom:.9rem}
+.card h2{font-family:var(--dp);font-weight:900;font-size:.95rem;letter-spacing:-.02em;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.card h2 .hint{font-size:.7rem;color:var(--mu);font-weight:600}
+/* ── tables ── */
+.tblwrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:560px}
+th{font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);font-weight:700;text-align:left;padding:.4rem .55rem;border-bottom:1px solid var(--ln);white-space:nowrap}
+td{padding:.55rem;border-bottom:1px solid var(--lns);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-size:.66rem;font-weight:700;border-radius:999px;padding:.18rem .55rem;letter-spacing:.03em}
+.pill.pro{background:rgba(241,142,0,.14);color:var(--or)}
+.pill.plus{background:rgba(63,125,81,.14);color:var(--gn)}
+.pill.basic{background:var(--p2);color:var(--mu);border:1px solid var(--ln)}
+.pill.pending{background:rgba(241,142,0,.14);color:var(--or)}
+.pill.accepted,.pill.confirmed{background:rgba(63,125,81,.14);color:var(--gn)}
+.pill.declined,.pill.cancelled{background:rgba(192,57,43,.12);color:var(--rd)}
+.pill.test{background:var(--p2);color:var(--mu);border:1px dashed var(--ln)}
+.bar{height:8px;border-radius:999px;background:var(--p2);border:1px solid var(--lns);overflow:hidden;margin:.3rem 0 .55rem}
+.bar i{display:block;height:100%;background:var(--or)}
+.mrow{display:flex;justify-content:space-between;font-size:.78rem;margin-top:.45rem}
+.mrow b{font-weight:700}
+.empty{font-size:.8rem;color:var(--mu);padding:.4rem 0}
+.note{font-size:.74rem;color:var(--mu);line-height:1.55}
+.err{display:none;font-size:.78rem;color:var(--rd);margin:.4rem 0}
+/* ── login gate ── */
+#gate{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;align-items:center;justify-content:center;padding:1rem}
+.gbox{background:var(--p);border:1px solid var(--lns);border-radius:var(--r);padding:1.9rem;width:100%;max-width:380px}
+.gbox h1{font-family:var(--dp);font-weight:900;font-size:1.15rem;letter-spacing:-.03em;margin:.9rem 0 .2rem}
+.gbox p{font-size:.8rem;color:var(--mu);margin-bottom:1.1rem;line-height:1.55}
+.fl{display:block;font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mu);margin:.7rem 0 .3rem}
+.fi{width:100%;background:var(--p2);border:1px solid var(--ln);border-radius:9px;padding:.6rem .7rem;font-size:.9rem;color:var(--tx);font-family:var(--bd)}
+.fi:focus{outline:none;border-color:var(--or)}
+.go{width:100%;margin-top:1rem;background:var(--or);color:#0e1113;border:none;border-radius:9px;padding:.7rem;font-weight:800;font-size:.9rem;cursor:pointer;font-family:var(--bd)}
+.go:disabled{opacity:.6;cursor:default}
+#app{display:none}
+</style>
+</head>
+<body>
+
+<!-- owner login gate -->
+<div id="gate">
+  <div class="gbox">
+    <div class="brand"><div class="k">K</div><div><div class="t">HAF <span>KNECT</span></div><div class="sub">Network overview</div></div></div>
+    <h1>Owner sign in</h1>
+    <p>This area shows the full network. It opens only for the HAF owner account.</p>
+    <label class="fl" for="g-user">HAF username</label>
+    <input class="fi" id="g-user" placeholder="e.g. BF638793" autocomplete="username" autocapitalize="characters" maxlength="10" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')gateLogin()">
+    <label class="fl" for="g-pass">PIN or password</label>
+    <input class="fi" id="g-pass" type="password" placeholder="4–6 digit PIN or password" autocomplete="current-password" onkeydown="if(event.key==='Enter')gateLogin()">
+    <div class="err" id="g-err"></div>
+    <button class="go" id="g-btn" onclick="gateLogin()">Open overview →</button>
+  </div>
+</div>
+
+<!-- overview -->
+<div id="app">
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><div class="k">K</div><div><div class="t">HAF <span>KNECT</span></div><div class="sub">Network overview</div></div></div>
+    <div class="top-r">
+      <span class="chip" id="stamp">—</span>
+      <button class="obtn" onclick="loadAll()">Refresh</button>
+      <button class="ibtn" onclick="toggleTheme()" title="Day / night" id="themeBtn">N</button>
+      <button class="obtn" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n" id="k-drivers">—</div><div class="l">Drivers on network</div></div>
+    <div class="kpi"><div class="n" id="k-bookings">—</div><div class="l">Bookings all time</div></div>
+    <div class="kpi"><div class="n" id="k-pending">—</div><div class="l">Awaiting driver</div></div>
+    <div class="kpi"><div class="n" id="k-confirmed">—</div><div class="l">Jobs confirmed this month</div></div>
+    <div class="kpi"><div class="n" id="k-cancelled">—</div><div class="l">Cancellations this month</div></div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2>Drivers <span class="hint" id="d-hint"></span></h2>
+        <div class="tblwrap"><table id="d-tbl">
+          <thead><tr><th>Driver</th><th>Username</th><th>City</th><th>Plan</th><th>Confirmed</th><th>Cancelled</th><th>Conv.</th><th>Page views</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+      <div class="card">
+        <h2>Bookings <span class="hint" id="b-hint"></span></h2>
+        <div class="tblwrap"><table id="b-tbl">
+          <thead><tr><th>Ref</th><th>Customer</th><th>Route</th><th>Date</th><th>Driver</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h2>Plan mix</h2>
+        <div id="planmix"></div>
+      </div>
+      <div class="card">
+        <h2>Feedback board</h2>
+        <div id="ideas"></div>
+        <p class="note" style="margin-top:.5rem">Ideas and votes from the demo's Feedback &amp; Ideas board.</p>
+      </div>
+      <div class="card">
+        <h2>CleverPay pipeline</h2>
+        <p class="note">Applications currently live in the CleverPay portal and aren't centralised yet — this card connects automatically when the shared CleverPay backend (already in the build queue) lands.</p>
+        <p class="note" style="margin-top:.5rem"><a href="https://clever.usehaf.co.uk/team.html" target="_blank">Open the CleverPay team portal →</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const OWNER='BF638793';
+const PLNA='https://ggkpqqrtxtlafdkxcaqg.supabase.co';
+const PKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdna3BxcXJ0eHRsYWZka3hjYXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTM2NjAsImV4cCI6MjA5Nzc2OTY2MH0.hB70KOYZu4dshwhsrxF_dFyBn0n72gStWTwxYGsLdgY';
+const HUB='https://jsdwvogsxlnczzbefwgp.supabase.co';
+const HKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzZHd2b2dzeGxuY3p6YmVmd2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODgyMzYsImV4cCI6MjA5Njk2NDIzNn0.pxqM-Oh4f_3PlqCbKIKvcKZnNRUZ1ASKqqdNg78M_4M';
+const $=id=>document.getElementById(id);
+async function sha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
+function pf(path,key){return fetch(path,{headers:{'apikey':key,'Authorization':'Bearer '+key}}).then(r=>r.json())}
+
+/* ── theme ── */
+const savedTheme=localStorage.getItem('knect-admin-theme')||'day';
+document.documentElement.dataset.theme=savedTheme;
+function toggleTheme(){const n=document.documentElement.dataset.theme==='day'?'night':'day';document.documentElement.dataset.theme=n;localStorage.setItem('knect-admin-theme',n)}
+
+/* ── gate ── */
+async function gateLogin(){
+  const u=$('g-user').value.trim().toUpperCase(), s=$('g-pass').value, err=$('g-err'), btn=$('g-btn');
+  err.style.display='none';
+  if(!u||!s){err.textContent='Enter your HAF username and your PIN or password.';err.style.display='block';return}
+  if(u!==OWNER){err.textContent='This area is for the HAF owner account only.';err.style.display='block';return}
+  btn.disabled=true;btn.textContent='Checking…';
+  try{
+    const isPin=/^\d{4,6}$/.test(s);
+    const hash=await sha(isPin?u+':'+s:s);
+    const col=isPin?'pin_hash':'password_hash';
+    const d=await pf(PLNA+'/rest/v1/plna_drivers?haf_username=eq.'+u+'&'+col+'=eq.'+hash+'&select=haf_username,full_name',PKEY);
+    if(!Array.isArray(d)||!d.length){err.textContent=isPin?'That PIN didn\'t match.':'Incorrect password.';err.style.display='block';btn.disabled=false;btn.textContent='Open overview →';return}
+    sessionStorage.setItem('knect-admin','1');
+    enter();
+  }catch(e){err.textContent='Connection problem — please try again.';err.style.display='block';btn.disabled=false;btn.textContent='Open overview →'}
+}
+function enter(){$('gate').style.display='none';$('app').style.display='block';loadAll()}
+function signOut(){sessionStorage.removeItem('knect-admin');location.reload()}
+if(sessionStorage.getItem('knect-admin')==='1') enter();
+
+/* ── data ── */
+function esc(x){const d=document.createElement('div');d.textContent=x==null?'':String(x);return d.innerHTML}
+function planPill(p){const c=p==='pro'?'pro':(p==='plus'?'plus':'basic');const l=p==='basic'?'Lite':p.charAt(0).toUpperCase()+p.slice(1);return '<span class="pill '+c+'">'+esc(l)+'</span>'}
+async function loadAll(){
+  $('stamp').textContent='Updating…';
+  try{
+    const [drivers,bookings]=await Promise.all([
+      pf(PLNA+'/rest/v1/plna_drivers?select=haf_username,full_name,plan,city,confirmed_this_month,cancelled_this_month,conv_rate,page_views&order=confirmed_this_month.desc',PKEY),
+      pf(PLNA+'/rest/v1/plna_bookings?select=ref,customer_first,customer_last,from_postcode,to_postcode,preferred_date,driver_username,status,created_at&order=created_at.desc&limit=25',PKEY)
+    ]);
+    let ideas=[];
+    try{ideas=await pf(HUB+'/rest/v1/knect_feedback_board?select=*&limit=6',HKEY);if(!Array.isArray(ideas))ideas=[]}catch(e){ideas=[]}
+
+    /* KPIs */
+    $('k-drivers').textContent=drivers.length;
+    $('k-bookings').textContent=bookings.length>=25?'25+':bookings.length;
+    $('k-pending').textContent=bookings.filter(b=>b.status==='pending').length;
+    $('k-confirmed').textContent=drivers.reduce((a,d)=>a+(d.confirmed_this_month||0),0);
+    $('k-cancelled').textContent=drivers.reduce((a,d)=>a+(d.cancelled_this_month||0),0);
+
+    /* drivers table */
+    $('d-hint').textContent=drivers.length+' on the network';
+    document.querySelector('#d-tbl tbody').innerHTML=drivers.map(d=>{
+      const test=/^TEST/i.test(d.haf_username);
+      return '<tr><td>'+esc(d.full_name)+(test?' <span class="pill test">test</span>':'')+'</td><td>'+esc(d.haf_username)+'</td><td>'+esc(d.city||'—')+'</td><td>'+planPill(d.plan||'basic')+'</td><td>'+esc(d.confirmed_this_month||0)+'</td><td>'+esc(d.cancelled_this_month||0)+'</td><td>'+esc((d.conv_rate||0)+'%')+'</td><td>'+esc(d.page_views||0)+'</td></tr>';
+    }).join('')||'<tr><td colspan="8" class="empty">No drivers yet.</td></tr>';
+
+    /* bookings table */
+    $('b-hint').textContent='latest '+bookings.length;
+    document.querySelector('#b-tbl tbody').innerHTML=bookings.map(b=>
+      '<tr><td>'+esc(b.ref)+'</td><td>'+esc((b.customer_first||'')+' '+(b.customer_last||''))+'</td><td>'+esc(b.from_postcode+' → '+b.to_postcode)+'</td><td>'+esc(b.preferred_date||'—')+'</td><td>'+esc(b.driver_username)+'</td><td><span class="pill '+esc(b.status)+'">'+esc(b.status)+'</span></td></tr>'
+    ).join('')||'<tr><td colspan="6" class="empty">No bookings yet.</td></tr>';
+
+    /* plan mix */
+    const mix={pro:0,plus:0,basic:0};drivers.forEach(d=>{mix[d.plan]===undefined?mix.basic++:mix[d.plan]++});
+    const tot=Math.max(drivers.length,1);
+    $('planmix').innerHTML=[['Pro','pro'],['Plus','plus'],['Lite','basic']].map(([l,k])=>
+      '<div class="mrow"><span>'+l+'</span><b>'+mix[k]+'</b></div><div class="bar"><i style="width:'+Math.round(mix[k]/tot*100)+'%"></i></div>'
+    ).join('');
+
+    /* ideas */
+    $('ideas').innerHTML=ideas.length
+      ? ideas.map(i=>'<div class="mrow"><span>'+esc(i.title||i.idea||'Untitled')+'</span><b>'+esc(i.votes??i.vote_count??0)+'</b></div>').join('')
+      : '<div class="empty">No ideas posted yet — the board is live and waiting.</div>';
+
+    $('stamp').textContent='Updated '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){$('stamp').textContent='Update failed — tap Refresh'}
+}
+setInterval(()=>{if(sessionStorage.getItem('knect-admin')==='1')loadAll()},60000);
+</script>
+</body>
+</html>
