@@ -1,4 +1,27 @@
+h:0;height:0}
+.toggle-sl{position:absolute;inset:0;background:var(--p3);border-radius:var(--pill);transition:background .2s}
+.toggle-sl::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s}
+.toggle input:checked + .toggle-sl{background:var(--gn)}
+.toggle input:checked + .toggle-sl::before{transform:translateX(20px)}
 
+/* LOAD CARD */
+.ldc{background:var(--p);border:1px solid var(--ln);border-radius:var(--rs);padding:1rem;margin-bottom:.75rem;box-shadow:var(--sd);transition:border-color .14s}
+.ldc:hover{border-color:var(--or)}
+.ldc-h{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.55rem}
+.ldc-route{font-weight:700;font-size:.88rem}
+.ldc-meta{display:flex;gap:1rem;flex-wrap:wrap}
+.ldc-mi{font-size:.71rem;color:var(--mu)}.ldc-mi strong{color:var(--tx);font-weight:600}
+
+/* CAP BOARD */
+.cap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.75rem;margin-bottom:1.1rem}
+.cap-card{background:var(--p);border:1px solid var(--ln);border-radius:var(--rs);padding:.9rem;text-align:center;box-shadow:var(--sd)}
+.cap-area{font-size:.7rem;font-weight:700;color:var(--mu);letter-spacing:.04em;margin-bottom:.4rem}
+.cap-avail{font-family:var(--dp);font-weight:900;font-size:1.25rem;letter-spacing:-.04em}
+.cap-avail.hi{color:var(--gn)}.cap-avail.med{color:var(--am)}.cap-avail.lo{color:var(--rd)}
+.cap-sub{font-size:.66rem;color:var(--mu);margin-top:.12rem}
+
+/* REBATE */
+.reb-bar-wrap{background:var(--p2);border-radius:var(--pill);height:7px;margin:.5rem 0;overflow:hidden}
 .reb-bar-fill{height:100%;background:var(--or);border-radius:var(--pill);transition:width .4s}
 
 /* PLAN CARDS */
@@ -172,33 +195,4 @@
 
   <div class="land-body">
 
-    <!-- LEFT: Main -->
-    <div class="land-main">
-
-      <!-- ALWAYS-ON PRICE CALCULATOR -->
-      <div class="calc-box">
-        <div class="pc-row">
-          <div class="fi">
-            <span class="fi-lbl">From postcode</span>
-            <input class="fi-inp" id="pc-from" placeholder="e.g. S9 1AA" maxlength="8" autocomplete="off" oninput="onPcInput()">
-          </div>
-          <div class="fi">
-            <span class="fi-lbl">To postcode</span>
-            <input class="fi-inp" id="pc-to" placeholder="e.g. M1 1AA" maxlength="8" autocomplete="off" oninput="onPcInput()">
-          </div>
-        </div>
-        <div class="van-lbl">Van size</div>
-        <div class="van-pills" id="van-pills">
-          <button class="vp" onclick="selVan(this,'small')">Small box<span class="vp-sub">up to 400 kg</span></button>
-          <button class="vp" onclick="selVan(this,'swb')">Half van<span class="vp-sub">up to 800 kg</span></button>
-          <button class="vp sel" onclick="selVan(this,'lwb')">Full van<span class="vp-sub">up to 1,200 kg</span></button>
-          <button class="vp" onclick="selVan(this,'luton')">XL Van or Special<span class="vp-sub">Luton + tail-lift</span></button>
-        </div>
-        <!-- LIVE PRICE DISPLAY -->
-        <div class="lp-box hint" id="lp-box">
-          <div id="lp-hint-txt" class="lp-hint-txt">Enter both postcodes to see your guide price</div>
-          <div id="lp-priced" class="lp-priced" style="display:none">
-            <div class="lp-range-row">
-              <span class="lp-range" id="lp-range"></span>
-              <span class="lp-vat">+ VAT</span>
-    
+  

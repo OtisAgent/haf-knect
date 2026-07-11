@@ -1,0 +1,66 @@
+currentAcc)return;sel._set=true;const map={plna:'driver',business:'business',freight:'business',knect:'customer'};sel.value=map[currentAcc.tierGroup]||'customer'}
+async function fbLoad(force){
+  if(fbLoaded&&!force)return;
+  try{
+    const r=await fetch(FB_URL+'/knect_feedback_board?select=*&order=votes.desc,created_at.desc&limit=200',{headers:FB_H});
+    if(!r.ok)throw 0;
+    fbItems=await r.json();fbLoaded=true;fbRender();
+  }catch(e){document.getElementById('fb-list').innerHTML='<div class="fb-empty">Could not load the board — check your connection and try again.</div>'}
+}
+function fbRender(){
+  const voted=fbMyVotes();
+  const list=fbItems.filter(i=>fbCat==='all'||i.category===fbCat);
+  const el=document.getElementById('fb-list');
+  if(!list.length){el.innerHTML='<div class="fb-empty">Nothing here yet — be the first to post.</div>';return}
+  el.innerHTML=list.map(i=>{
+    const st=FB_STATUS[i.status]||FB_STATUS.under_review,ct=FB_CAT[i.category]||FB_CAT.idea;
+    const v=voted.has(i.id);
+    const when=new Date(i.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    return `<div class="fb-item">
+      <button class="fb-vote${v?' voted':''}" onclick="fbVote('${i.id}',this)" title="${v?'You voted for this':'Vote for this'}">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+        <span>${i.votes}</span>
+      </button>
+      <div class="fb-body">
+        <div class="fb-title">${fbEsc(i.title)}</div>
+        ${i.details?`<div class="fb-details">${fbEsc(i.details)}</div>`:''}
+        <div class="fb-meta"><span class="chip ${ct[1]}">${ct[0]}</span><span class="chip ${st[1]}">${st[0]}</span><span class="fb-by">${fbEsc(i.author_name||'Anonymous')} · ${FB_ROLE[i.author_role]||'User'} · ${when}</span></div>
+      </div>
+    </div>`}).join('');
+}
+function fbFilter(c,btn){fbCat=c;document.querySelectorAll('.fb-fbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');fbRender()}
+async function fbVote(id,btn){
+  const voted=fbMyVotes();
+  if(voted.has(id)){fbNote("You've already voted for this one.");return}
+  btn.disabled=true;
+  try{
+    const r=await fetch(FB_URL+'/knect_feedback_votes',{method:'POST',headers:FB_H,body:JSON.stringify({idea_id:id,voter_key:fbVoter()})});
+    if(!r.ok&&r.status!==409)throw 0;
+    voted.add(id);localStorage.setItem('haf_fb_voted',JSON.stringify([...voted]));
+    const it=fbItems.find(x=>x.id===id);if(it&&r.ok)it.votes++;
+    fbItems.sort((a,b)=>b.votes-a.votes||new Date(b.created_at)-new Date(a.created_at));
+    fbRender();
+  }catch(e){fbNote("Vote didn't go through — try again.");btn.disabled=false}
+}
+function fbNote(m,good){const el=document.getElementById('fb-msg');el.textContent=m;el.style.display='block';el.style.color=good?'var(--gn)':'var(--rd)';clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',3600)}
+async function fbSubmit(){
+  const title=document.getElementById('fb-title').value.trim();
+  if(title.length<3){fbNote('Give it a short summary first (3+ characters).');return}
+  const btn=document.getElementById('fb-submit');btn.disabled=true;btn.textContent='Posting…';
+  const body={title,details:document.getElementById('fb-details').value.trim()||null,category:document.getElementById('fb-cat').value,author_role:document.getElementById('fb-role').value,author_name:document.getElementById('fb-name').value.trim()||'Anonymous'};
+  try{
+    const r=await fetch(FB_URL+'/knect_feedback_ideas',{method:'POST',headers:FB_H,body:JSON.stringify(body)});
+    if(!r.ok)throw 0;
+    document.getElementById('fb-title').value='';document.getElementById('fb-details').value='';
+    fbNote("Posted — thank you. It's on the board.",true);
+    await fbLoad(true);
+  }catch(e){fbNote("Couldn't post right now — try again in a minute.")}
+  btn.disabled=false;btn.textContent='Post to the board';
+}
+
+// Boot in day mode
+document.documentElement.removeAttribute('data-theme');
+document.getElementById('landing').style.display='flex';
+</script>
+</body>
+</html>

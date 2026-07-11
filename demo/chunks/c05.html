@@ -1,0 +1,125 @@
+menu-btn" onclick="toggleSb()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <a class="tlogo" href="#">
+        <div class="tlogo-m">K</div>
+        <div class="tlogo-t">HAF <span>KNECT</span></div>
+      </a>
+    </div>
+    <div class="tb-r">
+      <span class="tb-user" id="tb-user">—</span>
+      <span class="role-chip chip" id="tb-role">—</span>
+      <span class="plan-badge" id="tb-plan" style="display:none">—</span>
+      <button class="ib" title="Toggle theme" onclick="toggleTheme()">
+        <svg id="app-theme-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+      </button>
+      <div class="av" id="tb-av">??</div>
+    </div>
+  </div>
+
+  <div class="app-body">
+    <nav class="sidebar" id="sidebar">
+      <div id="nav-list"></div>
+      <div class="sb-bot">
+        <hr class="sdiv">
+        <button class="back-btn" onclick="goLanding()">
+          <svg class="ni-ic" viewBox="0 0 24 24"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+          Back to send page
+        </button>
+        <button class="so-btn" onclick="signOut()">
+          <svg class="ni-ic" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign out
+        </button>
+      </div>
+    </nav>
+
+    <main class="main" id="main">
+
+      <!-- DRIVER: My Status -->
+      <div class="tp" id="pane-d-home">
+        <h1 class="pt">Home</h1><p class="ps">Your day at a glance — the PLNA driver dashboard.</p>
+        <div class="avail-card">
+          <div class="avail-top"><div class="avail-lbl" id="avail-lbl">Available — Taking jobs</div><label class="toggle"><input type="checkbox" id="avail-tog" checked onchange="toggleAvail()"><span class="toggle-sl"></span></label></div>
+          <div style="font-size:.74rem;color:var(--mu)">Visible on the KNECT exchange · 3 jobs near you</div>
+        </div>
+        <div class="kg"><div class="kc"><div class="kc-l">Today's pay</div><div class="kc-v or">£187</div></div><div class="kc"><div class="kc-l">Jobs done</div><div class="kc-v">2</div></div><div class="kc"><div class="kc-l">Miles</div><div class="kc-v">84</div></div><div class="kc"><div class="kc-l">Rating</div><div class="kc-v gn">4.9</div></div></div>
+        <div class="card" style="max-width:560px"><div class="ct">Quick job quote</div>
+          <div class="fr"><div class="fg"><label class="fl">From postcode</label><input class="fi2" value="M1 1AA"></div><div class="fg"><label class="fl">To postcode</label><input class="fi2" value="LS1 4DY"></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Van size</label><select class="fi2"><option>Small van</option><option selected>Full van</option><option>Luton / pallet</option></select></div><div class="fg"><label class="fl" style="visibility:hidden">Go</label><button class="btn btn-or btn-sm btn-wide" onclick="plnaQuote(this)">Get guide price</button></div></div>
+          <div id="qq-out" style="display:none;margin-top:.5rem;font-size:.92rem;font-weight:800;color:var(--or)">Guide price: £96 · HAF pricing engine (demo)</div>
+        </div>
+        <div class="card"><div class="ct">KNECT exchange — live jobs near you</div>
+          <div class="jl">
+            <div id="kj-net-home"></div>
+            <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2853 · 2.1 mi away · 14:00</div><div class="jroute">Manchester M1 → Salford M50</div><div class="jdet">Small van · 180 kg · 12 miles</div></div><div class="jacts"><div class="jamt">£38</div><button class="btn btn-or btn-xs" onclick="kjAccept('HAF-2853','Manchester M1 → Salford M50','Small van · 180 kg · 12 miles','£38')">Accept</button></div></div>
+            <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2855 · 4.7 mi away · 15:30</div><div class="jroute">Manchester M4 → Stockport SK1</div><div class="jdet">Medium van · 340 kg · 18 miles</div></div><div class="jacts"><div class="jamt">£54</div><button class="btn btn-or btn-xs" onclick="kjAccept('HAF-2855','Manchester M4 → Stockport SK1','Medium van · 340 kg · 18 miles','£54')">Accept</button></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRIVER: Today -->
+      <div class="tp" id="pane-d-today">
+        <h1 class="pt">Today</h1><p class="ps">Your active job and what's next.</p>
+        <div class="card" style="max-width:560px"><div class="ct">Active job</div><div id="kj-active">
+          <div class="cr"><span class="ck">Ref</span><span class="cv">HAF-2848</span></div>
+          <div class="cr"><span class="ck">Route</span><span class="cv">Manchester M1 → Leeds LS1</span></div>
+          <div class="cr"><span class="ck">Load</span><span class="cv">420 kg · LWB · collect 14:30</span></div>
+          <div class="cr"><span class="ck">Status</span><span class="cv"><span class="chip cb">In transit</span></span></div>
+          <div style="margin-top:.7rem;display:flex;gap:.45rem"><button class="btn btn-or btn-xs" onclick="kjSeed2848()">Mark delivered</button><button class="btn btn-gh btn-xs">Add note</button></div></div>
+        </div>
+        <div class="card"><div class="ct">Available jobs nearby</div>
+          <div class="jl">
+            <div id="kj-net-today"></div>
+            <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2853 · 2.1 mi away · 14:00</div><div class="jroute">Manchester M1 → Salford M50</div><div class="jdet">Small van · 180 kg · 12 miles</div></div><div class="jacts"><div class="jamt">£38</div><button class="btn btn-or btn-xs" onclick="kjAccept('HAF-2853','Manchester M1 → Salford M50','Small van · 180 kg · 12 miles','£38')">Accept</button></div></div>
+            <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2855 · 4.7 mi away · 15:30</div><div class="jroute">Manchester M4 → Stockport SK1</div><div class="jdet">Medium van · 340 kg · 18 miles</div></div><div class="jacts"><div class="jamt">£54</div><button class="btn btn-or btn-xs" onclick="kjAccept('HAF-2855','Manchester M4 → Stockport SK1','Medium van · 340 kg · 18 miles','£54')">Accept</button></div></div>
+            <div class="jc"><div class="jdot" style="background:var(--bl)"></div><div class="jm"><div class="jref">HAF-2856 · Tomorrow 09:00</div><div class="jroute">Trafford WA14 → Manchester M60</div><div class="jdet">LWB · 720 kg · 22 miles</div></div><div class="jacts"><div class="jamt">£87</div><button class="btn btn-gh btn-xs">View</button></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRIVER: Calendar -->
+      <div class="tp" id="pane-d-cal">
+        <h1 class="pt">Calendar</h1><p class="ps">Tap a day to switch between available and off. Customers see this on your booking page.</p>
+        <div class="card" style="max-width:560px"><div class="ct">This week</div>
+          <div style="display:flex;gap:.45rem;flex-wrap:wrap">
+            <button class="btn btn-or btn-xs" onclick="plnaDay(this)">Mon</button><button class="btn btn-or btn-xs" onclick="plnaDay(this)">Tue</button><button class="btn btn-or btn-xs" onclick="plnaDay(this)">Wed</button><button class="btn btn-or btn-xs" onclick="plnaDay(this)">Thu</button><button class="btn btn-or btn-xs" onclick="plnaDay(this)">Fri</button><button class="btn btn-gh btn-xs" onclick="plnaDay(this)">Sat</button><button class="btn btn-gh btn-xs" onclick="plnaDay(this)">Sun</button>
+          </div>
+          <div style="font-size:.7rem;color:var(--mu);margin-top:.65rem">Orange = available · grey = off. Past days lock automatically on your live booking page.</div>
+        </div>
+        <div class="card" style="max-width:560px"><div class="ct">Upcoming bookings</div>
+          <div class="cr"><span class="ck">Fri · Stockport SK1 → Manchester M4</span><span class="cv"><span class="chip cg">Confirmed</span></span></div>
+          <div class="cr"><span class="ck">Mon · Leeds LS1 → York YO1</span><span class="cv"><span class="chip ca">Pending</span></span></div>
+        </div>
+      </div>
+
+      <!-- DRIVER: My Booking Page (content per tier — rendered by renderPlnaBook) -->
+      <div class="tp" id="pane-d-book">
+        <h1 class="pt">My Booking Page</h1><p class="ps">Your public link — customers book you directly, no app needed.</p>
+        <div id="plna-book-body"></div>
+        <div class="card"><div class="ct">Booking requests</div>
+          <div class="jl">
+            <div class="jc"><div class="jdot" style="background:var(--or)"></div><div class="jm"><div class="jref">REQUEST · Today 16:40</div><div class="jroute">Stockport SK1 → Manchester M4</div><div class="jdet">Same-day delivery · Fri · from your booking page</div></div><div class="jacts"><div class="jamt">£54</div><span id="plna-req1"><button class="btn btn-or btn-xs" onclick="plnaReq('plna-req1',1)">Accept</button><button class="btn btn-gh btn-xs" onclick="plnaReq('plna-req1',0)">Decline</button></span></div></div>
+            <div class="jc"><div class="jdot" style="background:var(--or)"></div><div class="jm"><div class="jref">REQUEST · Yesterday 19:12</div><div class="jroute">Leeds LS1 → York YO1</div><div class="jdet">Multi-stop route · Mon · from your booking page</div></div><div class="jacts"><div class="jamt">£110</div><span id="plna-req2"><button class="btn btn-or btn-xs" onclick="plnaReq('plna-req2',1)">Accept</button><button class="btn btn-gh btn-xs" onclick="plnaReq('plna-req2',0)">Decline</button></span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRIVER: Booking System (customer view — rendered per tier) -->
+      <div class="tp" id="pane-d-cust">
+        <h1 class="pt">Booking System</h1><p class="ps">This is what your customers see when they open your booking link — try it.</p>
+        <div id="plna-cust-body"></div>
+      </div>
+
+      <!-- DRIVER: Budget & Profit -->
+      <div class="tp" id="pane-d-budget">
+        <h1 class="pt">Budget &amp; Profit</h1><p class="ps">Earnings, running costs and what you actually keep.</p>
+        <div class="kg"><div class="kc"><div class="kc-l">This week</div><div class="kc-v or">£642</div><div class="kc-d pos">+18% vs last week</div></div><div class="kc"><div class="kc-l">Costs</div><div class="kc-v">£126</div></div><div class="kc"><div class="kc-l">Profit</div><div class="kc-v gn">£516</div></div><div class="kc"><div class="kc-l">Jobs</div><div class="kc-v">28</div></div></div>
+        <div class="card"><div class="ct">Recent jobs</div><table class="dt"><thead><tr><th>Ref</th><th>Route</th><th>Date</th><th>Pay</th></tr></thead><tbody><tr><td>HAF-2848</td><td>M1 → LS1</td><td>Today</td><td style="color:var(--or);font-weight:700">£87</td></tr><tr><td>HAF-2840</td><td>S1 → NG1</td><td>7 Jul</td><td style="color:var(--or);font-weight:700">£54</td></tr><tr><td>HAF-2831</td><td>B1 → CV1</td><td>5 Jul</td><td style="color:var(--or);font-weight:700">£112</td></tr><tr><td>HAF-2820</td><td>WA1 → M1</td><td>4 Jul</td><td style="color:var(--or);font-weight:700">£38</td></tr></tbody></table></div>
+        <div class="card" style="max-width:560px"><div class="ct">This week's costs</div><div class="cr"><span class="ck">Fuel</span><span class="cv">£86</span></div><div class="cr"><span class="ck">Insurance (weekly)</span><span class="cv">£28</span></div><div class="cr"><span class="ck">Van wash</span><span class="cv">£12</span></div><div class="cr"><span class="ck">Total</span><span class="cv" style="font-weight:800">£126</span></div></div>
+      </div>
+
+      <!-- DRIVER: Compliance -->
+      <div class="tp" id="pane-d-comp">
+        <h1 class="pt">Compliance</h1><p class="ps">Your CleverPay status and document checklist.</p>
+        <div class="sp" id="d-comp-sp"><div class="sp-dot"></div><div class="sp-tx"><h4 id="d-comp-title">—</h4><p id="d-comp-desc">—</p></div></div>
+        <div class="card"><div class="ct">Document checklist</div><div class="cr"><span class="ck">Driving licence</span><span class="cv" id="dc-lic">—</span></div><div class="cr"><span class="ck">MOT certificate</span><span class="cv" id="dc-mot">—</span></div><div class="cr"><span class="ck">Vehicle insurance</span><span class="cv" id="dc-ins">—</span></div><div class="cr"><span class="ck">Goods in transit</span><span class="cv" id="dc-git">—</span></div><div class="cr"><span class="ck">Right to work</span><span class="cv" id="dc-r

@@ -1,4 +1,33 @@
+  <!-- LEFT: Main -->
+    <div class="land-main">
+
+      <!-- ALWAYS-ON PRICE CALCULATOR -->
+      <div class="calc-box">
+        <div class="pc-row">
+          <div class="fi">
+            <span class="fi-lbl">From postcode</span>
+            <input class="fi-inp" id="pc-from" placeholder="e.g. S9 1AA" maxlength="8" autocomplete="off" oninput="onPcInput()">
+          </div>
+          <div class="fi">
+            <span class="fi-lbl">To postcode</span>
+            <input class="fi-inp" id="pc-to" placeholder="e.g. M1 1AA" maxlength="8" autocomplete="off" oninput="onPcInput()">
+          </div>
         </div>
+        <div class="van-lbl">Van size</div>
+        <div class="van-pills" id="van-pills">
+          <button class="vp" onclick="selVan(this,'small')">Small box<span class="vp-sub">up to 400 kg</span></button>
+          <button class="vp" onclick="selVan(this,'swb')">Half van<span class="vp-sub">up to 800 kg</span></button>
+          <button class="vp sel" onclick="selVan(this,'lwb')">Full van<span class="vp-sub">up to 1,200 kg</span></button>
+          <button class="vp" onclick="selVan(this,'luton')">XL Van or Special<span class="vp-sub">Luton + tail-lift</span></button>
+        </div>
+        <!-- LIVE PRICE DISPLAY -->
+        <div class="lp-box hint" id="lp-box">
+          <div id="lp-hint-txt" class="lp-hint-txt">Enter both postcodes to see your guide price</div>
+          <div id="lp-priced" class="lp-priced" style="display:none">
+            <div class="lp-range-row">
+              <span class="lp-range" id="lp-range"></span>
+              <span class="lp-vat">+ VAT</span>
+            </div>
             <div class="lp-info" id="lp-info"></div>
           </div>
         </div>
@@ -122,28 +151,11 @@
               <div style="text-align:center;padding:.6rem 0 .9rem">
                 <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto .6rem"><circle cx="22" cy="22" r="22" fill="var(--gn-d)"/><polyline points="13,23 20,30 31,15" stroke="var(--gn)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <div style="font-family:var(--dp);font-weight:900;font-size:1.55rem;letter-spacing:-.04em;color:var(--or);margin:.4rem 0 .35rem" id="fq-ref">HAF-XXXX</div>
-                <p style="font-size:.79rem;color:var(--mu);line-height:1.65">Your delivery is booked. HAF will assign a driver and confirm by text within 15 minutes. Save your reference above.</p>
+                <p style="font-size:.79rem;color:var(--mu);line-height:1.65">Your job is live on the KNECT network — matched drivers nearby can accept it now. You will get a text the moment a driver accepts. Track it any time with your reference above.</p>
               </div>
               <button class="btn btn-or btn-wide" onclick="closeInlineFlow()">Done</button>
             </div>
           </div>
 
           <!-- ── REPEAT ORDER STEPS ── -->
-          <div id="if-repeat" style="display:none">
-            <div class="fstep on" id="ro-1">
-              <div class="slbl">Enter your reference</div>
-              <div class="of" style="margin-bottom:.9rem"><label class="ol">Order reference</label><input class="oi" id="ro-ref" placeholder="e.g. HAF-2847 or KN-471293" autocomplete="off"></div>
-              <button class="btn btn-or btn-wide" onclick="roLookup()">Find order &#8594;</button>
-              <p style="font-size:.71rem;color:var(--su);margin-top:.65rem;line-height:1.55">Try: HAF-2847 or KN-471293</p>
-            </div>
-            <div class="fstep" id="ro-2">
-              <div class="slbl">Order found</div>
-              <div id="ro-found" style="background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:1rem;margin-bottom:.9rem;font-size:.8rem;line-height:1.7"></div>
-              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="roStep(1)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="roStep(3)">Rebook this &#8594;</button></div>
-            </div>
-            <div class="fstep" id="ro-3">
-              <div class="slbl">Confirm contact</div>
-              <p style="font-size:.77rem;color:var(--mu);margin-bottom:.85rem;line-height:1.6">Confirm your mobile number to receive delivery updates.</p>
-              <div class="of" style="margin-bottom:.85rem"><label class="ol">Mobile</label><input class="oi" id="ro-mobile" placeholder="07xxx xxxxxx" type="tel" autocomplete="tel"></div>
-              <button class="btn btn-or btn-wide" onclick="roBook()">Confirm rebook &#8594;</button>
-              <button class="btn btn-gh btn-wide" onclick="roSte
+          <d

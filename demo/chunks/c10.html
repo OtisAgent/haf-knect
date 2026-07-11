@@ -1,20 +1,175 @@
-idebar').classList.remove('open');
+ss Account',rc:'co',tierGroup:'business',initTier:'pro',
+    tabIds:['b-book','b-del','b-spend','b-saved','billing','support','feedback'],def:'b-book',cp:'green'},
+  'freight-pro': {n:'NorthFreight UK',  u:'NF992190',i:'NF',r:'Freight Forwarder',rc:'cb',tierGroup:'freight', initTier:'pro',
+    tabIds:['f-post','f-cap','f-lanes','f-loads','f-cover','f-account','billing','support','feedback'],def:'f-post',cp:'green'},
+  'plna-plus':   {n:'Marcus Reid',      u:'MR668793',i:'MR',r:'PLNA Driver',      rc:'cg',tierGroup:'plna',    initTier:'plus',
+    tabIds:['d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support','feedback'],def:'d-home',cp:'green'},
+  'knect-free':  {n:'Sam Patel',        u:'SP881291',i:'SP',r:'KNECT Member',      rc:'cb',tierGroup:'knect',   initTier:'free',
+    tabIds:['b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback'],def:'b-book',cp:'green'},
+  'knect-founder':{n:'Rachel Moore',    u:'RM449082',i:'RM',r:'KNECT Founder',     rc:'co',tierGroup:'knect',   initTier:'founder',
+    tabIds:['b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback'],def:'b-book',cp:'green'},
+};
+
+let currentAcc=null;
+
+function demoLogin(key){
+  const a=ACCS[key];if(!a)return;
+  currentAcc=a;
+  document.querySelectorAll('.dp').forEach(p=>p.classList.remove('on'));
+  const pills=document.querySelectorAll('.dp');
+  const map={customer:0,'biz-pro':1,'freight-pro':2,'plna-plus':3,'knect-free':4,'knect-founder':5};
+  if(map[key]!==undefined)pills[map[key]].classList.add('on');
+  document.getElementById('tb-user').textContent=a.u;
+  document.getElementById('tb-av').textContent=a.i;
+  const rc=document.getElementById('tb-role');
+  rc.className='role-chip chip '+a.rc;rc.textContent=a.r;
+  setComp(a.cp,a.u);
+  document.getElementById('landing').style.display='none';
+  document.getElementById('login-ov').classList.remove('open');
+  document.getElementById('app').classList.add('open');
+  const tierBar=document.getElementById('tier-bar');
+  const tierPills=document.getElementById('tier-pills');
+  if(a.tierGroup&&TIER_DEFS[a.tierGroup]){
+    const tiers=TIER_DEFS[a.tierGroup];
+    tierPills.innerHTML=tiers.map(t=>`<button class="tp-btn" id="tp-${t.key}" onclick="switchTier('${t.key}')">${t.label}</button>`).join('');
+    tierBar.classList.add('show');
+    switchTier(a.initTier);
+  } else {
+    tierBar.classList.remove('show');
+    const pb=document.getElementById('tb-plan');if(pb)pb.style.display='none';
+    const tabs=a.tabIds.map(id=>{const t=TAB_REG[id];return t?{...t,id,locked:false}:null}).filter(Boolean);
+    buildNav(tabs);
+    switchTab('pane-'+a.def);
+  }
 }
+
+function switchTier(tierKey){
+  if(!currentAcc||!currentAcc.tierGroup)return;
+  const tiers=TIER_DEFS[currentAcc.tierGroup];
+  const tier=tiers.find(t=>t.key===tierKey);if(!tier)return;
+  document.querySelectorAll('.tp-btn').forEach(b=>b.classList.remove('on'));
+  const tp=document.getElementById('tp-'+tierKey);if(tp)tp.classList.add('on');
+  const pb=document.getElementById('tb-plan');
+  if(pb){pb.className='plan-badge '+tier.cls;pb.textContent=tier.plan;pb.style.display='';}
+  const unlockSet=new Set(tier.unlock);
+  const tabs=currentAcc.tabIds.map(id=>{const t=TAB_REG[id];return t?{...t,id,locked:!unlockSet.has(id)}:null}).filter(Boolean);
+  buildNav(tabs);
+  const first=tabs.find(t=>!t.locked);
+  if(first)switchTab('pane-'+first.id);
+  window._nextTier=tier.next;
+  if(currentAcc.tierGroup==='plna'){renderPlnaBook(tierKey);renderPlnaCust(tierKey);}
+}
+
+function showUpgrade(feat){
+  const f=document.getElementById('upg-feat');if(f)f.textContent=feat;
+  const n=document.getElementById('upg-next');if(n)n.textContent=window._nextTier||'the next plan';
+  switchTab('pane-upgrade');
+}
+
+function setComp(s,u){
+  const sp=document.getElementById('d-comp-sp');if(!sp)return;
+  sp.className='sp '+s;
+  const titles={green:'Green — Approved to work',amber:'Amber — Review in progress'};
+  const descs={green:'All documents verified. You are cleared for HAF jobs.',amber:'One or more documents are under review. You cannot accept jobs until cleared.'};
+  document.getElementById('d-comp-title').textContent=titles[s]||'—';
+  document.getElementById('d-comp-desc').textContent=descs[s]||'—';
+  const v='<span class="chip cg">Verified</span>',p='<span class="chip ca">Pending upload</span>';
+  if(s==='green'){['dc-lic','dc-mot','dc-ins','dc-git','dc-rtw'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=v});}
+  else{['dc-lic','dc-mot','dc-ins','dc-rtw'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=v});const g=document.getElementById('dc-git');if(g)g.innerHTML=p;}
+  const un=document.getElementById('dc-uname');if(un)un.textContent=u;
+}
+
+function buildNav(tabs){
+  const LOCK_ICO='<svg class="lock-ic" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+  let h='',cs='';
+  tabs.forEach(t=>{
+    if(t.s!==cs){if(cs)h+='<hr class="sdiv">';h+=`<div class="nav-sec">${t.s}</div>`;cs=t.s;}
+    if(t.locked){
+      h+=`<div class="ni locked" onclick="showUpgrade('${t.l}')"><svg class="ni-ic" viewBox="0 0 24 24">${t.ico}</svg>${t.l}${LOCK_ICO}</div>`;
+    } else {
+      h+=`<div class="ni" id="ni-${t.id}" onclick="switchTab('pane-${t.id}')"><svg class="ni-ic" viewBox="0 0 24 24">${t.ico}</svg>${t.l}${t.badge?`<span class="nb">${t.badge}</span>`:''}</div>`;
+    }
+  });
+  document.getElementById('nav-list').innerHTML=h;
+}
+let ct=null;
+function switchTab(id){
+  if(ct){document.getElementById(ct).classList.remove('on');const n=document.getElementById('ni-'+ct.replace('pane-',''));if(n)n.classList.remove('on');}
+  const p=document.getElementById(id);if(p)p.classList.add('on');
+  const n=document.getElementById('ni-'+id.replace('pane-',''));if(n)n.classList.add('on');
+  ct=id;
+  if(typeof kjRender==='function')kjRender();
+  if(id==='pane-feedback'){fbPrefill();fbLoad();}
+  if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
+}
+
+/* ── LIVE ORDER LIFECYCLE (KNECT network demo) ── */
+const KJ_KEY='knect_jobs_v1';
+const KJ_STAGES=['network','accepted','picked','delivered','completed'];
+const KJ_LBL={network:'On the network',accepted:'Accepted',picked:'Picked up',delivered:'Delivered',completed:'Completed'};
+const KJ_CHIP={network:'ca',accepted:'cb',picked:'cb',delivered:'cg',completed:'cg'};
+const KJ_NEXT={accepted:'Confirm pickup',picked:'Mark delivered',delivered:'Complete order'};
+function kjAll(){try{return JSON.parse(localStorage.getItem(KJ_KEY))||[]}catch(e){return[]}}
+function kjSave(a){try{localStorage.setItem(KJ_KEY,JSON.stringify(a))}catch(e){}}
+function kjGet(ref){return kjAll().find(j=>j.ref===ref)}
+function kjAdd(ref,route,det,amt){const a=kjAll().filter(j=>j.ref!==ref);a.unshift({ref:ref,route:route,det:det,amt:amt,status:'network'});kjSave(a);kjRender();}
+function kjAccept(ref,route,det,amt){const a=kjAll();let j=a.find(x=>x.ref===ref);if(!j){j={ref:ref,route:route||'',det:det||'',amt:amt||''};a.unshift(j)}j.status='accepted';kjSave(a);kjRender();switchTab('pane-d-today');}
+function kjAdvance(ref){const a=kjAll();const j=a.find(x=>x.ref===ref);if(!j)return;const i=KJ_STAGES.indexOf(j.status);if(i>-1&&i<KJ_STAGES.length-1){j.status=KJ_STAGES[i+1];kjSave(a);kjRender();}}
+function kjClear(ref){kjSave(kjAll().filter(j=>j.ref!==ref));kjRender();}
+function kjSeed2848(){const a=kjAll().filter(j=>j.ref!=='HAF-2848');a.unshift({ref:'HAF-2848',route:'Manchester M1 → Leeds LS1',det:'420 kg · LWB · collect 14:30',amt:'£94',status:'delivered'});kjSave(a);kjRender();}
+function kjChip(st){return '<span class="chip '+KJ_CHIP[st]+'">'+KJ_LBL[st]+'</span>'}
+function kjSteps(st){const i=KJ_STAGES.indexOf(st);return '<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.6rem">'+KJ_STAGES.map((s,k)=>'<span class="chip '+(k<=i?'cg':'ch')+'">'+KJ_LBL[s]+'</span>').join('')+'</div>'}
+function kjRender(){
+  const all=kjAll();
+  const net=all.filter(j=>j.status==='network');
+  const netHtml=net.map(j=>'<div class="jc"><div class="jdot" style="background:var(--am)"></div><div class="jm"><div class="jref">'+j.ref+' · just posted · LIVE</div><div class="jroute">'+j.route+'</div><div class="jdet">'+j.det+'</div></div><div class="jacts"><div class="jamt">'+j.amt+'</div><button class="btn btn-or btn-xs" onclick="kjAccept(&#39;'+j.ref+'&#39;)">Accept</button></div></div>').join('');
+  ['kj-net-home','kj-net-today'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=netHtml});
+  const card=document.getElementById('kj-active');
+  if(card){
+    if(!window.KJ_FALLBACK)window.KJ_FALLBACK=card.innerHTML;
+    const act=all.find(j=>j.status!=='network'&&j.status!=='completed');
+    const done=all.find(j=>j.status==='completed');
+    if(act){
+      card.innerHTML='<div class="cr"><span class="ck">Ref</span><span class="cv">'+act.ref+'</span></div>'
+      +'<div class="cr"><span class="ck">Route</span><span class="cv">'+act.route+'</span></div>'
+      +'<div class="cr"><span class="ck">Load</span><span class="cv">'+act.det+'</span></div>'
+      +'<div class="cr"><span class="ck">Pay</span><span class="cv">'+act.amt+'</span></div>'
+      +'<div class="cr"><span class="ck">Status</span><span class="cv">'+kjChip(act.status)+'</span></div>'
+      +kjSteps(act.status)
+      +'<div style="margin-top:.7rem;display:flex;gap:.45rem"><button class="btn btn-or btn-xs" onclick="kjAdvance(&#39;'+act.ref+'&#39;)">'+KJ_NEXT[act.status]+'</button><button class="btn btn-gh btn-xs">Add note</button></div>';
+    }else if(done){
+      card.innerHTML='<div style="text-align:center;padding:.5rem 0"><div style="font-family:var(--dp);font-weight:900;font-size:1.05rem;color:var(--gn);margin-bottom:.3rem">'+done.ref+' — Order completed</div><div style="font-size:.76rem;color:var(--mu);line-height:1.6">Order delivered and closed. Payment '+done.amt+' added to your Today totals.</div>'+kjSteps('completed')+'<div style="margin-top:.75rem"><button class="btn btn-or btn-xs" onclick="kjClear(&#39;'+done.ref+'&#39;);switchTab(&#39;pane-d-home&#39;)">Find your next job &#8594;</button></div></div>';
+    }else{
+      card.innerHTML=window.KJ_FALLBACK;
+    }
+  }
+  const rows=all.map(j=>'<tr><td>'+j.ref+'</td><td>'+j.route+'</td><td>Today</td><td>'+j.amt+'</td><td>'+kjChip(j.status)+'</td></tr>').join('');
+  ['kj-orders','kj-orders-biz'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=rows});
+}
+document.addEventListener('DOMContentLoaded',kjRender);
 
 /* ── CUSTOMER TRACK ── */
 const CT_DB={'HAF-2847':{status:'Delivered',route:'Manchester M1 → Leeds LS1 · 5 Jul 2026 · 14:22'},'HAF-2831':{status:'In transit',route:'Birmingham B1 → Nottingham NG1 · ETA 16:30 today'},'HAF-2853':{status:'Driver assigned — collecting soon',route:'Manchester M1 → Salford M50 · Today'}};
 function ctLookup(){
   const ref=(document.getElementById('ct-ref').value||'HAF-2847').trim().toUpperCase();
-  const d=CT_DB[ref]||{status:'No delivery found',route:'Check the reference and try again.'};
+  const j=(typeof kjGet==='function')?kjGet(ref):null;
+  const d=j?{status:KJ_LBL[j.status],route:j.route+' · '+j.det+' · '+j.amt}:(CT_DB[ref]||{status:'No delivery found',route:'Check the reference and try again.'});
+  const st=document.getElementById('ct-steps');if(st)st.innerHTML=j?kjSteps(j.status):'';
   document.getElementById('ct-refout').textContent=ref;
   document.getElementById('ct-status').textContent=d.status;
   document.getElementById('ct-route').textContent=d.route;
   document.getElementById('ct-result').style.display='block';
 }
 
-// Boot in day mode
-document.documentElement.removeAttribute('data-theme');
-document.getElementById('landing').style.display='flex';
-</script>
-</body>
-</html>
+/* ── FEEDBACK & IDEAS BOARD (live — HUB database) ── */
+const FB_URL='https://jsdwvogsxlnczzbefwgp.supabase.co/rest/v1';
+const FB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzZHd2b2dzeGxuY3p6YmVmd2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODgyMzYsImV4cCI6MjA5Njk2NDIzNn0.pxqM-Oh4f_3PlqCbKIKvcKZnNRUZ1ASKqqdNg78M_4M';
+const FB_H={apikey:FB_KEY,Authorization:'Bearer '+FB_KEY,'Content-Type':'application/json'};
+const FB_STATUS={under_review:['Under review','ca'],planned:['Planned','cb'],building:['Building','co'],done:['Done','cg'],declined:['Not planned','cr2']};
+const FB_CAT={idea:['Idea','cb'],not_working:['Not working','cr2'],working:['Working well','cg']};
+const FB_ROLE={driver:'Driver',customer:'Customer',business:'Business',team:'HAF team',other:'Other',user:'User'};
+let fbItems=[],fbCat='all',fbLoaded=false;
+function fbVoter(){let k=localStorage.getItem('haf_fb_voter');if(!k){k=(crypto.randomUUID?crypto.randomUUID():String(Math.random()).slice(2)+'-'+new Date().getTime());localStorage.setItem('haf_fb_voter',k);}return k}
+function fbMyVotes(){try{return new Set(JSON.parse(localStorage.getItem('haf_fb_voted')||'[]'))}catch(e){return new Set()}}
+function fbEsc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fbPrefill(){const sel=document.getElementById('fb-role');if(sel._set||!

@@ -90,6 +90,23 @@
 .cr2{background:var(--rd-d);color:var(--rd);border:1px solid rgba(208,64,64,.22)}.cr2::before{background:var(--rd)}
 .co{background:var(--or-d);color:var(--or);border:1px solid var(--or-g)}.co::before{background:var(--or)}
 .cb{background:var(--bl-d);color:var(--bl);border:1px solid rgba(61,125,202,.22)}.cb::before{background:var(--bl)}
+.ch{background:var(--p2);color:var(--mu);border:1px solid var(--ln)}.ch::before{background:var(--mu)}
+
+/* FEEDBACK BOARD */
+.fb-filters{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem}
+.fb-fbtn{padding:.3rem .8rem;border-radius:var(--pill);font-size:.72rem;font-weight:700;background:var(--p);border:1px solid var(--ln);color:var(--mu);transition:all .14s}
+.fb-fbtn.on{background:var(--or-d);border-color:var(--or-g);color:var(--or)}
+.fb-item{background:var(--p);border:1px solid var(--ln);border-radius:var(--rs);padding:.85rem 1rem;display:flex;gap:.85rem;align-items:flex-start;box-shadow:var(--sd);margin-bottom:.55rem}
+.fb-vote{display:flex;flex-direction:column;align-items:center;gap:.1rem;min-width:44px;padding:.45rem .3rem;border-radius:var(--rx);border:1px solid var(--ln);background:var(--p2);color:var(--mu);font-size:.82rem;font-weight:800;transition:all .14s;flex-shrink:0}
+.fb-vote:hover{border-color:var(--or);color:var(--or)}
+.fb-vote.voted{background:var(--or-d);border-color:var(--or-g);color:var(--or)}
+.fb-body{flex:1;min-width:0}
+.fb-title{font-weight:700;font-size:.92rem;overflow-wrap:anywhere}
+.fb-details{font-size:.78rem;color:var(--mu);line-height:1.55;margin-top:.15rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.fb-meta{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-top:.45rem}
+.fb-by{font-size:.68rem;color:var(--su);font-weight:600}
+.fb-empty{padding:1.4rem;text-align:center;color:var(--su);font-size:.8rem;background:var(--p);border:1px dashed var(--lns);border-radius:var(--rs)}
+@media(max-width:900px){.fb-g2{grid-template-columns:1fr!important}}
 
 /* JOB CARDS */
 .jl{display:flex;flex-direction:column;gap:.55rem;margin-bottom:1rem}
@@ -134,27 +151,4 @@ textarea.fi2{resize:vertical;min-height:70px}
 .avail-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem}
 .avail-lbl{font-family:var(--dp);font-weight:800;font-size:.9rem;letter-spacing:-.02em}
 .toggle{position:relative;width:44px;height:24px;cursor:pointer}
-.toggle input{opacity:0;width:0;height:0}
-.toggle-sl{position:absolute;inset:0;background:var(--p3);border-radius:var(--pill);transition:background .2s}
-.toggle-sl::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s}
-.toggle input:checked + .toggle-sl{background:var(--gn)}
-.toggle input:checked + .toggle-sl::before{transform:translateX(20px)}
-
-/* LOAD CARD */
-.ldc{background:var(--p);border:1px solid var(--ln);border-radius:var(--rs);padding:1rem;margin-bottom:.75rem;box-shadow:var(--sd);transition:border-color .14s}
-.ldc:hover{border-color:var(--or)}
-.ldc-h{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.55rem}
-.ldc-route{font-weight:700;font-size:.88rem}
-.ldc-meta{display:flex;gap:1rem;flex-wrap:wrap}
-.ldc-mi{font-size:.71rem;color:var(--mu)}.ldc-mi strong{color:var(--tx);font-weight:600}
-
-/* CAP BOARD */
-.cap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.75rem;margin-bottom:1.1rem}
-.cap-card{background:var(--p);border:1px solid var(--ln);border-radius:var(--rs);padding:.9rem;text-align:center;box-shadow:var(--sd)}
-.cap-area{font-size:.7rem;font-weight:700;color:var(--mu);letter-spacing:.04em;margin-bottom:.4rem}
-.cap-avail{font-family:var(--dp);font-weight:900;font-size:1.25rem;letter-spacing:-.04em}
-.cap-avail.hi{color:var(--gn)}.cap-avail.med{color:var(--am)}.cap-avail.lo{color:var(--rd)}
-.cap-sub{font-size:.66rem;color:var(--mu);margin-top:.12rem}
-
-/* REBATE */
-.reb-bar-wrap{background:var(--p2);border-radius:var(--pill);height:7px;margin:.5rem 0;overflow:hidden}
+.toggle input{opacity:0;widt
