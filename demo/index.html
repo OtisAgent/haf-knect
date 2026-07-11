@@ -1977,9 +1977,68 @@ function switchTab(id){
 }
 
 /* ── EXCHANGE DASHBOARD ── */
+const EXCH_JOBS={
+  driver:[
+    {ref:'HAF-2853',type:'direct',time:'14:00',route:'Manchester M1 → Salford M50',   det:'Small van · 180 kg · 12 mi',  pay:'£38', pc:'M1'},
+    {ref:'HAF-2855',type:'open',  time:'15:30',route:'Manchester M4 → Stockport SK1', det:'Medium van · 340 kg · 18 mi', pay:'£54', pc:'M'},
+    {ref:'HAF-2856',type:'open',  time:'Tomorrow 09:00',route:'Altrincham WA14 → Manchester M60',det:'LWB · 720 kg · 22 mi',pay:'£87',pc:'WA'},
+    {ref:'HAF-2858',type:'open',  time:'16:00',route:'Leeds LS1 → York YO1',          det:'Small van · 200 kg · 24 mi', pay:'£72', pc:'LS'},
+    {ref:'HAF-2860',type:'open',  time:'Tomorrow 08:30',route:'Sheffield S1 → Nottingham NG1',det:'LWB · 560 kg · 38 mi',pay:'£95',pc:'S'},
+    {ref:'HAF-2862',type:'open',  time:'17:00',route:'Birmingham B1 → Coventry CV1',  det:'SWB · 310 kg · 20 mi',       pay:'£67', pc:'B'},
+    {ref:'HAF-2864',type:'open',  time:'15:00',route:'Liverpool L1 → Warrington WA1', det:'Small van · 180 kg · 16 mi', pay:'£48', pc:'L'},
+    {ref:'HAF-2866',type:'open',  time:'Tomorrow 10:00',route:'Newcastle NE1 → Sunderland SR1',det:'SWB · 280 kg · 12 mi',pay:'£42',pc:'NE'},
+  ],
+  freight:[
+    {ref:'FF-0092',route:'Manchester M1 → Birmingham B1',det:'LWB · 640 kg · Driver confirmed · ETD 15:00',status:'cg',label:'Confirmed',pc:'M1'},
+    {ref:'FF-0091',route:'Leeds LS1 → London E1',         det:'Artic · 8t · Awaiting driver response',     status:'ca',label:'Pending',  pc:'LS'},
+    {ref:'FF-0095',route:'Sheffield S1 → Nottingham NG1', det:'LWB · 500 kg · Open to network',            status:'ca',label:'Open',     pc:'S'},
+    {ref:'FF-0096',route:'Liverpool L1 → Manchester M1',  det:'SWB · 320 kg · Open to network',            status:'ca',label:'Open',     pc:'L'},
+    {ref:'FF-0097',route:'Birmingham B1 → Bristol BS1',   det:'Luton · 780 kg · Driver confirmed',         status:'cg',label:'Confirmed',pc:'B'},
+    {ref:'FF-0098',route:'Newcastle NE1 → Leeds LS1',     det:'LWB · 620 kg · Awaiting driver response',   status:'ca',label:'Pending',  pc:'NE'},
+  ],
+  business:[
+    {ref:'HAF-2831',route:'Birmingham B1 → Nottingham NG1',det:'ETA 16:30 today · Clever Checked',status:'cb',label:'En route',pc:'B'},
+    {ref:'HAF-2847',route:'Manchester M1 → Leeds LS1',     det:'LWB · 420 kg · Delivered 5 Jul',  status:'cg',label:'Delivered',pc:'M1'},
+    {ref:'HAF-2849',route:'Sheffield S1 → Derby DE1',      det:'SWB · 280 kg · ETA Tomorrow',     status:'cb',label:'En route',pc:'S'},
+    {ref:'HAF-2851',route:'Liverpool L1 → Chester CH1',    det:'Small van · 160 kg · Delivered',   status:'cg',label:'Delivered',pc:'L'},
+    {ref:'HAF-2854',route:'Leeds LS1 → York YO1',          det:'LWB · 510 kg · Booked — tomorrow', status:'co',label:'Booked',  pc:'LS'},
+    {ref:'HAF-2857',route:'Bristol BS1 → Cardiff CF1',     det:'Luton · 700 kg · Driver assigned', status:'cb',label:'En route',pc:'BS'},
+  ],
+};
+
+let _exchRadius='any';
+function setExchRadius(r,btn){
+  _exchRadius=r;
+  document.querySelectorAll('#exch-rpills .cap-pill').forEach(p=>p.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  filterExchJobs();
+}
+function filterExchJobs(){
+  const pcVal=(document.getElementById('exch-pc')||{}).value||'';
+  const r=_exchRadius;
+  const cards=document.querySelectorAll('#exch-job-list [data-pc]');
+  let shown=0,total=cards.length;
+  cards.forEach(card=>{
+    const jobPc=card.getAttribute('data-pc');
+    let vis=true;
+    if(r!=='any'&&pcVal.trim().length>=2){
+      const d=pcDist(pcVal.trim(),jobPc);
+      vis=d<=r;
+    }
+    card.style.display=vis?'':'none';
+    if(vis)shown++;
+  });
+  const ct=document.getElementById('exch-count');
+  if(ct){
+    if(r==='any'||pcVal.trim().length<2){ct.textContent=total+' jobs';}
+    else{ct.textContent=shown+' of '+total+' within '+r+' mi of '+pcVal.trim().toUpperCase();}
+  }
+}
+
 function renderExchange(){
   if(!currentAcc)return;
   const role=currentAcc.demo_role;
+  _exchRadius='any';
   let h='';
   // Ticker
   h+=`<div style="background:#0a0c0e;border-radius:var(--rs);padding:.55rem 1.1rem;margin-bottom:1.1rem;overflow-x:auto;white-space:nowrap;display:flex;align-items:center;gap:.55rem">
@@ -2001,31 +2060,88 @@ function renderExchange(){
     <div class="kc"><div class="kc-l">Avg rate</div><div class="kc-v">£2.10/mi</div></div>
     <div class="kc"><div class="kc-l">Active loads</div><div class="kc-v">4</div></div>
   </div>`;
-  // Role-specific section
+  // Area filter bar
+  const jobLabel=role==='driver'?'jobs':role==='freight'?'loads':'deliveries';
+  h+=`<div class="card" style="margin-bottom:.85rem">
+    <div class="ct" style="margin-bottom:.7rem">Filter by area</div>
+    <div style="display:flex;align-items:center;gap:.55rem;flex-wrap:wrap">
+      <input id="exch-pc" class="fi2" placeholder="Your postcode e.g. M1" style="max-width:150px;flex-shrink:0;padding:.42rem .75rem;font-size:.82rem" maxlength="8" autocomplete="off" oninput="filterExchJobs()">
+      <div id="exch-rpills" style="display:flex;gap:.3rem;flex-wrap:wrap">
+        <button class="cap-pill active" onclick="setExchRadius('any',this)">Any</button>
+        <button class="cap-pill" onclick="setExchRadius(10,this)">10 mi</button>
+        <button class="cap-pill" onclick="setExchRadius(25,this)">25 mi</button>
+        <button class="cap-pill" onclick="setExchRadius(50,this)">50 mi</button>
+        <button class="cap-pill" onclick="setExchRadius(100,this)">100 mi</button>
+      </div>
+      <span id="exch-count" style="font-size:.7rem;color:var(--mu);white-space:nowrap;margin-left:auto"></span>
+    </div>
+  </div>`;
+  // Job / load list
   if(role==='driver'){
-    h+=`<div class="card"><div class="ct">Your job invites</div><div class="jl">
-      <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2853 · Direct invite · 14:00</div><div class="jroute">Manchester M1 → Salford M50</div><div class="jdet">Small van · 180 kg · 12 miles</div></div><div class="jacts"><div class="jamt">£38</div><button class="btn btn-or btn-xs">Accept</button></div></div>
-      <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2855 · Open job · 15:30</div><div class="jroute">Manchester M4 → Stockport SK1</div><div class="jdet">Medium van · 340 kg · 18 miles</div></div><div class="jacts"><div class="jamt">£54</div><button class="btn btn-or btn-xs">Accept</button></div></div>
-    </div><div style="margin-top:.75rem;display:flex;gap:.45rem"><button class="btn btn-gh btn-sm" onclick="switchTab('pane-d-today')">See all open jobs →</button><button class="btn btn-gh btn-sm" onclick="switchTab('pane-d-budget')">Earnings this week →</button></div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1rem">
-      <div class="ptile" onclick="switchTab('pane-f-cap')"><div class="ptile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg></div><div class="ptile-h">Network Map</div><p class="ptile-p">See live driver zones, active jobs and demand near you.</p><div class="ptile-arr">Open map →</div></div>
+    const jobs=EXCH_JOBS.driver;
+    let jh='<div class="jl" id="exch-job-list">';
+    jobs.forEach(j=>{
+      const isDirect=j.type==='direct';
+      jh+=`<div class="jc" data-pc="${j.pc}">
+        <div class="jdot" style="background:var(--gn)"></div>
+        <div class="jm">
+          <div class="jref">${j.ref} · ${isDirect?'<span style="color:var(--or)">Direct invite</span>':'Open job'} · ${j.time}</div>
+          <div class="jroute">${j.route}</div>
+          <div class="jdet">${j.det}</div>
+        </div>
+        <div class="jacts"><div class="jamt">${j.pay}</div><button class="btn ${isDirect?'btn-or':'btn-gh'} btn-xs">${isDirect?'Accept':'View'}</button></div>
+      </div>`;
+    });
+    jh+='</div>';
+    h+=`<div class="card"><div class="ct" style="display:flex;align-items:center;justify-content:space-between"><span>Jobs near you</span><span id="exch-count-inner" style="font-size:.68rem;color:var(--mu)">${jobs.length} jobs</span></div>${jh}<div style="margin-top:.75rem;display:flex;gap:.45rem"><button class="btn btn-gh btn-sm" onclick="switchTab('pane-d-today')">See all open jobs →</button><button class="btn btn-gh btn-sm" onclick="switchTab('pane-d-budget')">Earnings this week →</button></div></div>`;
+  } else if(role==='freight'){
+    const loads=EXCH_JOBS.freight;
+    let lh='<div class="jl" id="exch-job-list">';
+    loads.forEach(l=>{
+      const dot=l.status==='cg'?'var(--gn)':'var(--or)';
+      lh+=`<div class="jc" data-pc="${l.pc}">
+        <div class="jdot" style="background:${dot}"></div>
+        <div class="jm">
+          <div class="jref">${l.ref} · Collection: ${l.pc}</div>
+          <div class="jroute">${l.route}</div>
+          <div class="jdet">${l.det}</div>
+        </div>
+        <div class="jacts"><span class="chip c${l.status.replace('c','')}">${l.label}</span></div>
+      </div>`;
+    });
+    lh+='</div>';
+    h+=`<div class="card"><div class="ct" style="display:flex;align-items:center;justify-content:space-between"><span>Active loads</span><span id="exch-count-inner" style="font-size:.68rem;color:var(--mu)">${loads.length} loads</span></div>${lh}<div style="margin-top:.75rem;display:flex;gap:.45rem"><button class="btn btn-or btn-sm" onclick="switchTab('pane-f-post')">Post a load →</button><button class="btn btn-gh btn-sm" onclick="switchTab('pane-f-loads')">All loads →</button></div></div>`;
+  } else {
+    const dels=EXCH_JOBS.business;
+    let dh='<div class="jl" id="exch-job-list">';
+    dels.forEach(d=>{
+      const dot=d.status==='cg'?'var(--gn)':d.status==='cb'?'var(--bl)':'var(--or)';
+      dh+=`<div class="jc" data-pc="${d.pc}">
+        <div class="jdot" style="background:${dot}"></div>
+        <div class="jm">
+          <div class="jref">${d.ref} · Collection: ${d.pc}</div>
+          <div class="jroute">${d.route}</div>
+          <div class="jdet">${d.det}</div>
+        </div>
+        <div class="jacts"><span class="chip ${d.status}">${d.label}</span></div>
+      </div>`;
+    });
+    dh+='</div>';
+    h+=`<div class="card"><div class="ct" style="display:flex;align-items:center;justify-content:space-between"><span>Your deliveries</span><span id="exch-count-inner" style="font-size:.68rem;color:var(--mu)">${dels.length} deliveries</span></div>${dh}<div style="margin-top:.75rem;display:flex;gap:.45rem"><button class="btn btn-or btn-sm" onclick="switchTab('pane-b-book')">Book a courier →</button><button class="btn btn-gh btn-sm" onclick="switchTab('pane-b-del')">All deliveries →</button></div></div>`;
+  }
+  // Quick tiles
+  if(role==='driver'){
+    h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1rem">
+      <div class="ptile" onclick="switchTab('pane-f-cap')"><div class="ptile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg></div><div class="ptile-h">Network Map</div><p class="ptile-p">Live driver zones, demand and relay hubs.</p><div class="ptile-arr">Open map →</div></div>
       <div class="ptile" onclick="switchTab('pane-d-comp')"><div class="ptile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="ptile-h">My Compliance</div><p class="ptile-p">CleverPay status · document checklist.</p><div class="ptile-arr">Check →</div></div>
     </div>`;
   } else if(role==='freight'){
-    h+=`<div class="card"><div class="ct">Active loads</div><div class="jl">
-      <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">FF-0092 · Posted today</div><div class="jroute">Manchester M1 → Birmingham B1</div><div class="jdet">LWB · 640 kg · Driver confirmed · ETD 15:00</div></div><div class="jacts"><span class="chip cg">Confirmed</span></div></div>
-      <div class="jc"><div class="jdot" style="background:var(--or)"></div><div class="jm"><div class="jref">FF-0091 · Posted yesterday</div><div class="jroute">Leeds LS1 → London E1</div><div class="jdet">Artic · 8t · Awaiting driver response</div></div><div class="jacts"><span class="chip ca">Pending</span></div></div>
-    </div><div style="margin-top:.75rem;display:flex;gap:.45rem"><button class="btn btn-or btn-sm" onclick="switchTab('pane-f-post')">Post a load →</button><button class="btn btn-gh btn-sm" onclick="switchTab('pane-f-loads')">All active loads →</button></div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1rem">
-      <div class="ptile" onclick="switchTab('pane-f-cap')"><div class="ptile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg></div><div class="ptile-h">Network Map</div><p class="ptile-p">Find available drivers by zone, vehicle and rate.</p><div class="ptile-arr">Open map →</div></div>
+    h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1rem">
+      <div class="ptile" onclick="switchTab('pane-f-cap')"><div class="ptile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg></div><div class="ptile-h">Network Map</div><p class="ptile-p">Find drivers by zone, vehicle and rate.</p><div class="ptile-arr">Open map →</div></div>
       <div class="ptile" onclick="switchTab('pane-f-lanes')"><div class="ptile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="ptile-h">Lane Pricing</div><p class="ptile-p">Current rates by route — lock in your margins.</p><div class="ptile-arr">View rates →</div></div>
     </div>`;
   } else {
-    h+=`<div class="card"><div class="ct">Recent deliveries</div><div class="jl">
-      <div class="jc"><div class="jdot" style="background:var(--bl)"></div><div class="jm"><div class="jref">HAF-2831 · In transit</div><div class="jroute">Birmingham B1 → Nottingham NG1</div><div class="jdet">ETA 16:30 today · Clever Checked driver</div></div><div class="jacts"><span class="chip cb">En route</span></div></div>
-      <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2847 · Delivered 5 Jul</div><div class="jroute">Manchester M1 → Leeds LS1</div><div class="jdet">LWB · 420 kg · Signed by reception</div></div><div class="jacts"><span class="chip cg">Done</span></div></div>
-    </div><div style="margin-top:.75rem;display:flex;gap:.45rem"><button class="btn btn-or btn-sm" onclick="switchTab('pane-b-book')">Book a courier →</button><button class="btn btn-gh btn-sm" onclick="switchTab('pane-b-del')">All deliveries →</button></div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1rem">
+    h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1rem">
       <div class="ptile" onclick="switchTab('pane-f-cap')"><div class="ptile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg></div><div class="ptile-h">Network Map</div><p class="ptile-p">See driver availability across the UK right now.</p><div class="ptile-arr">Open map →</div></div>
       <div class="ptile" onclick="switchTab('pane-cust-track')"><div class="ptile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="ptile-h">Track a delivery</div><p class="ptile-p">Live status on any HAF reference number.</p><div class="ptile-arr">Track →</div></div>
     </div>`;
@@ -2039,6 +2155,9 @@ function renderExchange(){
     <div id="exch-map" style="height:210px;border-radius:var(--rx);overflow:hidden;background:var(--p2)"></div>
   </div>`;
   document.getElementById('exchange-body').innerHTML=h;
+  // init filter count
+  const ct=document.getElementById('exch-count');
+  if(ct){const n=document.querySelectorAll('#exch-job-list [data-pc]').length;ct.textContent=n+' '+jobLabel;}
   setTimeout(initExchMap,80);
 }
 
