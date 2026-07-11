@@ -362,6 +362,65 @@ textarea.fi2{resize:vertical;min-height:70px}
 .reb-bar-wrap{background:var(--p2);border-radius:var(--pill);height:7px;margin:.5rem 0;overflow:hidden}
 .reb-bar-fill{height:100%;background:var(--or);border-radius:var(--pill);transition:width .4s}
 
+/* ── EXCHANGE DRIVER UI ─────────────────────────────────────── */
+.xch-bar{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:.9rem 1.1rem;margin-bottom:.9rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+.xch-status{display:flex;align-items:center;gap:.65rem}
+.xch-pulse{width:10px;height:10px;border-radius:50%;background:var(--gn);flex-shrink:0;animation:xpulse 1.6s infinite}
+@keyframes xpulse{0%,100%{box-shadow:0 0 0 0 rgba(45,171,96,.55)}60%{box-shadow:0 0 0 7px rgba(45,171,96,0)}}
+.xch-bar.xch-off .xch-pulse{background:#888;animation:none}
+.xch-lbl{font-weight:800;font-size:.84rem;letter-spacing:-.01em}
+.xch-sub{font-size:.68rem;color:var(--mu)}
+.xch-nums{display:flex;gap:1.1rem;align-items:center}
+.xch-num{text-align:center}.xch-nv{font-weight:900;font-size:1.05rem;color:var(--or)}.xch-nl{font-size:.6rem;color:var(--mu);text-transform:uppercase;letter-spacing:.05em}
+.xch-num.neu .xch-nv{color:var(--tx)}
+.avail-pill{display:flex;align-items:center;gap:.45rem;padding:.42rem .9rem;border-radius:20px;border:1.5px solid var(--gn);background:rgba(45,171,96,.08);cursor:pointer;user-select:none;transition:all .2s;white-space:nowrap}
+.avail-pill.off{border-color:var(--rd);background:rgba(204,51,51,.06)}
+.avail-pill .ap-dot{width:8px;height:8px;border-radius:50%;background:var(--gn);flex-shrink:0}
+.avail-pill.off .ap-dot{background:var(--rd)}
+.avail-pill .ap-lbl{font-weight:700;font-size:.75rem;color:var(--gn)}
+.avail-pill.off .ap-lbl{color:var(--rd)}
+/* Exchange job cards */
+.xc{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:.95rem 1.05rem;margin-bottom:.7rem;box-shadow:var(--sd);transition:border-color .18s,box-shadow .18s}
+.xc:hover{border-color:rgba(255,120,0,.35);box-shadow:0 2px 12px rgba(255,120,0,.08)}
+.xc.xc-invite{border-color:var(--or-g)}
+.xc-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.5rem}
+.xc-badges{display:flex;gap:.28rem;align-items:center;flex-wrap:wrap}
+.xb{font-size:.57rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;padding:.18rem .5rem;border-radius:4px}
+.xb.inv{background:rgba(255,120,0,.15);color:var(--or);border:1px solid var(--or-g)}
+.xb.urg{background:rgba(208,64,64,.13);color:var(--rd)}
+.xb.sdy{background:rgba(232,140,0,.13);color:var(--am)}
+.xb.flx{background:var(--ln);color:var(--mu)}
+.xb.pref{background:rgba(45,171,96,.12);color:var(--gn)}
+.xb-ref{font-size:.65rem;color:var(--mu);font-weight:600}
+.xc-viewers{font-size:.63rem;color:var(--mu);display:flex;align-items:center;gap:.22rem}
+.xc-route{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.025em;margin-bottom:.55rem;line-height:1.2}
+.xc-sr{display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg);border:1px solid var(--ln);border-radius:6px;overflow:hidden;margin-bottom:.5rem}
+.xcs{padding:.38rem .4rem;text-align:center;border-right:1px solid var(--ln)}.xcs:last-child{border-right:none}
+.xcs-v{font-weight:800;font-size:.8rem;white-space:nowrap}.xcs-k{font-size:.56rem;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;margin-top:.05rem}
+.xcs.rate .xcs-v{color:var(--gn);font-size:.92rem}
+.xc-goods{font-size:.71rem;color:var(--mu);padding:.3rem .5rem;background:var(--bg);border:1px solid var(--ln);border-radius:5px;margin-bottom:.55rem}
+.xc-pref{font-size:.68rem;color:var(--gn);font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.28rem}
+.xc-foot{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.xc-meta{font-size:.63rem;color:var(--mu);line-height:1.5}
+.xc-cd{font-size:.65rem;font-weight:700;color:var(--rd);display:flex;align-items:center;gap:.2rem}
+.xc-btns{display:flex;gap:.35rem;flex-shrink:0}
+.xfeed-hdr{font-size:.63rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mu);margin:.85rem 0 .55rem;display:flex;align-items:center;gap:.5rem}
+.xfeed-hdr::after{content:'';flex:1;height:1px;background:var(--ln)}
+/* Active job banner */
+.ajob{border:2px solid var(--or);border-radius:var(--r);background:var(--or-d);padding:.95rem 1.05rem;margin-bottom:.9rem}
+.ajob-tag{font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--or);margin-bottom:.22rem}
+.ajob-route{font-family:var(--dp);font-weight:900;font-size:.97rem;margin-bottom:.75rem}
+.ajob-steps{display:flex;align-items:center;margin-bottom:.8rem}
+.ajs{display:flex;flex-direction:column;align-items:center;gap:.18rem;flex-shrink:0}
+.ajs-dot{width:13px;height:13px;border-radius:50%;background:var(--ln);border:2px solid #888}
+.ajs-lbl{font-size:.58rem;font-weight:700;color:#888;text-align:center;white-space:nowrap}
+.ajs.on .ajs-dot{background:var(--or);border-color:var(--or)}
+.ajs.on .ajs-lbl{color:var(--or)}
+.ajs.done .ajs-dot{background:var(--gn);border-color:var(--gn)}
+.ajs.done .ajs-lbl{color:var(--gn)}
+.ajob-line{flex:1;height:2px;background:var(--ln);min-width:16px}
+.ajob-line.on{background:var(--or)}
+.ajob-line.done{background:var(--gn)}
 /* PLAN CARDS */
 .plg{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.85rem;margin-bottom:1.2rem}
 .plc{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:1.3rem;box-shadow:var(--sd)}
@@ -924,79 +983,244 @@ textarea.fi2{resize:vertical;min-height:70px}
 
     <main class="main" id="main">
 
-      <!-- DRIVER: My Status -->
-      <div class="tp" id="pane-d-status">
-        <h1 class="pt">My Status</h1><p class="ps">Set your availability and location.</p>
-        <div class="avail-card">
-          <div class="avail-top"><div class="avail-lbl" id="avail-lbl">Available — Taking jobs</div><label class="toggle"><input type="checkbox" id="avail-tog" checked onchange="toggleAvail()"><span class="toggle-sl"></span></label></div>
-          <div class="fr"><div class="fg"><label class="fl">Current area</label><input class="fi2" value="M1 1AA" placeholder="Postcode"></div><div class="fg"><label class="fl">Preferred direction</label><select class="fi2"><option>Any direction</option><option>North</option><option>South</option><option>East</option><option>West</option><option>Local only</option></select></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Available from</label><input class="fi2" type="time" value="08:00"></div><div class="fg"><label class="fl">Available until</label><input class="fi2" type="time" value="18:00"></div></div>
-          <button class="btn btn-or btn-sm btn-wide" style="margin-top:.3rem">Update status</button>
-        </div>
-        <div class="g2">
-          <div class="card"><div class="ct">Today</div><div class="cr"><span class="ck">Status</span><span class="cv"><span class="chip cg">Available</span></span></div><div class="cr"><span class="ck">Jobs</span><span class="cv">3</span></div><div class="cr"><span class="ck">Earnings</span><span class="cv" style="color:var(--or)">£142</span></div><div class="cr"><span class="ck">Miles</span><span class="cv">84</span></div></div>
-          <div class="card"><div class="ct">Vehicle</div><div class="cr"><span class="ck">Type</span><span class="cv">Long wheelbase</span></div><div class="cr"><span class="ck">MOT</span><span class="cv"><span class="chip cg">Dec 2026</span></span></div><div class="cr"><span class="ck">Insurance</span><span class="cv"><span class="chip cg">Mar 2027</span></span></div><div class="cr"><span class="ck">Goods in transit</span><span class="cv"><span class="chip ca">Pending</span></span></div></div>
-        </div>
-      </div>
-
-      <!-- DRIVER: Job Invites -->
+      <!-- DRIVER: Exchange Hub -->
       <div class="tp" id="pane-d-invites">
-        <h1 class="pt">Job Invites</h1><p class="ps">Jobs HAF has sent directly to you on the KNECT network.</p>
-        <div class="jl">
-          <div class="jc"><div class="jdot" style="background:var(--or)"></div><div class="jm"><div class="jref">INVITE · HAF-2858 · Expires in 8 min</div><div class="jroute">Manchester M4 → Warrington WA1</div><div class="jdet">Collect 14:30 · LWB · 420 kg · 28 miles</div></div><div class="jacts"><div class="jamt">£68</div><button class="btn btn-or btn-xs" onclick="acceptJob(this,'HAF-2858')">Accept</button><button class="btn btn-gh btn-xs">Decline</button></div></div>
-          <div class="jc"><div class="jdot" style="background:var(--bl)"></div><div class="jm"><div class="jref">INVITE · HAF-2861 · Tomorrow</div><div class="jroute">Salford M50 → Sheffield S1</div><div class="jdet">Collect 09:00 · LWB · 680 kg · 38 miles</div></div><div class="jacts"><div class="jamt">£94</div><button class="btn btn-or btn-xs" onclick="acceptJob(this,'HAF-2861')">Accept</button><button class="btn btn-gh btn-xs">Decline</button></div></div>
+        <!-- Active job banner (shown when job accepted) -->
+        <div class="ajob" id="xch-active" style="display:none">
+          <div class="ajob-tag">Active job</div>
+          <div class="ajob-route" id="xch-aj-route">—</div>
+          <div class="ajob-steps" id="xch-aj-steps">
+            <div class="ajs on" id="ajs-accepted"><div class="ajs-dot"></div><div class="ajs-lbl">Accepted</div></div>
+            <div class="ajob-line" id="ajl-collected"></div>
+            <div class="ajs" id="ajs-collected"><div class="ajs-dot"></div><div class="ajs-lbl">Collected</div></div>
+            <div class="ajob-line" id="ajl-enroute"></div>
+            <div class="ajs" id="ajs-enroute"><div class="ajs-dot"></div><div class="ajs-lbl">En route</div></div>
+            <div class="ajob-line" id="ajl-delivered"></div>
+            <div class="ajs" id="ajs-delivered"><div class="ajs-dot"></div><div class="ajs-lbl">Delivered</div></div>
+          </div>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+            <button class="btn btn-or btn-sm" id="aj-btn-collect" onclick="xAdvance('collected')">Mark collected</button>
+            <button class="btn btn-or btn-sm" id="aj-btn-enroute" onclick="xAdvance('enroute')">Mark en route</button>
+            <button class="btn btn-gh btn-sm" id="aj-btn-deliver" onclick="xAdvance('delivered')">Mark delivered</button>
+          </div>
+          <div id="xch-aj-rate" style="font-size:.75rem;font-weight:700;color:var(--gn);margin-top:.6rem"></div>
         </div>
-        <div id="active-job-track" style="display:none;margin-top:.5rem">
-          <div class="card">
-            <div class="ct">Active job — <span id="ajt-ref">—</span></div>
-            <div id="ajt-route" style="font-weight:700;margin-bottom:.85rem">—</div>
-            <div style="display:flex;gap:0;align-items:center;margin-bottom:1rem" id="ajt-pipeline">
-              <div class="jtrack-step on" id="jts-posted"><div class="jts-dot"></div><div class="jts-lbl">Posted</div></div>
-              <div class="jtrack-line"></div>
-              <div class="jtrack-step on" id="jts-accepted"><div class="jts-dot"></div><div class="jts-lbl">Accepted</div></div>
-              <div class="jtrack-line"></div>
-              <div class="jtrack-step" id="jts-enroute"><div class="jts-dot"></div><div class="jts-lbl">En route</div></div>
-              <div class="jtrack-line"></div>
-              <div class="jtrack-step" id="jts-delivered"><div class="jts-dot"></div><div class="jts-lbl">Delivered</div></div>
+
+        <!-- Exchange status bar -->
+        <div class="xch-bar" id="xch-bar">
+          <div class="xch-status">
+            <div class="xch-pulse" id="xch-pulse"></div>
+            <div>
+              <div class="xch-lbl" id="xch-lbl">Live on HAF KNECT Exchange</div>
+              <div class="xch-sub">Manchester · LWB · Accepting jobs now</div>
             </div>
-            <div style="display:flex;gap:.45rem">
-              <button class="btn btn-or btn-sm" onclick="advanceJob('enroute')">Mark en route</button>
-              <button class="btn btn-gh btn-sm" onclick="advanceJob('delivered')">Mark delivered</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+            <div class="xch-nums">
+              <div class="xch-num"><div class="xch-nv">£142</div><div class="xch-nl">Today</div></div>
+              <div class="xch-num neu"><div class="xch-nv">3</div><div class="xch-nl">Jobs</div></div>
+              <div class="xch-num neu"><div class="xch-nv">84 mi</div><div class="xch-nl">Miles</div></div>
             </div>
+            <div class="avail-pill" id="xch-pill" onclick="toggleXchAvail()">
+              <div class="ap-dot"></div><span class="ap-lbl" id="xch-pill-lbl">Online</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Direct invites -->
+        <div class="xfeed-hdr">Direct invites <span style="background:var(--or);color:#fff;padding:.1rem .5rem;border-radius:4px;font-size:.58rem;margin-left:.25rem">2</span></div>
+
+        <div class="xc xc-invite" id="xc-HAF-2858">
+          <div class="xc-head">
+            <div class="xc-badges"><span class="xb inv">Invite</span><span class="xb urg">Urgent</span><span class="xb-ref">HAF-2858</span></div>
+            <div class="xc-viewers"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 3 viewing</div>
+          </div>
+          <div class="xc-route">Manchester M4 → Warrington WA1</div>
+          <div class="xc-sr">
+            <div class="xcs"><div class="xcs-v">14:30</div><div class="xcs-k">Collect</div></div>
+            <div class="xcs"><div class="xcs-v">LWB</div><div class="xcs-k">Vehicle</div></div>
+            <div class="xcs"><div class="xcs-v">28 mi</div><div class="xcs-k">Loaded</div></div>
+            <div class="xcs rate"><div class="xcs-v">£68</div><div class="xcs-k">Driver pay</div></div>
+          </div>
+          <div class="xc-goods">420 kg · 2 pallets · tail lift required · no hazmat</div>
+          <div class="xc-pref">★ Preferred match — you've completed this lane 3 times</div>
+          <div class="xc-foot">
+            <div><div class="xc-cd">⏱ Expires in 08:42</div><div class="xc-meta">Posted 4 min ago · Manchester zone reward active</div></div>
+            <div class="xc-btns"><button class="btn btn-gh btn-xs">Details</button><button class="btn btn-or btn-sm" onclick="xAccept(this,'HAF-2858','Manchester M4 → Warrington WA1','£68')">Accept job →</button></div>
+          </div>
+        </div>
+
+        <div class="xc xc-invite" id="xc-HAF-2861">
+          <div class="xc-head">
+            <div class="xc-badges"><span class="xb inv">Invite</span><span class="xb sdy">Same-day</span><span class="xb-ref">HAF-2861</span></div>
+            <div class="xc-viewers"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 1 viewing</div>
+          </div>
+          <div class="xc-route">Salford M50 → Sheffield S1</div>
+          <div class="xc-sr">
+            <div class="xcs"><div class="xcs-v">09:00</div><div class="xcs-k">Collect</div></div>
+            <div class="xcs"><div class="xcs-v">LWB</div><div class="xcs-k">Vehicle</div></div>
+            <div class="xcs"><div class="xcs-v">38 mi</div><div class="xcs-k">Loaded</div></div>
+            <div class="xcs rate"><div class="xcs-v">£94</div><div class="xcs-k">Driver pay</div></div>
+          </div>
+          <div class="xc-goods">680 kg · no stacking · tail lift · tomorrow collection</div>
+          <div class="xc-foot">
+            <div class="xc-meta">Posted 12 min ago · Collect tomorrow 09:00</div>
+            <div class="xc-btns"><button class="btn btn-gh btn-xs">Details</button><button class="btn btn-or btn-sm" onclick="xAccept(this,'HAF-2861','Salford M50 → Sheffield S1','£94')">Accept job →</button></div>
+          </div>
+        </div>
+
+        <!-- Open jobs nearby -->
+        <div class="xfeed-hdr" style="margin-top:1.1rem">Open jobs near you — 3 matching your LWB</div>
+
+        <div class="xc" id="xc-HAF-2853">
+          <div class="xc-head">
+            <div class="xc-badges"><span class="xb urg">Urgent</span><span class="xb-ref">HAF-2853 · 2.1 mi from you</span></div>
+            <div class="xc-viewers"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 5 viewing</div>
+          </div>
+          <div class="xc-route">Manchester M1 → Salford M50</div>
+          <div class="xc-sr">
+            <div class="xcs"><div class="xcs-v">14:00</div><div class="xcs-k">Collect</div></div>
+            <div class="xcs"><div class="xcs-v">Small van</div><div class="xcs-k">Vehicle</div></div>
+            <div class="xcs"><div class="xcs-v">12 mi</div><div class="xcs-k">Loaded</div></div>
+            <div class="xcs rate"><div class="xcs-v">£38</div><div class="xcs-k">Driver pay</div></div>
+          </div>
+          <div class="xc-goods">180 kg · 4 boxes · stacking OK</div>
+          <div class="xc-foot">
+            <div><div class="xc-cd">⏱ 5 drivers required · 12:15 cutoff</div><div class="xc-meta">Posted 2 min ago</div></div>
+            <div class="xc-btns"><button class="btn btn-gh btn-xs">Details</button><button class="btn btn-or btn-sm" onclick="xAccept(this,'HAF-2853','Manchester M1 → Salford M50','£38')">Accept job →</button></div>
+          </div>
+        </div>
+
+        <div class="xc" id="xc-HAF-2855">
+          <div class="xc-head">
+            <div class="xc-badges"><span class="xb sdy">Same-day</span><span class="xb-ref">HAF-2855 · 4.7 mi from you</span></div>
+            <div class="xc-viewers"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 2 viewing</div>
+          </div>
+          <div class="xc-route">Manchester M4 → Stockport SK1</div>
+          <div class="xc-sr">
+            <div class="xcs"><div class="xcs-v">15:30</div><div class="xcs-k">Collect</div></div>
+            <div class="xcs"><div class="xcs-v">SWB</div><div class="xcs-k">Vehicle</div></div>
+            <div class="xcs"><div class="xcs-v">18 mi</div><div class="xcs-k">Loaded</div></div>
+            <div class="xcs rate"><div class="xcs-v">£54</div><div class="xcs-k">Driver pay</div></div>
+          </div>
+          <div class="xc-goods">340 kg · fragile electronics · handle with care</div>
+          <div class="xc-foot">
+            <div class="xc-meta">Posted 7 min ago · Collect today 15:30</div>
+            <div class="xc-btns"><button class="btn btn-gh btn-xs">Details</button><button class="btn btn-or btn-sm" onclick="xAccept(this,'HAF-2855','Manchester M4 → Stockport SK1','£54')">Accept job →</button></div>
+          </div>
+        </div>
+
+        <div class="xc" id="xc-HAF-2856">
+          <div class="xc-head">
+            <div class="xc-badges"><span class="xb flx">Flexible</span><span class="xb-ref">HAF-2856 · Backload opportunity</span></div>
+            <div class="xc-viewers"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 0 viewing</div>
+          </div>
+          <div class="xc-route">Trafford WA14 → Birmingham B1</div>
+          <div class="xc-sr">
+            <div class="xcs"><div class="xcs-v">09:00</div><div class="xcs-k">Collect</div></div>
+            <div class="xcs"><div class="xcs-v">LWB</div><div class="xcs-k">Vehicle</div></div>
+            <div class="xcs"><div class="xcs-v">84 mi</div><div class="xcs-k">Loaded</div></div>
+            <div class="xcs rate"><div class="xcs-v">£187</div><div class="xcs-k">Driver pay</div></div>
+          </div>
+          <div class="xc-goods">720 kg · 4 pallets · no stacking · tomorrow collect</div>
+          <div class="xc-foot">
+            <div class="xc-meta">Posted 18 min ago · Tomorrow 09:00 · Birmingham zone reward +0.5%</div>
+            <div class="xc-btns"><button class="btn btn-gh btn-xs">Details</button><button class="btn btn-or btn-sm" onclick="xAccept(this,'HAF-2856','Trafford WA14 → Birmingham B1','£187')">Accept job →</button></div>
           </div>
         </div>
       </div>
 
-      <!-- DRIVER: Available Jobs -->
+      <!-- DRIVER: Open Jobs (full network browse) -->
       <div class="tp" id="pane-d-jobs">
-        <h1 class="pt">Available Jobs</h1><p class="ps">Open jobs on the network matching your vehicle.</p>
-        <div class="kg"><div class="kc"><div class="kc-l">Today</div><div class="kc-v or">£142</div></div><div class="kc"><div class="kc-l">This week</div><div class="kc-v">7 jobs</div></div><div class="kc"><div class="kc-l">Miles</div><div class="kc-v">312</div></div><div class="kc"><div class="kc-l">Rating</div><div class="kc-v gn">4.9</div></div></div>
-        <div class="jl">
-          <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2853 · 2.1 mi away · 14:00</div><div class="jroute">Manchester M1 → Salford M50</div><div class="jdet">Small van · 180 kg · 12 miles</div></div><div class="jacts"><div class="jamt">£38</div><button class="btn btn-or btn-xs">Accept</button></div></div>
-          <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2855 · 4.7 mi away · 15:30</div><div class="jroute">Manchester M4 → Stockport SK1</div><div class="jdet">Medium van · 340 kg · 18 miles</div></div><div class="jacts"><div class="jamt">£54</div><button class="btn btn-or btn-xs">Accept</button></div></div>
-          <div class="jc"><div class="jdot" style="background:var(--bl)"></div><div class="jm"><div class="jref">HAF-2856 · Tomorrow 09:00</div><div class="jroute">Trafford WA14 → Manchester M60</div><div class="jdet">LWB · 720 kg · 22 miles</div></div><div class="jacts"><div class="jamt">£87</div><button class="btn btn-gh btn-xs">View</button></div></div>
+        <h1 class="pt">Open Jobs</h1><p class="ps">All open jobs on the network — filter by area, vehicle or urgency.</p>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem">
+          <select class="fi2" style="flex:1;min-width:130px;max-width:180px"><option>All vehicles</option><option>Small van</option><option>SWB</option><option selected>LWB</option><option>XLWB</option><option>Luton</option></select>
+          <select class="fi2" style="flex:1;min-width:130px;max-width:180px"><option>All urgency</option><option>Urgent</option><option>Same-day</option><option>Flexible</option></select>
+          <select class="fi2" style="flex:1;min-width:130px;max-width:180px"><option>Any direction</option><option>North</option><option>South</option><option>East</option><option>West</option></select>
+          <button class="btn btn-or btn-sm">Filter</button>
+        </div>
+        <div class="kg"><div class="kc"><div class="kc-l">Network open</div><div class="kc-v or">38</div><div class="kc-d">jobs now</div></div><div class="kc"><div class="kc-l">Matching LWB</div><div class="kc-v">14</div></div><div class="kc"><div class="kc-l">Urgent</div><div class="kc-v rd">6</div></div><div class="kc"><div class="kc-l">Your rating</div><div class="kc-v gn">4.9★</div></div></div>
+        <div class="xc">
+          <div class="xc-head"><div class="xc-badges"><span class="xb urg">Urgent</span><span class="xb-ref">HAF-2862 · Leeds LS1</span></div><div class="xc-viewers"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 7 viewing</div></div>
+          <div class="xc-route">Leeds LS1 → London EC1</div>
+          <div class="xc-sr"><div class="xcs"><div class="xcs-v">13:00</div><div class="xcs-k">Collect</div></div><div class="xcs"><div class="xcs-v">LWB</div><div class="xcs-k">Vehicle</div></div><div class="xcs"><div class="xcs-v">192 mi</div><div class="xcs-k">Loaded</div></div><div class="xcs rate"><div class="xcs-v">£310</div><div class="xcs-k">Driver pay</div></div></div>
+          <div class="xc-goods">580 kg · trade samples · time-critical · same-day delivery</div>
+          <div class="xc-foot"><div><div class="xc-cd">⏱ High demand · 12:30 cutoff</div><div class="xc-meta">Posted 1 min ago · 196 mi from you</div></div><div class="xc-btns"><button class="btn btn-gh btn-xs">Details</button><button class="btn btn-or btn-sm" onclick="xAccept(this,'HAF-2862','Leeds LS1 → London EC1','£310')">Accept job →</button></div></div>
+        </div>
+        <div class="xc">
+          <div class="xc-head"><div class="xc-badges"><span class="xb sdy">Same-day</span><span class="xb-ref">HAF-2859 · Birmingham B1</span></div><div class="xc-viewers"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 4 viewing</div></div>
+          <div class="xc-route">Birmingham B1 → Coventry CV1</div>
+          <div class="xc-sr"><div class="xcs"><div class="xcs-v">16:00</div><div class="xcs-k">Collect</div></div><div class="xcs"><div class="xcs-v">SWB</div><div class="xcs-k">Vehicle</div></div><div class="xcs"><div class="xcs-v">19 mi</div><div class="xcs-k">Loaded</div></div><div class="xcs rate"><div class="xcs-v">£52</div><div class="xcs-k">Driver pay</div></div></div>
+          <div class="xc-goods">260 kg · 3 boxes · retail returns</div>
+          <div class="xc-foot"><div class="xc-meta">Posted 9 min ago · Birmingham zone reward active</div><div class="xc-btns"><button class="btn btn-gh btn-xs">Details</button><button class="btn btn-or btn-sm" onclick="xAccept(this,'HAF-2859','Birmingham B1 → Coventry CV1','£52')">Accept job →</button></div></div>
+        </div>
+        <div class="xc">
+          <div class="xc-head"><div class="xc-badges"><span class="xb flx">Flexible</span><span class="xb pref">★ Preferred</span><span class="xb-ref">HAF-2847 · Sheffield S1</span></div><div class="xc-viewers"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 1 viewing</div></div>
+          <div class="xc-route">Sheffield S1 → Nottingham NG1</div>
+          <div class="xc-sr"><div class="xcs"><div class="xcs-v">08:00</div><div class="xcs-k">Collect</div></div><div class="xcs"><div class="xcs-v">LWB</div><div class="xcs-k">Vehicle</div></div><div class="xcs"><div class="xcs-v">42 mi</div><div class="xcs-k">Loaded</div></div><div class="xcs rate"><div class="xcs-v">£96</div><div class="xcs-k">Driver pay</div></div></div>
+          <div class="xc-goods">520 kg · machinery parts · tail lift required · tomorrow</div>
+          <div class="xc-pref">★ You've completed Sheffield → Nottingham twice before</div>
+          <div class="xc-foot"><div class="xc-meta">Posted 31 min ago · Tomorrow 08:00</div><div class="xc-btns"><button class="btn btn-gh btn-xs">Details</button><button class="btn btn-or btn-sm" onclick="xAccept(this,'HAF-2847','Sheffield S1 → Nottingham NG1','£96')">Accept job →</button></div></div>
         </div>
       </div>
 
-      <!-- DRIVER: Empty Miles -->
-      <div class="tp" id="pane-d-empty">
-        <h1 class="pt">Empty Miles</h1><p class="ps">List your return routes to fill your van and earn more.</p>
-        <div class="card" style="max-width:500px">
-          <div class="ct">Post a return route</div>
-          <div class="fr"><div class="fg"><label class="fl">From area</label><input class="fi2" placeholder="e.g. LS1"></div><div class="fg"><label class="fl">To area</label><input class="fi2" placeholder="e.g. M1"></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Date</label><input class="fi2" type="date"></div><div class="fg"><label class="fl">Window</label><input class="fi2" placeholder="e.g. 12:00–16:00"></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Space</label><select class="fi2"><option>Full van</option><option>Half van</option><option>Part load</option></select></div><div class="fg"><label class="fl">Min rate (£)</label><input class="fi2" type="number" placeholder="e.g. 45"></div></div>
-          <button class="btn btn-or btn-sm btn-wide" style="margin-top:.3rem">Post return route</button>
+      <!-- DRIVER: My Status -->
+      <div class="tp" id="pane-d-status">
+        <h1 class="pt">My Status</h1><p class="ps">Your availability, vehicle and today's summary.</p>
+        <div id="st-active-banner" style="display:none;margin-bottom:.9rem">
+          <div class="ajob"><div class="ajob-tag">Active job</div><div class="ajob-route" id="st-aj-route">—</div><div style="font-size:.75rem;color:var(--or);font-weight:700" id="st-aj-rate"></div></div>
         </div>
-        <div class="card"><div class="ct">Active return routes</div><div class="cr"><span class="ck">Manchester → Leeds · Today 14:00–18:00</span><span class="cv"><span class="chip co">Live</span></span></div><div class="cr"><span class="ck">Sheffield → Nottingham · Tomorrow 09:00</span><span class="cv"><span class="chip cb">Pending</span></span></div></div>
+        <div class="g2" style="margin-bottom:.85rem">
+          <div class="card" style="display:flex;flex-direction:column;gap:.6rem">
+            <div class="ct" style="margin-bottom:0">Availability</div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div id="st-avail-lbl" style="font-weight:700;font-size:.85rem;color:var(--gn)">● Online — Taking jobs</div>
+              <div class="avail-pill" id="st-pill" onclick="toggleXchAvail()"><div class="ap-dot"></div><span class="ap-lbl" id="st-pill-lbl">Online</span></div>
+            </div>
+            <div class="fr" style="margin:0"><div class="fg"><label class="fl">Base area</label><input class="fi2" value="Manchester M1" placeholder="Postcode"></div><div class="fg"><label class="fl">Operating zone</label><select class="fi2"><option>Any direction</option><option>North West</option><option>Yorkshire</option><option>Midlands</option><option>London</option><option>Local only</option></select></div></div>
+            <div class="fr" style="margin:0"><div class="fg"><label class="fl">Available from</label><input class="fi2" type="time" value="07:00"></div><div class="fg"><label class="fl">Available until</label><input class="fi2" type="time" value="18:00"></div></div>
+            <button class="btn btn-or btn-sm btn-wide" style="margin-top:.1rem">Update status</button>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:.75rem"><div class="ct">Today</div><div class="cr"><span class="ck">Jobs completed</span><span class="cv">3</span></div><div class="cr"><span class="ck">Earnings</span><span class="cv" style="color:var(--or);font-weight:700">£142</span></div><div class="cr"><span class="ck">Miles driven</span><span class="cv">84</span></div><div class="cr"><span class="ck">Rating</span><span class="cv" style="color:var(--gn);font-weight:700">4.9 ★</span></div></div>
+            <div class="card"><div class="ct">Vehicle on duty</div><div class="cr"><span class="ck">Type</span><span class="cv">Long wheelbase</span></div><div class="cr"><span class="ck">MOT</span><span class="cv"><span class="chip cg">Dec 2026</span></span></div><div class="cr"><span class="ck">Insurance</span><span class="cv"><span class="chip cg">Mar 2027</span></span></div><div class="cr"><span class="ck">GIT cover</span><span class="cv"><span class="chip ca">Pending upload</span></span></div></div>
+          </div>
+        </div>
+        <div class="card"><div class="ct">Looking for a backload?</div><p style="font-size:.78rem;color:var(--mu);margin-bottom:.7rem">Tell the network you're heading home — we'll match loads going your way.</p><div class="fr" style="margin:0"><div class="fg"><label class="fl">Heading towards</label><input class="fi2" value="Manchester M1" placeholder="Home area"></div><div class="fg"><label class="fl">From (current area)</label><input class="fi2" placeholder="Current postcode"></div></div><button class="btn btn-or btn-sm" style="margin-top:.6rem">Flag backload available →</button></div>
+      </div>
+
+      <!-- DRIVER: Backload Finder -->
+      <div class="tp" id="pane-d-empty">
+        <h1 class="pt">Backload Finder</h1><p class="ps">Post your return direction and pick up a load heading your way.</p>
+        <div class="card" style="max-width:540px;margin-bottom:.85rem">
+          <div class="ct">I'm heading back towards…</div>
+          <div class="fr"><div class="fg"><label class="fl">From (current area)</label><input class="fi2" placeholder="e.g. Birmingham B1"></div><div class="fg"><label class="fl">Home / destination</label><input class="fi2" placeholder="e.g. Manchester M1"></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Available from</label><input class="fi2" type="time" value="14:00"></div><div class="fg"><label class="fl">Space available</label><select class="fi2"><option>Full van</option><option>Half load</option><option>Part load</option></select></div></div>
+          <div class="fg"><label class="fl">Minimum rate (£)</label><input class="fi2" type="number" placeholder="e.g. 40" style="max-width:160px"></div>
+          <button class="btn btn-or btn-sm btn-wide" style="margin-top:.3rem">Post return route →</button>
+        </div>
+        <div class="xfeed-hdr">Jobs heading towards Manchester</div>
+        <div class="xc">
+          <div class="xc-head"><div class="xc-badges"><span class="xb flx">Flexible</span><span class="xb pref">↩ Backload</span><span class="xb-ref">HAF-2860 · Birmingham B1</span></div></div>
+          <div class="xc-route">Birmingham B1 → Manchester M1</div>
+          <div class="xc-sr"><div class="xcs"><div class="xcs-v">15:00</div><div class="xcs-k">Collect</div></div><div class="xcs"><div class="xcs-v">LWB</div><div class="xcs-k">Vehicle</div></div><div class="xcs"><div class="xcs-v">84 mi</div><div class="xcs-k">Loaded</div></div><div class="xcs rate"><div class="xcs-v">£185</div><div class="xcs-k">Driver pay</div></div></div>
+          <div class="xc-goods">640 kg · industrial parts · collect at 15:00</div>
+          <div class="xc-foot"><div class="xc-meta">Goes to your home area · Posted 6 min ago</div><div class="xc-btns"><button class="btn btn-or btn-sm" onclick="xAccept(this,'HAF-2860','Birmingham B1 → Manchester M1','£185')">Accept →</button></div></div>
+        </div>
+        <div class="card" style="margin-top:.75rem"><div class="ct">Active return routes</div><div class="cr"><span class="ck">Manchester → Leeds · Today 14:00–18:00</span><span class="cv"><span class="chip co">Live</span></span></div><div class="cr"><span class="ck">Sheffield → Nottingham · Tomorrow 08:00</span><span class="cv"><span class="chip cb">Pending</span></span></div></div>
       </div>
 
       <!-- DRIVER: Earnings -->
       <div class="tp" id="pane-d-earn">
-        <h1 class="pt">Earnings</h1><p class="ps">Your completed jobs, payments and PLNA tier rewards.</p>
-        <div class="kg"><div class="kc"><div class="kc-l">This week</div><div class="kc-v or">£642</div><div class="kc-d pos">+18% vs last week</div></div><div class="kc"><div class="kc-l">Pending</div><div class="kc-v">£284</div></div><div class="kc"><div class="kc-l">This month</div><div class="kc-v">£2,180</div></div><div class="kc"><div class="kc-l">Jobs</div><div class="kc-v gn">28</div></div></div>
-        <div class="card"><div class="ct">Recent jobs</div><table class="dt"><thead><tr><th>Ref</th><th>Route</th><th>Date</th><th>Pay</th></tr></thead><tbody><tr><td>HAF-2848</td><td>M1 → LS1</td><td>Today</td><td style="color:var(--or);font-weight:700">£87</td></tr><tr><td>HAF-2840</td><td>S1 → NG1</td><td>7 Jul</td><td style="color:var(--or);font-weight:700">£54</td></tr><tr><td>HAF-2831</td><td>B1 → CV1</td><td>5 Jul</td><td style="color:var(--or);font-weight:700">£112</td></tr><tr><td>HAF-2820</td><td>WA1 → M1</td><td>4 Jul</td><td style="color:var(--or);font-weight:700">£38</td></tr></tbody></table></div>
-        <div class="card"><div class="ct">PLNA tier</div><div class="cr"><span class="ck">Tier</span><span class="cv"><span class="chip co">PLNA Plus</span></span></div><div class="cr"><span class="ck">Priority access</span><span class="cv"><span class="chip cg">Active</span></span></div><div class="cr"><span class="ck">Relay pool</span><span class="cv"><span class="chip cg">Eligible</span></span></div></div>
+        <h1 class="pt">Earnings</h1><p class="ps">Your pay, payment schedule and PLNA tier.</p>
+        <div class="kg"><div class="kc"><div class="kc-l">This week</div><div class="kc-v or">£642</div><div class="kc-d pos">+18% vs last week</div></div><div class="kc"><div class="kc-l">Pending</div><div class="kc-v am">£284</div><div class="kc-d">due Friday</div></div><div class="kc"><div class="kc-l">This month</div><div class="kc-v">£2,180</div></div><div class="kc"><div class="kc-l">Jobs done</div><div class="kc-v gn">28</div></div></div>
+        <div class="g2">
+          <div class="card"><div class="ct">Recent jobs</div><table class="dt"><thead><tr><th>Ref</th><th>Route</th><th>Date</th><th>Pay</th><th>Status</th></tr></thead><tbody><tr><td>HAF-2848</td><td>M1 → LS1</td><td>Today</td><td style="color:var(--gn);font-weight:700">£87</td><td><span class="chip cg">Paid</span></td></tr><tr><td>HAF-2840</td><td>S1 → NG1</td><td>7 Jul</td><td style="color:var(--gn);font-weight:700">£54</td><td><span class="chip cg">Paid</span></td></tr><tr><td>HAF-2831</td><td>B1 → CV1</td><td>5 Jul</td><td style="color:var(--or);font-weight:700">£112</td><td><span class="chip ca">Pending</span></td></tr><tr><td>HAF-2820</td><td>WA1 → M1</td><td>4 Jul</td><td style="color:var(--or);font-weight:700">£38</td><td><span class="chip ca">Pending</span></td></tr></tbody></table></div>
+          <div>
+            <div class="card" style="margin-bottom:.75rem"><div class="ct">Next payment</div><div class="cr"><span class="ck">Amount</span><span class="cv" style="font-size:1.2rem;font-weight:900;color:var(--gn)">£284.00</span></div><div class="cr"><span class="ck">Payment date</span><span class="cv">Friday 13 Jul</span></div><div class="cr"><span class="ck">Via</span><span class="cv">CleverPay</span></div><div class="cr"><span class="ck">Jobs included</span><span class="cv">HAF-2820, HAF-2831</span></div></div>
+            <div class="card"><div class="ct">PLNA tier</div><div class="cr"><span class="ck">Tier</span><span class="cv"><span class="chip co">PLNA Plus</span></span></div><div class="cr"><span class="ck">Priority matching</span><span class="cv"><span class="chip cg">Active</span></span></div><div class="cr"><span class="ck">Relay pool</span><span class="cv"><span class="chip cg">Eligible</span></span></div><div class="cr"><span class="ck">Zone rewards</span><span class="cv"><span class="chip cg">Earning</span></span></div></div>
+          </div>
+        </div>
       </div>
 
       <!-- DRIVER: Compliance -->
@@ -1004,7 +1228,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         <h1 class="pt">Compliance</h1><p class="ps">Your CleverPay status and document checklist.</p>
         <div class="sp" id="d-comp-sp"><div class="sp-dot"></div><div class="sp-tx"><h4 id="d-comp-title">—</h4><p id="d-comp-desc">—</p></div></div>
         <div class="card"><div class="ct">Document checklist</div><div class="cr"><span class="ck">Driving licence</span><span class="cv" id="dc-lic">—</span></div><div class="cr"><span class="ck">MOT certificate</span><span class="cv" id="dc-mot">—</span></div><div class="cr"><span class="ck">Vehicle insurance</span><span class="cv" id="dc-ins">—</span></div><div class="cr"><span class="ck">Goods in transit</span><span class="cv" id="dc-git">—</span></div><div class="cr"><span class="ck">Right to work</span><span class="cv" id="dc-rtw">—</span></div><div class="cr"><span class="ck">WhatsApp verified</span><span class="cv"><span class="chip cg">Verified</span></span></div><div class="cr"><span class="ck">HAF username</span><span class="cv" id="dc-uname">—</span></div></div>
-        <div class="card"><div class="ct">CleverPay portal</div><p style="font-size:.78rem;color:var(--mu);margin-bottom:.85rem">Upload missing documents and check your full compliance file.</p><a href="https://clever.usehaf.co.uk" target="_blank" class="btn btn-or btn-sm">Open CleverPay</a></div>
+        <div class="card"><div class="ct">CleverPay portal</div><p style="font-size:.78rem;color:var(--mu);margin-bottom:.85rem">Upload missing documents and check your full compliance record.</p><a href="https://clever.usehaf.co.uk" target="_blank" class="btn btn-or btn-sm">Open CleverPay →</a></div>
       </div>
 
       <!-- BUSINESS: Book (own goods only — free) -->
@@ -1551,10 +1775,10 @@ let hafPend=null; /* password-verified user waiting on PIN setup: {u, hash} */
 function hafErr(el,msg){el.textContent=msg;el.style.display='block'}
 function hafGo(u,k,t){localStorage.setItem('knect-user',u);enterKnectApp(u);}
 const DRIVER_NAV=[
-  {id:'d-invites',l:'Job Invites',s:'KNECT Jobs',badge:'2',ico:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>'},
-  {id:'d-jobs',l:'Available Jobs',s:'KNECT Jobs',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
+  {id:'d-invites',l:'Exchange',s:'KNECT Jobs',badge:'2',ico:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>'},
+  {id:'d-jobs',l:'Open Jobs',s:'KNECT Jobs',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'d-status',l:'My Status',s:'KNECT Jobs',ico:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
-  {id:'d-empty',l:'Empty Miles',s:'KNECT Jobs',ico:'<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.54"/>'},
+  {id:'d-empty',l:'Backload',s:'KNECT Jobs',ico:'<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.54"/>'},
   {id:'d-earn',l:'Earnings',s:'My Account',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
   {id:'d-comp',l:'Compliance',s:'My Account',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
   {id:'billing',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
@@ -1642,34 +1866,72 @@ async function pinSave(){
 }
 function goLanding(){document.getElementById('app').classList.remove('open');document.getElementById('landing').style.display='flex'}
 function signOut(){localStorage.removeItem('knect-user');goLanding();}
-/* JOB TRACKING */
-const JOB_DATA={'HAF-2858':{route:'Manchester M4 → Warrington WA1',status:'accepted'},'HAF-2861':{route:'Salford M50 → Sheffield S1',status:'accepted'}};
-function acceptJob(btn,ref){
+/* EXCHANGE */
+let _xchOnline=true;
+let _xchActiveJob=null;
+const _xchSteps=['accepted','collected','enroute','delivered'];
+
+function xAccept(btn,ref,route,rate){
   btn.textContent='Accepted ✓';btn.disabled=true;btn.style.background='var(--gn)';
-  const j=JOB_DATA[ref];
-  if(!j)return;
-  document.getElementById('ajt-ref').textContent=ref;
-  document.getElementById('ajt-route').textContent=j.route;
-  document.getElementById('active-job-track').style.display='block';
-  setJobStep('accepted');
+  const card=document.getElementById('xc-'+ref);
+  if(card){card.style.opacity='.45';card.style.pointerEvents='none';}
+  _xchActiveJob={ref,route,rate,step:0};
+  _xchRenderActive();
 }
-function setJobStep(step){
-  const steps=['posted','accepted','enroute','delivered'];
-  const idx=steps.indexOf(step);
-  steps.forEach((s,i)=>{
-    const el=document.getElementById('jts-'+s);
-    if(el){if(i<=idx)el.classList.add('on');else el.classList.remove('on');}
+function _xchRenderActive(){
+  if(!_xchActiveJob)return;
+  const {route,rate,step}=_xchActiveJob;
+  ['xch-active','st-active-banner'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.style.display='block';
+  });
+  ['xch-aj-route','st-aj-route'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.textContent=route;
+  });
+  ['xch-aj-rate','st-aj-rate'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.textContent=rate+' · job in progress';
+  });
+  _xchSteps.forEach((s,i)=>{
+    const dot=document.getElementById('ajs-'+s);const line=document.getElementById('ajl-'+s);
+    if(dot){if(i<=step)dot.classList.add('on');else dot.classList.remove('on');}
+    if(line){if(i<step)line.classList.add('on');else line.classList.remove('on');}
+  });
+  const seq=[
+    {id:'aj-btn-collect',label:'Mark collected',step:0},
+    {id:'aj-btn-enroute',label:'Mark en route',step:1},
+    {id:'aj-btn-deliver',label:'Mark delivered',step:2},
+  ];
+  seq.forEach(({id,label,step:s})=>{
+    const b=document.getElementById(id);if(!b)return;
+    if(step>s){b.textContent=label.replace('Mark','')+'✓';b.disabled=true;b.style.background='var(--gn)';}
+    else{b.textContent=label;b.disabled=(step!==s);b.style.background='';}
   });
 }
-function advanceJob(step){
-  setJobStep(step);
-  const btn1=document.querySelector('[onclick="advanceJob(\'enroute\')"]');
-  const btn2=document.querySelector('[onclick="advanceJob(\'delivered\')"]');
-  if(step==='enroute'&&btn1){btn1.textContent='En route ✓';btn1.disabled=true;btn1.style.background='var(--gn)';}
-  if(step==='delivered'&&btn2){btn2.textContent='Delivered ✓';btn2.disabled=true;btn2.style.background='var(--gn)';if(btn1)btn1.style.display='none';}
+function xAdvance(stepName){
+  if(!_xchActiveJob)return;
+  const idx=_xchSteps.indexOf(stepName);
+  if(idx>_xchActiveJob.step||idx===-1)_xchActiveJob.step=Math.max(_xchActiveJob.step,idx>=0?idx:_xchActiveJob.step);
+  _xchRenderActive();
+  if(stepName==='delivered'){
+    setTimeout(()=>{
+      ['xch-active','st-active-banner'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+      _xchActiveJob=null;
+    },2200);
+  }
+}
+function toggleXchAvail(){
+  _xchOnline=!_xchOnline;
+  const pulse=document.getElementById('xch-pulse');
+  const lbl=document.getElementById('xch-lbl');
+  ['xch-pill-lbl','st-pill-lbl'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=_xchOnline?'Online':'Offline';});
+  const pills=[document.getElementById('xch-pill'),document.getElementById('st-pill')];
+  pills.forEach(p=>{if(p){if(_xchOnline)p.classList.remove('off');else p.classList.add('off');}});
+  if(pulse)pulse.style.background=_xchOnline?'var(--gn)':'var(--mu)';
+  if(lbl)lbl.textContent=_xchOnline?'Live on HAF KNECT Exchange':'Offline — not receiving jobs';
+  const stLbl=document.getElementById('st-avail-lbl');
+  if(stLbl)stLbl.textContent=_xchOnline?'● Online — Taking jobs':'○ Offline — Not taking jobs';
+  if(stLbl)stLbl.style.color=_xchOnline?'var(--gn)':'var(--mu)';
 }
 function toggleSb(){document.getElementById('sidebar').classList.toggle('open')}
-function toggleAvail(){document.getElementById('avail-lbl').textContent=document.getElementById('avail-tog').checked?'Available — Taking jobs':'Offline — Not taking jobs'}
 
 /* ── DEMO REQUEST ── */
 function openDemoReq(){document.getElementById('dr-ov').classList.add('open');document.getElementById('dr-name').focus();}
