@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 /* ── TOKENS ─────────────────────────────────────────────────── */
 :root{
@@ -1091,7 +1093,18 @@ textarea.fi2{resize:vertical;min-height:70px}
 
       <!-- FREIGHT: Network Capacity -->
       <div class="tp" id="pane-f-cap">
-        <h1 class="pt">Network Capacity</h1><p class="ps">Live driver availability across the HAF KNECT network.</p>
+        <h1 class="pt">Network Capacity</h1><p class="ps">Live job locations and driver availability across the HAF KNECT network.</p>
+        <!-- Map -->
+        <div style="border-radius:var(--r);overflow:hidden;border:1.5px solid var(--ln);margin-bottom:1rem;position:relative">
+          <div id="cap-map" style="height:420px;width:100%;background:var(--bg)"></div>
+          <div style="position:absolute;bottom:10px;left:10px;z-index:1000;background:var(--p);border:1px solid var(--ln);border-radius:8px;padding:.5rem .7rem;font-size:.7rem;display:flex;flex-direction:column;gap:.3rem;box-shadow:0 2px 8px rgba(0,0,0,.18)">
+            <div style="display:flex;align-items:center;gap:.4rem"><span style="width:11px;height:11px;border-radius:50%;background:#ff7800;display:inline-block;border:2px solid #fff"></span>Active job en route</div>
+            <div style="display:flex;align-items:center;gap:.4rem"><span style="width:11px;height:11px;border-radius:50%;background:#2dab60;display:inline-block;border:2px solid #fff"></span>Drivers available (high)</div>
+            <div style="display:flex;align-items:center;gap:.4rem"><span style="width:11px;height:11px;border-radius:50%;background:#e88c00;display:inline-block;border:2px solid #fff"></span>Drivers available (med)</div>
+            <div style="display:flex;align-items:center;gap:.4rem"><span style="width:11px;height:11px;border-radius:50%;background:#cc3333;display:inline-block;border:2px solid #fff"></span>Drivers low / load unmatched</div>
+          </div>
+        </div>
+        <!-- Area cards -->
         <div class="cap-grid">
           <div class="cap-card"><div class="cap-area">Manchester</div><div class="cap-avail hi">14</div><div class="cap-sub">available now</div></div>
           <div class="cap-card"><div class="cap-area">Leeds</div><div class="cap-avail hi">9</div><div class="cap-sub">available now</div></div>
@@ -1707,12 +1720,63 @@ function switchTab(id){
   const p=document.getElementById(id);if(p)p.classList.add('on');
   const n=document.getElementById('ni-'+id.replace('pane-',''));if(n)n.classList.add('on');
   ct=id;
+  if(id==='pane-f-cap')setTimeout(initCapMap,80);
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
 }
 
 // Boot in day mode
 document.documentElement.removeAttribute('data-theme');
 document.getElementById('landing').style.display='flex';
+
+/* ── NETWORK CAPACITY MAP ── */
+let capMap=null;
+function initCapMap(){
+  const el=document.getElementById('cap-map');
+  if(!el||typeof L==='undefined')return;
+  if(capMap){capMap.invalidateSize();return;}
+  capMap=L.map('cap-map',{zoomControl:true,scrollWheelZoom:false}).setView([52.8,-1.8],6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:18,opacity:.85
+  }).addTo(capMap);
+
+  /* Active jobs en route — orange */
+  [{lat:52.92,lng:-1.48,ref:'JB-0218',route:'Manchester → Birmingham',driver:'MW015291',step:'En route – M6'},
+   {lat:52.30,lng:-0.88,ref:'JB-0201',route:'Leeds → London',driver:'JH029483',step:'En route – A1(M)'},
+   {lat:53.44,lng:-2.18,ref:'JB-0196',route:'Liverpool → Sheffield',driver:'KP041872',step:'Collected – M62'},
+   {lat:51.72,lng:-1.08,ref:'JB-0189',route:'Bristol → London',driver:'TD018392',step:'En route – M40'}
+  ].forEach(j=>{
+    L.circleMarker([j.lat,j.lng],{radius:11,fillColor:'#ff7800',color:'#fff',weight:2.5,fillOpacity:.95})
+     .addTo(capMap)
+     .bindPopup(`<strong style="color:#ff7800">${j.ref}</strong><br><b>${j.route}</b><br>Driver: ${j.driver}<br><span style="color:#ff7800">● ${j.step}</span>`);
+  });
+
+  /* Available drivers — green (high) / amber (med) / red (low) */
+  [{lat:53.48,lng:-2.24,city:'Manchester',n:14},
+   {lat:53.80,lng:-1.55,city:'Leeds',n:9},
+   {lat:52.49,lng:-1.89,city:'Birmingham',n:11},
+   {lat:53.41,lng:-2.99,city:'Liverpool',n:6},
+   {lat:53.38,lng:-1.47,city:'Sheffield',n:5},
+   {lat:51.51,lng:-0.09,city:'London',n:8},
+   {lat:52.95,lng:-1.15,city:'Nottingham',n:2},
+   {lat:51.45,lng:-2.60,city:'Bristol',n:3},
+   {lat:54.98,lng:-1.62,city:'Newcastle',n:7},
+   {lat:52.64,lng:-1.13,city:'Leicester',n:4}
+  ].forEach(a=>{
+    const col=a.n>=8?'#2dab60':a.n>=4?'#e88c00':'#cc3333';
+    L.circleMarker([a.lat,a.lng],{radius:9,fillColor:col,color:'#fff',weight:2,fillOpacity:.88})
+     .addTo(capMap)
+     .bindPopup(`<strong>${a.city}</strong><br>${a.n} drivers available now`);
+  });
+
+  /* Unmatched posted loads — red outline */
+  [{lat:52.64,lng:-1.13,ref:'JB-0225',route:'Leicester → Glasgow'},
+   {lat:54.91,lng:-1.38,ref:'JB-0219',route:'Sunderland → Birmingham'}
+  ].forEach(u=>{
+    L.circleMarker([u.lat,u.lng],{radius:9,fillColor:'#cc3333',color:'#ff7800',weight:2,fillOpacity:.85})
+     .addTo(capMap)
+     .bindPopup(`<strong>${u.ref}</strong><br>${u.route}<br><span style="color:#cc3333">● Awaiting driver match</span>`);
+  });
+}
 </script>
 </body>
 </html>
