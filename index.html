@@ -2100,6 +2100,10 @@ function hav(a,b){const R=3959,dLa=(b.lat-a.lat)*Math.PI/180,dLo=(b.lng-a.lng)*M
    quote section) -> postcodes.io straight-line x1.25 -> offline area table */
 const DMX='https://haf-distance.pages.dev/';
 async function pcDistReal(a,b){
+  /* 1) validate both against the UK postcode database (catches gibberish) */
+  const [pa,pb]=await Promise.all([pcLookup(a),pcLookup(b)]);
+  if(pa===null||pb===null)return{miles:0,exact:false,from:pa,to:pb};  // null = not a real postcode
+  /* 2) accurate driving distance from the HAF gateway (Google) */
   try{
     const g=await fetch(DMX+'?from='+encodeURIComponent(a.trim())+'&to='+encodeURIComponent(b.trim()));
     if(g.ok){
@@ -2108,9 +2112,8 @@ async function pcDistReal(a,b){
         from:{area:d.from},to:{area:d.to}};
     }
   }catch(e){}
-  const [pa,pb]=await Promise.all([pcLookup(a),pcLookup(b)]);
+  /* 3) offline fallback: straight-line x1.25, or area table if lookup errored */
   if(pa==='ERR'||pb==='ERR')return{miles:pcDist(a,b),exact:false,from:undefined,to:undefined};
-  if(!pa||!pb)return{miles:pcDist(a,b),exact:false,from:pa,to:pb};
   return{miles:Math.max(1,Math.round(hav(pa,pb)*1.25)),exact:true,from:pa,to:pb};
 }
 
