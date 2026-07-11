@@ -1088,7 +1088,7 @@ textarea.fi2{resize:vertical;min-height:70px}
       <!-- BUSINESS: Book -->
       <div class="tp" id="pane-b-book">
         <h1 class="pt">Book a Courier</h1><p class="ps">Five-step booking for your own business deliveries.</p>
-        <div style="background:var(--bl-d);border:1px solid rgba(61,125,202,.2);border-radius:var(--rx);padding:.75rem 1rem;font-size:.76rem;color:var(--bl);margin-bottom:1.1rem">This account is for your own business products only. To move goods for other customers, apply for a Freight Forward account.</div>
+        <div style="background:var(--bl-d);border:1px solid rgba(61,125,202,.2);border-radius:var(--rx);padding:.75rem 1rem;font-size:.76rem;color:var(--bl);margin-bottom:1.1rem">Your goods, your network — move your own stock and products. You choose who can accept each job: your registered drivers first, your drivers only, or the open network.</div>
         <div class="card" style="max-width:560px">
           <div class="ct">Step 1 of 5 — Collection</div>
           <div class="fg"><label class="fl">Collection address</label><input class="fi2" placeholder="Full address or postcode"></div>
@@ -1131,7 +1131,8 @@ textarea.fi2{resize:vertical;min-height:70px}
         <h1 class="pt">Usage &amp; Activity</h1><p class="ps">Your monthly shipping activity — Business Account is free, no tiers.</p>
         <div class="kg"><div class="kc"><div class="kc-l">Deliveries this month</div><div class="kc-v or">38</div><div class="kc-d pos">+12% vs last month</div></div><div class="kc"><div class="kc-l">Spend this month</div><div class="kc-v">£4,820</div></div><div class="kc"><div class="kc-l">On-time rate</div><div class="kc-v gn">97%</div></div><div class="kc"><div class="kc-l">Account type</div><div class="kc-v" style="font-size:1rem">Free</div></div></div>
         <div class="card"><div class="ct">Account summary</div><div class="cr"><span class="ck">Plan</span><span class="cv"><span class="chip cb">Business Account — Free</span></span></div><div class="cr"><span class="ck">Goods type</span><span class="cv">Your own stock and products only</span></div><div class="cr"><span class="ck">Third-party freight</span><span class="cv"><span class="chip cr2">Not permitted</span></span></div><div class="cr"><span class="ck">Fleet on network</span><span class="cv"><span class="chip cg">Enabled</span></span></div></div>
-        <div style="border:1.5px solid var(--or-g);border-radius:var(--rs);padding:1rem;background:var(--or-d)"><div style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Want to forward goods for other businesses?</div><p style="font-size:.78rem;color:var(--mu);margin-bottom:.7rem">Upgrade to a Freight Forward account to post loads on behalf of third parties, access lane pricing, and unlock volume-based network fee reductions.</p><button class="btn btn-or btn-sm" onclick="switchTab('pane-feedback')">Apply for Freight Forward →</button></div>
+        <div style="border:1.5px solid var(--or-g);border-radius:var(--rs);padding:1rem;background:var(--or-d)"><div style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Drivers with their own vehicle?</div><p style="font-size:.78rem;color:var(--mu);margin-bottom:.7rem">Give each of your drivers a PLNA account — they manage their schedule, stay compliant through CleverPay, and can fill their empty return runs with network backloads.</p><a href="https://clever.usehaf.co.uk" target="_blank" class="btn btn-or btn-sm">Register a driver →</a></div>
+        
       </div>
 
       <!-- BUSINESS: Saved -->
@@ -1757,7 +1758,7 @@ const TAB_REG={
   'd-budget':  {l:'Budget & Profit',   ico:'<line x1="12" y1="1" x2="12" y2="23"/>',                       s:'DRIVER'},
   'd-comp':    {l:'Compliance',        ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',     s:'DRIVER'},
   'f-post':    {l:'Post a Load',       ico:'<line x1="12" y1="5" x2="12" y2="19"/>',                       s:'FREIGHT'},
-  'f-cap':     {l:'Network Map',  ico:'<circle cx="12" cy="12" r="10"/>',                              s:'FREIGHT'},
+  'f-cap':     {l:'Network Map',  ico:'<circle cx="12" cy="12" r="10"/>',                              s:'NETWORK'},
   'f-lanes':   {l:'Lane Pricing',      ico:'<line x1="12" y1="1" x2="12" y2="23"/>',                       s:'FREIGHT'},
   'f-loads':   {l:'Active Loads',      ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',             s:'FREIGHT'},
   'f-cover':   {l:'Coverage Board',    ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',     s:'FREIGHT'},
@@ -1773,7 +1774,7 @@ const TAB_REG={
 const TIER_DEFS={
   freight:[
     {key:'free',    label:'Free',    cls:'pb-free',    plan:'Free',      next:'Plus',
-     unlock:['exchange','f-post','f-loads','billing','support','feedback']},
+     unlock:['exchange','f-cap','f-post','f-loads','billing','support','feedback']},
     {key:'plus',    label:'Plus',    cls:'pb-plus',    plan:'Plus',      next:'Pro',
      unlock:['exchange','f-post','f-cap','f-loads','f-lanes','billing','support','feedback']},
     {key:'pro',     label:'Pro',     cls:'pb-pro',     plan:'Pro',       next:null,
@@ -1781,48 +1782,48 @@ const TIER_DEFS={
   ],
   plna:[
     {key:'lite',    label:'Lite',    cls:'pb-lite',    plan:'PLNA Lite', next:'Plus',
-     unlock:['exchange','d-home','d-book','d-cust','d-comp','billing','support','feedback']},
+     unlock:['exchange','f-cap','d-home','d-book','d-cust','d-comp','billing','support','feedback']},
     {key:'plus',    label:'Plus',    cls:'pb-plus',    plan:'PLNA Plus', next:'Pro',
-     unlock:['exchange','d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support','feedback']},
+     unlock:['exchange','f-cap','d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support','feedback']},
     {key:'pro',     label:'Pro',     cls:'pb-pro',     plan:'PLNA Pro',  next:null,
-     unlock:['exchange','d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support','feedback']},
+     unlock:['exchange','f-cap','d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support','feedback']},
   ],
   knect:[
     {key:'free',    label:'Free',    cls:'pb-free',    plan:'Free',      next:'Founder',
-     unlock:['exchange','b-book','b-del','cust-track','billing','support','feedback']},
+     unlock:['exchange','f-cap','b-book','b-del','cust-track','billing','support','feedback']},
     {key:'founder', label:'Founder', cls:'pb-founder', plan:'Founder',   next:null,
-     unlock:['exchange','b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback']},
+     unlock:['exchange','f-cap','b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback']},
   ],
 };
 
 /* ── ACCOUNTS ── */
 const ACCS={
   customer:      {n:'Jordan Williams',  u:'JW012390',i:'JW',r:'Customer',         rc:'cb',tierGroup:null,      initTier:null,
-    tabIds:['cust-track','cust-pod','cust-orders','support','feedback'],def:'cust-track',cp:'green',
+    tabIds:['cust-track','cust-pod','cust-orders','f-cap','support','feedback'],def:'cust-track',cp:'green',
     persona:'Individual Customer',ver:'HAF Demo',
     account_environment:'demo',is_demo_account:true,demo_role:'customer',demo_persona:'Individual Customer'},
   'biz-pro':     {n:'Apex Logistics Ltd',u:'AL448793',i:'AL',r:'Business Account',rc:'co',tierGroup:null,initTier:null,
-    tabIds:['exchange','b-book','b-del','b-spend','b-saved','billing','support','feedback'],def:'exchange',cp:'green',
+    tabIds:['exchange','f-cap','b-book','b-del','b-spend','b-saved','billing','support','feedback'],def:'exchange',cp:'green',
     persona:'Business Account',ver:'HAF Demo',
     account_environment:'demo',is_demo_account:true,demo_role:'business',demo_persona:'Business Account'},
   'freight-pro': {n:'NorthFreight UK',  u:'NF992190',i:'NF',r:'Freight Forward Pro',rc:'cb',tierGroup:'freight', initTier:'pro',
-    tabIds:['exchange','f-post','f-cap','f-lanes','f-loads','f-cover','f-account','billing','support','feedback'],def:'exchange',cp:'green',
+    tabIds:['exchange','f-cap','f-post','f-lanes','f-loads','f-cover','f-account','billing','support','feedback'],def:'exchange',cp:'green',
     persona:'Freight Forward — Pro',ver:'HAF Demo',
     account_environment:'demo',is_demo_account:true,demo_role:'freight',demo_persona:'Freight Forward Pro'},
   'plna-new':    {n:'Alex Thompson',    u:'AT229184',i:'AT',r:'PLNA Driver',       rc:'ca',tierGroup:null,      initTier:null,
-    tabIds:['exchange','d-home','d-comp','billing','support'],def:'d-comp',cp:'amber',
+    tabIds:['f-cap','d-home','d-comp','billing','support'],def:'d-comp',cp:'amber',
     persona:'New Driver — Compliance Pending',ver:'DRV-1.4',
     account_environment:'demo',is_demo_account:true,demo_role:'driver',demo_persona:'New Driver'},
   'plna-plus':   {n:'Marcus Reid',      u:'MR668793',i:'MR',r:'PLNA Driver',      rc:'cg',tierGroup:'plna',    initTier:'plus',
-    tabIds:['exchange','d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','whats-new','billing','support','feedback'],def:'exchange',cp:'green',
+    tabIds:['exchange','f-cap','d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','whats-new','billing','support','feedback'],def:'exchange',cp:'green',
     persona:'Clever Checked Driver — PLNA Plus',ver:'DRV-1.4',
     account_environment:'demo',is_demo_account:true,demo_role:'driver',demo_persona:'PLNA Plus Driver'},
   'knect-free':  {n:'Sam Patel',        u:'SP881291',i:'SP',r:'KNECT Member',      rc:'cb',tierGroup:'knect',   initTier:'free',
-    tabIds:['exchange','b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback'],def:'exchange',cp:'green',
+    tabIds:['exchange','f-cap','b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback'],def:'exchange',cp:'green',
     persona:'KNECT Member — Free',ver:'HAF Demo',
     account_environment:'demo',is_demo_account:true,demo_role:'knect',demo_persona:'KNECT Free Member'},
   'knect-founder':{n:'Rachel Moore',    u:'RM449082',i:'RM',r:'KNECT Founder',     rc:'co',tierGroup:'knect',   initTier:'founder',
-    tabIds:['exchange','b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback'],def:'exchange',cp:'green',
+    tabIds:['exchange','f-cap','b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback'],def:'exchange',cp:'green',
     persona:'KNECT Founder',ver:'HAF Demo',
     account_environment:'demo',is_demo_account:true,demo_role:'knect',demo_persona:'KNECT Founder'},
 };
