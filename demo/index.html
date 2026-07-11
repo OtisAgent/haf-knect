@@ -1056,6 +1056,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         <div id="plna-book-body"></div>
         <div class="card"><div class="ct">Booking requests</div>
           <div class="jl">
+            <div class="jc" style="border-color:var(--or);background:var(--or-d)"><div class="jdot" style="background:var(--or)"></div><div class="jm"><div class="jref">DIRECT JOB · Sent to your username · Today 17:05</div><div class="jroute">Manchester M1 → Preston PR1</div><div class="jdet">LWB · 480 kg · from Apex Logistics (Business) · sent direct via MR668793</div></div><div class="jacts"><div class="jamt">£92</div><span id="plna-req0"><button class="btn btn-or btn-xs" onclick="plnaReq('plna-req0',1)">Accept</button><button class="btn btn-gh btn-xs" onclick="plnaReq('plna-req0',0)">Decline</button></span></div></div>
             <div class="jc"><div class="jdot" style="background:var(--or)"></div><div class="jm"><div class="jref">REQUEST · Today 16:40</div><div class="jroute">Stockport SK1 → Manchester M4</div><div class="jdet">Same-day delivery · Fri · from your booking page</div></div><div class="jacts"><div class="jamt">£54</div><span id="plna-req1"><button class="btn btn-or btn-xs" onclick="plnaReq('plna-req1',1)">Accept</button><button class="btn btn-gh btn-xs" onclick="plnaReq('plna-req1',0)">Decline</button></span></div></div>
             <div class="jc"><div class="jdot" style="background:var(--or)"></div><div class="jm"><div class="jref">REQUEST · Yesterday 19:12</div><div class="jroute">Leeds LS1 → York YO1</div><div class="jdet">Multi-stop route · Mon · from your booking page</div></div><div class="jacts"><div class="jamt">£110</div><span id="plna-req2"><button class="btn btn-or btn-xs" onclick="plnaReq('plna-req2',1)">Accept</button><button class="btn btn-gh btn-xs" onclick="plnaReq('plna-req2',0)">Decline</button></span></div></div>
           </div>
@@ -1102,6 +1103,16 @@ textarea.fi2{resize:vertical;min-height:70px}
             <div class="jc"><div class="jdot" style="background:var(--am)"></div><div class="jm"><div class="jref">BEST VALUE</div><div class="jroute">Return route courier · This afternoon</div><div class="jdet">Estimated collection: 2h · Clever Checked</div></div><button class="btn btn-gh btn-xs">Select</button></div>
           </div>
         </div>
+        <div class="card" style="max-width:560px">
+          <div class="ct">Know your driver? Send it direct</div>
+          <p style="font-size:.76rem;color:var(--mu);margin-bottom:.7rem;line-height:1.55">Enter their HAF username and this job goes straight into their booking system — no open listing.</p>
+          <div style="display:flex;gap:.5rem">
+            <input class="fi2" id="b-dt-user" placeholder="e.g. MR668793" maxlength="8" autocomplete="off" style="flex:1;text-transform:uppercase" oninput="dtCheck('b')">
+            <button class="btn btn-or btn-sm" id="b-dt-btn" onclick="dtSubmit('b')" style="flex-shrink:0">Send direct →</button>
+          </div>
+          <div id="b-dt-out" style="font-size:.74rem;margin-top:.45rem;min-height:1.1rem"></div>
+          <div id="b-dt-done" style="display:none;margin-top:.55rem;padding:.75rem 1rem;border-radius:var(--rx);background:var(--gn-d);border:1px solid rgba(45,171,96,.25);font-size:.8rem;font-weight:600;color:var(--gn)"></div>
+        </div>
       </div>
 
       <!-- BUSINESS: Deliveries -->
@@ -1141,7 +1152,20 @@ textarea.fi2{resize:vertical;min-height:70px}
           <div class="fr"><div class="fg"><label class="fl">Vehicle required</label><select class="fi2"><option>Small van</option><option>SWB</option><option>LWB</option><option>XLWB</option><option>Luton</option></select></div><div class="fg"><label class="fl">Urgency</label><select class="fi2"><option>Flexible</option><option>Same-day</option><option>Urgent</option><option>Timed</option></select></div></div>
           <div class="fr"><div class="fg"><label class="fl">Target buy rate (£)</label><input class="fi2" type="number" placeholder="Your max carrier cost"></div><div class="fg"><label class="fl">Customer sell rate (£)</label><input class="fi2" type="number" placeholder="What customer pays"></div></div>
           <div class="fg"><label class="fl">Special instructions</label><textarea class="fi2" placeholder="Tail lift, fragile, hazmat, access..."></textarea></div>
-          <button class="btn btn-or btn-wide" style="margin-top:.3rem">Post load to network →</button>
+          <div style="border-top:1px solid var(--ln);margin:.9rem 0;padding-top:.9rem">
+            <label class="fl" style="margin-bottom:.5rem">Who gets this job?</label>
+            <div style="display:flex;gap:.4rem;margin-bottom:.6rem">
+              <button class="cap-pill active" id="f-dt-open" onclick="dtMode('f','open')">Open network</button>
+              <button class="cap-pill" id="f-dt-direct" onclick="dtMode('f','direct')">Direct to a driver</button>
+            </div>
+            <div id="f-dt-box" style="display:none">
+              <input class="fi2" id="f-dt-user" placeholder="Driver's HAF username e.g. MR668793" maxlength="8" autocomplete="off" style="text-transform:uppercase" oninput="dtCheck('f')">
+              <div id="f-dt-out" style="font-size:.74rem;margin-top:.4rem;min-height:1.1rem"></div>
+              <p style="font-size:.7rem;color:var(--su);line-height:1.5;margin-top:.3rem">The job goes straight into this driver's booking system — no open listing. They accept or decline directly.</p>
+            </div>
+          </div>
+          <button class="btn btn-or btn-wide" id="f-dt-btn" style="margin-top:.3rem" onclick="dtSubmit('f')">Post load to network →</button>
+          <div id="f-dt-done" style="display:none;margin-top:.7rem;padding:.75rem 1rem;border-radius:var(--rx);background:var(--gn-d);border:1px solid rgba(45,171,96,.25);font-size:.8rem;font-weight:600;color:var(--gn)"></div>
         </div>
       </div>
 
@@ -1974,6 +1998,50 @@ function switchTab(id){
     const dot=ni?.querySelector('.upd-dot');if(dot)dot.remove();
   }
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
+}
+
+/* ── DIRECT-TO-DRIVER JOBS ── */
+const DEMO_DRIVERS={
+  MR668793:{name:'Marcus Reid',info:'PLNA Plus · Manchester · Clever Checked'},
+  AT229184:{name:'Alex Thompson',info:'New driver · compliance pending'},
+  KP041872:{name:'Kim Park',info:'PLNA Pro · Liverpool · Clever Checked'},
+  TD018392:{name:'Tom Drake',info:'PLNA Plus · Bristol · Clever Checked'},
+};
+let _dtMode={f:'open'};
+function dtMode(p,mode){
+  _dtMode[p]=mode;
+  document.getElementById(p+'-dt-open').classList.toggle('active',mode==='open');
+  document.getElementById(p+'-dt-direct').classList.toggle('active',mode==='direct');
+  document.getElementById(p+'-dt-box').style.display=mode==='direct'?'':'none';
+  const btn=document.getElementById(p+'-dt-btn');
+  if(btn)btn.textContent=mode==='direct'?'Send direct to driver →':'Post load to network →';
+}
+function dtCheck(p){
+  const inp=document.getElementById(p+'-dt-user');
+  const out=document.getElementById(p+'-dt-out');
+  const v=inp.value.trim().toUpperCase();
+  if(v.length<8){out.textContent='';return null;}
+  if(!/^[A-Z]{2}\d{6}$/.test(v)){out.innerHTML='<span style="color:var(--rd)">Not a valid HAF username — format is 2 letters + 6 digits</span>';return null;}
+  const d=DEMO_DRIVERS[v];
+  if(d){out.innerHTML='<span style="color:var(--gn);font-weight:700">✓ '+d.name+'</span> <span style="color:var(--mu)">· '+d.info+'</span>';return v;}
+  out.innerHTML='<span style="color:var(--rd)">No driver found with that username</span>';return null;
+}
+function dtSubmit(p){
+  if(p==='f'&&_dtMode.f==='open'){
+    const done=document.getElementById('f-dt-done');
+    done.textContent='Load posted to the open network (demo — no live posting)';
+    done.style.display='';return;
+  }
+  const v=dtCheck(p);
+  const done=document.getElementById(p+'-dt-done');
+  if(!v){
+    done.style.display='';done.style.color='var(--rd)';done.style.background='var(--rd-d)';done.style.borderColor='rgba(208,64,64,.25)';
+    done.textContent='Enter a valid driver username first';return;
+  }
+  const d=DEMO_DRIVERS[v];
+  done.style.color='var(--gn)';done.style.background='var(--gn-d)';done.style.borderColor='rgba(45,171,96,.25)';
+  done.textContent='Sent direct to '+d.name+' ('+v+') — it’s now in their booking system awaiting accept/decline (demo)';
+  done.style.display='';
 }
 
 /* ── EXCHANGE DASHBOARD ── */
