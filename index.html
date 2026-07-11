@@ -489,13 +489,11 @@ textarea.fi2{resize:vertical;min-height:70px}
 .booked-sub{font-size:.8rem;color:var(--mu);line-height:1.65}
 /* ── SUPER MODE SELECTOR ── */
 #super-mode{display:none}
-#super-mode.open{display:flex}
 .sm-card{transition:box-shadow .14s,transform .12s;user-select:none}
 .sm-card:hover{box-shadow:var(--sd-h);transform:translateY(-1px)}
 .sm-card:active{transform:translateY(0)}
 .sm-va{display:flex;flex-direction:column;align-items:flex-start;gap:.1rem;padding:.65rem .8rem}
 #viewas-banner{display:none}
-#viewas-banner.show{display:flex}
 </style>
 </head>
 <body>
@@ -946,7 +944,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 </div>
 
 <!-- ══ SUPER MODE SELECTOR ══════════════════════════════════════ -->
-<div id="super-mode" style="display:none;position:fixed;inset:0;z-index:7000;background:var(--bg);align-items:center;justify-content:center;padding:1.5rem;flex-direction:column">
+<div id="super-mode" style="position:fixed;inset:0;z-index:7000;background:var(--bg);align-items:center;justify-content:center;padding:1.5rem;flex-direction:column">
   <div style="width:100%;max-width:680px">
     <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.3rem">
       <div style="background:var(--or);border-radius:10px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:.95rem;color:#0e1113">K</div>
@@ -1067,7 +1065,7 @@ textarea.fi2{resize:vertical;min-height:70px}
     <main class="main" id="main">
 
       <!-- VIEW-AS BANNER (only shown in impersonation modes) -->
-      <div id="viewas-banner" style="display:none;background:var(--p2);border:1.5px solid var(--lns);border-radius:var(--rx);padding:.55rem 1rem;margin-bottom:1rem;display:none;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
+      <div id="viewas-banner" style="background:var(--p2);border:1.5px solid var(--lns);border-radius:var(--rx);padding:.55rem 1rem;margin-bottom:1rem;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:.5rem">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           <span style="font-size:.76rem;font-weight:700;color:var(--or)">Super Admin preview — </span>
@@ -2107,10 +2105,10 @@ function enterKnectApp(u){
   document.getElementById('tb-av').textContent=u.slice(0,2);
   const sm=document.getElementById('sm-username');if(sm)sm.textContent=u;
   document.getElementById('landing').style.display='none';
-  document.getElementById('app').classList.add('open');
   if(isAdmin){
     showModeSelector();
   }else{
+    document.getElementById('app').classList.add('open');
     const roleEl=document.getElementById('tb-role');
     roleEl.textContent='Driver';roleEl.className='role-chip chip cb';
     const plnaBtn=document.getElementById('plna-link-btn');
@@ -2123,20 +2121,20 @@ function enterKnectApp(u){
 
 function showModeSelector(){
   const ov=document.getElementById('super-mode');
-  if(ov){ov.classList.add('open');}
+  if(ov)ov.style.display='flex';
   document.getElementById('app').classList.remove('open');
 }
 
 function enterMode(mode){
   const ov=document.getElementById('super-mode');
-  if(ov)ov.classList.remove('open');
+  if(ov)ov.style.display='none';
   document.getElementById('app').classList.add('open');
   const roleEl=document.getElementById('tb-role');
   const plnaBtn=document.getElementById('plna-link-btn');
   const vaBanner=document.getElementById('viewas-banner');
   const vaLbl=document.getElementById('viewas-lbl');
   if(plnaBtn)plnaBtn.style.display='none';
-  if(vaBanner)vaBanner.classList.remove('show');
+  if(vaBanner)vaBanner.style.display='none';
 
   const VA_LABELS={
     'view-driver':'Driver view — PLNA driver on the HAF KNECT exchange',
@@ -2185,7 +2183,7 @@ function enterMode(mode){
       if(tb2)tb2.innerHTML=`<span style="font-weight:700;color:var(--or)">${name}</span><span style="color:var(--mu)">${desc}</span>`;
     }
     _setModePill('Preview','var(--mu)');
-    if(vaBanner){vaBanner.classList.add('show');}
+    if(vaBanner){vaBanner.style.display='flex';}
     if(vaLbl)vaLbl.textContent=VA_LABELS[mode]||mode;
   }
 }
