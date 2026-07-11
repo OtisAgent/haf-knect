@@ -1601,21 +1601,88 @@ textarea.fi2{resize:vertical;min-height:70px}
         </div>
       </div>
 
-      <!-- FREIGHT: Network Capacity -->
+      <!-- FREIGHT: Network Map -->
       <div class="tp" id="pane-f-cap">
-        <h1 class="pt">Network Capacity</h1><p class="ps">Live job locations and driver availability across the HAF KNECT network.</p>
+        <h1 class="pt">Network Map</h1><p class="ps">Live driver capacity, active jobs, relay stations, and indicative lane rates across the HAF network.</p>
+
+        <!-- Filter bar -->
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.7rem;align-items:center">
+          <select id="cap-veh" class="fi2" style="flex:1;min-width:140px;max-width:200px" onchange="capFilter()">
+            <option value="">All vehicles</option>
+            <option value="van">Small van</option>
+            <option value="swb">SWB</option>
+            <option value="lwb">LWB</option>
+            <option value="xlwb">Extra LWB</option>
+            <option value="luton">Luton</option>
+            <option value="artic">Artic</option>
+            <option value="flatbed">Flatbed</option>
+            <option value="fridge">Refrigerated</option>
+            <option value="curtain">Curtainsider</option>
+          </select>
+          <select id="cap-from" class="fi2" style="flex:1;min-width:140px;max-width:180px" onchange="capFilter()">
+            <option value="">From — any zone</option>
+            <option>North East</option>
+            <option>Yorkshire</option>
+            <option>North West</option>
+            <option>West Midlands</option>
+            <option>East Midlands</option>
+            <option>East of England</option>
+            <option>London / M25</option>
+            <option>South East</option>
+            <option>South West</option>
+            <option>Scotland</option>
+          </select>
+          <select id="cap-to" class="fi2" style="flex:1;min-width:140px;max-width:180px" onchange="capFilter()">
+            <option value="">To — any zone</option>
+            <option>North East</option>
+            <option>Yorkshire</option>
+            <option>North West</option>
+            <option>West Midlands</option>
+            <option>East Midlands</option>
+            <option>East of England</option>
+            <option>London / M25</option>
+            <option>South East</option>
+            <option>South West</option>
+            <option>Scotland</option>
+          </select>
+          <label style="display:flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:600;cursor:pointer;white-space:nowrap;padding:.35rem .5rem;border:1px solid var(--ln);border-radius:var(--rx);background:var(--p2)">
+            <input type="checkbox" id="cap-relay" onchange="capFilter()" style="cursor:pointer;accent-color:var(--or)"> Relay stations
+          </label>
+        </div>
+
+        <!-- Rate strip -->
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.7rem">
+          <div style="flex:1;min-width:140px;padding:.5rem .75rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);font-size:.73rem">
+            <div style="font-weight:800;color:var(--or);font-size:.82rem" id="cap-rate-lbl">£1.80 – £2.40<span style="font-weight:500;color:var(--mu)">/mile</span></div>
+            <div style="color:var(--mu);margin-top:.12rem;font-size:.7rem">Current job rate · van / LWB</div>
+          </div>
+          <div style="flex:1;min-width:140px;padding:.5rem .75rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);font-size:.73rem">
+            <div style="font-weight:800;font-size:.82rem">9% <span style="font-weight:500;color:var(--mu)">network fee</span></div>
+            <div style="color:var(--mu);margin-top:.12rem;font-size:.7rem">HAF KNECT fee on posted loads</div>
+          </div>
+          <div style="flex:1;min-width:140px;padding:.5rem .75rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);font-size:.73rem">
+            <div style="font-weight:800;font-size:.82rem;color:var(--mu)">Pooling rate &nbsp;<span style="font-size:.66rem;background:var(--or-d);color:var(--or);padding:2px 6px;border-radius:4px;font-weight:700;vertical-align:middle">Coming soon</span></div>
+            <div style="color:var(--mu);margin-top:.12rem;font-size:.7rem">Shared-load rate model in development</div>
+          </div>
+        </div>
+
+        <!-- Active filter badge -->
+        <div id="cap-filter-bar" style="display:none;margin-bottom:.55rem;padding:.4rem .7rem;background:var(--or-d);border:1px solid rgba(255,120,0,.3);border-radius:var(--rx);font-size:.75rem;color:var(--or);font-weight:600"></div>
+
         <!-- Map -->
         <div style="border-radius:var(--r);overflow:hidden;border:1.5px solid var(--ln);margin-bottom:1rem;position:relative">
           <div id="cap-map" style="height:420px;width:100%;background:var(--bg)"></div>
           <div style="position:absolute;bottom:10px;left:10px;z-index:1000;background:var(--p);border:1px solid var(--ln);border-radius:8px;padding:.55rem .75rem;font-size:.68rem;display:flex;flex-direction:column;gap:.32rem;box-shadow:0 2px 8px rgba(0,0,0,.22)">
-            <div style="font-weight:800;font-size:.62rem;letter-spacing:.06em;color:var(--mu);text-transform:uppercase;margin-bottom:.1rem">Zone key</div>
+            <div style="font-weight:800;font-size:.62rem;letter-spacing:.06em;color:var(--mu);text-transform:uppercase;margin-bottom:.1rem">Map key</div>
             <div style="display:flex;align-items:center;gap:.45rem"><span style="width:13px;height:13px;border-radius:3px;background:#2dab60;opacity:.7;display:inline-block"></span>High capacity zone</div>
             <div style="display:flex;align-items:center;gap:.45rem"><span style="width:13px;height:13px;border-radius:3px;background:#e88c00;opacity:.7;display:inline-block"></span>Medium capacity zone</div>
             <div style="display:flex;align-items:center;gap:.45rem"><span style="width:13px;height:13px;border-radius:3px;background:#cc3333;opacity:.7;display:inline-block"></span>Low capacity zone</div>
             <div style="display:flex;align-items:center;gap:.45rem"><span style="width:13px;height:13px;border-radius:50%;background:#ff7800;display:inline-block;border:2px solid #fff"></span>Active job en route</div>
+            <div style="display:flex;align-items:center;gap:.45rem"><span style="width:12px;height:12px;background:#5b3de8;display:inline-block;transform:rotate(45deg);margin:1px 1px 1px 1px"></span>Relay station</div>
             <div style="margin-top:.2rem;padding:.3rem .45rem;background:rgba(255,120,0,.1);border-radius:5px;color:var(--or);font-weight:700">★ = zone reward active</div>
           </div>
         </div>
+
         <!-- Area cards -->
         <div class="cap-grid">
           <div class="cap-card"><div class="cap-area">Manchester</div><div class="cap-avail hi">14</div><div class="cap-sub">available now</div></div>
@@ -2195,7 +2262,7 @@ const ADMIN_NAV=[
   {id:'admin',l:'Network Overview',s:'Overview',ico:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
   {id:'f-post',l:'Post a Load',s:'Freight Tools',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'f-loads',l:'Active Loads',s:'Freight Tools',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
-  {id:'f-cap',l:'Network Capacity',s:'Freight Tools',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
+  {id:'f-cap',l:'Network Map',s:'Freight Tools',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:'f-cover',l:'Coverage Board',s:'Freight Tools',ico:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'},
   {id:'f-lanes',l:'Lane Pricing',s:'Freight Tools',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
   {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
@@ -2214,7 +2281,7 @@ const BUSINESS_NAV=[
 const FREIGHT_NAV=[
   {id:'f-post',l:'Post a Load',s:'Freight',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'f-loads',l:'Active Loads',s:'Freight',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
-  {id:'f-cap',l:'Network Capacity',s:'Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
+  {id:'f-cap',l:'Network Map',s:'Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:'f-cover',l:'Coverage Board',s:'Freight',ico:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'},
   {id:'f-dir',l:'Driver Directory',s:'Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'f-lanes',l:'Lane Pricing',s:'Freight',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
@@ -2228,7 +2295,7 @@ const PERSONAL_NAV=[
   {id:'f-post',l:'Post a Load',s:'My Freight',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'f-loads',l:'My Active Loads',s:'My Freight',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'f-dir',l:'Driver Directory',s:'My Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
-  {id:'f-cap',l:'Network Capacity',s:'My Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
+  {id:'f-cap',l:'Network Map',s:'My Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:'f-account',l:'Account &amp; Rebate',s:'My Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
   {id:'billing',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'My Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
@@ -2601,6 +2668,63 @@ function initCapMap(){
      .addTo(capMap)
      .bindPopup(`<strong style="color:#ff7800">${j.ref}</strong><br><b>${j.route}</b><br>Driver: ${j.driver}<br><span style="color:#ff7800">● ${j.step}</span>`);
   });
+
+  /* Relay stations — major UK freight handoff hubs */
+  const RELAY_STATIONS=[
+    {lat:52.63,lng:-1.70,name:'Tamworth Relay Hub',  road:'M42 / A5',  note:'Central UK — ideal North↔South split'},
+    {lat:53.52,lng:-1.12,name:'Doncaster Relay Hub', road:'M18 / A1',  note:'Yorkshire — North↔South and East↔West'},
+    {lat:52.04,lng:-0.76,name:'Milton Keynes Hub',   road:'M1 J13',    note:'South Midlands — North↔London split'},
+    {lat:52.80,lng:-2.12,name:'Stafford Hub',         road:'M6 J14',    note:'West Midlands — M6 corridor midpoint'},
+    {lat:51.56,lng:-1.78,name:'Swindon Hub',          road:'M4 J15',    note:'South West — M4/M5 interchange'},
+  ];
+  const relayIcon=L.divIcon({
+    className:'',
+    html:`<div style="width:14px;height:14px;background:#5b3de8;transform:rotate(45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
+    iconSize:[14,14],iconAnchor:[7,7]
+  });
+  capMap._relayLayers=[];
+  RELAY_STATIONS.forEach(r=>{
+    const m=L.marker([r.lat,r.lng],{icon:relayIcon})
+     .bindPopup(`<strong style="color:#5b3de8">◆ ${r.name}</strong><br>${r.road}<br><span style="color:#666;font-size:11px">${r.note}</span>`);
+    capMap._relayLayers.push(m);
+  });
+}
+
+/* ── NETWORK MAP FILTER ── */
+function capFilter(){
+  const veh=(document.getElementById('cap-veh')||{}).value||'';
+  const from=(document.getElementById('cap-from')||{}).value||'';
+  const to=(document.getElementById('cap-to')||{}).value||'';
+  const relay=document.getElementById('cap-relay')&&document.getElementById('cap-relay').checked;
+
+  /* Relay station layer toggle */
+  if(capMap&&capMap._relayLayers){
+    capMap._relayLayers.forEach(m=>{
+      if(relay){m.addTo(capMap);}else{try{capMap.removeLayer(m);}catch(e){}}
+    });
+  }
+
+  /* Rate strip update by vehicle type */
+  const RATES={van:'£1.60 – £2.00',swb:'£1.65 – £2.10',lwb:'£1.80 – £2.40',xlwb:'£1.90 – £2.50',luton:'£2.00 – £2.70',artic:'£2.80 – £3.80',flatbed:'£2.50 – £3.40',fridge:'£2.60 – £3.50',curtain:'£2.40 – £3.20'};
+  const VEH_LABELS={van:'small van',swb:'SWB',lwb:'LWB',xlwb:'extra LWB',luton:'Luton',artic:'artic',flatbed:'flatbed',fridge:'refrigerated',curtain:'curtainsider'};
+  const rateEl=document.getElementById('cap-rate-lbl');
+  if(rateEl){
+    const r=RATES[veh]||'£1.80 – £2.40';
+    const vl=VEH_LABELS[veh]||'van / LWB';
+    rateEl.innerHTML=r+'<span style="font-weight:500;color:var(--mu)">/mile</span>';
+    rateEl.closest('div').querySelector('div:last-child').textContent='Current job rate · '+vl;
+  }
+
+  /* Active filter badge */
+  const fb=document.getElementById('cap-filter-bar');
+  if(!fb)return;
+  const parts=[];
+  if(veh)parts.push('Vehicle: '+(VEH_LABELS[veh]||veh));
+  if(from)parts.push('From: '+from);
+  if(to)parts.push('To: '+to);
+  if(relay)parts.push('Relay stations visible');
+  if(parts.length){fb.style.display='block';fb.textContent='Filtering — '+parts.join(' · ');}
+  else{fb.style.display='none';}
 }
 
 /* ── DRIVER DIRECTORY ── */
