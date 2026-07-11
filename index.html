@@ -769,11 +769,11 @@ textarea.fi2{resize:vertical;min-height:70px}
         <div class="sc-title">Log in to your account</div>
         <div class="sc-fi">
           <span class="sc-lbl">HAF username</span>
-          <input class="sc-inp" id="sc-user" placeholder="e.g. JW012390" autocomplete="off">
+          <input class="sc-inp" id="sc-user" placeholder="e.g. JW012390" autocomplete="username" autocapitalize="characters" maxlength="10" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')scLogin()">
         </div>
         <div class="sc-fi">
-          <span class="sc-lbl">Password</span>
-          <input class="sc-inp" id="sc-pass" placeholder="Password" type="password">
+          <span class="sc-lbl">PIN or password</span>
+          <input class="sc-inp" id="sc-pass" placeholder="4–6 digit PIN or password" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')scLogin()">
         </div>
         <div class="sc-err" id="sc-err"></div>
         <button class="btn btn-or btn-wide" onclick="scLogin()" style="margin-top:.3rem">Log in →</button>
@@ -844,12 +844,26 @@ textarea.fi2{resize:vertical;min-height:70px}
       <div style="font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.04em;color:var(--tx)">HAF <span style="color:var(--or)">KNECT</span></div>
     </div>
     <h2>Sign in</h2>
-    <p>Enter your HAF username and password to access your account.</p>
-    <div class="of"><label class="ol">HAF username</label><input class="oi" id="l-user" placeholder="e.g. JW012390" autocomplete="off"></div>
-    <div class="of"><label class="ol">Password</label><input class="oi" id="l-pass" placeholder="Password" type="password"></div>
+    <p>Enter your HAF username with your PIN (or password) to access your account.</p>
+    <div class="of"><label class="ol">HAF username</label><input class="oi" id="l-user" placeholder="e.g. JW012390" autocomplete="username" autocapitalize="characters" maxlength="10" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="of"><label class="ol">PIN or password</label><input class="oi" id="l-pass" placeholder="4–6 digit PIN or password" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div class="oe" id="l-err"></div>
     <button class="btn btn-or btn-wide" onclick="doLogin()">Sign in →</button>
     <p style="font-size:.72rem;color:var(--mu);text-align:center;margin-top:.8rem">No account? <a href="https://clever.usehaf.co.uk" target="_blank">Create one via CleverPay</a></p>
+  </div>
+</div>
+
+<!-- ══ PIN SETUP OVERLAY ══════════════════════════════════════════ -->
+<div class="overlay" id="pin-ov">
+  <div class="obox">
+    <button class="obox-close" onclick="pinSkip()">×</button>
+    <h2>Create your quick PIN</h2>
+    <p>Choose a 4–6 digit PIN. Next time, your username and PIN get you straight in — no password needed.</p>
+    <div class="of"><label class="ol">New PIN (4–6 digits)</label><input class="oi" id="pin-a" type="password" inputmode="numeric" maxlength="6" placeholder="e.g. 4590" onkeydown="if(event.key==='Enter')pinSave()"></div>
+    <div class="of"><label class="ol">Confirm PIN</label><input class="oi" id="pin-b" type="password" inputmode="numeric" maxlength="6" placeholder="Repeat PIN" onkeydown="if(event.key==='Enter')pinSave()"></div>
+    <div class="oe" id="pin-err"></div>
+    <button class="btn btn-or btn-wide" id="pin-btn" onclick="pinSave()">Save PIN and continue</button>
+    <p style="font-size:.72rem;color:var(--mu);text-align:center;margin-top:.8rem"><a href="#" onclick="pinSkip();return false">Skip for now — take me to my account</a></p>
   </div>
 </div>
 
@@ -1373,11 +1387,52 @@ function openDemoGate(){
   if(gate)gate.style.display='block';
 }
 
-/* ── LOGIN ── */
+/* ── LOGIN (real — PLNA driver accounts via Supabase) ── */
+const PLNA_URL='https://ggkpqqrtxtlafdkxcaqg.supabase.co';
+const PLNA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdna3BxcXJ0eHRsYWZka3hjYXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTM2NjAsImV4cCI6MjA5Nzc2OTY2MH0.hB70KOYZu4dshwhsrxF_dFyBn0n72gStWTwxYGsLdgY';
+const PLNA_HOME='https://plna.usehaf.co.uk';
 function openLogin(){document.getElementById('login-ov').classList.add('open')}
 function closeLogin(){document.getElementById('login-ov').classList.remove('open')}
-function doLogin(){document.getElementById('l-err').style.display='block'}
-function scLogin(){document.getElementById('sc-err').style.display='block'}
+async function hafSha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
+let hafPend=null; /* password-verified user waiting on PIN setup: {u, hash} */
+function hafErr(el,msg){el.textContent=msg;el.style.display='block'}
+function hafGo(u,k,t){window.location.href=PLNA_HOME+'/sso.html#u='+encodeURIComponent(u)+'&k='+k+'&t='+t}
+async function hafAuth(u,s,err,btn){
+  err.style.display='none';err.textContent='';
+  u=(u||'').trim().toUpperCase();s=(s||'');
+  if(!u||!s){hafErr(err,'Enter your HAF username and your PIN or password.');return}
+  if(u.length<6){hafErr(err,'Username looks too short — format is like JW012390.');return}
+  const isPin=/^\d{4,6}$/.test(s);
+  const old=btn.textContent;btn.textContent='Signing in…';btn.disabled=true;
+  try{
+    const hash=await hafSha(isPin?u+':'+s:s);
+    const col=isPin?'pin_hash':'password_hash';
+    const r=await fetch(PLNA_URL+'/rest/v1/plna_drivers?haf_username=eq.'+encodeURIComponent(u)+'&'+col+'=eq.'+hash+'&select=haf_username,full_name,plan,pin_hash',{headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY}});
+    const d=await r.json();
+    if(!Array.isArray(d)||!d.length){
+      hafErr(err,isPin?'That PIN didn\'t match. If you haven\'t set a PIN yet, sign in with your password first.':'Incorrect username or password. Try again.');
+      btn.textContent=old;btn.disabled=false;return}
+    if(!isPin&&!d[0].pin_hash){hafPend={u:u,hash:hash};btn.textContent=old;btn.disabled=false;closeLogin();document.getElementById('pin-ov').classList.add('open');document.getElementById('pin-a').focus();return}
+    hafGo(u,hash,isPin?'p':'w');
+  }catch(e){hafErr(err,'Connection problem — please try again.');btn.textContent=old;btn.disabled=false}
+}
+function doLogin(){hafAuth(document.getElementById('l-user').value,document.getElementById('l-pass').value,document.getElementById('l-err'),document.querySelector('#login-ov .btn-wide'))}
+function scLogin(){hafAuth(document.getElementById('sc-user').value,document.getElementById('sc-pass').value,document.getElementById('sc-err'),document.querySelector('.side-card .btn-wide'))}
+function pinSkip(){document.getElementById('pin-ov').classList.remove('open');if(hafPend)hafGo(hafPend.u,hafPend.hash,'w')}
+async function pinSave(){
+  const a=document.getElementById('pin-a').value.trim(),b=document.getElementById('pin-b').value.trim(),err=document.getElementById('pin-err'),btn=document.getElementById('pin-btn');
+  err.style.display='none';
+  if(!/^\d{4,6}$/.test(a)){hafErr(err,'Your PIN must be 4 to 6 digits.');return}
+  if(a!==b){hafErr(err,'The two PINs don\'t match — try again.');return}
+  btn.textContent='Saving…';btn.disabled=true;
+  try{
+    const ph=await hafSha(hafPend.u+':'+a);
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/set_driver_pin',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:hafPend.u,p_password_hash:hafPend.hash,p_pin_hash:ph})});
+    const ok=await r.json();
+    if(ok!==true){hafErr(err,'Couldn\'t save your PIN — please try again.');btn.textContent='Save PIN and continue';btn.disabled=false;return}
+    hafGo(hafPend.u,hafPend.hash,'w');
+  }catch(e){hafErr(err,'Connection problem — please try again.');btn.textContent='Save PIN and continue';btn.disabled=false}
+}
 function goLanding(){document.getElementById('app').classList.remove('open');document.getElementById('landing').style.display='flex'}
 function signOut(){goLanding()}
 function toggleSb(){document.getElementById('sidebar').classList.toggle('open')}
