@@ -489,6 +489,9 @@ textarea.fi2{resize:vertical;min-height:70px}
 .booked-sub{font-size:.8rem;color:var(--mu);line-height:1.65}
 /* ── SUPER MODE SELECTOR ── */
 #super-mode{display:none}
+.cap-pill{padding:.28rem .7rem;border:1.5px solid var(--ln);border-radius:20px;background:var(--p2);font-size:.7rem;font-weight:700;color:var(--mu);cursor:pointer;transition:all .12s;white-space:nowrap}
+.cap-pill:hover{border-color:var(--or);color:var(--or)}
+.cap-pill.active{border-color:var(--or);background:var(--or-d);color:var(--or)}
 .demo-tile{flex:1;padding:.55rem .35rem;background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);cursor:pointer;text-align:center;transition:border-color .14s,background .14s;display:flex;flex-direction:column;align-items:center;gap:.18rem}
 .demo-tile:hover{border-color:var(--or);background:var(--or-d)}
 .demo-tile-ico{width:18px;height:18px;color:var(--or);stroke:var(--or);margin-bottom:.1rem}
@@ -1655,96 +1658,45 @@ textarea.fi2{resize:vertical;min-height:70px}
 
       <!-- FREIGHT: Network Map -->
       <div class="tp" id="pane-f-cap">
-        <h1 class="pt">Network Map</h1><p class="ps">Live driver capacity, active jobs, relay stations, and indicative lane rates across the HAF network.</p>
-
-        <!-- Filter bar -->
-        <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.7rem;align-items:center">
-          <select id="cap-veh" class="fi2" style="flex:1;min-width:140px;max-width:200px" onchange="capFilter()">
-            <option value="">All vehicles</option>
-            <option value="van">Small van</option>
-            <option value="swb">SWB</option>
-            <option value="lwb">LWB</option>
-            <option value="xlwb">Extra LWB</option>
-            <option value="luton">Luton</option>
-            <option value="artic">Artic</option>
-            <option value="flatbed">Flatbed</option>
-            <option value="fridge">Refrigerated</option>
-            <option value="curtain">Curtainsider</option>
-          </select>
-          <select id="cap-from" class="fi2" style="flex:1;min-width:140px;max-width:180px" onchange="capFilter()">
-            <option value="">From — any zone</option>
-            <option>North East</option>
-            <option>Yorkshire</option>
-            <option>North West</option>
-            <option>West Midlands</option>
-            <option>East Midlands</option>
-            <option>East of England</option>
-            <option>London / M25</option>
-            <option>South East</option>
-            <option>South West</option>
-            <option>Scotland</option>
-          </select>
-          <select id="cap-to" class="fi2" style="flex:1;min-width:140px;max-width:180px" onchange="capFilter()">
-            <option value="">To — any zone</option>
-            <option>North East</option>
-            <option>Yorkshire</option>
-            <option>North West</option>
-            <option>West Midlands</option>
-            <option>East Midlands</option>
-            <option>East of England</option>
-            <option>London / M25</option>
-            <option>South East</option>
-            <option>South West</option>
-            <option>Scotland</option>
-          </select>
-          <label style="display:flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:600;cursor:pointer;white-space:nowrap;padding:.35rem .5rem;border:1px solid var(--ln);border-radius:var(--rx);background:var(--p2)">
-            <input type="checkbox" id="cap-relay" onchange="capFilter()" style="cursor:pointer;accent-color:var(--or)"> Relay stations
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:.8rem">
+          <div>
+            <h1 class="pt" style="margin-bottom:.2rem">Network Map</h1>
+            <p class="ps" style="margin:0">83 drivers live · 4 active jobs · tap any zone for detail</p>
+          </div>
+          <label style="display:flex;align-items:center;gap:.35rem;font-size:.73rem;font-weight:600;cursor:pointer;white-space:nowrap;padding:.32rem .6rem;border:1.5px solid var(--ln);border-radius:20px;background:var(--p2);margin-top:.15rem">
+            <input type="checkbox" id="cap-relay" onchange="capFilter()" style="cursor:pointer;accent-color:var(--or)"> Relay hubs
           </label>
         </div>
 
-        <!-- Rate strip -->
-        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.7rem">
-          <div style="flex:1;min-width:140px;padding:.5rem .75rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);font-size:.73rem">
-            <div style="font-weight:800;color:var(--or);font-size:.82rem" id="cap-rate-lbl">£1.80 – £2.40<span style="font-weight:500;color:var(--mu)">/mile</span></div>
-            <div style="color:var(--mu);margin-top:.12rem;font-size:.7rem">Current job rate · van / LWB</div>
-          </div>
-          <div style="flex:1;min-width:140px;padding:.5rem .75rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);font-size:.73rem">
-            <div style="font-weight:800;font-size:.82rem">9% <span style="font-weight:500;color:var(--mu)">network fee</span></div>
-            <div style="color:var(--mu);margin-top:.12rem;font-size:.7rem">HAF KNECT fee on posted loads</div>
-          </div>
-          <div style="flex:1;min-width:140px;padding:.5rem .75rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);font-size:.73rem">
-            <div style="font-weight:800;font-size:.82rem;color:var(--mu)">Pooling rate &nbsp;<span style="font-size:.66rem;background:var(--or-d);color:var(--or);padding:2px 6px;border-radius:4px;font-weight:700;vertical-align:middle">Coming soon</span></div>
-            <div style="color:var(--mu);margin-top:.12rem;font-size:.7rem">Shared-load rate model in development</div>
-          </div>
+        <!-- Vehicle pills + rate -->
+        <div style="display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;margin-bottom:.75rem">
+          <button id="cpill-" class="cap-pill active" onclick="capSetVeh('')">All</button>
+          <button id="cpill-van" class="cap-pill" onclick="capSetVeh('van')">Van</button>
+          <button id="cpill-lwb" class="cap-pill" onclick="capSetVeh('lwb')">LWB</button>
+          <button id="cpill-luton" class="cap-pill" onclick="capSetVeh('luton')">Luton</button>
+          <button id="cpill-artic" class="cap-pill" onclick="capSetVeh('artic')">Artic</button>
+          <button id="cpill-fridge" class="cap-pill" onclick="capSetVeh('fridge')">Fridge</button>
+          <span style="margin-left:auto;font-size:.72rem;color:var(--mu);white-space:nowrap">Rate: <strong id="cap-rate-lbl" style="color:var(--or)">£1.80–£2.40/mi</strong> · 9% network fee</span>
         </div>
-
-        <!-- Active filter badge -->
-        <div id="cap-filter-bar" style="display:none;margin-bottom:.55rem;padding:.4rem .7rem;background:var(--or-d);border:1px solid rgba(255,120,0,.3);border-radius:var(--rx);font-size:.75rem;color:var(--or);font-weight:600"></div>
 
         <!-- Map -->
         <div style="border-radius:var(--r);overflow:hidden;border:1.5px solid var(--ln);margin-bottom:1rem;position:relative">
-          <div id="cap-map" style="height:420px;width:100%;background:var(--bg)"></div>
-          <div style="position:absolute;bottom:10px;left:10px;z-index:1000;background:var(--p);border:1px solid var(--ln);border-radius:8px;padding:.55rem .75rem;font-size:.68rem;display:flex;flex-direction:column;gap:.32rem;box-shadow:0 2px 8px rgba(0,0,0,.22)">
-            <div style="font-weight:800;font-size:.62rem;letter-spacing:.06em;color:var(--mu);text-transform:uppercase;margin-bottom:.1rem">Map key</div>
-            <div style="display:flex;align-items:center;gap:.45rem"><span style="width:13px;height:13px;border-radius:3px;background:#2dab60;opacity:.7;display:inline-block"></span>High capacity zone</div>
-            <div style="display:flex;align-items:center;gap:.45rem"><span style="width:13px;height:13px;border-radius:3px;background:#e88c00;opacity:.7;display:inline-block"></span>Medium capacity zone</div>
-            <div style="display:flex;align-items:center;gap:.45rem"><span style="width:13px;height:13px;border-radius:3px;background:#cc3333;opacity:.7;display:inline-block"></span>Low capacity zone</div>
-            <div style="display:flex;align-items:center;gap:.45rem"><span style="width:13px;height:13px;border-radius:50%;background:#ff7800;display:inline-block;border:2px solid #fff"></span>Active job en route</div>
-            <div style="display:flex;align-items:center;gap:.45rem"><span style="width:12px;height:12px;background:#5b3de8;display:inline-block;transform:rotate(45deg);margin:1px 1px 1px 1px"></span>Relay station</div>
-            <div style="margin-top:.2rem;padding:.3rem .45rem;background:rgba(255,120,0,.1);border-radius:5px;color:var(--or);font-weight:700">★ = zone reward active</div>
+          <div id="cap-map" style="height:480px;width:100%;background:var(--bg)"></div>
+          <!-- Compact floating legend pill -->
+          <div style="position:absolute;top:10px;right:10px;z-index:1000;background:rgba(14,17,19,.82);border-radius:20px;padding:.3rem .7rem;font-size:.63rem;display:flex;align-items:center;gap:.6rem;box-shadow:0 1px 6px rgba(0,0,0,.3);backdrop-filter:blur(4px)">
+            <span style="display:flex;align-items:center;gap:.28rem;color:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#2dab60;display:inline-block"></span>High</span>
+            <span style="display:flex;align-items:center;gap:.28rem;color:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#e88c00;display:inline-block"></span>Med</span>
+            <span style="display:flex;align-items:center;gap:.28rem;color:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#cc3333;display:inline-block"></span>Low</span>
+            <span style="display:flex;align-items:center;gap:.28rem;color:#ff7800"><span style="width:8px;height:8px;border-radius:50%;background:#ff7800;display:inline-block"></span>Live job</span>
           </div>
         </div>
 
-        <!-- Area cards -->
-        <div class="cap-grid">
-          <div class="cap-card"><div class="cap-area">Manchester</div><div class="cap-avail hi">14</div><div class="cap-sub">available now</div></div>
-          <div class="cap-card"><div class="cap-area">Leeds</div><div class="cap-avail hi">9</div><div class="cap-sub">available now</div></div>
-          <div class="cap-card"><div class="cap-area">Sheffield</div><div class="cap-avail med">5</div><div class="cap-sub">available now</div></div>
-          <div class="cap-card"><div class="cap-area">Birmingham</div><div class="cap-avail hi">11</div><div class="cap-sub">available now</div></div>
-          <div class="cap-card"><div class="cap-area">Liverpool</div><div class="cap-avail med">6</div><div class="cap-sub">available now</div></div>
-          <div class="cap-card"><div class="cap-area">Nottingham</div><div class="cap-avail lo">2</div><div class="cap-sub">available now</div></div>
-          <div class="cap-card"><div class="cap-area">London</div><div class="cap-avail med">8</div><div class="cap-sub">available now</div></div>
-          <div class="cap-card"><div class="cap-area">Bristol</div><div class="cap-avail lo">3</div><div class="cap-sub">available now</div></div>
+        <!-- Summary stats row -->
+        <div class="kg">
+          <div class="kc"><div class="kc-l">Drivers live</div><div class="kc-v or">83</div><div class="kc-d">on network now</div></div>
+          <div class="kc"><div class="kc-l">Active jobs</div><div class="kc-v co">4</div><div class="kc-d">en route</div></div>
+          <div class="kc"><div class="kc-l">High zones</div><div class="kc-v gn">3</div><div class="kc-d">Mcr · Leeds · Bham</div></div>
+          <div class="kc"><div class="kc-l">Avg job rate</div><div class="kc-v">£1.80–£2.40</div><div class="kc-d">per mile · van / LWB</div></div>
         </div>
       </div>
 
@@ -2786,10 +2738,15 @@ function initCapMap(){
 }
 
 /* ── NETWORK MAP FILTER ── */
+let _capVeh='';
+function capSetVeh(v){
+  _capVeh=v;
+  document.querySelectorAll('.cap-pill').forEach(p=>p.classList.remove('active'));
+  const active=document.getElementById('cpill-'+v);
+  if(active)active.classList.add('active');
+  capFilter();
+}
 function capFilter(){
-  const veh=(document.getElementById('cap-veh')||{}).value||'';
-  const from=(document.getElementById('cap-from')||{}).value||'';
-  const to=(document.getElementById('cap-to')||{}).value||'';
   const relay=document.getElementById('cap-relay')&&document.getElementById('cap-relay').checked;
 
   /* Relay station layer toggle */
@@ -2799,27 +2756,10 @@ function capFilter(){
     });
   }
 
-  /* Rate strip update by vehicle type */
-  const RATES={van:'£1.60 – £2.00',swb:'£1.65 – £2.10',lwb:'£1.80 – £2.40',xlwb:'£1.90 – £2.50',luton:'£2.00 – £2.70',artic:'£2.80 – £3.80',flatbed:'£2.50 – £3.40',fridge:'£2.60 – £3.50',curtain:'£2.40 – £3.20'};
-  const VEH_LABELS={van:'small van',swb:'SWB',lwb:'LWB',xlwb:'extra LWB',luton:'Luton',artic:'artic',flatbed:'flatbed',fridge:'refrigerated',curtain:'curtainsider'};
+  /* Rate update by vehicle pill */
+  const RATES={van:'£1.60–£2.00',swb:'£1.65–£2.10',lwb:'£1.80–£2.40',xlwb:'£1.90–£2.50',luton:'£2.00–£2.70',artic:'£2.80–£3.80',flatbed:'£2.50–£3.40',fridge:'£2.60–£3.50',curtain:'£2.40–£3.20'};
   const rateEl=document.getElementById('cap-rate-lbl');
-  if(rateEl){
-    const r=RATES[veh]||'£1.80 – £2.40';
-    const vl=VEH_LABELS[veh]||'van / LWB';
-    rateEl.innerHTML=r+'<span style="font-weight:500;color:var(--mu)">/mile</span>';
-    rateEl.closest('div').querySelector('div:last-child').textContent='Current job rate · '+vl;
-  }
-
-  /* Active filter badge */
-  const fb=document.getElementById('cap-filter-bar');
-  if(!fb)return;
-  const parts=[];
-  if(veh)parts.push('Vehicle: '+(VEH_LABELS[veh]||veh));
-  if(from)parts.push('From: '+from);
-  if(to)parts.push('To: '+to);
-  if(relay)parts.push('Relay stations visible');
-  if(parts.length){fb.style.display='block';fb.textContent='Filtering — '+parts.join(' · ');}
-  else{fb.style.display='none';}
+  if(rateEl)rateEl.textContent=(RATES[_capVeh]||'£1.80–£2.40')+'/mi';
 }
 
 /* ── DRIVER DIRECTORY ── */
