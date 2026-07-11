@@ -14,50 +14,86 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--tx);font-family:var(--bd);font-size:15px;min-height:100vh}
 a{color:var(--or)}
-.wrap{max-width:1180px;margin:0 auto;padding:1.2rem}
-/* ── header ── */
+.wrap{max-width:1200px;margin:0 auto;padding:1.2rem}
+/* header */
 .top{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.4rem 0 1.1rem;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:.55rem}
 .brand .k{width:34px;height:34px;background:var(--or);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:1.05rem;color:#0e1113}
 .brand .t{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em}
 .brand .t span{color:var(--or)}
 .brand .sub{font-size:.72rem;color:var(--mu);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-top:.1rem}
-.top-r{display:flex;align-items:center;gap:.5rem}
+.top-r{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .chip{font-size:.74rem;color:var(--mu);background:var(--p);border:1px solid var(--ln);border-radius:999px;padding:.32rem .7rem;font-weight:600}
 .ibtn{width:34px;height:34px;border-radius:9px;background:var(--p);border:1px solid var(--ln);color:var(--tx);cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center}
 .obtn{font-size:.78rem;font-weight:700;background:var(--p);border:1px solid var(--ln);color:var(--tx);border-radius:9px;padding:.45rem .8rem;cursor:pointer}
-/* ── cards / grid ── */
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;margin-bottom:.9rem}
+.ebtn{font-size:.68rem;font-weight:700;background:var(--p2);border:1px solid var(--ln);color:var(--mu);border-radius:7px;padding:.28rem .62rem;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.ebtn:hover{color:var(--or);border-color:var(--or)}
+/* kpis */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.7rem;margin-bottom:.9rem}
 .kpi{background:var(--p);border:1px solid var(--lns);border-radius:var(--r);padding:.95rem 1rem}
 .kpi .n{font-family:var(--dp);font-weight:900;font-size:1.75rem;letter-spacing:-.04em;line-height:1.1}
 .kpi .l{font-size:.7rem;color:var(--mu);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-top:.25rem}
+/* pipeline */
+.pipeline-wrap{background:var(--p);border:1px solid var(--lns);border-radius:var(--r);padding:1.05rem 1.1rem;margin-bottom:.9rem}
+.pipeline-wrap h2{font-family:var(--dp);font-weight:900;font-size:.95rem;letter-spacing:-.02em;margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.pipeline-wrap h2 .hint{font-size:.7rem;color:var(--mu);font-weight:600}
+.pipeline{display:flex;align-items:center;gap:0;overflow-x:auto;padding-bottom:.3rem}
+.pstage{flex:1;min-width:80px;text-align:center;padding:.6rem .3rem}
+.pstage .ps-dot{width:10px;height:10px;border-radius:50%;margin:0 auto .4rem;background:var(--mu)}
+.pstage.st-pending .ps-dot{background:var(--or)}
+.pstage.st-confirmed .ps-dot{background:#4a9eff}
+.pstage.st-inprogress .ps-dot{background:#9b59b6}
+.pstage.st-completed .ps-dot{background:var(--gn)}
+.pstage .ps-n{font-family:var(--dp);font-weight:900;font-size:1.45rem;letter-spacing:-.03em;line-height:1}
+.pstage .ps-l{font-size:.63rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin-top:.2rem}
+.parrow{display:flex;align-items:center;color:var(--mu);font-size:.85rem;padding:0 .1rem;flex-shrink:0}
+.pcancelled{display:flex;align-items:center;gap:.6rem;border-top:1px dashed var(--ln);margin-top:.7rem;padding-top:.6rem;font-size:.8rem;color:var(--mu)}
+.pcancelled .ps-n{font-family:var(--dp);font-weight:900;font-size:1.1rem;color:var(--rd);letter-spacing:-.02em}
+/* grid */
 .grid{display:grid;grid-template-columns:2fr 1fr;gap:.9rem;align-items:start}
 @media(max-width:860px){.grid{grid-template-columns:1fr}}
 .card{background:var(--p);border:1px solid var(--lns);border-radius:var(--r);padding:1.05rem 1.1rem;margin-bottom:.9rem}
-.card h2{font-family:var(--dp);font-weight:900;font-size:.95rem;letter-spacing:-.02em;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
-.card h2 .hint{font-size:.7rem;color:var(--mu);font-weight:600}
-/* ── tables ── */
+.card h2{font-family:var(--dp);font-weight:900;font-size:.95rem;letter-spacing:-.02em;margin-bottom:.75rem;display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+.card h2 .hint{font-size:.7rem;color:var(--mu);font-weight:600;margin-right:auto}
+/* tables */
 .tblwrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:560px}
 th{font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);font-weight:700;text-align:left;padding:.4rem .55rem;border-bottom:1px solid var(--ln);white-space:nowrap}
-td{padding:.55rem;border-bottom:1px solid var(--lns);white-space:nowrap}
+td{padding:.52rem .55rem;border-bottom:1px solid var(--lns);white-space:nowrap}
 tr:last-child td{border-bottom:none}
+/* pills */
 .pill{display:inline-block;font-size:.66rem;font-weight:700;border-radius:999px;padding:.18rem .55rem;letter-spacing:.03em}
 .pill.pro{background:rgba(241,142,0,.14);color:var(--or)}
 .pill.plus{background:rgba(63,125,81,.14);color:var(--gn)}
-.pill.basic{background:var(--p2);color:var(--mu);border:1px solid var(--ln)}
+.pill.basic,.pill.lite{background:var(--p2);color:var(--mu);border:1px solid var(--ln)}
 .pill.pending{background:rgba(241,142,0,.14);color:var(--or)}
-.pill.accepted,.pill.confirmed{background:rgba(63,125,81,.14);color:var(--gn)}
-.pill.declined,.pill.cancelled{background:rgba(192,57,43,.12);color:var(--rd)}
+.pill.confirmed,.pill.accepted,.pill.completed{background:rgba(63,125,81,.14);color:var(--gn)}
+.pill.inprogress,.pill.in_progress{background:rgba(74,158,255,.14);color:#4a9eff}
+.pill.cancelled,.pill.declined{background:rgba(192,57,43,.12);color:var(--rd)}
 .pill.test{background:var(--p2);color:var(--mu);border:1px dashed var(--ln)}
+/* bars */
 .bar{height:8px;border-radius:999px;background:var(--p2);border:1px solid var(--lns);overflow:hidden;margin:.3rem 0 .55rem}
 .bar i{display:block;height:100%;background:var(--or)}
-.mrow{display:flex;justify-content:space-between;font-size:.78rem;margin-top:.45rem}
-.mrow b{font-weight:700}
+.mrow{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;margin-top:.45rem;gap:.4rem}
+.mrow b{font-weight:700;flex-shrink:0}
+/* link traffic */
+.lt-row{margin:.5rem 0}
+.lt-top{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;gap:.4rem;margin-bottom:.18rem}
+.lt-top b{font-weight:700;flex-shrink:0}
+.lt-bar{height:6px;border-radius:999px;background:var(--p2);border:1px solid var(--lns);overflow:hidden}
+.lt-bar i{display:block;height:100%;background:var(--or);opacity:.8}
+.lt-total{font-size:.72rem;color:var(--mu);margin-bottom:.6rem}
+/* availability */
+.av-row{display:flex;align-items:center;gap:.6rem;padding:.38rem 0;border-bottom:1px solid var(--lns);font-size:.8rem}
+.av-row:last-child{border-bottom:none}
+.av-dot{width:8px;height:8px;border-radius:50%;background:var(--gn);flex-shrink:0}
+.av-row .av-name{flex:1;font-weight:600}
+.av-row .av-shift{font-size:.72rem;color:var(--mu)}
+/* misc */
 .empty{font-size:.8rem;color:var(--mu);padding:.4rem 0}
 .note{font-size:.74rem;color:var(--mu);line-height:1.55}
 .err{display:none;font-size:.78rem;color:var(--rd);margin:.4rem 0}
-/* ── login gate ── */
+/* gate */
 #gate{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;align-items:center;justify-content:center;padding:1rem}
 .gbox{background:var(--p);border:1px solid var(--lns);border-radius:var(--r);padding:1.9rem;width:100%;max-width:380px}
 .gbox h1{font-family:var(--dp);font-weight:900;font-size:1.15rem;letter-spacing:-.03em;margin:.9rem 0 .2rem}
@@ -90,58 +126,121 @@ tr:last-child td{border-bottom:none}
 <!-- overview -->
 <div id="app">
 <div class="wrap">
+
   <div class="top">
     <div class="brand"><div class="k">K</div><div><div class="t">HAF <span>KNECT</span></div><div class="sub">Network overview</div></div></div>
     <div class="top-r">
       <span class="chip" id="stamp">—</span>
       <button class="obtn" onclick="loadAll()">Refresh</button>
-      <button class="ibtn" onclick="toggleTheme()" title="Day / night" id="themeBtn">N</button>
+      <button class="ibtn" onclick="toggleTheme()" title="Day / night">☀</button>
       <button class="obtn" onclick="signOut()">Sign out</button>
     </div>
   </div>
 
+  <!-- KPIs -->
   <div class="kpis">
     <div class="kpi"><div class="n" id="k-drivers">—</div><div class="l">Drivers on network</div></div>
     <div class="kpi"><div class="n" id="k-bookings">—</div><div class="l">Bookings all time</div></div>
     <div class="kpi"><div class="n" id="k-pending">—</div><div class="l">Awaiting driver</div></div>
-    <div class="kpi"><div class="n" id="k-confirmed">—</div><div class="l">Jobs confirmed this month</div></div>
+    <div class="kpi"><div class="n" id="k-confirmed">—</div><div class="l">Confirmed this month</div></div>
     <div class="kpi"><div class="n" id="k-cancelled">—</div><div class="l">Cancellations this month</div></div>
+    <div class="kpi"><div class="n" id="k-views">—</div><div class="l">Profile link views</div></div>
+  </div>
+
+  <!-- Job pipeline (full width) -->
+  <div class="pipeline-wrap">
+    <h2>Job pipeline <span class="hint">live flow of every booking through the network</span></h2>
+    <div class="pipeline">
+      <div class="pstage st-pending">
+        <div class="ps-dot"></div>
+        <div class="ps-n" id="pp-pending">—</div>
+        <div class="ps-l">Pending</div>
+      </div>
+      <div class="parrow">›</div>
+      <div class="pstage st-confirmed">
+        <div class="ps-dot"></div>
+        <div class="ps-n" id="pp-confirmed">—</div>
+        <div class="ps-l">Confirmed</div>
+      </div>
+      <div class="parrow">›</div>
+      <div class="pstage st-inprogress">
+        <div class="ps-dot"></div>
+        <div class="ps-n" id="pp-inprogress">—</div>
+        <div class="ps-l">In progress</div>
+      </div>
+      <div class="parrow">›</div>
+      <div class="pstage st-completed">
+        <div class="ps-dot"></div>
+        <div class="ps-n" id="pp-completed">—</div>
+        <div class="ps-l">Completed</div>
+      </div>
+    </div>
+    <div class="pcancelled">
+      <div class="ps-n" id="pp-cancelled">—</div>
+      <span>cancelled</span>
+    </div>
   </div>
 
   <div class="grid">
+    <!-- LEFT column -->
     <div>
+      <!-- Drivers -->
       <div class="card">
-        <h2>Drivers <span class="hint" id="d-hint"></span></h2>
+        <h2>Drivers <span class="hint" id="d-hint"></span><button class="ebtn" onclick="exportDrivers()">↓ Export CSV</button></h2>
         <div class="tblwrap"><table id="d-tbl">
-          <thead><tr><th>Driver</th><th>Username</th><th>City</th><th>Plan</th><th>Confirmed</th><th>Cancelled</th><th>Conv.</th><th>Page views</th></tr></thead>
+          <thead><tr><th>Driver</th><th>Username</th><th>City</th><th>Plan</th><th>Confirmed</th><th>Cancelled</th><th>Conv.</th><th>Profile views</th></tr></thead>
           <tbody></tbody>
         </table></div>
       </div>
+
+      <!-- Bookings -->
       <div class="card">
-        <h2>Bookings <span class="hint" id="b-hint"></span></h2>
+        <h2>Bookings <span class="hint" id="b-hint"></span><button class="ebtn" onclick="exportBookings()">↓ Export CSV</button></h2>
         <div class="tblwrap"><table id="b-tbl">
-          <thead><tr><th>Ref</th><th>Customer</th><th>Route</th><th>Date</th><th>Driver</th><th>Status</th></tr></thead>
+          <thead><tr><th>Ref</th><th>Customer</th><th>Phone</th><th>Route</th><th>Date</th><th>Driver</th><th>Status</th></tr></thead>
           <tbody></tbody>
         </table></div>
       </div>
     </div>
+
+    <!-- RIGHT column -->
     <div>
+      <!-- Profile link traffic -->
+      <div class="card">
+        <h2>Profile link traffic</h2>
+        <p class="lt-total" id="lt-total"></p>
+        <div id="linktraffic"></div>
+        <p class="note" style="margin-top:.6rem">Each driver gets a profile link they share with customers. These are visits to those links.</p>
+      </div>
+
+      <!-- Available today -->
+      <div class="card">
+        <h2>Available today <span class="hint" id="av-hint"></span></h2>
+        <div id="avail"></div>
+      </div>
+
+      <!-- Plan mix -->
       <div class="card">
         <h2>Plan mix</h2>
         <div id="planmix"></div>
       </div>
+
+      <!-- Feedback board -->
       <div class="card">
         <h2>Feedback board</h2>
         <div id="ideas"></div>
-        <p class="note" style="margin-top:.5rem">Ideas and votes from the demo's Feedback &amp; Ideas board.</p>
+        <p class="note" style="margin-top:.5rem">Ideas and votes from the KNECT Feedback &amp; Ideas board.</p>
       </div>
+
+      <!-- CleverPay -->
       <div class="card">
         <h2>CleverPay pipeline</h2>
-        <p class="note">Applications currently live in the CleverPay portal and aren't centralised yet — this card connects automatically when the shared CleverPay backend (already in the build queue) lands.</p>
-        <p class="note" style="margin-top:.5rem"><a href="https://clever.usehaf.co.uk/team.html" target="_blank">Open the CleverPay team portal →</a></p>
+        <p class="note">Applications currently live in the CleverPay portal and aren't centralised yet — this card connects automatically when the shared CleverPay backend lands.</p>
+        <p class="note" style="margin-top:.5rem"><a href="https://clever.usehaf.co.uk/team.html" target="_blank">Open CleverPay team portal →</a></p>
       </div>
     </div>
   </div>
+
 </div>
 </div>
 
@@ -155,23 +254,23 @@ const $=id=>document.getElementById(id);
 async function sha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
 function pf(path,key){return fetch(path,{headers:{'apikey':key,'Authorization':'Bearer '+key}}).then(r=>r.json())}
 
-/* ── theme ── */
-const savedTheme=localStorage.getItem('knect-admin-theme')||'day';
-document.documentElement.dataset.theme=savedTheme;
+/* theme */
+const saved=localStorage.getItem('knect-admin-theme')||'day';
+document.documentElement.dataset.theme=saved;
 function toggleTheme(){const n=document.documentElement.dataset.theme==='day'?'night':'day';document.documentElement.dataset.theme=n;localStorage.setItem('knect-admin-theme',n)}
 
-/* ── gate ── */
+/* gate */
 async function gateLogin(){
-  const u=$('g-user').value.trim().toUpperCase(), s=$('g-pass').value, err=$('g-err'), btn=$('g-btn');
+  const u=$('g-user').value.trim().toUpperCase(),s=$('g-pass').value,err=$('g-err'),btn=$('g-btn');
   err.style.display='none';
-  if(!u||!s){err.textContent='Enter your HAF username and your PIN or password.';err.style.display='block';return}
+  if(!u||!s){err.textContent='Enter your HAF username and PIN or password.';err.style.display='block';return}
   if(u!==OWNER){err.textContent='This area is for the HAF owner account only.';err.style.display='block';return}
   btn.disabled=true;btn.textContent='Checking…';
   try{
     const isPin=/^\d{4,6}$/.test(s);
     const hash=await sha(isPin?u+':'+s:s);
     const col=isPin?'pin_hash':'password_hash';
-    const d=await pf(PLNA+'/rest/v1/plna_drivers?haf_username=eq.'+u+'&'+col+'=eq.'+hash+'&select=haf_username,full_name',PKEY);
+    const d=await pf(PLNA+'/rest/v1/plna_drivers?haf_username=eq.'+u+'&'+col+'=eq.'+hash+'&select=haf_username',PKEY);
     if(!Array.isArray(d)||!d.length){err.textContent=isPin?'That PIN didn\'t match.':'Incorrect password.';err.style.display='block';btn.disabled=false;btn.textContent='Open overview →';return}
     sessionStorage.setItem('knect-admin','1');
     enter();
@@ -181,54 +280,122 @@ function enter(){$('gate').style.display='none';$('app').style.display='block';l
 function signOut(){sessionStorage.removeItem('knect-admin');location.reload()}
 if(sessionStorage.getItem('knect-admin')==='1') enter();
 
-/* ── data ── */
+/* helpers */
 function esc(x){const d=document.createElement('div');d.textContent=x==null?'':String(x);return d.innerHTML}
-function planPill(p){const c=p==='pro'?'pro':(p==='plus'?'plus':'basic');const l=p==='basic'?'Lite':p.charAt(0).toUpperCase()+p.slice(1);return '<span class="pill '+c+'">'+esc(l)+'</span>'}
+function planPill(p){const c=p==='pro'?'pro':(p==='plus'?'plus':'basic');const l=p==='pro'?'Pro':p==='plus'?'Plus':'Lite';return '<span class="pill '+c+'">'+l+'</span>'}
+function statusPill(s){const raw=s||'';const k=raw.toLowerCase().replace(/[\s_]+/g,'');return '<span class="pill '+esc(k)+'">'+esc(raw||'—')+'</span>'}
+
+/* state (kept for CSV export) */
+let _drivers=[],_bookings=[];
+
+/* CSV export */
+function dlCSV(rows,filename){
+  if(!rows.length){alert('No data to export.');return}
+  const heads=Object.keys(rows[0]);
+  const body=[heads.join(','),...rows.map(r=>heads.map(h=>{const v=String(r[h]==null?'':r[h]);return '"'+v.replace(/"/g,'""')+'"'}).join(','))].join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([body],{type:'text/csv;charset=utf-8'}));
+  a.download=filename;a.click();
+}
+function exportDrivers(){
+  dlCSV(_drivers.map(d=>({username:d.haf_username,name:d.full_name,city:d.city||'',plan:d.plan||'',confirmed_this_month:d.confirmed_this_month||0,cancelled_this_month:d.cancelled_this_month||0,conv_pct:d.conv_rate||0,profile_views:d.page_views||0})),'haf-network-drivers.csv')
+}
+function exportBookings(){
+  dlCSV(_bookings.map(b=>({ref:b.ref,driver:b.driver_username,customer_first:b.customer_first,customer_last:b.customer_last,customer_phone:b.customer_phone||'',from:b.from_postcode,to:b.to_postcode,date:b.preferred_date||'',status:b.status||'',created_at:b.created_at||''})),'haf-network-bookings.csv')
+}
+
+/* main data load */
 async function loadAll(){
   $('stamp').textContent='Updating…';
+  const today=new Date().toISOString().slice(0,10);
   try{
-    const [drivers,bookings]=await Promise.all([
+    const [drivers,bookings,avail]=await Promise.all([
       pf(PLNA+'/rest/v1/plna_drivers?select=haf_username,full_name,plan,city,confirmed_this_month,cancelled_this_month,conv_rate,page_views&order=confirmed_this_month.desc',PKEY),
-      pf(PLNA+'/rest/v1/plna_bookings?select=ref,customer_first,customer_last,from_postcode,to_postcode,preferred_date,driver_username,status,created_at&order=created_at.desc&limit=25',PKEY)
+      pf(PLNA+'/rest/v1/plna_bookings?select=ref,customer_first,customer_last,customer_phone,from_postcode,to_postcode,preferred_date,driver_username,status,created_at&order=created_at.desc&limit=50',PKEY),
+      pf(PLNA+'/rest/v1/plna_availability?date=eq.'+today+'&is_available=eq.true&select=driver_id,shift_start,shift_end,area,vehicle_type',PKEY)
     ]);
+    _drivers=Array.isArray(drivers)?drivers:[];
+    _bookings=Array.isArray(bookings)?bookings:[];
+    const _avail=Array.isArray(avail)?avail:[];
+
     let ideas=[];
     try{ideas=await pf(HUB+'/rest/v1/knect_feedback_board?select=*&limit=6',HKEY);if(!Array.isArray(ideas))ideas=[]}catch(e){ideas=[]}
 
     /* KPIs */
-    $('k-drivers').textContent=drivers.length;
-    $('k-bookings').textContent=bookings.length>=25?'25+':bookings.length;
-    $('k-pending').textContent=bookings.filter(b=>b.status==='pending').length;
-    $('k-confirmed').textContent=drivers.reduce((a,d)=>a+(d.confirmed_this_month||0),0);
-    $('k-cancelled').textContent=drivers.reduce((a,d)=>a+(d.cancelled_this_month||0),0);
+    $('k-drivers').textContent=_drivers.length;
+    $('k-bookings').textContent=_bookings.length>=50?'50+':_bookings.length;
+    $('k-pending').textContent=_bookings.filter(b=>b.status==='pending').length;
+    $('k-confirmed').textContent=_drivers.reduce((a,d)=>a+(d.confirmed_this_month||0),0);
+    $('k-cancelled').textContent=_drivers.reduce((a,d)=>a+(d.cancelled_this_month||0),0);
+    const totalViews=_drivers.reduce((a,d)=>a+(d.page_views||0),0);
+    $('k-views').textContent=totalViews;
+
+    /* pipeline — count bookings by status */
+    const sc={pending:0,confirmed:0,inprogress:0,completed:0,cancelled:0};
+    _bookings.forEach(b=>{
+      const k=(b.status||'').toLowerCase().replace(/[\s_-]+/g,'');
+      if(k==='inprogress'||k==='in_progress')sc.inprogress++;
+      else if(sc[k]!==undefined)sc[k]++;
+    });
+    $('pp-pending').textContent=sc.pending;
+    $('pp-confirmed').textContent=sc.confirmed;
+    $('pp-inprogress').textContent=sc.inprogress;
+    $('pp-completed').textContent=sc.completed;
+    $('pp-cancelled').textContent=sc.cancelled;
 
     /* drivers table */
-    $('d-hint').textContent=drivers.length+' on the network';
-    document.querySelector('#d-tbl tbody').innerHTML=drivers.map(d=>{
+    $('d-hint').textContent=_drivers.length+' on network';
+    document.querySelector('#d-tbl tbody').innerHTML=_drivers.map(d=>{
       const test=/^TEST/i.test(d.haf_username);
-      return '<tr><td>'+esc(d.full_name)+(test?' <span class="pill test">test</span>':'')+'</td><td>'+esc(d.haf_username)+'</td><td>'+esc(d.city||'—')+'</td><td>'+planPill(d.plan||'basic')+'</td><td>'+esc(d.confirmed_this_month||0)+'</td><td>'+esc(d.cancelled_this_month||0)+'</td><td>'+esc((d.conv_rate||0)+'%')+'</td><td>'+esc(d.page_views||0)+'</td></tr>';
+      return '<tr><td>'+esc(d.full_name)+(test?' <span class="pill test">test</span>':'')+'</td><td>'+esc(d.haf_username)+'</td><td>'+esc(d.city||'—')+'</td><td>'+planPill(d.plan||'basic')+'</td><td>'+esc(d.confirmed_this_month||0)+'</td><td>'+esc(d.cancelled_this_month||0)+'</td><td>'+(d.conv_rate||0)+'%</td><td>'+esc(d.page_views||0)+'</td></tr>';
     }).join('')||'<tr><td colspan="8" class="empty">No drivers yet.</td></tr>';
 
     /* bookings table */
-    $('b-hint').textContent='latest '+bookings.length;
-    document.querySelector('#b-tbl tbody').innerHTML=bookings.map(b=>
-      '<tr><td>'+esc(b.ref)+'</td><td>'+esc((b.customer_first||'')+' '+(b.customer_last||''))+'</td><td>'+esc(b.from_postcode+' → '+b.to_postcode)+'</td><td>'+esc(b.preferred_date||'—')+'</td><td>'+esc(b.driver_username)+'</td><td><span class="pill '+esc(b.status)+'">'+esc(b.status)+'</span></td></tr>'
-    ).join('')||'<tr><td colspan="6" class="empty">No bookings yet.</td></tr>';
+    $('b-hint').textContent='latest '+_bookings.length;
+    document.querySelector('#b-tbl tbody').innerHTML=_bookings.map(b=>
+      '<tr><td>'+esc(b.ref)+'</td><td>'+esc((b.customer_first||'')+' '+(b.customer_last||''))+'</td><td>'+esc(b.customer_phone||'—')+'</td><td>'+esc(b.from_postcode+' → '+b.to_postcode)+'</td><td>'+esc(b.preferred_date||'—')+'</td><td>'+esc(b.driver_username)+'</td><td>'+statusPill(b.status)+'</td></tr>'
+    ).join('')||'<tr><td colspan="7" class="empty">No bookings yet.</td></tr>';
+
+    /* profile link traffic */
+    $('lt-total').textContent=totalViews+' total views across all shared links';
+    const maxV=Math.max(..._drivers.map(d=>d.page_views||0),1);
+    const nonTest=_drivers.filter(d=>!/^TEST/i.test(d.haf_username));
+    $('linktraffic').innerHTML=nonTest.length
+      ?nonTest.slice().sort((a,b)=>(b.page_views||0)-(a.page_views||0)).map(d=>`
+        <div class="lt-row">
+          <div class="lt-top"><span>${esc(d.full_name)}</span><b>${esc(d.page_views||0)}</b></div>
+          <div class="lt-bar"><i style="width:${Math.round((d.page_views||0)/maxV*100)}%"></i></div>
+        </div>`).join('')
+      :'<div class="empty">No drivers yet.</div>';
+
+    /* availability today */
+    $('av-hint').textContent=today;
+    $('avail').innerHTML=_avail.length
+      ?_avail.map(a=>{
+          const dr=_drivers.find(d=>d.haf_username===a.driver_id)||{full_name:a.driver_id};
+          const shift=a.shift_start&&a.shift_end?a.shift_start.slice(0,5)+'–'+a.shift_end.slice(0,5):'All day';
+          const area=a.area?' · '+a.area:'';
+          return '<div class="av-row"><div class="av-dot"></div><span class="av-name">'+esc(dr.full_name)+'</span><span class="av-shift">'+esc(shift+area)+'</span></div>';
+        }).join('')
+      :'<div class="empty">No drivers have logged availability for today.</div>';
 
     /* plan mix */
-    const mix={pro:0,plus:0,basic:0};drivers.forEach(d=>{mix[d.plan]===undefined?mix.basic++:mix[d.plan]++});
-    const tot=Math.max(drivers.length,1);
+    const mix={pro:0,plus:0,basic:0};
+    _drivers.forEach(d=>{const k=d.plan==='pro'?'pro':d.plan==='plus'?'plus':'basic';mix[k]++});
+    const tot=Math.max(_drivers.length,1);
     $('planmix').innerHTML=[['Pro','pro'],['Plus','plus'],['Lite','basic']].map(([l,k])=>
       '<div class="mrow"><span>'+l+'</span><b>'+mix[k]+'</b></div><div class="bar"><i style="width:'+Math.round(mix[k]/tot*100)+'%"></i></div>'
     ).join('');
 
     /* ideas */
     $('ideas').innerHTML=ideas.length
-      ? ideas.map(i=>'<div class="mrow"><span>'+esc(i.title||i.idea||'Untitled')+'</span><b>'+esc(i.votes??i.vote_count??0)+'</b></div>').join('')
-      : '<div class="empty">No ideas posted yet — the board is live and waiting.</div>';
+      ?ideas.map(i=>'<div class="mrow"><span>'+esc(i.title||i.idea||'Untitled')+'</span><b>'+esc(i.votes??i.vote_count??0)+'</b></div>').join('')
+      :'<div class="empty">No ideas posted yet — the board is live and waiting.</div>';
 
     $('stamp').textContent='Updated '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-  }catch(e){$('stamp').textContent='Update failed — tap Refresh'}
+  }catch(e){$('stamp').textContent='Update failed — tap Refresh';console.error(e)}
 }
+
 setInterval(()=>{if(sessionStorage.getItem('knect-admin')==='1')loadAll()},60000);
 </script>
 </body>
