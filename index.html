@@ -349,6 +349,13 @@ textarea.fi2{resize:vertical;min-height:70px}
 .cap-avail.hi{color:var(--gn)}.cap-avail.med{color:var(--am)}.cap-avail.lo{color:var(--rd)}
 .cap-sub{font-size:.66rem;color:var(--mu);margin-top:.12rem}
 
+/* JOB TRACK PIPELINE */
+.jtrack-step{display:flex;flex-direction:column;align-items:center;gap:.2rem;flex-shrink:0}
+.jts-dot{width:12px;height:12px;border-radius:50%;background:var(--ln);border:2px solid var(--lns)}
+.jts-lbl{font-size:.6rem;font-weight:700;color:var(--su);text-align:center;white-space:nowrap}
+.jtrack-step.on .jts-dot{background:var(--or);border-color:var(--or)}
+.jtrack-step.on .jts-lbl{color:var(--or)}
+.jtrack-line{flex:1;height:2px;background:var(--ln);min-width:20px}
 /* REBATE */
 .reb-bar-wrap{background:var(--p2);border-radius:var(--pill);height:7px;margin:.5rem 0;overflow:hidden}
 .reb-bar-fill{height:100%;background:var(--or);border-radius:var(--pill);transition:width .4s}
@@ -876,7 +883,10 @@ textarea.fi2{resize:vertical;min-height:70px}
       </button>
       <a class="tlogo" href="#">
         <div class="tlogo-m">K</div>
-        <div class="tlogo-t">HAF <span>KNECT</span></div>
+        <div>
+          <div class="tlogo-t">HAF <span>KNECT</span></div>
+          <div style="font-size:.56rem;color:var(--mu);font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-family:var(--fn);margin-top:-.05rem">Courier Connector</div>
+        </div>
       </a>
     </div>
     <div class="tb-r">
@@ -894,6 +904,10 @@ textarea.fi2{resize:vertical;min-height:70px}
       <div id="nav-list"></div>
       <div class="sb-bot">
         <hr class="sdiv">
+        <button class="back-btn" id="plna-link-btn" style="display:none;color:var(--or);" onclick="window.open('https://plna.usehaf.co.uk','_blank')">
+          <svg class="ni-ic" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          My PLNA Network →
+        </button>
         <button class="back-btn" onclick="goLanding()">
           <svg class="ni-ic" viewBox="0 0 24 24"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
           Back to send page
@@ -924,10 +938,29 @@ textarea.fi2{resize:vertical;min-height:70px}
 
       <!-- DRIVER: Job Invites -->
       <div class="tp" id="pane-d-invites">
-        <h1 class="pt">Job Invites</h1><p class="ps">Jobs HAF has sent directly to you.</p>
+        <h1 class="pt">Job Invites</h1><p class="ps">Jobs HAF has sent directly to you on the KNECT network.</p>
         <div class="jl">
-          <div class="jc"><div class="jdot" style="background:var(--or)"></div><div class="jm"><div class="jref">INVITE · HAF-2858 · Expires in 8 min</div><div class="jroute">Manchester M4 → Warrington WA1</div><div class="jdet">Collect 14:30 · LWB · 420 kg · 28 miles</div></div><div class="jacts"><div class="jamt">£68</div><button class="btn btn-or btn-xs">Accept</button><button class="btn btn-gh btn-xs">Decline</button></div></div>
-          <div class="jc"><div class="jdot" style="background:var(--bl)"></div><div class="jm"><div class="jref">INVITE · HAF-2861 · Tomorrow</div><div class="jroute">Salford M50 → Sheffield S1</div><div class="jdet">Collect 09:00 · LWB · 680 kg · 38 miles</div></div><div class="jacts"><div class="jamt">£94</div><button class="btn btn-or btn-xs">Accept</button><button class="btn btn-gh btn-xs">Decline</button></div></div>
+          <div class="jc"><div class="jdot" style="background:var(--or)"></div><div class="jm"><div class="jref">INVITE · HAF-2858 · Expires in 8 min</div><div class="jroute">Manchester M4 → Warrington WA1</div><div class="jdet">Collect 14:30 · LWB · 420 kg · 28 miles</div></div><div class="jacts"><div class="jamt">£68</div><button class="btn btn-or btn-xs" onclick="acceptJob(this,'HAF-2858')">Accept</button><button class="btn btn-gh btn-xs">Decline</button></div></div>
+          <div class="jc"><div class="jdot" style="background:var(--bl)"></div><div class="jm"><div class="jref">INVITE · HAF-2861 · Tomorrow</div><div class="jroute">Salford M50 → Sheffield S1</div><div class="jdet">Collect 09:00 · LWB · 680 kg · 38 miles</div></div><div class="jacts"><div class="jamt">£94</div><button class="btn btn-or btn-xs" onclick="acceptJob(this,'HAF-2861')">Accept</button><button class="btn btn-gh btn-xs">Decline</button></div></div>
+        </div>
+        <div id="active-job-track" style="display:none;margin-top:.5rem">
+          <div class="card">
+            <div class="ct">Active job — <span id="ajt-ref">—</span></div>
+            <div id="ajt-route" style="font-weight:700;margin-bottom:.85rem">—</div>
+            <div style="display:flex;gap:0;align-items:center;margin-bottom:1rem" id="ajt-pipeline">
+              <div class="jtrack-step on" id="jts-posted"><div class="jts-dot"></div><div class="jts-lbl">Posted</div></div>
+              <div class="jtrack-line"></div>
+              <div class="jtrack-step on" id="jts-accepted"><div class="jts-dot"></div><div class="jts-lbl">Accepted</div></div>
+              <div class="jtrack-line"></div>
+              <div class="jtrack-step" id="jts-enroute"><div class="jts-dot"></div><div class="jts-lbl">En route</div></div>
+              <div class="jtrack-line"></div>
+              <div class="jtrack-step" id="jts-delivered"><div class="jts-dot"></div><div class="jts-lbl">Delivered</div></div>
+            </div>
+            <div style="display:flex;gap:.45rem">
+              <button class="btn btn-or btn-sm" onclick="advanceJob('enroute')">Mark en route</button>
+              <button class="btn btn-gh btn-sm" onclick="advanceJob('delivered')">Mark delivered</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1396,7 +1429,41 @@ function closeLogin(){document.getElementById('login-ov').classList.remove('open
 async function hafSha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
 let hafPend=null; /* password-verified user waiting on PIN setup: {u, hash} */
 function hafErr(el,msg){el.textContent=msg;el.style.display='block'}
-function hafGo(u,k,t){window.location.href=PLNA_HOME+'/sso.html#u='+encodeURIComponent(u)+'&k='+k+'&t='+t}
+function hafGo(u,k,t){localStorage.setItem('knect-user',u);enterKnectApp(u);}
+const DRIVER_NAV=[
+  {id:'d-invites',l:'Job Invites',s:'KNECT Jobs',badge:'2',ico:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>'},
+  {id:'d-jobs',l:'Available Jobs',s:'KNECT Jobs',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
+  {id:'d-status',l:'My Status',s:'KNECT Jobs',ico:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
+  {id:'d-empty',l:'Empty Miles',s:'KNECT Jobs',ico:'<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.54"/>'},
+  {id:'d-earn',l:'Earnings',s:'My Account',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
+  {id:'d-comp',l:'Compliance',s:'My Account',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
+  {id:'billing',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
+  {id:'support',l:'Support',s:'My Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
+];
+const ADMIN_NAV=[
+  {id:'admin',l:'Network Overview',s:'Overview',ico:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
+  {id:'f-post',l:'Post a Load',s:'Freight Tools',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
+  {id:'f-loads',l:'Active Loads',s:'Freight Tools',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
+  {id:'f-cap',l:'Network Capacity',s:'Freight Tools',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
+  {id:'f-cover',l:'Coverage Board',s:'Freight Tools',ico:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'},
+  {id:'f-lanes',l:'Lane Pricing',s:'Freight Tools',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
+  {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
+  {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
+];
+function enterKnectApp(u){
+  const isAdmin=u==='BF638793';
+  document.getElementById('tb-user').textContent=u;
+  document.getElementById('tb-av').textContent=u.slice(0,2);
+  const roleEl=document.getElementById('tb-role');
+  roleEl.textContent=isAdmin?'Admin':'Driver';
+  roleEl.className='role-chip chip '+(isAdmin?'co':'cb');
+  const plnaBtn=document.getElementById('plna-link-btn');
+  if(plnaBtn)plnaBtn.style.display=isAdmin?'none':'flex';
+  buildNav(isAdmin?ADMIN_NAV:DRIVER_NAV);
+  switchTab(isAdmin?'pane-admin':'pane-d-invites');
+  document.getElementById('landing').style.display='none';
+  document.getElementById('app').classList.add('open');
+}
 async function hafAuth(u,s,err,btn){
   err.style.display='none';err.textContent='';
   u=(u||'').trim().toUpperCase();s=(s||'');
@@ -1434,7 +1501,33 @@ async function pinSave(){
   }catch(e){hafErr(err,'Connection problem — please try again.');btn.textContent='Save PIN and continue';btn.disabled=false}
 }
 function goLanding(){document.getElementById('app').classList.remove('open');document.getElementById('landing').style.display='flex'}
-function signOut(){goLanding()}
+function signOut(){localStorage.removeItem('knect-user');goLanding();}
+/* JOB TRACKING */
+const JOB_DATA={'HAF-2858':{route:'Manchester M4 → Warrington WA1',status:'accepted'},'HAF-2861':{route:'Salford M50 → Sheffield S1',status:'accepted'}};
+function acceptJob(btn,ref){
+  btn.textContent='Accepted ✓';btn.disabled=true;btn.style.background='var(--gn)';
+  const j=JOB_DATA[ref];
+  if(!j)return;
+  document.getElementById('ajt-ref').textContent=ref;
+  document.getElementById('ajt-route').textContent=j.route;
+  document.getElementById('active-job-track').style.display='block';
+  setJobStep('accepted');
+}
+function setJobStep(step){
+  const steps=['posted','accepted','enroute','delivered'];
+  const idx=steps.indexOf(step);
+  steps.forEach((s,i)=>{
+    const el=document.getElementById('jts-'+s);
+    if(el){if(i<=idx)el.classList.add('on');else el.classList.remove('on');}
+  });
+}
+function advanceJob(step){
+  setJobStep(step);
+  const btn1=document.querySelector('[onclick="advanceJob(\'enroute\')"]');
+  const btn2=document.querySelector('[onclick="advanceJob(\'delivered\')"]');
+  if(step==='enroute'&&btn1){btn1.textContent='En route ✓';btn1.disabled=true;btn1.style.background='var(--gn)';}
+  if(step==='delivered'&&btn2){btn2.textContent='Delivered ✓';btn2.disabled=true;btn2.style.background='var(--gn)';if(btn1)btn1.style.display='none';}
+}
 function toggleSb(){document.getElementById('sidebar').classList.toggle('open')}
 function toggleAvail(){document.getElementById('avail-lbl').textContent=document.getElementById('avail-tog').checked?'Available — Taking jobs':'Offline — Not taking jobs'}
 
