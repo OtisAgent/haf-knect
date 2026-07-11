@@ -1130,6 +1130,120 @@ textarea.fi2{resize:vertical;min-height:70px}
         <button class="btn btn-gh btn-xs" onclick="showModeSelector()">Exit preview →</button>
       </div>
 
+      <!-- EXCHANGE DASHBOARD (all member roles) -->
+      <div class="tp" id="pane-d-home">
+
+        <!-- Status bar: mirrors the Exchange status bar -->
+        <div class="xch-bar" id="dash-xch-bar">
+          <div class="xch-status">
+            <div class="xch-pulse"></div>
+            <div>
+              <div class="xch-lbl">HAF KNECT Exchange — Live</div>
+              <div class="xch-sub" id="dash-zone-sub">Manchester · LWB · Accepting jobs now</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+            <div class="xch-nums">
+              <div class="xch-num"><div class="xch-nv" id="dash-earn">£142</div><div class="xch-nl">Today</div></div>
+              <div class="xch-num neu"><div class="xch-nv" id="dash-jobs-done">3</div><div class="xch-nl">Jobs done</div></div>
+              <div class="xch-num neu"><div class="xch-nv" id="dash-miles">84 mi</div><div class="xch-nl">Miles</div></div>
+            </div>
+            <div class="avail-pill" id="dash-pill" onclick="toggleXchAvail()">
+              <div class="ap-dot"></div><span class="ap-lbl">Online</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Network ticker -->
+        <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.45rem .75rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);margin-bottom:.75rem;font-size:.68rem;color:var(--mu)">
+          <span style="display:flex;align-items:center;gap:.3rem"><span style="width:7px;height:7px;border-radius:50%;background:#2dab60;display:inline-block;animation:pulse-dot 1.6s ease-in-out infinite"></span><strong style="color:var(--tx)">83</strong> drivers online</span>
+          <span style="color:var(--ln)">·</span>
+          <span><strong style="color:var(--tx)">12</strong> open jobs</span>
+          <span style="color:var(--ln)">·</span>
+          <span><strong style="color:var(--tx)">4</strong> en route</span>
+          <span style="color:var(--ln)">·</span>
+          <span>Rate <strong style="color:var(--or)">£1.80–£2.40/mi</strong></span>
+          <span style="color:var(--ln)">·</span>
+          <span style="color:#2dab60;font-weight:700">Manchester ★ HIGH DEMAND</span>
+          <span style="margin-left:auto;color:var(--mu)">9% network fee</span>
+        </div>
+
+        <!-- Network Map -->
+        <div style="border-radius:var(--r);overflow:hidden;border:1.5px solid var(--ln);margin-bottom:.85rem;position:relative">
+          <div id="dash-map" style="height:340px;width:100%;background:var(--bg)"></div>
+          <div style="position:absolute;top:10px;right:10px;z-index:1000;background:rgba(14,17,19,.82);border-radius:20px;padding:.28rem .65rem;font-size:.6rem;display:flex;align-items:center;gap:.55rem;pointer-events:none">
+            <span style="display:flex;align-items:center;gap:.28rem"><span style="width:8px;height:8px;border-radius:50%;background:#2dab60;opacity:.85"></span>High</span>
+            <span style="display:flex;align-items:center;gap:.28rem"><span style="width:8px;height:8px;border-radius:50%;background:#e88c00;opacity:.85"></span>Med</span>
+            <span style="display:flex;align-items:center;gap:.28rem"><span style="width:8px;height:8px;border-radius:50%;background:#cc3333;opacity:.85"></span>Low</span>
+            <span style="display:flex;align-items:center;gap:.28rem"><span style="width:8px;height:8px;border-radius:50%;background:#ff7800"></span>Job</span>
+          </div>
+          <div style="position:absolute;bottom:10px;left:10px;z-index:1000">
+            <button onclick="switchTab('pane-f-cap')" style="background:rgba(14,17,19,.82);color:var(--or);border:1px solid var(--or-g);border-radius:20px;padding:.25rem .65rem;font-size:.62rem;font-weight:700;cursor:pointer">Full map →</button>
+          </div>
+        </div>
+
+        <!-- Network stat cards -->
+        <div class="kg" style="margin-bottom:.9rem">
+          <div class="kc"><div class="kc-l">Drivers live</div><div class="kc-v or">83</div><div class="kc-d">on network now</div></div>
+          <div class="kc"><div class="kc-l">Open jobs</div><div class="kc-v co">12</div><div class="kc-d">ready to grab</div></div>
+          <div class="kc"><div class="kc-l">Your invites</div><div class="kc-v gn">2</div><div class="kc-d">direct to you</div></div>
+          <div class="kc"><div class="kc-l">Avg rate</div><div class="kc-v">£1.80–£2.40</div><div class="kc-d">per mile · van/LWB</div></div>
+        </div>
+
+        <!-- Role-specific quick actions -->
+        <div id="dash-quick-actions" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
+          <!-- Populated by _buildDashActions() on login -->
+        </div>
+
+        <!-- Direct invites preview (driver-relevant) -->
+        <div class="xfeed-hdr" id="dash-feed-hdr">Direct invites <span style="background:var(--or);color:#fff;padding:.1rem .5rem;border-radius:4px;font-size:.58rem;margin-left:.25rem">2</span></div>
+
+        <div class="xc xc-invite">
+          <div class="xc-head">
+            <div class="xc-badges"><span class="xb inv">Invite</span><span class="xb urg">Urgent</span><span class="xb-ref">HAF-2858</span></div>
+            <div class="xc-viewers"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 3 viewing</div>
+          </div>
+          <div class="xc-route">Manchester M4 → Warrington WA1</div>
+          <div class="xc-sr">
+            <div class="xcs"><div class="xcs-v">14:30</div><div class="xcs-k">Collect</div></div>
+            <div class="xcs"><div class="xcs-v">LWB</div><div class="xcs-k">Vehicle</div></div>
+            <div class="xcs"><div class="xcs-v">28 mi</div><div class="xcs-k">Loaded</div></div>
+            <div class="xcs rate"><div class="xcs-v">£68</div><div class="xcs-k">Driver pay</div></div>
+          </div>
+          <div class="xc-goods">420 kg · 2 pallets · tail lift required</div>
+          <div class="xc-pref">★ Preferred match — you've completed this lane 3 times</div>
+          <div class="xc-foot">
+            <div><div class="xc-cd">⏱ Expires in 08:42</div><div class="xc-meta">Posted 4 min ago · Manchester zone reward active</div></div>
+            <div class="xc-btns"><button class="btn btn-gh btn-xs">Details</button><button class="btn btn-or btn-sm" onclick="xAccept(this,'HAF-2858','Manchester M4 → Warrington WA1','£68')">Accept →</button></div>
+          </div>
+        </div>
+
+        <div class="xc xc-invite">
+          <div class="xc-head">
+            <div class="xc-badges"><span class="xb inv">Invite</span><span class="xb sdy">Same-day</span><span class="xb-ref">HAF-2861</span></div>
+            <div class="xc-viewers"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 1 viewing</div>
+          </div>
+          <div class="xc-route">Salford M50 → Sheffield S1</div>
+          <div class="xc-sr">
+            <div class="xcs"><div class="xcs-v">09:00</div><div class="xcs-k">Collect</div></div>
+            <div class="xcs"><div class="xcs-v">LWB</div><div class="xcs-k">Vehicle</div></div>
+            <div class="xcs"><div class="xcs-v">38 mi</div><div class="xcs-k">Loaded</div></div>
+            <div class="xcs rate"><div class="xcs-v">£94</div><div class="xcs-k">Driver pay</div></div>
+          </div>
+          <div class="xc-goods">680 kg · no stacking · tail lift · tomorrow collection</div>
+          <div class="xc-foot">
+            <div class="xc-meta">Posted 12 min ago · Collect tomorrow 09:00</div>
+            <div class="xc-btns"><button class="btn btn-gh btn-xs">Details</button><button class="btn btn-or btn-sm" onclick="xAccept(this,'HAF-2861','Salford M50 → Sheffield S1','£94')">Accept →</button></div>
+          </div>
+        </div>
+
+        <!-- See all CTA -->
+        <div style="text-align:center;margin-top:.85rem">
+          <button onclick="switchTab('pane-d-invites')" class="btn btn-gh btn-sm" style="margin-right:.5rem">View all exchange jobs →</button>
+          <button onclick="switchTab('pane-f-cap')" class="btn btn-gh btn-sm">Full network map →</button>
+        </div>
+      </div>
+
       <!-- DRIVER: Exchange Hub -->
       <div class="tp" id="pane-d-invites">
         <!-- Active job banner (shown when job accepted) -->
@@ -2229,6 +2343,7 @@ let hafPend=null; /* password-verified user waiting on PIN setup: {u, hash} */
 function hafErr(el,msg){el.textContent=msg;el.style.display='block'}
 function hafGo(u,k,t){localStorage.setItem('knect-user',u);enterKnectApp(u);}
 const DRIVER_NAV=[
+  {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
   {id:'d-invites',l:'Exchange',s:'KNECT Jobs',badge:'2',ico:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>'},
   {id:'d-jobs',l:'Open Jobs',s:'KNECT Jobs',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'d-status',l:'My Status',s:'KNECT Jobs',ico:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
@@ -2251,6 +2366,7 @@ const ADMIN_NAV=[
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
 ];
 const BUSINESS_NAV=[
+  {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
   {id:'b-book',l:'Book a Courier',s:'Send Goods',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'b-del',l:'My Deliveries',s:'Send Goods',ico:'<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'},
   {id:'f-cap',l:'Network Map',s:'Send Goods',ico:'<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>'},
@@ -2262,6 +2378,7 @@ const BUSINESS_NAV=[
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
 ];
 const FREIGHT_NAV=[
+  {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
   {id:'f-post',l:'Post a Load',s:'Freight',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'f-loads',l:'Active Loads',s:'Freight',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'f-cap',l:'Network Map',s:'Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
@@ -2314,7 +2431,8 @@ function enterKnectApp(u){
       buildNav(DRIVER_NAV);
       setComp('green',u);
       _showDemoBar('Driver');
-      switchTab('pane-f-cap');
+      _buildDashActions('driver');
+      switchTab('pane-d-home');
     }else if(demo.role==='freight-pro'){
       roleEl.textContent='Freight Pro Demo';roleEl.className='role-chip chip co';
       buildNav(FREIGHT_NAV);
@@ -2323,12 +2441,14 @@ function enterKnectApp(u){
       const tb2=document.getElementById('ff-tier-post');
       if(tb2)tb2.innerHTML='<span style="font-weight:700;color:var(--or)">Freight Forward Pro</span><span style="color:var(--mu)">9% network fee · 3% rebate earns credit</span>';
       _showDemoBar('Freight Pro');
-      switchTab('pane-f-cap');
+      _buildDashActions('freight-pro');
+      switchTab('pane-d-home');
     }else if(demo.role==='business'){
       roleEl.textContent='Business Demo';roleEl.className='role-chip chip cb';
       buildNav(BUSINESS_NAV);
       _showDemoBar('Business');
-      switchTab('pane-f-cap');
+      _buildDashActions('business');
+      switchTab('pane-d-home');
     }
     _setModePill('Demo','var(--mu)');
   }else{
@@ -2336,7 +2456,8 @@ function enterKnectApp(u){
     roleEl.textContent='Driver';roleEl.className='role-chip chip cb';
     if(plnaBtn)plnaBtn.style.display='flex';
     buildNav(DRIVER_NAV);
-    switchTab('pane-d-invites');
+    _buildDashActions('driver');
+    switchTab('pane-d-home');
     _setModePill('','');
   }
 }
@@ -2387,15 +2508,18 @@ function enterMode(mode){
       roleEl.textContent='Viewing: Driver';roleEl.className='role-chip chip cb';
       if(plnaBtn)plnaBtn.style.display='flex';
       buildNav(DRIVER_NAV);
-      switchTab('pane-d-invites');
+      _buildDashActions('driver');
+      switchTab('pane-d-home');
     }else if(mode==='view-business'){
       roleEl.textContent='Viewing: Business';roleEl.className='role-chip chip cb';
       buildNav(BUSINESS_NAV);
-      switchTab('pane-b-book');
+      _buildDashActions('business');
+      switchTab('pane-d-home');
     }else{
       roleEl.textContent='Viewing: FF';roleEl.className='role-chip chip co';
       buildNav(FREIGHT_NAV);
-      switchTab('pane-f-post');
+      _buildDashActions('freight-pro');
+      switchTab('pane-d-home');
       // Set tier banner per sub-mode
       const tiers={'view-ff-free':['Freight Forward Free','12% network fee · no rebate'],'view-ff-plus':['Freight Forward Plus','10% network fee · 1% rebate per job'],'view-ff-pro':['Freight Forward Pro','9% network fee · 3% rebate per job']};
       const [name,desc]=tiers[mode]||['Freight Forward Free',''];
@@ -2653,6 +2777,7 @@ function switchTab(id){
   const p=document.getElementById(id);if(p)p.classList.add('on');
   const n=document.getElementById('ni-'+id.replace('pane-',''));if(n)n.classList.add('on');
   ct=id;
+  if(id==='pane-d-home')setTimeout(initDashMap,80);
   if(id==='pane-f-cap')setTimeout(initCapMap,80);
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
 }
@@ -2660,6 +2785,63 @@ function switchTab(id){
 // Boot in day mode
 document.documentElement.removeAttribute('data-theme');
 document.getElementById('landing').style.display='flex';
+
+/* ── EXCHANGE DASHBOARD MAP ── */
+let dashMap=null;
+function initDashMap(){
+  const el=document.getElementById('dash-map');
+  if(!el||typeof L==='undefined')return;
+  if(dashMap){dashMap.invalidateSize();return;}
+  dashMap=L.map('dash-map',{zoomControl:false,scrollWheelZoom:false,dragging:false,touchZoom:false}).setView([52.8,-1.8],6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'',maxZoom:18,opacity:.65}).addTo(dashMap);
+  const ZONES=[
+    {lat:53.48,lng:-2.24,city:'Manchester',n:14,tier:'hi'},
+    {lat:53.80,lng:-1.55,city:'Leeds',n:9,tier:'hi'},
+    {lat:52.49,lng:-1.89,city:'Birmingham',n:11,tier:'hi'},
+    {lat:53.41,lng:-2.99,city:'Liverpool',n:6,tier:'med'},
+    {lat:53.38,lng:-1.47,city:'Sheffield',n:5,tier:'med'},
+    {lat:51.51,lng:-0.09,city:'London',n:8,tier:'med'},
+    {lat:52.95,lng:-1.15,city:'Nottingham',n:2,tier:'lo'},
+    {lat:51.45,lng:-2.60,city:'Bristol',n:3,tier:'lo'},
+    {lat:54.98,lng:-1.62,city:'Newcastle',n:7,tier:'med'},
+    {lat:55.86,lng:-4.25,city:'Glasgow',n:5,tier:'med'},
+  ];
+  const TC={hi:{fill:'#2dab60',stroke:'#1e7a45'},med:{fill:'#e88c00',stroke:'#b36b00'},lo:{fill:'#cc3333',stroke:'#992222'}};
+  ZONES.forEach(z=>{
+    const c=TC[z.tier];
+    L.circle([z.lat,z.lng],{radius:22000,fillColor:c.fill,color:c.stroke,weight:1,fillOpacity:.18}).addTo(dashMap);
+    L.marker([z.lat,z.lng],{icon:L.divIcon({className:'',html:`<div style="text-align:center"><div style="background:${c.fill};color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;border:1.5px solid ${c.stroke};white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.3)">${z.city}</div><div style="font-size:8px;color:${c.stroke};font-weight:700">${z.n} drivers</div></div>`,iconSize:[80,28],iconAnchor:[40,8]})}).addTo(dashMap);
+  });
+  [{lat:52.92,lng:-1.48,ref:'HAF-2858',route:'Manchester → Birmingham'},{lat:52.30,lng:-0.88,ref:'HAF-2201',route:'Leeds → London'},{lat:53.44,lng:-2.18,ref:'HAF-2196',route:'Liverpool → Sheffield'},{lat:51.72,lng:-1.08,ref:'HAF-2189',route:'Bristol → London'}].forEach(j=>{
+    L.circleMarker([j.lat,j.lng],{radius:7,fillColor:'#ff7800',color:'#fff',weight:2,fillOpacity:.95}).addTo(dashMap).bindPopup(`<strong style="color:#ff7800">${j.ref}</strong><br>${j.route}`);
+  });
+}
+function _buildDashActions(role){
+  const el=document.getElementById('dash-quick-actions');
+  if(!el)return;
+  const maps={
+    driver:[
+      {l:'Exchange jobs',t:'pane-d-invites',style:'btn-or'},
+      {l:'Open jobs',t:'pane-d-jobs',style:'btn-gh'},
+      {l:'My earnings',t:'pane-d-earn',style:'btn-gh'},
+      {l:'Full network map',t:'pane-f-cap',style:'btn-gh'},
+    ],
+    'freight-pro':[
+      {l:'Post a load',t:'pane-f-post',style:'btn-or'},
+      {l:'Active loads',t:'pane-f-loads',style:'btn-gh'},
+      {l:'Driver directory',t:'pane-f-dir',style:'btn-gh'},
+      {l:'Full network map',t:'pane-f-cap',style:'btn-gh'},
+    ],
+    business:[
+      {l:'Book a courier',t:'pane-b-book',style:'btn-or'},
+      {l:'My deliveries',t:'pane-b-del',style:'btn-gh'},
+      {l:'My fleet',t:'pane-b-fleet',style:'btn-gh'},
+      {l:'Full network map',t:'pane-f-cap',style:'btn-gh'},
+    ],
+  };
+  const actions=maps[role]||maps.driver;
+  el.innerHTML=actions.map(a=>`<button onclick="switchTab('${a.t}')" class="btn ${a.style} btn-sm">${a.l}</button>`).join('');
+}
 
 /* ── NETWORK CAPACITY MAP ── */
 let capMap=null;
