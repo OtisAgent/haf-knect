@@ -853,6 +853,14 @@ textarea.fi2{resize:vertical;min-height:70px}
         <div class="sc-err" id="sc-err"></div>
         <button class="btn btn-or btn-wide" onclick="scLogin()" style="margin-top:.3rem">Log in →</button>
         <p class="sc-foot">No account? <a href="https://clever.usehaf.co.uk" target="_blank">Create one via CleverPay</a></p>
+        <div style="border-top:1px solid var(--ln);padding-top:.7rem;margin-top:.7rem">
+          <div style="font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-bottom:.4rem">Try a demo</div>
+          <div style="display:flex;gap:.35rem">
+            <button onclick="demoLogin('DEMO-DRV')" style="flex:1;padding:.42rem .3rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);cursor:pointer;font-size:.65rem;font-weight:700;color:var(--tx);transition:border-color .14s" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--ln)'">Driver</button>
+            <button onclick="demoLogin('DEMO-PRO')" style="flex:1;padding:.42rem .3rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);cursor:pointer;font-size:.65rem;font-weight:700;color:var(--tx);transition:border-color .14s" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--ln)'">Freight Pro</button>
+            <button onclick="demoLogin('DEMO-BIZ')" style="flex:1;padding:.42rem .3rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);cursor:pointer;font-size:.65rem;font-weight:700;color:var(--tx);transition:border-color .14s" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--ln)'">Business</button>
+          </div>
+        </div>
       </div>
       <div class="side-card" id="side-talk">
         <div class="sc-title">Talk to HAF</div>
@@ -925,7 +933,23 @@ textarea.fi2{resize:vertical;min-height:70px}
     <div class="of"><label class="ol">PIN or password</label><input class="oi" id="l-pass" placeholder="4–6 digit PIN or password" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div class="oe" id="l-err"></div>
     <button class="btn btn-or btn-wide" onclick="doLogin()">Sign in →</button>
-    <p style="font-size:.72rem;color:var(--mu);text-align:center;margin-top:.8rem">No account? <a href="https://clever.usehaf.co.uk" target="_blank">Create one via CleverPay</a></p>
+    <div style="margin-top:1.1rem;border-top:1px solid var(--ln);padding-top:.9rem">
+      <div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-bottom:.5rem;text-align:center">Or try a demo account</div>
+      <div style="display:flex;gap:.4rem">
+        <button onclick="demoLogin('DEMO-DRV')" style="flex:1;padding:.5rem .4rem;background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);cursor:pointer;text-align:center;transition:border-color .14s" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--ln)'">
+          <div style="font-size:.72rem;font-weight:800;color:var(--tx)">Driver</div>
+          <div style="font-size:.62rem;color:var(--mu);margin-top:.1rem">Exchange view</div>
+        </button>
+        <button onclick="demoLogin('DEMO-PRO')" style="flex:1;padding:.5rem .4rem;background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);cursor:pointer;text-align:center;transition:border-color .14s" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--ln)'">
+          <div style="font-size:.72rem;font-weight:800;color:var(--tx)">Freight Pro</div>
+          <div style="font-size:.62rem;color:var(--mu);margin-top:.1rem">Forwarder view</div>
+        </button>
+        <button onclick="demoLogin('DEMO-BIZ')" style="flex:1;padding:.5rem .4rem;background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);cursor:pointer;text-align:center;transition:border-color .14s" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--ln)'">
+          <div style="font-size:.72rem;font-weight:800;color:var(--tx)">Business</div>
+          <div style="font-size:.62rem;color:var(--mu);margin-top:.1rem">Own goods view</div>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2214,17 +2238,49 @@ let _superUser='';
 function enterKnectApp(u){
   _superUser=u;
   const isAdmin=u==='BF638793';
-  document.getElementById('tb-user').textContent=u;
-  document.getElementById('tb-av').textContent=u.slice(0,2);
-  const sm=document.getElementById('sm-username');if(sm)sm.textContent=u;
+  const demo=DEMO_ACCOUNTS[u];
+  const displayName=demo?demo.name:u;
+  const initials=demo?demo.initials:u.slice(0,2);
+  document.getElementById('tb-user').textContent=displayName;
+  document.getElementById('tb-av').textContent=initials;
+  const sm=document.getElementById('sm-username');if(sm)sm.textContent=displayName;
   document.getElementById('landing').style.display='none';
+  closeLogin();
+
   if(isAdmin){
     showModeSelector();
+    return;
+  }
+
+  document.getElementById('app').classList.add('open');
+  const roleEl=document.getElementById('tb-role');
+  const plnaBtn=document.getElementById('plna-link-btn');
+  if(plnaBtn)plnaBtn.style.display='none';
+
+  if(demo){
+    if(demo.role==='driver'){
+      roleEl.textContent='Driver Demo';roleEl.className='role-chip chip cb';
+      if(plnaBtn)plnaBtn.style.display='flex';
+      buildNav(DRIVER_NAV);
+      switchTab('pane-d-invites');
+      setComp('green',u);
+    }else if(demo.role==='freight-pro'){
+      roleEl.textContent='Freight Pro Demo';roleEl.className='role-chip chip co';
+      buildNav(FREIGHT_NAV);
+      // Set Pro tier banners
+      const tb=document.getElementById('ff-tier-banner');
+      if(tb)tb.innerHTML='<div><span style="font-weight:800;color:var(--or)">Freight Forward Pro</span> <span style="color:var(--mu)">· 9% network fee · 3% rebate on every job</span></div><button class="btn btn-or btn-xs" onclick="switchTab(\'pane-f-plans\')">See plans →</button>';
+      const tb2=document.getElementById('ff-tier-post');
+      if(tb2)tb2.innerHTML='<span style="font-weight:700;color:var(--or)">Freight Forward Pro</span><span style="color:var(--mu)">9% network fee · 3% rebate earns credit</span>';
+      switchTab('pane-f-post');
+    }else if(demo.role==='business'){
+      roleEl.textContent='Business Demo';roleEl.className='role-chip chip cb';
+      buildNav(BUSINESS_NAV);
+      switchTab('pane-b-book');
+    }
+    _setModePill('Demo','var(--mu)');
   }else{
-    document.getElementById('app').classList.add('open');
-    const roleEl=document.getElementById('tb-role');
     roleEl.textContent='Driver';roleEl.className='role-chip chip cb';
-    const plnaBtn=document.getElementById('plna-link-btn');
     if(plnaBtn)plnaBtn.style.display='flex';
     buildNav(DRIVER_NAV);
     switchTab('pane-d-invites');
@@ -2310,10 +2366,22 @@ function _setModePill(label,col){
   if(lbl)lbl.textContent=label;
   pill.style.borderColor=col||'var(--lns)';
 }
+/* ── DEMO ACCOUNTS ── */
+const DEMO_ACCOUNTS={
+  'DEMO-DRV':{role:'driver',name:'Demo Driver',initials:'DD'},
+  'DEMO-PRO':{role:'freight-pro',name:'Demo Freight Pro',initials:'DF'},
+  'DEMO-BIZ':{role:'business',name:'Demo Business',initials:'DB'},
+};
+function demoLogin(u){
+  closeLogin();
+  enterKnectApp(u);
+}
+
 async function hafAuth(u,s,err,btn){
   err.style.display='none';err.textContent='';
   u=(u||'').trim().toUpperCase();s=(s||'');
   if(!u||!s){hafErr(err,'Enter your HAF username and your PIN or password.');return}
+  if(DEMO_ACCOUNTS[u]){enterKnectApp(u);return;}
   if(u.length<6){hafErr(err,'Username looks too short — format is like JW012390.');return}
   const isPin=/^\d{4,6}$/.test(s);
   const old=btn.textContent;btn.textContent='Signing in…';btn.disabled=true;
