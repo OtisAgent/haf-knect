@@ -1231,6 +1231,65 @@ textarea.fi2{resize:vertical;min-height:70px}
         <div class="card"><div class="ct">CleverPay portal</div><p style="font-size:.78rem;color:var(--mu);margin-bottom:.85rem">Upload missing documents and check your full compliance record.</p><a href="https://clever.usehaf.co.uk" target="_blank" class="btn btn-or btn-sm">Open CleverPay →</a></div>
       </div>
 
+      <!-- DRIVER: Directory -->
+      <div class="tp" id="pane-d-dir">
+        <h1 class="pt">Driver Directory</h1>
+        <p class="ps">List yourself so freight forwarders can find and contact you directly — or book you without posting to the open network.</p>
+        <div style="background:var(--bl-d);border:1.5px solid rgba(61,125,202,.22);border-radius:var(--rx);padding:.65rem 1rem;font-size:.75rem;color:var(--bl);margin-bottom:1rem;display:flex;align-items:center;gap:.55rem">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>Available on <strong>PLNA Plus and Pro</strong>. Free tier drivers are not listed.</span>
+        </div>
+        <div class="card" style="max-width:560px;margin-bottom:.85rem">
+          <div class="ct">My listing</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem .8rem;background:var(--p2);border-radius:var(--rx);margin-bottom:.8rem">
+            <div>
+              <div style="font-weight:700;font-size:.84rem">Show me in the freight forwarder directory</div>
+              <div style="font-size:.72rem;color:var(--mu);margin-top:.12rem">Freight forwarders can contact and book you directly</div>
+            </div>
+            <button id="dir-tog" onclick="dirToggle()" style="padding:.32rem .75rem;border-radius:var(--pill);font-size:.72rem;font-weight:800;background:var(--gn);color:#fff;border:none;cursor:pointer;transition:background .15s;white-space:nowrap">● Listed</button>
+          </div>
+          <div class="fr" style="margin:0 0 .65rem">
+            <div class="fg"><label class="fl">Contact via WhatsApp</label><input class="fi2" id="dir-wa" placeholder="07xxx xxxxxx" type="tel"></div>
+            <div class="fg"><label class="fl">Or contact via email</label><input class="fi2" id="dir-email" placeholder="your@email.com" type="email"></div>
+          </div>
+          <div class="fr" style="margin:0 0 .65rem">
+            <div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>Short wheelbase</option><option selected>Long wheelbase</option><option>Extra LWB</option><option>Luton / tail-lift</option><option>7.5t truck</option></select></div>
+            <div class="fg"><label class="fl">Home zone</label><select class="fi2"><option>North West</option><option>Yorkshire &amp; Humber</option><option>North East</option><option>East Midlands</option><option>West Midlands</option><option>East of England</option><option>M25 / Greater London</option><option>South East</option><option>South West</option></select></div>
+          </div>
+          <div class="fg" style="margin-bottom:.7rem"><label class="fl">Run directions (tick all that apply)</label>
+            <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.3rem">
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--or)"> North</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--or)"> South</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--or)"> East</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--or)"> West</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--or)"> National</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--or)"> Backloads welcome</label>
+            </div>
+          </div>
+          <div class="fg" style="margin-bottom:.7rem"><label class="fl">Short bio (optional)</label><textarea class="fi2" rows="2" placeholder="e.g. Based in Manchester, running M62 corridor daily, available for urgent and same-day jobs."></textarea></div>
+          <button class="btn btn-or btn-sm">Save listing →</button>
+        </div>
+        <div class="card" style="max-width:560px">
+          <div class="ct">How your listing looks to freight forwarders</div>
+          <div style="padding:.8rem;background:var(--p2);border-radius:var(--rx);border:1px solid var(--ln)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+              <div>
+                <div style="font-weight:800;font-size:.88rem">JW012390 — James Wilson</div>
+                <div style="font-size:.72rem;color:var(--mu);margin-top:.1rem">Long wheelbase · North West zone</div>
+              </div>
+              <span class="chip cg">Available</span>
+            </div>
+            <div style="font-size:.72rem;color:var(--mu);margin-bottom:.55rem">Runs: North · South · West · Backloads welcome</div>
+            <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+              <button class="btn btn-or btn-xs">WhatsApp →</button>
+              <button class="btn btn-gh btn-xs">Email →</button>
+              <button class="btn btn-gh btn-xs">Book this driver →</button>
+            </div>
+          </div>
+          <p style="font-size:.72rem;color:var(--mu);margin-top:.6rem">Direct bookings from freight forwarders land in your job invites with a <strong>Direct Booking</strong> badge.</p>
+        </div>
+      </div>
+
       <!-- BUSINESS: Book (own goods only — free) -->
       <div class="tp" id="pane-b-book">
         <h1 class="pt">Book a Courier</h1><p class="ps">Send your own business goods via the HAF network.</p>
@@ -1376,6 +1435,103 @@ textarea.fi2{resize:vertical;min-height:70px}
         </tbody></table></div>
       </div>
 
+      <!-- FREIGHT: Driver Directory -->
+      <div class="tp" id="pane-f-dir">
+        <h1 class="pt">Driver Directory</h1>
+        <p class="ps">Browse drivers who have opted in to direct contact. Reach them by WhatsApp, email, or book them straight from here without posting to the open network.</p>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem">
+          <select class="fi2" style="flex:1;min-width:140px;max-width:200px"><option>All zones</option><option>North West</option><option>Yorkshire &amp; Humber</option><option>West Midlands</option><option>East Midlands</option><option>M25 / Greater London</option><option>South East</option></select>
+          <select class="fi2" style="flex:1;min-width:130px;max-width:200px"><option>All vehicles</option><option>Small van</option><option>SWB</option><option selected>LWB</option><option>Extra LWB</option><option>Luton</option></select>
+          <select class="fi2" style="flex:1;min-width:130px;max-width:200px"><option>Any direction</option><option>North</option><option>South</option><option>East</option><option>West</option><option>Backloads</option></select>
+          <button class="btn btn-or btn-sm">Filter</button>
+        </div>
+        <div class="kg" style="margin-bottom:.85rem">
+          <div class="kc"><div class="kc-l">Listed drivers</div><div class="kc-v or">47</div><div class="kc-d">in directory</div></div>
+          <div class="kc"><div class="kc-l">Available now</div><div class="kc-v gn">23</div></div>
+          <div class="kc"><div class="kc-l">Matching LWB</div><div class="kc-v">18</div></div>
+          <div class="kc"><div class="kc-l">Your direct bookings</div><div class="kc-v">3</div><div class="kc-d">this month</div></div>
+        </div>
+        <!-- Driver cards -->
+        <div class="xc" style="margin-bottom:.65rem">
+          <div class="xc-head"><div class="xc-badges"><span class="xb pref">★ PLNA Plus</span><span class="xb-ref">JW012390 — James Wilson</span></div><span class="chip cg">Available now</span></div>
+          <div class="xc-route" style="margin-bottom:.35rem">Long wheelbase · North West zone</div>
+          <div class="xc-sr" style="margin-bottom:.5rem">
+            <div class="xcs"><div class="xcs-v">North</div><div class="xcs-k">Runs</div></div>
+            <div class="xcs"><div class="xcs-v">South</div><div class="xcs-k">Direction</div></div>
+            <div class="xcs"><div class="xcs-v">West</div><div class="xcs-k">Direction</div></div>
+            <div class="xcs"><div class="xcs-v">4.9★</div><div class="xcs-k">Rating</div></div>
+          </div>
+          <div class="xc-goods" style="margin-bottom:.6rem">Based in Manchester · Backloads welcome · Available Mon–Sat</div>
+          <div class="xc-foot">
+            <div style="font-size:.7rem;color:var(--mu)">28 jobs completed · Clever Checked</div>
+            <div class="xc-btns">
+              <button class="btn btn-gh btn-xs" onclick="dirContact('wa','07712345678')">WhatsApp →</button>
+              <button class="btn btn-gh btn-xs" onclick="dirContact('email','jw012390@network.usehaf.co.uk')">Email →</button>
+              <button class="btn btn-or btn-sm" onclick="openDirBook('JW012390','James Wilson','Long wheelbase','Manchester · North West')">Book directly →</button>
+            </div>
+          </div>
+        </div>
+        <div class="xc" style="margin-bottom:.65rem">
+          <div class="xc-head"><div class="xc-badges"><span class="xb pref">★ PLNA Pro</span><span class="xb-ref">DH022641 — David Hughes</span></div><span class="chip co">On a job</span></div>
+          <div class="xc-route" style="margin-bottom:.35rem">Long wheelbase · West Midlands zone</div>
+          <div class="xc-sr" style="margin-bottom:.5rem">
+            <div class="xcs"><div class="xcs-v">National</div><div class="xcs-k">Runs</div></div>
+            <div class="xcs"><div class="xcs-v">All UK</div><div class="xcs-k">Direction</div></div>
+            <div class="xcs"><div class="xcs-v">5.0★</div><div class="xcs-k">Rating</div></div>
+            <div class="xcs"><div class="xcs-v">44</div><div class="xcs-k">Jobs</div></div>
+          </div>
+          <div class="xc-goods" style="margin-bottom:.6rem">Based in Birmingham · National runs preferred · Available 7 days · Free ~17:00 today</div>
+          <div class="xc-foot">
+            <div style="font-size:.7rem;color:var(--mu)">44 jobs completed · Clever Checked</div>
+            <div class="xc-btns">
+              <button class="btn btn-gh btn-xs" onclick="dirContact('wa','07823456789')">WhatsApp →</button>
+              <button class="btn btn-gh btn-xs" onclick="dirContact('email','dh022641@network.usehaf.co.uk')">Email →</button>
+              <button class="btn btn-or btn-sm" onclick="openDirBook('DH022641','David Hughes','Long wheelbase','Birmingham · West Midlands')">Book directly →</button>
+            </div>
+          </div>
+        </div>
+        <div class="xc" style="margin-bottom:.65rem">
+          <div class="xc-head"><div class="xc-badges"><span class="xb pref">★ PLNA Plus</span><span class="xb-ref">KP041872 — Karen Price</span></div><span class="chip cg">Available now</span></div>
+          <div class="xc-route" style="margin-bottom:.35rem">Extra LWB · Yorkshire &amp; Humber zone</div>
+          <div class="xc-sr" style="margin-bottom:.5rem">
+            <div class="xcs"><div class="xcs-v">North</div><div class="xcs-k">Runs</div></div>
+            <div class="xcs"><div class="xcs-v">South</div><div class="xcs-k">Runs</div></div>
+            <div class="xcs"><div class="xcs-v">4.8★</div><div class="xcs-k">Rating</div></div>
+            <div class="xcs"><div class="xcs-v">31</div><div class="xcs-k">Jobs</div></div>
+          </div>
+          <div class="xc-goods" style="margin-bottom:.6rem">Based in Leeds · M1/A1 corridor specialist · Mon–Fri</div>
+          <div class="xc-foot">
+            <div style="font-size:.7rem;color:var(--mu)">31 jobs completed · Clever Checked</div>
+            <div class="xc-btns">
+              <button class="btn btn-gh btn-xs" onclick="dirContact('wa','07934567890')">WhatsApp →</button>
+              <button class="btn btn-gh btn-xs" onclick="dirContact('email','kp041872@network.usehaf.co.uk')">Email →</button>
+              <button class="btn btn-or btn-sm" onclick="openDirBook('KP041872','Karen Price','Extra LWB','Leeds · Yorkshire')">Book directly →</button>
+            </div>
+          </div>
+        </div>
+        <div class="xc" style="margin-bottom:.65rem">
+          <div class="xc-head"><div class="xc-badges"><span class="xb pref">★ PLNA Plus</span><span class="xb-ref">TD018392 — Thomas Dean</span></div><span class="chip cg">Available now</span></div>
+          <div class="xc-route" style="margin-bottom:.35rem">Long wheelbase · M25 / Greater London zone</div>
+          <div class="xc-sr" style="margin-bottom:.5rem">
+            <div class="xcs"><div class="xcs-v">M25</div><div class="xcs-k">Specialist</div></div>
+            <div class="xcs"><div class="xcs-v">South</div><div class="xcs-k">Runs</div></div>
+            <div class="xcs"><div class="xcs-v">Backload</div><div class="xcs-k">Welcome</div></div>
+            <div class="xcs"><div class="xcs-v">4.7★</div><div class="xcs-k">Rating</div></div>
+          </div>
+          <div class="xc-goods" style="margin-bottom:.6rem">Based in London E1 · M25 specialist · Backloads north/midlands welcome</div>
+          <div class="xc-foot">
+            <div style="font-size:.7rem;color:var(--mu)">19 jobs completed · Clever Checked</div>
+            <div class="xc-btns">
+              <button class="btn btn-gh btn-xs" onclick="dirContact('wa','07645678901')">WhatsApp →</button>
+              <button class="btn btn-gh btn-xs" onclick="dirContact('email','td018392@network.usehaf.co.uk')">Email →</button>
+              <button class="btn btn-or btn-sm" onclick="openDirBook('TD018392','Thomas Dean','Long wheelbase','London · South East')">Book directly →</button>
+            </div>
+          </div>
+        </div>
+        <!-- Dynamically added direct bookings summary -->
+        <div id="fdir-direct-bookings"></div>
+      </div>
+
       <!-- FREIGHT: Solutions Plans -->
       <div class="tp" id="pane-f-plans">
         <h1 class="pt">Freight Forward Plans</h1><p class="ps">All freight forwarding accounts can post loads for any client. Your tier sets your network fee, rebate, and tools.</p>
@@ -1489,6 +1645,29 @@ textarea.fi2{resize:vertical;min-height:70px}
       </div>
 
     </main>
+  </div>
+</div>
+
+<!-- ══ DIRECT BOOKING MODAL ══════════════════════════════════════ -->
+<div class="dr-ov" id="dir-book-ov" onclick="if(event.target===this)closeDirBook()">
+  <div class="dr-box" style="max-width:460px">
+    <button class="dr-box-close" onclick="closeDirBook()">✕</button>
+    <h2>Book a driver directly</h2>
+    <p class="dr-box-sub" id="db-driver-lbl">Booking driver: —</p>
+    <div class="fg" style="margin-bottom:.55rem"><label class="fl">Collection postcode or address</label><input class="fi2" id="db-from" placeholder="e.g. M4 1HQ"></div>
+    <div class="fg" style="margin-bottom:.55rem"><label class="fl">Delivery postcode or address</label><input class="fi2" id="db-to" placeholder="e.g. B1 1BB"></div>
+    <div style="display:flex;gap:.5rem;margin-bottom:.55rem">
+      <div class="fg" style="flex:1"><label class="fl">Date needed</label><input class="fi2" id="db-date" type="date"></div>
+      <div class="fg" style="flex:1"><label class="fl">Collect by</label><input class="fi2" id="db-time" type="time" value="09:00"></div>
+    </div>
+    <div style="display:flex;gap:.5rem;margin-bottom:.55rem">
+      <div class="fg" style="flex:1"><label class="fl">Load type</label><input class="fi2" id="db-goods" placeholder="e.g. Pallets, boxes"></div>
+      <div class="fg" style="flex:1"><label class="fl">Weight (kg)</label><input class="fi2" id="db-weight" type="number" placeholder="e.g. 500"></div>
+    </div>
+    <div class="fg" style="margin-bottom:.7rem"><label class="fl">Your reference (optional)</label><input class="fi2" id="db-ref" placeholder="Client or PO reference"></div>
+    <div id="db-err" style="display:none;font-size:.76rem;color:var(--rd);font-weight:600;margin-bottom:.5rem"></div>
+    <button class="btn btn-or btn-wide" onclick="submitDirBook()">Send booking request →</button>
+    <p style="font-size:.7rem;color:var(--mu);margin-top:.55rem;text-align:center">The driver sees this in their job invites. You can track the status in Active Loads.</p>
   </div>
 </div>
 
@@ -1781,6 +1960,7 @@ const DRIVER_NAV=[
   {id:'d-empty',l:'Backload',s:'KNECT Jobs',ico:'<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.54"/>'},
   {id:'d-earn',l:'Earnings',s:'My Account',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
   {id:'d-comp',l:'Compliance',s:'My Account',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
+  {id:'d-dir',l:'Driver Directory',s:'My Account',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'billing',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'My Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
 ];
@@ -1808,6 +1988,7 @@ const FREIGHT_NAV=[
   {id:'f-loads',l:'Active Loads',s:'Freight',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'f-cap',l:'Network Capacity',s:'Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:'f-cover',l:'Coverage Board',s:'Freight',ico:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'},
+  {id:'f-dir',l:'Driver Directory',s:'Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'f-lanes',l:'Lane Pricing',s:'Freight',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
   {id:'f-plans',l:'Solutions Plan',s:'Account',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
   {id:'f-account',l:'Account Controls',s:'Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
@@ -2051,6 +2232,129 @@ function initCapMap(){
      .addTo(capMap)
      .bindPopup(`<strong style="color:#ff7800">${j.ref}</strong><br><b>${j.route}</b><br>Driver: ${j.driver}<br><span style="color:#ff7800">● ${j.step}</span>`);
   });
+}
+
+/* ── DRIVER DIRECTORY ── */
+let _dirListed=true;
+function dirToggle(){
+  _dirListed=!_dirListed;
+  const btn=document.getElementById('dir-tog');
+  if(!btn)return;
+  btn.textContent=_dirListed?'● Listed':'○ Unlisted';
+  btn.style.background=_dirListed?'var(--gn)':'var(--mu)';
+}
+
+/* ── FREIGHT: DRIVER DIRECTORY ── */
+function dirContact(type,val){
+  if(type==='wa'){window.open('https://wa.me/44'+val.replace(/^0/,''),'_blank');}
+  else{window.open('mailto:'+val,'_blank');}
+}
+
+let _dbDriver={};
+function openDirBook(id,name,veh,zone){
+  _dbDriver={id,name,veh,zone};
+  const lbl=document.getElementById('db-driver-lbl');
+  if(lbl)lbl.textContent='Driver: '+name+' ('+id+') · '+veh+' · '+zone;
+  const dateEl=document.getElementById('db-date');
+  if(dateEl&&!dateEl.value){
+    const d=new Date();
+    dateEl.value=d.toISOString().split('T')[0];
+  }
+  const ov=document.getElementById('dir-book-ov');
+  if(ov){ov.classList.add('open');setTimeout(()=>{const f=document.getElementById('db-from');if(f)f.focus();},60);}
+}
+function closeDirBook(){
+  const ov=document.getElementById('dir-book-ov');
+  if(ov)ov.classList.remove('open');
+  const err=document.getElementById('db-err');
+  if(err){err.style.display='none';err.textContent='';}
+}
+
+const _directBookings=[];
+let _dbCounter=100;
+function submitDirBook(){
+  const from=(document.getElementById('db-from').value||'').trim();
+  const to=(document.getElementById('db-to').value||'').trim();
+  const date=document.getElementById('db-date').value;
+  const time=document.getElementById('db-time').value;
+  const goods=(document.getElementById('db-goods').value||'').trim();
+  const weight=(document.getElementById('db-weight').value||'').trim();
+  const ref=(document.getElementById('db-ref').value||'').trim();
+  const err=document.getElementById('db-err');
+  if(!from||!to){err.textContent='Please enter collection and delivery postcodes.';err.style.display='block';return;}
+  err.style.display='none';
+  _dbCounter++;
+  const jobRef='DB-'+_dbCounter;
+  const bk={ref:jobRef,driver:{..._dbDriver},from,to,date,time,goods,weight,clientRef:ref,status:'Pending Acceptance',posted:'Just now'};
+  _directBookings.push(bk);
+  _renderDirectBookings();
+  _addDirectInvite(bk);
+  ['db-from','db-to','db-goods','db-weight','db-ref'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  closeDirBook();
+  switchTab('pane-f-loads');
+}
+
+function _renderDirectBookings(){
+  if(!_directBookings.length)return;
+  const loadsPane=document.getElementById('pane-f-loads');
+  if(!loadsPane)return;
+  let block=document.getElementById('direct-bookings-block');
+  if(!block){block=document.createElement('div');block.id='direct-bookings-block';loadsPane.appendChild(block);}
+  let h='<div class="xfeed-hdr" style="margin-top:.7rem">Direct bookings</div>';
+  _directBookings.forEach(bk=>{
+    const sc=bk.status==='Pending Acceptance'?'ca':bk.status==='Accepted'?'cg':'cb';
+    h+=`<div class="ldc">
+      <div class="ldc-h">
+        <div><div class="ldc-route">${bk.from} → ${bk.to}</div>
+        <div style="font-size:.71rem;color:var(--mu);margin-top:.12rem">${bk.ref} · Driver: ${bk.driver.name} · ${bk.posted}${bk.clientRef?' · Ref: '+bk.clientRef:''}</div></div>
+        <span class="chip ${sc}">${bk.status}</span>
+      </div>
+      <div class="ldc-meta">
+        ${bk.goods?`<span class="ldc-mi"><strong>${bk.goods}</strong>${bk.weight?' · '+bk.weight+' kg':''}</span>`:''}
+        ${bk.date?`<span class="ldc-mi">Date <strong>${bk.date}</strong>${bk.time?' at '+bk.time:''}</span>`:''}
+        <span class="ldc-mi"><span class="chip cb">Direct booking</span></span>
+      </div>
+    </div>`;
+  });
+  block.innerHTML=h;
+}
+
+function _addDirectInvite(bk){
+  const invPane=document.getElementById('pane-d-invites');
+  if(!invPane)return;
+  const hdr=invPane.querySelector('.xfeed-hdr');
+  if(!hdr)return;
+  const card=document.createElement('div');
+  card.className='xc xc-invite';
+  card.id='xc-'+bk.ref;
+  card.innerHTML=`
+    <div class="xc-head">
+      <div class="xc-badges"><span class="xb inv">Direct Booking</span><span class="xb-ref">${bk.ref}</span></div>
+      <div style="font-size:.68rem;color:var(--mu)">from freight forwarder</div>
+    </div>
+    <div class="xc-route">${bk.from} → ${bk.to}</div>
+    <div class="xc-sr">
+      ${bk.time?`<div class="xcs"><div class="xcs-v">${bk.time}</div><div class="xcs-k">Collect by</div></div>`:''}
+      <div class="xcs"><div class="xcs-v">${bk.driver.veh}</div><div class="xcs-k">Vehicle</div></div>
+      ${bk.goods?`<div class="xcs"><div class="xcs-v">${bk.goods}</div><div class="xcs-k">Goods</div></div>`:''}
+      ${bk.weight?`<div class="xcs"><div class="xcs-v">${bk.weight} kg</div><div class="xcs-k">Weight</div></div>`:''}
+    </div>
+    <div class="xc-foot">
+      <div class="xc-meta">Direct booking · Posted by freight forwarder via directory</div>
+      <div class="xc-btns">
+        <button class="btn btn-gh btn-xs" onclick="this.closest('.xc').remove()">Decline</button>
+        <button class="btn btn-or btn-sm" onclick="xDirectAccept(this,'${bk.ref}','${bk.from} → ${bk.to}','Direct booking')">Accept →</button>
+      </div>
+    </div>`;
+  hdr.insertAdjacentElement('afterend',card);
+  const badge=document.querySelector('#ni-d-invites .nb');
+  if(badge)badge.textContent=parseInt(badge.textContent||'0')+1;
+}
+
+function xDirectAccept(btn,ref,route,rate){
+  xAccept(btn,ref,route,rate);
+  const bk=_directBookings.find(b=>b.ref===ref);
+  if(bk){bk.status='Accepted';_renderDirectBookings();}
 }
 </script>
 </body>
