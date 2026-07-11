@@ -1097,11 +1097,13 @@ textarea.fi2{resize:vertical;min-height:70px}
         <!-- Map -->
         <div style="border-radius:var(--r);overflow:hidden;border:1.5px solid var(--ln);margin-bottom:1rem;position:relative">
           <div id="cap-map" style="height:420px;width:100%;background:var(--bg)"></div>
-          <div style="position:absolute;bottom:10px;left:10px;z-index:1000;background:var(--p);border:1px solid var(--ln);border-radius:8px;padding:.5rem .7rem;font-size:.7rem;display:flex;flex-direction:column;gap:.3rem;box-shadow:0 2px 8px rgba(0,0,0,.18)">
-            <div style="display:flex;align-items:center;gap:.4rem"><span style="width:11px;height:11px;border-radius:50%;background:#ff7800;display:inline-block;border:2px solid #fff"></span>Active job en route</div>
-            <div style="display:flex;align-items:center;gap:.4rem"><span style="width:11px;height:11px;border-radius:50%;background:#2dab60;display:inline-block;border:2px solid #fff"></span>Drivers available (high)</div>
-            <div style="display:flex;align-items:center;gap:.4rem"><span style="width:11px;height:11px;border-radius:50%;background:#e88c00;display:inline-block;border:2px solid #fff"></span>Drivers available (med)</div>
-            <div style="display:flex;align-items:center;gap:.4rem"><span style="width:11px;height:11px;border-radius:50%;background:#cc3333;display:inline-block;border:2px solid #fff"></span>Drivers low / load unmatched</div>
+          <div style="position:absolute;bottom:10px;left:10px;z-index:1000;background:var(--p);border:1px solid var(--ln);border-radius:8px;padding:.55rem .75rem;font-size:.68rem;display:flex;flex-direction:column;gap:.32rem;box-shadow:0 2px 8px rgba(0,0,0,.22)">
+            <div style="font-weight:800;font-size:.62rem;letter-spacing:.06em;color:var(--mu);text-transform:uppercase;margin-bottom:.1rem">Zone key</div>
+            <div style="display:flex;align-items:center;gap:.45rem"><span style="width:13px;height:13px;border-radius:3px;background:#2dab60;opacity:.7;display:inline-block"></span>High capacity zone</div>
+            <div style="display:flex;align-items:center;gap:.45rem"><span style="width:13px;height:13px;border-radius:3px;background:#e88c00;opacity:.7;display:inline-block"></span>Medium capacity zone</div>
+            <div style="display:flex;align-items:center;gap:.45rem"><span style="width:13px;height:13px;border-radius:3px;background:#cc3333;opacity:.7;display:inline-block"></span>Low capacity zone</div>
+            <div style="display:flex;align-items:center;gap:.45rem"><span style="width:13px;height:13px;border-radius:50%;background:#ff7800;display:inline-block;border:2px solid #fff"></span>Active job en route</div>
+            <div style="margin-top:.2rem;padding:.3rem .45rem;background:rgba(255,120,0,.1);border-radius:5px;color:var(--or);font-weight:700">★ = zone reward active</div>
           </div>
         </div>
         <!-- Area cards -->
@@ -1736,45 +1738,56 @@ function initCapMap(){
   if(capMap){capMap.invalidateSize();return;}
   capMap=L.map('cap-map',{zoomControl:true,scrollWheelZoom:false}).setView([52.8,-1.8],6);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:18,opacity:.85
+    attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:18,opacity:.7
   }).addTo(capMap);
 
-  /* Active jobs en route — orange */
+  /* Zone definitions — radius in metres, tier: hi/med/lo, reward if zone bonus active */
+  const ZONES=[
+    {lat:53.48,lng:-2.24,city:'Manchester',  n:14,r:28000,tier:'hi', reward:true, bonus:'+0.5% rebate this week'},
+    {lat:53.80,lng:-1.55,city:'Leeds',        n:9, r:22000,tier:'hi', reward:false},
+    {lat:52.49,lng:-1.89,city:'Birmingham',   n:11,r:26000,tier:'hi', reward:true, bonus:'+0.5% rebate this week'},
+    {lat:53.41,lng:-2.99,city:'Liverpool',    n:6, r:20000,tier:'med',reward:false},
+    {lat:53.38,lng:-1.47,city:'Sheffield',    n:5, r:18000,tier:'med',reward:false},
+    {lat:51.51,lng:-0.09,city:'London',       n:8, r:32000,tier:'med',reward:true, bonus:'+1% rebate this week'},
+    {lat:52.95,lng:-1.15,city:'Nottingham',   n:2, r:16000,tier:'lo', reward:false},
+    {lat:51.45,lng:-2.60,city:'Bristol',      n:3, r:17000,tier:'lo', reward:false},
+    {lat:54.98,lng:-1.62,city:'Newcastle',    n:7, r:20000,tier:'med',reward:false},
+    {lat:52.64,lng:-1.13,city:'Leicester',    n:4, r:16000,tier:'med',reward:false},
+    {lat:55.86,lng:-4.25,city:'Glasgow',      n:5, r:22000,tier:'med',reward:false},
+  ];
+
+  const TIER_COL={hi:{fill:'#2dab60',stroke:'#1e7a45'},med:{fill:'#e88c00',stroke:'#b36b00'},lo:{fill:'#cc3333',stroke:'#992222'}};
+
+  ZONES.forEach(z=>{
+    const c=TIER_COL[z.tier];
+    /* Zone circle */
+    L.circle([z.lat,z.lng],{
+      radius:z.r,
+      fillColor:c.fill,color:c.stroke,weight:1.5,fillOpacity:.18
+    }).addTo(capMap);
+    /* Zone label marker */
+    const rewardBadge=z.reward?`<br><span style="display:inline-block;margin-top:4px;background:#ff7800;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px">★ Zone reward: ${z.bonus}</span>`:'';
+    const icon=L.divIcon({
+      className:'',
+      html:`<div style="text-align:center;pointer-events:none">
+        <div style="background:${c.fill};color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;border:2px solid ${c.stroke};white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.3)">${z.city}${z.reward?' ★':''}</div>
+        <div style="font-size:9px;color:${c.stroke};font-weight:700;margin-top:1px">${z.n} drivers</div>
+      </div>`,
+      iconSize:[90,36],iconAnchor:[45,10]
+    });
+    L.marker([z.lat,z.lng],{icon}).addTo(capMap)
+     .bindPopup(`<strong>${z.city} Zone</strong><br>${z.n} drivers available<br>Status: <b style="color:${c.fill}">${z.tier==='hi'?'High capacity':z.tier==='med'?'Medium capacity':'Low capacity'}</b>${rewardBadge}`);
+  });
+
+  /* Active jobs en route — orange dot on top */
   [{lat:52.92,lng:-1.48,ref:'JB-0218',route:'Manchester → Birmingham',driver:'MW015291',step:'En route – M6'},
-   {lat:52.30,lng:-0.88,ref:'JB-0201',route:'Leeds → London',driver:'JH029483',step:'En route – A1(M)'},
-   {lat:53.44,lng:-2.18,ref:'JB-0196',route:'Liverpool → Sheffield',driver:'KP041872',step:'Collected – M62'},
-   {lat:51.72,lng:-1.08,ref:'JB-0189',route:'Bristol → London',driver:'TD018392',step:'En route – M40'}
+   {lat:52.30,lng:-0.88,ref:'JB-0201',route:'Leeds → London',        driver:'JH029483',step:'En route – A1(M)'},
+   {lat:53.44,lng:-2.18,ref:'JB-0196',route:'Liverpool → Sheffield',  driver:'KP041872',step:'Collected – M62'},
+   {lat:51.72,lng:-1.08,ref:'JB-0189',route:'Bristol → London',       driver:'TD018392',step:'En route – M40'}
   ].forEach(j=>{
-    L.circleMarker([j.lat,j.lng],{radius:11,fillColor:'#ff7800',color:'#fff',weight:2.5,fillOpacity:.95})
+    L.circleMarker([j.lat,j.lng],{radius:8,fillColor:'#ff7800',color:'#fff',weight:2,fillOpacity:.95})
      .addTo(capMap)
      .bindPopup(`<strong style="color:#ff7800">${j.ref}</strong><br><b>${j.route}</b><br>Driver: ${j.driver}<br><span style="color:#ff7800">● ${j.step}</span>`);
-  });
-
-  /* Available drivers — green (high) / amber (med) / red (low) */
-  [{lat:53.48,lng:-2.24,city:'Manchester',n:14},
-   {lat:53.80,lng:-1.55,city:'Leeds',n:9},
-   {lat:52.49,lng:-1.89,city:'Birmingham',n:11},
-   {lat:53.41,lng:-2.99,city:'Liverpool',n:6},
-   {lat:53.38,lng:-1.47,city:'Sheffield',n:5},
-   {lat:51.51,lng:-0.09,city:'London',n:8},
-   {lat:52.95,lng:-1.15,city:'Nottingham',n:2},
-   {lat:51.45,lng:-2.60,city:'Bristol',n:3},
-   {lat:54.98,lng:-1.62,city:'Newcastle',n:7},
-   {lat:52.64,lng:-1.13,city:'Leicester',n:4}
-  ].forEach(a=>{
-    const col=a.n>=8?'#2dab60':a.n>=4?'#e88c00':'#cc3333';
-    L.circleMarker([a.lat,a.lng],{radius:9,fillColor:col,color:'#fff',weight:2,fillOpacity:.88})
-     .addTo(capMap)
-     .bindPopup(`<strong>${a.city}</strong><br>${a.n} drivers available now`);
-  });
-
-  /* Unmatched posted loads — red outline */
-  [{lat:52.64,lng:-1.13,ref:'JB-0225',route:'Leicester → Glasgow'},
-   {lat:54.91,lng:-1.38,ref:'JB-0219',route:'Sunderland → Birmingham'}
-  ].forEach(u=>{
-    L.circleMarker([u.lat,u.lng],{radius:9,fillColor:'#cc3333',color:'#ff7800',weight:2,fillOpacity:.85})
-     .addTo(capMap)
-     .bindPopup(`<strong>${u.ref}</strong><br>${u.route}<br><span style="color:#cc3333">● Awaiting driver match</span>`);
   });
 }
 </script>
