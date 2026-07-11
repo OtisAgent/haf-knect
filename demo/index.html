@@ -1392,6 +1392,11 @@ textarea.fi2{resize:vertical;min-height:70px}
         </div>
       </div>
 
+      <!-- EXCHANGE DASHBOARD -->
+      <div class="tp" id="pane-exchange">
+        <div id="exchange-body"><!-- rendered by renderExchange() --></div>
+      </div>
+
       <!-- ADMIN -->
       <div class="tp" id="pane-admin">
         <h1 class="pt">OTIS Control</h1><p class="ps">Full platform view. Admin only.</p>
@@ -1404,6 +1409,27 @@ textarea.fi2{resize:vertical;min-height:70px}
       </div>
 
     </main>
+  </div>
+</div>
+
+<!-- WHAT'S NEW POPUP -->
+<div class="overlay" id="wn-ov" style="z-index:9000">
+  <div class="obox" style="max-width:480px;padding:0;overflow:hidden">
+    <div style="background:var(--or);padding:.6rem 1.2rem;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-family:var(--dp);font-weight:900;font-size:.82rem;letter-spacing:-.02em;color:#0e1113">What's new in HAF KNECT</span>
+      <button onclick="wnClose()" style="background:rgba(14,17,19,.15);border:none;border-radius:50%;width:22px;height:22px;color:#0e1113;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+    </div>
+    <div id="wn-slides" style="padding:1.4rem 1.6rem 1rem">
+      <!-- slides injected by JS -->
+    </div>
+    <div style="padding:.85rem 1.6rem 1.2rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--ln)">
+      <button id="wn-prev" onclick="wnNav(-1)" class="btn btn-gh btn-xs">← Prev</button>
+      <div id="wn-dots" style="display:flex;gap:.35rem"></div>
+      <button id="wn-next" onclick="wnNav(1)" class="btn btn-or btn-xs">Next →</button>
+    </div>
+    <div style="text-align:center;padding-bottom:1rem">
+      <button onclick="wnClose()" style="background:none;border:none;color:var(--su);font-size:.72rem;font-weight:600;cursor:pointer;text-decoration:underline">Skip — enter the demo</button>
+    </div>
   </div>
 </div>
 
@@ -1716,31 +1742,32 @@ const TAB_REG={
   'cust-pod':  {l:'Proof of Delivery', ico:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>',s:'DELIVERY'},
   'cust-orders':{l:'My Orders',        ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',             s:'ACCOUNT'},
   'whats-new': {l:"What's New",        ico:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',s:'DRIVER',updot:true},
+  'exchange':  {l:'Exchange',          ico:'<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',s:'NETWORK'},
 };
 
 /* ── TIER DEFINITIONS ── */
 const TIER_DEFS={
   freight:[
     {key:'free',    label:'Free',    cls:'pb-free',    plan:'Free',      next:'Plus',
-     unlock:['f-post','f-loads','billing','support','feedback']},
+     unlock:['exchange','f-post','f-loads','billing','support','feedback']},
     {key:'plus',    label:'Plus',    cls:'pb-plus',    plan:'Plus',      next:'Pro',
-     unlock:['f-post','f-cap','f-loads','f-lanes','billing','support','feedback']},
+     unlock:['exchange','f-post','f-cap','f-loads','f-lanes','billing','support','feedback']},
     {key:'pro',     label:'Pro',     cls:'pb-pro',     plan:'Pro',       next:null,
-     unlock:['f-post','f-cap','f-lanes','f-loads','f-cover','f-account','billing','support','feedback']},
+     unlock:['exchange','f-post','f-cap','f-lanes','f-loads','f-cover','f-account','billing','support','feedback']},
   ],
   plna:[
     {key:'lite',    label:'Lite',    cls:'pb-lite',    plan:'PLNA Lite', next:'Plus',
-     unlock:['d-home','d-book','d-cust','d-comp','billing','support','feedback']},
+     unlock:['exchange','d-home','d-book','d-cust','d-comp','billing','support','feedback']},
     {key:'plus',    label:'Plus',    cls:'pb-plus',    plan:'PLNA Plus', next:'Pro',
-     unlock:['d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support','feedback']},
+     unlock:['exchange','d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support','feedback']},
     {key:'pro',     label:'Pro',     cls:'pb-pro',     plan:'PLNA Pro',  next:null,
-     unlock:['d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support','feedback']},
+     unlock:['exchange','d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support','feedback']},
   ],
   knect:[
     {key:'free',    label:'Free',    cls:'pb-free',    plan:'Free',      next:'Founder',
-     unlock:['b-book','b-del','cust-track','billing','support','feedback']},
+     unlock:['exchange','b-book','b-del','cust-track','billing','support','feedback']},
     {key:'founder', label:'Founder', cls:'pb-founder', plan:'Founder',   next:null,
-     unlock:['b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback']},
+     unlock:['exchange','b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback']},
   ],
 };
 
@@ -1751,27 +1778,27 @@ const ACCS={
     persona:'Individual Customer',ver:'HAF Demo',
     account_environment:'demo',is_demo_account:true,demo_role:'customer',demo_persona:'Individual Customer'},
   'biz-pro':     {n:'Apex Logistics Ltd',u:'AL448793',i:'AL',r:'Business Account',rc:'co',tierGroup:null,initTier:null,
-    tabIds:['b-book','b-del','b-spend','b-saved','billing','support','feedback'],def:'b-book',cp:'green',
+    tabIds:['exchange','b-book','b-del','b-spend','b-saved','billing','support','feedback'],def:'exchange',cp:'green',
     persona:'Business Account',ver:'HAF Demo',
     account_environment:'demo',is_demo_account:true,demo_role:'business',demo_persona:'Business Account'},
   'freight-pro': {n:'NorthFreight UK',  u:'NF992190',i:'NF',r:'Freight Forward Pro',rc:'cb',tierGroup:'freight', initTier:'pro',
-    tabIds:['f-post','f-cap','f-lanes','f-loads','f-cover','f-account','billing','support','feedback'],def:'f-post',cp:'green',
+    tabIds:['exchange','f-post','f-cap','f-lanes','f-loads','f-cover','f-account','billing','support','feedback'],def:'exchange',cp:'green',
     persona:'Freight Forward — Pro',ver:'HAF Demo',
     account_environment:'demo',is_demo_account:true,demo_role:'freight',demo_persona:'Freight Forward Pro'},
   'plna-new':    {n:'Alex Thompson',    u:'AT229184',i:'AT',r:'PLNA Driver',       rc:'ca',tierGroup:null,      initTier:null,
-    tabIds:['d-home','d-comp','billing','support'],def:'d-comp',cp:'amber',
+    tabIds:['exchange','d-home','d-comp','billing','support'],def:'d-comp',cp:'amber',
     persona:'New Driver — Compliance Pending',ver:'DRV-1.4',
     account_environment:'demo',is_demo_account:true,demo_role:'driver',demo_persona:'New Driver'},
   'plna-plus':   {n:'Marcus Reid',      u:'MR668793',i:'MR',r:'PLNA Driver',      rc:'cg',tierGroup:'plna',    initTier:'plus',
-    tabIds:['d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','whats-new','billing','support','feedback'],def:'d-home',cp:'green',
+    tabIds:['exchange','d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','whats-new','billing','support','feedback'],def:'exchange',cp:'green',
     persona:'Clever Checked Driver — PLNA Plus',ver:'DRV-1.4',
     account_environment:'demo',is_demo_account:true,demo_role:'driver',demo_persona:'PLNA Plus Driver'},
   'knect-free':  {n:'Sam Patel',        u:'SP881291',i:'SP',r:'KNECT Member',      rc:'cb',tierGroup:'knect',   initTier:'free',
-    tabIds:['b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback'],def:'b-book',cp:'green',
+    tabIds:['exchange','b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback'],def:'exchange',cp:'green',
     persona:'KNECT Member — Free',ver:'HAF Demo',
     account_environment:'demo',is_demo_account:true,demo_role:'knect',demo_persona:'KNECT Free Member'},
   'knect-founder':{n:'Rachel Moore',    u:'RM449082',i:'RM',r:'KNECT Founder',     rc:'co',tierGroup:'knect',   initTier:'founder',
-    tabIds:['b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback'],def:'b-book',cp:'green',
+    tabIds:['exchange','b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback'],def:'exchange',cp:'green',
     persona:'KNECT Founder',ver:'HAF Demo',
     account_environment:'demo',is_demo_account:true,demo_role:'knect',demo_persona:'KNECT Founder'},
 };
@@ -1816,6 +1843,7 @@ function demoLogin(key){
     buildNav(tabs);
     switchTab('pane-'+a.def);
   }
+  setTimeout(wnShow,400);
 }
 
 function switchTier(tierKey){
@@ -1938,6 +1966,7 @@ function switchTab(id){
   const p=document.getElementById(id);if(p)p.classList.add('on');
   const ni=document.getElementById('ni-'+id.replace('pane-',''));if(ni)ni.classList.add('on');
   ct=id;
+  if(id==='pane-exchange')renderExchange();
   if(id==='pane-f-cap')setTimeout(initCapMap,80);
   if(id==='pane-feedback'){fbPrefill();fbLoad();}
   if(id==='pane-whats-new'){
@@ -1945,6 +1974,149 @@ function switchTab(id){
     const dot=ni?.querySelector('.upd-dot');if(dot)dot.remove();
   }
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
+}
+
+/* ── EXCHANGE DASHBOARD ── */
+function renderExchange(){
+  if(!currentAcc)return;
+  const role=currentAcc.demo_role;
+  let h='';
+  // Ticker
+  h+=`<div style="background:#0a0c0e;border-radius:var(--rs);padding:.55rem 1.1rem;margin-bottom:1.1rem;overflow-x:auto;white-space:nowrap;display:flex;align-items:center;gap:.55rem">
+    <span style="font-size:.6rem;font-weight:800;letter-spacing:.1em;color:var(--or);text-transform:uppercase">LIVE</span>
+    <span style="font-size:.7rem;font-weight:600;color:#e8e3db">83 drivers on network</span>
+    <span style="color:#364048">·</span>
+    <span style="font-size:.7rem;font-weight:600;color:#e8e3db">14 open jobs</span>
+    <span style="color:#364048">·</span>
+    <span style="font-size:.7rem;font-weight:600;color:#e8e3db">4 en route</span>
+    <span style="color:#364048">·</span>
+    <span style="font-size:.7rem;font-weight:700;color:var(--or)">£1.80–£2.40/mi</span>
+    <span style="color:#364048">·</span>
+    <span style="font-size:.7rem;font-weight:700;color:var(--gn)">★ Manchester HIGH DEMAND</span>
+  </div>`;
+  // Stats
+  h+=`<div class="kg" style="margin-bottom:1.1rem">
+    <div class="kc"><div class="kc-l">Drivers live</div><div class="kc-v gn">83</div></div>
+    <div class="kc"><div class="kc-l">Open jobs</div><div class="kc-v or">14</div></div>
+    <div class="kc"><div class="kc-l">Avg rate</div><div class="kc-v">£2.10/mi</div></div>
+    <div class="kc"><div class="kc-l">Active loads</div><div class="kc-v">4</div></div>
+  </div>`;
+  // Role-specific section
+  if(role==='driver'){
+    h+=`<div class="card"><div class="ct">Your job invites</div><div class="jl">
+      <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2853 · Direct invite · 14:00</div><div class="jroute">Manchester M1 → Salford M50</div><div class="jdet">Small van · 180 kg · 12 miles</div></div><div class="jacts"><div class="jamt">£38</div><button class="btn btn-or btn-xs">Accept</button></div></div>
+      <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2855 · Open job · 15:30</div><div class="jroute">Manchester M4 → Stockport SK1</div><div class="jdet">Medium van · 340 kg · 18 miles</div></div><div class="jacts"><div class="jamt">£54</div><button class="btn btn-or btn-xs">Accept</button></div></div>
+    </div><div style="margin-top:.75rem;display:flex;gap:.45rem"><button class="btn btn-gh btn-sm" onclick="switchTab('pane-d-today')">See all open jobs →</button><button class="btn btn-gh btn-sm" onclick="switchTab('pane-d-budget')">Earnings this week →</button></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1rem">
+      <div class="ptile" onclick="switchTab('pane-f-cap')"><div class="ptile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg></div><div class="ptile-h">Network Map</div><p class="ptile-p">See live driver zones, active jobs and demand near you.</p><div class="ptile-arr">Open map →</div></div>
+      <div class="ptile" onclick="switchTab('pane-d-comp')"><div class="ptile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="ptile-h">My Compliance</div><p class="ptile-p">CleverPay status · document checklist.</p><div class="ptile-arr">Check →</div></div>
+    </div>`;
+  } else if(role==='freight'){
+    h+=`<div class="card"><div class="ct">Active loads</div><div class="jl">
+      <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">FF-0092 · Posted today</div><div class="jroute">Manchester M1 → Birmingham B1</div><div class="jdet">LWB · 640 kg · Driver confirmed · ETD 15:00</div></div><div class="jacts"><span class="chip cg">Confirmed</span></div></div>
+      <div class="jc"><div class="jdot" style="background:var(--or)"></div><div class="jm"><div class="jref">FF-0091 · Posted yesterday</div><div class="jroute">Leeds LS1 → London E1</div><div class="jdet">Artic · 8t · Awaiting driver response</div></div><div class="jacts"><span class="chip ca">Pending</span></div></div>
+    </div><div style="margin-top:.75rem;display:flex;gap:.45rem"><button class="btn btn-or btn-sm" onclick="switchTab('pane-f-post')">Post a load →</button><button class="btn btn-gh btn-sm" onclick="switchTab('pane-f-loads')">All active loads →</button></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1rem">
+      <div class="ptile" onclick="switchTab('pane-f-cap')"><div class="ptile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg></div><div class="ptile-h">Network Map</div><p class="ptile-p">Find available drivers by zone, vehicle and rate.</p><div class="ptile-arr">Open map →</div></div>
+      <div class="ptile" onclick="switchTab('pane-f-lanes')"><div class="ptile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="ptile-h">Lane Pricing</div><p class="ptile-p">Current rates by route — lock in your margins.</p><div class="ptile-arr">View rates →</div></div>
+    </div>`;
+  } else {
+    h+=`<div class="card"><div class="ct">Recent deliveries</div><div class="jl">
+      <div class="jc"><div class="jdot" style="background:var(--bl)"></div><div class="jm"><div class="jref">HAF-2831 · In transit</div><div class="jroute">Birmingham B1 → Nottingham NG1</div><div class="jdet">ETA 16:30 today · Clever Checked driver</div></div><div class="jacts"><span class="chip cb">En route</span></div></div>
+      <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">HAF-2847 · Delivered 5 Jul</div><div class="jroute">Manchester M1 → Leeds LS1</div><div class="jdet">LWB · 420 kg · Signed by reception</div></div><div class="jacts"><span class="chip cg">Done</span></div></div>
+    </div><div style="margin-top:.75rem;display:flex;gap:.45rem"><button class="btn btn-or btn-sm" onclick="switchTab('pane-b-book')">Book a courier →</button><button class="btn btn-gh btn-sm" onclick="switchTab('pane-b-del')">All deliveries →</button></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1rem">
+      <div class="ptile" onclick="switchTab('pane-f-cap')"><div class="ptile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg></div><div class="ptile-h">Network Map</div><p class="ptile-p">See driver availability across the UK right now.</p><div class="ptile-arr">Open map →</div></div>
+      <div class="ptile" onclick="switchTab('pane-cust-track')"><div class="ptile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="ptile-h">Track a delivery</div><p class="ptile-p">Live status on any HAF reference number.</p><div class="ptile-arr">Track →</div></div>
+    </div>`;
+  }
+  // Mini map
+  h+=`<div class="card" style="margin-bottom:0">
+    <div class="ct" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+      <span>Network Map</span>
+      <button class="btn btn-gh btn-xs" onclick="switchTab('pane-f-cap')">Full map →</button>
+    </div>
+    <div id="exch-map" style="height:210px;border-radius:var(--rx);overflow:hidden;background:var(--p2)"></div>
+  </div>`;
+  document.getElementById('exchange-body').innerHTML=h;
+  setTimeout(initExchMap,80);
+}
+
+let exchMap=null;
+function initExchMap(){
+  const el=document.getElementById('exch-map');
+  if(!el||typeof L==='undefined'){return;}
+  if(exchMap){try{exchMap.remove();}catch(e){} exchMap=null;}
+  exchMap=L.map('exch-map',{zoomControl:false,scrollWheelZoom:false,dragging:false,attributionControl:false}).setView([52.8,-1.8],5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,opacity:.55}).addTo(exchMap);
+  const TC={hi:{fill:'#2dab60',stroke:'#1e7a45'},med:{fill:'#e88c00',stroke:'#b36b00'},lo:{fill:'#cc3333',stroke:'#992222'}};
+  [{lat:53.48,lng:-2.24,r:28000,t:'hi'},{lat:52.49,lng:-1.89,r:26000,t:'hi'},{lat:53.80,lng:-1.55,r:22000,t:'hi'},{lat:53.41,lng:-2.99,r:20000,t:'med'},{lat:51.51,lng:-0.09,r:32000,t:'med'},{lat:55.86,lng:-4.25,r:22000,t:'med'},{lat:51.45,lng:-2.60,r:17000,t:'lo'},{lat:52.95,lng:-1.15,r:16000,t:'lo'}].forEach(z=>{
+    L.circle([z.lat,z.lng],{radius:z.r,fillColor:TC[z.t].fill,color:TC[z.t].stroke,weight:1.5,fillOpacity:.22}).addTo(exchMap);
+  });
+  [{lat:52.92,lng:-1.48},{lat:52.30,lng:-0.88},{lat:53.44,lng:-2.18},{lat:51.72,lng:-1.08}].forEach(j=>{
+    L.circleMarker([j.lat,j.lng],{radius:6,fillColor:'#ff7800',color:'#fff',weight:2,fillOpacity:.95}).addTo(exchMap);
+  });
+}
+
+/* ── WHAT'S NEW POPUP ── */
+const WN_SLIDES=[
+  {title:'Exchange Dashboard',icon:'⇄',
+   before:'Logged in to your individual section',
+   after:'Land on a live exchange — network ticker, active jobs and map at a glance',
+   why:'One view of the whole network every time you sign in.'},
+  {title:'Network Map — for everyone',icon:'◎',
+   before:'Map was only visible to Freight Pro accounts',
+   after:'Every member — Driver, Business, KNECT — can see live driver zones, active loads and relay hubs',
+   why:'You can check driver availability before booking or accepting a job.'},
+  {title:'Business Account model',icon:'▦',
+   before:'Business accounts had freight forwarding options mixed in',
+   after:'Own goods only · register your drivers on PLNA · gap insurance coming for every shipment',
+   why:'Clear, simple model with fleet management built in from the start.'},
+  {title:'Feedback & Ideas Board',icon:'✦',
+   before:'No way to give product feedback from inside the platform',
+   after:'New Feedback & Ideas board on every account — post ideas, flag issues, vote for what gets built next',
+   why:'The most-voted ideas get prioritised. You shape what we build.'},
+];
+let wnSlideIdx=0;
+function wnShow(){
+  wnSlideIdx=0;
+  wnRender();
+  document.getElementById('wn-ov').classList.add('open');
+}
+function wnClose(){document.getElementById('wn-ov').classList.remove('open');}
+function wnNav(d){
+  wnSlideIdx=Math.max(0,Math.min(WN_SLIDES.length-1,wnSlideIdx+d));
+  wnRender();
+}
+function wnRender(){
+  const s=WN_SLIDES[wnSlideIdx];
+  const isLast=wnSlideIdx===WN_SLIDES.length-1;
+  document.getElementById('wn-slides').innerHTML=`
+    <div style="text-align:center;margin-bottom:1rem">
+      <div style="font-size:1.6rem;margin-bottom:.4rem">${s.icon}</div>
+      <div style="font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.03em;margin-bottom:.2rem">${s.title}</div>
+      <div style="font-size:.72rem;color:var(--su)">${wnSlideIdx+1} of ${WN_SLIDES.length}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:.55rem;align-items:center;margin-bottom:.95rem">
+      <div style="background:var(--rd-d);border:1px solid rgba(208,64,64,.2);border-radius:var(--rx);padding:.65rem .85rem">
+        <div style="font-size:.58rem;font-weight:800;letter-spacing:.09em;color:var(--rd);text-transform:uppercase;margin-bottom:.28rem">Before</div>
+        <div style="font-size:.76rem;color:var(--tx);line-height:1.5">${s.before}</div>
+      </div>
+      <div style="font-size:1.1rem;color:var(--or);font-weight:800;flex-shrink:0">→</div>
+      <div style="background:var(--gn-d);border:1px solid rgba(45,171,96,.2);border-radius:var(--rx);padding:.65rem .85rem">
+        <div style="font-size:.58rem;font-weight:800;letter-spacing:.09em;color:var(--gn);text-transform:uppercase;margin-bottom:.28rem">Now</div>
+        <div style="font-size:.76rem;color:var(--tx);line-height:1.5">${s.after}</div>
+      </div>
+    </div>
+    <div style="background:var(--or-d);border:1px solid var(--or-g);border-radius:var(--rx);padding:.55rem .85rem;font-size:.74rem;color:var(--tx);line-height:1.5">
+      <strong style="color:var(--or)">Why it matters:</strong> ${s.why}
+    </div>`;
+  const dots=WN_SLIDES.map((_,i)=>`<div style="width:${i===wnSlideIdx?'18':'7'}px;height:7px;border-radius:var(--pill);background:${i===wnSlideIdx?'var(--or)':'var(--p3)'};transition:width .2s"></div>`).join('');
+  document.getElementById('wn-dots').innerHTML=dots;
+  const prevBtn=document.getElementById('wn-prev');
+  const nextBtn=document.getElementById('wn-next');
+  if(prevBtn)prevBtn.style.visibility=wnSlideIdx===0?'hidden':'visible';
+  if(nextBtn){nextBtn.textContent=isLast?'Enter demo →':'Next →';if(isLast)nextBtn.onclick=wnClose;else nextBtn.onclick=()=>wnNav(1);}
 }
 
 /* ── CUSTOMER TRACK ── */
