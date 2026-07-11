@@ -823,11 +823,11 @@ textarea.fi2{resize:vertical;min-height:70px}
         <span class="sc-lbl">Account type I'm interested in</span>
         <select class="dr-select" id="dr-actype">
           <option value="">Select an account type…</option>
-          <option value="KNECT Free">KNECT — Free</option>
-          <option value="KNECT Founder">KNECT — Founder</option>
-          <option value="Business Account">Business Account</option>
-          <option value="Freight Forwarding">Freight Forwarding</option>
-          <option value="PLNA Driver">PLNA Driver</option>
+          <option value="Business Account">Business Account — send your own goods (free)</option>
+          <option value="Freight Solutions Lite">Freight Solutions Lite — forward for others (free to start)</option>
+          <option value="Freight Solutions Plus">Freight Solutions Plus — £99/mo · 10% fee</option>
+          <option value="Freight Solutions Pro">Freight Solutions Pro — £299/mo · 7% fee</option>
+          <option value="PLNA Driver">PLNA Driver — join the courier network</option>
           <option value="Not sure yet">Not sure yet</option>
         </select>
       </div>
@@ -1004,19 +1004,22 @@ textarea.fi2{resize:vertical;min-height:70px}
         <div class="card"><div class="ct">CleverPay portal</div><p style="font-size:.78rem;color:var(--mu);margin-bottom:.85rem">Upload missing documents and check your full compliance file.</p><a href="https://clever.usehaf.co.uk" target="_blank" class="btn btn-or btn-sm">Open CleverPay</a></div>
       </div>
 
-      <!-- BUSINESS: Book -->
+      <!-- BUSINESS: Book (own goods only — free) -->
       <div class="tp" id="pane-b-book">
-        <h1 class="pt">Book a Courier</h1><p class="ps">Five-step booking for your own business deliveries.</p>
-        <div style="background:var(--bl-d);border:1px solid rgba(61,125,202,.2);border-radius:var(--rx);padding:.75rem 1rem;font-size:.76rem;color:var(--bl);margin-bottom:1.1rem">This account is for your own business products only. To move goods for other customers, apply for a Freight Forwarder account.</div>
-        <div class="card" style="max-width:560px">
-          <div class="ct">Step 1 of 5 — Collection</div>
-          <div class="fg"><label class="fl">Collection address</label><input class="fi2" placeholder="Full address or postcode"></div>
-          <div class="fr"><div class="fg"><label class="fl">Contact name</label><input class="fi2" placeholder="Name"></div><div class="fg"><label class="fl">Contact number</label><input class="fi2" placeholder="07xxx"></div></div>
-          <div class="fg"><label class="fl">Access notes</label><input class="fi2" placeholder="Loading bay, barriers, height restrictions..."></div>
-          <div class="fr" style="margin-top:.4rem"><button class="btn btn-gh btn-sm">Save draft</button><button class="btn btn-or btn-sm">Next: Delivery →</button></div>
+        <h1 class="pt">Book a Courier</h1><p class="ps">Send your own business goods via the HAF network.</p>
+        <div style="background:var(--bl-d);border:1.5px solid rgba(61,125,202,.28);border-radius:var(--rx);padding:.8rem 1rem;font-size:.78rem;color:var(--bl);margin-bottom:1.1rem;display:flex;align-items:flex-start;gap:.6rem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:.1rem"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div><strong>Business Account — own goods only.</strong> This account lets you ship your own stock and products. You cannot post loads on behalf of other companies — that requires a Freight Forwarder account. <a href="#" onclick="openDemoReq()" style="color:var(--bl);font-weight:700;text-decoration:underline">Apply for a Freight Solutions account →</a></div>
         </div>
         <div class="card" style="max-width:560px">
-          <div class="ct">Available options (guide)</div>
+          <div class="ct">Delivery details</div>
+          <div class="fr"><div class="fg"><label class="fl">Collection address</label><input class="fi2" placeholder="Full address or postcode"></div><div class="fg"><label class="fl">Delivery address</label><input class="fi2" placeholder="Full address or postcode"></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Your reference</label><input class="fi2" placeholder="Internal order or PO ref"></div><div class="fg"><label class="fl">Goods description</label><input class="fi2" placeholder="e.g. Retail stock, tools"></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 200"></div><div class="fg"><label class="fl">Urgency</label><select class="fi2"><option>Flexible</option><option>Same-day</option><option>Urgent</option><option>Timed window</option></select></div></div>
+          <div class="fr" style="margin-top:.4rem"><button class="btn btn-gh btn-sm">Save draft</button><button class="btn btn-or btn-sm">Find a driver →</button></div>
+        </div>
+        <div class="card" style="max-width:560px">
+          <div class="ct">Available on the network (guide)</div>
           <div class="jl">
             <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">FASTEST</div><div class="jroute">LWB courier available now</div><div class="jdet">Estimated collection: 45 min · Clever Checked</div></div><button class="btn btn-or btn-xs">Select</button></div>
             <div class="jc"><div class="jdot" style="background:var(--am)"></div><div class="jm"><div class="jref">BEST VALUE</div><div class="jroute">Return route courier · This afternoon</div><div class="jdet">Estimated collection: 2h · Clever Checked</div></div><button class="btn btn-gh btn-xs">Select</button></div>
@@ -1026,47 +1029,68 @@ textarea.fi2{resize:vertical;min-height:70px}
 
       <!-- BUSINESS: Deliveries -->
       <div class="tp" id="pane-b-del">
-        <h1 class="pt">My Deliveries</h1><p class="ps">All your business shipments.</p>
-        <div class="card"><table class="dt"><thead><tr><th>Ref</th><th>Route</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead><tbody>
-          <tr><td>HAF-2847</td><td>Manchester → Leeds</td><td>5 Jul</td><td>£94</td><td><span class="chip cg">Delivered</span></td></tr>
-          <tr><td>HAF-2831</td><td>Birmingham → Nottingham</td><td>8 Jul</td><td>£67</td><td><span class="chip cb">In transit</span></td></tr>
-          <tr><td>HAF-2819</td><td>Sheffield → Derby</td><td>3 Jul</td><td>£112</td><td><span class="chip cg">Delivered</span></td></tr>
-          <tr><td>HAF-2804</td><td>Liverpool → Chester</td><td>1 Jul</td><td>£48</td><td><span class="chip cg">Delivered</span></td></tr>
+        <h1 class="pt">My Deliveries</h1><p class="ps">All shipments booked through your business account.</p>
+        <div class="card"><table class="dt"><thead><tr><th>Ref</th><th>Route</th><th>Your Ref</th><th>Date</th><th>Status</th></tr></thead><tbody>
+          <tr><td>HAF-2847</td><td>Manchester → Leeds</td><td>PO-1041</td><td>5 Jul</td><td><span class="chip cg">Delivered</span></td></tr>
+          <tr><td>HAF-2831</td><td>Birmingham → Nottingham</td><td>PO-1038</td><td>8 Jul</td><td><span class="chip cb">In transit</span></td></tr>
+          <tr><td>HAF-2819</td><td>Sheffield → Derby</td><td>PO-1032</td><td>3 Jul</td><td><span class="chip cg">Delivered</span></td></tr>
+          <tr><td>HAF-2804</td><td>Liverpool → Chester</td><td>PO-1025</td><td>1 Jul</td><td><span class="chip cg">Delivered</span></td></tr>
         </tbody></table></div>
       </div>
 
-      <!-- BUSINESS: Spend/Rebate -->
-      <div class="tp" id="pane-b-spend">
-        <h1 class="pt">Spend &amp; Rebate</h1><p class="ps">Your monthly spend and rebate progress.</p>
-        <div class="kg"><div class="kc"><div class="kc-l">Monthly spend</div><div class="kc-v or">£4,820</div><div class="kc-d pos">+12%</div></div><div class="kc"><div class="kc-l">Jobs</div><div class="kc-v">38</div></div><div class="kc"><div class="kc-l">Avg job</div><div class="kc-v">£127</div></div><div class="kc"><div class="kc-l">On-time</div><div class="kc-v gn">97%</div></div></div>
-        <div class="card"><div class="ct">Rebate progress</div><div class="cr"><span class="ck">Current tier</span><span class="cv">Tier 2 — 3% rebate</span></div><div class="cr"><span class="ck">Spend</span><span class="cv">£4,820</span></div><div class="cr"><span class="ck">Next tier at</span><span class="cv">£6,000 → 5%</span></div><div style="margin:.7rem 0 .25rem;font-size:.7rem;color:var(--mu)">Progress to next tier</div><div class="reb-bar-wrap"><div class="reb-bar-fill" style="width:80%"></div></div><div style="font-size:.7rem;color:var(--mu);margin-top:.2rem">£1,180 to go · £145 rebate earned</div></div>
+      <!-- BUSINESS: Usage -->
+      <div class="tp" id="pane-b-usage">
+        <h1 class="pt">Usage &amp; Activity</h1><p class="ps">Your monthly shipping activity — Business Account is free, no tiers.</p>
+        <div class="kg"><div class="kc"><div class="kc-l">Deliveries this month</div><div class="kc-v or">38</div><div class="kc-d pos">+12% vs last month</div></div><div class="kc"><div class="kc-l">Spend this month</div><div class="kc-v">£4,820</div></div><div class="kc"><div class="kc-l">On-time rate</div><div class="kc-v gn">97%</div></div><div class="kc"><div class="kc-l">Account type</div><div class="kc-v" style="font-size:1rem">Free</div></div></div>
+        <div class="card"><div class="ct">Account summary</div><div class="cr"><span class="ck">Plan</span><span class="cv"><span class="chip cb">Business Account — Free</span></span></div><div class="cr"><span class="ck">Goods type</span><span class="cv">Your own stock and products only</span></div><div class="cr"><span class="ck">Third-party freight</span><span class="cv"><span class="chip cr2">Not permitted</span></span></div><div class="cr"><span class="ck">Fleet on network</span><span class="cv"><span class="chip cg">Enabled</span></span></div></div>
+        <div style="border:1.5px solid var(--or-g);border-radius:var(--rs);padding:1rem;background:var(--or-d)"><div style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Want to forward goods for other businesses?</div><p style="font-size:.78rem;color:var(--mu);margin-bottom:.7rem">Upgrade to a Freight Solutions account to post loads on behalf of third parties, access lane pricing, and unlock volume-based network fee reductions.</p><button class="btn btn-or btn-sm" onclick="openDemoReq()">Apply for Freight Solutions →</button></div>
       </div>
 
-      <!-- BUSINESS: Saved -->
+      <!-- BUSINESS: My Fleet -->
+      <div class="tp" id="pane-b-fleet">
+        <h1 class="pt">My Fleet</h1><p class="ps">Register your company vehicles on the KNECT network to take inbound deliveries.</p>
+        <div class="card" style="max-width:540px">
+          <div class="ct">Add a vehicle</div>
+          <div class="fr"><div class="fg"><label class="fl">Registration</label><input class="fi2" placeholder="e.g. AB12 CDE" style="text-transform:uppercase"></div><div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>Short wheelbase</option><option>Long wheelbase</option><option>Extra LWB</option><option>Luton / tail-lift</option><option>7.5t truck</option></select></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Driver name</label><input class="fi2" placeholder="Assigned driver"></div><div class="fg"><label class="fl">Base postcode</label><input class="fi2" placeholder="e.g. S9"></div></div>
+          <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.76rem;font-weight:600;color:var(--mu);margin:.3rem 0 .7rem"><input type="checkbox" style="accent-color:var(--or)"> Add to KNECT network — accept inbound jobs when available</label>
+          <button class="btn btn-or btn-sm">Add vehicle</button>
+        </div>
+        <div class="card"><div class="ct">Registered fleet</div><div class="cr"><span class="ck">AB12 CDE — LWB · Sheffield S9</span><span class="cv"><span class="chip cg">On network</span></span></div><div class="cr"><span class="ck">XY64 FGH — Small van · Sheffield S9</span><span class="cv"><span class="chip ca">Off network</span></span></div></div>
+      </div>
+
+      <!-- BUSINESS: Saved Addresses -->
       <div class="tp" id="pane-b-saved">
         <h1 class="pt">Saved Addresses</h1><p class="ps">Your regular warehouses, shops and delivery points.</p>
         <div class="card"><div class="ct">Saved locations</div><div class="cr"><span class="ck">Main warehouse · Sheffield S9 1AA</span><button class="btn btn-gh btn-xs">Use</button></div><div class="cr"><span class="ck">Manchester depot · M60 1AA</span><button class="btn btn-gh btn-xs">Use</button></div><div class="cr"><span class="ck">Leeds store · LS1 2AB</span><button class="btn btn-gh btn-xs">Use</button></div></div>
         <button class="btn btn-or btn-sm">Add new address</button>
       </div>
 
+      <!-- FREIGHT: Solutions tier banner (reusable) -->
+      <div id="ff-tier-banner" style="background:var(--or-d);border:1.5px solid var(--or-g);border-radius:var(--rx);padding:.65rem 1rem;font-size:.78rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:1rem">
+        <div><span style="font-weight:800;color:var(--or)">Solutions Plus</span> <span style="color:var(--mu)">· 10% network fee · Net 14 payment terms</span></div>
+        <button class="btn btn-or btn-xs" onclick="switchTab('pane-f-plans')">Upgrade plan →</button>
+      </div>
+
       <!-- FREIGHT: Post a Load -->
       <div class="tp" id="pane-f-post">
-        <h1 class="pt">Post a Load</h1><p class="ps">List your freight on the HAF network.</p>
+        <h1 class="pt">Post a Load</h1><p class="ps">List freight for your clients on the HAF KNECT network.</p>
+        <div id="ff-tier-post" style="background:var(--or-d);border:1px solid var(--or-g);border-radius:var(--rx);padding:.55rem .9rem;font-size:.75rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.9rem"><span style="font-weight:700;color:var(--or)">Solutions Plus</span><span style="color:var(--mu)">10% network fee on this load</span></div>
         <div class="card" style="max-width:580px">
           <div class="ct">Load details</div>
-          <div class="fg"><label class="fl">Customer reference</label><input class="fi2" placeholder="Your internal ref"></div>
+          <div class="fg"><label class="fl">Customer reference</label><input class="fi2" placeholder="Your client's job ref"></div>
           <div class="fr"><div class="fg"><label class="fl">Collection address</label><input class="fi2" placeholder="Address or postcode"></div><div class="fg"><label class="fl">Delivery address</label><input class="fi2" placeholder="Address or postcode"></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Goods type</label><input class="fi2" placeholder="e.g. Pallets, boxes"></div><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 850"></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Goods type</label><input class="fi2" placeholder="e.g. Pallets, boxes, hazmat"></div><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 850"></div></div>
           <div class="fr"><div class="fg"><label class="fl">Vehicle required</label><select class="fi2"><option>Small van</option><option>SWB</option><option>LWB</option><option>XLWB</option><option>Luton</option></select></div><div class="fg"><label class="fl">Urgency</label><select class="fi2"><option>Flexible</option><option>Same-day</option><option>Urgent</option><option>Timed</option></select></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Target buy rate (£)</label><input class="fi2" type="number" placeholder="Your max carrier cost"></div><div class="fg"><label class="fl">Customer sell rate (£)</label><input class="fi2" type="number" placeholder="What customer pays"></div></div>
-          <div class="fg"><label class="fl">Special instructions</label><textarea class="fi2" placeholder="Tail lift, fragile, hazmat, access..."></textarea></div>
+          <div class="fr"><div class="fg"><label class="fl">Buy rate (max, £)</label><input class="fi2" type="number" placeholder="Your carrier cost ceiling"></div><div class="fg"><label class="fl">Client sell rate (£)</label><input class="fi2" type="number" placeholder="What your client pays"></div></div>
+          <div class="fg"><label class="fl">Special instructions</label><textarea class="fi2" placeholder="Tail lift, fragile, hazmat class, access..."></textarea></div>
           <button class="btn btn-or btn-wide" style="margin-top:.3rem">Post load to network →</button>
         </div>
       </div>
 
       <!-- FREIGHT: Network Capacity -->
       <div class="tp" id="pane-f-cap">
-        <h1 class="pt">Network Capacity</h1><p class="ps">Live driver availability across the HAF network.</p>
+        <h1 class="pt">Network Capacity</h1><p class="ps">Live driver availability across the HAF KNECT network.</p>
         <div class="cap-grid">
           <div class="cap-card"><div class="cap-area">Manchester</div><div class="cap-avail hi">14</div><div class="cap-sub">available now</div></div>
           <div class="cap-card"><div class="cap-area">Leeds</div><div class="cap-avail hi">9</div><div class="cap-sub">available now</div></div>
@@ -1092,29 +1116,87 @@ textarea.fi2{resize:vertical;min-height:70px}
 
       <!-- FREIGHT: Active Loads -->
       <div class="tp" id="pane-f-loads">
-        <h1 class="pt">Active Loads</h1><p class="ps">Your posted loads and current status.</p>
-        <div class="ldc"><div class="ldc-h"><div><div class="ldc-route">Manchester M60 → Glasgow G1</div><div style="font-size:.71rem;color:var(--mu);margin-top:.12rem">FF-0091 · Posted 6 Jul</div></div><span class="chip co">3 responses</span></div><div class="ldc-meta"><span class="ldc-mi"><strong>1,200 kg</strong> · 8 pallets</span><span class="ldc-mi">Collect <strong>10 Jul</strong></span><span class="ldc-mi">Target <strong>£380</strong></span></div></div>
-        <div class="ldc"><div class="ldc-h"><div><div class="ldc-route">Birmingham B1 → Bristol BS1</div><div style="font-size:.71rem;color:var(--mu);margin-top:.12rem">FF-0088 · Posted 4 Jul</div></div><span class="chip cg">Booked</span></div><div class="ldc-meta"><span class="ldc-mi"><strong>640 kg</strong> · 4 pallets</span><span class="ldc-mi">Collect <strong>7 Jul</strong></span><span class="ldc-mi">Agreed <strong>£240</strong></span></div></div>
-        <div class="ldc"><div class="ldc-h"><div><div class="ldc-route">Leeds LS1 → London E1</div><div style="font-size:.71rem;color:var(--mu);margin-top:.12rem">FF-0082 · Posted 2 Jul</div></div><span class="chip cb">In transit</span></div><div class="ldc-meta"><span class="ldc-mi"><strong>900 kg</strong> · 6 pallets</span><span class="ldc-mi">ETA <strong>Today 17:00</strong></span><span class="ldc-mi">Agreed <strong>£310</strong></span></div></div>
+        <h1 class="pt">Active Loads</h1><p class="ps">Your posted loads and current driver status.</p>
+        <div class="ldc"><div class="ldc-h"><div><div class="ldc-route">Manchester M60 → Glasgow G1</div><div style="font-size:.71rem;color:var(--mu);margin-top:.12rem">FF-0091 · Client: Acme Ltd · Posted 6 Jul</div></div><span class="chip co">3 responses</span></div><div class="ldc-meta"><span class="ldc-mi"><strong>1,200 kg</strong> · 8 pallets</span><span class="ldc-mi">Collect <strong>10 Jul</strong></span><span class="ldc-mi">Target <strong>£380</strong></span></div></div>
+        <div class="ldc"><div class="ldc-h"><div><div class="ldc-route">Birmingham B1 → Bristol BS1</div><div style="font-size:.71rem;color:var(--mu);margin-top:.12rem">FF-0088 · Client: Northern Pack · Posted 4 Jul</div></div><span class="chip cg">Booked</span></div><div class="ldc-meta"><span class="ldc-mi"><strong>640 kg</strong> · 4 pallets</span><span class="ldc-mi">Collect <strong>7 Jul</strong></span><span class="ldc-mi">Agreed <strong>£240</strong></span></div>
+          <div style="margin-top:.55rem;padding:.45rem .6rem;border-radius:var(--rx);background:var(--gn-d);border:1px solid rgba(45,171,96,.2);font-size:.72rem;color:var(--gn)">Driver: DH022641 · David Hughes · LWB · Confirmed en route 08:42</div>
+        </div>
+        <div class="ldc"><div class="ldc-h"><div><div class="ldc-route">Leeds LS1 → London E1</div><div style="font-size:.71rem;color:var(--mu);margin-top:.12rem">FF-0082 · Client: City Supplies · Posted 2 Jul</div></div><span class="chip cb">In transit</span></div><div class="ldc-meta"><span class="ldc-mi"><strong>900 kg</strong> · 6 pallets</span><span class="ldc-mi">ETA <strong>Today 17:00</strong></span><span class="ldc-mi">Agreed <strong>£310</strong></span></div>
+          <div style="margin-top:.55rem;padding:.45rem .6rem;border-radius:var(--rx);background:var(--bl-d);border:1px solid rgba(61,125,202,.2);font-size:.72rem;color:var(--bl)">Driver: JW012390 · James Wilson · En route · ETA London 17:00</div>
+        </div>
       </div>
 
       <!-- FREIGHT: Coverage Board -->
       <div class="tp" id="pane-f-cover">
         <h1 class="pt">Coverage Board</h1><p class="ps">Uncovered and at-risk loads needing attention.</p>
-        <div class="card"><table class="dt"><thead><tr><th>Ref</th><th>Route</th><th>Collect</th><th>Status</th><th>Action</th></tr></thead><tbody>
-          <tr><td>FF-0091</td><td>Manchester → Glasgow</td><td>10 Jul</td><td><span class="chip ca">Awaiting response</span></td><td><button class="btn btn-or btn-xs">Chase</button></td></tr>
-          <tr><td>FF-0093</td><td>Nottingham → Edinburgh</td><td>9 Jul</td><td><span class="chip cr2">Rate too low</span></td><td><button class="btn btn-or btn-xs">Reprice</button></td></tr>
-          <tr><td>FF-0089</td><td>Liverpool → Cardiff</td><td>8 Jul</td><td><span class="chip cb">Return match found</span></td><td><button class="btn btn-gh btn-xs">Assign</button></td></tr>
+        <div class="card"><table class="dt"><thead><tr><th>Ref</th><th>Client</th><th>Route</th><th>Collect</th><th>Status</th><th>Action</th></tr></thead><tbody>
+          <tr><td>FF-0091</td><td>Acme Ltd</td><td>Manchester → Glasgow</td><td>10 Jul</td><td><span class="chip ca">Awaiting response</span></td><td><button class="btn btn-or btn-xs">Chase</button></td></tr>
+          <tr><td>FF-0093</td><td>Greenway Co</td><td>Nottingham → Edinburgh</td><td>9 Jul</td><td><span class="chip cr2">Rate too low</span></td><td><button class="btn btn-or btn-xs">Reprice</button></td></tr>
+          <tr><td>FF-0089</td><td>Metro Dist.</td><td>Liverpool → Cardiff</td><td>8 Jul</td><td><span class="chip cb">Return match found</span></td><td><button class="btn btn-gh btn-xs">Assign</button></td></tr>
         </tbody></table></div>
+      </div>
+
+      <!-- FREIGHT: Solutions Plans -->
+      <div class="tp" id="pane-f-plans">
+        <h1 class="pt">Solutions Plans</h1><p class="ps">Your HAF KNECT Freight Solutions tier and what it includes.</p>
+        <div class="plg">
+          <div class="plc">
+            <div class="pl-n">Solutions Lite</div>
+            <div class="pl-p">Free<span style="font-size:.78rem;font-weight:500;color:var(--mu)"> to start</span></div>
+            <div class="pl-fs">
+              <div class="pl-f">Post loads on the HAF network</div>
+              <div class="pl-f">12% network fee per job</div>
+              <div class="pl-f">Basic load tracking</div>
+              <div class="pl-f">Up to 10 active loads</div>
+              <div class="pl-f" style="opacity:.45">Priority matching</div>
+              <div class="pl-f" style="opacity:.45">Lane pricing tools</div>
+              <div class="pl-f" style="opacity:.45">Coverage board</div>
+              <div class="pl-f" style="opacity:.45">Dedicated account manager</div>
+            </div>
+            <button class="btn btn-gh btn-sm btn-wide">Current plan</button>
+          </div>
+          <div class="plc feat">
+            <div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;color:var(--or);text-transform:uppercase;margin-bottom:.35rem">Most popular</div>
+            <div class="pl-n">Solutions Plus</div>
+            <div class="pl-p">£99<span>/mo</span></div>
+            <div class="pl-fs">
+              <div class="pl-f">Post unlimited loads</div>
+              <div class="pl-f"><strong>10% network fee</strong> per job</div>
+              <div class="pl-f">Live driver tracking per load</div>
+              <div class="pl-f">Priority load matching</div>
+              <div class="pl-f">Lane pricing &amp; demand data</div>
+              <div class="pl-f">Coverage board</div>
+              <div class="pl-f">Net 14 payment terms</div>
+              <div class="pl-f" style="opacity:.45">Dedicated account manager</div>
+            </div>
+            <button class="btn btn-or btn-sm btn-wide">Upgrade to Plus</button>
+          </div>
+          <div class="plc">
+            <div class="pl-n">Solutions Pro</div>
+            <div class="pl-p">£299<span>/mo</span></div>
+            <div class="pl-fs">
+              <div class="pl-f">Post unlimited loads</div>
+              <div class="pl-f"><strong>7% network fee</strong> per job</div>
+              <div class="pl-f">Live driver tracking per load</div>
+              <div class="pl-f">Highest-priority matching</div>
+              <div class="pl-f">Full lane pricing suite</div>
+              <div class="pl-f">Coverage board + auto-chase</div>
+              <div class="pl-f">Net 30 payment terms</div>
+              <div class="pl-f">Dedicated account manager</div>
+            </div>
+            <button class="btn btn-gh btn-sm btn-wide">Upgrade to Pro</button>
+          </div>
+        </div>
       </div>
 
       <!-- FREIGHT: Account -->
       <div class="tp" id="pane-f-account">
         <h1 class="pt">Account Controls</h1><p class="ps">Your commercial terms, credit limit and compliance rules.</p>
         <div class="g2">
-          <div class="card"><div class="ct">Commercial account</div><div class="cr"><span class="ck">Type</span><span class="cv">Freight Forwarder Plus</span></div><div class="cr"><span class="ck">Network fee</span><span class="cv">10%</span></div><div class="cr"><span class="ck">Payment terms</span><span class="cv">Net 14</span></div><div class="cr"><span class="ck">Credit limit</span><span class="cv">£25,000</span></div><div class="cr"><span class="ck">SLA status</span><span class="cv"><span class="chip cg">On track</span></span></div></div>
-          <div class="card"><div class="ct">Compliance rules</div><div class="cr"><span class="ck">Approved lanes</span><span class="cv">All UK</span></div><div class="cr"><span class="ck">Min GIT insurance</span><span class="cv">£50,000</span></div><div class="cr"><span class="ck">Cancellation rate</span><span class="cv"><span class="chip cg">1.2%</span></span></div><div class="cr"><span class="ck">Disputes (90d)</span><span class="cv">1 — resolved</span></div></div>
+          <div class="card"><div class="ct">Solutions account</div><div class="cr"><span class="ck">Plan</span><span class="cv"><span class="chip co">Solutions Plus</span></span></div><div class="cr"><span class="ck">Network fee</span><span class="cv" style="font-weight:700;color:var(--gn)">10% per job</span></div><div class="cr"><span class="ck">Payment terms</span><span class="cv">Net 14</span></div><div class="cr"><span class="ck">Credit limit</span><span class="cv">£25,000</span></div><div class="cr"><span class="ck">Active loads</span><span class="cv">Unlimited</span></div><div class="cr"><span class="ck">SLA status</span><span class="cv"><span class="chip cg">On track</span></span></div></div>
+          <div class="card"><div class="ct">Compliance rules</div><div class="cr"><span class="ck">Approved lanes</span><span class="cv">All UK</span></div><div class="cr"><span class="ck">Min GIT insurance</span><span class="cv">£50,000</span></div><div class="cr"><span class="ck">Cancellation rate</span><span class="cv"><span class="chip cg">1.2%</span></span></div><div class="cr"><span class="ck">Disputes (90d)</span><span class="cv">1 — resolved</span></div><div class="cr"><span class="ck">Third-party freight</span><span class="cv"><span class="chip cg">Permitted</span></span></div></div>
         </div>
+        <div style="margin-top:.5rem;padding:.7rem .9rem;border-radius:var(--rx);border:1px solid var(--or-g);background:var(--or-d);font-size:.76rem;color:var(--mu)">Upgrade to <strong style="color:var(--or)">Solutions Pro</strong> to reduce your network fee to 7% and unlock a dedicated account manager. <button class="btn btn-or btn-xs" onclick="switchTab('pane-f-plans')" style="margin-left:.4rem">See plans →</button></div>
       </div>
 
       <!-- SHARED: Payments -->
@@ -1136,12 +1218,20 @@ textarea.fi2{resize:vertical;min-height:70px}
       <!-- ADMIN -->
       <div class="tp" id="pane-admin">
         <h1 class="pt">OTIS Control</h1><p class="ps">Full platform view. Admin only.</p>
-        <div class="kg"><div class="kc"><div class="kc-l">Total drivers</div><div class="kc-v">340</div></div><div class="kc"><div class="kc-l">GMV all time</div><div class="kc-v or">£148k</div></div><div class="kc"><div class="kc-l">Active jobs</div><div class="kc-v gn">14</div></div><div class="kc"><div class="kc-l">Pending compliance</div><div class="kc-v am">22</div></div><div class="kc"><div class="kc-l">Business accounts</div><div class="kc-v">128</div></div><div class="kc"><div class="kc-l">Freight forwarders</div><div class="kc-v">22</div></div></div>
-        <div class="g2">
-          <div class="card"><div class="ct">System connections</div><div class="cr"><span class="ck">HAF PLNA</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">CleverPay</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">HAF Launch</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">Supabase DB</span><span class="cv"><span class="chip ca">Schema pending</span></span></div><div class="cr"><span class="ck">Better Auth</span><span class="cv"><span class="chip ca">Not deployed</span></span></div></div>
-          <div class="card"><div class="ct">Quick links</div><div style="display:flex;flex-direction:column;gap:.45rem"><a href="https://plna.usehaf.co.uk/dashboard.html" target="_blank" class="btn btn-gh btn-sm">Open PLNA</a><a href="https://clever.usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">Open CleverPay</a><a href="https://launch.usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">Open Launch site</a></div></div>
+        <div class="kg">
+          <div class="kc"><div class="kc-l">PLNA Drivers</div><div class="kc-v">340</div><div class="kc-d">on the network</div></div>
+          <div class="kc"><div class="kc-l">GMV all time</div><div class="kc-v or">£148k</div></div>
+          <div class="kc"><div class="kc-l">Active jobs</div><div class="kc-v gn">14</div></div>
+          <div class="kc"><div class="kc-l">Pending compliance</div><div class="kc-v am">22</div></div>
+          <div class="kc"><div class="kc-l">Business accounts</div><div class="kc-v">128</div><div class="kc-d">free · own goods only</div></div>
+          <div class="kc"><div class="kc-l">Freight Solutions</div><div class="kc-v">22</div><div class="kc-d">Lite · Plus · Pro</div></div>
         </div>
-        <div class="ig"><a class="ic" href="https://plna.usehaf.co.uk" target="_blank"><div class="ic-l">Platform</div><div class="ic-n">HAF PLNA</div><div class="ic-s">Live</div></a><a class="ic" href="https://clever.usehaf.co.uk" target="_blank"><div class="ic-l">Compliance</div><div class="ic-n">CleverPay</div><div class="ic-s">Live</div></a><a class="ic" href="https://launch.usehaf.co.uk" target="_blank"><div class="ic-l">Marketing</div><div class="ic-n">HAF Launch</div><div class="ic-s">Live</div></a></div>
+        <div class="g2">
+          <div class="card"><div class="ct">Freight Solutions breakdown</div><div class="cr"><span class="ck">Solutions Lite</span><span class="cv">11 accounts · 12% fee</span></div><div class="cr"><span class="ck">Solutions Plus</span><span class="cv">8 accounts · 10% fee</span></div><div class="cr"><span class="ck">Solutions Pro</span><span class="cv">3 accounts · 7% fee</span></div></div>
+          <div class="card"><div class="ct">System connections</div><div class="cr"><span class="ck">HAF PLNA</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">CleverPay</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">HAF Launch</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">Supabase DB</span><span class="cv"><span class="chip ca">Schema pending</span></span></div></div>
+        </div>
+        <div class="card"><div class="ct">Quick links</div><div style="display:flex;gap:.45rem;flex-wrap:wrap"><a href="https://plna.usehaf.co.uk/dashboard.html" target="_blank" class="btn btn-gh btn-sm">PLNA</a><a href="https://clever.usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">CleverPay</a><a href="https://launch.usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">Launch site</a><a href="https://usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">usehaf.co.uk</a></div></div>
+        <div class="ig"><a class="ic" href="https://plna.usehaf.co.uk" target="_blank"><div class="ic-l">Driver network</div><div class="ic-n">HAF PLNA</div><div class="ic-s">Live</div></a><a class="ic" href="https://clever.usehaf.co.uk" target="_blank"><div class="ic-l">Compliance</div><div class="ic-n">CleverPay</div><div class="ic-s">Live</div></a><a class="ic" href="https://launch.usehaf.co.uk" target="_blank"><div class="ic-l">Marketing</div><div class="ic-n">HAF Launch</div><div class="ic-s">Live</div></a></div>
       </div>
 
     </main>
@@ -1447,6 +1537,26 @@ const ADMIN_NAV=[
   {id:'f-cap',l:'Network Capacity',s:'Freight Tools',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:'f-cover',l:'Coverage Board',s:'Freight Tools',ico:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'},
   {id:'f-lanes',l:'Lane Pricing',s:'Freight Tools',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
+  {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
+  {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
+];
+const BUSINESS_NAV=[
+  {id:'b-book',l:'Book a Courier',s:'Send Goods',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
+  {id:'b-del',l:'My Deliveries',s:'Send Goods',ico:'<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'},
+  {id:'b-fleet',l:'My Fleet',s:'Send Goods',ico:'<path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="1"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>'},
+  {id:'b-saved',l:'Saved Addresses',s:'Send Goods',ico:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'},
+  {id:'b-usage',l:'Usage &amp; Activity',s:'Account',ico:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'},
+  {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
+  {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
+];
+const FREIGHT_NAV=[
+  {id:'f-post',l:'Post a Load',s:'Freight',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
+  {id:'f-loads',l:'Active Loads',s:'Freight',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
+  {id:'f-cap',l:'Network Capacity',s:'Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
+  {id:'f-cover',l:'Coverage Board',s:'Freight',ico:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'},
+  {id:'f-lanes',l:'Lane Pricing',s:'Freight',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
+  {id:'f-plans',l:'Solutions Plan',s:'Account',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
+  {id:'f-account',l:'Account Controls',s:'Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
   {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
 ];
