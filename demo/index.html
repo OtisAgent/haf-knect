@@ -540,12 +540,12 @@ textarea.fi2{resize:vertical;min-height:70px}
   <div class="demo-grp">
     <span class="demo-grp-lbl">Business</span>
     <button class="dp" onclick="demoLogin('biz-pro')">
-      <span class="dp-n">Business Pro</span>
-      <span class="dp-s">Corporate deliveries</span>
+      <span class="dp-n">Business Account</span>
+      <span class="dp-s">Own goods · free</span>
     </button>
     <button class="dp" onclick="demoLogin('freight-pro')">
-      <span class="dp-n">Freight Forwarder</span>
-      <span class="dp-s">Load board &amp; lanes</span>
+      <span class="dp-n">Freight Forward Pro</span>
+      <span class="dp-s">Load board · £100/mo</span>
     </button>
   </div>
 
@@ -1082,7 +1082,7 @@ textarea.fi2{resize:vertical;min-height:70px}
       <!-- BUSINESS: Book -->
       <div class="tp" id="pane-b-book">
         <h1 class="pt">Book a Courier</h1><p class="ps">Five-step booking for your own business deliveries.</p>
-        <div style="background:var(--bl-d);border:1px solid rgba(61,125,202,.2);border-radius:var(--rx);padding:.75rem 1rem;font-size:.76rem;color:var(--bl);margin-bottom:1.1rem">This account is for your own business products only. To move goods for other customers, apply for a Freight Forwarder account.</div>
+        <div style="background:var(--bl-d);border:1px solid rgba(61,125,202,.2);border-radius:var(--rx);padding:.75rem 1rem;font-size:.76rem;color:var(--bl);margin-bottom:1.1rem">This account is for your own business products only. To move goods for other customers, apply for a Freight Forward account.</div>
         <div class="card" style="max-width:560px">
           <div class="ct">Step 1 of 5 — Collection</div>
           <div class="fg"><label class="fl">Collection address</label><input class="fi2" placeholder="Full address or postcode"></div>
@@ -1110,11 +1110,12 @@ textarea.fi2{resize:vertical;min-height:70px}
         </tbody></table></div>
       </div>
 
-      <!-- BUSINESS: Spend/Rebate -->
+      <!-- BUSINESS: Usage & Activity -->
       <div class="tp" id="pane-b-spend">
-        <h1 class="pt">Spend &amp; Rebate</h1><p class="ps">Your monthly spend and rebate progress.</p>
-        <div class="kg"><div class="kc"><div class="kc-l">Monthly spend</div><div class="kc-v or">£4,820</div><div class="kc-d pos">+12%</div></div><div class="kc"><div class="kc-l">Jobs</div><div class="kc-v">38</div></div><div class="kc"><div class="kc-l">Avg job</div><div class="kc-v">£127</div></div><div class="kc"><div class="kc-l">On-time</div><div class="kc-v gn">97%</div></div></div>
-        <div class="card"><div class="ct">Rebate progress</div><div class="cr"><span class="ck">Current tier</span><span class="cv">Tier 2 — 3% rebate</span></div><div class="cr"><span class="ck">Spend</span><span class="cv">£4,820</span></div><div class="cr"><span class="ck">Next tier at</span><span class="cv">£6,000 → 5%</span></div><div style="margin:.7rem 0 .25rem;font-size:.7rem;color:var(--mu)">Progress to next tier</div><div class="reb-bar-wrap"><div class="reb-bar-fill" style="width:80%"></div></div><div style="font-size:.7rem;color:var(--mu);margin-top:.2rem">£1,180 to go · £145 rebate earned</div></div>
+        <h1 class="pt">Usage &amp; Activity</h1><p class="ps">Your monthly shipping activity — Business Account is free, no tiers.</p>
+        <div class="kg"><div class="kc"><div class="kc-l">Deliveries this month</div><div class="kc-v or">38</div><div class="kc-d pos">+12% vs last month</div></div><div class="kc"><div class="kc-l">Spend this month</div><div class="kc-v">£4,820</div></div><div class="kc"><div class="kc-l">On-time rate</div><div class="kc-v gn">97%</div></div><div class="kc"><div class="kc-l">Account type</div><div class="kc-v" style="font-size:1rem">Free</div></div></div>
+        <div class="card"><div class="ct">Account summary</div><div class="cr"><span class="ck">Plan</span><span class="cv"><span class="chip cb">Business Account — Free</span></span></div><div class="cr"><span class="ck">Goods type</span><span class="cv">Your own stock and products only</span></div><div class="cr"><span class="ck">Third-party freight</span><span class="cv"><span class="chip cr2">Not permitted</span></span></div><div class="cr"><span class="ck">Fleet on network</span><span class="cv"><span class="chip cg">Enabled</span></span></div></div>
+        <div style="border:1.5px solid var(--or-g);border-radius:var(--rs);padding:1rem;background:var(--or-d)"><div style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Want to forward goods for other businesses?</div><p style="font-size:.78rem;color:var(--mu);margin-bottom:.7rem">Upgrade to a Freight Forward account to post loads on behalf of third parties, access lane pricing, and unlock volume-based network fee reductions.</p><button class="btn btn-or btn-sm" onclick="switchTab('pane-feedback')">Apply for Freight Forward →</button></div>
       </div>
 
       <!-- BUSINESS: Saved -->
@@ -1187,7 +1188,7 @@ textarea.fi2{resize:vertical;min-height:70px}
       <div class="tp" id="pane-f-account">
         <h1 class="pt">Account Controls</h1><p class="ps">Your commercial terms, credit limit and compliance rules.</p>
         <div class="g2">
-          <div class="card"><div class="ct">Commercial account</div><div class="cr"><span class="ck">Type</span><span class="cv">Freight Forwarder Plus</span></div><div class="cr"><span class="ck">Network fee</span><span class="cv">10%</span></div><div class="cr"><span class="ck">Payment terms</span><span class="cv">Net 14</span></div><div class="cr"><span class="ck">Credit limit</span><span class="cv">£25,000</span></div><div class="cr"><span class="ck">SLA status</span><span class="cv"><span class="chip cg">On track</span></span></div></div>
+          <div class="card"><div class="ct">Commercial account</div><div class="cr"><span class="ck">Type</span><span class="cv">Freight Forward Plus</span></div><div class="cr"><span class="ck">Network fee</span><span class="cv">10%</span></div><div class="cr"><span class="ck">Payment terms</span><span class="cv">Net 14</span></div><div class="cr"><span class="ck">Credit limit</span><span class="cv">£25,000</span></div><div class="cr"><span class="ck">SLA status</span><span class="cv"><span class="chip cg">On track</span></span></div></div>
           <div class="card"><div class="ct">Compliance rules</div><div class="cr"><span class="ck">Approved lanes</span><span class="cv">All UK</span></div><div class="cr"><span class="ck">Min GIT insurance</span><span class="cv">£50,000</span></div><div class="cr"><span class="ck">Cancellation rate</span><span class="cv"><span class="chip cg">1.2%</span></span></div><div class="cr"><span class="ck">Disputes (90d)</span><span class="cv">1 — resolved</span></div></div>
         </div>
       </div>
@@ -1666,7 +1667,7 @@ function renderPlnaBook(tier){
 const TAB_REG={
   'b-book':    {l:'Book a Courier',    ico:'<path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16"/>',       s:'BOOKINGS'},
   'b-del':     {l:'My Deliveries',     ico:'<rect x="1" y="3" width="15" height="13" rx="1"/>',             s:'BOOKINGS'},
-  'b-spend':   {l:'Spend & Rebate',    ico:'<line x1="12" y1="1" x2="12" y2="23"/>',                       s:'ACCOUNT'},
+  'b-spend':   {l:'Usage & Activity',  ico:'<line x1="12" y1="1" x2="12" y2="23"/>',                       s:'ACCOUNT'},
   'b-saved':   {l:'Saved Addresses',   ico:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>',  s:'ACCOUNT'},
   'billing':   {l:'Payments',          ico:'<rect x="1" y="4" width="22" height="16" rx="2"/>',             s:'ACCOUNT'},
   'support':   {l:'Support',           ico:'<circle cx="12" cy="12" r="10"/>',                              s:'ACCOUNT'},
@@ -1692,14 +1693,6 @@ const TAB_REG={
 
 /* ── TIER DEFINITIONS ── */
 const TIER_DEFS={
-  business:[
-    {key:'free',    label:'Free',    cls:'pb-free',    plan:'Free',      next:'Plus',
-     unlock:['b-book','b-del','billing','support','feedback']},
-    {key:'plus',    label:'Plus',    cls:'pb-plus',    plan:'Plus',      next:'Pro',
-     unlock:['b-book','b-del','b-saved','billing','support','feedback']},
-    {key:'pro',     label:'Pro',     cls:'pb-pro',     plan:'Pro',       next:null,
-     unlock:['b-book','b-del','b-saved','b-spend','billing','support','feedback']},
-  ],
   freight:[
     {key:'free',    label:'Free',    cls:'pb-free',    plan:'Free',      next:'Plus',
      unlock:['f-post','f-loads','billing','support','feedback']},
@@ -1730,14 +1723,14 @@ const ACCS={
     tabIds:['cust-track','cust-pod','cust-orders','support','feedback'],def:'cust-track',cp:'green',
     persona:'Individual Customer',ver:'HAF Demo',
     account_environment:'demo',is_demo_account:true,demo_role:'customer',demo_persona:'Individual Customer'},
-  'biz-pro':     {n:'Apex Logistics Ltd',u:'AL448793',i:'AL',r:'Business Account',rc:'co',tierGroup:'business',initTier:'pro',
+  'biz-pro':     {n:'Apex Logistics Ltd',u:'AL448793',i:'AL',r:'Business Account',rc:'co',tierGroup:null,initTier:null,
     tabIds:['b-book','b-del','b-spend','b-saved','billing','support','feedback'],def:'b-book',cp:'green',
-    persona:'Business Account — Pro',ver:'HAF Demo',
-    account_environment:'demo',is_demo_account:true,demo_role:'business',demo_persona:'Business Pro'},
-  'freight-pro': {n:'NorthFreight UK',  u:'NF992190',i:'NF',r:'Freight Forwarder',rc:'cb',tierGroup:'freight', initTier:'pro',
+    persona:'Business Account',ver:'HAF Demo',
+    account_environment:'demo',is_demo_account:true,demo_role:'business',demo_persona:'Business Account'},
+  'freight-pro': {n:'NorthFreight UK',  u:'NF992190',i:'NF',r:'Freight Forward Pro',rc:'cb',tierGroup:'freight', initTier:'pro',
     tabIds:['f-post','f-cap','f-lanes','f-loads','f-cover','f-account','billing','support','feedback'],def:'f-post',cp:'green',
-    persona:'Freight Forwarder — Pro',ver:'HAF Demo',
-    account_environment:'demo',is_demo_account:true,demo_role:'freight',demo_persona:'Freight Forwarder Pro'},
+    persona:'Freight Forward — Pro',ver:'HAF Demo',
+    account_environment:'demo',is_demo_account:true,demo_role:'freight',demo_persona:'Freight Forward Pro'},
   'plna-new':    {n:'Alex Thompson',    u:'AT229184',i:'AT',r:'PLNA Driver',       rc:'ca',tierGroup:null,      initTier:null,
     tabIds:['d-home','d-comp','billing','support'],def:'d-comp',cp:'amber',
     persona:'New Driver — Compliance Pending',ver:'DRV-1.4',
