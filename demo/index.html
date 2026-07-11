@@ -225,6 +225,11 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 .tlogo-t{font-family:var(--dp);font-weight:900;font-size:.92rem;letter-spacing:-.04em;color:var(--tx)}
 .tlogo-t span{color:var(--or)}
 .menu-btn{display:none;width:30px;height:30px;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln);align-items:center;justify-content:center;color:var(--mu);cursor:pointer}
+.tb-sep{width:1px;height:18px;background:var(--ln);flex-shrink:0;margin:0 .15rem}
+.tb-feedback{display:flex;align-items:center;gap:.32rem;padding:.3rem .75rem;border-radius:var(--pill);background:transparent;border:1px solid var(--ln);color:var(--mu);font-size:.75rem;font-weight:600;cursor:pointer;transition:all .14s;white-space:nowrap}
+.tb-feedback:hover{background:var(--or-d);border-color:var(--or-g);color:var(--or)}
+.tb-feedback svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+@media(max-width:600px){.tb-fb-lbl{display:none}.tb-feedback{padding:.3rem .45rem}}
 .tb-r{display:flex;align-items:center;gap:.45rem}
 .tb-user{font-size:.76rem;font-weight:600;color:var(--mu)}
 .role-chip{font-size:.64rem;font-weight:700;letter-spacing:.06em;padding:.13rem .5rem;border-radius:var(--pill);text-transform:uppercase}
@@ -941,6 +946,11 @@ textarea.fi2{resize:vertical;min-height:70px}
         <div class="tlogo-m">K</div>
         <div class="tlogo-t">HAF <span>KNECT</span></div>
       </a>
+      <div class="tb-sep"></div>
+      <button class="tb-feedback" onclick="switchTab('pane-feedback')" title="Feedback &amp; Ideas">
+        <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.4 1 2.3h6c0-.9.4-1.8 1-2.3A7 7 0 0 0 12 2z"/><path d="M9 21h6"/></svg>
+        <span class="tb-fb-lbl">Feedback &amp; Ideas</span>
+      </button>
     </div>
     <div class="tb-r">
       <span class="tb-user" id="tb-user">—</span>
