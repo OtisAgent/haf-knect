@@ -2069,6 +2069,42 @@ function pcArea(s){return(s.trim().match(/^[A-Z]+/i)||['M'])[0].toUpperCase()}
 function pcDist(a,b){const ca=PC[pcArea(a)]||[52.5,-1.5],cb=PC[pcArea(b)]||[53.0,-1.0];const R=3959,dLa=(cb[0]-ca[0])*Math.PI/180,dLo=(cb[1]-ca[1])*Math.PI/180;const x=Math.sin(dLa/2)**2+Math.cos(ca[0]*Math.PI/180)*Math.cos(cb[0]*Math.PI/180)*Math.sin(dLo/2)**2;return Math.round(2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)))||28;}
 function zoneMult(m){return m<30?1:m<80?1.04:m<150?1.08:1.12}
 
+/* ── REAL POSTCODE LOOKUP (postcodes.io — ONS data) ── */
+const PCX={};
+async function pcLookup(raw){
+  const pc=(raw||'').trim().toUpperCase().replace(/\s+/g,'');
+  if(!pc||pc.length<2||!/^[A-Z]{1,2}\d/.test(pc))return null;
+  if(PCX[pc]!==undefined)return PCX[pc];
+  let out=null;
+  try{
+    if(pc.length>=5){
+      const r=await fetch('https://api.postcodes.io/postcodes/'+encodeURIComponent(pc));
+      const d=await r.json();
+      if(d.status===200){out={lat:d.result.latitude,lng:d.result.longitude,area:d.result.admin_district||''};}
+      else if(d.terminated&&d.terminated.latitude){out={lat:d.terminated.latitude,lng:d.terminated.longitude,area:''};}
+    }
+    if(!out){
+      const oc=(pc.match(/^[A-Z]{1,2}\d[A-Z\d]?/)||[])[0];
+      if(oc){
+        const r2=await fetch('https://api.postcodes.io/outcodes/'+oc);
+        const d2=await r2.json();
+        if(d2.status===200){out={lat:d2.result.latitude,lng:d2.result.longitude,area:(d2.result.admin_district||[])[0]||''};}
+      }
+    }
+  }catch(e){return 'ERR';}
+  PCX[pc]=out;
+  return out;
+}
+function hav(a,b){const R=3959,dLa=(b.lat-a.lat)*Math.PI/180,dLo=(b.lng-a.lng)*Math.PI/180;const x=Math.sin(dLa/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLo/2)**2;return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+/* 1.25 road factor: straight-line to typical UK driving distance */
+async function pcDistReal(a,b){
+  const [pa,pb]=await Promise.all([pcLookup(a),pcLookup(b)]);
+  if(pa==='ERR'||pb==='ERR')return{miles:pcDist(a,b),exact:false,from:undefined,to:undefined};
+  if(!pa||!pb)return{miles:pcDist(a,b),exact:false,from:pa,to:pb};
+  return{miles:Math.max(1,Math.round(hav(pa,pb)*1.25)),exact:true,from:pa,to:pb};
+}
+
+
 /* ── ACCESS GATE ── */
 const GATE_CODE='HAFLAUNCH';
 function checkGate(){
@@ -2117,7 +2153,8 @@ function selVan(el,key){
 let pcTimer=null;
 function onPcInput(){clearTimeout(pcTimer);pcTimer=setTimeout(calcLivePrice,600);}
 
-function calcLivePrice(){
+window._lpSeq=0;
+async function calcLivePrice(){
   const fr=document.getElementById('pc-from').value.trim().toUpperCase();
   const to=document.getElementById('pc-to').value.trim().toUpperCase();
   const box=document.getElementById('lp-box');
@@ -2125,16 +2162,27 @@ function calcLivePrice(){
   const priced=document.getElementById('lp-priced');
   if(!fr||!to||fr.length<2||to.length<2){
     box.className='lp-box hint';
+    hint.textContent='Enter both postcodes to see your guide price';
     hint.style.display='';
     priced.style.display='none';
     return;
   }
   const v=VAN[selVanKey]||VAN.lwb;
-  const miles=pcDist(fr,to);
+  const seq=++window._lpSeq;
+  const r=await pcDistReal(fr,to);
+  if(seq!==window._lpSeq)return;
+  if(r.from===null||r.to===null){
+    box.className='lp-box hint';
+    hint.innerHTML='<span style="color:var(--rd);font-weight:600">“'+(r.from===null?fr:to)+'” isn\u2019t a recognised UK postcode — check and try again</span>';
+    hint.style.display='';priced.style.display='none';return;
+  }
+  const miles=r.miles;
   const base=Math.max(v.min,miles*v.ppm*zoneMult(miles));
   const lo=Math.round(base*.9),hi=Math.round(base*1.1);
+  const fa=r.from&&r.from.area?r.from.area+' ('+fr+')':fr;
+  const ta=r.to&&r.to.area?r.to.area+' ('+to+')':to;
   document.getElementById('lp-range').textContent='£'+lo+'–£'+hi;
-  document.getElementById('lp-info').textContent=(VAN_LABELS[selVanKey]||v.n)+' · '+fr+' → '+to+' · est. '+miles+' mi · ±10%';
+  document.getElementById('lp-info').textContent=(VAN_LABELS[selVanKey]||v.n)+' · '+fa+' → '+ta+' · ~'+miles+' mi road est. · ±10%';
   box.className='lp-box priced';
   hint.style.display='none';
   priced.style.display='flex';
@@ -2263,19 +2311,19 @@ function hpBookV(){
   hpBook();
 }
 
-function fqCalcPrice(){
+async function fqCalcPrice(){
   const fr=(document.getElementById('fq-from').value||'M1').trim().toUpperCase();
   const to=(document.getElementById('fq-to').value||'LS1').trim().toUpperCase();
   const vk=fqData.van||'lwb';
   const uk=fqData.urg||'flex';
   const v=VAN[vk]||VAN.lwb;
   const u=URG[uk]||URG.flex;
-  const miles=pcDist(fr,to);
+  const miles=(await pcDistReal(fr,to)).miles;
   const base=Math.max(v.min,miles*v.ppm*u.m*zoneMult(miles));
   return{lo:Math.round(base*.9),hi:Math.round(base*1.1),miles,v,u,fr,to};
 }
-function fqShowPrice(){
-  const r=fqCalcPrice();
+async function fqShowPrice(){
+  const r=await fqCalcPrice();
   document.getElementById('fq-pr-range').textContent='£'+r.lo+'–£'+r.hi;
   document.getElementById('fq-pr-basis').textContent=r.v.n+' · '+r.fr+' → '+r.to+' · ~'+r.miles+' mi · '+r.u.n;
   fqStep(6);
@@ -2309,12 +2357,12 @@ function hpSel(el,key,val){
   if(g)g.querySelectorAll('.oopt').forEach(b=>b.classList.remove('sel'));
   el.classList.add('sel');hpData[key]=val;
 }
-function hpEstimate(){
+async function hpEstimate(){
   const fr=(document.getElementById('hp-from').value||'M1').trim().toUpperCase();
   const to=(document.getElementById('hp-to').value||'LS1').trim().toUpperCase();
   const vk=LOAD_VAN[hpData.load||'van']||'lwb';
   const v=VAN[vk];
-  const miles=pcDist(fr,to);
+  const miles=(await pcDistReal(fr,to)).miles;
   const base=Math.max(v.min,miles*v.ppm*zoneMult(miles));
   const lo=Math.round(base*.9),hi=Math.round(base*1.1);
   document.getElementById('hp-van-rec').textContent=v.n+' — HAF recommended';
