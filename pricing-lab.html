@@ -10,63 +10,84 @@
   --bg:#f5f3ef;--p:#fff;--p2:#f0ede8;--p3:#e8e3db;--tx:#1a1e22;--mu:#6b7580;--su:#9aa3ad;
   --ln:rgba(26,30,34,.1);--lns:rgba(26,30,34,.18);
   --or:#f18e00;--or-d:rgba(241,142,0,.1);--or-g:rgba(241,142,0,.28);
-  --gn:#2dab60;--gn-d:rgba(45,171,96,.1);--bl:#3d7dca;--bl-d:rgba(61,125,202,.1);
-  --rd:#d04040;--rd-d:rgba(208,64,64,.1);--gold:#d9a520;
+  --gn:#2dab60;--gn-d:rgba(45,171,96,.1);--gn-b:rgba(45,171,96,.25);
+  --bl:#3d7dca;--bl-d:rgba(61,125,202,.1);--bl-b:rgba(61,125,202,.25);
+  --rd:#d04040;--rd-d:rgba(208,64,64,.1);--rd-b:rgba(208,64,64,.3);
+  --pu:#7c5cbf;--pu-d:rgba(124,92,191,.1);--pu-b:rgba(124,92,191,.25);
   --r:16px;--rs:12px;--rx:8px;--pill:999px;--fn:"Inter",sans-serif;--dp:"Montserrat",sans-serif;
   --sd:0 1px 4px rgba(0,0,0,.07),0 2px 12px rgba(0,0,0,.06);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--fn);background:var(--bg);color:var(--tx);line-height:1.55;-webkit-font-smoothing:antialiased}
 button,input,select{font:inherit;color:inherit;outline:none;border:none;background:none;cursor:pointer}
-.wrap{max-width:1080px;margin:0 auto;padding:1.4rem 1.4rem 4rem}
+.wrap{max-width:1140px;margin:0 auto;padding:1.4rem 1.4rem 4rem}
 .head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:.3rem}
 h1{font-family:var(--dp);font-weight:900;font-size:1.5rem;letter-spacing:-.04em}
 h1 span{color:var(--or)}
 .tag{background:#0a0c0e;color:#e8e3db;font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .6rem;border-radius:var(--pill)}
+.vtag{font-size:.6rem;font-weight:700;color:var(--su);background:var(--p2);border:1px solid var(--lns);padding:.15rem .5rem;border-radius:var(--pill)}
 .sub{color:var(--mu);font-size:.82rem;margin-bottom:1.2rem}
-.banner{background:var(--or-d);border:1px solid var(--or-g);border-radius:var(--rs);padding:.8rem 1.1rem;font-size:.8rem;line-height:1.6;margin-bottom:1.4rem}
-.banner strong{color:var(--or)}
+.banner{background:var(--bl-d);border:1px solid var(--bl-b);border-radius:var(--rs);padding:.8rem 1.1rem;font-size:.8rem;line-height:1.6;margin-bottom:1.4rem}
+.banner strong{color:var(--bl)}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem}
-@media(max-width:820px){.grid{grid-template-columns:1fr}}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
 .card{background:var(--p);border:1px solid var(--ln);border-radius:var(--rs);padding:1.2rem;box-shadow:var(--sd);margin-bottom:1.1rem}
 .ct{font-family:var(--dp);font-weight:800;font-size:.9rem;letter-spacing:-.02em;margin-bottom:.9rem;display:flex;align-items:center;justify-content:space-between}
 .fl{display:block;font-size:.66rem;font-weight:700;color:var(--mu);margin-bottom:.28rem;letter-spacing:.05em;text-transform:uppercase}
 .fi{width:100%;background:var(--p2);border:1.5px solid var(--lns);border-radius:var(--rx);padding:.5rem .75rem;font-size:.86rem;transition:border-color .14s}
 .fi:focus{border-color:var(--or)}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:.7rem}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;margin-bottom:.7rem}
-.pills{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.7rem}
-.pill{padding:.32rem .7rem;border-radius:var(--pill);font-size:.72rem;font-weight:700;background:var(--p2);border:1.5px solid var(--ln);color:var(--mu);transition:all .12s}
+.pills{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.75rem}
+.pill{padding:.32rem .7rem;border-radius:var(--pill);font-size:.72rem;font-weight:700;background:var(--p2);border:1.5px solid var(--ln);color:var(--mu);transition:all .12s;cursor:pointer}
 .pill.on{background:var(--or);border-color:var(--or);color:#0e1113}
-.btn{display:inline-flex;align-items:center;gap:.4rem;font-weight:700;font-size:.82rem;border-radius:var(--pill);padding:.55rem 1.2rem;background:var(--or);color:#0e1113;box-shadow:0 4px 16px var(--or-g);transition:all .14s}
+.btn{display:inline-flex;align-items:center;gap:.4rem;font-weight:700;font-size:.82rem;border-radius:var(--pill);padding:.55rem 1.2rem;background:var(--or);color:#0e1113;box-shadow:0 4px 16px var(--or-g);transition:all .14s;cursor:pointer}
 .btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
 .btn-gh{background:transparent;color:var(--tx);border:1.5px solid var(--lns);box-shadow:none}
 /* result */
 .res{background:var(--p);border:1.5px solid var(--or-g);border-radius:var(--rs);padding:1.2rem;box-shadow:var(--sd);margin-bottom:1.1rem}
-.split{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;margin:.4rem 0 1rem}
-@media(max-width:560px){.split{grid-template-columns:1fr}}
-.sc{border-radius:var(--rx);padding:.85rem;text-align:center}
-.sc.drv{background:var(--gn-d);border:1px solid rgba(45,171,96,.25)}
+.split4{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:.4rem 0 .9rem}
+@media(max-width:580px){.split4{grid-template-columns:1fr 1fr}}
+.sc{border-radius:var(--rx);padding:.8rem .6rem;text-align:center}
+.sc.drv{background:var(--gn-d);border:1px solid var(--gn-b)}
 .sc.haf{background:var(--or-d);border:1px solid var(--or-g)}
-.sc.cus{background:var(--bl-d);border:1px solid rgba(61,125,202,.25)}
-.sc-l{font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin-bottom:.3rem}
-.sc-v{font-family:var(--dp);font-weight:900;font-size:1.5rem;letter-spacing:-.04em}
-.sc.drv .sc-v{color:var(--gn)}.sc.haf .sc-v{color:var(--or)}.sc.cus .sc-v{color:var(--bl)}
-.sc-s{font-size:.66rem;color:var(--mu);margin-top:.2rem}
-.meta{display:flex;flex-wrap:wrap;gap:.5rem 1.2rem;font-size:.76rem;color:var(--mu);border-top:1px solid var(--ln);padding-top:.8rem}
-.meta b{color:var(--tx);font-weight:700}
-.save{background:var(--gn-d);border:1px solid rgba(45,171,96,.25);border-radius:var(--rx);padding:.6rem .9rem;font-size:.8rem;color:var(--gn);font-weight:700;margin-top:.8rem;text-align:center}
-table{width:100%;border-collapse:collapse;font-size:.76rem;margin-top:.3rem}
-th{text-align:left;padding:.45rem .55rem;font-size:.6rem;font-weight:700;letter-spacing:.06em;color:var(--su);text-transform:uppercase;border-bottom:1px solid var(--ln)}
-td{padding:.5rem .55rem;border-bottom:1px solid var(--ln)}
-tr:last-child td{border-bottom:none}
-td.n{font-weight:700}
-.hint{font-size:.7rem;color:var(--su);line-height:1.5;margin-top:.5rem}
-.num-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.32rem 0;border-bottom:1px dashed var(--ln)}
+.sc.net{background:var(--pu-d);border:1px solid var(--pu-b)}
+.sc.cus{background:var(--bl-d);border:1px solid var(--bl-b)}
+.sc-l{font-size:.59rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin-bottom:.28rem}
+.sc-v{font-family:var(--dp);font-weight:900;font-size:1.3rem;letter-spacing:-.04em}
+.sc.drv .sc-v{color:var(--gn)}.sc.haf .sc-v{color:var(--or)}.sc.net .sc-v{color:var(--pu)}.sc.cus .sc-v{color:var(--bl)}
+.sc-s{font-size:.63rem;color:var(--mu);margin-top:.2rem;line-height:1.4}
+.total-row{display:flex;align-items:center;justify-content:space-between;background:var(--tx);color:#fff;border-radius:var(--rx);padding:.7rem 1rem;margin-bottom:.8rem}
+.total-label{font-size:.7rem;font-weight:700;opacity:.65}
+.total-vat{font-size:.68rem;opacity:.55;margin-top:.1rem}
+.total-val{font-family:var(--dp);font-weight:900;font-size:1.45rem;letter-spacing:-.04em}
+.path-row{display:flex;align-items:flex-start;gap:.5rem;font-size:.73rem;padding:.5rem .7rem;border-radius:var(--rx);background:var(--p2);margin-bottom:.5rem}
+.path-label{font-weight:700;white-space:nowrap}
+.path-win{color:var(--gn);font-weight:700}
+.warn-pill{display:inline-flex;align-items:center;gap:.3rem;background:var(--rd-d);border:1px solid var(--rd-b);color:var(--rd);font-size:.67rem;font-weight:700;border-radius:var(--pill);padding:.22rem .65rem}
+.meta-row{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;font-size:.74rem;color:var(--mu);border-top:1px solid var(--ln);padding-top:.7rem;margin-top:.3rem}
+.meta-row b{color:var(--tx);font-weight:700}
+/* spec tests */
+.test-pass{background:var(--gn-d);border:1px solid var(--gn-b);border-radius:var(--rx);padding:.38rem .7rem;font-size:.72rem;display:flex;gap:.5rem;align-items:center;margin-bottom:.3rem}
+.test-fail{background:var(--rd-d);border:1px solid var(--rd-b);border-radius:var(--rx);padding:.38rem .7rem;font-size:.72rem;display:flex;gap:.5rem;align-items:flex-start;margin-bottom:.3rem;color:var(--rd)}
+.test-note{background:var(--or-d);border:1px solid var(--or-g);border-radius:var(--rx);padding:.38rem .7rem;font-size:.68rem;display:flex;gap:.5rem;align-items:center;margin-bottom:.3rem}
+/* dials */
+.num-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.3rem 0;border-bottom:1px dashed var(--ln)}
 .num-row:last-child{border-bottom:none}
-.num-row label{font-size:.76rem;color:var(--tx)}
-.num-row .u{font-size:.66rem;color:var(--su)}
-.num-row input{width:88px;text-align:right;background:var(--p2);border:1.5px solid var(--lns);border-radius:6px;padding:.3rem .5rem;font-size:.8rem;font-weight:700}
+.num-row label{font-size:.75rem;color:var(--tx)}
+.num-row .u{font-size:.65rem;color:var(--su)}
+.num-row input{width:78px;text-align:right;background:var(--p2);border:1.5px solid var(--lns);border-radius:6px;padding:.28rem .45rem;font-size:.8rem;font-weight:700}
+/* ref table */
+.ref-table{width:100%;border-collapse:collapse;font-size:.72rem}
+.ref-table th{text-align:left;padding:.38rem .5rem;font-size:.58rem;font-weight:700;letter-spacing:.05em;color:var(--su);text-transform:uppercase;border-bottom:1px solid var(--ln)}
+.ref-table td{padding:.38rem .5rem;border-bottom:1px solid var(--ln)}
+.ref-table tr:last-child td{border-bottom:none}
+/* matrix */
+table.mt{width:100%;border-collapse:collapse;font-size:.71rem;margin-top:.3rem}
+table.mt th{text-align:left;padding:.38rem .45rem;font-size:.57rem;font-weight:700;letter-spacing:.05em;color:var(--su);text-transform:uppercase;border-bottom:1px solid var(--ln)}
+table.mt td{padding:.42rem .45rem;border-bottom:1px solid var(--ln)}
+table.mt tr:last-child td{border-bottom:none}
+.n{font-weight:700}
+.hint{font-size:.7rem;color:var(--su);line-height:1.5;margin-top:.5rem}
 /* gate */
 #gate{position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:1.5rem}
 .gbox{background:var(--p);border:1px solid var(--lns);border-radius:16px;padding:2.2rem 2rem;width:100%;max-width:340px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.08)}
@@ -91,12 +112,15 @@ td.n{font-weight:700}
 <div class="wrap">
   <div class="head">
     <h1>HAF <span>Pricing Lab</span></h1>
-    <span class="tag">Internal · not live pricing</span>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <span class="tag">Internal · not live pricing</span>
+      <span class="vtag">HAF-PRICE-V2.0</span>
+    </div>
   </div>
-  <p class="sub">Test any route through the pricing matrix and see the three-way split — driver, HAF, customer — before anything touches the live quote engine.</p>
+  <p class="sub">Test any route through the V2 engine — driver pay, HAF margin, network pool, VAT, and customer total. All rates are loaded directly from the V2 spec. Nothing here changes live prices.</p>
 
   <div class="banner">
-    <strong>These numbers are a starting placeholder, not a decision.</strong> Every dial below is editable. Send me your formula and target rates and I'll load them in, then we tune until the driver earns well, HAF holds a fair margin, and the customer still saves versus the market. Nothing here changes live prices.
+    <strong>This is the real V2 formula.</strong> The engine calculates driver pay two ways — mileage-based and foundation-based — and always protects the higher result. Short local jobs use the PLNA collective floor; longer routes switch to mileage automatically. The £40 hard market floor is always enforced. HAF margin is locked by job type with account discounts applied above the floor. The 5% network pool (2.5% driver + 2.5% relay) is separated on every job. All 7 main spec test cases verify at the bottom of the page.
   </div>
 
   <div class="grid">
@@ -104,51 +128,127 @@ td.n{font-weight:700}
     <div>
       <div class="card">
         <div class="ct">Test a route</div>
+
         <div class="row">
           <div><label class="fl">From postcode</label><input class="fi" id="pcFrom" value="M1 1AE" maxlength="8"></div>
           <div><label class="fl">To postcode</label><input class="fi" id="pcTo" value="LS1 4DY" maxlength="8"></div>
         </div>
+
         <label class="fl">Vehicle</label>
         <div class="pills" id="vehPills"></div>
-        <label class="fl">Urgency</label>
-        <div class="pills" id="urgPills"></div>
-        <button class="btn" onclick="runRoute()" id="runBtn">Calculate →</button>
-        <div class="hint">Distance and drive time come live from the HAF distance gateway (Google). If a postcode isn't recognised you'll see a note instead of a price.</div>
+
+        <label class="fl">Job type <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--su)">(sets HAF margin + service factor)</span></label>
+        <div class="pills" id="jobPills"></div>
+
+        <label class="fl">Weight</label>
+        <div class="pills" id="wtPills"></div>
+
+        <label class="fl">Zone / return-load potential</label>
+        <div class="pills" id="zonePills"></div>
+
+        <label class="fl">Account type <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--su)">(reduces HAF margin only — floors enforced)</span></label>
+        <div class="pills" id="accPills"></div>
+
+        <div class="row" style="margin-top:.3rem">
+          <div>
+            <label class="fl">PLNA collective floor (ex-VAT, min £40)</label>
+            <input class="fi" type="number" id="plnaFloor" value="50" min="40" step="5">
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="btn" onclick="runRoute()" id="runBtn" style="width:100%;justify-content:center">Calculate →</button>
+          </div>
+        </div>
+
+        <div class="hint">Enter any valid UK postcodes. Distance comes live from the HAF gateway (Google). The engine clamps any floor below £40 back to £40 automatically.</div>
       </div>
 
+      <!-- RESULT -->
       <div class="res" id="resBox" style="display:none">
-        <div class="ct" id="resTitle">Result</div>
-        <div class="split">
-          <div class="sc drv"><div class="sc-l">Driver earns</div><div class="sc-v" id="rDrv">—</div><div class="sc-s" id="rDrvHr">—</div></div>
-          <div class="sc haf"><div class="sc-l">HAF margin</div><div class="sc-v" id="rHaf">—</div><div class="sc-s" id="rHafPct">—</div></div>
-          <div class="sc cus"><div class="sc-l">Customer pays</div><div class="sc-v" id="rCus">—</div><div class="sc-s">+ VAT</div></div>
+        <div class="ct" id="resTitle" style="margin-bottom:.6rem">Result</div>
+
+        <div class="split4">
+          <div class="sc drv">
+            <div class="sc-l">Driver earns</div>
+            <div class="sc-v" id="rDrv">—</div>
+            <div class="sc-s" id="rDrvHr">—</div>
+          </div>
+          <div class="sc haf">
+            <div class="sc-l">HAF margin</div>
+            <div class="sc-v" id="rHaf">—</div>
+            <div class="sc-s" id="rHafPct">—</div>
+          </div>
+          <div class="sc net">
+            <div class="sc-l">Network pool</div>
+            <div class="sc-v" id="rNet">—</div>
+            <div class="sc-s">2.5% driver<br>2.5% relay</div>
+          </div>
+          <div class="sc cus">
+            <div class="sc-l">Subtotal ex-VAT</div>
+            <div class="sc-v" id="rCus">—</div>
+            <div class="sc-s" id="rVatLine">—</div>
+          </div>
         </div>
-        <div class="meta">
+
+        <div class="total-row">
+          <div>
+            <div class="total-label">Customer total (inc VAT 20%)</div>
+            <div class="total-vat" id="rVatBrk">—</div>
+          </div>
+          <div class="total-val" id="rTotal">—</div>
+        </div>
+
+        <div class="path-row" id="pathRow">
+          <span class="path-label">Pay path:</span>
+          <span id="pathDetail">—</span>
+        </div>
+
+        <div id="warnBox" style="display:none;margin-bottom:.5rem">
+          <span class="warn-pill">⚠ Combined multiplier above 1.40x — auto-capped · job must go to manual review before release</span>
+        </div>
+
+        <div class="meta-row">
           <span>Distance <b id="rMiles">—</b></span>
           <span>Drive time <b id="rMins">—</b></span>
-          <span>Customer £/mile <b id="rPpm">—</b></span>
+          <span>HAF margin <b id="rMPct">—</b></span>
+          <span>Multiplier <b id="rMult">—</b></span>
           <span>Route <b id="rRoute">—</b></span>
         </div>
-        <div class="save" id="rSave">—</div>
       </div>
     </div>
 
-    <!-- RIGHT: the matrix dials -->
+    <!-- RIGHT: reference + matrix -->
     <div>
       <div class="card">
-        <div class="ct">The pricing matrix <span style="font-size:.62rem;font-weight:700;color:var(--su)">editable</span></div>
-        <label class="fl">Driver pay — £ per mile by vehicle</label>
+        <div class="ct">Vehicle base rates <span style="font-size:.62rem;font-weight:700;color:var(--su)">V2 spec — edit to test scenarios</span></div>
         <div id="drvRates"></div>
-        <label class="fl" style="margin-top:.9rem">Levers</label>
-        <div id="levers"></div>
-        <div class="hint">Driver pay = miles × £/mile × urgency, with a per-vehicle minimum. HAF margin is added on top. Customer price = driver pay + HAF margin. The "saving" compares the customer price to a typical market £/mile.</div>
+        <div class="hint" style="margin-top:.4rem">Protected driver mileage rates from the V2 spec. Edit freely — no effect on live prices.</div>
       </div>
 
       <div class="card">
-        <div class="ct">Matrix at a glance</div>
-        <div style="overflow-x:auto"><table id="matrixTable"></table></div>
-        <div class="hint">Six common lanes at the current dials — recalculates when you change a number and press <b>Calculate</b> on a route, or reload lanes below.</div>
+        <div class="ct">HAF margin reference <span style="font-size:.62rem;font-weight:700;color:var(--su)">V2 spec</span></div>
+        <table class="ref-table">
+          <tr><th>Job type</th><th>Starting margin</th><th>Floor</th><th>Svc factor</th></tr>
+          <tr><td>Groupage / Flexible</td><td>10%</td><td>8%</td><td>1.00×</td></tr>
+          <tr><td>Flexible / Co-load</td><td>15%</td><td>10%</td><td>1.00×</td></tr>
+          <tr><td>Standard Same-Day</td><td>20%</td><td>15%</td><td>1.00×</td></tr>
+          <tr><td>Timed Delivery</td><td>25%</td><td>18%</td><td>1.00×</td></tr>
+          <tr><td>Urgent / Time-Critical</td><td>30%</td><td>22%</td><td>1.10×</td></tr>
+          <tr><td>Immediate / Out-of-hours</td><td>30%</td><td>22%</td><td>1.25×</td></tr>
+        </table>
+        <div class="hint" style="margin-top:.45rem">Account adjustments: Business Volume −3pts, FF Plus −4pts, FF Pro −7pts. Floor always enforced regardless of discount.</div>
+      </div>
+
+      <div class="card">
+        <div class="ct">Lane matrix <span style="font-size:.62rem;font-weight:700;color:var(--su)" id="matrixLabel">—</span></div>
+        <div style="overflow-x:auto"><table class="mt" id="matrixTable"><tr><td style="color:var(--su);font-size:.72rem">Loading lanes…</td></tr></table></div>
+        <div class="hint">Standard weight, normal zone at current vehicle + job type settings. <span style="color:var(--gn);font-weight:700">M</span> = mileage path won · <span style="color:var(--pu);font-weight:700">F</span> = foundation path won (short-job floor protecting the driver).</div>
         <button class="btn btn-gh" style="margin-top:.7rem;font-size:.76rem" onclick="buildMatrix()">Reload lanes</button>
+      </div>
+
+      <div class="card">
+        <div class="ct">Spec regression <span style="font-size:.62rem;font-weight:700;color:var(--su)">7 of 8 auto-verified</span></div>
+        <div id="specTests"><div style="color:var(--su);font-size:.72rem">Running…</div></div>
+        <div class="hint" style="margin-top:.45rem">Test 8 (extreme job) in the spec includes driver supplements (tail-lift, two-person crew) that sit outside the base route formula. The multiplier cap and review trigger are verified; the specific driver pay figure differs because of those supplements.</div>
       </div>
     </div>
   </div>
@@ -163,38 +263,136 @@ function gsub(){
   else{document.getElementById('ge').textContent='Incorrect code.';document.getElementById('gi').value='';}
 }
 
-/* ── PRICING MATRIX (STARTING PLACEHOLDER — replace with Brent's formula) ── */
-const VEH=[
-  {k:'small',n:'Small van',drv:0.85,min:22},
-  {k:'swb',  n:'SWB',      drv:1.00,min:28},
-  {k:'lwb',  n:'LWB',      drv:1.20,min:36},
-  {k:'luton',n:'Luton',    drv:1.55,min:48},
-  {k:'artic',n:'Artic',    drv:2.30,min:90},
-];
-const URG=[
-  {k:'flex', n:'Flexible', m:1.00},
-  {k:'sday', n:'Same-day', m:1.20},
-  {k:'urg',  n:'Urgent',   m:1.45},
-];
-const LEVERS={
-  haf_margin_pct:{label:'HAF margin on driver pay',val:20,u:'%'},
-  market_ppm:{label:'Typical market £/mile (for saving)',val:2.40,u:'£/mi'},
-  min_drive_mph:{label:'Assumed avg speed if no drive time',val:32,u:'mph'},
-};
-let selVeh='lwb',selUrg='flex';
+/* ────────────────────────────────────────────────────────────
+   HAF UNIVERSAL PRICING ENGINE  HAF-PRICE-V2.0
+   Source: HAF_Universal_Pricing_Engine_V2_PLNA_Collective_Floor.md
+   ──────────────────────────────────────────────────────────── */
 
-/* ── UI BUILD ── */
+/* Vehicle protected mileage rates */
+const VEH=[
+  {k:'small',n:'Small Van',drv:0.80},
+  {k:'swb',  n:'SWB',      drv:0.90},
+  {k:'mwb',  n:'MWB',      drv:1.00},
+  {k:'lwb',  n:'LWB',      drv:1.10},
+  {k:'xlwb', n:'XLWB',     drv:1.15},
+  {k:'luton',n:'Luton',    drv:1.25},
+];
+
+/* Job types: margin, floor, service hindrance factor */
+const JOB=[
+  {k:'groupage',n:'Groupage / Flexible',        margin:.10,floor:.08,svc:1.00},
+  {k:'coload',  n:'Flexible / Co-load',          margin:.15,floor:.10,svc:1.00},
+  {k:'sameday', n:'Standard Same-Day',           margin:.20,floor:.15,svc:1.00},
+  {k:'timed',   n:'Timed Delivery',              margin:.25,floor:.18,svc:1.00},
+  {k:'urgent',  n:'Urgent / Time-Critical',      margin:.30,floor:.22,svc:1.10},
+  {k:'immed',   n:'Immediate / Out-of-hours',    margin:.30,floor:.22,svc:1.25},
+];
+
+const WT=[
+  {k:'std',n:'Standard',     f:1.00},
+  {k:'mod',n:'Moderate',     f:1.03},
+  {k:'hvy',n:'Heavy',        f:1.07},
+  {k:'npl',n:'Near payload', f:1.12},
+];
+
+const ZONE=[
+  {k:'strong', n:'Strong return',  f:1.00},
+  {k:'normal', n:'Normal',         f:1.03},
+  {k:'limited',n:'Limited return', f:1.07},
+  {k:'remote', n:'Remote',         f:1.12},
+];
+
+const ACC=[
+  {k:'guest',  n:'Guest / Free', adj:0},
+  {k:'bizv',   n:'Biz Volume',   adj:.03},
+  {k:'ffplus', n:'FF Plus',      adj:.04},
+  {k:'ffpro',  n:'FF Pro',       adj:.07},
+];
+
+const NET_POOL=.05, HARD_FLOOR=40, VAT=.20;
+let selVeh='lwb',selJob='sameday',selWt='std',selZone='normal',selAcc='guest';
+
+/* ── CORE V2 CALCULATION ──
+   Implements the exact formulas from section 13 of the implementation spec.
+   Returns a full breakdown object.                                          */
+function calcV2(miles,mins,vehKey,jobKey,wtKey,zoneKey,accKey,plnaFloor){
+  const v=VEH.find(x=>x.k===vehKey)||VEH[3];
+  const jt=JOB.find(x=>x.k===jobKey)||JOB[2];
+  const wt=WT.find(x=>x.k===wtKey)||WT[0];
+  const zn=ZONE.find(x=>x.k===zoneKey)||ZONE[1];
+  const ac=ACC.find(x=>x.k===accKey)||ACC[0];
+
+  /* 1. Final HAF margin — account adjustment above job-type floor */
+  const hafMargin=Math.max(jt.margin-ac.adj,jt.floor);
+  const driverShare=1-hafMargin-NET_POOL;
+
+  /* 2. Combined driver hindrance multiplier, capped at 1.40x */
+  const rawMult=wt.f*jt.svc*zn.f;
+  const appliedMult=Math.min(rawMult,1.40);
+  const multCapped=rawMult>1.40;
+
+  /* 3. Effective foundation — MAX(£40 hard floor, PLNA collective floor) */
+  const inputFloor=plnaFloor||HARD_FLOOR;
+  const effFloor=Math.max(HARD_FLOOR,inputFloor);
+  const floorClamped=inputFloor<HARD_FLOOR;
+
+  /* 4. Two driver-pay paths */
+  const mileagePay=miles*v.drv*appliedMult;
+  const foundationPay=effFloor*driverShare*appliedMult;
+
+  /* 5. Protected driver pay = MAX of the two paths */
+  const protectedPay=Math.max(mileagePay,foundationPay);
+  const usedFoundation=foundationPay>=mileagePay;
+
+  /* 6. Customer transport subtotal, floored at £40 */
+  const custTransport=protectedPay/driverShare;
+  const custSubtotal=Math.max(custTransport,HARD_FLOOR);
+
+  /* 7. Component split */
+  const hafCash=custSubtotal*hafMargin;
+  const driverPool=custSubtotal*.025;
+  const relayPool=custSubtotal*.025;
+  const netCash=driverPool+relayPool;
+
+  /* 8. VAT + total */
+  const vat=custSubtotal*VAT;
+  const custTotal=custSubtotal+vat;
+
+  const driveMins=mins||Math.round(miles/32*60);
+  const driverHr=driveMins>0?protectedPay/(driveMins/60):0;
+
+  return{
+    miles,driveMins,vehicle:v.n,vehicleRate:v.drv,jobType:jt.n,
+    hafMargin,hafMarginPct:Math.round(hafMargin*100),
+    rawMult:+rawMult.toFixed(4),appliedMult:+appliedMult.toFixed(4),multCapped,
+    effFloor,floorClamped,
+    mileagePay:+mileagePay.toFixed(2),foundationPay:+foundationPay.toFixed(2),
+    protectedPay:+protectedPay.toFixed(2),usedFoundation,
+    custSubtotal:+custSubtotal.toFixed(2),hafCash:+hafCash.toFixed(2),
+    driverPool:+driverPool.toFixed(2),relayPool:+relayPool.toFixed(2),netCash:+netCash.toFixed(2),
+    vat:+vat.toFixed(2),custTotal:+custTotal.toFixed(2),
+    driverHr:+driverHr.toFixed(1),
+  };
+}
+
+/* ── UI: PILLS + DIALS ── */
 function buildPills(){
-  document.getElementById('vehPills').innerHTML=VEH.map(v=>`<button class="pill ${v.k===selVeh?'on':''}" onclick="pickVeh('${v.k}')">${v.n}</button>`).join('');
-  document.getElementById('urgPills').innerHTML=URG.map(u=>`<button class="pill ${u.k===selUrg?'on':''}" onclick="pickUrg('${u.k}')">${u.n}</button>`).join('');
+  const mk=(arr,sel,fn)=>arr.map(v=>`<button class="pill ${v.k===sel?'on':''}" onclick="${fn}('${v.k}')">${v.n}</button>`).join('');
+  document.getElementById('vehPills').innerHTML=mk(VEH,selVeh,'pickVeh');
+  document.getElementById('jobPills').innerHTML=mk(JOB,selJob,'pickJob');
+  document.getElementById('wtPills').innerHTML=mk(WT,selWt,'pickWt');
+  document.getElementById('zonePills').innerHTML=mk(ZONE,selZone,'pickZone');
+  document.getElementById('accPills').innerHTML=mk(ACC,selAcc,'pickAcc');
 }
 function pickVeh(k){selVeh=k;buildPills();}
-function pickUrg(k){selUrg=k;buildPills();}
+function pickJob(k){selJob=k;buildPills();}
+function pickWt(k){selWt=k;buildPills();}
+function pickZone(k){selZone=k;buildPills();}
+function pickAcc(k){selAcc=k;buildPills();}
+
 function buildDials(){
   document.getElementById('drvRates').innerHTML=VEH.map((v,i)=>
-    `<div class="num-row"><label>${v.n}</label><span><input type="number" step="0.05" value="${v.drv}" oninput="VEH[${i}].drv=parseFloat(this.value)||0"> <span class="u">£/mi</span></span></div>`).join('');
-  document.getElementById('levers').innerHTML=Object.entries(LEVERS).map(([k,l])=>
-    `<div class="num-row"><label>${l.label}</label><span><input type="number" step="${l.u==='%'?'1':'0.05'}" value="${l.val}" oninput="LEVERS['${k}'].val=parseFloat(this.value)||0"> <span class="u">${l.u}</span></span></div>`).join('');
+    `<div class="num-row"><label>${v.n}</label><span><input type="number" step="0.05" value="${v.drv}" min="0" oninput="VEH[${i}].drv=parseFloat(this.value)||0"> <span class="u">£/mi</span></span></div>`).join('');
 }
 
 /* ── DISTANCE GATEWAY ── */
@@ -207,49 +405,61 @@ async function getDist(a,b){
   return null;
 }
 
-/* ── PRICE MODEL ── */
-function price(miles,mins,vehKey,urgKey){
-  const v=VEH.find(x=>x.k===vehKey)||VEH[2];
-  const u=URG.find(x=>x.k===urgKey)||URG[0];
-  const driver=Math.max(v.min, miles*v.drv*u.m);
-  const hafPct=LEVERS.haf_margin_pct.val/100;
-  const haf=driver*hafPct;
-  const customer=driver+haf;
-  const driveMins=mins||Math.round(miles/LEVERS.min_drive_mph.val*60);
-  const perHr=driveMins>0?driver/(driveMins/60):0;
-  const marketPrice=miles*LEVERS.market_ppm.val;
-  const saving=marketPrice-customer;
-  return{driver,haf,hafPct,customer,driveMins,perHr,ppm:customer/miles,saving,marketPrice};
-}
-
+/* ── ROUTE RUNNER ── */
+function fmt(n){return'£'+n.toFixed(0);}
 async function runRoute(){
-  const btn=document.getElementById('runBtn');btn.textContent='Calculating…';
-  const from=document.getElementById('pcFrom').value,to=document.getElementById('pcTo').value;
+  const btn=document.getElementById('runBtn');
+  btn.textContent='Calculating…';btn.disabled=true;
+  const from=document.getElementById('pcFrom').value;
+  const to=document.getElementById('pcTo').value;
+  const plnaFloor=parseFloat(document.getElementById('plnaFloor').value)||HARD_FLOOR;
   const d=await getDist(from,to);
-  btn.textContent='Calculate →';
+  btn.textContent='Calculate →';btn.disabled=false;
+
   const box=document.getElementById('resBox');box.style.display='block';
-  if(!d){document.getElementById('resTitle').textContent='Route not recognised';
-    document.getElementById('rSave').textContent='Check both postcodes and try again.';
-    ['rDrv','rHaf','rCus','rMiles','rMins','rPpm','rRoute','rDrvHr','rHafPct'].forEach(id=>document.getElementById(id).textContent='—');
-    return;}
-  const p=price(d.miles,d.mins,selVeh,selUrg);
+  if(!d){
+    document.getElementById('resTitle').textContent='Route not recognised';
+    ['rDrv','rHaf','rNet','rCus','rTotal','rMiles','rMins','rMPct','rMult','rRoute','rDrvHr','rHafPct','rVatLine','rVatBrk'].forEach(id=>document.getElementById(id).textContent='—');
+    document.getElementById('pathDetail').textContent='Check both postcodes are valid UK postcodes and try again.';
+    document.getElementById('warnBox').style.display='none';
+    return;
+  }
+
+  const p=calcV2(d.miles,d.mins,selVeh,selJob,selWt,selZone,selAcc,plnaFloor);
+  const vn=VEH.find(v=>v.k===selVeh);
+  const jt=JOB.find(j=>j.k===selJob);
   const dt=d.mins>=60?Math.floor(d.mins/60)+'h '+(d.mins%60)+'m':d.mins+' min';
-  document.getElementById('resTitle').textContent=(VEH.find(v=>v.k===selVeh).n)+' · '+(URG.find(u=>u.k===selUrg).n);
-  document.getElementById('rDrv').textContent='£'+p.driver.toFixed(0);
-  document.getElementById('rDrvHr').textContent='≈ £'+p.perHr.toFixed(0)+'/hr driving';
-  document.getElementById('rHaf').textContent='£'+p.haf.toFixed(0);
-  document.getElementById('rHafPct').textContent=(p.hafPct*100).toFixed(0)+'% margin';
-  document.getElementById('rCus').textContent='£'+p.customer.toFixed(0);
+
+  document.getElementById('resTitle').textContent=vn.n+' · '+jt.n;
+  document.getElementById('rDrv').textContent=fmt(p.protectedPay);
+  document.getElementById('rDrvHr').textContent='≈ £'+p.driverHr+'/hr driving';
+  document.getElementById('rHaf').textContent=fmt(p.hafCash);
+  document.getElementById('rHafPct').textContent=p.hafMarginPct+'% of subtotal';
+  document.getElementById('rNet').textContent=fmt(p.netCash);
+  document.getElementById('rCus').textContent=fmt(p.custSubtotal);
+  document.getElementById('rVatLine').textContent='+ £'+p.vat.toFixed(0)+' VAT (20%)';
+  document.getElementById('rTotal').textContent=fmt(p.custTotal);
+  document.getElementById('rVatBrk').textContent='Subtotal £'+p.custSubtotal.toFixed(0)+' + VAT £'+p.vat.toFixed(0);
   document.getElementById('rMiles').textContent=d.miles+' mi';
   document.getElementById('rMins').textContent=dt;
-  document.getElementById('rPpm').textContent='£'+p.ppm.toFixed(2);
-  document.getElementById('rRoute').textContent=d.from+' → '+d.to;
-  const save=document.getElementById('rSave');
-  if(p.saving>0){save.style.color='var(--gn)';save.textContent='Customer saves ~£'+p.saving.toFixed(0)+' vs typical market (£'+p.marketPrice.toFixed(0)+')';}
-  else{save.style.color='var(--rd)';save.textContent='⚠ Priced ABOVE market by £'+Math.abs(p.saving).toFixed(0)+' — customer saving is negative here';}
+  document.getElementById('rMPct').textContent=p.hafMarginPct+'%';
+  document.getElementById('rMult').textContent=p.appliedMult.toFixed(3)+'×';
+  document.getElementById('rRoute').textContent=(d.from||from)+' → '+(d.to||to);
+
+  const pe=document.getElementById('pathDetail');
+  if(p.usedFoundation){
+    pe.innerHTML='<span class="path-win">Foundation path won</span> — floor £'+p.effFloor+
+      ' × driver share = £'+p.foundationPay.toFixed(2)+
+      ' beats mileage £'+p.mileagePay.toFixed(2)+' ('+d.miles+' mi × £'+vn.drv+')';
+  } else {
+    pe.innerHTML='<span class="path-win">Mileage path won</span> — '+d.miles+
+      ' mi × £'+vn.drv+' = £'+p.mileagePay.toFixed(2)+
+      ' overtakes foundation £'+p.foundationPay.toFixed(2);
+  }
+  document.getElementById('warnBox').style.display=p.multCapped?'block':'none';
 }
 
-/* ── MATRIX TABLE ── */
+/* ── LANE MATRIX ── */
 const LANES=[
   ['M1 1AE','LS1 4DY','Manchester → Leeds'],
   ['S1 2HH','NG1 5DT','Sheffield → Nottingham'],
@@ -259,22 +469,88 @@ const LANES=[
   ['B1 1AA','E1 6AN','Birmingham → London'],
 ];
 async function buildMatrix(){
+  const jt=JOB.find(j=>j.k===selJob);
+  const vn=VEH.find(v=>v.k===selVeh).n;
+  const plnaFloor=parseFloat(document.getElementById('plnaFloor').value)||HARD_FLOOR;
+  document.getElementById('matrixLabel').textContent=vn+' · '+jt.n;
   const t=document.getElementById('matrixTable');
-  t.innerHTML='<tr><th>Lane</th><th>Miles</th><th>Driver</th><th>HAF</th><th>Customer</th><th>Save</th></tr>'+
-    LANES.map(()=>'<tr><td colspan="6" style="color:var(--su)">loading…</td></tr>').join('');
+  t.innerHTML='<tr><th>Lane</th><th>mi</th><th>Driver</th><th>HAF</th><th>Pool</th><th>ex-VAT</th><th>inc-VAT</th></tr>'+
+    LANES.map(()=>'<tr><td colspan="7" style="color:var(--su);font-size:.68rem">loading…</td></tr>').join('');
   const rows=[];
   for(const [a,b,label] of LANES){
     const d=await getDist(a,b);
-    if(!d){rows.push('<tr><td>'+label+'</td><td colspan="5" style="color:var(--su)">n/a</td></tr>');continue;}
-    const p=price(d.miles,d.mins,selVeh,selUrg);
-    rows.push('<tr><td>'+label+'</td><td class="n">'+d.miles+'</td><td class="n" style="color:var(--gn)">£'+p.driver.toFixed(0)+
-      '</td><td class="n" style="color:var(--or)">£'+p.haf.toFixed(0)+'</td><td class="n" style="color:var(--bl)">£'+p.customer.toFixed(0)+
-      '</td><td class="n" style="color:'+(p.saving>0?'var(--gn)':'var(--rd)')+'">£'+p.saving.toFixed(0)+'</td></tr>');
+    if(!d){rows.push('<tr><td>'+label+'</td><td colspan="6" style="color:var(--su)">n/a</td></tr>');continue;}
+    const p=calcV2(d.miles,d.mins,selVeh,selJob,'std','normal',selAcc,plnaFloor);
+    const path=p.usedFoundation
+      ?'<span style="color:var(--pu);font-weight:800;font-size:.6rem;margin-left:.15rem" title="Foundation path">F</span>'
+      :'<span style="color:var(--gn);font-weight:800;font-size:.6rem;margin-left:.15rem" title="Mileage path">M</span>';
+    rows.push('<tr><td>'+label+'</td><td class="n">'+d.miles+'</td>'+
+      '<td class="n" style="color:var(--gn)">'+fmt(p.protectedPay)+path+'</td>'+
+      '<td class="n" style="color:var(--or)">'+fmt(p.hafCash)+'</td>'+
+      '<td class="n" style="color:var(--pu)">'+fmt(p.netCash)+'</td>'+
+      '<td class="n" style="color:var(--bl)">'+fmt(p.custSubtotal)+'</td>'+
+      '<td class="n" style="font-weight:800">'+fmt(p.custTotal)+'</td></tr>');
   }
-  t.innerHTML='<tr><th>Lane ('+VEH.find(v=>v.k===selVeh).n+')</th><th>Miles</th><th>Driver</th><th>HAF</th><th>Customer</th><th>Save</th></tr>'+rows.join('');
+  t.innerHTML='<tr><th>Lane ('+vn+' · '+jt.n+')</th><th>mi</th><th>Driver</th><th>HAF</th><th>Pool</th><th>ex-VAT</th><th>inc-VAT</th></tr>'+rows.join('');
 }
 
-buildPills();buildDials();buildMatrix();
+/* ── SPEC REGRESSION TESTS ──
+   Runs all spec test cases in-page on load. Tests 1-7 match the exact figures
+   from the spec tables. Test 8 verifies multiplier cap behaviour only (the
+   spec's driver pay figure includes supplements outside the base formula).   */
+const SPEC_TESTS=[
+  {name:'1. Local Small Van — £50 collective floor',
+   i:{miles:10,plnaFloor:50,veh:'small',job:'sameday',wt:'std',zone:'strong',acc:'guest'},
+   expect:{protectedPay:37.50,hafCash:10.00,netCash:2.50,custSubtotal:50.00,vat:10.00,custTotal:60.00,usedFoundation:true}},
+  {name:'2. Small Van — authorised override to £40',
+   i:{miles:10,plnaFloor:40,veh:'small',job:'sameday',wt:'std',zone:'strong',acc:'guest'},
+   expect:{effFloor:40,protectedPay:30.00,hafCash:8.00,netCash:2.00,custSubtotal:40.00,vat:8.00,custTotal:48.00}},
+  {name:'3. Urgent Small Van — floor + urgency multiplier (1.10×)',
+   i:{miles:10,plnaFloor:50,veh:'small',job:'urgent',wt:'std',zone:'strong',acc:'guest'},
+   expect:{protectedPay:35.75,hafCash:16.50,netCash:2.75,custSubtotal:55.00,vat:11.00,custTotal:66.00}},
+  {name:'4. Short remote Luton — £60 floor + heavy weight + remote zone (1.198×)',
+   i:{miles:15,plnaFloor:60,veh:'luton',job:'timed',wt:'hvy',zone:'remote',acc:'ffplus'},
+   expect:{protectedPay:53.21,hafCash:15.10,netCash:3.60,custSubtotal:71.90,vat:14.38,custTotal:86.28,usedFoundation:true}},
+  {name:'5. Long LWB — mileage overtakes floor (120 mi, 1.061×)',
+   i:{miles:120,plnaFloor:50,veh:'lwb',job:'sameday',wt:'mod',zone:'normal',acc:'bizv'},
+   expect:{protectedPay:140.04,hafCash:30.52,netCash:8.98,custSubtotal:179.54,vat:35.91,custTotal:215.44,usedFoundation:false}},
+  {name:'6. SWB — £35 override clamped to £40 hard floor',
+   i:{miles:8,plnaFloor:35,veh:'swb',job:'coload',wt:'std',zone:'strong',acc:'guest'},
+   expect:{effFloor:40,floorClamped:true,protectedPay:32.00,hafCash:6.00,netCash:2.00,custSubtotal:40.00,vat:8.00,custTotal:48.00}},
+  {name:'7. MWB co-load FF Pro — floor protected, margin floor enforced at 10%',
+   i:{miles:20,plnaFloor:45,veh:'mwb',job:'coload',wt:'std',zone:'strong',acc:'ffpro'},
+   expect:{hafMarginPct:10,protectedPay:38.25,hafCash:4.50,netCash:2.25,custSubtotal:45.00,vat:9.00,custTotal:54.00}},
+  {name:'8. Extreme job — combined multiplier capped at 1.40x + review flag',
+   i:{miles:70,plnaFloor:50,veh:'lwb',job:'immed',wt:'npl',zone:'remote',acc:'guest'},
+   expectCapped:true,
+   note:'Spec driver pay (£132.80) includes tail-lift / crew supplements — cap behaviour verified only'},
+];
+
+function runSpecTests(){
+  const TOL=0.06;
+  let html='';
+  for(const t of SPEC_TESTS){
+    const r=calcV2(t.i.miles,0,t.i.veh,t.i.job,t.i.wt,t.i.zone,t.i.acc,t.i.plnaFloor);
+    if(t.expectCapped!==undefined){
+      const ok=r.multCapped===t.expectCapped;
+      html+=`<div class="${ok?'test-pass':'test-fail'}"><span>${ok?'✅':'❌'}</span><span>${t.name} — raw ${r.rawMult.toFixed(3)}× → cap ${r.multCapped?'triggered':'not triggered'}${ok?'':' UNEXPECTED'}</span></div>`;
+      if(t.note)html+=`<div class="test-note" style="margin-left:1.4rem"><span>ℹ</span><span>${t.note}</span></div>`;
+      continue;
+    }
+    let pass=true,issues=[];
+    for(const[k,v] of Object.entries(t.expect||{})){
+      const got=r[k];
+      if(typeof v==='number'){if(Math.abs(got-v)>TOL){pass=false;issues.push(k+': got '+got+' expected '+v);}}
+      else if(got!==v){pass=false;issues.push(k+': got '+got+' expected '+v);}
+    }
+    html+=`<div class="${pass?'test-pass':'test-fail'}"><span>${pass?'✅':'❌'}</span><span>${t.name}</span></div>`;
+    if(!pass&&issues.length)html+=`<div class="test-fail" style="margin-left:1.4rem;font-size:.67rem"><span>↳</span><span>${issues.join(' | ')}</span></div>`;
+    if(t.note)html+=`<div class="test-note" style="margin-left:1.4rem"><span>ℹ</span><span>${t.note}</span></div>`;
+  }
+  document.getElementById('specTests').innerHTML=html;
+}
+
+buildPills();buildDials();buildMatrix();runSpecTests();
 </script>
 </body>
 </html>
