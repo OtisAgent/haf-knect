@@ -1725,16 +1725,9 @@ textarea.fi2{resize:vertical;min-height:70px}
         <button class="btn btn-or btn-sm">Add new address</button>
       </div>
 
-      <!-- FREIGHT: Solutions tier banner (reusable) -->
-      <div id="ff-tier-banner" style="background:var(--or-d);border:1.5px solid var(--or-g);border-radius:var(--rx);padding:.65rem 1rem;font-size:.78rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:1rem">
-        <div><span style="font-weight:800;color:var(--or)">Freight Forward Free</span> <span style="color:var(--mu)">· 12% network fee · Upgrade to Plus or Pro to earn rebate credits</span></div>
-        <button class="btn btn-or btn-xs" onclick="switchTab('pane-f-plans')">See plans →</button>
-      </div>
-
       <!-- FREIGHT: Post a Load -->
       <div class="tp" id="pane-f-post">
         <h1 class="pt">Post a Load</h1><p class="ps">List freight for your clients on the HAF KNECT network.</p>
-        <div id="ff-tier-post" style="background:var(--or-d);border:1px solid var(--or-g);border-radius:var(--rx);padding:.55rem .9rem;font-size:.75rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.9rem"><span style="font-weight:700;color:var(--or)">Freight Forward Free</span><span style="color:var(--mu)">12% network fee on this load · no rebate on free tier</span></div>
         <div class="card" style="max-width:580px">
           <div class="ct">Load details</div>
           <div class="fg"><label class="fl">Customer reference</label><input class="fi2" placeholder="Your client's job ref"></div>
@@ -1921,9 +1914,9 @@ textarea.fi2{resize:vertical;min-height:70px}
         <div id="fdir-direct-bookings"></div>
       </div>
 
-      <!-- FREIGHT: Solutions Plans -->
+      <!-- FREIGHT: Upgrade (plans & tiers) -->
       <div class="tp" id="pane-f-plans">
-        <h1 class="pt">Freight Forward Plans</h1><p class="ps">All freight forwarding accounts can post loads for any client. Your tier sets your network fee, rebate, and tools.</p>
+        <h1 class="pt">Upgrade</h1><p class="ps">All freight forwarding accounts can post loads for any client. Your tier sets your network fee, rebate, and tools — upgrade any time.</p>
         <div class="plg" style="grid-template-columns:repeat(auto-fit,minmax(195px,1fr))">
           <div class="plc">
             <div class="pl-n">Freight Forward Free</div>
@@ -2473,10 +2466,10 @@ const FREIGHT_NAV=[
   {id:'f-cover',l:'Coverage Board',s:'Freight',ico:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'},
   {id:'f-dir',l:'Driver Directory',s:'Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'f-lanes',l:'Lane Pricing',s:'Freight',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
-  {id:'f-plans',l:'Solutions Plan',s:'Account',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
   {id:'f-account',l:'Account Controls',s:'Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
   {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
+  {id:'f-plans',l:'Upgrade',s:'Upgrade',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
 ];
 /* ── PERSONAL NAV (Brent as Pro freight forwarder) ── */
 const PERSONAL_NAV=[
@@ -2487,6 +2480,7 @@ const PERSONAL_NAV=[
   {id:'f-account',l:'Account &amp; Rebate',s:'My Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
   {id:'billing',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'My Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
+  {id:'f-plans',l:'Upgrade',s:'Upgrade',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
 ];
 
 let _superUser='';
@@ -2524,10 +2518,6 @@ function enterKnectApp(u){
     }else if(demo.role==='freight-pro'){
       roleEl.textContent='Freight Pro Demo';roleEl.className='role-chip chip co';
       buildNav(FREIGHT_NAV);
-      const tb=document.getElementById('ff-tier-banner');
-      if(tb)tb.innerHTML='<div><span style="font-weight:800;color:var(--or)">Freight Forward Pro</span> <span style="color:var(--mu)">· 9% network fee · 3% rebate on every job</span></div><button class="btn btn-or btn-xs" onclick="switchTab(\'pane-f-plans\')">See plans →</button>';
-      const tb2=document.getElementById('ff-tier-post');
-      if(tb2)tb2.innerHTML='<span style="font-weight:700;color:var(--or)">Freight Forward Pro</span><span style="color:var(--mu)">9% network fee · 3% rebate earns credit</span>';
       _showDemoBar('Freight Pro');
       _buildDashActions('freight-pro');
       switchTab('pane-d-home');
@@ -2585,11 +2575,6 @@ function enterMode(mode){
     buildNav(PERSONAL_NAV);
     switchTab('pane-f-post');
     _setModePill('My Account','var(--bl)');
-    // Swap the tier banner to show personal Pro branding
-    const tb=document.getElementById('ff-tier-banner');
-    if(tb)tb.innerHTML='<div><span style="font-weight:800;color:var(--or)">My Account — Freight Forward Pro</span> <span style="color:var(--mu)">· 9% network fee · 3% rebate on every job</span></div><button class="btn btn-gh btn-xs" onclick="switchTab(\'pane-f-account\')">Account →</button>';
-    const tb2=document.getElementById('ff-tier-post');
-    if(tb2)tb2.innerHTML='<span style="font-weight:700;color:var(--or)">Freight Forward Pro · My Account</span><span style="color:var(--mu)">9% network fee · 3% rebate earns credit</span>';
   }else{
     // View As modes
     if(mode==='view-driver'){
@@ -2608,13 +2593,6 @@ function enterMode(mode){
       buildNav(FREIGHT_NAV);
       _buildDashActions('freight-pro');
       switchTab('pane-d-home');
-      // Set tier banner per sub-mode
-      const tiers={'view-ff-free':['Freight Forward Free','12% network fee · no rebate'],'view-ff-plus':['Freight Forward Plus','10% network fee · 1% rebate per job'],'view-ff-pro':['Freight Forward Pro','9% network fee · 3% rebate per job']};
-      const [name,desc]=tiers[mode]||['Freight Forward Free',''];
-      const tb=document.getElementById('ff-tier-banner');
-      if(tb)tb.innerHTML=`<div><span style="font-weight:800;color:var(--or)">${name}</span> <span style="color:var(--mu)">· ${desc}</span></div><button class="btn btn-or btn-xs" onclick="switchTab('pane-f-plans')">See plans →</button>`;
-      const tb2=document.getElementById('ff-tier-post');
-      if(tb2)tb2.innerHTML=`<span style="font-weight:700;color:var(--or)">${name}</span><span style="color:var(--mu)">${desc}</span>`;
     }
     _setModePill('Preview','var(--mu)');
     if(vaBanner){vaBanner.style.display='flex';}
