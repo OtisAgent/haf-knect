@@ -1,0 +1,65 @@
+{
+  "source": "Hallam Express (The Pallet Network) zonal rate card, sheet S24, photographed 2024-09-24, supplied by Brent 2026-07-12",
+  "company": "Hallam Express, BHI House, Centurion Business Park, Bessemer Way, Rotherham S60 1FB",
+  "notes": [
+    "All goods securely wrapped/banded/fixed to pallet base",
+    "Tail-lift pallets must not exceed 1000kg",
+    "Pallets over 1.2m in length incur an additional charge",
+    "Redeliveries and failed collections charged at 75% of the zonal pallet rate",
+    "All prices subject to fuel surcharge at prevailing rate",
+    "All prices subject to VAT",
+    "RHA Conditions of Carriage 2020, insured up to £5000/tonne"
+  ],
+  "pallet_specs": {
+    "quarter": {"footprint_m": "1.2 x 1.0", "max_height_m": 0.8, "max_kg": 250},
+    "half":    {"footprint_m": "1.2 x 1.0", "max_height_m": 1.0, "max_kg": 500},
+    "full":    {"footprint_m": "1.2 x 1.0", "max_height_m": 2.2, "max_kg": 1200}
+  },
+  "surcharges": {
+    "am_pm_delivery_per_con": 15.00,
+    "timed_delivery_per_con": 20.00,
+    "sat_am_per_con": 50.00,
+    "tail_lift_per_pallet": 2.50,
+    "roi_customs_entry_per_con": 95.50
+  },
+  "uk_mainland": [
+    {"zone": 2,  "areas": "S", "economy": {"half": 28.00, "full": 28.00}, "next_day": {"quarter": 28.00, "half": 28.00, "full": 28.00}},
+    {"zone": 3,  "areas": "B, BB, BD, BL, CB, CF1-24,61-72, B3, CH, CV, CW, DE, DN, DY, FY, GL, HD, HX, L, LE1-12,17-67, LN1-3 & 5-6, LS, M, MK1-19,44,46,77, NG, NN, NP1-2,10,18-20,26,44, OL, OX7,15-17, PE1-21 & 26-38, PR, SK1-5,7-11,13-21, ST, TF, WA, WF, WN, WR, WS, WV", "economy": {"half": 39.49, "full": 44.42}, "next_day": {"quarter": 41.20, "half": 43.45, "full": 51.48}},
+    {"zone": 4,  "areas": "AL, BA, BS, CF31-48,81-82,87,99, HG, HP, HR, HU, LE13-16, LN4,7-13, LU, MK40-42,43,45, NP4-8,11-16,22-25, OX1-5,9-14,18,20-29,33,39,44,49, PE22-25, SK6,12,22-23, SN, TS1-5,19-90", "economy": {"half": 40.05, "full": 47.14}, "next_day": {"quarter": 43.45, "half": 45.71, "full": 55.01}},
+    {"zone": 5,  "areas": "CM, IP, LA1-10, NE1-13,15-18,20-47,49,82-83,85,88,92,98-99, PO1-22, SG, SO, SR, TS6-18", "economy": {"half": 41.75, "full": 47.14}, "next_day": {"quarter": 43.45, "half": 49.11, "full": 57.99}},
+    {"zone": 6,  "areas": "CO, DH, DL, SL", "economy": {"half": 44.59, "full": 47.41}, "next_day": {"quarter": 45.30, "half": 50.92, "full": 57.19}},
+    {"zone": 7,  "areas": "NR, RG, TA, YO", "economy": {"half": 44.59, "full": 54.19}, "next_day": {"quarter": 46.29, "half": 52.51, "full": 64.50}},
+    {"zone": 8,  "areas": "GU, ME", "economy": {"half": 50.24, "full": 51.80}, "next_day": {"quarter": 51.65, "half": 58.16, "full": 62.62}},
+    {"zone": 9,  "areas": "EN, HA, IG, SP, SS, WD", "economy": {"half": 48.93, "full": 52.25}, "next_day": {"quarter": 51.12, "half": 53.86, "full": 59.08}},
+    {"zone": 10, "areas": "BH, BR, CR, DA, KT, LL11-34, RH, RM, SM, TW, UB", "economy": {"half": 50.24, "full": 52.25}, "next_day": {"quarter": 50.80, "half": 54.77, "full": 59.62}},
+    {"zone": 11, "areas": "CA, LA11-23, LD, NE19,48,61-71, SY", "economy": {"half": 50.80, "full": 56.37}, "next_day": {"quarter": 52.51, "half": 61.56, "full": 66.68}},
+    {"zone": 12, "areas": "BN, CT, DT, LL35-78, TN", "economy": {"half": 51.79, "full": 56.37}, "next_day": {"quarter": 53.50, "half": 63.83, "full": 66.68}},
+    {"zone": 13, "areas": "EX, PL, TQ", "economy": {"half": 53.89, "full": 59.37}, "next_day": {"quarter": 55.60, "half": 65.93, "full": 68.78}},
+    {"zone": 14, "areas": "SA1-18", "economy": {"half": 50.80, "full": 60.70}, "next_day": {"quarter": 52.51, "half": 61.56, "full": 71.02}},
+    {"zone": 15, "areas": "DG, EH, FK, G, KA1-26,29-30, KY, ML, PA1-19, SA19-99, TD, TR", "economy": {"half": 58.10, "full": 67.72}, "next_day": {"quarter": 68.84, "half": 68.84, "full": 71.52}},
+    {"zone": 16, "areas": "E, N, NW, SE2-10,12-28, SW2,4,6,8,9,11-20,99, W3-7,9,12-13", "economy": {"half": 60.97, "full": 61.19}, "next_day": {"quarter": 62.61, "half": 66.44, "full": 67.48}},
+    {"zone": 17, "areas": "DD, PH1-16", "economy": {"half": 69.05, "full": 80.98}, "next_day": {"quarter": 88.75, "half": 88.75, "full": 100.70}},
+    {"zone": 18, "areas": "EC, SE1,11, SW1,3,5,7,10, W1-2,8,10-11,14, WC", "economy": {"half": 68.63, "full": 68.63}, "next_day": {"quarter": 64.80, "half": 71.36, "full": 71.36}},
+    {"zone": 19, "areas": "AB10-16,21-25,30 & 39", "economy": {"half": 80.98, "full": 92.93}, "next_day": {"quarter": 100.70, "half": 100.70, "full": 113.00}}
+  ],
+  "highlands_islands": [
+    {"zone": 20, "areas": "PH17-26", "extended_economy": {"half": 76.32, "full": 85.93}},
+    {"zone": 21, "areas": "AB31-38,41-45,51-56, IV1-28,30-32,36,53-54", "extended_economy": {"half": 82.23, "full": 94.45}},
+    {"zone": 22, "areas": "PH30-41,49-50", "extended_economy": {"half": 85.61, "full": 96.64}},
+    {"zone": 23, "areas": "KW1-14", "extended_economy": {"half": 92.23, "full": 108.85}},
+    {"zone": 24, "areas": "PO30-41", "extended_economy": {"half": 84.74, "full": 84.74}},
+    {"zone": 25, "areas": "PA21-41", "extended_economy": {"half": 90.90, "full": 90.90}},
+    {"zone": 26, "areas": "KA27-28", "extended_economy": {"half": 119.18, "full": 130.49}},
+    {"zone": 27, "areas": "IM, PH42-44", "extended_economy": {"half": 124.84, "full": 124.84}},
+    {"zone": 28, "areas": "ZE", "extended_economy": {"half": 130.49, "full": 164.92}},
+    {"zone": 29, "areas": "GY,(GY9-10 POA), JE, PA20,42-49,60-78,80", "extended_economy": {"half": 136.15, "full": 136.15}},
+    {"zone": 30, "areas": "IV40-49,51-52,55-56 & 63, KW15-17", "extended_economy": {"half": 153.62, "full": 153.62}},
+    {"zone": 31, "areas": "HS", "extended_economy": {"half": 187.06, "full": 187.06}}
+  ],
+  "northern_ireland_eire": [
+    {"zone": 32, "areas": "BT1-17,36-39,41", "economy": {"half": 68.75, "full": 77.93}},
+    {"zone": 33, "areas": "REST OF BT", "economy": {"half": 74.41, "full": 84.44}},
+    {"zone": 34, "areas": "DUBLIN", "economy": {"half": 81.09, "full": 84.34}},
+    {"zone": 35, "areas": "REST OF EIRE", "economy": {"half": 91.27, "full": 99.54}}
+  ]
+}
