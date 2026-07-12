@@ -20,7 +20,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--fn);background:var(--bg);color:var(--tx);line-height:1.55;-webkit-font-smoothing:antialiased}
 button,input,select{font:inherit;color:inherit;outline:none;border:none;background:none;cursor:pointer}
-.wrap{max-width:1140px;margin:0 auto;padding:1.4rem 1.4rem 4rem}
+.wrap{max-width:1180px;margin:0 auto;padding:1.4rem 1.4rem 4rem}
 .head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:.3rem}
 h1{font-family:var(--dp);font-weight:900;font-size:1.5rem;letter-spacing:-.04em}
 h1 span{color:var(--or)}
@@ -37,12 +37,14 @@ h1 span{color:var(--or)}
 .fi{width:100%;background:var(--p2);border:1.5px solid var(--lns);border-radius:var(--rx);padding:.5rem .75rem;font-size:.86rem;transition:border-color .14s}
 .fi:focus{border-color:var(--or)}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:.7rem}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;margin-bottom:.7rem}
 .pills{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.75rem}
 .pill{padding:.32rem .7rem;border-radius:var(--pill);font-size:.72rem;font-weight:700;background:var(--p2);border:1.5px solid var(--ln);color:var(--mu);transition:all .12s;cursor:pointer}
 .pill.on{background:var(--or);border-color:var(--or);color:#0e1113}
 .btn{display:inline-flex;align-items:center;gap:.4rem;font-weight:700;font-size:.82rem;border-radius:var(--pill);padding:.55rem 1.2rem;background:var(--or);color:#0e1113;box-shadow:0 4px 16px var(--or-g);transition:all .14s;cursor:pointer}
 .btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
 .btn-gh{background:transparent;color:var(--tx);border:1.5px solid var(--lns);box-shadow:none}
+.adv-toggle{font-size:.72rem;font-weight:700;color:var(--bl);cursor:pointer;background:none;border:none;padding:.15rem 0;margin-bottom:.5rem;display:flex;align-items:center;gap:.3rem}
 /* result */
 .res{background:var(--p);border:1.5px solid var(--or-g);border-radius:var(--rs);padding:1.2rem;box-shadow:var(--sd);margin-bottom:1.1rem}
 .split4{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:.4rem 0 .9rem}
@@ -60,10 +62,18 @@ h1 span{color:var(--or)}
 .total-label{font-size:.7rem;font-weight:700;opacity:.65}
 .total-vat{font-size:.68rem;opacity:.55;margin-top:.1rem}
 .total-val{font-family:var(--dp);font-weight:900;font-size:1.45rem;letter-spacing:-.04em}
-.path-row{display:flex;align-items:flex-start;gap:.5rem;font-size:.73rem;padding:.5rem .7rem;border-radius:var(--rx);background:var(--p2);margin-bottom:.5rem}
-.path-label{font-weight:700;white-space:nowrap}
-.path-win{color:var(--gn);font-weight:700}
-.warn-pill{display:inline-flex;align-items:center;gap:.3rem;background:var(--rd-d);border:1px solid var(--rd-b);color:var(--rd);font-size:.67rem;font-weight:700;border-radius:var(--pill);padding:.22rem .65rem}
+/* audit trail */
+.audit{border:1px solid var(--ln);border-radius:var(--rx);overflow:hidden;margin-bottom:.8rem}
+.audit-hd{background:var(--p2);padding:.42rem .75rem;font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);display:flex;justify-content:space-between}
+.audit-row{display:flex;justify-content:space-between;align-items:center;padding:.38rem .75rem;border-top:1px solid var(--ln);font-size:.76rem}
+.audit-row.win{background:rgba(45,171,96,.06)}
+.audit-label{color:var(--mu)}
+.audit-val{font-weight:700}
+.path-badge{display:inline-flex;align-items:center;padding:.12rem .5rem;border-radius:var(--pill);font-size:.62rem;font-weight:800;margin-left:.4rem}
+.badge-dist{background:var(--bl-d);color:var(--bl)}
+.badge-time{background:var(--gn-d);color:var(--gn)}
+.badge-floor{background:var(--or-d);color:var(--or)}
+.warn-pill{display:inline-flex;align-items:center;gap:.3rem;background:var(--rd-d);border:1px solid var(--rd-b);color:var(--rd);font-size:.67rem;font-weight:700;border-radius:var(--pill);padding:.22rem .65rem;margin-bottom:.5rem}
 .meta-row{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;font-size:.74rem;color:var(--mu);border-top:1px solid var(--ln);padding-top:.7rem;margin-top:.3rem}
 .meta-row b{color:var(--tx);font-weight:700}
 /* spec tests */
@@ -114,13 +124,13 @@ table.mt tr:last-child td{border-bottom:none}
     <h1>HAF <span>Pricing Lab</span></h1>
     <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
       <span class="tag">Internal · not live pricing</span>
-      <span class="vtag">HAF-PRICE-V2.0</span>
+      <span class="vtag">HAF-PRICE-V3.0</span>
     </div>
   </div>
-  <p class="sub">Test any route through the V2 engine — driver pay, HAF margin, network pool, VAT, and customer total. All rates are loaded directly from the V2 spec. Nothing here changes live prices.</p>
+  <p class="sub">Full V3 engine — distance vs time path selection, driver exposure, positioning, and driver-first margin allocation. Nothing here changes live prices.</p>
 
   <div class="banner">
-    <strong>This is the real V2 formula.</strong> The engine calculates driver pay two ways — mileage-based and foundation-based — and always protects the higher result. Short local jobs use the PLNA collective floor; longer routes switch to mileage automatically. The £40 hard market floor is always enforced. HAF margin is locked by job type with account discounts applied above the floor. The 5% network pool (2.5% driver + 2.5% relay) is separated on every job. All 7 main spec test cases verify at the bottom of the page.
+    <strong>V3 core principle:</strong> every route is priced two ways — mileage-based and time-based — and the driver always receives the higher result. A 70-mile job taking 2 hours pays more than a 70-mile job taking 1 hour, because the driver's time is worth the same per hour regardless of speed. Driver exposure (late finish, remote area, poor return-load probability) is a separate multiplier. HAF margin is calculated <em>after</em> protecting driver pay — account discounts come from HAF's share only.
   </div>
 
   <div class="grid">
@@ -143,10 +153,16 @@ table.mt tr:last-child td{border-bottom:none}
         <label class="fl">Weight</label>
         <div class="pills" id="wtPills"></div>
 
+        <label class="fl">Handling</label>
+        <div class="pills" id="handPills"></div>
+
         <label class="fl">Zone / return-load potential</label>
         <div class="pills" id="zonePills"></div>
 
-        <label class="fl">Account type <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--su)">(reduces HAF margin only — floors enforced)</span></label>
+        <label class="fl">Driver exposure <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--su)">(time of day · away from home · return risk)</span></label>
+        <div class="pills" id="expPills"></div>
+
+        <label class="fl">Account type <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--su)">(reduces HAF margin only)</span></label>
         <div class="pills" id="accPills"></div>
 
         <div class="row" style="margin-top:.3rem">
@@ -159,12 +175,28 @@ table.mt tr:last-child td{border-bottom:none}
           </div>
         </div>
 
-        <div class="hint">Enter any valid UK postcodes. Distance comes live from the HAF gateway (Google). The engine clamps any floor below £40 back to £40 automatically.</div>
+        <button class="adv-toggle" onclick="toggleAdv()">▸ Positioning + supplements</button>
+        <div id="advPanel" style="display:none">
+          <div class="row3" style="margin-bottom:.5rem">
+            <div><label class="fl">Positioning miles</label><input class="fi" type="number" id="posMiles" value="0" min="0" step="1"></div>
+            <div><label class="fl">Positioning hours</label><input class="fi" type="number" id="posHours" value="0" min="0" step="0.1"></div>
+            <div><label class="fl">Recovery %</label><input class="fi" type="number" id="posRec" value="100" min="0" max="100" step="5"></div>
+          </div>
+          <div class="row">
+            <div><label class="fl">Stop fees (£)</label><input class="fi" type="number" id="stopFees" value="0" min="0" step="5"></div>
+            <div><label class="fl">Waiting fees (£)</label><input class="fi" type="number" id="waitFees" value="0" min="0" step="5"></div>
+          </div>
+        </div>
+
+        <div class="hint">Postcodes checked against UK database · distance from Google via HAF gateway · time protection fires automatically when the route is slow.</div>
       </div>
 
       <!-- RESULT -->
       <div class="res" id="resBox" style="display:none">
         <div class="ct" id="resTitle" style="margin-bottom:.6rem">Result</div>
+
+        <!-- path winner banner -->
+        <div id="pathBanner" style="margin-bottom:.8rem"></div>
 
         <div class="split4">
           <div class="sc drv">
@@ -197,37 +229,54 @@ table.mt tr:last-child td{border-bottom:none}
           <div class="total-val" id="rTotal">—</div>
         </div>
 
-        <div class="path-row" id="pathRow">
-          <span class="path-label">Pay path:</span>
-          <span id="pathDetail">—</span>
+        <div id="warnBox" style="display:none">
+          <span class="warn-pill">⚠ Combined multiplier above 1.40× — auto-capped · manual review required before release</span>
         </div>
 
-        <div id="warnBox" style="display:none;margin-bottom:.5rem">
-          <span class="warn-pill">⚠ Combined multiplier above 1.40x — auto-capped · job must go to manual review before release</span>
+        <!-- Audit trail -->
+        <div class="audit">
+          <div class="audit-hd"><span>Route calculation</span><span id="aRouteWinner"></span></div>
+          <div class="audit-row"><span class="audit-label">Distance cost (miles × VSBR)</span><span class="audit-val" id="aDistCost">—</span></div>
+          <div class="audit-row" id="aTimeRow"><span class="audit-label">Time cost (hours × VSHR)</span><span class="audit-val" id="aTimeCost">—</span></div>
+          <div class="audit-row win"><span class="audit-label">Loaded route base (higher path)</span><span class="audit-val" id="aRouteBase">—</span></div>
+          <div class="audit-row" id="aPosRow" style="display:none"><span class="audit-label">Positioning pay</span><span class="audit-val" id="aPosPay">—</span></div>
+          <div class="audit-row" id="aStopRow" style="display:none"><span class="audit-label">Stop + waiting fees</span><span class="audit-val" id="aStopVal">—</span></div>
+          <div class="audit-row"><span class="audit-label">Pre-multiplier total</span><span class="audit-val" id="aPreMult">—</span></div>
+          <div class="audit-row win"><span class="audit-label">Combined driver multiplier</span><span class="audit-val" id="aMult">—</span></div>
+          <div class="audit-row"><span class="audit-label">Driver core pay</span><span class="audit-val" id="aDriverPay">—</span></div>
+        </div>
+
+        <div class="audit">
+          <div class="audit-hd"><span>Customer price build</span><span id="aFloorWinner"></span></div>
+          <div class="audit-row"><span class="audit-label">Base HAF price (driver ÷ driver share)</span><span class="audit-val" id="aBaseHAF">—</span></div>
+          <div class="audit-row win"><span class="audit-label">Transport subtotal (floor applied)</span><span class="audit-val" id="aCustSub">—</span></div>
+          <div class="audit-row"><span class="audit-label">VAT (20%)</span><span class="audit-val" id="aVAT">—</span></div>
+          <div class="audit-row"><span class="audit-label">Customer total</span><span class="audit-val" id="aCustTotal">—</span></div>
         </div>
 
         <div class="meta-row">
           <span>Distance <b id="rMiles">—</b></span>
           <span>Drive time <b id="rMins">—</b></span>
+          <span>Avg speed <b id="rSpeed">—</b></span>
+          <span>VSHR <b id="rVSHR">—</b></span>
           <span>HAF margin <b id="rMPct">—</b></span>
-          <span>Multiplier <b id="rMult">—</b></span>
           <span>Route <b id="rRoute">—</b></span>
         </div>
       </div>
     </div>
 
-    <!-- RIGHT: reference + matrix -->
+    <!-- RIGHT: reference + matrix + tests -->
     <div>
       <div class="card">
-        <div class="ct">Vehicle base rates <span style="font-size:.62rem;font-weight:700;color:var(--su)">V2 spec — edit to test scenarios</span></div>
+        <div class="ct">Vehicle rates <span style="font-size:.62rem;font-weight:700;color:var(--su)">V3 spec — VSBR + derived VSHR</span></div>
         <div id="drvRates"></div>
-        <div class="hint" style="margin-top:.4rem">Protected driver mileage rates from the V2 spec. Edit freely — no effect on live prices.</div>
+        <div class="hint" style="margin-top:.4rem">VSHR = VSBR × 40 (reference productive miles per hour). Edit VSBR freely — VSHR updates automatically. No effect on live prices.</div>
       </div>
 
       <div class="card">
-        <div class="ct">HAF margin reference <span style="font-size:.62rem;font-weight:700;color:var(--su)">V2 spec</span></div>
+        <div class="ct">HAF margin reference <span style="font-size:.62rem;font-weight:700;color:var(--su)">V3 spec</span></div>
         <table class="ref-table">
-          <tr><th>Job type</th><th>Starting margin</th><th>Floor</th><th>Svc factor</th></tr>
+          <tr><th>Job type</th><th>Margin</th><th>Floor</th><th>Svc factor</th></tr>
           <tr><td>Groupage / Flexible</td><td>10%</td><td>8%</td><td>1.00×</td></tr>
           <tr><td>Flexible / Co-load</td><td>15%</td><td>10%</td><td>1.00×</td></tr>
           <tr><td>Standard Same-Day</td><td>20%</td><td>15%</td><td>1.00×</td></tr>
@@ -235,20 +284,20 @@ table.mt tr:last-child td{border-bottom:none}
           <tr><td>Urgent / Time-Critical</td><td>30%</td><td>22%</td><td>1.10×</td></tr>
           <tr><td>Immediate / Out-of-hours</td><td>30%</td><td>22%</td><td>1.25×</td></tr>
         </table>
-        <div class="hint" style="margin-top:.45rem">Account adjustments: Business Volume −3pts, FF Plus −4pts, FF Pro −7pts. Floor always enforced regardless of discount.</div>
+        <div class="hint" style="margin-top:.45rem">Account adjustments from HAF margin only — never from driver pay. Biz Volume −3pts · FF Plus −4pts · FF Pro −7pts. Job-type floor always enforced.</div>
       </div>
 
       <div class="card">
         <div class="ct">Lane matrix <span style="font-size:.62rem;font-weight:700;color:var(--su)" id="matrixLabel">—</span></div>
         <div style="overflow-x:auto"><table class="mt" id="matrixTable"><tr><td style="color:var(--su);font-size:.72rem">Loading lanes…</td></tr></table></div>
-        <div class="hint">Standard weight, normal zone at current vehicle + job type settings. <span style="color:var(--gn);font-weight:700">M</span> = mileage path won · <span style="color:var(--pu);font-weight:700">F</span> = foundation path won (short-job floor protecting the driver).</div>
+        <div class="hint"><span style="color:var(--gn);font-weight:700">T</span> = time path won (congested) · <span style="color:var(--bl);font-weight:700">D</span> = distance path won (free-flowing). Std weight, no exposure uplift.</div>
         <button class="btn btn-gh" style="margin-top:.7rem;font-size:.76rem" onclick="buildMatrix()">Reload lanes</button>
       </div>
 
       <div class="card">
-        <div class="ct">Spec regression <span style="font-size:.62rem;font-weight:700;color:var(--su)">7 of 8 auto-verified</span></div>
+        <div class="ct">Spec regression <span style="font-size:.62rem;font-weight:700;color:var(--su)">CSV + time-of-day scenarios</span></div>
         <div id="specTests"><div style="color:var(--su);font-size:.72rem">Running…</div></div>
-        <div class="hint" style="margin-top:.45rem">Test 8 (extreme job) in the spec includes driver supplements (tail-lift, two-person crew) that sit outside the base route formula. The multiplier cap and review trigger are verified; the specific driver pay figure differs because of those supplements.</div>
+        <div class="hint" style="margin-top:.45rem">Tests 1–4: straight route, no positioning. Test 5: urban SWB with positioning — time path wins for both route and positioning leg. Time-of-day tests verify exposure multiplier bands against the spec CSV.</div>
       </div>
     </div>
   </div>
@@ -262,30 +311,41 @@ function gsub(){
   if(v==='HAFLAB'){sessionStorage.setItem('haf-lab','1');document.getElementById('gate').style.display='none';}
   else{document.getElementById('ge').textContent='Incorrect code.';document.getElementById('gi').value='';}
 }
+function toggleAdv(){
+  const p=document.getElementById('advPanel'),b=document.querySelector('.adv-toggle');
+  const show=p.style.display==='none';
+  p.style.display=show?'block':'none';
+  b.textContent=(show?'▾':'▸')+' Positioning + supplements';
+}
 
 /* ────────────────────────────────────────────────────────────
-   HAF UNIVERSAL PRICING ENGINE  HAF-PRICE-V2.0
-   Source: HAF_Universal_Pricing_Engine_V2_PLNA_Collective_Floor.md
+   HAF UNIVERSAL PRICING ENGINE  HAF-PRICE-V3.0
+   Sources: OTIS_HAF_Core_Pricing_Formula_Framework.md
+            OTIS_HAF_Time_of_Day_Away_From_Home_Return_Load_Instructions.md
+            OTIS_HAF_Driver_First_Multipliers_and_Margin_Allocation.md
    ──────────────────────────────────────────────────────────── */
 
-/* Vehicle protected mileage rates */
+const REF_MPH = 40; // reference productive miles per hour (seed value — calibrate from live jobs)
+const NET_POOL = .05, HARD_FLOOR = 40, VAT = .20;
+
+/* Vehicle protected mileage rates (VSBR). VSHR derived at runtime. */
 const VEH=[
-  {k:'small',n:'Small Van',drv:0.80},
-  {k:'swb',  n:'SWB',      drv:0.90},
-  {k:'mwb',  n:'MWB',      drv:1.00},
-  {k:'lwb',  n:'LWB',      drv:1.10},
-  {k:'xlwb', n:'XLWB',     drv:1.15},
-  {k:'luton',n:'Luton',    drv:1.25},
+  {k:'small',n:'Small Van', drv:0.80},
+  {k:'swb',  n:'SWB',       drv:0.90},
+  {k:'mwb',  n:'MWB',       drv:1.00},
+  {k:'lwb',  n:'LWB',       drv:1.10},
+  {k:'xlwb', n:'XLWB',      drv:1.15},
+  {k:'luton',n:'Luton',     drv:1.25},
 ];
 
-/* Job types: margin, floor, service hindrance factor */
+/* Job types: HAF margin, margin floor, service factor */
 const JOB=[
-  {k:'groupage',n:'Groupage / Flexible',        margin:.10,floor:.08,svc:1.00},
-  {k:'coload',  n:'Flexible / Co-load',          margin:.15,floor:.10,svc:1.00},
-  {k:'sameday', n:'Standard Same-Day',           margin:.20,floor:.15,svc:1.00},
-  {k:'timed',   n:'Timed Delivery',              margin:.25,floor:.18,svc:1.00},
-  {k:'urgent',  n:'Urgent / Time-Critical',      margin:.30,floor:.22,svc:1.10},
-  {k:'immed',   n:'Immediate / Out-of-hours',    margin:.30,floor:.22,svc:1.25},
+  {k:'groupage',n:'Groupage / Flexible',     margin:.10,floor:.08,svc:1.00},
+  {k:'coload',  n:'Flexible / Co-load',      margin:.15,floor:.10,svc:1.00},
+  {k:'sameday', n:'Standard Same-Day',       margin:.20,floor:.15,svc:1.00},
+  {k:'timed',   n:'Timed Delivery',          margin:.25,floor:.18,svc:1.00},
+  {k:'urgent',  n:'Urgent / Time-Critical',  margin:.30,floor:.22,svc:1.10},
+  {k:'immed',   n:'Immediate / Out-of-hours',margin:.30,floor:.22,svc:1.25},
 ];
 
 const WT=[
@@ -295,11 +355,28 @@ const WT=[
   {k:'npl',n:'Near payload', f:1.12},
 ];
 
+const HAND=[
+  {k:'kerb',  n:'Kerbside',          f:1.00},
+  {k:'assist',n:'Driver-assisted',   f:1.03},
+  {k:'awkwd', n:'Awkward / fragile', f:1.06},
+  {k:'tail',  n:'Tail-lift',         f:1.08},
+];
+
+/* Zone factor — also reflects return-load probability */
 const ZONE=[
-  {k:'strong', n:'Strong return',  f:1.00},
-  {k:'normal', n:'Normal',         f:1.03},
-  {k:'limited',n:'Limited return', f:1.07},
-  {k:'remote', n:'Remote',         f:1.12},
+  {k:'strong', n:'Strong return',   f:1.00},
+  {k:'normal', n:'Normal',          f:1.03},
+  {k:'limited',n:'Limited return',  f:1.07},
+  {k:'remote', n:'Remote',          f:1.12},
+];
+
+/* Driver exposure: MAX(time-of-day, return-risk, away-from-home) — spec CSV values */
+const EXP=[
+  {k:'day',     n:'Daytime',            f:1.00, desc:'Home before end of working window'},
+  {k:'late1',   n:'Home 1h late',       f:1.05, desc:'Finish up to 1 hour after preferred end'},
+  {k:'late3',   n:'Home 2–3h late',     f:1.10, desc:'Driver 2–3 hours outside operating window'},
+  {k:'night',   n:'Late night remote',  f:1.15, desc:'Late finish, poor return probability'},
+  {k:'overnight',n:'Overnight / stay',  f:1.25, desc:'Overnight or likely stay-away risk'},
 ];
 
 const ACC=[
@@ -309,90 +386,130 @@ const ACC=[
   {k:'ffpro',  n:'FF Pro',       adj:.07},
 ];
 
-const NET_POOL=.05, HARD_FLOOR=40, VAT=.20;
-let selVeh='lwb',selJob='sameday',selWt='std',selZone='normal',selAcc='guest';
+let selVeh='lwb',selJob='sameday',selWt='std',selHand='kerb',selZone='normal',selExp='day',selAcc='guest';
 
-/* ── CORE V2 CALCULATION ──
-   Implements the exact formulas from section 13 of the implementation spec.
-   Returns a full breakdown object.                                          */
-function calcV2(miles,mins,vehKey,jobKey,wtKey,zoneKey,accKey,plnaFloor){
-  const v=VEH.find(x=>x.k===vehKey)||VEH[3];
-  const jt=JOB.find(x=>x.k===jobKey)||JOB[2];
-  const wt=WT.find(x=>x.k===wtKey)||WT[0];
-  const zn=ZONE.find(x=>x.k===zoneKey)||ZONE[1];
-  const ac=ACC.find(x=>x.k===accKey)||ACC[0];
+/* ── V3 CORE CALCULATION ──────────────────────────────────────
+   Implements the driver-first waterfall from spec sections 2–10.
+   Every route priced two ways; driver always gets the higher result.
+   ──────────────────────────────────────────────────────────── */
+function calcV3(miles, mins, vehKey, jobKey, wtKey, handKey, zoneKey, expKey, accKey,
+                posMiles, posHours, posRec, stopFees, waitFees, plnaFloor) {
+  const v   = VEH.find(x=>x.k===vehKey)||VEH[3];
+  const jt  = JOB.find(x=>x.k===jobKey)||JOB[2];
+  const wt  = WT.find(x=>x.k===wtKey)||WT[0];
+  const hand= HAND.find(x=>x.k===handKey)||HAND[0];
+  const zn  = ZONE.find(x=>x.k===zoneKey)||ZONE[1];
+  const exp = EXP.find(x=>x.k===expKey)||EXP[0];
+  const ac  = ACC.find(x=>x.k===accKey)||ACC[0];
 
-  /* 1. Final HAF margin — account adjustment above job-type floor */
-  const hafMargin=Math.max(jt.margin-ac.adj,jt.floor);
-  const driverShare=1-hafMargin-NET_POOL;
+  /* 1. Derived hourly rate */
+  const VSHR = v.drv * REF_MPH;
 
-  /* 2. Combined driver hindrance multiplier, capped at 1.40x */
-  const rawMult=wt.f*jt.svc*zn.f;
-  const appliedMult=Math.min(rawMult,1.40);
-  const multCapped=rawMult>1.40;
+  /* 2. Loaded route — price both ways, protect the higher */
+  const loadedHours = (mins||0) / 60;
+  const distCost  = miles * v.drv;
+  const timeCost  = loadedHours * VSHR;
+  const routeBase = Math.max(distCost, timeCost);
+  const timeWins  = timeCost > distCost;
+  const avgSpeed  = loadedHours > 0 ? miles / loadedHours : 0;
 
-  /* 3. Effective foundation — MAX(£40 hard floor, PLNA collective floor) */
-  const inputFloor=plnaFloor||HARD_FLOOR;
-  const effFloor=Math.max(HARD_FLOOR,inputFloor);
-  const floorClamped=inputFloor<HARD_FLOOR;
+  /* 3. Positioning leg (same MAX logic, then apply recovery %) */
+  const pm = posMiles||0, ph = posHours||0, rec = (posRec||100)/100;
+  const posDistCost = pm * v.drv;
+  const posTimeCost = ph * VSHR;
+  const posBase     = Math.max(posDistCost, posTimeCost);
+  const posPay      = posBase * rec;
+  const posTimeWins = posTimeCost > posDistCost;
+  const hasPos      = pm > 0 || ph > 0;
 
-  /* 4. Two driver-pay paths */
-  const mileagePay=miles*v.drv*appliedMult;
-  const foundationPay=effFloor*driverShare*appliedMult;
+  /* 4. Supplements */
+  const sf = stopFees||0, wf = waitFees||0;
+  const hasSupp = sf > 0 || wf > 0;
 
-  /* 5. Protected driver pay = MAX of the two paths */
-  const protectedPay=Math.max(mileagePay,foundationPay);
-  const usedFoundation=foundationPay>=mileagePay;
+  /* 5. Combined driver multiplier (capped at 1.40×) */
+  const rawMult     = wt.f * hand.f * zn.f * jt.svc * exp.f;
+  const appliedMult = Math.min(rawMult, 1.40);
+  const multCapped  = rawMult > 1.40;
 
-  /* 6. Customer transport subtotal, floored at £40 */
-  const custTransport=protectedPay/driverShare;
-  const custSubtotal=Math.max(custTransport,HARD_FLOOR);
+  /* 6. Driver core pay — spec section 8 */
+  const preMult     = routeBase + posPay + sf + wf;
+  const driverCorePay = preMult * appliedMult;
 
-  /* 7. Component split */
-  const hafCash=custSubtotal*hafMargin;
-  const driverPool=custSubtotal*.025;
-  const relayPool=custSubtotal*.025;
-  const netCash=driverPool+relayPool;
+  /* 7. HAF margin — account discount from HAF margin only, never driver pay */
+  const hafMargin   = Math.max(jt.margin - ac.adj, jt.floor);
+  const driverShare = 1 - hafMargin - NET_POOL;
 
-  /* 8. VAT + total */
-  const vat=custSubtotal*VAT;
-  const custTotal=custSubtotal+vat;
+  /* 8. Customer price — spec section 10 */
+  const baseHAFPrice = driverCorePay / driverShare;
+  const inputFloor   = Math.max(plnaFloor||HARD_FLOOR, HARD_FLOOR);
+  const floorClamped = (plnaFloor||HARD_FLOOR) < HARD_FLOOR;
+  const custSubtotal = Math.max(baseHAFPrice, HARD_FLOOR, inputFloor);
+  const floorKind    = custSubtotal <= HARD_FLOOR ? '£40 hard floor'
+                     : custSubtotal <= inputFloor  ? 'PLNA floor'
+                     : 'route price';
+  const floorWon     = custSubtotal > baseHAFPrice;
 
-  const driveMins=mins||Math.round(miles/32*60);
-  const driverHr=driveMins>0?protectedPay/(driveMins/60):0;
+  /* 9. Split */
+  const hafCash = custSubtotal * hafMargin;
+  const netCash = custSubtotal * NET_POOL;
+  const actualDriverPay = custSubtotal * driverShare;
 
-  return{
-    miles,driveMins,vehicle:v.n,vehicleRate:v.drv,jobType:jt.n,
-    hafMargin,hafMarginPct:Math.round(hafMargin*100),
-    rawMult:+rawMult.toFixed(4),appliedMult:+appliedMult.toFixed(4),multCapped,
-    effFloor,floorClamped,
-    mileagePay:+mileagePay.toFixed(2),foundationPay:+foundationPay.toFixed(2),
-    protectedPay:+protectedPay.toFixed(2),usedFoundation,
-    custSubtotal:+custSubtotal.toFixed(2),hafCash:+hafCash.toFixed(2),
-    driverPool:+driverPool.toFixed(2),relayPool:+relayPool.toFixed(2),netCash:+netCash.toFixed(2),
-    vat:+vat.toFixed(2),custTotal:+custTotal.toFixed(2),
+  /* 10. VAT */
+  const vat      = custSubtotal * VAT;
+  const custTotal= custSubtotal + vat;
+
+  const driverHr = loadedHours > 0 ? driverCorePay / loadedHours : 0;
+
+  return {
+    miles, mins, loadedHours:+loadedHours.toFixed(2), avgSpeed:+avgSpeed.toFixed(1),
+    vehicle:v.n, vehicleRate:v.drv, VSHR:+VSHR.toFixed(1), jobType:jt.n,
+    distCost:+distCost.toFixed(2), timeCost:+timeCost.toFixed(2),
+    routeBase:+routeBase.toFixed(2), timeWins,
+    posDistCost:+posDistCost.toFixed(2), posTimeCost:+posTimeCost.toFixed(2),
+    posBase:+posBase.toFixed(2), posPay:+posPay.toFixed(2), posTimeWins, hasPos,
+    sf, wf, hasSupp,
+    rawMult:+rawMult.toFixed(4), appliedMult:+appliedMult.toFixed(4), multCapped,
+    preMult:+preMult.toFixed(2), driverCorePay:+driverCorePay.toFixed(2),
+    hafMargin, hafMarginPct:Math.round(hafMargin*100), driverShare,
+    baseHAFPrice:+baseHAFPrice.toFixed(2), inputFloor, floorClamped,
+    custSubtotal:+custSubtotal.toFixed(2), floorKind, floorWon,
+    hafCash:+hafCash.toFixed(2), netCash:+netCash.toFixed(2),
+    actualDriverPay:+actualDriverPay.toFixed(2),
+    vat:+vat.toFixed(2), custTotal:+custTotal.toFixed(2),
     driverHr:+driverHr.toFixed(1),
   };
 }
 
 /* ── UI: PILLS + DIALS ── */
 function buildPills(){
-  const mk=(arr,sel,fn)=>arr.map(v=>`<button class="pill ${v.k===sel?'on':''}" onclick="${fn}('${v.k}')">${v.n}</button>`).join('');
+  const mk=(arr,sel,fn)=>arr.map(v=>`<button class="pill ${v.k===sel?'on':''}" onclick="${fn}('${v.k}')" title="${v.desc||''}">${v.n}${v.f&&v.f!==1?' <span style="opacity:.6;font-size:.65em">'+v.f+'×</span>':''}</button>`).join('');
   document.getElementById('vehPills').innerHTML=mk(VEH,selVeh,'pickVeh');
   document.getElementById('jobPills').innerHTML=mk(JOB,selJob,'pickJob');
   document.getElementById('wtPills').innerHTML=mk(WT,selWt,'pickWt');
+  document.getElementById('handPills').innerHTML=mk(HAND,selHand,'pickHand');
   document.getElementById('zonePills').innerHTML=mk(ZONE,selZone,'pickZone');
+  document.getElementById('expPills').innerHTML=mk(EXP,selExp,'pickExp');
   document.getElementById('accPills').innerHTML=mk(ACC,selAcc,'pickAcc');
 }
 function pickVeh(k){selVeh=k;buildPills();}
 function pickJob(k){selJob=k;buildPills();}
 function pickWt(k){selWt=k;buildPills();}
+function pickHand(k){selHand=k;buildPills();}
 function pickZone(k){selZone=k;buildPills();}
+function pickExp(k){selExp=k;buildPills();}
 function pickAcc(k){selAcc=k;buildPills();}
 
 function buildDials(){
   document.getElementById('drvRates').innerHTML=VEH.map((v,i)=>
-    `<div class="num-row"><label>${v.n}</label><span><input type="number" step="0.05" value="${v.drv}" min="0" oninput="VEH[${i}].drv=parseFloat(this.value)||0"> <span class="u">£/mi</span></span></div>`).join('');
+    `<div class="num-row">
+       <label>${v.n}</label>
+       <span style="display:flex;align-items:center;gap:.5rem">
+         <span style="font-size:.68rem;color:var(--su)">VSHR £<span id="vshr_${i}">${(v.drv*REF_MPH).toFixed(0)}</span>/hr</span>
+         <input type="number" step="0.05" value="${v.drv}" min="0"
+           oninput="VEH[${i}].drv=parseFloat(this.value)||0;document.getElementById('vshr_${i}').textContent=(VEH[${i}].drv*${REF_MPH}).toFixed(0)">
+         <span class="u">£/mi</span>
+       </span>
+     </div>`).join('');
 }
 
 /* ── DISTANCE GATEWAY ── */
@@ -407,31 +524,47 @@ async function getDist(a,b){
 
 /* ── ROUTE RUNNER ── */
 function fmt(n){return'£'+n.toFixed(0);}
+function fmt2(n){return'£'+n.toFixed(2);}
+
 async function runRoute(){
   const btn=document.getElementById('runBtn');
   btn.textContent='Calculating…';btn.disabled=true;
   const from=document.getElementById('pcFrom').value;
   const to=document.getElementById('pcTo').value;
   const plnaFloor=parseFloat(document.getElementById('plnaFloor').value)||HARD_FLOOR;
+  const posMiles=parseFloat(document.getElementById('posMiles').value)||0;
+  const posHours=parseFloat(document.getElementById('posHours').value)||0;
+  const posRec=parseFloat(document.getElementById('posRec').value)||100;
+  const stopFees=parseFloat(document.getElementById('stopFees').value)||0;
+  const waitFees=parseFloat(document.getElementById('waitFees').value)||0;
+
   const d=await getDist(from,to);
   btn.textContent='Calculate →';btn.disabled=false;
 
   const box=document.getElementById('resBox');box.style.display='block';
   if(!d){
     document.getElementById('resTitle').textContent='Route not recognised';
-    ['rDrv','rHaf','rNet','rCus','rTotal','rMiles','rMins','rMPct','rMult','rRoute','rDrvHr','rHafPct','rVatLine','rVatBrk'].forEach(id=>document.getElementById(id).textContent='—');
-    document.getElementById('pathDetail').textContent='Check both postcodes are valid UK postcodes and try again.';
-    document.getElementById('warnBox').style.display='none';
+    document.getElementById('pathBanner').innerHTML='<p style="color:var(--mu);font-size:.78rem">Check both postcodes are valid UK postcodes and try again.</p>';
     return;
   }
 
-  const p=calcV2(d.miles,d.mins,selVeh,selJob,selWt,selZone,selAcc,plnaFloor);
+  const p=calcV3(d.miles,d.mins,selVeh,selJob,selWt,selHand,selZone,selExp,selAcc,
+                 posMiles,posHours,posRec,stopFees,waitFees,plnaFloor);
   const vn=VEH.find(v=>v.k===selVeh);
-  const jt=JOB.find(j=>j.k===selJob);
   const dt=d.mins>=60?Math.floor(d.mins/60)+'h '+(d.mins%60)+'m':d.mins+' min';
 
-  document.getElementById('resTitle').textContent=vn.n+' · '+jt.n;
-  document.getElementById('rDrv').textContent=fmt(p.protectedPay);
+  document.getElementById('resTitle').textContent=vn.n+' · '+JOB.find(j=>j.k===selJob).n;
+
+  /* path banner */
+  const pathCol=p.timeWins?'var(--gn)':'var(--bl)';
+  const pathLabel=p.timeWins
+    ?`⏱ Time path won — route took ${d.mins>=60?Math.floor(d.mins/60)+'h '+(d.mins%60)+'m':d.mins+'m'} at ${p.avgSpeed} mph avg · time cost £${p.timeCost} beats distance cost £${p.distCost}`
+    :`📏 Distance path won — ${d.miles} mi × £${vn.drv} = £${p.distCost} · time cost £${p.timeCost}`;
+  document.getElementById('pathBanner').innerHTML=
+    `<div style="background:${p.timeWins?'var(--gn-d)':'var(--bl-d)'};border:1px solid ${p.timeWins?'var(--gn-b)':'var(--bl-b)'};border-radius:var(--rx);padding:.5rem .75rem;font-size:.76rem;font-weight:700;color:${pathCol}">${pathLabel}</div>`;
+
+  /* summary cards */
+  document.getElementById('rDrv').textContent=fmt(p.actualDriverPay);
   document.getElementById('rDrvHr').textContent='≈ £'+p.driverHr+'/hr driving';
   document.getElementById('rHaf').textContent=fmt(p.hafCash);
   document.getElementById('rHafPct').textContent=p.hafMarginPct+'% of subtotal';
@@ -440,23 +573,38 @@ async function runRoute(){
   document.getElementById('rVatLine').textContent='+ £'+p.vat.toFixed(0)+' VAT (20%)';
   document.getElementById('rTotal').textContent=fmt(p.custTotal);
   document.getElementById('rVatBrk').textContent='Subtotal £'+p.custSubtotal.toFixed(0)+' + VAT £'+p.vat.toFixed(0);
+  document.getElementById('warnBox').style.display=p.multCapped?'block':'none';
+
+  /* audit trail — route */
+  document.getElementById('aRouteWinner').innerHTML=p.timeWins
+    ?'<span class="path-badge badge-time">TIME</span>':'<span class="path-badge badge-dist">DISTANCE</span>';
+  document.getElementById('aDistCost').textContent=fmt2(p.distCost)+` (${d.miles} mi × £${vn.drv})`;
+  document.getElementById('aTimeCost').textContent=fmt2(p.timeCost)+` (${p.loadedHours}h × £${p.VSHR}/hr VSHR)`;
+  document.getElementById('aTimeRow').className='audit-row'+(p.timeWins?' win':'');
+  document.getElementById('aRouteBase').textContent=fmt2(p.routeBase);
+  document.getElementById('aPosRow').style.display=p.hasPos?'flex':'none';
+  document.getElementById('aPosPay').textContent=fmt2(p.posPay)+(p.hasPos?` (${p.posTimeWins?'time':'dist'} path, ${posRec}% recovery)`:'');
+  document.getElementById('aStopRow').style.display=p.hasSupp?'flex':'none';
+  document.getElementById('aStopVal').textContent=fmt2(p.sf+p.wf);
+  document.getElementById('aPreMult').textContent=fmt2(p.preMult);
+  document.getElementById('aMult').textContent=p.appliedMult.toFixed(3)+'×'+(p.multCapped?' (capped from '+p.rawMult.toFixed(3)+'×)':'');
+  document.getElementById('aDriverPay').textContent=fmt2(p.driverCorePay);
+
+  /* audit trail — customer price */
+  document.getElementById('aFloorWinner').innerHTML=p.floorWon
+    ?`<span class="path-badge badge-floor">${p.floorKind.toUpperCase()}</span>`:'<span class="path-badge badge-dist">ROUTE PRICE</span>';
+  document.getElementById('aBaseHAF').textContent=fmt2(p.baseHAFPrice);
+  document.getElementById('aCustSub').textContent=fmt2(p.custSubtotal)+(p.floorWon?' ('+p.floorKind+' applied)':'');
+  document.getElementById('aVAT').textContent=fmt2(p.vat);
+  document.getElementById('aCustTotal').textContent=fmt2(p.custTotal);
+
+  /* meta */
   document.getElementById('rMiles').textContent=d.miles+' mi';
   document.getElementById('rMins').textContent=dt;
+  document.getElementById('rSpeed').textContent=p.avgSpeed+' mph';
+  document.getElementById('rVSHR').textContent='£'+p.VSHR+'/hr';
   document.getElementById('rMPct').textContent=p.hafMarginPct+'%';
-  document.getElementById('rMult').textContent=p.appliedMult.toFixed(3)+'×';
   document.getElementById('rRoute').textContent=(d.from||from)+' → '+(d.to||to);
-
-  const pe=document.getElementById('pathDetail');
-  if(p.usedFoundation){
-    pe.innerHTML='<span class="path-win">Foundation path won</span> — floor £'+p.effFloor+
-      ' × driver share = £'+p.foundationPay.toFixed(2)+
-      ' beats mileage £'+p.mileagePay.toFixed(2)+' ('+d.miles+' mi × £'+vn.drv+')';
-  } else {
-    pe.innerHTML='<span class="path-win">Mileage path won</span> — '+d.miles+
-      ' mi × £'+vn.drv+' = £'+p.mileagePay.toFixed(2)+
-      ' overtakes foundation £'+p.foundationPay.toFixed(2);
-  }
-  document.getElementById('warnBox').style.display=p.multCapped?'block':'none';
 }
 
 /* ── LANE MATRIX ── */
@@ -474,78 +622,100 @@ async function buildMatrix(){
   const plnaFloor=parseFloat(document.getElementById('plnaFloor').value)||HARD_FLOOR;
   document.getElementById('matrixLabel').textContent=vn+' · '+jt.n;
   const t=document.getElementById('matrixTable');
-  t.innerHTML='<tr><th>Lane</th><th>mi</th><th>Driver</th><th>HAF</th><th>Pool</th><th>ex-VAT</th><th>inc-VAT</th></tr>'+
+  t.innerHTML='<tr><th>Lane</th><th>mi</th><th>Path</th><th>Driver</th><th>HAF</th><th>ex-VAT</th><th>inc-VAT</th></tr>'+
     LANES.map(()=>'<tr><td colspan="7" style="color:var(--su);font-size:.68rem">loading…</td></tr>').join('');
   const rows=[];
   for(const [a,b,label] of LANES){
     const d=await getDist(a,b);
     if(!d){rows.push('<tr><td>'+label+'</td><td colspan="6" style="color:var(--su)">n/a</td></tr>');continue;}
-    const p=calcV2(d.miles,d.mins,selVeh,selJob,'std','normal',selAcc,plnaFloor);
-    const path=p.usedFoundation
-      ?'<span style="color:var(--pu);font-weight:800;font-size:.6rem;margin-left:.15rem" title="Foundation path">F</span>'
-      :'<span style="color:var(--gn);font-weight:800;font-size:.6rem;margin-left:.15rem" title="Mileage path">M</span>';
+    const p=calcV3(d.miles,d.mins,selVeh,selJob,'std','kerb','normal','day',selAcc,0,0,100,0,0,plnaFloor);
+    const pathBadge=p.timeWins
+      ?'<span style="color:var(--gn);font-weight:800;font-size:.6rem" title="Time path won">T</span>'
+      :'<span style="color:var(--bl);font-weight:800;font-size:.6rem" title="Distance path won">D</span>';
     rows.push('<tr><td>'+label+'</td><td class="n">'+d.miles+'</td>'+
-      '<td class="n" style="color:var(--gn)">'+fmt(p.protectedPay)+path+'</td>'+
+      '<td>'+pathBadge+'</td>'+
+      '<td class="n" style="color:var(--gn)">'+fmt(p.actualDriverPay)+'</td>'+
       '<td class="n" style="color:var(--or)">'+fmt(p.hafCash)+'</td>'+
-      '<td class="n" style="color:var(--pu)">'+fmt(p.netCash)+'</td>'+
       '<td class="n" style="color:var(--bl)">'+fmt(p.custSubtotal)+'</td>'+
       '<td class="n" style="font-weight:800">'+fmt(p.custTotal)+'</td></tr>');
   }
-  t.innerHTML='<tr><th>Lane ('+vn+' · '+jt.n+')</th><th>mi</th><th>Driver</th><th>HAF</th><th>Pool</th><th>ex-VAT</th><th>inc-VAT</th></tr>'+rows.join('');
+  t.innerHTML='<tr><th>Lane ('+vn+')</th><th>mi</th><th>Path</th><th>Driver</th><th>HAF</th><th>ex-VAT</th><th>inc-VAT</th></tr>'+rows.join('');
 }
 
-/* ── SPEC REGRESSION TESTS ──
-   Runs all spec test cases in-page on load. Tests 1-7 match the exact figures
-   from the spec tables. Test 8 verifies multiplier cap behaviour only (the
-   spec's driver pay figure includes supplements outside the base formula).   */
+/* ── SPEC REGRESSION TESTS ──────────────────────────────────────
+   Tests 1–5 match the exact figures from HAF_Core_Pricing_Formula_Test_Examples.csv.
+   Tests 6–10 verify time-of-day exposure bands from the time-of-day spec CSV.
+   All use Standard Same-Day (20% margin + 5% pool = 75% driver share).
+   ──────────────────────────────────────────────────────────── */
+const TOL = 0.07;
+
+function specCalc(miles, mins, veh, job, wt, hand, zone, exp, acc, pm, ph, pr, sf, wf, floor) {
+  return calcV3(miles, mins||0, veh, job, wt, hand, zone, exp, acc, pm||0, ph||0, pr||100, sf||0, wf||0, floor||50);
+}
+
 const SPEC_TESTS=[
-  {name:'1. Local Small Van — £50 collective floor',
-   i:{miles:10,plnaFloor:50,veh:'small',job:'sameday',wt:'std',zone:'strong',acc:'guest'},
-   expect:{protectedPay:37.50,hafCash:10.00,netCash:2.50,custSubtotal:50.00,vat:10.00,custTotal:60.00,usedFoundation:true}},
-  {name:'2. Small Van — authorised override to £40',
-   i:{miles:10,plnaFloor:40,veh:'small',job:'sameday',wt:'std',zone:'strong',acc:'guest'},
-   expect:{effFloor:40,protectedPay:30.00,hafCash:8.00,netCash:2.00,custSubtotal:40.00,vat:8.00,custTotal:48.00}},
-  {name:'3. Urgent Small Van — floor + urgency multiplier (1.10×)',
-   i:{miles:10,plnaFloor:50,veh:'small',job:'urgent',wt:'std',zone:'strong',acc:'guest'},
-   expect:{protectedPay:35.75,hafCash:16.50,netCash:2.75,custSubtotal:55.00,vat:11.00,custTotal:66.00}},
-  {name:'4. Short remote Luton — £60 floor + heavy weight + remote zone (1.198×)',
-   i:{miles:15,plnaFloor:60,veh:'luton',job:'timed',wt:'hvy',zone:'remote',acc:'ffplus'},
-   expect:{protectedPay:53.21,hafCash:15.10,netCash:3.60,custSubtotal:71.90,vat:14.38,custTotal:86.28,usedFoundation:true}},
-  {name:'5. Long LWB — mileage overtakes floor (120 mi, 1.061×)',
-   i:{miles:120,plnaFloor:50,veh:'lwb',job:'sameday',wt:'mod',zone:'normal',acc:'bizv'},
-   expect:{protectedPay:140.04,hafCash:30.52,netCash:8.98,custSubtotal:179.54,vat:35.91,custTotal:215.44,usedFoundation:false}},
-  {name:'6. SWB — £35 override clamped to £40 hard floor',
-   i:{miles:8,plnaFloor:35,veh:'swb',job:'coload',wt:'std',zone:'strong',acc:'guest'},
-   expect:{effFloor:40,floorClamped:true,protectedPay:32.00,hafCash:6.00,netCash:2.00,custSubtotal:40.00,vat:8.00,custTotal:48.00}},
-  {name:'7. MWB co-load FF Pro — floor protected, margin floor enforced at 10%',
-   i:{miles:20,plnaFloor:45,veh:'mwb',job:'coload',wt:'std',zone:'strong',acc:'ffpro'},
-   expect:{hafMarginPct:10,protectedPay:38.25,hafCash:4.50,netCash:2.25,custSubtotal:45.00,vat:9.00,custTotal:54.00}},
-  {name:'8. Extreme job — combined multiplier capped at 1.40x + review flag',
-   i:{miles:70,plnaFloor:50,veh:'lwb',job:'immed',wt:'npl',zone:'remote',acc:'guest'},
-   expectCapped:true,
-   note:'Spec driver pay (£132.80) includes tail-lift / crew supplements — cap behaviour verified only'},
+  // From CSV: Vehicle,Loaded Miles,Loaded Hours,VSBR,VSHR,Distance Cost,Time Cost,Loaded Route Base,Positioning Cost,Driver Multiplier,Driver Pay,Customer Subtotal,Customer Total
+  {name:'1. Small Van 70mi 1h (70mph) — distance path wins',
+   r:specCalc(70,60,'small','sameday','std','kerb','strong','day','guest'),
+   expect:{distCost:56,timeCost:32,routeBase:56,timeWins:false,driverCorePay:56,custSubtotal:74.67,custTotal:89.60}},
+
+  {name:'2. Small Van 70mi 2h (35mph) — time path wins (congested route)',
+   r:specCalc(70,120,'small','sameday','std','kerb','strong','day','guest'),
+   expect:{distCost:56,timeCost:64,routeBase:64,timeWins:true,driverCorePay:64,custSubtotal:85.33,custTotal:102.40}},
+
+  {name:'3. LWB 70mi 1h (70mph) — distance path',
+   r:specCalc(70,60,'lwb','sameday','std','kerb','strong','day','guest'),
+   expect:{distCost:77,timeCost:44,routeBase:77,timeWins:false,driverCorePay:77,custSubtotal:102.67,custTotal:123.20}},
+
+  {name:'4. LWB 70mi 2h (35mph) — time path wins',
+   r:specCalc(70,120,'lwb','sameday','std','kerb','strong','day','guest'),
+   expect:{distCost:77,timeCost:88,routeBase:88,timeWins:true,driverCorePay:88,custSubtotal:117.33,custTotal:140.80}},
+
+  {name:'5. SWB 25mi 1.2h (21mph) + 12mi positioning @ 100% — time wins both legs',
+   // Positioning: 12mi × 0.9 = 10.8 dist, 0.3h × 36 = 10.8 time → tie → posBase=10.8
+   // Route: 25×0.9=22.5 dist, 1.2×36=43.2 time → time wins → routeBase=43.2
+   // (43.2+10.8) × 1.03 = 55.62
+   r:specCalc(25,72,'swb','sameday','mod','kerb','strong','day','guest',12,0.3,100),
+   expect:{distCost:22.5,timeCost:43.2,routeBase:43.2,timeWins:true,posPay:10.8,driverCorePay:55.62,custSubtotal:74.16,custTotal:88.99}},
+
+  // Time-of-day exposure tests — Small Van, 50mi standard route, no positioning
+  // Route: MAX(50×0.8=40, 1.25h×32=40) = 40, mult includes exposure factor
+  {name:'6. Time-of-day: Daytime — exposure 1.0× (no uplift)',
+   r:specCalc(50,75,'small','sameday','std','kerb','normal','day','guest'),
+   expect:{appliedMult:1.03}},  // zone normal 1.03, no exposure uplift
+
+  {name:'7. Time-of-day: Home 1h late — exposure 1.05×',
+   r:specCalc(50,75,'small','sameday','std','kerb','strong','late1','guest'),
+   expect:{rawMult:1.05,appliedMult:1.05}},
+
+  {name:'8. Time-of-day: Home 2–3h late — exposure 1.10×',
+   r:specCalc(50,75,'small','sameday','std','kerb','strong','late3','guest'),
+   expect:{rawMult:1.10,appliedMult:1.10}},
+
+  {name:'9. Time-of-day: Late night remote — exposure 1.15×',
+   r:specCalc(50,75,'small','sameday','std','kerb','strong','night','guest'),
+   expect:{rawMult:1.15,appliedMult:1.15}},
+
+  {name:'10. Overnight stay + heavy load — cap check (1.12×1.25=1.40 — right at cap)',
+   r:specCalc(50,75,'small','sameday','npl','kerb','strong','overnight','guest'),
+   expect:{rawMult:1.40,multCapped:false}},
 ];
 
 function runSpecTests(){
-  const TOL=0.06;
   let html='';
   for(const t of SPEC_TESTS){
-    const r=calcV2(t.i.miles,0,t.i.veh,t.i.job,t.i.wt,t.i.zone,t.i.acc,t.i.plnaFloor);
-    if(t.expectCapped!==undefined){
-      const ok=r.multCapped===t.expectCapped;
-      html+=`<div class="${ok?'test-pass':'test-fail'}"><span>${ok?'✅':'❌'}</span><span>${t.name} — raw ${r.rawMult.toFixed(3)}× → cap ${r.multCapped?'triggered':'not triggered'}${ok?'':' UNEXPECTED'}</span></div>`;
-      if(t.note)html+=`<div class="test-note" style="margin-left:1.4rem"><span>ℹ</span><span>${t.note}</span></div>`;
-      continue;
-    }
+    const r=t.r;
     let pass=true,issues=[];
-    for(const[k,v] of Object.entries(t.expect||{})){
+    for(const [k,v] of Object.entries(t.expect||{})){
       const got=r[k];
-      if(typeof v==='number'){if(Math.abs(got-v)>TOL){pass=false;issues.push(k+': got '+got+' expected '+v);}}
-      else if(got!==v){pass=false;issues.push(k+': got '+got+' expected '+v);}
+      if(typeof v==='number'){
+        if(Math.abs(got-v)>TOL){pass=false;issues.push(k+': got '+got+' expected '+v);}
+      } else {
+        if(got!==v){pass=false;issues.push(k+': got '+got+' expected '+v);}
+      }
     }
     html+=`<div class="${pass?'test-pass':'test-fail'}"><span>${pass?'✅':'❌'}</span><span>${t.name}</span></div>`;
     if(!pass&&issues.length)html+=`<div class="test-fail" style="margin-left:1.4rem;font-size:.67rem"><span>↳</span><span>${issues.join(' | ')}</span></div>`;
-    if(t.note)html+=`<div class="test-note" style="margin-left:1.4rem"><span>ℹ</span><span>${t.note}</span></div>`;
   }
   document.getElementById('specTests').innerHTML=html;
 }
