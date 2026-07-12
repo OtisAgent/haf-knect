@@ -880,6 +880,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         </div>
         <div class="sc-err" id="sc-err"></div>
         <button class="btn btn-or btn-wide" onclick="scLogin()" style="margin-top:.3rem">Log in →</button>
+        <p class="sc-foot" style="margin-top:.5rem"><a href="#" onclick="openReset();return false">Forgotten your PIN or password? Reset it</a></p>
         <p class="sc-foot">No account? <a href="https://clever.usehaf.co.uk" target="_blank">Create one via CleverPay</a></p>
         <div style="border-top:1px solid var(--ln);padding-top:.7rem;margin-top:.7rem;text-align:center">
           <a href="https://demo.knect.usehaf.co.uk" target="_blank" class="btn btn-or btn-wide" style="display:inline-flex;align-items:center;justify-content:center;gap:.4rem;font-size:.72rem;text-decoration:none">Try a live demo →</a>
@@ -957,6 +958,7 @@ textarea.fi2{resize:vertical;min-height:70px}
     <div class="of"><label class="ol">PIN or password</label><input class="oi" id="l-pass" placeholder="4–6 digit PIN or password" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div class="oe" id="l-err"></div>
     <button class="btn btn-or btn-wide" onclick="doLogin()">Sign in →</button>
+    <p style="margin:.6rem 0 0;font-size:.72rem;color:var(--mu);text-align:center"><a href="#" onclick="openReset();return false" style="color:var(--or);font-weight:600;text-decoration:none">Forgotten your PIN or password? Reset it</a></p>
     <div style="margin-top:1.1rem;border-top:1px solid var(--ln);padding-top:.9rem;text-align:center">
       <a href="https://demo.knect.usehaf.co.uk" target="_blank" class="btn btn-or btn-wide" style="display:inline-flex;align-items:center;justify-content:center;gap:.4rem;text-decoration:none">Try a live demo →</a>
       <p style="margin:.5rem 0 0;font-size:.62rem;color:var(--mu)">No login needed · Driver, Freight &amp; Business views</p>
@@ -975,6 +977,37 @@ textarea.fi2{resize:vertical;min-height:70px}
     <div class="oe" id="pin-err"></div>
     <button class="btn btn-or btn-wide" id="pin-btn" onclick="pinSave()">Save PIN and continue</button>
     <p style="font-size:.72rem;color:var(--mu);text-align:center;margin-top:.8rem"><a href="#" onclick="pinSkip();return false">Skip for now — take me to my account</a></p>
+  </div>
+</div>
+
+<!-- ══ RESET PIN / PASSWORD OVERLAY ═══════════════════════════════ -->
+<div class="overlay" id="reset-ov">
+  <div class="obox">
+    <button class="obox-close" onclick="closeReset()">×</button>
+    <div id="rs-form">
+      <h2>Reset your PIN or password</h2>
+      <p>Confirm the details on your account and choose a new one. All three must match what we hold.</p>
+      <div class="of"><label class="ol">HAF username</label><input class="oi" id="rs-user" placeholder="e.g. JW012390" autocomplete="username" autocapitalize="characters" maxlength="10" oninput="this.value=this.value.toUpperCase()"></div>
+      <div class="of"><label class="ol">Full name (as registered)</label><input class="oi" id="rs-name" placeholder="First and last name" autocomplete="name"></div>
+      <div class="of"><label class="ol">Mobile number</label><input class="oi" id="rs-phone" type="tel" placeholder="+44 7800 000000" autocomplete="tel"></div>
+      <div class="of"><label class="ol">Date of birth</label><input class="oi" id="rs-dob" type="date"></div>
+      <div class="of"><label class="ol">What do you want to reset?</label>
+        <div style="display:flex;gap:.4rem">
+          <button type="button" class="btn btn-or btn-sm" id="rs-t-pin" onclick="rsType('pin')" style="flex:1">My PIN</button>
+          <button type="button" class="btn btn-gh btn-sm" id="rs-t-pw" onclick="rsType('password')" style="flex:1">My password</button>
+        </div>
+      </div>
+      <div class="of"><label class="ol" id="rs-new-lbl">New PIN (4–6 digits)</label><input class="oi" id="rs-new" type="password" inputmode="numeric" maxlength="6" placeholder="e.g. 4590" autocomplete="new-password"></div>
+      <div class="of"><label class="ol" id="rs-conf-lbl">Confirm new PIN</label><input class="oi" id="rs-conf" type="password" inputmode="numeric" maxlength="6" placeholder="Repeat it" autocomplete="new-password" onkeydown="if(event.key==='Enter')resetSubmit()"></div>
+      <div class="oe" id="rs-err"></div>
+      <button class="btn btn-or btn-wide" id="rs-btn" onclick="resetSubmit()">Reset and sign in</button>
+      <p style="font-size:.68rem;color:var(--mu);text-align:center;margin-top:.8rem">For security, 5 wrong attempts locks resets on the account for an hour.</p>
+    </div>
+    <div id="rs-done" style="display:none;text-align:center">
+      <h2>✅ All reset</h2>
+      <p id="rs-done-msg">Your new PIN is saved. Sign in with it now.</p>
+      <button class="btn btn-or btn-wide" onclick="resetToLogin()">Sign in →</button>
+    </div>
   </div>
 </div>
 
@@ -2027,6 +2060,31 @@ textarea.fi2{resize:vertical;min-height:70px}
         </div>
       </div>
 
+      <!-- SHARED: Account Security -->
+      <div class="tp" id="pane-security">
+        <h1 class="pt">Account Security</h1><p class="ps">Change the PIN or password you sign in with. You'll need your current one to confirm it's you.</p>
+        <div id="sec-demo" style="display:none;background:var(--or-d);border:1px solid var(--or-g);border-radius:var(--rx);padding:.7rem .9rem;font-size:.78rem;color:var(--mu);margin-bottom:1rem"><strong style="color:var(--or)">Demo account:</strong> demo logins don't have a real PIN or password to change. Sign in with your own HAF account to manage security.</div>
+        <div class="g2" id="sec-cards">
+          <div class="card">
+            <div class="ct">Change your PIN</div>
+            <div class="fg"><label class="fl">Current PIN or password</label><input class="fi2" id="sec-pin-cur" type="password" autocomplete="current-password" placeholder="What you sign in with now"></div>
+            <div class="fg"><label class="fl">New PIN (4–6 digits)</label><input class="fi2" id="sec-pin-new" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password" placeholder="e.g. 4590"></div>
+            <div class="fg"><label class="fl">Confirm new PIN</label><input class="fi2" id="sec-pin-conf" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password" placeholder="Repeat it"></div>
+            <button class="btn btn-or btn-wide" id="sec-pin-btn" onclick="secChange('pin')">Save new PIN</button>
+            <div id="sec-pin-msg" style="display:none;margin-top:.6rem;font-size:.78rem;font-weight:700"></div>
+          </div>
+          <div class="card">
+            <div class="ct">Change your password</div>
+            <div class="fg"><label class="fl">Current password or PIN</label><input class="fi2" id="sec-pw-cur" type="password" autocomplete="current-password" placeholder="What you sign in with now"></div>
+            <div class="fg"><label class="fl">New password (min. 8 characters)</label><input class="fi2" id="sec-pw-new" type="password" autocomplete="new-password" placeholder="Min. 8 characters"></div>
+            <div class="fg"><label class="fl">Confirm new password</label><input class="fi2" id="sec-pw-conf" type="password" autocomplete="new-password" placeholder="Repeat it"></div>
+            <button class="btn btn-or btn-wide" id="sec-pw-btn" onclick="secChange('password')">Save new password</button>
+            <div id="sec-pw-msg" style="display:none;margin-top:.6rem;font-size:.78rem;font-weight:700"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:.5rem"><div class="ct">Forgotten what you sign in with?</div><div style="font-size:.78rem;color:var(--mu)">Log out and use <strong style="color:var(--tx)">"Forgotten your PIN or password? Reset it"</strong> on the sign-in screen — you'll confirm your name, mobile and date of birth and set a new one there. For security, 5 wrong attempts pauses changes for an hour.</div></div>
+      </div>
+
       <!-- SHARED: Community Feedback -->
       <div class="tp" id="pane-feedback">
         <h1 class="pt">Community Feedback</h1><p class="ps">Propose features and solutions to improve the HAF KNECT network — then vote for the ideas you'd actually use. Top-voted ideas get built first.</p>
@@ -2471,6 +2529,97 @@ function closeLogin(){document.getElementById('login-ov').classList.remove('open
 async function hafSha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
 let hafPend=null; /* password-verified user waiting on PIN setup: {u, hash} */
 function hafErr(el,msg){el.textContent=msg;el.style.display='block'}
+
+/* ── RESET PIN / PASSWORD (identity checked server-side: name + mobile + date of birth) ── */
+let _rsType='pin';
+function openReset(){
+  closeLogin();
+  document.getElementById('rs-form').style.display='block';
+  document.getElementById('rs-done').style.display='none';
+  const lu=document.getElementById('l-user').value||document.getElementById('sc-user').value;
+  if(lu)document.getElementById('rs-user').value=lu.toUpperCase();
+  document.getElementById('reset-ov').classList.add('open');
+}
+function closeReset(){document.getElementById('reset-ov').classList.remove('open')}
+function rsType(t){
+  _rsType=t;
+  const isPin=t==='pin',a=document.getElementById('rs-t-pin'),b=document.getElementById('rs-t-pw');
+  a.className='btn btn-sm '+(isPin?'btn-or':'btn-gh');b.className='btn btn-sm '+(isPin?'btn-gh':'btn-or');
+  a.style.flex='1';b.style.flex='1';
+  document.getElementById('rs-new-lbl').textContent=isPin?'New PIN (4–6 digits)':'New password (min. 8 characters)';
+  document.getElementById('rs-conf-lbl').textContent=isPin?'Confirm new PIN':'Confirm new password';
+  const n=document.getElementById('rs-new'),c=document.getElementById('rs-conf');
+  n.value='';c.value='';
+  n.maxLength=isPin?6:64;c.maxLength=isPin?6:64;
+  n.inputMode=isPin?'numeric':'text';c.inputMode=isPin?'numeric':'text';
+  n.placeholder=isPin?'e.g. 4590':'Min. 8 characters';c.placeholder='Repeat it';
+}
+async function resetSubmit(){
+  const err=document.getElementById('rs-err'),btn=document.getElementById('rs-btn');
+  err.style.display='none';
+  const u=document.getElementById('rs-user').value.trim().toUpperCase();
+  const nm=document.getElementById('rs-name').value.trim();
+  const ph=document.getElementById('rs-phone').value.trim();
+  const dob=document.getElementById('rs-dob').value;
+  const a=document.getElementById('rs-new').value,b=document.getElementById('rs-conf').value;
+  if(u.length<6||!nm||!ph||!dob){hafErr(err,'Fill in every field — username, full name, mobile and date of birth.');return}
+  if(_rsType==='pin'&&!/^\d{4,6}$/.test(a)){hafErr(err,'Your new PIN must be 4 to 6 digits.');return}
+  if(_rsType==='password'&&a.length<8){hafErr(err,'Your new password must be at least 8 characters.');return}
+  if(a!==b){hafErr(err,'The two entries don\'t match — try again.');return}
+  btn.disabled=true;const old=btn.textContent;btn.textContent='Checking…';
+  try{
+    const hash=await hafSha(_rsType==='pin'?u+':'+a:a); /* PINs are stored salted with the username, passwords plain */
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/reset_driver_secret',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:u,p_full_name:nm,p_phone:ph,p_dob:dob,p_new_hash:hash,p_type:_rsType})});
+    const d=await r.json();
+    btn.textContent=old;btn.disabled=false;
+    if(d&&d.ok===true){
+      document.getElementById('rs-form').style.display='none';
+      document.getElementById('rs-done').style.display='block';
+      document.getElementById('rs-done-msg').textContent=_rsType==='pin'?'Your new PIN is saved. Sign in with it now.':'Your new password is saved. Sign in with it now.';
+      document.getElementById('l-user').value=u;
+      return;
+    }
+    if(d&&d.error==='locked'){hafErr(err,'Too many attempts on this account — resets are paused for an hour. Try again later or contact HAF support.');return}
+    hafErr(err,'Those details don\'t match what we hold for that username. Check your full name, mobile number and date of birth.');
+  }catch(e){btn.textContent=old;btn.disabled=false;hafErr(err,'Connection problem — please try again.')}
+}
+function resetToLogin(){closeReset();document.getElementById('l-pass').value='';openLogin();document.getElementById('l-pass').focus()}
+if(new URLSearchParams(location.search).has('reset'))setTimeout(openReset,250); /* /?reset deep link (admin gate & PLNA point here) */
+
+/* ── ACCOUNT SECURITY PANE (signed-in change — needs the current PIN/password) ── */
+function secPrep(){
+  const isDemo=!!DEMO_ACCOUNTS[_superUser];
+  document.getElementById('sec-demo').style.display=isDemo?'block':'none';
+  document.getElementById('sec-cards').style.opacity=isDemo?'.45':'1';
+  document.getElementById('sec-cards').style.pointerEvents=isDemo?'none':'auto';
+}
+function secMsg(el,ok,msg){el.style.display='block';el.style.color=ok?'var(--gn)':'var(--rd, #e5484d)';el.textContent=msg}
+async function secChange(type){
+  const p=type==='pin'?'sec-pin':'sec-pw';
+  const cur=document.getElementById(p+'-cur').value,a=document.getElementById(p+'-new').value,b=document.getElementById(p+'-conf').value;
+  const msg=document.getElementById(p+'-msg'),btn=document.getElementById(p+'-btn');
+  msg.style.display='none';
+  if(!cur){secMsg(msg,false,'Enter your current PIN or password first.');return}
+  if(type==='pin'&&!/^\d{4,6}$/.test(a)){secMsg(msg,false,'Your new PIN must be 4 to 6 digits.');return}
+  if(type==='password'&&a.length<8){secMsg(msg,false,'Your new password must be at least 8 characters.');return}
+  if(a!==b){secMsg(msg,false,'The two entries don\'t match — try again.');return}
+  btn.disabled=true;const old=btn.textContent;btn.textContent='Saving…';
+  try{
+    const curIsPin=/^\d{4,6}$/.test(cur);
+    const curHash=await hafSha(curIsPin?_superUser+':'+cur:cur);
+    const newHash=await hafSha(type==='pin'?_superUser+':'+a:a);
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/change_driver_secret',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:_superUser,p_current_hash:curHash,p_new_hash:newHash,p_type:type})});
+    const d=await r.json();
+    btn.textContent=old;btn.disabled=false;
+    if(d&&d.ok===true){
+      ['cur','new','conf'].forEach(s=>document.getElementById(p+'-'+s).value='');
+      secMsg(msg,true,type==='pin'?'✅ New PIN saved — use it next time you sign in.':'✅ New password saved — use it next time you sign in.');
+      return;
+    }
+    if(d&&d.error==='locked'){secMsg(msg,false,'Too many wrong attempts — changes are paused for an hour.');return}
+    secMsg(msg,false,'That current PIN/password isn\'t right — check it and try again.');
+  }catch(e){btn.textContent=old;btn.disabled=false;secMsg(msg,false,'Connection problem — please try again.')}
+}
 function hafGo(u,k,t){localStorage.setItem('knect-user',u);enterKnectApp(u);}
 const DRIVER_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
@@ -2483,6 +2632,7 @@ const DRIVER_NAV=[
   {id:'d-comp',l:'Compliance',s:'My Account',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
   {id:'d-dir',l:'Driver Directory',s:'My Account',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'billing',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
+  {id:'security',l:'Account Security',s:'My Account',ico:'<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'},
   {id:'support',l:'Support',s:'My Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
   {id:'feedback',l:'Feedback',s:'My Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
 ];
@@ -2494,6 +2644,7 @@ const ADMIN_NAV=[
   {id:'f-cover',l:'Coverage Board',s:'Freight Tools',ico:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'},
   {id:'f-lanes',l:'Lane Pricing',s:'Freight Tools',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
   {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
+  {id:'security',l:'Account Security',s:'Account',ico:'<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'},
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
   {id:'feedback',l:'Feedback',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
 ];
@@ -2507,6 +2658,7 @@ const BUSINESS_NAV=[
   {id:'b-saved',l:'Saved Addresses',s:'Send Goods',ico:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'},
   {id:'b-usage',l:'Usage &amp; Activity',s:'Account',ico:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'},
   {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
+  {id:'security',l:'Account Security',s:'Account',ico:'<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'},
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
   {id:'feedback',l:'Feedback',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
 ];
@@ -2520,6 +2672,7 @@ const FREIGHT_NAV=[
   {id:'f-lanes',l:'Lane Pricing',s:'Freight',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
   {id:'f-account',l:'Account Controls',s:'Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
   {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
+  {id:'security',l:'Account Security',s:'Account',ico:'<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'},
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
   {id:'feedback',l:'Feedback',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {id:'f-plans',l:'Upgrade',s:'Upgrade',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
@@ -2532,6 +2685,7 @@ const PERSONAL_NAV=[
   {id:'f-cap',l:'Network Map',s:'My Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:'f-account',l:'Account &amp; Rebate',s:'My Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
   {id:'billing',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
+  {id:'security',l:'Account Security',s:'My Account',ico:'<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'},
   {id:'support',l:'Support',s:'My Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
   {id:'feedback',l:'Feedback',s:'My Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {id:'f-plans',l:'Upgrade',s:'Upgrade',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
@@ -2897,6 +3051,7 @@ function buildNav(tabs){
 let ct=null;
 function switchTab(id){
   if(id==='pane-feedback'){fbPrefill();fbLoad();}
+  if(id==='pane-security')secPrep();
   if(ct){document.getElementById(ct).classList.remove('on');const n=document.getElementById('ni-'+ct.replace('pane-',''));if(n)n.classList.remove('on');}
   const p=document.getElementById(id);if(p)p.classList.add('on');
   const n=document.getElementById('ni-'+id.replace('pane-',''));if(n)n.classList.add('on');
