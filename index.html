@@ -312,6 +312,25 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .fi2:focus{border-color:var(--or)}
 textarea.fi2{resize:vertical;min-height:70px}
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+/* feedback board */
+.fb-filters{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem}
+.fb-fbtn{padding:.3rem .8rem;border-radius:var(--pill);font-size:.72rem;font-weight:700;background:var(--p);border:1px solid var(--ln);color:var(--mu);transition:all .14s}
+.fb-fbtn.on{background:var(--or-d);border-color:var(--or-g);color:var(--or)}
+.fb-item{background:var(--p);border:1px solid var(--ln);border-radius:var(--rs);padding:.85rem 1rem;display:flex;gap:.85rem;align-items:flex-start;box-shadow:var(--sd);margin-bottom:.55rem}
+.fb-vote{display:flex;flex-direction:column;align-items:center;gap:.1rem;min-width:44px;padding:.45rem .3rem;border-radius:var(--rx);border:1px solid var(--ln);background:var(--p2);color:var(--mu);font-size:.82rem;font-weight:800;transition:all .14s;flex-shrink:0}
+.fb-vote:hover{border-color:var(--or);color:var(--or)}
+.fb-vote.voted{background:var(--or-d);border-color:var(--or-g);color:var(--or)}
+.fb-body{flex:1;min-width:0}
+.fb-title{font-weight:700;font-size:.92rem;overflow-wrap:anywhere}
+.fb-details{font-size:.78rem;color:var(--mu);line-height:1.55;margin-top:.15rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.fb-meta{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-top:.45rem}
+.fb-by{font-size:.68rem;color:var(--su);font-weight:600}
+.fb-empty{padding:1.4rem;text-align:center;color:var(--su);font-size:.8rem;background:var(--p);border:1px dashed var(--lns);border-radius:var(--rs)}
+@media(max-width:900px){.fb-g2{grid-template-columns:1fr!important}}
+/* sidebar PLNA promo */
+.sb-plna{display:block;margin:.9rem .8rem .4rem;padding:.8rem .9rem;background:var(--or-d);border:1.5px solid var(--or-g);border-radius:var(--rs);text-decoration:none;color:var(--tx);font-size:.74rem;line-height:1.5;transition:border-color .14s}
+.sb-plna:hover{border-color:var(--or)}
+.sb-plna b{display:block;color:var(--or);font-weight:800;margin-top:.15rem}
 @media(max-width:560px){.fr{grid-template-columns:1fr}}
 
 /* STATUS PANELS */
@@ -1085,6 +1104,7 @@ textarea.fi2{resize:vertical;min-height:70px}
   <div class="app-body">
     <nav class="sidebar" id="sidebar">
       <div id="nav-list"></div>
+      <a class="sb-plna" id="sb-plna" href="https://plna.usehaf.co.uk" target="_blank" rel="noopener">Looking to be a driver?<b>Sign up to the PLNA →</b></a>
       <div class="sb-bot">
         <hr class="sdiv">
         <button class="back-btn" id="plna-link-btn" style="display:none;color:var(--or);" onclick="window.open('https://plna.usehaf.co.uk','_blank')">
@@ -2007,6 +2027,35 @@ textarea.fi2{resize:vertical;min-height:70px}
         </div>
       </div>
 
+      <!-- SHARED: Community Feedback -->
+      <div class="tp" id="pane-feedback">
+        <h1 class="pt">Community Feedback</h1><p class="ps">Propose features and solutions to improve the HAF KNECT network — then vote for the ideas you'd actually use. Top-voted ideas get built first.</p>
+        <div style="background:var(--or-d);border:1px solid var(--or-g);border-radius:var(--rx);padding:.55rem .9rem;font-size:.73rem;color:var(--mu);margin-bottom:1rem"><strong style="color:var(--or)">House rules:</strong> strictly for suggesting alterations to the network — features, fixes and solutions. Anything rude, abusive or discriminatory is blocked and removed.</div>
+        <div class="g2 fb-g2" style="align-items:start">
+          <div class="card">
+            <div class="ct">Post to the board</div>
+            <div class="fr">
+              <div class="fg"><label class="fl">Your name (optional)</label><input class="fi2" id="fb-name" placeholder="Anonymous" maxlength="40"></div>
+              <div class="fg"><label class="fl">You are a…</label><select class="fi2" id="fb-role"><option value="driver">Driver</option><option value="customer">Customer</option><option value="business">Business</option><option value="team">HAF team</option><option value="other">Other</option></select></div>
+            </div>
+            <div class="fg"><label class="fl">Type</label><select class="fi2" id="fb-cat"><option value="idea">Feature idea</option><option value="not_working">Problem to fix</option><option value="working">Solution that works</option></select></div>
+            <div class="fg"><label class="fl">Summary</label><input class="fi2" id="fb-title" placeholder="One line — e.g. Let me save favourite routes" maxlength="120"></div>
+            <div class="fg"><label class="fl">Details (optional)</label><textarea class="fi2" id="fb-details" placeholder="What should change on the network, and why?" maxlength="1000"></textarea></div>
+            <button class="btn btn-or btn-wide" id="fb-submit" onclick="fbSubmit()">Post to the board</button>
+            <div id="fb-msg" style="display:none;margin-top:.6rem;font-size:.78rem;font-weight:700"></div>
+          </div>
+          <div>
+            <div class="fb-filters">
+              <button class="fb-fbtn on" onclick="fbFilter('all',this)">All</button>
+              <button class="fb-fbtn" onclick="fbFilter('idea',this)">Feature ideas</button>
+              <button class="fb-fbtn" onclick="fbFilter('not_working',this)">Problems</button>
+              <button class="fb-fbtn" onclick="fbFilter('working',this)">Working well</button>
+            </div>
+            <div id="fb-list"><div class="fb-empty">Loading the board…</div></div>
+          </div>
+        </div>
+      </div>
+
       <!-- ADMIN -->
       <div class="tp" id="pane-admin">
         <h1 class="pt">OTIS Control</h1><p class="ps">Full platform view. Admin only.</p>
@@ -2435,6 +2484,7 @@ const DRIVER_NAV=[
   {id:'d-dir',l:'Driver Directory',s:'My Account',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'billing',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'My Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
+  {id:'feedback',l:'Feedback',s:'My Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
 ];
 const ADMIN_NAV=[
   {id:'admin',l:'Network Overview',s:'Overview',ico:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
@@ -2445,6 +2495,7 @@ const ADMIN_NAV=[
   {id:'f-lanes',l:'Lane Pricing',s:'Freight Tools',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
   {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
+  {id:'feedback',l:'Feedback',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
 ];
 const BUSINESS_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
@@ -2457,6 +2508,7 @@ const BUSINESS_NAV=[
   {id:'b-usage',l:'Usage &amp; Activity',s:'Account',ico:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'},
   {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
+  {id:'feedback',l:'Feedback',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
 ];
 const FREIGHT_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
@@ -2469,6 +2521,7 @@ const FREIGHT_NAV=[
   {id:'f-account',l:'Account Controls',s:'Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
   {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
+  {id:'feedback',l:'Feedback',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {id:'f-plans',l:'Upgrade',s:'Upgrade',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
 ];
 /* ── PERSONAL NAV (Brent as Pro freight forwarder) ── */
@@ -2480,6 +2533,7 @@ const PERSONAL_NAV=[
   {id:'f-account',l:'Account &amp; Rebate',s:'My Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
   {id:'billing',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'My Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
+  {id:'feedback',l:'Feedback',s:'My Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {id:'f-plans',l:'Upgrade',s:'Upgrade',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
 ];
 
@@ -2836,9 +2890,13 @@ function buildNav(tabs){
     h+=`<div class="ni" id="ni-${t.id}" onclick="switchTab('pane-${t.id}')"><svg class="ni-ic" viewBox="0 0 24 24">${t.ico}</svg>${t.l}${t.badge?`<span class="nb">${t.badge}</span>`:''}</div>`;
   });
   document.getElementById('nav-list').innerHTML=h;
+  const promo=document.getElementById('sb-plna');
+  if(promo)promo.style.display=(tabs===DRIVER_NAV)?'none':'block';
+  _fbRoleGuess=(tabs===DRIVER_NAV)?'driver':(tabs===BUSINESS_NAV)?'business':(tabs===FREIGHT_NAV)?'business':'team';
 }
 let ct=null;
 function switchTab(id){
+  if(id==='pane-feedback'){fbPrefill();fbLoad();}
   if(ct){document.getElementById(ct).classList.remove('on');const n=document.getElementById('ni-'+ct.replace('pane-',''));if(n)n.classList.remove('on');}
   const p=document.getElementById(id);if(p)p.classList.add('on');
   const n=document.getElementById('ni-'+id.replace('pane-',''));if(n)n.classList.add('on');
@@ -2846,6 +2904,86 @@ function switchTab(id){
   if(id==='pane-d-home')setTimeout(initDashMap,80);
   if(id==='pane-f-cap')setTimeout(initCapMap,80);
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
+}
+
+/* ── COMMUNITY FEEDBACK BOARD (shared HUB database — same board as the demo) ── */
+const FB_URL='https://jsdwvogsxlnczzbefwgp.supabase.co/rest/v1';
+const FB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzZHd2b2dzeGxuY3p6YmVmd2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODgyMzYsImV4cCI6MjA5Njk2NDIzNn0.pxqM-Oh4f_3PlqCbKIKvcKZnNRUZ1ASKqqdNg78M_4M';
+const FB_H={apikey:FB_KEY,Authorization:'Bearer '+FB_KEY,'Content-Type':'application/json'};
+const FB_STATUS={under_review:['Under review','ca'],planned:['Planned','cb'],building:['Building','co'],done:['Done','cg'],declined:['Not planned','cr2']};
+const FB_CAT={idea:['Feature idea','cb'],not_working:['Problem','cr2'],working:['Working well','cg']};
+const FB_ROLE={driver:'Driver',customer:'Customer',business:'Business',team:'HAF team',other:'Other',user:'User'};
+let fbItems=[],fbCat='all',fbLoaded=false,_fbRoleGuess='customer';
+/* decency filter — the board is strictly for network alterations; abusive or racist content never leaves the page (the database blocks it server-side too) */
+const FB_BLOCK=/\b(nigg(?:er|a)s?|paki(?:s)?|chink(?:s)?|spic(?:s)?|coon(?:s)?|kike(?:s)?|gook(?:s)?|raghead(?:s)?|wog(?:s)?|golliwogs?|fuck(?:er|ing|ed|s)?|shit(?:e|ty|s)?|cunt(?:s)?|twat(?:s)?|wanker(?:s)?|bitch(?:es)?|bastard(?:s)?|dickhead(?:s)?|arsehole(?:s)?|asshole(?:s)?|prick(?:s)?|slags?|whore(?:s)?|retard(?:ed|s)?|fag(?:got)?s?|poofs?|trann(?:y|ies))\b/i;
+function fbVoter(){let k=localStorage.getItem('haf_fb_voter');if(!k){k=(crypto.randomUUID?crypto.randomUUID():String(Math.random()).slice(2)+'-'+new Date().getTime());localStorage.setItem('haf_fb_voter',k);}return k}
+function fbMyVotes(){try{return new Set(JSON.parse(localStorage.getItem('haf_fb_voted')||'[]'))}catch(e){return new Set()}}
+function fbEsc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fbPrefill(){
+  const sel=document.getElementById('fb-role');if(sel&&!sel._set){sel._set=true;sel.value=_fbRoleGuess;}
+  const nm=document.getElementById('fb-name');
+  if(nm&&!nm.value){const u=document.getElementById('tb-user');if(u&&u.textContent.trim())nm.value=u.textContent.trim().slice(0,40);}
+}
+async function fbLoad(force){
+  if(fbLoaded&&!force)return;
+  try{
+    const r=await fetch(FB_URL+'/knect_feedback_board?select=*&order=votes.desc,created_at.desc&limit=200',{headers:FB_H});
+    if(!r.ok)throw 0;
+    fbItems=await r.json();fbLoaded=true;fbRender();
+  }catch(e){document.getElementById('fb-list').innerHTML='<div class="fb-empty">Could not load the board — check your connection and try again.</div>'}
+}
+function fbRender(){
+  const voted=fbMyVotes();
+  const list=fbItems.filter(i=>fbCat==='all'||i.category===fbCat);
+  const el=document.getElementById('fb-list');
+  if(!list.length){el.innerHTML='<div class="fb-empty">Nothing here yet — be the first to post.</div>';return}
+  el.innerHTML=list.map(i=>{
+    const st=FB_STATUS[i.status]||FB_STATUS.under_review,ctg=FB_CAT[i.category]||FB_CAT.idea;
+    const v=voted.has(i.id);
+    const when=new Date(i.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    return `<div class="fb-item">
+      <button class="fb-vote${v?' voted':''}" onclick="fbVote('${i.id}',this)" title="${v?'You voted for this':'Vote for this'}">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+        <span>${i.votes}</span>
+      </button>
+      <div class="fb-body">
+        <div class="fb-title">${fbEsc(i.title)}</div>
+        ${i.details?`<div class="fb-details">${fbEsc(i.details)}</div>`:''}
+        <div class="fb-meta"><span class="chip ${ctg[1]}">${ctg[0]}</span><span class="chip ${st[1]}">${st[0]}</span><span class="fb-by">${fbEsc(i.author_name||'Anonymous')} · ${FB_ROLE[i.author_role]||'User'} · ${when}</span></div>
+      </div>
+    </div>`}).join('');
+}
+function fbFilter(c,btn){fbCat=c;document.querySelectorAll('.fb-fbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');fbRender()}
+async function fbVote(id,btn){
+  const voted=fbMyVotes();
+  if(voted.has(id)){fbNote("You've already voted for this one.");return}
+  btn.disabled=true;
+  try{
+    const r=await fetch(FB_URL+'/knect_feedback_votes',{method:'POST',headers:FB_H,body:JSON.stringify({idea_id:id,voter_key:fbVoter()})});
+    if(!r.ok&&r.status!==409)throw 0;
+    voted.add(id);localStorage.setItem('haf_fb_voted',JSON.stringify([...voted]));
+    const it=fbItems.find(x=>x.id===id);if(it&&r.ok)it.votes++;
+    fbItems.sort((a,b)=>b.votes-a.votes||new Date(b.created_at)-new Date(a.created_at));
+    fbRender();
+  }catch(e){fbNote("Vote didn't go through — try again.");btn.disabled=false}
+}
+function fbNote(m,good){const el=document.getElementById('fb-msg');el.textContent=m;el.style.display='block';el.style.color=good?'var(--gn)':'var(--rd)';clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',3600)}
+async function fbSubmit(){
+  const title=document.getElementById('fb-title').value.trim();
+  const details=document.getElementById('fb-details').value.trim();
+  const name=document.getElementById('fb-name').value.trim();
+  if(title.length<3){fbNote('Give it a short summary first (3+ characters).');return}
+  if(FB_BLOCK.test(title)||FB_BLOCK.test(details)||FB_BLOCK.test(name)){fbNote('Blocked — keep it clean and about the network. Rude or discriminatory posts are not accepted.');return}
+  const btn=document.getElementById('fb-submit');btn.disabled=true;btn.textContent='Posting…';
+  const body={title,details:details||null,category:document.getElementById('fb-cat').value,author_role:document.getElementById('fb-role').value,author_name:name||'Anonymous'};
+  try{
+    const r=await fetch(FB_URL+'/knect_feedback_ideas',{method:'POST',headers:FB_H,body:JSON.stringify(body)});
+    if(!r.ok)throw 0;
+    document.getElementById('fb-title').value='';document.getElementById('fb-details').value='';
+    fbNote('Posted — your idea is live on the board. Top-voted ideas get built first.',true);
+    await fbLoad(true);
+  }catch(e){fbNote("Couldn't post right now — try again in a minute.")}
+  btn.disabled=false;btn.textContent='Post to the board';
 }
 
 // Boot in day mode
