@@ -3207,7 +3207,7 @@ const CAP_REGIONS=[
   {id:'sco',name:'Scotland',geo:'Scotland',pc:'Scotland',colour:'#e8823c',lab:[56.6,-4.2],tier:'warm',drivers:6,jobs:0,cities:'Glasgow · Edinburgh · Aberdeen',corridor:'M8 / M74',demand:'Gateway to/from England via Penrith',
     relays:[{name:'Abington (M74)',road:'M74 J13',swaps:9,ontime:87,dwell:31,live:false}]},
   {id:'ni',name:'Northern Ireland',geo:'Northern Ireland',pc:'Northern Ireland',colour:'#4fae73',lab:[54.7,-6.8],tier:'cool',drivers:2,jobs:0,cities:'Belfast · Derry · Lisburn',corridor:'M1 / M2',demand:'Early — sea-link backloads',relays:[]},
-  {id:'ire',name:'Ireland',geo:'Ireland',pc:'Ireland',colour:'#3fa66a',lab:[53.3,-8.0],tier:'cool',drivers:0,jobs:0,cities:'Dublin · Cork · Galway · Limerick',corridor:'M50 / M7 / M8',demand:'Cross-border & sea-link — early',relays:[]},
+  {id:'ire',name:'Ireland',geo:'Ireland',pc:'Ireland',colour:'#3fa66a',lab:[53.4,-7.9],tier:'cool',drivers:0,jobs:0,cities:'Dublin · Cork · Galway · Limerick',corridor:'M50 / M7 / M8',demand:'Cross-border & sea-link — early',relays:[]},
   {id:'ne',name:'North East',geo:'North East',pc:'North East',colour:'#b5543f',lab:[54.9,-1.9],tier:'warm',drivers:7,jobs:0,cities:'Newcastle · Sunderland · Durham',corridor:'A1(M)',demand:'Long-haul South backloads',
     relays:[{name:'Scotch Corner (A1/A66)',road:'A1(M) J53',swaps:12,ontime:89,dwell:28,live:false}]},
   {id:'nw',name:'North West',geo:'North West',pc:'North West',colour:'#9ec13c',lab:[54.0,-2.7],tier:'hot',drivers:14,jobs:2,cities:'Manchester · Liverpool · Preston',corridor:'M6 / M62',demand:'Manchester → Birmingham runs daily',
@@ -3250,9 +3250,11 @@ const CAP_TOWNS={
 CAP_REGIONS.forEach(z=>z.towns=CAP_TOWNS[z.id]||z.cities);
 /* whole-island Ireland (Republic) overlay — a simplified coastal outline, added so Ireland is a section, not just NI */
 const IRELAND_FEATURE={type:'Feature',properties:{region:'Ireland'},geometry:{type:'MultiPolygon',coordinates:[[[
-  [-8.10,55.30],[-7.20,55.05],[-7.45,54.60],[-6.90,54.25],[-6.25,54.05],[-6.10,53.40],[-6.00,52.80],
-  [-6.20,52.20],[-7.55,52.10],[-8.30,51.60],[-9.60,51.50],[-10.25,51.95],[-9.90,52.55],[-9.95,53.10],
-  [-10.20,53.45],[-10.05,54.05],[-9.30,54.30],[-8.55,54.45],[-8.30,54.70],[-8.75,54.95],[-8.45,55.20],[-8.10,55.30]
+  [-6.22,54.05],[-6.30,54.10],[-6.80,54.28],[-7.23,54.18],[-7.87,54.29],[-8.10,54.48],[-7.60,54.70],
+  [-7.46,54.83],[-7.45,54.92],[-7.25,55.06],[-7.40,55.30],[-8.00,55.20],[-8.45,54.95],[-8.65,54.63],
+  [-8.55,54.30],[-9.20,54.10],[-10.05,54.00],[-10.10,53.55],[-9.85,53.25],[-9.90,52.90],[-9.85,52.55],
+  [-10.40,52.10],[-10.20,51.75],[-9.60,51.55],[-8.30,51.60],[-7.55,52.10],[-6.35,52.25],[-6.05,52.80],
+  [-6.10,53.35],[-6.20,53.90],[-6.22,54.05]
 ]]]}};
 CAP_REGIONS.forEach(z=>z.side=CAP_SIDE_L.has(z.id)?'l':'r');
 
@@ -3282,7 +3284,7 @@ function initCapMap(){
     /* add the Republic of Ireland shape once, so it draws as its own region */
     if(!window.UK_GEO.features.some(f=>f.properties.region==='Ireland'))window.UK_GEO.features.push(IRELAND_FEATURE);
     capMap._zoneLayers={};
-    const BASE=.42,HOV=.62;capMap._base=BASE;
+    const BASE=.3,HOV=.5;capMap._base=BASE;
     capMap._geo=L.geoJSON(window.UK_GEO,{
       style:(f)=>{const z=CAP_BY_GEO[f.properties.region];return{fillColor:z?z.colour:'#888',color:z?'#334a57':'#0e1113',weight:1.2,fillOpacity:z?BASE:.1,lineJoin:'round'};},
       onEachFeature:(f,layer)=>{const z=CAP_BY_GEO[f.properties.region];if(!z)return;
@@ -3366,7 +3368,7 @@ function capSelect(id){
   _capSel=id;
   /* highlight + zoom into the chosen region */
   if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>{
-    capMap._zoneLayers[k].setStyle({fillOpacity:k===id?.7:.16,weight:k===id?3:1.2,color:k===id?'#0e1113':'#334a57',fillColor:k===id?z.colour:CAP_REGIONS.find(r=>r.id===k).colour});
+    capMap._zoneLayers[k].setStyle({fillOpacity:k===id?.58:.12,weight:k===id?3:1.2,color:k===id?'#0e1113':'#334a57',fillColor:k===id?z.colour:CAP_REGIONS.find(r=>r.id===k).colour});
     if(k===id&&capMap._zoneLayers[k].bringToFront)capMap._zoneLayers[k].bringToFront();
   });
   if(capMap&&capMap._zoneLayers&&capMap._zoneLayers[id]&&capMap._zoneLayers[id].getBounds){
@@ -3416,7 +3418,7 @@ function capSelect(id){
 function capClear(){
   _capSel=null;
   document.getElementById('cap-detail').style.display='none';
-  if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>capMap._zoneLayers[k].setStyle({fillOpacity:(capMap._base||.42),weight:1.2,color:'#334a57'}));
+  if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>capMap._zoneLayers[k].setStyle({fillOpacity:(capMap._base||.3),weight:1.2,color:'#334a57'}));
   capMarkSectionActive(null);
   capResetView();
   capApplyFilters();
@@ -3573,7 +3575,7 @@ function capApplyFilters(){
     const c=document.getElementById('csec-'+z.id);
     if(c){c.style.opacity=ok?'1':'.3';c.style.filter=ok?'':'grayscale(.65)';}
     if(capMap&&capMap._zoneLayers&&capMap._zoneLayers[z.id]&&_capSel!==z.id){
-      if(ok)capMap._zoneLayers[z.id].setStyle({fillOpacity:(capMap._base||.42),fillColor:z.colour,color:'#334a57',weight:1.2});
+      if(ok)capMap._zoneLayers[z.id].setStyle({fillOpacity:(capMap._base||.3),fillColor:z.colour,color:'#334a57',weight:1.2});
       else capMap._zoneLayers[z.id].setStyle({fillOpacity:.05,fillColor:'#8a97a0',color:'#c2ccd2',weight:1});
     }
   });
