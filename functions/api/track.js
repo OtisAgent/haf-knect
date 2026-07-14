@@ -33,11 +33,21 @@ export async function onRequestPost({ request, env }) {
   if (!env.SUPA_URL || !env.SUPA_KEY) return j({ ok: false, error: 'not_configured' }, 503);
   let b;
   try { b = await request.json(); } catch (e) { return j({ ok: false, error: 'bad_json' }, 400); }
-  const job = String(b.job || '').trim().toUpperCase();
   const lat = Number(b.lat), lng = Number(b.lng);
-  if (!job || !isFinite(lat) || !isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+  if (!isFinite(lat) || !isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
     return j({ ok: false, error: 'bad_params' }, 400);
   }
+  /* writes are gated: only a phone holding a real issued link can post a position */
+  const token = String(b.token || '').trim();
+  if (!token) return j({ ok: false, error: 'no_token' }, 401);
+  let job;
+  try {
+    const lr = await fetch(env.SUPA_URL + '/rest/v1/track_links?token=eq.' + encodeURIComponent(token) + '&select=job',
+      { headers: { apikey: env.SUPA_KEY, Authorization: 'Bearer ' + env.SUPA_KEY } });
+    const lrows = await lr.json();
+    job = Array.isArray(lrows) && lrows[0] && lrows[0].job;
+  } catch (e) { return j({ ok: false, error: 'upstream' }, 502); }
+  if (!job) return j({ ok: false, error: 'bad_token' }, 401);
   const row = {
     job, lat, lng,
     kind: b.kind === 'pin' ? 'pin' : 'live',

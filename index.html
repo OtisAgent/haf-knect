@@ -3441,18 +3441,27 @@ function ljShowPin(j,d){
  const info=document.getElementById('lj-liveinfo');
  if(info)info.innerHTML='📍 '+(d.label||'Driver')+' shared their location'+ago;
 }
-/* driver taps this on their phone to open the one-tap live-share page for this job */
+/* issue a short private tracking link for a job (cached per job) — carries no PII */
+let ljTokens={};
+function hafIssue(j){
+ if(ljTokens[j.id])return Promise.resolve(ljTokens[j.id]);
+ const nm=(j.driverName&&j.driverName!=='—')?j.driverName:'Driver';
+ return fetch('/api/link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job:j.id,name:nm,from:j.from.name,to:j.to.name})})
+  .then(r=>r.json()).then(d=>{if(d&&d.ok&&d.token){ljTokens[j.id]=d.token;return d.token;}throw new Error('issue_failed');});
+}
+/* driver taps this on their phone → issues the private link and opens it */
 function hafShareLive(){
  const j=hafCurrentJob();
- const url=location.origin+'/track/?job='+encodeURIComponent(j.id)+'&name='+encodeURIComponent(j.driverName||'Driver')+'&from='+encodeURIComponent(j.from.name)+'&to='+encodeURIComponent(j.to.name);
- window.open(url,'_blank');
+ const w=window.open('','_blank');
+ hafIssue(j).then(tok=>{const url=location.origin+'/t/'+tok;if(w){w.location=url;}else{location.href=url;}})
+  .catch(()=>{if(w)w.close();alert('Could not create the tracking link — the tracker may still be publishing. Try again in a moment.');});
 }
 /* demo: one dropped location pin (this is what a WhatsApp 'share location' becomes) */
 function hafSimPin(){
  const j=hafCurrentJob();
  const lat=j.driverPos.lat+(Math.random()-.5)*.02,lng=j.driverPos.lng+(Math.random()-.5)*.02;
- fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job:j.id,lat:lat,lng:lng,kind:'pin',label:(j.driverName&&j.driverName!=='—')?j.driverName:'Driver'})})
-  .then(r=>r.json()).then(d=>{if(d&&d.ok){ljShowPin(j,{lat:lat,lng:lng,label:j.driverName,ageSec:0});}else{alert('Could not save the pin yet — the tracker may still be publishing. Try again in a moment.');}})
+ hafIssue(j).then(tok=>fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tok,lat:lat,lng:lng,kind:'pin',label:(j.driverName&&j.driverName!=='—')?j.driverName:'Driver'})}))
+  .then(r=>r.json()).then(d=>{if(d&&d.ok){ljShowPin(j,{lat:lat,lng:lng,label:j.driverName,ageSec:0});}else{alert('Could not save the pin yet — try again in a moment.');}})
   .catch(()=>alert('Could not reach the tracker.'));
 }
 /* demo: play a moving run down the route — writes real live positions to the gateway,
@@ -3460,16 +3469,18 @@ function hafSimPin(){
 function hafPlayDemoRun(){
  const j=hafCurrentJob();
  if(ljDemoTimer){clearInterval(ljDemoTimer);ljDemoTimer=null;}
- let t=0;const a=j.from,b=j.to;
  const info=document.getElementById('lj-liveinfo');if(info)info.innerHTML='<span style="color:#39d98a">● Live</span> · starting demo run…';
- ljDemoTimer=setInterval(()=>{
-  t+=0.06;if(t>1)t=1;
-  const lat=a.lat+(b.lat-a.lat)*t+Math.sin(t*7)*0.012;
-  const lng=a.lng+(b.lng-a.lng)*t;
-  fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job:j.id,lat:lat,lng:lng,kind:'live',label:((j.driverName&&j.driverName!=='—')?j.driverName:'Driver')+' (demo)'})}).catch(()=>{});
-  ljApplyLive(j,{lat:lat,lng:lng,ageSec:0});
-  if(t>=1){clearInterval(ljDemoTimer);ljDemoTimer=null;}
- },900);
+ hafIssue(j).then(tok=>{
+  let t=0;const a=j.from,b=j.to;
+  ljDemoTimer=setInterval(()=>{
+   t+=0.06;if(t>1)t=1;
+   const lat=a.lat+(b.lat-a.lat)*t+Math.sin(t*7)*0.012;
+   const lng=a.lng+(b.lng-a.lng)*t;
+   fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tok,lat:lat,lng:lng,kind:'live',label:((j.driverName&&j.driverName!=='—')?j.driverName:'Driver')+' (demo)'})}).catch(()=>{});
+   ljApplyLive(j,{lat:lat,lng:lng,ageSec:0});
+   if(t>=1){clearInterval(ljDemoTimer);ljDemoTimer=null;}
+  },900);
+ }).catch(()=>{if(info)info.innerHTML='Could not start the demo run.';});
 }
 
 /* ── PROOF OF DELIVERY — driver sign-off → locked, downloadable proof for customer & freight ── */
