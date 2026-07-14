@@ -519,6 +519,20 @@ textarea.fi2{resize:vertical;min-height:70px}
 .cap-role{border:none;background:transparent;color:var(--mu);font-weight:800;font-size:.74rem;padding:.32rem .8rem;border-radius:18px;cursor:pointer;transition:all .14s;white-space:nowrap}
 .cap-role.on{background:var(--or);color:#0e1113}
 .cap-back{position:absolute;top:10px;left:10px;z-index:1000;background:rgba(14,17,19,.86);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:18px;padding:.34rem .7rem;font-size:.7rem;font-weight:700;cursor:pointer;display:none;align-items:center;gap:.3rem;backdrop-filter:blur(4px)}
+/* Region overview card that floats over the map on hover — the map reads as an overview at a glance */
+.cap-tip{background:rgba(14,17,19,.92)!important;border:1px solid rgba(255,255,255,.16)!important;border-radius:12px!important;box-shadow:0 6px 22px rgba(0,0,0,.45)!important;padding:0!important;color:#fff!important;backdrop-filter:blur(6px)}
+.cap-tip:before{display:none!important}
+.cap-tip .leaflet-tooltip-content,.cap-tip{white-space:nowrap}
+.cap-ov{padding:.55rem .65rem;min-width:150px}
+.cap-ov-h{display:flex;align-items:center;gap:.4rem;margin-bottom:.4rem}
+.cap-ov-dot{width:11px;height:11px;border-radius:3px;flex:none}
+.cap-ov-nm{font-weight:800;font-size:.82rem;color:#fff}
+.cap-ov-st{font-size:.6rem;font-weight:800;padding:.05rem .4rem;border-radius:10px;text-transform:uppercase;letter-spacing:.02em}
+.cap-ov-row{display:flex;gap:.9rem;margin-top:.25rem}
+.cap-ov-row>div{text-align:center}
+.cap-ov-n{font-weight:800;font-size:.95rem;color:#fff;line-height:1}
+.cap-ov-l{font-size:.58rem;color:#9fb0bd;margin-top:.1rem}
+.cap-ov-cta{font-size:.62rem;color:#ffb454;font-weight:700;margin-top:.45rem;border-top:1px solid rgba(255,255,255,.12);padding-top:.35rem}
 .demo-tile{flex:1;padding:.55rem .35rem;background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);cursor:pointer;text-align:center;transition:border-color .14s,background .14s;display:flex;flex-direction:column;align-items:center;gap:.18rem}
 .demo-tile:hover{border-color:var(--or);background:var(--or-d)}
 .demo-tile-ico{width:18px;height:18px;color:var(--or);stroke:var(--or);margin-bottom:.1rem}
@@ -1803,7 +1817,7 @@ textarea.fi2{resize:vertical;min-height:70px}
             <div id="cap-map" style="height:520px;width:100%;background:var(--bg)"></div>
             <button id="cap-back" class="cap-back" onclick="capResetView()">← Back to UK</button>
             <div style="position:absolute;top:10px;right:10px;z-index:1000;background:rgba(14,17,19,.82);border-radius:20px;padding:.3rem .8rem;font-size:.63rem;display:flex;align-items:center;gap:.6rem;box-shadow:0 1px 6px rgba(0,0,0,.3);backdrop-filter:blur(4px)">
-              <span style="color:#fff">Tap a region</span>
+              <span style="color:#fff">Hover for overview · tap to open</span>
               <span style="display:flex;align-items:center;gap:.28rem;color:#c9a7ff"><span style="width:8px;height:8px;background:#6a3fd0;display:inline-block;transform:rotate(45deg)"></span>Relay point</span>
             </div>
           </div>
@@ -3142,21 +3156,23 @@ function initCapMap(){
     capMap.setView([54.5,-3.5],5);
   }else{
     capMap._zoneLayers={};
+    const BASE=.5,HOV=.82;capMap._base=BASE;
     capMap._geo=L.geoJSON(window.UK_GEO,{
-      style:(f)=>{const z=CAP_BY_GEO[f.properties.region];return{fillColor:z?z.colour:'#888',color:'#0e1113',weight:1,fillOpacity:z?.9:.4,lineJoin:'round'};},
+      style:(f)=>{const z=CAP_BY_GEO[f.properties.region];return{fillColor:z?z.colour:'#888',color:z?'#cfe0ee':'#0e1113',weight:1,fillOpacity:z?BASE:.12,lineJoin:'round'};},
       onEachFeature:(f,layer)=>{const z=CAP_BY_GEO[f.properties.region];if(!z)return;
         capMap._zoneLayers[z.id]=layer;
+        layer.bindTooltip(()=>capOverviewHtml(z),{className:'cap-tip',sticky:true,direction:'top',opacity:1,offset:[0,-6]});
         layer.on('click',()=>capSelect(z.id));
-        layer.on('mouseover',()=>{if(_capSel!==z.id)layer.setStyle({fillOpacity:1,weight:2});});
-        layer.on('mouseout',()=>{if(_capSel!==z.id)layer.setStyle({fillOpacity:.9,weight:1});});
+        layer.on('mouseover',()=>{if(_capSel!==z.id)layer.setStyle({fillOpacity:HOV,weight:2,color:'#fff'});});
+        layer.on('mouseout',()=>{if(_capSel!==z.id)layer.setStyle({fillOpacity:BASE,weight:1,color:'#cfe0ee'});});
       }
     }).addTo(capMap);
     /* bold uppercase region labels, like the reference infographic */
     capMap._labels={};
     CAP_REGIONS.forEach(z=>{
       const icon=L.divIcon({className:'',html:`<div style="text-align:center;pointer-events:none;white-space:nowrap">
-          <div style="color:#12181c;font-size:10px;font-weight:900;letter-spacing:.02em;text-transform:uppercase;text-shadow:0 1px 2px rgba(255,255,255,.55)">${z.name}</div>
-          <div style="font-size:9px;font-weight:800;color:#12181c;opacity:.85;text-shadow:0 1px 2px rgba(255,255,255,.55)">${z.drivers} drivers${z.jobs?' · '+z.jobs+' live':''}</div>
+          <div style="color:#fff;font-size:10px;font-weight:900;letter-spacing:.02em;text-transform:uppercase;text-shadow:0 1px 3px rgba(0,0,0,.85)">${z.name}</div>
+          <div style="font-size:9px;font-weight:800;color:#dbe6ef;opacity:.95;text-shadow:0 1px 3px rgba(0,0,0,.85)">${z.drivers} drivers${z.jobs?' · '+z.jobs+' live':''}</div>
         </div>`,iconSize:[130,30],iconAnchor:[65,12]});
       const m=L.marker(z.lab,{icon,interactive:false}).addTo(capMap);
       capMap._labels[z.id]=m;
@@ -3181,6 +3197,26 @@ function initCapMap(){
 /* ── ROLE: customer (coverage + book) vs driver (demand + work) ── */
 let capRole='customer';
 function capCover(n){return n>=8?['Well covered','var(--gn)']:n>=3?['Cover available','var(--or)']:['Coming soon','var(--mu)'];}
+/* Floating overview card shown over a region on hover — makes the map an at-a-glance overview of each area */
+function capOverviewHtml(z){
+  const relays=(z.relays||[]).length;
+  let pill,pc;
+  if(capRole==='customer'){const cov=capCover(z.drivers);pill=cov[0];pc=z.drivers>=8?'#4fae73':z.drivers>=3?'#e8823c':'#8ea3b0';}
+  else{const dm={hot:['Hot demand','#9ec13c'],warm:['Warm','#f0b429'],cool:['Building','#4a90d9']};const d=dm[z.tier]||dm.cool;pill=d[0];pc=d[1];}
+  const stats=capRole==='customer'
+    ? `<div><div class="cap-ov-n" style="color:${z.drivers>=3?'#ffb454':'#9fb0bd'}">${z.drivers}</div><div class="cap-ov-l">drivers ready</div></div>
+       <div><div class="cap-ov-n">${relays}</div><div class="cap-ov-l">relay${relays===1?'':'s'}</div></div>`
+    : `<div><div class="cap-ov-n" style="color:#ffb454">${z.drivers}</div><div class="cap-ov-l">drivers</div></div>
+       <div><div class="cap-ov-n" style="color:#5aa9ff">${z.jobs}</div><div class="cap-ov-l">live jobs</div></div>
+       <div><div class="cap-ov-n">${relays}</div><div class="cap-ov-l">relay${relays===1?'':'s'}</div></div>`;
+  const cta=capRole==='customer'?`Tap to book in this area →`:`Tap to see work here →`;
+  return `<div class="cap-ov">
+    <div class="cap-ov-h"><span class="cap-ov-dot" style="background:${z.colour}"></span><span class="cap-ov-nm">${z.name}</span></div>
+    <span class="cap-ov-st" style="background:${pc}22;color:${pc}">${pill}</span>
+    <div class="cap-ov-row">${stats}</div>
+    <div class="cap-ov-cta">${cta}</div>
+  </div>`;
+}
 function capSetRole(r){
   capRole=r;
   document.getElementById('crole-customer').classList.toggle('on',r==='customer');
@@ -3199,7 +3235,7 @@ function capSelect(id){
   _capSel=id;
   /* highlight + zoom into the chosen region */
   if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>{
-    capMap._zoneLayers[k].setStyle({fillOpacity:k===id?1:.35,weight:k===id?3:1,color:k===id?'#fff':'#0e1113'});
+    capMap._zoneLayers[k].setStyle({fillOpacity:k===id?.95:.14,weight:k===id?3:1,color:k===id?'#fff':'#cfe0ee'});
     if(k===id&&capMap._zoneLayers[k].bringToFront)capMap._zoneLayers[k].bringToFront();
   });
   if(capMap&&capMap._zoneLayers&&capMap._zoneLayers[id]&&capMap._zoneLayers[id].getBounds){
@@ -3248,7 +3284,7 @@ function capSelect(id){
 function capClear(){
   _capSel=null;
   document.getElementById('cap-detail').style.display='none';
-  if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>capMap._zoneLayers[k].setStyle({fillOpacity:.9,weight:1,color:'#0e1113'}));
+  if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>capMap._zoneLayers[k].setStyle({fillOpacity:(capMap._base||.5),weight:1,color:'#cfe0ee'}));
   capMarkSectionActive(null);
   capResetView();
 }
@@ -3269,10 +3305,14 @@ function capRenderSections(){
   const regions=CAP_REGIONS.slice().sort((a,b)=>order[a.tier]-order[b.tier]||b.drivers-a.drivers);
   el.innerHTML=regions.map(z=>{
     const rc=(z.relays||[]).length;
+    /* role-aware status pill — the same overview language as the map */
+    let pill,pc;
+    if(capRole==='customer'){const cov=capCover(z.drivers);pill=cov[0];pc=z.drivers>=8?'#4fae73':z.drivers>=3?'#e8823c':'#8ea3b0';}
+    else{const dm={hot:['Hot demand','#9ec13c'],warm:['Warm','#f0b429'],cool:['Building','#4a90d9']};const d=dm[z.tier]||dm.cool;pill=d[0];pc=d[1];}
     return `<button id="csec-${z.id}" onclick="capSelect('${z.id}')" style="text-align:left;cursor:pointer;background:var(--p2);border:1.5px solid var(--ln);border-left:5px solid ${z.colour};border-radius:var(--rx);padding:.7rem .8rem;transition:all .12s" onmouseover="this.style.borderColor='${z.colour}'" onmouseout="if(!this.classList.contains('csec-on'))this.style.borderColor='var(--ln)'">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:.4rem">
         <span style="font-weight:800;font-size:.85rem;color:var(--tx)">${z.name}</span>
-        <span style="width:11px;height:11px;border-radius:3px;background:${z.colour};flex:none"></span>
+        <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;padding:.1rem .45rem;border-radius:10px;white-space:nowrap;background:${pc}22;color:${pc}">${pill}</span>
       </div>
       <div style="font-size:.66rem;color:var(--mu);margin:.15rem 0 .5rem">${z.cities}</div>
       <div style="display:flex;gap:.9rem;font-size:.7rem">
