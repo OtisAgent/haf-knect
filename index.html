@@ -543,7 +543,12 @@ textarea.fi2{resize:vertical;min-height:70px}
 .cap-sec-top{display:flex;align-items:center;justify-content:space-between;gap:.35rem;margin-bottom:.4rem}
 .cap-sec-nm{font-weight:800;font-size:.8rem;color:var(--tx);line-height:1.1}
 .cap-sec-pill{font-size:.54rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;padding:.08rem .38rem;border-radius:9px;white-space:nowrap}
+.cap-sec-towns{font-size:.63rem;color:var(--mu);line-height:1.3;margin:.1rem 0 .45rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .cap-sec-mini{display:flex;flex-direction:column;gap:.2rem;font-size:.7rem}
+.cap-covers{margin:.7rem 0 .2rem;display:flex;flex-wrap:wrap;gap:.3rem;align-items:center}
+.cap-covers-l{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--mu);margin-right:.15rem}
+.cap-town{font-size:.66rem;font-weight:600;color:var(--tx);background:var(--p2);border:1px solid var(--ln);border-radius:20px;padding:.12rem .5rem;white-space:nowrap}
+.cap-ov-towns{font-size:.6rem;color:#9fb0bd;margin-top:.3rem;max-width:180px;white-space:normal;line-height:1.3}
 .cap-sec-mini>span{display:flex;align-items:center;gap:.35rem;color:var(--mu)}
 .cap-sec-mini b{font-size:.82rem}
 .cap-sec-mini i{width:14px;text-align:center;font-style:normal;opacity:.85}
@@ -3221,6 +3226,23 @@ const CAP_REGIONS=[
 const CAP_BY_GEO={};CAP_REGIONS.forEach(z=>CAP_BY_GEO[z.geo]=z);
 /* west/north regions sit in the left column, east/south in the right — map stays in the middle */
 const CAP_SIDE_L=new Set(['sco','ni','ire','nw','wal','wm','sw']);
+/* fuller town/city lists so people recognise their local area even if they don't know the region name */
+const CAP_TOWNS={
+  sco:'Glasgow · Edinburgh · Aberdeen · Dundee · Inverness · Stirling · Perth · Falkirk · Paisley · Ayr · Kilmarnock · Livingston',
+  ni:'Belfast · Derry / Londonderry · Lisburn · Newry · Bangor · Ballymena · Craigavon · Coleraine · Omagh · Enniskillen · Antrim',
+  ire:'Dublin · Cork · Galway · Limerick · Waterford · Drogheda · Dundalk · Kilkenny · Sligo · Athlone · Wexford · Ennis',
+  ne:'Newcastle · Sunderland · Durham · Gateshead · Middlesbrough · Darlington · Hartlepool · Stockton · Washington · Hexham · Blyth',
+  nw:'Manchester · Liverpool · Preston · Bolton · Warrington · Wigan · Blackburn · Blackpool · Salford · Stockport · Oldham · Lancaster · Chester · Rochdale',
+  yo:'Leeds · Sheffield · Hull · Bradford · York · Wakefield · Huddersfield · Doncaster · Rotherham · Barnsley · Halifax · Harrogate · Scarborough',
+  wm:'Birmingham · Coventry · Wolverhampton · Dudley · Walsall · Solihull · West Bromwich · Stoke-on-Trent · Telford · Tamworth · Nuneaton · Redditch',
+  em:'Nottingham · Leicester · Derby · Northampton · Lincoln · Mansfield · Chesterfield · Loughborough · Kettering · Corby · Grantham · Newark',
+  wal:'Cardiff · Swansea · Newport · Wrexham · Barry · Bridgend · Neath · Merthyr Tydfil · Rhyl · Aberystwyth · Llanelli · Cwmbran',
+  ea:'Cambridge · Norwich · Ipswich · Peterborough · Luton · Southend · Colchester · Chelmsford · Basildon · King’s Lynn · Bedford · Watford',
+  lon:'Central London · Croydon · Ealing · Barnet · Bromley · Enfield · Wembley · Stratford · Hounslow · Romford · Ilford · Kingston',
+  se:'Reading · Milton Keynes · Brighton · Oxford · Southampton · Portsmouth · Slough · Maidstone · Canterbury · Guildford · Basingstoke · High Wycombe',
+  sw:'Bristol · Exeter · Plymouth · Bournemouth · Gloucester · Swindon · Bath · Cheltenham · Torquay · Taunton · Poole · Yeovil'
+};
+CAP_REGIONS.forEach(z=>z.towns=CAP_TOWNS[z.id]||z.cities);
 /* whole-island Ireland (Republic) overlay — a simplified coastal outline, added so Ireland is a section, not just NI */
 const IRELAND_FEATURE={type:'Feature',properties:{region:'Ireland'},geometry:{type:'MultiPolygon',coordinates:[[[
   [-8.10,55.30],[-7.20,55.05],[-7.45,54.60],[-6.90,54.25],[-6.25,54.05],[-6.10,53.40],[-6.00,52.80],
@@ -3316,6 +3338,7 @@ function capOverviewHtml(z){
     <div class="cap-ov-h"><span class="cap-ov-dot" style="background:${z.colour}"></span><span class="cap-ov-nm">${z.name}</span></div>
     <span class="cap-ov-st" style="background:${pc}22;color:${pc}">${pill}</span>
     <div class="cap-ov-row">${stats}</div>
+    <div class="cap-ov-towns">${(z.towns||z.cities).split(' · ').slice(0,6).join(' · ')}…</div>
     <div class="cap-ov-cta">${cta}</div>
   </div>`;
 }
@@ -3379,6 +3402,7 @@ function capSelect(id){
       <button class="btn btn-gh btn-xs" onclick="capClear()">Close ✕</button>
     </div>
     ${body}
+    <div class="cap-covers"><span class="cap-covers-l">Towns &amp; areas covered</span>${(z.towns||z.cities).split(' · ').map(t=>`<span class="cap-town">${t}</span>`).join('')}</div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem">${cta}</div>
   </div>`;
   const d=document.getElementById('cap-detail');d.style.display='block';
@@ -3411,6 +3435,7 @@ function _capSecCard(z){
   else{const dm={hot:['Hot demand','#9ec13c'],warm:['Warm','#f0b429'],cool:['Building','#4a90d9']};const d=dm[z.tier]||dm.cool;pill=d[0];pc=d[1];}
   return `<button id="csec-${z.id}" class="cap-sec" onclick="capSelect('${z.id}')" style="border-left-color:${z.colour}" onmouseover="if(!this.classList.contains('csec-on'))this.style.borderColor='${z.colour}'" onmouseout="if(!this.classList.contains('csec-on'))this.style.borderColor='var(--ln)'">
       <div class="cap-sec-top"><span class="cap-sec-nm">${z.name}</span><span class="cap-sec-pill" style="background:${pc}22;color:${pc}">${pill}</span></div>
+      <div class="cap-sec-towns">${z.towns}</div>
       <div class="cap-sec-mini">
         <span><i>👤</i><b style="color:var(--or)">${z.drivers}</b> active drivers</span>
         <span><i>●</i><b style="color:${z.jobs?'#5aa9ff':'var(--mu)'}">${z.jobs}</b> active jobs</span>
