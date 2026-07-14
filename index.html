@@ -3269,6 +3269,7 @@ function hafRenderJobsList(){
 
 /* full Peace-of-Mind Live Job page — route, timeline, updates, messaging, POD */
 let ljMap=null,_ljForceJob=null;
+let ljPollTimer=null,ljDemoTimer=null,ljDriverMarker=null,ljDone=null,ljTogo=null,ljPinMarker=null,ljDotIcon=null;
 function hafCurrentJob(){if(_ljForceJob){const j=HAF_JOBS.find(x=>x.id===_ljForceJob);if(j)return j;}return hafActiveJob();}
 function hafRenderLiveJob(){
  const body=document.getElementById('lj-body');if(!body)return;
@@ -3323,7 +3324,12 @@ function hafRenderLiveJob(){
           <span style="display:flex;align-items:center;gap:.28rem"><span style="width:14px;height:3px;border-radius:2px;background:${j.colour};opacity:.4"></span>To go</span>
           <span style="display:flex;align-items:center;gap:.28rem"><span style="width:9px;height:9px;border-radius:50%;background:#fff;border:2px solid ${j.colour}"></span>Driver</span>
         </div>
-        <div style="position:absolute;bottom:10px;left:10px;z-index:1000;background:rgba(14,17,19,.78);border-radius:14px;padding:.22rem .55rem;font-size:.6rem;color:#cfe;backdrop-filter:blur(4px)">Driver location updated ${hafEsc(j.lastUpdate)}</div>
+        <div id="lj-liveinfo" style="position:absolute;bottom:10px;left:10px;z-index:1000;background:rgba(14,17,19,.78);border-radius:14px;padding:.22rem .55rem;font-size:.6rem;color:#cfe;backdrop-filter:blur(4px)">Driver location updated ${hafEsc(j.lastUpdate)}</div>
+      </div>
+      <div id="lj-trackctl" style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-top:.55rem">
+        ${role==='driver'?`<button class="btn btn-or btn-xs" onclick="hafShareLive()">📍 Share my live location</button>`:`<span style="font-size:.62rem;color:var(--mu)">Live tracking</span>`}
+        <button class="btn btn-gh btn-xs" onclick="hafPlayDemoRun()">▶ Play a live run <span style="opacity:.55">demo</span></button>
+        <button class="btn btn-gh btn-xs" onclick="hafSimPin()">📌 Driver shared location <span style="opacity:.55">demo</span></button>
       </div>
       <div class="card" style="margin-top:.8rem">
         <div class="ct" style="margin:0 0 .5rem">Live updates</div>${updates}
@@ -3387,19 +3393,83 @@ function hafLjAction(label){
 }
 function hafInitLjMap(j){
  const el=document.getElementById('lj-map');if(!el||typeof L==='undefined')return;
+ ljStopPoll();ljPinMarker=null;
  if(ljMap){try{ljMap.remove();}catch(e){}ljMap=null;}
  ljMap=L.map('lj-map',{zoomControl:true,scrollWheelZoom:false,attributionControl:false}).setView([j.driverPos.lat,j.driverPos.lng],8);
  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:18}).addTo(ljMap);
  /* completed section solid, remaining section faded/dashed — the route fills in as the driver moves */
- L.polyline([[j.from.lat,j.from.lng],[j.driverPos.lat,j.driverPos.lng]],{color:j.colour,weight:5,opacity:.95}).addTo(ljMap);
- L.polyline([[j.driverPos.lat,j.driverPos.lng],[j.to.lat,j.to.lng]],{color:j.colour,weight:5,opacity:.38,dashArray:'2,9'}).addTo(ljMap);
+ ljDone=L.polyline([[j.from.lat,j.from.lng],[j.driverPos.lat,j.driverPos.lng]],{color:j.colour,weight:5,opacity:.95}).addTo(ljMap);
+ ljTogo=L.polyline([[j.driverPos.lat,j.driverPos.lng],[j.to.lat,j.to.lng]],{color:j.colour,weight:5,opacity:.38,dashArray:'2,9'}).addTo(ljMap);
  const line=L.polyline([[j.from.lat,j.from.lng],[j.driverPos.lat,j.driverPos.lng],[j.to.lat,j.to.lng]],{opacity:0}).addTo(ljMap);
- const dot=(c,fill)=>L.divIcon({className:'',html:`<div style="width:14px;height:14px;border-radius:50%;background:${fill};border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.5)"></div>`,iconSize:[14,14],iconAnchor:[7,7]});
- L.marker([j.from.lat,j.from.lng],{icon:dot(j.colour,j.colour)}).addTo(ljMap).bindPopup('Collection · '+j.from.name);
- L.marker([j.to.lat,j.to.lng],{icon:dot(j.colour,'#2dab60')}).addTo(ljMap).bindPopup('Delivery · '+j.to.name);
- L.marker([j.driverPos.lat,j.driverPos.lng],{icon:dot(j.colour,'#fff')}).addTo(ljMap).bindPopup('Driver · '+j.driverName+' ('+j.progress+'%)');
+ ljDotIcon=(fill,sz)=>L.divIcon({className:'',html:`<div style="width:${sz||14}px;height:${sz||14}px;border-radius:50%;background:${fill};border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.5)"></div>`,iconSize:[sz||14,sz||14],iconAnchor:[(sz||14)/2,(sz||14)/2]});
+ L.marker([j.from.lat,j.from.lng],{icon:ljDotIcon(j.colour)}).addTo(ljMap).bindPopup('Collection · '+j.from.name);
+ L.marker([j.to.lat,j.to.lng],{icon:ljDotIcon('#2dab60')}).addTo(ljMap).bindPopup('Delivery · '+j.to.name);
+ ljDriverMarker=L.marker([j.driverPos.lat,j.driverPos.lng],{icon:ljDotIcon('#fff'),zIndexOffset:500}).addTo(ljMap).bindPopup('Driver · '+j.driverName+' ('+j.progress+'%)');
  try{ljMap.fitBounds(line.getBounds(),{padding:[40,40]});}catch(e){}
  setTimeout(()=>{try{ljMap.invalidateSize();}catch(e){}},80);
+ ljStartPoll(j);
+}
+/* ── LIVE TRACKING FEED — driver's phone (via /track) → the gateway → this dot ── */
+function ljStopPoll(){if(ljPollTimer){clearInterval(ljPollTimer);ljPollTimer=null;}}
+function ljStartPoll(j){
+ ljStopPoll();
+ const tick=()=>{
+  fetch('/api/track?job='+encodeURIComponent(j.id)).then(r=>r.json()).then(d=>{
+    if(!d||!d.ok||!d.found)return;
+    if(d.kind==='pin'){ljShowPin(j,d);return;}
+    if(typeof d.ageSec==='number'&&d.ageSec<=180)ljApplyLive(j,d);
+  }).catch(()=>{});
+ };
+ tick();ljPollTimer=setInterval(tick,5000);
+}
+function ljApplyLive(j,d){
+ if(!ljMap||!ljDriverMarker)return;
+ const p=[d.lat,d.lng];
+ ljDriverMarker.setLatLng(p);
+ if(ljDone)ljDone.setLatLngs([[j.from.lat,j.from.lng],p]);
+ if(ljTogo)ljTogo.setLatLngs([p,[j.to.lat,j.to.lng]]);
+ const info=document.getElementById('lj-liveinfo');
+ if(info)info.innerHTML='<span style="color:#39d98a">● Live</span> · driver location updated '+((d.ageSec||0)<5?'just now':d.ageSec+'s ago');
+}
+function ljShowPin(j,d){
+ if(!ljMap)return;
+ const ic=L.divIcon({className:'',html:'<div style="width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#ff7800;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.5)"></div>',iconSize:[16,16],iconAnchor:[8,16]});
+ if(ljPinMarker){ljPinMarker.setLatLng([d.lat,d.lng]);}
+ else{ljPinMarker=L.marker([d.lat,d.lng],{icon:ic,zIndexOffset:400}).addTo(ljMap);}
+ const ago=d.ageSec==null?'':(' · '+(d.ageSec<60?d.ageSec+'s':Math.round(d.ageSec/60)+'m')+' ago');
+ ljPinMarker.bindPopup((d.label||'Driver')+' shared this location'+ago);
+ const info=document.getElementById('lj-liveinfo');
+ if(info)info.innerHTML='📍 '+(d.label||'Driver')+' shared their location'+ago;
+}
+/* driver taps this on their phone to open the one-tap live-share page for this job */
+function hafShareLive(){
+ const j=hafCurrentJob();
+ const url=location.origin+'/track/?job='+encodeURIComponent(j.id)+'&name='+encodeURIComponent(j.driverName||'Driver')+'&from='+encodeURIComponent(j.from.name)+'&to='+encodeURIComponent(j.to.name);
+ window.open(url,'_blank');
+}
+/* demo: one dropped location pin (this is what a WhatsApp 'share location' becomes) */
+function hafSimPin(){
+ const j=hafCurrentJob();
+ const lat=j.driverPos.lat+(Math.random()-.5)*.02,lng=j.driverPos.lng+(Math.random()-.5)*.02;
+ fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job:j.id,lat:lat,lng:lng,kind:'pin',label:(j.driverName&&j.driverName!=='—')?j.driverName:'Driver'})})
+  .then(r=>r.json()).then(d=>{if(d&&d.ok){ljShowPin(j,{lat:lat,lng:lng,label:j.driverName,ageSec:0});}else{alert('Could not save the pin yet — the tracker may still be publishing. Try again in a moment.');}})
+  .catch(()=>alert('Could not reach the tracker.'));
+}
+/* demo: play a moving run down the route — writes real live positions to the gateway,
+   so a second device watching this job sees the dot move too */
+function hafPlayDemoRun(){
+ const j=hafCurrentJob();
+ if(ljDemoTimer){clearInterval(ljDemoTimer);ljDemoTimer=null;}
+ let t=0;const a=j.from,b=j.to;
+ const info=document.getElementById('lj-liveinfo');if(info)info.innerHTML='<span style="color:#39d98a">● Live</span> · starting demo run…';
+ ljDemoTimer=setInterval(()=>{
+  t+=0.06;if(t>1)t=1;
+  const lat=a.lat+(b.lat-a.lat)*t+Math.sin(t*7)*0.012;
+  const lng=a.lng+(b.lng-a.lng)*t;
+  fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job:j.id,lat:lat,lng:lng,kind:'live',label:((j.driverName&&j.driverName!=='—')?j.driverName:'Driver')+' (demo)'})}).catch(()=>{});
+  ljApplyLive(j,{lat:lat,lng:lng,ageSec:0});
+  if(t>=1){clearInterval(ljDemoTimer);ljDemoTimer=null;}
+ },900);
 }
 
 /* ── PROOF OF DELIVERY — driver sign-off → locked, downloadable proof for customer & freight ── */

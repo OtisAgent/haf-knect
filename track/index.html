@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e1113">
+<title>HAF KNECT · Share your live location</title>
+<style>
+  :root{--or:#ff7800;--bg:#0e1113;--card:#171b1e;--ln:#262c31;--mu:#8a97a0;--gn:#2dab60;--rd:#cc3333}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{background:var(--bg);color:#eef2f4;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex;flex-direction:column;min-height:100dvh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+  header{padding:1.1rem 1.2rem .6rem;display:flex;align-items:center;gap:.55rem}
+  .logo{font-weight:900;letter-spacing:.5px;font-size:1.05rem}
+  .logo b{color:var(--or)}
+  .wrap{flex:1;display:flex;flex-direction:column;gap:.9rem;padding:.3rem 1.1rem 1.4rem;max-width:520px;width:100%;margin:0 auto}
+  .job{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:1rem 1.1rem}
+  .job .ref{font-size:.72rem;color:var(--mu);text-transform:uppercase;letter-spacing:.5px}
+  .job .route{font-size:1.15rem;font-weight:800;margin:.25rem 0 .15rem;line-height:1.25}
+  .job .sub{font-size:.82rem;color:var(--mu)}
+  .status{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:1.2rem;text-align:center;flex:1;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7rem;min-height:200px}
+  .halo{width:78px;height:78px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative}
+  .halo .core{width:20px;height:20px;border-radius:50%;background:var(--mu);transition:background .3s}
+  .live .core{background:var(--gn)}
+  .live .halo::before,.live .halo::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--gn);animation:pulse 1.8s ease-out infinite}
+  .live .halo::after{animation-delay:.9s}
+  @keyframes pulse{0%{transform:scale(.35);opacity:.85}100%{transform:scale(1);opacity:0}}
+  .stmsg{font-size:1.05rem;font-weight:800}
+  .stsub{font-size:.82rem;color:var(--mu);line-height:1.45;max-width:340px}
+  .coords{font-size:.72rem;color:var(--mu);font-variant-numeric:tabular-nums}
+  .btn{border:0;border-radius:14px;padding:1.05rem;font-size:1.02rem;font-weight:800;width:100%;cursor:pointer;transition:filter .12s}
+  .btn:active{filter:brightness(.9)}
+  .btn-go{background:var(--or);color:#fff}
+  .btn-stop{background:#2a2f34;color:#fff;border:1px solid var(--ln)}
+  .foot{font-size:.72rem;color:var(--mu);text-align:center;line-height:1.5}
+  .foot b{color:#c7d0d6}
+  .err{background:#3a1d1d;border:1px solid #5a2a2a;color:#ffb4b4;border-radius:12px;padding:.75rem .9rem;font-size:.82rem;display:none}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gn);margin-right:.35rem;vertical-align:middle}
+</style>
+</head>
+<body>
+  <header><span class="logo">HAF <b>KNECT</b></span></header>
+  <div class="wrap">
+    <div class="job">
+      <div class="ref" id="ref">Job —</div>
+      <div class="route" id="route">Live delivery tracking</div>
+      <div class="sub" id="sub">Share your location so the customer can follow this run.</div>
+    </div>
+
+    <div class="err" id="err"></div>
+
+    <div class="status" id="status">
+      <div class="halo"><div class="core"></div></div>
+      <div class="stmsg" id="stmsg">Ready to share</div>
+      <div class="stsub" id="stsub">Tap the button below and allow location. Your live position shows on the customer's tracker until you stop or the job is delivered.</div>
+      <div class="coords" id="coords"></div>
+    </div>
+
+    <button class="btn btn-go" id="btn">Start sharing my location</button>
+    <div class="foot">Only shared while this screen is open, for <b id="jobf">this job</b>. Your phone number is never shown to the customer. Close the tab or tap stop to end sharing.</div>
+  </div>
+
+<script>
+(function(){
+  var qs=new URLSearchParams(location.search);
+  var JOB=(qs.get('job')||'').trim().toUpperCase();
+  var NAME=(qs.get('name')||'').trim();
+  var FROM=(qs.get('from')||'').trim(), TO=(qs.get('to')||'').trim();
+  var el=function(id){return document.getElementById(id);};
+  if(JOB){el('ref').textContent='Job '+JOB;el('jobf').textContent=JOB;}
+  if(FROM&&TO)el('route').textContent=FROM+' → '+TO;
+  if(NAME)el('sub').textContent='Hi '+NAME+' — share your location so the customer can follow this run.';
+
+  var watchId=null, live=false, lastSend=0, sending=false;
+  function showErr(m){var e=el('err');e.style.display='block';e.textContent=m;}
+  function clearErr(){el('err').style.display='none';}
+
+  function setLive(on){
+    live=on;
+    document.getElementById('status').classList.toggle('live',on);
+    el('btn').textContent=on?'Stop sharing':'Start sharing my location';
+    el('btn').className='btn '+(on?'btn-stop':'btn-go');
+    el('stmsg').innerHTML=on?'<span class="dot"></span>Sharing live':'Ready to share';
+    el('stsub').textContent=on
+      ?'The customer can now see you moving on their tracker. Keep this screen open while you drive.'
+      :'Tap the button below and allow location. Your live position shows on the customer’s tracker until you stop or the job is delivered.';
+    if(!on)el('coords').textContent='';
+  }
+
+  function send(lat,lng){
+    if(sending)return; sending=true;
+    fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({job:JOB,lat:lat,lng:lng,kind:'live',label:NAME||'Driver'})})
+      .then(function(r){return r.json();})
+      .then(function(d){ if(!d||!d.ok){showErr('Couldn’t reach the tracker just now — retrying.');} else {clearErr();} })
+      .catch(function(){showErr('No connection — will keep trying as you move.');})
+      .finally(function(){sending=false;});
+  }
+
+  function onPos(p){
+    var lat=p.coords.latitude, lng=p.coords.longitude;
+    el('coords').textContent=lat.toFixed(4)+', '+lng.toFixed(4)+'  ·  ±'+Math.round(p.coords.accuracy)+'m';
+    var now=Date.now();
+    if(now-lastSend>4000){ lastSend=now; send(lat,lng); }
+  }
+  function onErr(e){
+    showErr(e.code===1?'Location permission was blocked. Turn it on for this site and tap Start again.'
+      :'Couldn’t get a GPS fix — move to open sky and try again.');
+    stop();
+  }
+  function start(){
+    if(!JOB){showErr('This link is missing its job reference. Ask the office to resend it.');return;}
+    if(!('geolocation' in navigator)){showErr('This phone doesn’t support location sharing.');return;}
+    clearErr(); setLive(true);
+    watchId=navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:3000,timeout:20000});
+  }
+  function stop(){
+    if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null;}
+    setLive(false);
+  }
+  el('btn').onclick=function(){ live?stop():start(); };
+  window.addEventListener('beforeunload',function(){ if(watchId!=null)navigator.geolocation.clearWatch(watchId); });
+})();
+</script>
+</body>
+</html>
