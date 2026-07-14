@@ -1863,7 +1863,6 @@ textarea.fi2{resize:vertical;min-height:70px}
               <option value="xlwb">Extra LWB</option>
               <option value="luton">Luton</option>
               <option value="artic">Artic</option>
-              <option value="fridge">Fridge</option>
             </select>
           </div>
           <div class="cap-f">
@@ -3198,6 +3197,7 @@ const CAP_REGIONS=[
   {id:'sco',name:'Scotland',geo:'Scotland',pc:'Scotland',colour:'#e8823c',lab:[56.6,-4.2],tier:'warm',drivers:6,jobs:0,cities:'Glasgow · Edinburgh · Aberdeen',corridor:'M8 / M74',demand:'Gateway to/from England via Penrith',
     relays:[{name:'Abington (M74)',road:'M74 J13',swaps:9,ontime:87,dwell:31,live:false}]},
   {id:'ni',name:'Northern Ireland',geo:'Northern Ireland',pc:'Northern Ireland',colour:'#4fae73',lab:[54.7,-6.8],tier:'cool',drivers:2,jobs:0,cities:'Belfast · Derry · Lisburn',corridor:'M1 / M2',demand:'Early — sea-link backloads',relays:[]},
+  {id:'ire',name:'Ireland',geo:'Ireland',pc:'Ireland',colour:'#3fa66a',lab:[53.3,-8.0],tier:'cool',drivers:0,jobs:0,cities:'Dublin · Cork · Galway · Limerick',corridor:'M50 / M7 / M8',demand:'Cross-border & sea-link — early',relays:[]},
   {id:'ne',name:'North East',geo:'North East',pc:'North East',colour:'#b5543f',lab:[54.9,-1.9],tier:'warm',drivers:7,jobs:0,cities:'Newcastle · Sunderland · Durham',corridor:'A1(M)',demand:'Long-haul South backloads',
     relays:[{name:'Scotch Corner (A1/A66)',road:'A1(M) J53',swaps:12,ontime:89,dwell:28,live:false}]},
   {id:'nw',name:'North West',geo:'North West',pc:'North West',colour:'#9ec13c',lab:[54.0,-2.7],tier:'hot',drivers:14,jobs:2,cities:'Manchester · Liverpool · Preston',corridor:'M6 / M62',demand:'Manchester → Birmingham runs daily',
@@ -3220,7 +3220,13 @@ const CAP_REGIONS=[
 ];
 const CAP_BY_GEO={};CAP_REGIONS.forEach(z=>CAP_BY_GEO[z.geo]=z);
 /* west/north regions sit in the left column, east/south in the right — map stays in the middle */
-const CAP_SIDE_L=new Set(['sco','ni','nw','wal','wm','sw']);
+const CAP_SIDE_L=new Set(['sco','ni','ire','nw','wal','wm','sw']);
+/* whole-island Ireland (Republic) overlay — a simplified coastal outline, added so Ireland is a section, not just NI */
+const IRELAND_FEATURE={type:'Feature',properties:{region:'Ireland'},geometry:{type:'MultiPolygon',coordinates:[[[
+  [-8.10,55.30],[-7.20,55.05],[-7.45,54.60],[-6.90,54.25],[-6.25,54.05],[-6.10,53.40],[-6.00,52.80],
+  [-6.20,52.20],[-7.55,52.10],[-8.30,51.60],[-9.60,51.50],[-10.25,51.95],[-9.90,52.55],[-9.95,53.10],
+  [-10.20,53.45],[-10.05,54.05],[-9.30,54.30],[-8.55,54.45],[-8.30,54.70],[-8.75,54.95],[-8.45,55.20],[-8.10,55.30]
+]]]}};
 CAP_REGIONS.forEach(z=>z.side=CAP_SIDE_L.has(z.id)?'l':'r');
 
 let _capSel=null;
@@ -3246,6 +3252,8 @@ function initCapMap(){
     /* boundary file didn't load — keep the page usable via the side panels */
     capMap.fitBounds(UK_VIEW);
   }else{
+    /* add the Republic of Ireland shape once, so it draws as its own region */
+    if(!window.UK_GEO.features.some(f=>f.properties.region==='Ireland'))window.UK_GEO.features.push(IRELAND_FEATURE);
     capMap._zoneLayers={};
     const BASE=.42,HOV=.62;capMap._base=BASE;
     capMap._geo=L.geoJSON(window.UK_GEO,{
@@ -3513,7 +3521,7 @@ function capFilter(){
       if(relay){m.addTo(capMap);}else{try{capMap.removeLayer(m);}catch(e){}}
     });
   }
-  const RATES={van:'£1.60–£2.00',swb:'£1.65–£2.10',lwb:'£1.80–£2.40',xlwb:'£1.90–£2.50',luton:'£2.00–£2.70',artic:'£2.80–£3.80',flatbed:'£2.50–£3.40',fridge:'£2.60–£3.50',curtain:'£2.40–£3.20'};
+  const RATES={van:'£1.60–£2.00',swb:'£1.65–£2.10',lwb:'£1.80–£2.40',xlwb:'£1.90–£2.50',luton:'£2.00–£2.70',artic:'£2.80–£3.80',flatbed:'£2.50–£3.40',curtain:'£2.40–£3.20'};
   const rateEl=document.getElementById('cap-rate-lbl');
   if(rateEl)rateEl.textContent=(RATES[_capVeh]||'£1.80–£2.40')+'/mi';
 }
