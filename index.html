@@ -3295,16 +3295,9 @@ function initCapMap(){
         layer.on('mouseout',()=>{if(_capSel!==z.id)layer.setStyle({fillOpacity:BASE,weight:1.2,color:'#334a57'});});
       }
     }).addTo(capMap);
-    /* bold uppercase region labels — dark with a white halo so they read over the light map */
-    capMap._labels={};
-    CAP_REGIONS.forEach(z=>{
-      const icon=L.divIcon({className:'',html:`<div style="text-align:center;pointer-events:none;white-space:nowrap">
-          <div style="color:#12181c;font-size:10px;font-weight:900;letter-spacing:.02em;text-transform:uppercase;text-shadow:0 0 3px #fff,0 1px 2px #fff,0 0 6px #fff">${z.name}</div>
-          <div style="font-size:9px;font-weight:800;color:#1c2b34;text-shadow:0 0 3px #fff,0 1px 2px #fff">${z.drivers} drivers${z.jobs?' · '+z.jobs+' live':''}</div>
-        </div>`,iconSize:[130,30],iconAnchor:[65,12]});
-      const m=L.marker(z.lab,{icon,interactive:false}).addTo(capMap);
-      capMap._labels[z.id]=m;
-    });
+    /* No permanent on-map region labels — they collided and buried the real town names.
+       Region names come from the side panels + the hover card, so the map stays clean and
+       the actual towns (Sheffield, Leeds…) read straight through the light colour. */
     /* widen the fit so the whole of Ireland shows to the west, not just Northern Ireland */
     const b=capMap._geo.getBounds();b.extend([51.3,-10.6]);b.extend([55.4,-8.2]);
     capMap._fit=b;
