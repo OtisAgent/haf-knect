@@ -513,8 +513,8 @@ textarea.fi2{resize:vertical;min-height:70px}
 .cap-pill:hover{border-color:var(--or);color:var(--or)}
 .cap-pill.active{border-color:var(--or);background:var(--or-d);color:var(--or)}
 @media(max-width:820px){.cap-row{flex-direction:column}.cap-side{max-width:none!important;min-width:0!important}.cap-mapwrap #cap-map{height:340px!important}#cap-sections{max-height:none!important}}
-#cap-map{background:#0a1a2b}
-#cap-map .leaflet-container{background:#0a1a2b}
+#cap-map{background:#aadaff}
+#cap-map .leaflet-container{background:#aadaff}
 .leaflet-container{background:#0a1a2b}
 .cap-role{border:none;background:transparent;color:var(--mu);font-weight:800;font-size:.74rem;padding:.32rem .8rem;border-radius:18px;cursor:pointer;transition:all .14s;white-space:nowrap}
 .cap-role.on{background:var(--or);color:#0e1113}
@@ -3175,37 +3175,50 @@ function initCapMap(){
   const el=document.getElementById('cap-map');
   if(!el||typeof L==='undefined')return;
   if(capMap){capMap.invalidateSize();return;}
-  /* Flat UK regions map — no street tiles, plain background (set via CSS on #cap-map) */
-  capMap=L.map('cap-map',{zoomControl:false,scrollWheelZoom:false,attributionControl:false,dragging:true,doubleClickZoom:false,boxZoom:false});
+  /* Real base map (sea, land, roads) with transparent region overlays on top */
+  capMap=L.map('cap-map',{zoomControl:false,scrollWheelZoom:true,attributionControl:false,dragging:true,doubleClickZoom:true,boxZoom:false,minZoom:5,maxZoom:11});
+  /* street/road basemap — shows water, coastlines and all of Ireland underneath */
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+    subdomains:'abcd',maxZoom:19,detectRetina:true,crossOrigin:true
+  }).addTo(capMap);
+  /* zoom in/out buttons — bottom-right so they clear the Back button and legend */
+  L.control.zoom({position:'bottomright'}).addTo(capMap);
   capRenderSections();
+
+  /* keep the island of Britain + all of Ireland in frame, and stop the map drifting off into open sea */
+  const UK_VIEW=L.latLngBounds([49.6,-11.2],[59.6,2.2]);
+  capMap.setMaxBounds(UK_VIEW.pad(0.25));
 
   if(typeof window.UK_GEO==='undefined'){
     /* boundary file didn't load — keep the page usable via the side panels */
-    capMap.setView([54.5,-3.5],5);
+    capMap.fitBounds(UK_VIEW);
   }else{
     capMap._zoneLayers={};
-    const BASE=.5,HOV=.82;capMap._base=BASE;
+    const BASE=.42,HOV=.62;capMap._base=BASE;
     capMap._geo=L.geoJSON(window.UK_GEO,{
-      style:(f)=>{const z=CAP_BY_GEO[f.properties.region];return{fillColor:z?z.colour:'#888',color:z?'#cfe0ee':'#0e1113',weight:1,fillOpacity:z?BASE:.12,lineJoin:'round'};},
+      style:(f)=>{const z=CAP_BY_GEO[f.properties.region];return{fillColor:z?z.colour:'#888',color:z?'#334a57':'#0e1113',weight:1.2,fillOpacity:z?BASE:.1,lineJoin:'round'};},
       onEachFeature:(f,layer)=>{const z=CAP_BY_GEO[f.properties.region];if(!z)return;
         capMap._zoneLayers[z.id]=layer;
         layer.bindTooltip(()=>capOverviewHtml(z),{className:'cap-tip',sticky:true,direction:'top',opacity:1,offset:[0,-6]});
         layer.on('click',()=>capSelect(z.id));
-        layer.on('mouseover',()=>{if(_capSel!==z.id)layer.setStyle({fillOpacity:HOV,weight:2,color:'#fff'});});
-        layer.on('mouseout',()=>{if(_capSel!==z.id)layer.setStyle({fillOpacity:BASE,weight:1,color:'#cfe0ee'});});
+        layer.on('mouseover',()=>{if(_capSel!==z.id)layer.setStyle({fillOpacity:HOV,weight:2,color:'#0e1113'});});
+        layer.on('mouseout',()=>{if(_capSel!==z.id)layer.setStyle({fillOpacity:BASE,weight:1.2,color:'#334a57'});});
       }
     }).addTo(capMap);
-    /* bold uppercase region labels, like the reference infographic */
+    /* bold uppercase region labels — dark with a white halo so they read over the light map */
     capMap._labels={};
     CAP_REGIONS.forEach(z=>{
       const icon=L.divIcon({className:'',html:`<div style="text-align:center;pointer-events:none;white-space:nowrap">
-          <div style="color:#fff;font-size:10px;font-weight:900;letter-spacing:.02em;text-transform:uppercase;text-shadow:0 1px 3px rgba(0,0,0,.85)">${z.name}</div>
-          <div style="font-size:9px;font-weight:800;color:#dbe6ef;opacity:.95;text-shadow:0 1px 3px rgba(0,0,0,.85)">${z.drivers} drivers${z.jobs?' · '+z.jobs+' live':''}</div>
+          <div style="color:#12181c;font-size:10px;font-weight:900;letter-spacing:.02em;text-transform:uppercase;text-shadow:0 0 3px #fff,0 1px 2px #fff,0 0 6px #fff">${z.name}</div>
+          <div style="font-size:9px;font-weight:800;color:#1c2b34;text-shadow:0 0 3px #fff,0 1px 2px #fff">${z.drivers} drivers${z.jobs?' · '+z.jobs+' live':''}</div>
         </div>`,iconSize:[130,30],iconAnchor:[65,12]});
       const m=L.marker(z.lab,{icon,interactive:false}).addTo(capMap);
       capMap._labels[z.id]=m;
     });
-    try{capMap.fitBounds(capMap._geo.getBounds(),{padding:[8,8]});}catch(e){capMap.setView([54.5,-3.5],5);}
+    /* widen the fit so the whole of Ireland shows to the west, not just Northern Ireland */
+    const b=capMap._geo.getBounds();b.extend([51.3,-10.6]);b.extend([55.4,-8.2]);
+    capMap._fit=b;
+    try{capMap.fitBounds(b,{padding:[10,10]});}catch(e){capMap.fitBounds(UK_VIEW);}
   }
 
   /* Relay stations as diamonds on the region label points (toggle layer) */
@@ -3263,7 +3276,7 @@ function capSelect(id){
   _capSel=id;
   /* highlight + zoom into the chosen region */
   if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>{
-    capMap._zoneLayers[k].setStyle({fillOpacity:k===id?.95:.14,weight:k===id?3:1,color:k===id?'#fff':'#cfe0ee'});
+    capMap._zoneLayers[k].setStyle({fillOpacity:k===id?.7:.16,weight:k===id?3:1.2,color:k===id?'#0e1113':'#334a57'});
     if(k===id&&capMap._zoneLayers[k].bringToFront)capMap._zoneLayers[k].bringToFront();
   });
   if(capMap&&capMap._zoneLayers&&capMap._zoneLayers[id]&&capMap._zoneLayers[id].getBounds){
@@ -3312,13 +3325,13 @@ function capSelect(id){
 function capClear(){
   _capSel=null;
   document.getElementById('cap-detail').style.display='none';
-  if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>capMap._zoneLayers[k].setStyle({fillOpacity:(capMap._base||.5),weight:1,color:'#cfe0ee'}));
+  if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>capMap._zoneLayers[k].setStyle({fillOpacity:(capMap._base||.42),weight:1.2,color:'#334a57'}));
   capMarkSectionActive(null);
   capResetView();
 }
 function capResetView(){
   const bk=document.getElementById('cap-back');if(bk)bk.style.display='none';
-  if(capMap&&capMap._geo){try{capMap.flyToBounds(capMap._geo.getBounds(),{padding:[8,8],duration:.5});}catch(e){}}
+  if(capMap&&capMap._fit){try{capMap.flyToBounds(capMap._fit,{padding:[10,10],duration:.5});}catch(e){}}
 }
 /* route the region call-to-action to whichever booking/jobs page this account actually has */
 function capGo(kind){
