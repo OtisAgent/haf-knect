@@ -601,6 +601,26 @@ textarea.fi2{resize:vertical;min-height:70px}
 .lj-compose{display:flex;gap:.4rem;margin-top:.5rem}
 .lj-compose input{flex:1;min-width:0;padding:.5rem .6rem;border:1.5px solid var(--ln);border-radius:var(--pill);background:var(--bg);color:var(--tx);font-size:.78rem}
 @media(max-width:820px){.lj-wrap{grid-template-columns:1fr}#lj-map{height:300px}.lj-fields{grid-template-columns:1fr 1fr}}
+/* peace-of-mind status header */
+.lj-head{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.85rem;background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:.6rem .75rem}
+.lj-head-i{min-width:0}
+.lj-head-l{font-size:.57rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--mu)}
+.lj-head-v{font-size:1rem;font-weight:800;color:var(--tx);margin-top:.1rem;line-height:1.1}
+@media(max-width:560px){.lj-head{grid-template-columns:1fr 1fr}}
+/* proof-of-delivery sign-off overlay */
+.pod-ov{position:fixed;inset:0;background:rgba(8,10,12,.6);backdrop-filter:blur(3px);z-index:5000;display:none;align-items:flex-start;justify-content:center;padding:4vh 1rem;overflow-y:auto}
+.pod-ov.open{display:flex}
+.pod-card{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.pod-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.85rem 1rem;border-bottom:1px solid var(--ln)}
+.pod-body{padding:.5rem 1rem .85rem;display:flex;flex-direction:column}
+.pod-l{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--mu);margin:.6rem 0 .25rem}
+.pod-in{width:100%;padding:.55rem .65rem;border:1.5px solid var(--ln);border-radius:var(--rx);background:var(--bg);color:var(--tx);font-size:.82rem;font-family:inherit}
+.pod-sigwrap{position:relative;border:1.5px dashed var(--ln);border-radius:var(--rx);background:#fff}
+.pod-sig{width:100%;height:130px;display:block;touch-action:none;cursor:crosshair}
+.pod-sigclear{position:absolute;top:6px;right:6px;font-size:.6rem;font-weight:700;background:rgba(255,255,255,.9);border:1px solid #ddd;border-radius:12px;padding:.15rem .5rem;cursor:pointer;color:#333}
+.pod-thumb{max-width:120px;border-radius:var(--rx);border:1px solid var(--ln);margin-top:.4rem}
+.pod-err{color:#cc3333;font-size:.72rem;font-weight:600;margin-top:.5rem;min-height:1rem}
+.pod-foot{display:flex;justify-content:flex-end;gap:.5rem;padding:.75rem 1rem;border-top:1px solid var(--ln)}
 @media(max-width:980px){
   .cap-row{flex-direction:column}
   .cap-col{flex:auto;max-width:none}
@@ -3127,13 +3147,13 @@ const HAF_STEPS=['Job posted','Driver assigned','En route to collection','Collec
 const HAF_JOBS=[
  {id:'HAF-2858',colour:'#3d7dca',status:'transit',stepIdx:4,progress:62,
   from:{name:'Sheffield S1',lat:53.383,lng:-1.466},to:{name:'Leeds LS1',lat:53.796,lng:-1.547},driverPos:{lat:53.565,lng:-1.492},
-  driverName:'James W.',driverId:'JW012390',vehicle:'LWB',goods:'2 pallets · 420 kg · tail-lift',collect:'Today 13:30',deadline:'Today 15:00',eta:'14:35',distance:'38 mi',
+  driverName:'James W.',driverId:'JW012390',vehicle:'LWB',reg:'MA71 ZKD',goods:'2 pallets · 420 kg · tail-lift',collect:'Today 13:30',deadline:'Today 15:00',eta:'14:35',distance:'38 mi',lastUpdate:'2 min ago',onTime:'On time',recipientHint:'Northern Pack — goods-in',
   payout:'£86',rate:'£2.26 / loaded mi',price:'£128',vat:'£25.60',buy:'£86',sell:'£128',margin:'£42',marginPct:'33%',client:'Northern Pack',account:'ABC Trade Ltd',
   updates:[{t:'13:32',s:'Collected from Sheffield S1 — proof of collection uploaded'},{t:'13:49',s:'In transit, northbound on the M1'},{t:'14:06',s:'On schedule — ETA holding at 14:35'}],
   messages:[{who:'driver',from:'James W. (Driver)',t:'13:33',text:'Collected, all secure. 2 pallets on, heading up the M1.'},{who:'portal',from:'HAF KNECT',t:'13:34',text:'Thanks James — customer tracking is live.'}]},
  {id:'HAF-2861',colour:'#ff7800',status:'assigned',stepIdx:1,progress:16,
   from:{name:'Salford M50',lat:53.474,lng:-2.29},to:{name:'Sheffield S9',lat:53.41,lng:-1.42},driverPos:{lat:53.474,lng:-2.29},
-  driverName:'David H.',driverId:'DH022641',vehicle:'LWB',goods:'680 kg · no stacking · tail-lift',collect:'Tomorrow 09:00',deadline:'Tomorrow 12:30',eta:'11:40',distance:'41 mi',
+  driverName:'David H.',driverId:'DH022641',vehicle:'LWB',reg:'DH19 RGT',goods:'680 kg · no stacking · tail-lift',collect:'Tomorrow 09:00',deadline:'Tomorrow 12:30',eta:'11:40',distance:'41 mi',lastUpdate:'—',onTime:'Scheduled',recipientHint:'City Supplies — reception',
   payout:'£94',rate:'£2.29 / loaded mi',price:'£140',vat:'£28.00',buy:'£94',sell:'£140',margin:'£46',marginPct:'33%',client:'City Supplies',account:'ABC Trade Ltd',
   updates:[{t:'—',s:'Driver assigned — collection scheduled for 09:00 tomorrow'}],
   messages:[{who:'portal',from:'HAF KNECT',t:'12:10',text:'David is confirmed for the 09:00 collection tomorrow.'}]}
@@ -3142,7 +3162,7 @@ const HAF_JOBS=[
 const HAF_ROLECFG={
  driver:{title:'Current Job',me:'driver',meFrom:'You (Driver)',
    fields:j=>[['Your payout',j.payout,'var(--gn)'],['Effective rate',j.rate,''],['Loaded distance',j.distance,''],['Deadline',j.deadline,'var(--or)']],
-   actions:['Start navigation','Update status','Report issue']},
+   actions:['Complete delivery (POD)','Start navigation','Report issue']},
  business:{title:'Live Delivery',me:'business',meFrom:'You (Business)',
    fields:j=>[['Price',j.price,''],['VAT',j.vat,''],['Driver',j.driverName,''],['ETA',j.eta,'var(--or)']],
    actions:['Share tracking link','View proof of delivery','Report issue']},
@@ -3170,32 +3190,64 @@ function hafRenderLiveWidget(){
    <button class="sb-lj-btn">Open live job →</button>`;
 }
 
-/* full Live Job page — route, timeline, updates, two-way messaging */
-let ljMap=null;
+/* full Peace-of-Mind Live Job page — route, timeline, updates, messaging, POD */
+let ljMap=null,_ljForceJob=null;
+function hafCurrentJob(){if(_ljForceJob){const j=HAF_JOBS.find(x=>x.id===_ljForceJob);if(j)return j;}return hafActiveJob();}
 function hafRenderLiveJob(){
  const body=document.getElementById('lj-body');if(!body)return;
- const j=hafActiveJob();const role=hafRole();const cfg=HAF_ROLECFG[role]||HAF_ROLECFG.driver;
+ const j=hafCurrentJob();const role=hafRole();const cfg=HAF_ROLECFG[role]||HAF_ROLECFG.driver;
  const st=HAF_STATUS[j.status]||HAF_STATUS.transit;
+ const delivered=(j.status==='delivered');
+ const otCol=/late|delay/i.test(j.onTime)?'#cc3333':(/schedul/i.test(j.onTime)?'var(--mu)':'#2dab60');
  const fields=cfg.fields(j).map(f=>`<div class="lj-field"><div class="lj-field-l">${f[0]}</div><div class="lj-field-v" style="${f[2]?'color:'+f[2]:''}">${hafEsc(f[1])}</div></div>`).join('');
  const steps=HAF_STEPS.map((s,i)=>`<div class="lj-tstep ${i<j.stepIdx?'done':i===j.stepIdx?'now':''}">${s}</div>`).join('');
  const updates=j.updates.map(u=>`<div class="lj-update"><span class="lj-update-t">${hafEsc(u.t)}</span><span>${hafEsc(u.s)}</span></div>`).join('');
- const acts=cfg.actions.map((a,i)=>`<button class="btn ${i===0?'btn-or':'btn-gh'} btn-sm" onclick="hafLjAction('${hafEsc(a)}')">${a}</button>`).join('');
+ /* driver reassurance card — customers/freight see who's coming, never the driver's private number */
+ const dini=j.driverName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+ const maskReg=j.reg.slice(0,4)+' •••';
+ const idCard=role!=='driver'?`<div class="card">
+    <div class="ct" style="margin:0 0 .5rem">Your driver</div>
+    <div style="display:flex;align-items:center;gap:.7rem">
+      <div class="av" style="width:38px;height:38px;font-size:.85rem;flex:none">${dini}</div>
+      <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:.86rem">${hafEsc(j.driverName)}</div><div style="font-size:.7rem;color:var(--mu)">${hafEsc(j.vehicle)} · ${maskReg}</div></div>
+      <span class="chip cg" style="font-size:.58rem;white-space:nowrap">✓ Clever Checked</span>
+    </div>
+  </div>`:'';
+ /* action / delivered block */
+ let actionBlock;
+ if(delivered&&j.pod){
+   if(role==='driver'){
+     actionBlock=`<div style="padding:.6rem;border-radius:var(--rx);background:var(--gn-d);border:1px solid rgba(45,171,96,.25);font-size:.76rem;color:var(--gn);font-weight:600">Delivery completed. POD submitted at ${hafEsc(j.pod.time)}. No further action needed.<div style="color:var(--tx);margin-top:.35rem">Payout <strong>${hafEsc(j.payout)}</strong> — allocated to the next CleverPay block.</div></div>`;
+   }else{
+     actionBlock=`<div style="padding:.55rem;border-radius:var(--rx);background:var(--gn-d);border:1px solid rgba(45,171,96,.25);font-size:.76rem;color:var(--gn);font-weight:700;margin-bottom:.5rem">✓ Delivered ${hafEsc(j.pod.time)} · signed by ${hafEsc(j.pod.name)}</div><button class="btn btn-or btn-sm" onclick="hafDownloadPod('${j.id}')">Download proof of delivery →</button>`;
+   }
+ }else{
+   actionBlock=`<div style="display:flex;gap:.4rem;flex-wrap:wrap">${cfg.actions.map((a,i)=>`<button class="btn ${i===0?'btn-or':'btn-gh'} btn-sm" onclick="hafLjAction('${hafEsc(a)}')">${a}</button>`).join('')}</div>`;
+ }
  body.innerHTML=`
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem">
     <div><h1 class="pt" style="margin-bottom:.15rem">${cfg.title}</h1><p class="ps" style="margin:0">${hafEsc(j.from.name)} → ${hafEsc(j.to.name)} · ${j.id}</p></div>
     <span class="chip" style="background:${st[1]}22;color:${st[1]};font-weight:800;border:1px solid ${st[1]}55">● ${st[0]}</span>
+  </div>
+  <div class="lj-head">
+    <div class="lj-head-i"><div class="lj-head-l">Status</div><div class="lj-head-v" style="color:${st[1]}">${st[0]}</div></div>
+    <div class="lj-head-i"><div class="lj-head-l">ETA</div><div class="lj-head-v">${delivered?hafEsc(j.pod.time):hafEsc(j.eta)}</div></div>
+    <div class="lj-head-i"><div class="lj-head-l">${delivered?'Outcome':'On time'}</div><div class="lj-head-v" style="color:${delivered?'#2dab60':otCol};font-size:.86rem">${delivered?'Delivered':hafEsc(j.onTime)}</div></div>
+    <div class="lj-head-i"><div class="lj-head-l">Last update</div><div class="lj-head-v" style="font-size:.82rem">${hafEsc(j.lastUpdate)}</div></div>
   </div>
   <div class="lj-wrap">
     <div>
       <div class="lj-mapwrap"><div id="lj-map"></div>
         <div style="position:absolute;top:10px;left:10px;z-index:1000;background:rgba(14,17,19,.82);border-radius:16px;padding:.28rem .6rem;font-size:.62rem;color:#fff;display:flex;align-items:center;gap:.5rem;backdrop-filter:blur(4px)">
-          <span style="display:flex;align-items:center;gap:.28rem"><span style="width:9px;height:9px;border-radius:50%;background:${j.colour}"></span>Route</span>
+          <span style="display:flex;align-items:center;gap:.28rem"><span style="width:14px;height:3px;border-radius:2px;background:${j.colour}"></span>Done</span>
+          <span style="display:flex;align-items:center;gap:.28rem"><span style="width:14px;height:3px;border-radius:2px;background:${j.colour};opacity:.4"></span>To go</span>
           <span style="display:flex;align-items:center;gap:.28rem"><span style="width:9px;height:9px;border-radius:50%;background:#fff;border:2px solid ${j.colour}"></span>Driver</span>
         </div>
+        <div style="position:absolute;bottom:10px;left:10px;z-index:1000;background:rgba(14,17,19,.78);border-radius:14px;padding:.22rem .55rem;font-size:.6rem;color:#cfe;backdrop-filter:blur(4px)">Driver location updated ${hafEsc(j.lastUpdate)}</div>
       </div>
       <div class="card" style="margin-top:.8rem">
         <div class="ct" style="margin:0 0 .5rem">Live updates</div>${updates}
-        <div style="font-size:.66rem;color:var(--mu);margin-top:.5rem">Updates post automatically as the driver moves through each stage.</div>
+        <div style="font-size:.66rem;color:var(--mu);margin-top:.5rem">Updates post automatically as the driver moves through each stage — no need to call in.</div>
       </div>
     </div>
     <div class="lj-side">
@@ -3203,8 +3255,9 @@ function hafRenderLiveJob(){
         <div class="ct" style="margin:0 0 .55rem">This ${role==='freight'?'load':'delivery'}</div>
         <div class="lj-fields">${fields}</div>
         <div style="font-size:.72rem;color:var(--mu);margin:.6rem 0 .1rem"><strong style="color:var(--tx)">${hafEsc(j.vehicle)}</strong> · ${hafEsc(j.goods)}</div>
-        <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.7rem">${acts}</div>
+        <div style="margin-top:.7rem">${actionBlock}</div>
       </div>
+      ${idCard}
       <div class="card">
         <div class="ct" style="margin:0 0 .3rem">Job timeline</div>
         <div class="lj-time">${steps}</div>
@@ -3246,7 +3299,8 @@ function hafLjSend(){
  try{fetch(HAF_NOTIFY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job:j.id,route:j.from.name+' → '+j.to.name,from:cfg.meFrom,text:txt})}).catch(()=>{});}catch(e){}
 }
 function hafLjAction(label){
- const j=hafActiveJob();
+ const j=hafCurrentJob();
+ if(/POD|proof|complete deliv/i.test(label)){hafOpenPod();return;}
  if(/tracking/i.test(label)){alert('Shareable tracking link for '+j.id+':\nhttps://track.usehaf.co.uk/'+j.id.toLowerCase());return;}
  if(/navigation/i.test(label)){window.open('https://www.google.com/maps/dir/?api=1&destination='+j.to.lat+','+j.to.lng,'_blank');return;}
  alert(label+' — coming in the next build slice.');
@@ -3256,13 +3310,128 @@ function hafInitLjMap(j){
  if(ljMap){try{ljMap.remove();}catch(e){}ljMap=null;}
  ljMap=L.map('lj-map',{zoomControl:true,scrollWheelZoom:false,attributionControl:false}).setView([j.driverPos.lat,j.driverPos.lng],8);
  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:18}).addTo(ljMap);
- const line=L.polyline([[j.from.lat,j.from.lng],[j.driverPos.lat,j.driverPos.lng],[j.to.lat,j.to.lng]],{color:j.colour,weight:5,opacity:.9}).addTo(ljMap);
+ /* completed section solid, remaining section faded/dashed — the route fills in as the driver moves */
+ L.polyline([[j.from.lat,j.from.lng],[j.driverPos.lat,j.driverPos.lng]],{color:j.colour,weight:5,opacity:.95}).addTo(ljMap);
+ L.polyline([[j.driverPos.lat,j.driverPos.lng],[j.to.lat,j.to.lng]],{color:j.colour,weight:5,opacity:.38,dashArray:'2,9'}).addTo(ljMap);
+ const line=L.polyline([[j.from.lat,j.from.lng],[j.driverPos.lat,j.driverPos.lng],[j.to.lat,j.to.lng]],{opacity:0}).addTo(ljMap);
  const dot=(c,fill)=>L.divIcon({className:'',html:`<div style="width:14px;height:14px;border-radius:50%;background:${fill};border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.5)"></div>`,iconSize:[14,14],iconAnchor:[7,7]});
  L.marker([j.from.lat,j.from.lng],{icon:dot(j.colour,j.colour)}).addTo(ljMap).bindPopup('Collection · '+j.from.name);
  L.marker([j.to.lat,j.to.lng],{icon:dot(j.colour,'#2dab60')}).addTo(ljMap).bindPopup('Delivery · '+j.to.name);
  L.marker([j.driverPos.lat,j.driverPos.lng],{icon:dot(j.colour,'#fff')}).addTo(ljMap).bindPopup('Driver · '+j.driverName+' ('+j.progress+'%)');
  try{ljMap.fitBounds(line.getBounds(),{padding:[40,40]});}catch(e){}
  setTimeout(()=>{try{ljMap.invalidateSize();}catch(e){}},80);
+}
+
+/* ── PROOF OF DELIVERY — driver sign-off → locked, downloadable proof for customer & freight ── */
+const HAF_POD_EXC=['Delivered & signed','Left in approved safe place','Delivered to reception','Recipient refused to sign','Recipient unavailable','Site closed'];
+let _sigPad=null,_podPhoto=null;
+function hafOpenPod(){
+ let ov=document.getElementById('pod-ov');
+ if(!ov){ov=document.createElement('div');ov.id='pod-ov';ov.className='pod-ov';ov.onclick=e=>{if(e.target===ov)hafClosePod();};document.body.appendChild(ov);}
+ const j=hafCurrentJob();_podPhoto=null;
+ ov.innerHTML=`<div class="pod-card">
+   <div class="pod-head"><div><div class="ct" style="margin:0">Proof of delivery</div><div style="font-size:.7rem;color:var(--mu)">${j.id} · ${hafEsc(j.to.name)}</div></div><button class="btn btn-gh btn-xs" onclick="hafClosePod()">Close ✕</button></div>
+   <div class="pod-body">
+     <label class="pod-l">Delivery outcome</label>
+     <select id="pod-exc" class="pod-in" onchange="hafPodExc()">${HAF_POD_EXC.map(e=>`<option>${e}</option>`).join('')}</select>
+     <div id="pod-sign-fields">
+       <label class="pod-l">Recipient name <span style="color:#cc3333">*</span></label>
+       <input id="pod-name" class="pod-in" placeholder="Who took the delivery?">
+       <label class="pod-l">Company / department</label>
+       <input id="pod-co" class="pod-in" placeholder="${hafEsc(j.recipientHint||'e.g. Goods-in')}">
+       <label class="pod-l" id="pod-sig-l">Signature <span style="color:#cc3333">*</span></label>
+       <div class="pod-sigwrap"><canvas id="pod-sig" class="pod-sig"></canvas><button type="button" class="pod-sigclear" onclick="hafSigClear()">Clear</button></div>
+     </div>
+     <label class="pod-l">Delivery photo (optional)</label>
+     <input type="file" accept="image/*" capture="environment" id="pod-photo" class="pod-in" onchange="hafPodPhoto(event)">
+     <div id="pod-photo-prev"></div>
+     <label class="pod-l">Notes</label>
+     <textarea id="pod-notes" class="pod-in" rows="2" placeholder="Condition on delivery, anything to flag…"></textarea>
+     <div id="pod-err" class="pod-err"></div>
+   </div>
+   <div class="pod-foot"><button class="btn btn-gh btn-sm" onclick="hafClosePod()">Cancel</button><button class="btn btn-or" onclick="hafPodSubmit()">Submit proof of delivery</button></div>
+ </div>`;
+ ov.classList.add('open');
+ setTimeout(hafSigInit,60);
+}
+function hafClosePod(){const ov=document.getElementById('pod-ov');if(ov)ov.classList.remove('open');}
+function hafPodExc(){
+ const v=document.getElementById('pod-exc').value;
+ const needSig=/signed|reception/i.test(v);
+ const wrap=document.querySelector('.pod-sigwrap');const l=document.getElementById('pod-sig-l');
+ if(wrap)wrap.style.display=needSig?'block':'none';
+ if(l)l.style.display=needSig?'block':'none';
+}
+function hafPodPhoto(e){
+ const f=e.target.files&&e.target.files[0];if(!f)return;
+ const r=new FileReader();r.onload=()=>{_podPhoto=r.result;const p=document.getElementById('pod-photo-prev');if(p)p.innerHTML=`<img src="${r.result}" class="pod-thumb">`;};r.readAsDataURL(f);
+}
+function hafSigInit(){
+ const c=document.getElementById('pod-sig');if(!c)return;
+ const rect=c.getBoundingClientRect();c.width=Math.max(rect.width,200);c.height=130;
+ const ctx=c.getContext('2d');ctx.lineWidth=2.2;ctx.lineCap='round';ctx.strokeStyle='#0e1113';
+ let drawing=false,has=false;
+ const pos=e=>{const r=c.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return[t.clientX-r.left,t.clientY-r.top];};
+ const start=e=>{drawing=true;const[x,y]=pos(e);ctx.beginPath();ctx.moveTo(x,y);e.preventDefault();};
+ const move=e=>{if(!drawing)return;const[x,y]=pos(e);ctx.lineTo(x,y);ctx.stroke();has=true;e.preventDefault();};
+ const end=()=>{drawing=false;};
+ c.onmousedown=start;c.onmousemove=move;c.onmouseup=end;c.onmouseleave=end;
+ c.ontouchstart=start;c.ontouchmove=move;c.ontouchend=end;
+ c._hasInk=()=>has;c._clear=()=>{ctx.clearRect(0,0,c.width,c.height);has=false;};
+ _sigPad=c;
+}
+function hafSigClear(){if(_sigPad&&_sigPad._clear)_sigPad._clear();}
+function hafPodSubmit(){
+ const j=hafCurrentJob();
+ const exc=document.getElementById('pod-exc').value;
+ const name=document.getElementById('pod-name').value.trim();
+ const co=document.getElementById('pod-co').value.trim();
+ const notes=document.getElementById('pod-notes').value.trim();
+ const needSig=/signed|reception/i.test(exc);
+ const err=document.getElementById('pod-err');
+ if(!name){err.textContent='Enter who took the delivery.';return;}
+ if(needSig&&_sigPad&&_sigPad._hasInk&&!_sigPad._hasInk()){err.textContent='Capture the recipient signature, or pick a different outcome.';return;}
+ const sig=(needSig&&_sigPad)?_sigPad.toDataURL():null;
+ const time=hafNow();
+ j.pod={name,company:co,notes,outcome:exc,signature:sig,photo:_podPhoto,time,date:new Date().toLocaleDateString('en-GB')};
+ j.status='delivered';j.stepIdx=HAF_STEPS.length-1;j.progress=100;j.onTime='Delivered';j.lastUpdate='just now';j.driverPos={lat:j.to.lat,lng:j.to.lng};
+ j.updates.push({t:time,s:'Delivered — '+exc+(name?' · signed by '+name:'')});
+ j.messages.push({who:'driver',from:j.driverName+' (Driver)',t:time,text:'Delivered. '+exc+(name?', signed by '+name+'.':'.')});
+ _podPhoto=null;_sigPad=null;
+ hafClosePod();
+ _ljForceJob=j.id;
+ hafRenderLiveJob();hafRenderLiveWidget();
+}
+function hafDownloadPod(id){
+ const j=HAF_JOBS.find(x=>x.id===id);if(!j||!j.pod)return;
+ const p=j.pod;const audit='HAF-POD-'+j.id+'-'+Date.now().toString(36).toUpperCase();
+ const row=(k,v)=>`<tr><td class="k">${k}</td><td>${v}</td></tr>`;
+ const doc=`<!doctype html><html><head><meta charset="utf-8"><title>POD ${j.id}</title>
+   <style>body{font-family:Arial,Helvetica,sans-serif;color:#111;max-width:640px;margin:24px auto;padding:0 20px}
+   .h{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #ff7800;padding-bottom:10px}
+   .h b{font-size:20px}.t{color:#ff7800;font-weight:800;letter-spacing:.04em}
+   table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px}td{padding:7px 4px;border-bottom:1px solid #eee;vertical-align:top}
+   td.k{color:#666;width:42%}img{max-width:220px;border:1px solid #ddd;margin-top:6px}
+   .ok{color:#1a9d55;font-weight:700}.ref{color:#999;font-size:11px;margin-top:18px}</style></head><body>
+   <div class="h"><b>HAF <span class="t">KNECT</span></b><span class="t">PROOF OF DELIVERY</span></div>
+   <table>
+   ${row('HAF job reference','<b>'+j.id+'</b>')}
+   ${row('Collection',hafEsc(j.from.name))}
+   ${row('Delivery',hafEsc(j.to.name))}
+   ${row('Goods',hafEsc(j.goods))}
+   ${row('Vehicle',hafEsc(j.vehicle)+' · '+hafEsc(j.reg))}
+   ${row('Delivered',hafEsc(p.date)+' '+hafEsc(p.time))}
+   ${row('Outcome','<span class="ok">'+hafEsc(p.outcome)+'</span>')}
+   ${row('Recipient',hafEsc(p.name||'—')+(p.company?' · '+hafEsc(p.company):''))}
+   ${row('Driver',hafEsc(j.driverName)+' ('+hafEsc(j.driverId)+')')}
+   ${row('Notes',hafEsc(p.notes||'None'))}
+   ${p.signature?row('Signature','<img src="'+p.signature+'">'):''}
+   ${p.photo?row('Delivery photo','<img src="'+p.photo+'">'):''}
+   </table>
+   <div class="ref">Audit reference ${audit} · Generated by HAF KNECT · This record is locked and auditable.</div>
+   </body></html>`;
+ const w=window.open('','_blank');
+ if(w){w.document.write(doc);w.document.close();}else{const b=new Blob([doc],{type:'text/html'});window.open(URL.createObjectURL(b),'_blank');}
 }
 
 /* ── COMMUNITY FEEDBACK BOARD (shared HUB database — same board as the demo) ── */
