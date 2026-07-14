@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="uk-regions.js"></script>
 <style>
 /* ── TOKENS ─────────────────────────────────────────────────── */
 :root{
@@ -512,6 +513,9 @@ textarea.fi2{resize:vertical;min-height:70px}
 .cap-pill:hover{border-color:var(--or);color:var(--or)}
 .cap-pill.active{border-color:var(--or);background:var(--or-d);color:var(--or)}
 @media(max-width:820px){.cap-row{flex-direction:column}.cap-side{max-width:none!important;min-width:0!important}.cap-mapwrap #cap-map{height:340px!important}#cap-sections{max-height:none!important}}
+#cap-map{background:#0a1a2b}
+#cap-map .leaflet-container{background:#0a1a2b}
+.leaflet-container{background:#0a1a2b}
 .demo-tile{flex:1;padding:.55rem .35rem;background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);cursor:pointer;text-align:center;transition:border-color .14s,background .14s;display:flex;flex-direction:column;align-items:center;gap:.18rem}
 .demo-tile:hover{border-color:var(--or);background:var(--or-d)}
 .demo-tile-ico{width:18px;height:18px;color:var(--or);stroke:var(--or);margin-bottom:.1rem}
@@ -1789,11 +1793,9 @@ textarea.fi2{resize:vertical;min-height:70px}
           <!-- Map (left) -->
           <div class="cap-mapwrap" style="flex:1 1 60%;min-width:0;border-radius:var(--r);overflow:hidden;border:1.5px solid var(--ln);position:relative">
             <div id="cap-map" style="height:520px;width:100%;background:var(--bg)"></div>
-            <div style="position:absolute;top:10px;right:10px;z-index:1000;background:rgba(14,17,19,.82);border-radius:20px;padding:.3rem .7rem;font-size:.63rem;display:flex;align-items:center;gap:.6rem;box-shadow:0 1px 6px rgba(0,0,0,.3);backdrop-filter:blur(4px)">
-              <span style="display:flex;align-items:center;gap:.28rem;color:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#2dab60;display:inline-block"></span>Hot</span>
-              <span style="display:flex;align-items:center;gap:.28rem;color:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#e88c00;display:inline-block"></span>Warm</span>
-              <span style="display:flex;align-items:center;gap:.28rem;color:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#4a90d9;display:inline-block"></span>Cool</span>
-              <span style="display:flex;align-items:center;gap:.28rem;color:#a97bff"><span style="width:8px;height:8px;background:#a97bff;display:inline-block;transform:rotate(45deg)"></span>Relay</span>
+            <div style="position:absolute;top:10px;right:10px;z-index:1000;background:rgba(14,17,19,.82);border-radius:20px;padding:.3rem .8rem;font-size:.63rem;display:flex;align-items:center;gap:.6rem;box-shadow:0 1px 6px rgba(0,0,0,.3);backdrop-filter:blur(4px)">
+              <span style="color:#fff">Tap a region</span>
+              <span style="display:flex;align-items:center;gap:.28rem;color:#c9a7ff"><span style="width:8px;height:8px;background:#6a3fd0;display:inline-block;transform:rotate(45deg)"></span>Relay point</span>
             </div>
           </div>
           <!-- Side panels (right) -->
@@ -3087,79 +3089,78 @@ let capMap=null;
 /* ── NETWORK MAP — regional zones, click-to-detail, relay leaderboard ── */
 /* tier: hot / warm / cool. Each region carries its relay stations (with performance).
    Numbers are network placeholders until the live driver feed + relay swap data fill them. */
-const CAP_TIER={hot:{fill:'#2dab60',stroke:'#1a6e3d',lbl:'Hot demand'},warm:{fill:'#e88c00',stroke:'#b06a00',lbl:'Warm'},cool:{fill:'#4a90d9',stroke:'#2f6aa8',lbl:'Cool / building'}};
+const CAP_TIER={hot:{lbl:'Hot demand'},warm:{lbl:'Warm'},cool:{lbl:'Cool / building'}};
+/* 12 standard UK regions — geo = name in the map boundary file, pc = postcodes.io region/country.
+   colour = flat categorical fill (each section its own colour, like a regions infographic).
+   lab = [lat,lng] for the on-map label. Numbers are network placeholders until live data fills them. */
 const CAP_REGIONS=[
-  {id:'nw',name:'North West',lat:53.46,lng:-2.35,r:34000,tier:'hot',drivers:14,jobs:2,cities:'Manchester · Liverpool · Warrington',corridor:'M6 / M62',demand:'Manchester → Birmingham runs daily',
-    relays:[{name:'Lymm Relay (M6/M56)',road:'M6 J20',swaps:38,ontime:96,dwell:14,live:true},{name:'Haydock Hub',road:'M6 J23',swaps:19,ontime:91,dwell:22,live:false}]},
-  {id:'yo',name:'Yorkshire',lat:53.70,lng:-1.45,r:30000,tier:'hot',drivers:11,jobs:1,cities:'Leeds · Sheffield · Bradford',corridor:'M1 / M62 / A1(M)',demand:'Strong backload pool both ways',
-    relays:[{name:'Doncaster Gateway (M18/A1)',road:'M18 J3',swaps:41,ontime:97,dwell:12,live:true},{name:'Brighouse (M62)',road:'M62 J25',swaps:23,ontime:93,dwell:17,live:true}]},
-  {id:'wm',name:'West Midlands',lat:52.48,lng:-1.90,r:28000,tier:'hot',drivers:12,jobs:1,cities:'Birmingham · Coventry · Wolverhampton',corridor:'M6 / M42 / M5',demand:'Golden-triangle overspill',
-    relays:[{name:'Coleshill Cross (M6/M42)',road:'M6 J4',swaps:34,ontime:95,dwell:15,live:true},{name:'Tamworth (M42/A5)',road:'M42 J10',swaps:27,ontime:92,dwell:19,live:false}]},
-  {id:'em',name:'East Midlands',lat:52.85,lng:-1.20,r:26000,tier:'warm',drivers:7,jobs:1,cities:'Nottingham · Leicester · Derby',corridor:'M1 / A50',demand:'DIRFT / Golden Triangle spine',
-    relays:[{name:'Rugby / DIRFT',road:'M1 J18',swaps:29,ontime:94,dwell:16,live:true}]},
-  {id:'lse',name:'London & South East',lat:51.51,lng:-0.12,r:40000,tier:'warm',drivers:9,jobs:1,cities:'London · Watford · Dartford',corridor:'M25 / M1 / M40',demand:'High inbound, thin return capacity',
-    relays:[{name:'Milton Keynes (M1 J13)',road:'M1 J13',swaps:22,ontime:90,dwell:24,live:false},{name:'Thurrock (M25 J30)',road:'M25 J30',swaps:15,ontime:88,dwell:26,live:false}]},
-  {id:'ne',name:'North East',lat:54.95,lng:-1.62,r:26000,tier:'warm',drivers:7,jobs:0,cities:'Newcastle · Sunderland · Durham',corridor:'A1(M)',demand:'Long-haul South backloads',
-    relays:[{name:'Scotch Corner (A1/A66)',road:'A1(M) J53',swaps:12,ontime:89,dwell:28,live:false}]},
-  {id:'sco',name:'Central Scotland',lat:55.86,lng:-4.10,r:34000,tier:'warm',drivers:6,jobs:0,cities:'Glasgow · Edinburgh · Stirling',corridor:'M8 / M74',demand:'Gateway to/from England via Penrith',
+  {id:'sco',name:'Scotland',geo:'Scotland',pc:'Scotland',colour:'#e8823c',lab:[56.6,-4.2],tier:'warm',drivers:6,jobs:0,cities:'Glasgow · Edinburgh · Aberdeen',corridor:'M8 / M74',demand:'Gateway to/from England via Penrith',
     relays:[{name:'Abington (M74)',road:'M74 J13',swaps:9,ontime:87,dwell:31,live:false}]},
-  {id:'sw',name:'South West',lat:51.45,lng:-2.58,r:30000,tier:'cool',drivers:4,jobs:0,cities:'Bristol · Swindon · Exeter',corridor:'M4 / M5',demand:'Building — needs relay partners',
-    relays:[{name:'Swindon (M4 J15)',road:'M4 J15',swaps:7,ontime:91,dwell:20,live:false}]},
-  {id:'wal',name:'South Wales',lat:51.55,lng:-3.20,r:26000,tier:'cool',drivers:3,jobs:0,cities:'Cardiff · Newport · Swansea',corridor:'M4',demand:'Early — recruit drivers first',relays:[]},
-  {id:'ea',name:'East Anglia',lat:52.35,lng:0.55,r:30000,tier:'cool',drivers:3,jobs:0,cities:'Cambridge · Norwich · Ipswich',corridor:'A14 / A11',demand:'Port backloads (Felixstowe)',
+  {id:'ni',name:'Northern Ireland',geo:'Northern Ireland',pc:'Northern Ireland',colour:'#4fae73',lab:[54.7,-6.8],tier:'cool',drivers:2,jobs:0,cities:'Belfast · Derry · Lisburn',corridor:'M1 / M2',demand:'Early — sea-link backloads',relays:[]},
+  {id:'ne',name:'North East',geo:'North East',pc:'North East',colour:'#b5543f',lab:[54.9,-1.9],tier:'warm',drivers:7,jobs:0,cities:'Newcastle · Sunderland · Durham',corridor:'A1(M)',demand:'Long-haul South backloads',
+    relays:[{name:'Scotch Corner (A1/A66)',road:'A1(M) J53',swaps:12,ontime:89,dwell:28,live:false}]},
+  {id:'nw',name:'North West',geo:'North West',pc:'North West',colour:'#9ec13c',lab:[54.0,-2.7],tier:'hot',drivers:14,jobs:2,cities:'Manchester · Liverpool · Preston',corridor:'M6 / M62',demand:'Manchester → Birmingham runs daily',
+    relays:[{name:'Lymm Relay (M6/M56)',road:'M6 J20',swaps:38,ontime:96,dwell:14,live:true},{name:'Haydock Hub',road:'M6 J23',swaps:19,ontime:91,dwell:22,live:false}]},
+  {id:'yo',name:'Yorkshire & Humber',geo:'Yorkshire and The Humber',pc:'Yorkshire and The Humber',colour:'#d94f9a',lab:[53.85,-1.2],tier:'hot',drivers:11,jobs:1,cities:'Leeds · Sheffield · Hull',corridor:'M1 / M62 / A1(M)',demand:'Strong backload pool both ways',
+    relays:[{name:'Doncaster Gateway (M18/A1)',road:'M18 J3',swaps:41,ontime:97,dwell:12,live:true},{name:'Brighouse (M62)',road:'M62 J25',swaps:23,ontime:93,dwell:17,live:true}]},
+  {id:'wm',name:'West Midlands',geo:'West Midlands',pc:'West Midlands',colour:'#f0c020',lab:[52.5,-2.2],tier:'hot',drivers:12,jobs:1,cities:'Birmingham · Coventry · Wolverhampton',corridor:'M6 / M42 / M5',demand:'Golden-triangle overspill',
+    relays:[{name:'Coleshill Cross (M6/M42)',road:'M6 J4',swaps:34,ontime:95,dwell:15,live:true},{name:'Tamworth (M42/A5)',road:'M42 J10',swaps:27,ontime:92,dwell:19,live:false}]},
+  {id:'em',name:'East Midlands',geo:'East Midlands',pc:'East Midlands',colour:'#4a90d9',lab:[52.9,-0.9],tier:'warm',drivers:7,jobs:1,cities:'Nottingham · Leicester · Derby',corridor:'M1 / A50',demand:'DIRFT / Golden Triangle spine',
+    relays:[{name:'Rugby / DIRFT',road:'M1 J18',swaps:29,ontime:94,dwell:16,live:true}]},
+  {id:'wal',name:'Wales',geo:'Wales',pc:'Wales',colour:'#e8823c',lab:[52.3,-3.7],tier:'cool',drivers:3,jobs:0,cities:'Cardiff · Swansea · Wrexham',corridor:'M4 / A55',demand:'Early — recruit drivers first',relays:[]},
+  {id:'ea',name:'East of England',geo:'Eastern',pc:'East of England',colour:'#5fb87a',lab:[52.3,0.6],tier:'cool',drivers:3,jobs:0,cities:'Cambridge · Norwich · Ipswich',corridor:'A14 / A11',demand:'Port backloads (Felixstowe)',
     relays:[{name:'A14 Cambridge',road:'A14 J31',swaps:6,ontime:90,dwell:23,live:false}]},
+  {id:'lon',name:'London',geo:'London',pc:'London',colour:'#f0b429',lab:[51.5,-0.1],tier:'warm',drivers:5,jobs:1,cities:'Greater London',corridor:'M25 / North & South Circular',demand:'High inbound, thin return capacity',
+    relays:[{name:'Thurrock (M25 J30)',road:'M25 J30',swaps:15,ontime:88,dwell:26,live:false}]},
+  {id:'se',name:'South East',geo:'South East',pc:'South East',colour:'#e56aa0',lab:[51.2,-0.6],tier:'warm',drivers:6,jobs:0,cities:'Reading · Milton Keynes · Kent',corridor:'M25 / M40 / M3',demand:'Home-counties distribution belt',
+    relays:[{name:'Milton Keynes (M1 J13)',road:'M1 J13',swaps:22,ontime:90,dwell:24,live:false}]},
+  {id:'sw',name:'South West',geo:'South West',pc:'South West',colour:'#8cc152',lab:[50.9,-3.6],tier:'cool',drivers:4,jobs:0,cities:'Bristol · Exeter · Plymouth',corridor:'M4 / M5',demand:'Building — needs relay partners',
+    relays:[{name:'Swindon (M4 J15)',road:'M4 J15',swaps:7,ontime:91,dwell:20,live:false}]},
 ];
-/* Outlined region boundaries — clean bordered blocks (schematic, not survey-accurate) */
-const CAP_POLY={
-  sco:[[57.3,-5.2],[57.3,-2.0],[55.65,-2.0],[55.65,-5.2]],
-  ne :[[55.62,-2.5],[55.62,-1.0],[54.25,-1.0],[54.25,-2.5]],
-  nw :[[54.7,-3.3],[54.7,-2.10],[53.2,-2.10],[53.2,-3.3]],
-  yo :[[54.22,-2.10],[54.22,-0.65],[53.28,-0.65],[53.28,-2.10]],
-  wm :[[53.05,-2.7],[53.05,-1.72],[52.15,-1.72],[52.15,-2.7]],
-  em :[[53.25,-1.68],[53.25,-0.25],[52.5,-0.25],[52.5,-1.68]],
-  ea :[[52.95,-0.2],[52.95,1.5],[51.85,1.5],[51.85,-0.2]],
-  lse:[[52.05,-0.9],[52.05,0.95],[50.95,0.95],[50.95,-0.9]],
-  sw :[[51.7,-5.8],[51.7,-2.45],[49.9,-2.45],[49.9,-5.8]],
-  wal:[[52.35,-4.5],[52.35,-2.72],[51.42,-2.72],[51.42,-4.5]],
-};
+const CAP_BY_GEO={};CAP_REGIONS.forEach(z=>CAP_BY_GEO[z.geo]=z);
 
 let _capSel=null;
 function initCapMap(){
   const el=document.getElementById('cap-map');
   if(!el||typeof L==='undefined')return;
   if(capMap){capMap.invalidateSize();return;}
-  capMap=L.map('cap-map',{zoomControl:true,scrollWheelZoom:false}).setView([53.6,-2.4],6);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:18,opacity:.65
-  }).addTo(capMap);
-
-  capMap._zoneLayers={};capMap._relayLayers=[];
-  CAP_REGIONS.forEach(z=>{
-    const c=CAP_TIER[z.tier];
-    /* clean outlined block, not a fuzzy circle */
-    const poly=L.polygon(CAP_POLY[z.id]||[[z.lat+.3,z.lng-.3],[z.lat+.3,z.lng+.3],[z.lat-.3,z.lng+.3],[z.lat-.3,z.lng-.3]],
-      {fillColor:c.fill,color:c.stroke,weight:2.5,fillOpacity:.22,lineJoin:'round'});
-    /* one tidy label at the block centre */
-    const icon=L.divIcon({className:'',html:`<div style="text-align:center;pointer-events:none">
-        <div style="background:rgba(14,17,19,.86);color:#fff;font-size:11px;font-weight:800;padding:3px 9px;border-radius:6px;border:1.5px solid ${c.stroke};white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.35)">${z.name}</div>
-        <div style="font-size:10px;color:#fff;font-weight:700;margin-top:2px;text-shadow:0 1px 2px rgba(0,0,0,.7)">${z.drivers} drivers${z.jobs?' · '+z.jobs+' live':''}</div>
-      </div>`,iconSize:[130,42],iconAnchor:[65,16]});
-    const marker=L.marker([z.lat,z.lng],{icon});
-    poly.on('click',()=>capSelect(z.id));
-    marker.on('click',()=>capSelect(z.id));
-    poly.on('mouseover',()=>poly.setStyle({fillOpacity:.36}));
-    poly.on('mouseout',()=>{if(_capSel!==z.id)poly.setStyle({fillOpacity:.22});});
-    poly.addTo(capMap);marker.addTo(capMap);
-    capMap._zoneLayers[z.id]={poly,marker};
-  });
+  /* Flat UK regions map — no street tiles, plain background (set via CSS on #cap-map) */
+  capMap=L.map('cap-map',{zoomControl:false,scrollWheelZoom:false,attributionControl:false,dragging:true,doubleClickZoom:false,boxZoom:false});
   capRenderSections();
 
-  /* Relay stations plotted as diamonds — the network's reference points */
-  const relayIcon=L.divIcon({className:'',html:`<div style="width:13px;height:13px;background:#a97bff;transform:rotate(45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45)"></div>`,iconSize:[13,13],iconAnchor:[7,7]});
+  if(typeof window.UK_GEO==='undefined'){
+    /* boundary file didn't load — keep the page usable via the side panels */
+    capMap.setView([54.5,-3.5],5);
+  }else{
+    capMap._zoneLayers={};
+    capMap._geo=L.geoJSON(window.UK_GEO,{
+      style:(f)=>{const z=CAP_BY_GEO[f.properties.region];return{fillColor:z?z.colour:'#888',color:'#0e1113',weight:1,fillOpacity:z?.9:.4,lineJoin:'round'};},
+      onEachFeature:(f,layer)=>{const z=CAP_BY_GEO[f.properties.region];if(!z)return;
+        capMap._zoneLayers[z.id]=layer;
+        layer.on('click',()=>capSelect(z.id));
+        layer.on('mouseover',()=>{if(_capSel!==z.id)layer.setStyle({fillOpacity:1,weight:2});});
+        layer.on('mouseout',()=>{if(_capSel!==z.id)layer.setStyle({fillOpacity:.9,weight:1});});
+      }
+    }).addTo(capMap);
+    /* bold uppercase region labels, like the reference infographic */
+    capMap._labels={};
+    CAP_REGIONS.forEach(z=>{
+      const icon=L.divIcon({className:'',html:`<div style="text-align:center;pointer-events:none;white-space:nowrap">
+          <div style="color:#12181c;font-size:10px;font-weight:900;letter-spacing:.02em;text-transform:uppercase;text-shadow:0 1px 2px rgba(255,255,255,.55)">${z.name}</div>
+          <div style="font-size:9px;font-weight:800;color:#12181c;opacity:.85;text-shadow:0 1px 2px rgba(255,255,255,.55)">${z.drivers} drivers${z.jobs?' · '+z.jobs+' live':''}</div>
+        </div>`,iconSize:[130,30],iconAnchor:[65,12]});
+      const m=L.marker(z.lab,{icon,interactive:false}).addTo(capMap);
+      capMap._labels[z.id]=m;
+    });
+    try{capMap.fitBounds(capMap._geo.getBounds(),{padding:[8,8]});}catch(e){capMap.setView([54.5,-3.5],5);}
+  }
+
+  /* Relay stations as diamonds on the region label points (toggle layer) */
+  capMap._relayLayers=[];
+  const relayIcon=L.divIcon({className:'',html:`<div style="width:12px;height:12px;background:#6a3fd0;transform:rotate(45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>`,iconSize:[12,12],iconAnchor:[6,6]});
   CAP_REGIONS.forEach(z=>{(z.relays||[]).forEach((rs,ri)=>{
-    const off=0.10+ri*0.16; /* fan multiple relays out from the region centre */
-    const m=L.marker([z.lat+off,z.lng+off*0.9],{icon:relayIcon})
-     .bindPopup(`<strong style="color:#7b4fd0">◆ ${rs.name}</strong><br>${rs.road}<br><span style="color:#666;font-size:11px">${z.name} · ${rs.live?rs.swaps+' swaps logged':'candidate hub'}</span>`);
+    const m=L.marker([z.lab[0]-0.25-ri*0.28,z.lab[1]+0.35+ri*0.2],{icon:relayIcon})
+     .bindPopup(`<strong style="color:#6a3fd0">◆ ${rs.name}</strong><br>${rs.road}<br><span style="color:#666;font-size:11px">${z.name} · ${rs.live?rs.swaps+' swaps logged':'candidate hub'}</span>`);
     capMap._relayLayers.push(m);
   });});
   capFilter();
@@ -3170,9 +3171,10 @@ function initCapMap(){
 function capSelect(id){
   const z=CAP_REGIONS.find(r=>r.id===id);if(!z)return;
   _capSel=id;
-  /* highlight the chosen block, dim the rest */
-  Object.keys(capMap._zoneLayers).forEach(k=>{
-    capMap._zoneLayers[k].poly.setStyle({fillOpacity:k===id?.5:.10,weight:k===id?3.5:1.5});
+  /* highlight the chosen region on the map, dim the rest */
+  if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>{
+    capMap._zoneLayers[k].setStyle({fillOpacity:k===id?1:.4,weight:k===id?3:1,color:k===id?'#fff':'#0e1113'});
+    if(k===id&&capMap._zoneLayers[k].bringToFront)capMap._zoneLayers[k].bringToFront();
   });
   capMarkSectionActive(id);
   const c=CAP_TIER[z.tier];
@@ -3181,10 +3183,10 @@ function capSelect(id){
       <div><div style="font-weight:700;font-size:.82rem">◆ ${r.name}</div><div style="font-size:.68rem;color:var(--mu)">${r.road} · ${r.live?'live':'candidate hub'}</div></div>
       <div style="text-align:right;white-space:nowrap">${r.live?`<div style="font-weight:800;font-size:.85rem;color:var(--or)">${r.swaps}</div><div style="font-size:.64rem;color:var(--mu)">swaps · ${r.ontime}% on-time</div>`:`<span class="chip ca" style="font-size:.6rem">Recruiting partner</span>`}</div>
     </div>`).join(''):`<div style="font-size:.78rem;color:var(--mu);padding:.5rem 0">No relay station here yet — this region is a recruitment target. When a farm, yard or storage site comes on, it becomes the reference point for the whole area.</div>`;
-  document.getElementById('cap-detail').innerHTML=`<div class="card" style="border-left:4px solid ${c.fill}">
+  document.getElementById('cap-detail').innerHTML=`<div class="card" style="border-left:5px solid ${z.colour}">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
-      <div><div class="ct" style="margin:0;font-size:1.05rem">${z.name}</div><div style="font-size:.72rem;color:var(--mu);margin-top:.15rem">${z.cities}</div></div>
-      <span class="chip" style="background:${c.fill}22;color:${c.fill};border:1px solid ${c.fill}55;font-weight:700">${c.lbl}</span>
+      <div style="display:flex;align-items:center;gap:.5rem"><span style="width:14px;height:14px;border-radius:4px;background:${z.colour};flex:none"></span><div><div class="ct" style="margin:0;font-size:1.05rem">${z.name}</div><div style="font-size:.72rem;color:var(--mu);margin-top:.15rem">${z.cities}</div></div></div>
+      <span class="chip" style="background:var(--p2);color:var(--tx);border:1px solid var(--ln);font-weight:700">${c.lbl}</span>
     </div>
     <div class="kg" style="margin:.9rem 0 .4rem">
       <div class="kc"><div class="kc-l">Drivers here</div><div class="kc-v or">${z.drivers}</div></div>
@@ -3203,20 +3205,20 @@ function capSelect(id){
 function capClear(){
   _capSel=null;
   document.getElementById('cap-detail').style.display='none';
-  if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>capMap._zoneLayers[k].poly.setStyle({fillOpacity:.22,weight:2.5}));
+  if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>capMap._zoneLayers[k].setStyle({fillOpacity:.9,weight:1,color:'#0e1113'}));
   capMarkSectionActive(null);
 }
-/* Outlined section cards — the clear divisions off the map */
+/* Section panels beside the map — each region its own colour, like the map */
 function capRenderSections(){
   const el=document.getElementById('cap-sections');if(!el)return;
   const order={hot:0,warm:1,cool:2};
   const regions=CAP_REGIONS.slice().sort((a,b)=>order[a.tier]-order[b.tier]||b.drivers-a.drivers);
   el.innerHTML=regions.map(z=>{
-    const c=CAP_TIER[z.tier];const rc=(z.relays||[]).length;
-    return `<button id="csec-${z.id}" onclick="capSelect('${z.id}')" style="text-align:left;cursor:pointer;background:var(--p2);border:1.5px solid var(--ln);border-left:5px solid ${c.fill};border-radius:var(--rx);padding:.7rem .8rem;transition:all .12s" onmouseover="this.style.borderColor='${c.fill}';this.style.borderLeftColor='${c.fill}'" onmouseout="if(!this.classList.contains('csec-on')){this.style.borderColor='var(--ln)';this.style.borderLeftColor='${c.fill}'}">
+    const rc=(z.relays||[]).length;
+    return `<button id="csec-${z.id}" onclick="capSelect('${z.id}')" style="text-align:left;cursor:pointer;background:var(--p2);border:1.5px solid var(--ln);border-left:5px solid ${z.colour};border-radius:var(--rx);padding:.7rem .8rem;transition:all .12s" onmouseover="this.style.borderColor='${z.colour}'" onmouseout="if(!this.classList.contains('csec-on'))this.style.borderColor='var(--ln)'">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:.4rem">
         <span style="font-weight:800;font-size:.85rem;color:var(--tx)">${z.name}</span>
-        <span style="width:9px;height:9px;border-radius:50%;background:${c.fill};flex:none"></span>
+        <span style="width:11px;height:11px;border-radius:3px;background:${z.colour};flex:none"></span>
       </div>
       <div style="font-size:.66rem;color:var(--mu);margin:.15rem 0 .5rem">${z.cities}</div>
       <div style="display:flex;gap:.9rem;font-size:.7rem">
@@ -3232,14 +3234,25 @@ function capMarkSectionActive(id){
   });
   if(id){const b=document.getElementById('csec-'+id);if(b){b.classList.add('csec-on');b.style.boxShadow='0 0 0 2px var(--or) inset';b.style.borderColor='var(--or)';b.scrollIntoView({block:'nearest'});}}
 }
-/* Postcode check → resolves to the region it sits in and opens that section */
-function _capDist(a,b,c,d){const R=6371,t=x=>x*Math.PI/180;const dLa=t(c-a),dLo=t(d-b);const h=Math.sin(dLa/2)**2+Math.cos(t(a))*Math.cos(t(c))*Math.sin(dLo/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
-function _capInPoly(lat,lng,poly){/* ray cast; poly pts are [lat,lng] */let inside=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const yi=poly[i][0],xi=poly[i][1],yj=poly[j][0],xj=poly[j][1];if(((yi>lat)!==(yj>lat))&&(lng<(xj-xi)*(lat-yi)/(yj-yi)+xi))inside=!inside;}return inside;}
-function _capRegionAt(lat,lng){
-  /* prefer the region whose outlined block contains the point; tie-break by nearest centre */
-  const hits=CAP_REGIONS.filter(z=>CAP_POLY[z.id]&&_capInPoly(lat,lng,CAP_POLY[z.id]));
-  const pool=hits.length?hits:CAP_REGIONS;
-  let best=null,bd=1e9;pool.forEach(z=>{const dd=_capDist(lat,lng,z.lat,z.lng);if(dd<bd){bd=dd;best=z;}});
+/* Postcode check → real UK region from postcodes.io (region for England, country for Scotland/Wales/NI) */
+const CAP_PC_ALIAS={'East of England':'Eastern','Yorkshire and the Humber':'Yorkshire and The Humber'};
+function _capRegionByPc(res){
+  if(!res)return null;
+  let key=res.region||res.country||'';
+  const geo=CAP_PC_ALIAS[key]||key;
+  return CAP_REGIONS.find(z=>z.geo===geo||z.pc===key||z.pc===geo)||null;
+}
+/* geometry fallback: which region's real shape contains this point (for outcodes with no region field) */
+function _capPtInRing(lng,lat,ring){let inside=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1];if(((yi>lat)!==(yj>lat))&&(lng<(xj-xi)*(lat-yi)/(yj-yi)+xi))inside=!inside;}return inside;}
+function _capRegionAtLatLng(lat,lng){
+  if(typeof window.UK_GEO!=='undefined'){
+    for(const f of window.UK_GEO.features){
+      for(const poly of f.geometry.coordinates){if(_capPtInRing(lng,lat,poly[0]))return CAP_BY_GEO[f.properties.region]||null;}
+    }
+  }
+  /* coastline simplification can leave a point just outside its region — fall back to nearest region centre */
+  let best=null,bd=1e9;const t=x=>x*Math.PI/180;
+  CAP_REGIONS.forEach(z=>{const dLa=t(z.lab[0]-lat),dLo=t(z.lab[1]-lng);const h=Math.sin(dLa/2)**2+Math.cos(t(lat))*Math.cos(t(z.lab[0]))*Math.sin(dLo/2)**2;const dd=2*6371*Math.asin(Math.sqrt(h));if(dd<bd){bd=dd;best=z;}});
   return best;
 }
 async function capPostcode(){
@@ -3249,17 +3262,15 @@ async function capPostcode(){
   if(!raw){show('Type a postcode first.',false);return;}
   show('Checking…',true);msg.style.color='var(--mu)';
   try{
-    let lat,lng,label;
+    let best=null,label;
     let r=await fetch('https://api.postcodes.io/postcodes/'+encodeURIComponent(raw));
-    if(r.ok){const d=await r.json();lat=d.result.latitude;lng=d.result.longitude;label=d.result.postcode;}
-    else{
-      /* fall back to the outward part (e.g. M1 from M1 1AA) */
-      const out=raw.match(/^[A-Z]{1,2}[0-9][A-Z0-9]?/);
-      if(out){const r2=await fetch('https://api.postcodes.io/outcodes/'+encodeURIComponent(out[0]));
-        if(r2.ok){const d2=await r2.json();lat=d2.result.latitude;lng=d2.result.longitude;label=out[0];}}
+    if(r.ok){const res=(await r.json()).result;label=res.postcode;best=_capRegionByPc(res);}
+    else if(raw.length>=5){
+      const out=raw.slice(0,-3); /* inward code is always 3 chars → outward = the rest (RG1 from RG11AA) */
+      const r2=await fetch('https://api.postcodes.io/outcodes/'+encodeURIComponent(out));
+      if(r2.ok){const res=(await r2.json()).result;label=out;best=_capRegionAtLatLng(res.latitude,res.longitude);}
     }
-    if(lat==null){show('That postcode wasn\'t recognised — check it and try again.',false);return;}
-    const best=_capRegionAt(lat,lng);
+    if(!label){show('That postcode wasn\'t recognised — check it and try again.',false);return;}
     if(!best){show('Couldn\'t match that to a region yet.',false);return;}
     show('<strong>'+label+'</strong> sits in <strong style="color:var(--or)">'+best.name+'</strong> — opening it below.',true);
     capSelect(best.id);
