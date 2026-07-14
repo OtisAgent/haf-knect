@@ -1765,10 +1765,10 @@ textarea.fi2{resize:vertical;min-height:70px}
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:.8rem">
           <div>
             <h1 class="pt" style="margin-bottom:.2rem">Network Map</h1>
-            <p class="ps" style="margin:0">83 drivers live · 4 active jobs · tap any zone for detail</p>
+            <p class="ps" style="margin:0">Tap a region to open its detail — drivers, live jobs and relay stations. Zones tighten to bases &amp; postcodes as the network grows.</p>
           </div>
           <label style="display:flex;align-items:center;gap:.35rem;font-size:.73rem;font-weight:600;cursor:pointer;white-space:nowrap;padding:.32rem .6rem;border:1.5px solid var(--ln);border-radius:20px;background:var(--p2);margin-top:.15rem">
-            <input type="checkbox" id="cap-relay" onchange="capFilter()" style="cursor:pointer;accent-color:var(--or)"> Relay hubs
+            <input type="checkbox" id="cap-relay" checked onchange="capFilter()" style="cursor:pointer;accent-color:var(--or)"> Relay hubs
           </label>
         </div>
 
@@ -1788,19 +1788,33 @@ textarea.fi2{resize:vertical;min-height:70px}
           <div id="cap-map" style="height:480px;width:100%;background:var(--bg)"></div>
           <!-- Compact floating legend pill -->
           <div style="position:absolute;top:10px;right:10px;z-index:1000;background:rgba(14,17,19,.82);border-radius:20px;padding:.3rem .7rem;font-size:.63rem;display:flex;align-items:center;gap:.6rem;box-shadow:0 1px 6px rgba(0,0,0,.3);backdrop-filter:blur(4px)">
-            <span style="display:flex;align-items:center;gap:.28rem;color:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#2dab60;display:inline-block"></span>High</span>
-            <span style="display:flex;align-items:center;gap:.28rem;color:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#e88c00;display:inline-block"></span>Med</span>
-            <span style="display:flex;align-items:center;gap:.28rem;color:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#cc3333;display:inline-block"></span>Low</span>
-            <span style="display:flex;align-items:center;gap:.28rem;color:#ff7800"><span style="width:8px;height:8px;border-radius:50%;background:#ff7800;display:inline-block"></span>Live job</span>
+            <span style="display:flex;align-items:center;gap:.28rem;color:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#2dab60;display:inline-block"></span>Hot</span>
+            <span style="display:flex;align-items:center;gap:.28rem;color:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#e88c00;display:inline-block"></span>Warm</span>
+            <span style="display:flex;align-items:center;gap:.28rem;color:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#4a90d9;display:inline-block"></span>Cool</span>
+            <span style="display:flex;align-items:center;gap:.28rem;color:#a97bff"><span style="width:8px;height:8px;background:#a97bff;display:inline-block;transform:rotate(45deg)"></span>Relay</span>
           </div>
         </div>
 
+        <!-- Region detail panel (opens when a zone is clicked) -->
+        <div id="cap-detail" style="display:none;margin-bottom:1rem"></div>
+
         <!-- Summary stats row -->
         <div class="kg">
-          <div class="kc"><div class="kc-l">Drivers live</div><div class="kc-v or">83</div><div class="kc-d">on network now</div></div>
-          <div class="kc"><div class="kc-l">Active jobs</div><div class="kc-v co">4</div><div class="kc-d">en route</div></div>
-          <div class="kc"><div class="kc-l">High zones</div><div class="kc-v gn">3</div><div class="kc-d">Mcr · Leeds · Bham</div></div>
-          <div class="kc"><div class="kc-l">Avg job rate</div><div class="kc-v">£1.80–£2.40</div><div class="kc-d">per mile · van / LWB</div></div>
+          <div class="kc"><div class="kc-l">Drivers on network</div><div class="kc-v or" id="cap-tot-drv">—</div><div class="kc-d">across all regions</div></div>
+          <div class="kc"><div class="kc-l">Live jobs</div><div class="kc-v co" id="cap-tot-job">—</div><div class="kc-d">moving now</div></div>
+          <div class="kc"><div class="kc-l">Hot regions</div><div class="kc-v gn" id="cap-tot-hot">—</div><div class="kc-d">highest demand</div></div>
+          <div class="kc"><div class="kc-l">Relay stations</div><div class="kc-v" id="cap-tot-relay">—</div><div class="kc-d">swap points live</div></div>
+        </div>
+
+        <!-- Relay station leaderboard -->
+        <div class="card" style="margin-top:1rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">
+            <div class="ct" style="margin:0">🏆 Relay Station Leaderboard</div>
+            <span class="chip ca" style="font-size:.62rem">Live as drivers log swaps</span>
+          </div>
+          <p style="font-size:.73rem;color:var(--mu);margin:.35rem 0 .8rem">Ranked by throughput — loads swapped, on-time rate and how fast each station turns a driver around. The top station sets the standard for the network.</p>
+          <div id="cap-leaderboard"></div>
+          <div style="font-size:.68rem;color:var(--mu);margin-top:.7rem;padding-top:.6rem;border-top:1px solid var(--ln)">Throughput and dwell fill in from real swap data logged at each relay point. Stations shown are candidate hubs; live numbers grow with the network.</div>
         </div>
       </div>
 
@@ -3049,83 +3063,135 @@ function _buildDashActions(role){
 
 /* ── NETWORK CAPACITY MAP ── */
 let capMap=null;
+/* ── NETWORK MAP — regional zones, click-to-detail, relay leaderboard ── */
+/* tier: hot / warm / cool. Each region carries its relay stations (with performance).
+   Numbers are network placeholders until the live driver feed + relay swap data fill them. */
+const CAP_TIER={hot:{fill:'#2dab60',stroke:'#1a6e3d',lbl:'Hot demand'},warm:{fill:'#e88c00',stroke:'#b06a00',lbl:'Warm'},cool:{fill:'#4a90d9',stroke:'#2f6aa8',lbl:'Cool / building'}};
+const CAP_REGIONS=[
+  {id:'nw',name:'North West',lat:53.46,lng:-2.35,r:34000,tier:'hot',drivers:14,jobs:2,cities:'Manchester · Liverpool · Warrington',corridor:'M6 / M62',demand:'Manchester → Birmingham runs daily',
+    relays:[{name:'Lymm Relay (M6/M56)',road:'M6 J20',swaps:38,ontime:96,dwell:14,live:true},{name:'Haydock Hub',road:'M6 J23',swaps:19,ontime:91,dwell:22,live:false}]},
+  {id:'yo',name:'Yorkshire',lat:53.70,lng:-1.45,r:30000,tier:'hot',drivers:11,jobs:1,cities:'Leeds · Sheffield · Bradford',corridor:'M1 / M62 / A1(M)',demand:'Strong backload pool both ways',
+    relays:[{name:'Doncaster Gateway (M18/A1)',road:'M18 J3',swaps:41,ontime:97,dwell:12,live:true},{name:'Brighouse (M62)',road:'M62 J25',swaps:23,ontime:93,dwell:17,live:true}]},
+  {id:'wm',name:'West Midlands',lat:52.48,lng:-1.90,r:28000,tier:'hot',drivers:12,jobs:1,cities:'Birmingham · Coventry · Wolverhampton',corridor:'M6 / M42 / M5',demand:'Golden-triangle overspill',
+    relays:[{name:'Coleshill Cross (M6/M42)',road:'M6 J4',swaps:34,ontime:95,dwell:15,live:true},{name:'Tamworth (M42/A5)',road:'M42 J10',swaps:27,ontime:92,dwell:19,live:false}]},
+  {id:'em',name:'East Midlands',lat:52.85,lng:-1.20,r:26000,tier:'warm',drivers:7,jobs:1,cities:'Nottingham · Leicester · Derby',corridor:'M1 / A50',demand:'DIRFT / Golden Triangle spine',
+    relays:[{name:'Rugby / DIRFT',road:'M1 J18',swaps:29,ontime:94,dwell:16,live:true}]},
+  {id:'lse',name:'London & South East',lat:51.51,lng:-0.12,r:40000,tier:'warm',drivers:9,jobs:1,cities:'London · Watford · Dartford',corridor:'M25 / M1 / M40',demand:'High inbound, thin return capacity',
+    relays:[{name:'Milton Keynes (M1 J13)',road:'M1 J13',swaps:22,ontime:90,dwell:24,live:false},{name:'Thurrock (M25 J30)',road:'M25 J30',swaps:15,ontime:88,dwell:26,live:false}]},
+  {id:'ne',name:'North East',lat:54.95,lng:-1.62,r:26000,tier:'warm',drivers:7,jobs:0,cities:'Newcastle · Sunderland · Durham',corridor:'A1(M)',demand:'Long-haul South backloads',
+    relays:[{name:'Scotch Corner (A1/A66)',road:'A1(M) J53',swaps:12,ontime:89,dwell:28,live:false}]},
+  {id:'sco',name:'Central Scotland',lat:55.86,lng:-4.10,r:34000,tier:'warm',drivers:6,jobs:0,cities:'Glasgow · Edinburgh · Stirling',corridor:'M8 / M74',demand:'Gateway to/from England via Penrith',
+    relays:[{name:'Abington (M74)',road:'M74 J13',swaps:9,ontime:87,dwell:31,live:false}]},
+  {id:'sw',name:'South West',lat:51.45,lng:-2.58,r:30000,tier:'cool',drivers:4,jobs:0,cities:'Bristol · Swindon · Exeter',corridor:'M4 / M5',demand:'Building — needs relay partners',
+    relays:[{name:'Swindon (M4 J15)',road:'M4 J15',swaps:7,ontime:91,dwell:20,live:false}]},
+  {id:'wal',name:'South Wales',lat:51.55,lng:-3.20,r:26000,tier:'cool',drivers:3,jobs:0,cities:'Cardiff · Newport · Swansea',corridor:'M4',demand:'Early — recruit drivers first',relays:[]},
+  {id:'ea',name:'East Anglia',lat:52.35,lng:0.55,r:30000,tier:'cool',drivers:3,jobs:0,cities:'Cambridge · Norwich · Ipswich',corridor:'A14 / A11',demand:'Port backloads (Felixstowe)',
+    relays:[{name:'A14 Cambridge',road:'A14 J31',swaps:6,ontime:90,dwell:23,live:false}]},
+];
+
+let _capSel=null;
 function initCapMap(){
   const el=document.getElementById('cap-map');
   if(!el||typeof L==='undefined')return;
   if(capMap){capMap.invalidateSize();return;}
-  capMap=L.map('cap-map',{zoomControl:true,scrollWheelZoom:false}).setView([52.8,-1.8],6);
+  capMap=L.map('cap-map',{zoomControl:true,scrollWheelZoom:false}).setView([53.6,-2.4],6);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:18,opacity:.7
+    attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:18,opacity:.65
   }).addTo(capMap);
 
-  /* Zone definitions — radius in metres, tier: hi/med/lo, reward if zone bonus active */
-  const ZONES=[
-    {lat:53.48,lng:-2.24,city:'Manchester',  n:14,r:28000,tier:'hi', reward:true, bonus:'+0.5% rebate this week'},
-    {lat:53.80,lng:-1.55,city:'Leeds',        n:9, r:22000,tier:'hi', reward:false},
-    {lat:52.49,lng:-1.89,city:'Birmingham',   n:11,r:26000,tier:'hi', reward:true, bonus:'+0.5% rebate this week'},
-    {lat:53.41,lng:-2.99,city:'Liverpool',    n:6, r:20000,tier:'med',reward:false},
-    {lat:53.38,lng:-1.47,city:'Sheffield',    n:5, r:18000,tier:'med',reward:false},
-    {lat:51.51,lng:-0.09,city:'London',       n:8, r:32000,tier:'med',reward:true, bonus:'+1% rebate this week'},
-    {lat:52.95,lng:-1.15,city:'Nottingham',   n:2, r:16000,tier:'lo', reward:false},
-    {lat:51.45,lng:-2.60,city:'Bristol',      n:3, r:17000,tier:'lo', reward:false},
-    {lat:54.98,lng:-1.62,city:'Newcastle',    n:7, r:20000,tier:'med',reward:false},
-    {lat:52.64,lng:-1.13,city:'Leicester',    n:4, r:16000,tier:'med',reward:false},
-    {lat:55.86,lng:-4.25,city:'Glasgow',      n:5, r:22000,tier:'med',reward:false},
-  ];
-
-  const TIER_COL={hi:{fill:'#2dab60',stroke:'#1e7a45'},med:{fill:'#e88c00',stroke:'#b36b00'},lo:{fill:'#cc3333',stroke:'#992222'}};
-
-  ZONES.forEach(z=>{
-    const c=TIER_COL[z.tier];
-    /* Zone circle */
-    L.circle([z.lat,z.lng],{
-      radius:z.r,
-      fillColor:c.fill,color:c.stroke,weight:1.5,fillOpacity:.18
-    }).addTo(capMap);
-    /* Zone label marker */
-    const rewardBadge=z.reward?`<br><span style="display:inline-block;margin-top:4px;background:#ff7800;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px">★ Zone reward: ${z.bonus}</span>`:'';
-    const icon=L.divIcon({
-      className:'',
-      html:`<div style="text-align:center;pointer-events:none">
-        <div style="background:${c.fill};color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;border:2px solid ${c.stroke};white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.3)">${z.city}${z.reward?' ★':''}</div>
-        <div style="font-size:9px;color:${c.stroke};font-weight:700;margin-top:1px">${z.n} drivers</div>
-      </div>`,
-      iconSize:[90,36],iconAnchor:[45,10]
-    });
-    L.marker([z.lat,z.lng],{icon}).addTo(capMap)
-     .bindPopup(`<strong>${z.city} Zone</strong><br>${z.n} drivers available<br>Status: <b style="color:${c.fill}">${z.tier==='hi'?'High capacity':z.tier==='med'?'Medium capacity':'Low capacity'}</b>${rewardBadge}`);
+  capMap._zoneLayers={};capMap._relayLayers=[];
+  CAP_REGIONS.forEach(z=>{
+    const c=CAP_TIER[z.tier];
+    const circle=L.circle([z.lat,z.lng],{radius:z.r,fillColor:c.fill,color:c.stroke,weight:2,fillOpacity:.20});
+    const icon=L.divIcon({className:'',html:`<div style="text-align:center;pointer-events:none">
+        <div style="background:${c.fill};color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;border:2px solid ${c.stroke};white-space:nowrap;box-shadow:0 1px 5px rgba(0,0,0,.35)">${z.name}</div>
+        <div style="font-size:10px;color:#fff;font-weight:700;margin-top:2px;text-shadow:0 1px 2px rgba(0,0,0,.6)">${z.drivers} drivers${z.jobs?' · '+z.jobs+' live':''}</div>
+      </div>`,iconSize:[120,42],iconAnchor:[60,12]});
+    const marker=L.marker([z.lat,z.lng],{icon});
+    circle.on('click',()=>capSelect(z.id));
+    marker.on('click',()=>capSelect(z.id));
+    circle.addTo(capMap);marker.addTo(capMap);
+    capMap._zoneLayers[z.id]={circle,marker};
   });
 
-  /* Active jobs en route — orange dot on top */
-  [{lat:52.92,lng:-1.48,ref:'JB-0218',route:'Manchester → Birmingham',driver:'MW015291',step:'En route – M6'},
-   {lat:52.30,lng:-0.88,ref:'JB-0201',route:'Leeds → London',        driver:'JH029483',step:'En route – A1(M)'},
-   {lat:53.44,lng:-2.18,ref:'JB-0196',route:'Liverpool → Sheffield',  driver:'KP041872',step:'Collected – M62'},
-   {lat:51.72,lng:-1.08,ref:'JB-0189',route:'Bristol → London',       driver:'TD018392',step:'En route – M40'}
-  ].forEach(j=>{
-    L.circleMarker([j.lat,j.lng],{radius:8,fillColor:'#ff7800',color:'#fff',weight:2,fillOpacity:.95})
-     .addTo(capMap)
-     .bindPopup(`<strong style="color:#ff7800">${j.ref}</strong><br><b>${j.route}</b><br>Driver: ${j.driver}<br><span style="color:#ff7800">● ${j.step}</span>`);
-  });
-
-  /* Relay stations — major UK freight handoff hubs */
-  const RELAY_STATIONS=[
-    {lat:52.63,lng:-1.70,name:'Tamworth Relay Hub',  road:'M42 / A5',  note:'Central UK — ideal North↔South split'},
-    {lat:53.52,lng:-1.12,name:'Doncaster Relay Hub', road:'M18 / A1',  note:'Yorkshire — North↔South and East↔West'},
-    {lat:52.04,lng:-0.76,name:'Milton Keynes Hub',   road:'M1 J13',    note:'South Midlands — North↔London split'},
-    {lat:52.80,lng:-2.12,name:'Stafford Hub',         road:'M6 J14',    note:'West Midlands — M6 corridor midpoint'},
-    {lat:51.56,lng:-1.78,name:'Swindon Hub',          road:'M4 J15',    note:'South West — M4/M5 interchange'},
-  ];
-  const relayIcon=L.divIcon({
-    className:'',
-    html:`<div style="width:14px;height:14px;background:#5b3de8;transform:rotate(45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
-    iconSize:[14,14],iconAnchor:[7,7]
-  });
-  capMap._relayLayers=[];
-  RELAY_STATIONS.forEach(r=>{
-    const m=L.marker([r.lat,r.lng],{icon:relayIcon})
-     .bindPopup(`<strong style="color:#5b3de8">◆ ${r.name}</strong><br>${r.road}<br><span style="color:#666;font-size:11px">${r.note}</span>`);
+  /* Relay stations plotted as diamonds — the network's reference points */
+  const relayIcon=L.divIcon({className:'',html:`<div style="width:13px;height:13px;background:#a97bff;transform:rotate(45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45)"></div>`,iconSize:[13,13],iconAnchor:[7,7]});
+  CAP_REGIONS.forEach(z=>{(z.relays||[]).forEach((rs,ri)=>{
+    const off=0.10+ri*0.16; /* fan multiple relays out from the region centre */
+    const m=L.marker([z.lat+off,z.lng+off*0.9],{icon:relayIcon})
+     .bindPopup(`<strong style="color:#7b4fd0">◆ ${rs.name}</strong><br>${rs.road}<br><span style="color:#666;font-size:11px">${z.name} · ${rs.live?rs.swaps+' swaps logged':'candidate hub'}</span>`);
     capMap._relayLayers.push(m);
+  });});
+  capFilter();
+  capRenderTotals();
+  capRenderLeaderboard();
+}
+
+function capSelect(id){
+  const z=CAP_REGIONS.find(r=>r.id===id);if(!z)return;
+  _capSel=id;
+  /* highlight the chosen zone, dim the rest */
+  Object.keys(capMap._zoneLayers).forEach(k=>{
+    const zl=capMap._zoneLayers[k],rg=CAP_REGIONS.find(r=>r.id===k),cc=CAP_TIER[rg.tier];
+    zl.circle.setStyle({fillOpacity:k===id?.42:.12,weight:k===id?3:1.5});
   });
+  const c=CAP_TIER[z.tier];
+  const relays=(z.relays||[]);
+  const relayRows=relays.length?relays.map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.5rem .1rem;border-bottom:1px solid var(--ln)">
+      <div><div style="font-weight:700;font-size:.82rem">◆ ${r.name}</div><div style="font-size:.68rem;color:var(--mu)">${r.road} · ${r.live?'live':'candidate hub'}</div></div>
+      <div style="text-align:right;white-space:nowrap">${r.live?`<div style="font-weight:800;font-size:.85rem;color:var(--or)">${r.swaps}</div><div style="font-size:.64rem;color:var(--mu)">swaps · ${r.ontime}% on-time</div>`:`<span class="chip ca" style="font-size:.6rem">Recruiting partner</span>`}</div>
+    </div>`).join(''):`<div style="font-size:.78rem;color:var(--mu);padding:.5rem 0">No relay station here yet — this region is a recruitment target. When a farm, yard or storage site comes on, it becomes the reference point for the whole area.</div>`;
+  document.getElementById('cap-detail').innerHTML=`<div class="card" style="border-left:4px solid ${c.fill}">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
+      <div><div class="ct" style="margin:0;font-size:1.05rem">${z.name}</div><div style="font-size:.72rem;color:var(--mu);margin-top:.15rem">${z.cities}</div></div>
+      <span class="chip" style="background:${c.fill}22;color:${c.fill};border:1px solid ${c.fill}55;font-weight:700">${c.lbl}</span>
+    </div>
+    <div class="kg" style="margin:.9rem 0 .4rem">
+      <div class="kc"><div class="kc-l">Drivers here</div><div class="kc-v or">${z.drivers}</div></div>
+      <div class="kc"><div class="kc-l">Live jobs</div><div class="kc-v co">${z.jobs}</div></div>
+      <div class="kc"><div class="kc-l">Main corridor</div><div class="kc-v" style="font-size:1rem">${z.corridor}</div></div>
+      <div class="kc"><div class="kc-l">Relay stations</div><div class="kc-v">${relays.length}</div></div>
+    </div>
+    <div style="font-size:.76rem;color:var(--mu);margin:.2rem 0 .8rem"><strong style="color:var(--tx)">Demand:</strong> ${z.demand}</div>
+    <div class="ct" style="font-size:.85rem;margin-bottom:.2rem">Relay stations in ${z.name}</div>
+    ${relayRows}
+    <div style="text-align:right;margin-top:.7rem"><button class="btn btn-gh btn-xs" onclick="capClear()">Close ✕</button></div>
+  </div>`;
+  const d=document.getElementById('cap-detail');d.style.display='block';
+  d.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function capClear(){
+  _capSel=null;
+  document.getElementById('cap-detail').style.display='none';
+  if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>capMap._zoneLayers[k].circle.setStyle({fillOpacity:.20,weight:2}));
+}
+function capRenderTotals(){
+  const drv=CAP_REGIONS.reduce((s,z)=>s+z.drivers,0);
+  const job=CAP_REGIONS.reduce((s,z)=>s+z.jobs,0);
+  const hot=CAP_REGIONS.filter(z=>z.tier==='hot').length;
+  const relay=CAP_REGIONS.reduce((s,z)=>s+(z.relays||[]).length,0);
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('cap-tot-drv',drv);set('cap-tot-job',job);set('cap-tot-hot',hot);set('cap-tot-relay',relay);
+}
+function capRenderLeaderboard(){
+  const el=document.getElementById('cap-leaderboard');if(!el)return;
+  const all=[];
+  CAP_REGIONS.forEach(z=>(z.relays||[]).forEach(r=>all.push({...r,region:z.name})));
+  const live=all.filter(r=>r.live).map(r=>({...r,score:Math.round(r.swaps*(r.ontime/100)*(30/Math.max(r.dwell,1)))}));
+  live.sort((a,b)=>b.score-a.score);
+  if(!live.length){el.innerHTML='<div style="font-size:.78rem;color:var(--mu)">No swaps logged yet — the leaderboard fills the moment drivers start using relay points.</div>';return;}
+  const medal=['🥇','🥈','🥉'];
+  el.innerHTML=live.map((r,i)=>{
+    const top=i===0;
+    return `<div style="display:flex;align-items:center;gap:.7rem;padding:.55rem .65rem;border-radius:var(--rx);margin-bottom:.4rem;${top?'background:linear-gradient(90deg,rgba(255,184,0,.14),transparent);border:1px solid rgba(255,184,0,.4)':'background:var(--p2);border:1px solid var(--ln)'}">
+      <div style="font-size:1.1rem;width:26px;text-align:center">${medal[i]||'<span style=\"font-size:.8rem;color:var(--mu);font-weight:800\">'+(i+1)+'</span>'}</div>
+      <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:.85rem;${top?'color:#ffb800':''}">${r.name}</div><div style="font-size:.67rem;color:var(--mu)">${r.region} · ${r.road}</div></div>
+      <div style="display:flex;gap:1rem;text-align:center;font-size:.7rem">
+        <div><div style="font-weight:800;font-size:.9rem">${r.swaps}</div><div style="color:var(--mu);font-size:.6rem">swaps</div></div>
+        <div><div style="font-weight:800;font-size:.9rem">${r.ontime}%</div><div style="color:var(--mu);font-size:.6rem">on-time</div></div>
+        <div><div style="font-weight:800;font-size:.9rem">${r.dwell}m</div><div style="color:var(--mu);font-size:.6rem">dwell</div></div>
+      </div>
+    </div>`;}).join('');
 }
 
 /* ── NETWORK MAP FILTER ── */
@@ -3139,15 +3205,11 @@ function capSetVeh(v){
 }
 function capFilter(){
   const relay=document.getElementById('cap-relay')&&document.getElementById('cap-relay').checked;
-
-  /* Relay station layer toggle */
   if(capMap&&capMap._relayLayers){
     capMap._relayLayers.forEach(m=>{
       if(relay){m.addTo(capMap);}else{try{capMap.removeLayer(m);}catch(e){}}
     });
   }
-
-  /* Rate update by vehicle pill */
   const RATES={van:'£1.60–£2.00',swb:'£1.65–£2.10',lwb:'£1.80–£2.40',xlwb:'£1.90–£2.50',luton:'£2.00–£2.70',artic:'£2.80–£3.80',flatbed:'£2.50–£3.40',fridge:'£2.60–£3.50',curtain:'£2.40–£3.20'};
   const rateEl=document.getElementById('cap-rate-lbl');
   if(rateEl)rateEl.textContent=(RATES[_capVeh]||'£1.80–£2.40')+'/mi';
