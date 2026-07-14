@@ -516,6 +516,9 @@ textarea.fi2{resize:vertical;min-height:70px}
 #cap-map{background:#0a1a2b}
 #cap-map .leaflet-container{background:#0a1a2b}
 .leaflet-container{background:#0a1a2b}
+.cap-role{border:none;background:transparent;color:var(--mu);font-weight:800;font-size:.74rem;padding:.32rem .8rem;border-radius:18px;cursor:pointer;transition:all .14s;white-space:nowrap}
+.cap-role.on{background:var(--or);color:#0e1113}
+.cap-back{position:absolute;top:10px;left:10px;z-index:1000;background:rgba(14,17,19,.86);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:18px;padding:.34rem .7rem;font-size:.7rem;font-weight:700;cursor:pointer;display:none;align-items:center;gap:.3rem;backdrop-filter:blur(4px)}
 .demo-tile{flex:1;padding:.55rem .35rem;background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);cursor:pointer;text-align:center;transition:border-color .14s,background .14s;display:flex;flex-direction:column;align-items:center;gap:.18rem}
 .demo-tile:hover{border-color:var(--or);background:var(--or-d)}
 .demo-tile-ico{width:18px;height:18px;color:var(--or);stroke:var(--or);margin-bottom:.1rem}
@@ -1767,17 +1770,19 @@ textarea.fi2{resize:vertical;min-height:70px}
 
       <!-- FREIGHT: Network Map -->
       <div class="tp" id="pane-f-cap">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:.8rem">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:.7rem">
           <div>
             <h1 class="pt" style="margin-bottom:.2rem">Network Map</h1>
-            <p class="ps" style="margin:0">Tap a region to open its detail — drivers, live jobs and relay stations. Zones tighten to bases &amp; postcodes as the network grows.</p>
+            <p class="ps" id="cap-sub" style="margin:0">Tap your area to see who covers it and book a courier.</p>
           </div>
-          <label style="display:flex;align-items:center;gap:.35rem;font-size:.73rem;font-weight:600;cursor:pointer;white-space:nowrap;padding:.32rem .6rem;border:1.5px solid var(--ln);border-radius:20px;background:var(--p2);margin-top:.15rem">
-            <input type="checkbox" id="cap-relay" onchange="capFilter()" style="cursor:pointer;accent-color:var(--or)"> Show relay points
-          </label>
+          <!-- Customer / Driver view switch -->
+          <div style="display:inline-flex;background:var(--p2);border:1.5px solid var(--ln);border-radius:22px;padding:3px;margin-top:.15rem">
+            <button id="crole-customer" class="cap-role on" onclick="capSetRole('customer')">I'm a customer</button>
+            <button id="crole-driver" class="cap-role" onclick="capSetRole('driver')">I'm a driver</button>
+          </div>
         </div>
 
-        <!-- Vehicle pills + rate -->
+        <!-- Controls row (relay toggle is driver-only) -->
         <div style="display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;margin-bottom:.75rem">
           <button id="cpill-" class="cap-pill active" onclick="capSetVeh('')">All</button>
           <button id="cpill-van" class="cap-pill" onclick="capSetVeh('van')">Van</button>
@@ -1785,7 +1790,10 @@ textarea.fi2{resize:vertical;min-height:70px}
           <button id="cpill-luton" class="cap-pill" onclick="capSetVeh('luton')">Luton</button>
           <button id="cpill-artic" class="cap-pill" onclick="capSetVeh('artic')">Artic</button>
           <button id="cpill-fridge" class="cap-pill" onclick="capSetVeh('fridge')">Fridge</button>
-          <span style="margin-left:auto;font-size:.72rem;color:var(--mu);white-space:nowrap">Rate: <strong id="cap-rate-lbl" style="color:var(--or)">£1.80–£2.40/mi</strong> · 9% network fee</span>
+          <label id="cap-relay-wrap" style="display:none;align-items:center;gap:.35rem;font-size:.72rem;font-weight:600;cursor:pointer;white-space:nowrap;padding:.28rem .6rem;border:1.5px solid var(--ln);border-radius:20px;background:var(--p2)">
+            <input type="checkbox" id="cap-relay" onchange="capFilter()" style="cursor:pointer;accent-color:var(--or)"> Relay points
+          </label>
+          <span style="margin-left:auto;font-size:.72rem;color:var(--mu);white-space:nowrap">Rate: <strong id="cap-rate-lbl" style="color:var(--or)">£1.80–£2.40/mi</strong></span>
         </div>
 
         <!-- Map + side panels -->
@@ -1793,6 +1801,7 @@ textarea.fi2{resize:vertical;min-height:70px}
           <!-- Map (left) -->
           <div class="cap-mapwrap" style="flex:1 1 60%;min-width:0;border-radius:var(--r);overflow:hidden;border:1.5px solid var(--ln);position:relative">
             <div id="cap-map" style="height:520px;width:100%;background:var(--bg)"></div>
+            <button id="cap-back" class="cap-back" onclick="capResetView()">← Back to UK</button>
             <div style="position:absolute;top:10px;right:10px;z-index:1000;background:rgba(14,17,19,.82);border-radius:20px;padding:.3rem .8rem;font-size:.63rem;display:flex;align-items:center;gap:.6rem;box-shadow:0 1px 6px rgba(0,0,0,.3);backdrop-filter:blur(4px)">
               <span style="color:#fff">Tap a region</span>
               <span style="display:flex;align-items:center;gap:.28rem;color:#c9a7ff"><span style="width:8px;height:8px;background:#6a3fd0;display:inline-block;transform:rotate(45deg)"></span>Relay point</span>
@@ -1829,8 +1838,8 @@ textarea.fi2{resize:vertical;min-height:70px}
           <div class="kc"><div class="kc-l">Relay stations</div><div class="kc-v" id="cap-tot-relay">—</div><div class="kc-d">swap points live</div></div>
         </div>
 
-        <!-- Relay station leaderboard -->
-        <div class="card" style="margin-top:1rem">
+        <!-- Relay station leaderboard (driver view only) -->
+        <div class="card" id="cap-lb-card" style="margin-top:1rem">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">
             <div class="ct" style="margin:0">🏆 Relay Station Leaderboard</div>
             <span class="chip ca" style="font-size:.62rem">Live as drivers log swaps</span>
@@ -3166,38 +3175,72 @@ function initCapMap(){
   capFilter();
   capRenderTotals();
   capRenderLeaderboard();
+  capSetRole(capRole); /* apply the default (customer) view */
 }
 
+/* ── ROLE: customer (coverage + book) vs driver (demand + work) ── */
+let capRole='customer';
+function capCover(n){return n>=8?['Well covered','var(--gn)']:n>=3?['Cover available','var(--or)']:['Coming soon','var(--mu)'];}
+function capSetRole(r){
+  capRole=r;
+  document.getElementById('crole-customer').classList.toggle('on',r==='customer');
+  document.getElementById('crole-driver').classList.toggle('on',r==='driver');
+  const sub=document.getElementById('cap-sub');
+  if(sub)sub.textContent=r==='customer'?'Tap your area to see who covers it and book a courier.':'Tap a region to see demand, live jobs and relay points to position for.';
+  const rw=document.getElementById('cap-relay-wrap');if(rw)rw.style.display=r==='driver'?'inline-flex':'none';
+  const lb=document.getElementById('cap-lb-card');if(lb)lb.style.display=r==='driver'?'block':'none';
+  if(r==='customer'){const cb=document.getElementById('cap-relay');if(cb)cb.checked=false;}
+  capFilter();
+  capRenderSections();
+  if(_capSel)capSelect(_capSel); else capMarkSectionActive(null);
+}
 function capSelect(id){
   const z=CAP_REGIONS.find(r=>r.id===id);if(!z)return;
   _capSel=id;
-  /* highlight the chosen region on the map, dim the rest */
+  /* highlight + zoom into the chosen region */
   if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>{
-    capMap._zoneLayers[k].setStyle({fillOpacity:k===id?1:.4,weight:k===id?3:1,color:k===id?'#fff':'#0e1113'});
+    capMap._zoneLayers[k].setStyle({fillOpacity:k===id?1:.35,weight:k===id?3:1,color:k===id?'#fff':'#0e1113'});
     if(k===id&&capMap._zoneLayers[k].bringToFront)capMap._zoneLayers[k].bringToFront();
   });
+  if(capMap&&capMap._zoneLayers&&capMap._zoneLayers[id]&&capMap._zoneLayers[id].getBounds){
+    try{capMap.flyToBounds(capMap._zoneLayers[id].getBounds(),{padding:[30,30],maxZoom:8,duration:.6});}catch(e){}
+    const bk=document.getElementById('cap-back');if(bk)bk.style.display='inline-flex';
+  }
   capMarkSectionActive(id);
   const c=CAP_TIER[z.tier];
   const relays=(z.relays||[]);
-  const relayRows=relays.length?relays.map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.5rem .1rem;border-bottom:1px solid var(--ln)">
-      <div><div style="font-weight:700;font-size:.82rem">◆ ${r.name}</div><div style="font-size:.68rem;color:var(--mu)">${r.road} · ${r.live?'live':'candidate hub'}</div></div>
-      <div style="text-align:right;white-space:nowrap">${r.live?`<div style="font-weight:800;font-size:.85rem;color:var(--or)">${r.swaps}</div><div style="font-size:.64rem;color:var(--mu)">swaps · ${r.ontime}% on-time</div>`:`<span class="chip ca" style="font-size:.6rem">Recruiting partner</span>`}</div>
-    </div>`).join(''):`<div style="font-size:.78rem;color:var(--mu);padding:.5rem 0">No relay station here yet — this region is a recruitment target. When a farm, yard or storage site comes on, it becomes the reference point for the whole area.</div>`;
+  const cov=capCover(z.drivers);
+  let body,cta;
+  if(capRole==='customer'){
+    body=`<div class="kg" style="margin:.9rem 0 .4rem">
+        <div class="kc"><div class="kc-l">Coverage</div><div class="kc-v" style="font-size:1rem;color:${cov[1]}">${cov[0]}</div></div>
+        <div class="kc"><div class="kc-l">Drivers ready</div><div class="kc-v or">${z.drivers}</div></div>
+        <div class="kc"><div class="kc-l">Typical vehicles</div><div class="kc-v" style="font-size:1rem">Van–Luton</div></div>
+      </div>
+      <div style="font-size:.78rem;color:var(--mu);margin:.2rem 0 .3rem">Book a same-day courier across <strong style="color:var(--tx)">${z.cities}</strong> and the surrounding area. Live tracking from pickup to drop.</div>`;
+    cta=`<button class="btn btn-or" onclick="capGo('book')">Book a courier in ${z.name} →</button>`;
+  }else{
+    const relayRows=relays.length?relays.map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.5rem .1rem;border-bottom:1px solid var(--ln)">
+        <div><div style="font-weight:700;font-size:.82rem">◆ ${r.name}</div><div style="font-size:.68rem;color:var(--mu)">${r.road} · ${r.live?'live':'candidate hub'}</div></div>
+        <div style="text-align:right;white-space:nowrap">${r.live?`<div style="font-weight:800;font-size:.85rem;color:var(--or)">${r.swaps}</div><div style="font-size:.64rem;color:var(--mu)">swaps · ${r.ontime}% on-time</div>`:`<span class="chip ca" style="font-size:.6rem">Recruiting partner</span>`}</div>
+      </div>`).join(''):`<div style="font-size:.78rem;color:var(--mu);padding:.5rem 0">No relay point here yet — a swap yard here would anchor the whole area.</div>`;
+    body=`<div class="kg" style="margin:.9rem 0 .4rem">
+        <div class="kc"><div class="kc-l">Demand</div><div class="kc-v" style="font-size:1rem">${c.lbl}</div></div>
+        <div class="kc"><div class="kc-l">Live jobs</div><div class="kc-v co">${z.jobs}</div></div>
+        <div class="kc"><div class="kc-l">Drivers here</div><div class="kc-v or">${z.drivers}</div></div>
+        <div class="kc"><div class="kc-l">Main corridor</div><div class="kc-v" style="font-size:1rem">${z.corridor}</div></div>
+      </div>
+      <div style="font-size:.76rem;color:var(--mu);margin:.2rem 0 .7rem"><strong style="color:var(--tx)">Backloads:</strong> ${z.demand}</div>
+      <div class="ct" style="font-size:.85rem;margin-bottom:.2rem">Relay points in ${z.name}</div>${relayRows}`;
+    cta=`<button class="btn btn-or" onclick="capGo('work')">Find work in ${z.name} →</button>`;
+  }
   document.getElementById('cap-detail').innerHTML=`<div class="card" style="border-left:5px solid ${z.colour}">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:.5rem"><span style="width:14px;height:14px;border-radius:4px;background:${z.colour};flex:none"></span><div><div class="ct" style="margin:0;font-size:1.05rem">${z.name}</div><div style="font-size:.72rem;color:var(--mu);margin-top:.15rem">${z.cities}</div></div></div>
-      <span class="chip" style="background:var(--p2);color:var(--tx);border:1px solid var(--ln);font-weight:700">${c.lbl}</span>
+      <button class="btn btn-gh btn-xs" onclick="capClear()">Close ✕</button>
     </div>
-    <div class="kg" style="margin:.9rem 0 .4rem">
-      <div class="kc"><div class="kc-l">Drivers here</div><div class="kc-v or">${z.drivers}</div></div>
-      <div class="kc"><div class="kc-l">Live jobs</div><div class="kc-v co">${z.jobs}</div></div>
-      <div class="kc"><div class="kc-l">Main corridor</div><div class="kc-v" style="font-size:1rem">${z.corridor}</div></div>
-      <div class="kc"><div class="kc-l">Relay stations</div><div class="kc-v">${relays.length}</div></div>
-    </div>
-    <div style="font-size:.76rem;color:var(--mu);margin:.2rem 0 .8rem"><strong style="color:var(--tx)">Demand:</strong> ${z.demand}</div>
-    <div class="ct" style="font-size:.85rem;margin-bottom:.2rem">Relay stations in ${z.name}</div>
-    ${relayRows}
-    <div style="text-align:right;margin-top:.7rem"><button class="btn btn-gh btn-xs" onclick="capClear()">Close ✕</button></div>
+    ${body}
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem">${cta}</div>
   </div>`;
   const d=document.getElementById('cap-detail');d.style.display='block';
   d.scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -3207,6 +3250,17 @@ function capClear(){
   document.getElementById('cap-detail').style.display='none';
   if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>capMap._zoneLayers[k].setStyle({fillOpacity:.9,weight:1,color:'#0e1113'}));
   capMarkSectionActive(null);
+  capResetView();
+}
+function capResetView(){
+  const bk=document.getElementById('cap-back');if(bk)bk.style.display='none';
+  if(capMap&&capMap._geo){try{capMap.flyToBounds(capMap._geo.getBounds(),{padding:[8,8],duration:.5});}catch(e){}}
+}
+/* route the region call-to-action to whichever booking/jobs page this account actually has */
+function capGo(kind){
+  const first=ids=>ids.find(i=>document.getElementById('pane-'+i));
+  const target=kind==='book'?first(['b-book','f-post','d-jobs']):first(['d-jobs','d-invites','f-post']);
+  if(target)switchTab('pane-'+target);
 }
 /* Section panels beside the map — each region its own colour, like the map */
 function capRenderSections(){
