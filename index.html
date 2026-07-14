@@ -554,6 +554,14 @@ textarea.fi2{resize:vertical;min-height:70px}
 .cap-sec-mini>span{display:flex;align-items:center;gap:.35rem;color:var(--mu)}
 .cap-sec-mini b{font-size:.82rem}
 .cap-sec-mini i{width:14px;text-align:center;font-style:normal;opacity:.85}
+/* clean role-focused line under each section card — words, not judgy numbers */
+.cap-sec-line{display:flex;align-items:center;gap:.4rem;font-size:.68rem;font-weight:600;color:var(--mu)}
+.cap-sec-line .cap-sec-relay{display:inline-flex;align-items:center;gap:.28rem;color:#a688e6;font-weight:700}
+.cap-sec-cta{font-size:.66rem;font-weight:800;color:var(--or);margin-top:.15rem}
+/* List view: same cards, no map, responsive grid */
+.cap-listgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.55rem}
+.cap-listgrid .cap-sec{height:100%}
+@media(max-width:560px){.cap-listgrid{grid-template-columns:1fr}}
 @media(max-width:980px){
   .cap-row{flex-direction:column}
   .cap-col{flex:auto;max-width:none}
@@ -1834,10 +1842,18 @@ textarea.fi2{resize:vertical;min-height:70px}
             <h1 class="pt" style="margin-bottom:.2rem">Network Map</h1>
             <p class="ps" id="cap-sub" style="margin:0">Tap your area to see who covers it and book a courier.</p>
           </div>
-          <!-- Customer / Driver view switch -->
-          <div style="display:inline-flex;background:var(--p2);border:1.5px solid var(--ln);border-radius:22px;padding:3px;margin-top:.15rem">
-            <button id="crole-customer" class="cap-role on" onclick="capSetRole('customer')">I'm a customer</button>
-            <button id="crole-driver" class="cap-role" onclick="capSetRole('driver')">I'm a driver</button>
+          <!-- Toggles: who am I + map/list -->
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem;margin-top:.15rem">
+            <!-- Customer / Driver view switch -->
+            <div style="display:inline-flex;background:var(--p2);border:1.5px solid var(--ln);border-radius:22px;padding:3px">
+              <button id="crole-customer" class="cap-role on" onclick="capSetRole('customer')">I'm a customer</button>
+              <button id="crole-driver" class="cap-role" onclick="capSetRole('driver')">I'm a driver</button>
+            </div>
+            <!-- Map / List view switch -->
+            <div style="display:inline-flex;background:var(--p2);border:1.5px solid var(--ln);border-radius:22px;padding:3px">
+              <button id="cview-map" class="cap-role on" onclick="capSetView('map')">🗺 Map</button>
+              <button id="cview-list" class="cap-role" onclick="capSetView('list')">☰ List</button>
+            </div>
           </div>
         </div>
 
@@ -1925,16 +1941,13 @@ textarea.fi2{resize:vertical;min-height:70px}
           </div>
         </div>
 
+        <!-- List view: same regions, plain list, no map -->
+        <div id="cap-listview" style="display:none;margin-bottom:1rem">
+          <div id="cap-list" class="cap-listgrid"></div>
+        </div>
+
         <!-- Region detail panel (opens when a section is chosen) -->
         <div id="cap-detail" style="display:none;margin-bottom:1rem"></div>
-
-        <!-- Summary stats row -->
-        <div class="kg">
-          <div class="kc"><div class="kc-l">Drivers on network</div><div class="kc-v or" id="cap-tot-drv">—</div><div class="kc-d">across all regions</div></div>
-          <div class="kc"><div class="kc-l">Live jobs</div><div class="kc-v co" id="cap-tot-job">—</div><div class="kc-d">moving now</div></div>
-          <div class="kc"><div class="kc-l">Hot regions</div><div class="kc-v gn" id="cap-tot-hot">—</div><div class="kc-d">highest demand</div></div>
-          <div class="kc"><div class="kc-l">Relay stations</div><div class="kc-v" id="cap-tot-relay">—</div><div class="kc-d">swap points live</div></div>
-        </div>
 
         <!-- Relay station leaderboard (driver view only) -->
         <div class="card" id="cap-lb-card" style="margin-top:1rem">
@@ -3327,17 +3340,15 @@ function capOverviewHtml(z){
   let pill,pc;
   if(capRole==='customer'){const cov=capCover(z.drivers);pill=cov[0];pc=z.drivers>=8?'#4fae73':z.drivers>=3?'#e8823c':'#8ea3b0';}
   else{const dm={hot:['Hot demand','#9ec13c'],warm:['Warm','#f0b429'],cool:['Building','#4a90d9']};const d=dm[z.tier]||dm.cool;pill=d[0];pc=d[1];}
-  const stats=capRole==='customer'
-    ? `<div><div class="cap-ov-n" style="color:${z.drivers>=3?'#ffb454':'#9fb0bd'}">${z.drivers}</div><div class="cap-ov-l">drivers ready</div></div>
-       <div><div class="cap-ov-n">${relays}</div><div class="cap-ov-l">relay${relays===1?'':'s'}</div></div>`
-    : `<div><div class="cap-ov-n" style="color:#ffb454">${z.drivers}</div><div class="cap-ov-l">drivers</div></div>
-       <div><div class="cap-ov-n" style="color:#5aa9ff">${z.jobs}</div><div class="cap-ov-l">live jobs</div></div>
-       <div><div class="cap-ov-n">${relays}</div><div class="cap-ov-l">relay${relays===1?'':'s'}</div></div>`;
+  /* no raw counts on the map — a status word + towns, so nobody judges an area by placeholder numbers */
+  const line=capRole==='customer'
+    ? `<div class="cap-ov-towns" style="margin-top:.35rem;color:#cdd8e0">Same-day courier cover${relays?` · ◆ relay swap point`:''}</div>`
+    : `<div class="cap-ov-towns" style="margin-top:.35rem;color:#cdd8e0">${z.corridor} corridor${relays?` · ◆ relay swap point`:''}</div>`;
   const cta=capRole==='customer'?`Tap to book in this area →`:`Tap to see work here →`;
   return `<div class="cap-ov">
     <div class="cap-ov-h"><span class="cap-ov-dot" style="background:${z.colour}"></span><span class="cap-ov-nm">${z.name}</span></div>
     <span class="cap-ov-st" style="background:${pc}22;color:${pc}">${pill}</span>
-    <div class="cap-ov-row">${stats}</div>
+    ${line}
     <div class="cap-ov-towns">${(z.towns||z.cities).split(' · ').slice(0,6).join(' · ')}…</div>
     <div class="cap-ov-cta">${cta}</div>
   </div>`;
@@ -3376,8 +3387,8 @@ function capSelect(id){
   if(capRole==='customer'){
     body=`<div class="kg" style="margin:.9rem 0 .4rem">
         <div class="kc"><div class="kc-l">Coverage</div><div class="kc-v" style="font-size:1rem;color:${cov[1]}">${cov[0]}</div></div>
-        <div class="kc"><div class="kc-l">Drivers ready</div><div class="kc-v or">${z.drivers}</div></div>
         <div class="kc"><div class="kc-l">Typical vehicles</div><div class="kc-v" style="font-size:1rem">Van–Luton</div></div>
+        <div class="kc"><div class="kc-l">Booking</div><div class="kc-v" style="font-size:1rem">Same-day</div></div>
       </div>
       <div style="font-size:.78rem;color:var(--mu);margin:.2rem 0 .3rem">Book a same-day courier across <strong style="color:var(--tx)">${z.cities}</strong> and the surrounding area. Live tracking from pickup to drop.</div>`;
     cta=`<button class="btn btn-or" onclick="capGo('book')">Book a courier in ${z.name} →</button>`;
@@ -3388,9 +3399,8 @@ function capSelect(id){
       </div>`).join(''):`<div style="font-size:.78rem;color:var(--mu);padding:.5rem 0">No relay point here yet — a swap yard here would anchor the whole area.</div>`;
     body=`<div class="kg" style="margin:.9rem 0 .4rem">
         <div class="kc"><div class="kc-l">Demand</div><div class="kc-v" style="font-size:1rem">${c.lbl}</div></div>
-        <div class="kc"><div class="kc-l">Live jobs</div><div class="kc-v co">${z.jobs}</div></div>
-        <div class="kc"><div class="kc-l">Drivers here</div><div class="kc-v or">${z.drivers}</div></div>
         <div class="kc"><div class="kc-l">Main corridor</div><div class="kc-v" style="font-size:1rem">${z.corridor}</div></div>
+        <div class="kc"><div class="kc-l">Relay points</div><div class="kc-v" style="font-size:1rem">${relays.length?relays.length+' live':'Coming'}</div></div>
       </div>
       <div style="font-size:.76rem;color:var(--mu);margin:.2rem 0 .7rem"><strong style="color:var(--tx)">Backloads:</strong> ${z.demand}</div>
       <div class="ct" style="font-size:.85rem;margin-bottom:.2rem">Relay points in ${z.name}</div>${relayRows}`;
@@ -3433,27 +3443,58 @@ function _capSecCard(z){
   let pill,pc;
   if(capRole==='customer'){const cov=capCover(z.drivers);pill=cov[0];pc=z.drivers>=8?'#4fae73':z.drivers>=3?'#e8823c':'#8ea3b0';}
   else{const dm={hot:['Hot demand','#9ec13c'],warm:['Warm','#f0b429'],cool:['Building','#4a90d9']};const d=dm[z.tier]||dm.cool;pill=d[0];pc=d[1];}
+  /* role-focused line — no raw counts, so nobody writes an area off before the network fills */
+  const relayBit=rc?`<span class="cap-sec-relay">◆ Relay swap point</span>`:'';
+  let line,cta;
+  if(capRole==='customer'){
+    line=`<div class="cap-sec-line">Same-day courier cover · van to Luton</div>`;
+    cta=`<div class="cap-sec-cta">Book here →</div>`;
+  }else{
+    line=`<div class="cap-sec-line">${z.corridor} corridor${relayBit?' · ':''}${relayBit}</div>`;
+    cta=`<div class="cap-sec-cta">See work here →</div>`;
+  }
   return `<button id="csec-${z.id}" class="cap-sec" onclick="capSelect('${z.id}')" style="border-left-color:${z.colour}" onmouseover="if(!this.classList.contains('csec-on'))this.style.borderColor='${z.colour}'" onmouseout="if(!this.classList.contains('csec-on'))this.style.borderColor='var(--ln)'">
       <div class="cap-sec-top"><span class="cap-sec-nm">${z.name}</span><span class="cap-sec-pill" style="background:${pc}22;color:${pc}">${pill}</span></div>
       <div class="cap-sec-towns">${z.towns}</div>
-      <div class="cap-sec-mini">
-        <span><i>👤</i><b style="color:var(--or)">${z.drivers}</b> active drivers</span>
-        <span><i>●</i><b style="color:${z.jobs?'#5aa9ff':'var(--mu)'}">${z.jobs}</b> active jobs</span>
-        <span><i style="color:#a688e6">◆</i><b>${rc}</b> relay station${rc===1?'':'s'}</span>
-      </div>
+      ${line}
+      ${cta}
     </button>`;
 }
 function capRenderSections(){
   const left=document.getElementById('cap-sections-left'),right=document.getElementById('cap-sections-right');
-  if(!left||!right)return;
   const order={hot:0,warm:1,cool:2};
   const sorted=s=>CAP_REGIONS.filter(z=>z.side===s).sort((a,b)=>order[a.tier]-order[b.tier]||b.drivers-a.drivers);
   const L=sorted('l'),R=sorted('r');
-  left.innerHTML=L.map(_capSecCard).join('');
-  right.innerHTML=R.map(_capSecCard).join('');
+  const list=document.getElementById('cap-list');
+  /* only the active view renders cards, so csec-<id> stays unique in the DOM */
+  if(capView==='list'){
+    if(left)left.innerHTML='';
+    if(right)right.innerHTML='';
+    if(list){const all=[...CAP_REGIONS].sort((a,b)=>order[a.tier]-order[b.tier]||b.drivers-a.drivers);list.innerHTML=all.map(_capSecCard).join('');}
+  }else{
+    if(list)list.innerHTML='';
+    if(left)left.innerHTML=L.map(_capSecCard).join('');
+    if(right)right.innerHTML=R.map(_capSecCard).join('');
+  }
   const cl=document.getElementById('cap-cnt-l'),cr=document.getElementById('cap-cnt-r');
   if(cl)cl.textContent=L.length+' regions';
   if(cr)cr.textContent=R.length+' regions';
+}
+/* ── VIEW: interactive map vs plain list ── */
+let capView='map';
+function capSetView(v){
+  capView=v;
+  document.getElementById('cview-map').classList.toggle('on',v==='map');
+  document.getElementById('cview-list').classList.toggle('on',v==='list');
+  const row=document.querySelector('#pane-f-cap .cap-row');
+  const lv=document.getElementById('cap-listview');
+  if(row)row.style.display=v==='map'?'flex':'none';
+  if(lv)lv.style.display=v==='list'?'block':'none';
+  capRenderSections();
+  if(_capSel)capMarkSectionActive(_capSel);
+  capApplyFilters();
+  /* leaflet needs a nudge to redraw after being un-hidden */
+  if(v==='map'&&capMap){setTimeout(()=>{try{capMap.invalidateSize();}catch(e){}},60);}
 }
 function capMarkSectionActive(id){
   document.querySelectorAll('.cap-sec').forEach(b=>{
