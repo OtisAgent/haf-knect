@@ -562,6 +562,45 @@ textarea.fi2{resize:vertical;min-height:70px}
 .cap-listgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.55rem}
 .cap-listgrid .cap-sec{height:100%}
 @media(max-width:560px){.cap-listgrid{grid-template-columns:1fr}}
+/* ── LIVE JOB SPINE (sidebar tracker + full page, shared across every role) ── */
+.sb-livejob{margin:.5rem .6rem .3rem;border:1.5px solid var(--or-g);border-radius:var(--r);background:linear-gradient(160deg,var(--or-d),var(--p2));padding:.6rem .65rem;cursor:pointer;transition:all .14s;display:none}
+.sb-livejob:hover{border-color:var(--or)}
+.sb-lj-top{display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin-bottom:.35rem}
+.sb-lj-tag{font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--or);display:flex;align-items:center;gap:.3rem}
+.sb-lj-dot{width:7px;height:7px;border-radius:50%;background:var(--or);animation:pulse-dot 1.5s ease-in-out infinite}
+.sb-lj-ref{font-size:.56rem;color:var(--mu);font-weight:700}
+.sb-lj-route{font-size:.74rem;font-weight:800;color:var(--tx);line-height:1.25;margin-bottom:.3rem}
+.sb-lj-meta{display:flex;align-items:center;justify-content:space-between;gap:.4rem;font-size:.6rem;color:var(--mu);margin-bottom:.4rem}
+.sb-lj-bar{height:5px;border-radius:3px;background:var(--ln);overflow:hidden;margin-bottom:.45rem}
+.sb-lj-fill{height:100%;border-radius:3px;transition:width .5s}
+.sb-lj-btn{width:100%;text-align:center;font-size:.64rem;font-weight:800;color:var(--or);background:transparent;border:1px solid var(--or-g);border-radius:var(--pill);padding:.3rem;cursor:pointer}
+.lj-wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:.9rem;align-items:start}
+.lj-mapwrap{position:relative;border:1.5px solid var(--ln);border-radius:var(--r);overflow:hidden}
+#lj-map{height:430px;width:100%;background:#aadaff}
+.lj-side{display:flex;flex-direction:column;gap:.9rem;min-width:0}
+.lj-fields{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.lj-field{background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.5rem .6rem}
+.lj-field-l{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--mu)}
+.lj-field-v{font-size:.95rem;font-weight:800;color:var(--tx);margin-top:.15rem}
+.lj-time{position:relative;padding-left:1rem}
+.lj-time:before{content:'';position:absolute;left:.16rem;top:.6rem;bottom:.6rem;width:2px;background:var(--ln)}
+.lj-tstep{position:relative;padding:.3rem 0 .3rem .2rem;font-size:.74rem;color:var(--mu)}
+.lj-tstep:before{content:'';position:absolute;left:-.84rem;top:.48rem;width:9px;height:9px;border-radius:50%;background:var(--ln);border:2px solid var(--p)}
+.lj-tstep.done{color:var(--tx);font-weight:600}
+.lj-tstep.done:before{background:var(--gn)}
+.lj-tstep.now{color:var(--or);font-weight:800}
+.lj-tstep.now:before{background:var(--or);box-shadow:0 0 0 3px var(--or-g)}
+.lj-update{display:flex;gap:.5rem;font-size:.72rem;padding:.35rem 0;border-bottom:1px solid var(--ln)}
+.lj-update-t{color:var(--mu);white-space:nowrap;font-weight:700;font-size:.66rem;min-width:42px}
+.lj-thread{display:flex;flex-direction:column;gap:.45rem;max-height:250px;overflow-y:auto;padding:.3rem .1rem}
+.lj-msg{max-width:84%;padding:.45rem .6rem;border-radius:12px;font-size:.76rem;line-height:1.4}
+.lj-msg.them{align-self:flex-start;background:var(--p2);border:1px solid var(--ln);border-bottom-left-radius:3px}
+.lj-msg.me{align-self:flex-end;background:var(--or-d);border:1px solid var(--or-g);border-bottom-right-radius:3px}
+.lj-msg-who{font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--mu);margin-bottom:.15rem}
+.lj-msg-t{font-size:.54rem;color:var(--mu);margin-top:.2rem;text-align:right}
+.lj-compose{display:flex;gap:.4rem;margin-top:.5rem}
+.lj-compose input{flex:1;min-width:0;padding:.5rem .6rem;border:1.5px solid var(--ln);border-radius:var(--pill);background:var(--bg);color:var(--tx);font-size:.78rem}
+@media(max-width:820px){.lj-wrap{grid-template-columns:1fr}#lj-map{height:300px}.lj-fields{grid-template-columns:1fr 1fr}}
 @media(max-width:980px){
   .cap-row{flex-direction:column}
   .cap-col{flex:auto;max-width:none}
@@ -1178,6 +1217,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 
   <div class="app-body">
     <nav class="sidebar" id="sidebar">
+      <div class="sb-livejob" id="sb-livejob"></div>
       <div id="nav-list"></div>
       <a class="sb-plna" id="sb-plna" href="https://plna.usehaf.co.uk" target="_blank" rel="noopener">Looking to be a driver?<b>Sign up to the PLNA →</b></a>
       <div class="sb-bot">
@@ -1833,6 +1873,11 @@ textarea.fi2{resize:vertical;min-height:70px}
           <div class="fg"><label class="fl">Special instructions</label><textarea class="fi2" placeholder="Tail lift, fragile, hazmat class, access..."></textarea></div>
           <button class="btn btn-or btn-wide" style="margin-top:.3rem">Post load to network →</button>
         </div>
+      </div>
+
+      <!-- LIVE JOB (shared spine — reshapes per role) -->
+      <div class="tp" id="pane-livejob">
+        <div id="lj-body"></div>
       </div>
 
       <!-- FREIGHT: Network Map -->
@@ -2632,6 +2677,7 @@ function hafGo(u,k,t){localStorage.setItem('knect-user',u);enterKnectApp(u);}
 const DRIVER_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
   {id:'d-invites',l:'Exchange',s:'KNECT Jobs',badge:'2',ico:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>'},
+  {id:'livejob',l:'Live Job',s:'KNECT Jobs',ico:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'},
   {id:'d-jobs',l:'Open Jobs',s:'KNECT Jobs',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'d-status',l:'My Status',s:'KNECT Jobs',ico:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
   {id:'d-empty',l:'Backload',s:'KNECT Jobs',ico:'<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.54"/>'},
@@ -2657,6 +2703,7 @@ const ADMIN_NAV=[
 const BUSINESS_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
   {id:'b-book',l:'Book a Courier',s:'Send Goods',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
+  {id:'livejob',l:'Live Job',s:'Send Goods',ico:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'},
   {id:'b-del',l:'My Deliveries',s:'Send Goods',ico:'<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'},
   {id:'f-cap',l:'Network Map',s:'Send Goods',ico:'<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>'},
   {id:'b-fleet',l:'My Fleet',s:'Send Goods',ico:'<path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="1"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>'},
@@ -2671,6 +2718,7 @@ const FREIGHT_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
   {id:'f-post',l:'Post a Load',s:'Freight',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'f-loads',l:'Active Loads',s:'Freight',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
+  {id:'livejob',l:'Live Job',s:'Freight',ico:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'},
   {id:'f-cap',l:'Network Map',s:'Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:'f-cover',l:'Coverage Board',s:'Freight',ico:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'},
   {id:'f-dir',l:'Driver Directory',s:'Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
@@ -2685,6 +2733,7 @@ const FREIGHT_NAV=[
 const PERSONAL_NAV=[
   {id:'f-post',l:'Post a Load',s:'My Freight',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'f-loads',l:'My Active Loads',s:'My Freight',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
+  {id:'livejob',l:'Live Job',s:'My Freight',ico:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'},
   {id:'f-dir',l:'Driver Directory',s:'My Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'f-cap',l:'Network Map',s:'My Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:'f-account',l:'Account &amp; Rebate',s:'My Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
@@ -3050,6 +3099,9 @@ function buildNav(tabs){
   const promo=document.getElementById('sb-plna');
   if(promo)promo.style.display=(tabs===DRIVER_NAV)?'none':'block';
   _fbRoleGuess=(tabs===DRIVER_NAV)?'driver':(tabs===BUSINESS_NAV)?'business':(tabs===FREIGHT_NAV)?'business':'team';
+  /* one place decides the Live Job view: driver / business / freight (Brent's personal + admin see the freight view) */
+  window.HAF_ROLE=(tabs===DRIVER_NAV)?'driver':(tabs===BUSINESS_NAV)?'business':(tabs===FREIGHT_NAV||tabs===PERSONAL_NAV)?'freight':'admin';
+  hafRenderLiveWidget();
 }
 let ct=null;
 function switchTab(id){
@@ -3060,7 +3112,157 @@ function switchTab(id){
   ct=id;
   if(id==='pane-d-home')setTimeout(initDashMap,80);
   if(id==='pane-f-cap')setTimeout(initCapMap,80);
+  if(id==='pane-livejob')setTimeout(hafRenderLiveJob,60);
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
+}
+
+/* ═══════════════ HAF LIVE JOB SPINE ═══════════════
+   One delivery record, stored once. Each role sees its own permitted slice.
+   The sidebar tracker + this page are the spine every account orbits.
+   Adding a field, a role or a job = editing config below — never a redesign. */
+window.HAF_ROLE=window.HAF_ROLE||'driver';
+const HAF_STATUS={draft:['Scheduled','#8a97a0'],awaiting:['Awaiting driver','#e88c00'],assigned:['Driver assigned','#3d7dca'],collection:['En route to collection','#6a3fd0'],transit:['In transit','#0d9488'],delivered:['Delivered','#2dab60'],delayed:['Delayed','#cc3333'],closed:['Closed','#5b6b74']};
+const HAF_STEPS=['Job posted','Driver assigned','En route to collection','Collected','In transit','Out for delivery','Delivered','Proof confirmed'];
+/* shared records — every field lives here once; role config decides what shows */
+const HAF_JOBS=[
+ {id:'HAF-2858',colour:'#3d7dca',status:'transit',stepIdx:4,progress:62,
+  from:{name:'Sheffield S1',lat:53.383,lng:-1.466},to:{name:'Leeds LS1',lat:53.796,lng:-1.547},driverPos:{lat:53.565,lng:-1.492},
+  driverName:'James W.',driverId:'JW012390',vehicle:'LWB',goods:'2 pallets · 420 kg · tail-lift',collect:'Today 13:30',deadline:'Today 15:00',eta:'14:35',distance:'38 mi',
+  payout:'£86',rate:'£2.26 / loaded mi',price:'£128',vat:'£25.60',buy:'£86',sell:'£128',margin:'£42',marginPct:'33%',client:'Northern Pack',account:'ABC Trade Ltd',
+  updates:[{t:'13:32',s:'Collected from Sheffield S1 — proof of collection uploaded'},{t:'13:49',s:'In transit, northbound on the M1'},{t:'14:06',s:'On schedule — ETA holding at 14:35'}],
+  messages:[{who:'driver',from:'James W. (Driver)',t:'13:33',text:'Collected, all secure. 2 pallets on, heading up the M1.'},{who:'portal',from:'HAF KNECT',t:'13:34',text:'Thanks James — customer tracking is live.'}]},
+ {id:'HAF-2861',colour:'#ff7800',status:'assigned',stepIdx:1,progress:16,
+  from:{name:'Salford M50',lat:53.474,lng:-2.29},to:{name:'Sheffield S9',lat:53.41,lng:-1.42},driverPos:{lat:53.474,lng:-2.29},
+  driverName:'David H.',driverId:'DH022641',vehicle:'LWB',goods:'680 kg · no stacking · tail-lift',collect:'Tomorrow 09:00',deadline:'Tomorrow 12:30',eta:'11:40',distance:'41 mi',
+  payout:'£94',rate:'£2.29 / loaded mi',price:'£140',vat:'£28.00',buy:'£94',sell:'£140',margin:'£46',marginPct:'33%',client:'City Supplies',account:'ABC Trade Ltd',
+  updates:[{t:'—',s:'Driver assigned — collection scheduled for 09:00 tomorrow'}],
+  messages:[{who:'portal',from:'HAF KNECT',t:'12:10',text:'David is confirmed for the 09:00 collection tomorrow.'}]}
+];
+/* role config — the whole personality of each view lives here */
+const HAF_ROLECFG={
+ driver:{title:'Current Job',me:'driver',meFrom:'You (Driver)',
+   fields:j=>[['Your payout',j.payout,'var(--gn)'],['Effective rate',j.rate,''],['Loaded distance',j.distance,''],['Deadline',j.deadline,'var(--or)']],
+   actions:['Start navigation','Update status','Report issue']},
+ business:{title:'Live Delivery',me:'business',meFrom:'You (Business)',
+   fields:j=>[['Price',j.price,''],['VAT',j.vat,''],['Driver',j.driverName,''],['ETA',j.eta,'var(--or)']],
+   actions:['Share tracking link','View proof of delivery','Report issue']},
+ freight:{title:'Live Load',me:'freight',meFrom:'You (Freight)',
+   fields:j=>[['Buy rate',j.buy,''],['Sell rate',j.sell,''],['Margin',j.margin+' · '+j.marginPct,'var(--gn)'],['ETA',j.eta,'var(--or)']],
+   actions:['Client tracking','Manage load','Allocate driver']}
+};
+function hafRole(){const r=window.HAF_ROLE;return HAF_ROLECFG[r]?r:'driver';}
+function hafActiveJob(){return HAF_JOBS.find(j=>j.status!=='delivered'&&j.status!=='closed')||HAF_JOBS[0];}
+function hafNow(){try{return new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}catch(e){return 'now';}}
+function hafEsc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+/* sidebar tracker — always one glance from the live job */
+function hafRenderLiveWidget(){
+ const el=document.getElementById('sb-livejob');if(!el)return;
+ const j=hafActiveJob();
+ if(!j||hafRole()==='admin'){el.style.display='none';return;}
+ const st=HAF_STATUS[j.status]||HAF_STATUS.transit;
+ el.style.display='block';
+ el.onclick=()=>switchTab('pane-livejob');
+ el.innerHTML=`<div class="sb-lj-top"><span class="sb-lj-tag"><span class="sb-lj-dot"></span>Live job</span><span class="sb-lj-ref">${j.id}</span></div>
+   <div class="sb-lj-route">${hafEsc(j.from.name)} → ${hafEsc(j.to.name)}</div>
+   <div class="sb-lj-meta"><span style="color:${st[1]};font-weight:800">${st[0]}</span><span>ETA ${hafEsc(j.eta)}</span></div>
+   <div class="sb-lj-bar"><div class="sb-lj-fill" style="width:${j.progress}%;background:${j.colour}"></div></div>
+   <button class="sb-lj-btn">Open live job →</button>`;
+}
+
+/* full Live Job page — route, timeline, updates, two-way messaging */
+let ljMap=null;
+function hafRenderLiveJob(){
+ const body=document.getElementById('lj-body');if(!body)return;
+ const j=hafActiveJob();const role=hafRole();const cfg=HAF_ROLECFG[role]||HAF_ROLECFG.driver;
+ const st=HAF_STATUS[j.status]||HAF_STATUS.transit;
+ const fields=cfg.fields(j).map(f=>`<div class="lj-field"><div class="lj-field-l">${f[0]}</div><div class="lj-field-v" style="${f[2]?'color:'+f[2]:''}">${hafEsc(f[1])}</div></div>`).join('');
+ const steps=HAF_STEPS.map((s,i)=>`<div class="lj-tstep ${i<j.stepIdx?'done':i===j.stepIdx?'now':''}">${s}</div>`).join('');
+ const updates=j.updates.map(u=>`<div class="lj-update"><span class="lj-update-t">${hafEsc(u.t)}</span><span>${hafEsc(u.s)}</span></div>`).join('');
+ const acts=cfg.actions.map((a,i)=>`<button class="btn ${i===0?'btn-or':'btn-gh'} btn-sm" onclick="hafLjAction('${hafEsc(a)}')">${a}</button>`).join('');
+ body.innerHTML=`
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem">
+    <div><h1 class="pt" style="margin-bottom:.15rem">${cfg.title}</h1><p class="ps" style="margin:0">${hafEsc(j.from.name)} → ${hafEsc(j.to.name)} · ${j.id}</p></div>
+    <span class="chip" style="background:${st[1]}22;color:${st[1]};font-weight:800;border:1px solid ${st[1]}55">● ${st[0]}</span>
+  </div>
+  <div class="lj-wrap">
+    <div>
+      <div class="lj-mapwrap"><div id="lj-map"></div>
+        <div style="position:absolute;top:10px;left:10px;z-index:1000;background:rgba(14,17,19,.82);border-radius:16px;padding:.28rem .6rem;font-size:.62rem;color:#fff;display:flex;align-items:center;gap:.5rem;backdrop-filter:blur(4px)">
+          <span style="display:flex;align-items:center;gap:.28rem"><span style="width:9px;height:9px;border-radius:50%;background:${j.colour}"></span>Route</span>
+          <span style="display:flex;align-items:center;gap:.28rem"><span style="width:9px;height:9px;border-radius:50%;background:#fff;border:2px solid ${j.colour}"></span>Driver</span>
+        </div>
+      </div>
+      <div class="card" style="margin-top:.8rem">
+        <div class="ct" style="margin:0 0 .5rem">Live updates</div>${updates}
+        <div style="font-size:.66rem;color:var(--mu);margin-top:.5rem">Updates post automatically as the driver moves through each stage.</div>
+      </div>
+    </div>
+    <div class="lj-side">
+      <div class="card">
+        <div class="ct" style="margin:0 0 .55rem">This ${role==='freight'?'load':'delivery'}</div>
+        <div class="lj-fields">${fields}</div>
+        <div style="font-size:.72rem;color:var(--mu);margin:.6rem 0 .1rem"><strong style="color:var(--tx)">${hafEsc(j.vehicle)}</strong> · ${hafEsc(j.goods)}</div>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.7rem">${acts}</div>
+      </div>
+      <div class="card">
+        <div class="ct" style="margin:0 0 .3rem">Job timeline</div>
+        <div class="lj-time">${steps}</div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.4rem">
+          <div class="ct" style="margin:0">${role==='driver'?'Message the office':'Message the driver'}</div>
+          <span class="chip ca" style="font-size:.58rem">${role==='driver'?'Driver ↔ HAF':'You ↔ driver'}</span>
+        </div>
+        <div class="lj-thread" id="lj-thread"></div>
+        <div class="lj-compose">
+          <input id="lj-input" placeholder="Type a message…" onkeydown="if(event.key==='Enter')hafLjSend()">
+          <button class="btn btn-or btn-sm" onclick="hafLjSend()">Send</button>
+        </div>
+        <div style="font-size:.62rem;color:var(--mu);margin-top:.45rem">Messages notify the other side instantly. Driver alerts route to WhatsApp once the network number is connected.</div>
+      </div>
+    </div>
+  </div>`;
+ hafRenderThread(j);
+ setTimeout(()=>hafInitLjMap(j),60);
+}
+function hafRenderThread(j){
+ const t=document.getElementById('lj-thread');if(!t)return;
+ const mine=hafRole();
+ t.innerHTML=j.messages.map(m=>{
+   const me=(m.who===mine)||(m.who==='business'&&mine==='business')||(m.who==='freight'&&mine==='freight');
+   return `<div class="lj-msg ${me?'me':'them'}"><div class="lj-msg-who">${hafEsc(m.from)}</div>${hafEsc(m.text)}<div class="lj-msg-t">${hafEsc(m.t)}</div></div>`;
+ }).join('');
+ t.scrollTop=t.scrollHeight;
+}
+const HAF_NOTIFY_URL='https://haf-notify.pages.dev/notify';
+function hafLjSend(){
+ const inp=document.getElementById('lj-input');if(!inp)return;
+ const txt=inp.value.trim();if(!txt)return;
+ const j=hafActiveJob();const cfg=HAF_ROLECFG[hafRole()]||HAF_ROLECFG.driver;
+ j.messages.push({who:cfg.me,from:cfg.meFrom,t:hafNow(),text:txt});
+ inp.value='';hafRenderThread(j);
+ /* bounce to the notify gateway (Telegram now, WhatsApp once the number lands) — never blocks the UI */
+ try{fetch(HAF_NOTIFY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job:j.id,route:j.from.name+' → '+j.to.name,from:cfg.meFrom,text:txt})}).catch(()=>{});}catch(e){}
+}
+function hafLjAction(label){
+ const j=hafActiveJob();
+ if(/tracking/i.test(label)){alert('Shareable tracking link for '+j.id+':\nhttps://track.usehaf.co.uk/'+j.id.toLowerCase());return;}
+ if(/navigation/i.test(label)){window.open('https://www.google.com/maps/dir/?api=1&destination='+j.to.lat+','+j.to.lng,'_blank');return;}
+ alert(label+' — coming in the next build slice.');
+}
+function hafInitLjMap(j){
+ const el=document.getElementById('lj-map');if(!el||typeof L==='undefined')return;
+ if(ljMap){try{ljMap.remove();}catch(e){}ljMap=null;}
+ ljMap=L.map('lj-map',{zoomControl:true,scrollWheelZoom:false,attributionControl:false}).setView([j.driverPos.lat,j.driverPos.lng],8);
+ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:18}).addTo(ljMap);
+ const line=L.polyline([[j.from.lat,j.from.lng],[j.driverPos.lat,j.driverPos.lng],[j.to.lat,j.to.lng]],{color:j.colour,weight:5,opacity:.9}).addTo(ljMap);
+ const dot=(c,fill)=>L.divIcon({className:'',html:`<div style="width:14px;height:14px;border-radius:50%;background:${fill};border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.5)"></div>`,iconSize:[14,14],iconAnchor:[7,7]});
+ L.marker([j.from.lat,j.from.lng],{icon:dot(j.colour,j.colour)}).addTo(ljMap).bindPopup('Collection · '+j.from.name);
+ L.marker([j.to.lat,j.to.lng],{icon:dot(j.colour,'#2dab60')}).addTo(ljMap).bindPopup('Delivery · '+j.to.name);
+ L.marker([j.driverPos.lat,j.driverPos.lng],{icon:dot(j.colour,'#fff')}).addTo(ljMap).bindPopup('Driver · '+j.driverName+' ('+j.progress+'%)');
+ try{ljMap.fitBounds(line.getBounds(),{padding:[40,40]});}catch(e){}
+ setTimeout(()=>{try{ljMap.invalidateSize();}catch(e){}},80);
 }
 
 /* ── COMMUNITY FEEDBACK BOARD (shared HUB database — same board as the demo) ── */
