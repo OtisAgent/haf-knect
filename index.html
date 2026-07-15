@@ -1936,8 +1936,8 @@ textarea.fi2{resize:vertical;min-height:70px}
             </div>
             <!-- Map / List view switch -->
             <div style="display:inline-flex;background:var(--p2);border:1.5px solid var(--ln);border-radius:22px;padding:3px">
-              <button id="cview-map" class="cap-role on" onclick="capSetView('map')">🗺 Map</button>
-              <button id="cview-list" class="cap-role" onclick="capSetView('list')">☰ List</button>
+              <button id="cview-list" class="cap-role on" onclick="capSetView('list')">☰ List</button>
+              <button id="cview-map" class="cap-role" onclick="capSetView('map')">🗺 Map</button>
             </div>
           </div>
         </div>
@@ -2046,8 +2046,12 @@ textarea.fi2{resize:vertical;min-height:70px}
           </div>
         </div>
 
-        <!-- List view: same regions, plain list, no map -->
+        <!-- List view: area tiles (default), no map — with a clear expand-to-map button -->
         <div id="cap-listview" style="display:none;margin-bottom:1rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem">
+            <div style="font-size:.78rem;color:var(--mu)">Tap your area for cover &amp; booking — or open the full map.</div>
+            <button class="btn btn-or btn-sm" onclick="capSetView('map')">🗺 Expand to full map</button>
+          </div>
           <div id="cap-list" class="cap-listgrid"></div>
         </div>
 
@@ -3849,6 +3853,7 @@ function capBootPane(){
     const dw=document.getElementById('cap-driverwork');if(dw)dw.style.display='none';
     const mz=document.getElementById('cap-mapzone');if(mz)mz.style.display='';
     capMapOpen=true;initCapMap();
+    capSetView(capView); /* land on the simple area tiles by default; map is one tap away */
   }
 }
 function capRenderDriverWork(){
@@ -3886,6 +3891,19 @@ function capToggleMapZone(open){
   if(capMapOpen){initCapMap();capSetRole('driver');setTimeout(()=>{try{if(capMap)capMap.invalidateSize();}catch(e){}},60);}
   else{const lb=document.getElementById('cap-lb-card');if(lb)lb.style.display='none';}
 }
+/* Extra town/city labels so the map reads richer than the base tiles alone.
+   Mid-size network towns the tiles drop at UK zoom; shown once you're zoomed in a touch. */
+const CAP_MAP_TOWNS=[
+ [53.43,-1.36,'Rotherham'],[53.52,-1.13,'Doncaster'],[53.55,-1.48,'Barnsley'],[53.68,-1.50,'Wakefield'],
+ [53.65,-1.78,'Huddersfield'],[53.79,-1.75,'Bradford'],[53.96,-1.08,'York'],[53.23,-0.54,'Lincoln'],
+ [53.39,-2.59,'Warrington'],[53.19,-2.89,'Chester'],[53.76,-2.70,'Preston'],[53.82,-3.05,'Blackpool'],
+ [53.58,-2.43,'Bolton'],[53.55,-2.63,'Wigan'],[53.41,-2.16,'Stockport'],[54.89,-2.93,'Carlisle'],
+ [52.68,-2.45,'Telford'],[52.41,-1.51,'Coventry'],[52.92,-1.48,'Derby'],[52.64,-1.13,'Leicester'],
+ [52.24,-0.90,'Northampton'],[52.57,-0.24,'Peterborough'],[52.63,1.30,'Norwich'],[52.06,1.16,'Ipswich'],
+ [51.56,-1.78,'Swindon'],[50.72,-3.53,'Exeter'],[50.38,-4.14,'Plymouth'],[54.57,-1.23,'Middlesbrough'],
+ [54.91,-1.38,'Sunderland'],[57.15,-2.09,'Aberdeen'],[56.46,-2.97,'Dundee'],[51.62,-3.94,'Swansea'],
+ [51.59,-2.99,'Newport'],[53.27,-9.05,'Galway'],[52.66,-8.62,'Limerick'],[52.26,-7.11,'Waterford']
+];
 function initCapMap(){
   const el=document.getElementById('cap-map');
   if(!el||typeof L==='undefined')return;
@@ -3936,6 +3954,13 @@ function initCapMap(){
     try{capMap.fitBounds(b,{padding:[10,10]});}catch(e){capMap.fitBounds(UK_VIEW);}
   }
 
+  /* Extra town labels — sit above the coloured regions, appear once zoomed in a touch so the UK overview stays clean */
+  capMap._towns=L.layerGroup();
+  CAP_MAP_TOWNS.forEach(([la,ln,nm])=>{
+    L.marker([la,ln],{pane:'cap-labels',interactive:false,keyboard:false,icon:L.divIcon({className:'',iconSize:[0,0],html:`<div style="display:flex;align-items:center;gap:2px;transform:translate(-3px,-6px);white-space:nowrap"><span style="width:4px;height:4px;background:#c0392b;border-radius:50%;box-shadow:0 0 0 1px #fff;flex:none"></span><span style="font:600 10px/1 system-ui,sans-serif;color:#2b3a42;text-shadow:-1px -1px 0 #fff,1px -1px 0 #fff,-1px 1px 0 #fff,1px 1px 0 #fff,0 0 2px #fff">${nm}</span></div>`})}).addTo(capMap._towns);
+  });
+  const capTownVis=()=>{const show=capMap.getZoom()>=6;const has=capMap.hasLayer(capMap._towns);if(show&&!has)capMap._towns.addTo(capMap);else if(!show&&has)capMap.removeLayer(capMap._towns);};
+  capMap.on('zoomend',capTownVis);setTimeout(capTownVis,0);
   /* Relay stations as diamonds on the region label points (toggle layer) */
   capMap._relayLayers=[];
   const relayIcon=L.divIcon({className:'',html:`<div style="width:12px;height:12px;background:#6a3fd0;transform:rotate(45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>`,iconSize:[12,12],iconAnchor:[6,6]});
@@ -4104,8 +4129,8 @@ function capRenderSections(){
   if(cl)cl.textContent=L.length+' regions';
   if(cr)cr.textContent=R.length+' regions';
 }
-/* ── VIEW: interactive map vs plain list ── */
-let capView='map';
+/* ── VIEW: plain list/area tiles (default, easiest) vs the full interactive map ── */
+let capView='list';
 function capSetView(v){
   capView=v;
   document.getElementById('cview-map').classList.toggle('on',v==='map');
