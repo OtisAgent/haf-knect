@@ -3865,6 +3865,9 @@ function initCapMap(){
 
 /* ── ROLE: customer (coverage + book) vs driver (demand + work) ── */
 let capRole='customer';
+/* relay stations show for drivers positioning AND for business/freight accounts (they benefit from the swap network) — never for a plain public customer */
+function capBiz(){const r=(window.HAF_ROLE||'').toLowerCase();return r==='business'||r==='freight';}
+function capRelayVis(){return capRole==='driver'||capBiz();}
 function capCover(n){return n>=8?['Well covered','var(--gn)']:n>=3?['Cover available','var(--or)']:['Coming soon','var(--mu)'];}
 /* Floating overview card shown over a region on hover — makes the map an at-a-glance overview of each area */
 function capOverviewHtml(z){
@@ -3891,9 +3894,10 @@ function capSetRole(r){
   document.getElementById('crole-driver').classList.toggle('on',r==='driver');
   const sub=document.getElementById('cap-sub');
   if(sub)sub.textContent=r==='customer'?'Tap your area to see who covers it and book a courier.':'Tap a region to see demand, live jobs and relay points to position for.';
-  const rw=document.getElementById('cap-relay-wrap');if(rw)rw.style.display=r==='driver'?'inline-flex':'none';
-  const lb=document.getElementById('cap-lb-card');if(lb)lb.style.display=r==='driver'?'block':'none';
-  if(r==='customer'){const cb=document.getElementById('cap-relay');if(cb)cb.checked=false;}
+  const rw=document.getElementById('cap-relay-wrap');if(rw)rw.style.display=capRelayVis()?'inline-flex':'none';
+  const lb=document.getElementById('cap-lb-card');if(lb)lb.style.display=capRelayVis()?'block':'none';
+  const cb=document.getElementById('cap-relay');
+  if(cb){ if(capBiz())cb.checked=true; else if(r==='customer')cb.checked=false; }
   capFilter();
   capRenderSections();
   if(_capSel)capSelect(_capSel); else capMarkSectionActive(null);
@@ -3915,6 +3919,11 @@ function capSelect(id){
   const c=CAP_TIER[z.tier];
   const relays=(z.relays||[]);
   const cov=capCover(z.drivers);
+  const relayRows=relays.length?relays.map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.5rem .1rem;border-bottom:1px solid var(--ln)">
+        <div><div style="font-weight:700;font-size:.82rem">◆ ${r.name}</div><div style="font-size:.68rem;color:var(--mu)">${r.road} · ${r.live?'live':'candidate hub'}</div></div>
+        <div style="text-align:right;white-space:nowrap">${r.live?`<div style="font-weight:800;font-size:.85rem;color:var(--or)">${r.swaps}</div><div style="font-size:.64rem;color:var(--mu)">swaps · ${r.ontime}% on-time</div>`:`<span class="chip ca" style="font-size:.6rem">Recruiting partner</span>`}</div>
+      </div>`).join(''):`<div style="font-size:.78rem;color:var(--mu);padding:.5rem 0">No relay point here yet — a swap yard here would anchor the whole area.</div>`;
+  const bizRelay=capBiz()?`<div class="ct" style="font-size:.85rem;margin:.8rem 0 .15rem">◆ Relay swap points serving ${z.name}</div><div style="font-size:.72rem;color:var(--mu);margin-bottom:.25rem">Where our drivers hand off long-distance loads — how HAF moves your goods faster and cheaper across regions.</div>${relayRows}`:'';
   let body,cta;
   if(capRole==='customer'){
     body=`<div class="kg" style="margin:.9rem 0 .4rem">
@@ -3922,13 +3931,9 @@ function capSelect(id){
         <div class="kc"><div class="kc-l">Typical vehicles</div><div class="kc-v" style="font-size:1rem">Van–Luton</div></div>
         <div class="kc"><div class="kc-l">Booking</div><div class="kc-v" style="font-size:1rem">Same-day</div></div>
       </div>
-      <div style="font-size:.78rem;color:var(--mu);margin:.2rem 0 .3rem">Book a same-day courier across <strong style="color:var(--tx)">${z.cities}</strong> and the surrounding area. Live tracking from pickup to drop.</div>`;
+      <div style="font-size:.78rem;color:var(--mu);margin:.2rem 0 .3rem">Book a same-day courier across <strong style="color:var(--tx)">${z.cities}</strong> and the surrounding area. Live tracking from pickup to drop.</div>${bizRelay}`;
     cta=`<button class="btn btn-or" onclick="capGo('book')">Book a courier in ${z.name} →</button>`;
   }else{
-    const relayRows=relays.length?relays.map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.5rem .1rem;border-bottom:1px solid var(--ln)">
-        <div><div style="font-weight:700;font-size:.82rem">◆ ${r.name}</div><div style="font-size:.68rem;color:var(--mu)">${r.road} · ${r.live?'live':'candidate hub'}</div></div>
-        <div style="text-align:right;white-space:nowrap">${r.live?`<div style="font-weight:800;font-size:.85rem;color:var(--or)">${r.swaps}</div><div style="font-size:.64rem;color:var(--mu)">swaps · ${r.ontime}% on-time</div>`:`<span class="chip ca" style="font-size:.6rem">Recruiting partner</span>`}</div>
-      </div>`).join(''):`<div style="font-size:.78rem;color:var(--mu);padding:.5rem 0">No relay point here yet — a swap yard here would anchor the whole area.</div>`;
     body=`<div class="kg" style="margin:.9rem 0 .4rem">
         <div class="kc"><div class="kc-l">Demand</div><div class="kc-v" style="font-size:1rem">${c.lbl}</div></div>
         <div class="kc"><div class="kc-l">Main corridor</div><div class="kc-v" style="font-size:1rem">${z.corridor}</div></div>
