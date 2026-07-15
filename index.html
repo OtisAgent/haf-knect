@@ -1343,18 +1343,13 @@ textarea.fi2{resize:vertical;min-height:70px}
           <span style="margin-left:auto;color:var(--mu)">9% network fee</span>
         </div>
 
-        <!-- Network Map -->
-        <div style="border-radius:var(--r);overflow:hidden;border:1.5px solid var(--ln);margin-bottom:.85rem;position:relative">
-          <div id="dash-map" style="height:340px;width:100%;background:var(--bg)"></div>
-          <div style="position:absolute;top:10px;right:10px;z-index:1000;background:rgba(14,17,19,.82);border-radius:20px;padding:.28rem .65rem;font-size:.6rem;display:flex;align-items:center;gap:.55rem;pointer-events:none">
-            <span style="display:flex;align-items:center;gap:.28rem"><span style="width:8px;height:8px;border-radius:50%;background:#2dab60;opacity:.85"></span>High</span>
-            <span style="display:flex;align-items:center;gap:.28rem"><span style="width:8px;height:8px;border-radius:50%;background:#e88c00;opacity:.85"></span>Med</span>
-            <span style="display:flex;align-items:center;gap:.28rem"><span style="width:8px;height:8px;border-radius:50%;background:#cc3333;opacity:.85"></span>Low</span>
-            <span style="display:flex;align-items:center;gap:.28rem"><span style="width:8px;height:8px;border-radius:50%;background:#ff7800"></span>Job</span>
+        <!-- Areas across the network — simple tiles; expand into the full map on its own page -->
+        <div class="card" style="margin-bottom:.85rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem">
+            <div><div class="ct" style="margin:0">Areas across the network</div><div style="font-size:.72rem;color:var(--mu)">Tap an area for detail — or open the full map.</div></div>
+            <button class="btn btn-or btn-sm" onclick="dashFullMap()">🗺 Expand to full map</button>
           </div>
-          <div style="position:absolute;bottom:10px;left:10px;z-index:1000">
-            <button onclick="switchTab('pane-f-cap')" style="background:rgba(14,17,19,.82);color:var(--or);border:1px solid var(--or-g);border-radius:20px;padding:.25rem .65rem;font-size:.62rem;font-weight:700;cursor:pointer">Full map →</button>
-          </div>
+          <div id="dash-areas" class="cap-listgrid"></div>
         </div>
 
         <!-- Network stat cards -->
@@ -1936,8 +1931,8 @@ textarea.fi2{resize:vertical;min-height:70px}
             </div>
             <!-- Map / List view switch -->
             <div style="display:inline-flex;background:var(--p2);border:1.5px solid var(--ln);border-radius:22px;padding:3px">
-              <button id="cview-list" class="cap-role on" onclick="capSetView('list')">☰ List</button>
-              <button id="cview-map" class="cap-role" onclick="capSetView('map')">🗺 Map</button>
+              <button id="cview-map" class="cap-role on" onclick="capSetView('map')">🗺 Map</button>
+              <button id="cview-list" class="cap-role" onclick="capSetView('list')">☰ List</button>
             </div>
           </div>
         </div>
@@ -3176,7 +3171,7 @@ function switchTab(id){
   const p=document.getElementById(id);if(p)p.classList.add('on');
   const n=document.getElementById('ni-'+id.replace('pane-',''));if(n)n.classList.add('on');
   ct=id;
-  if(id==='pane-d-home')setTimeout(initDashMap,80);
+  if(id==='pane-d-home')setTimeout(renderDashAreas,80);
   if(id==='pane-f-cap')setTimeout(capBootPane,80);
   if(id==='pane-livejob')setTimeout(hafRenderLive,60);
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
@@ -3706,6 +3701,20 @@ document.getElementById('landing').style.display='flex';
 
 /* ── EXCHANGE DASHBOARD MAP ── */
 let dashMap=null;
+/* Dashboard area tiles — the simple default; expand opens the full map page (pane-f-cap) */
+function renderDashAreas(){
+  const el=document.getElementById('dash-areas');if(!el||typeof CAP_REGIONS==='undefined')return;
+  const order={hot:0,warm:1,cool:2};
+  const all=[...CAP_REGIONS].sort((a,b)=>order[a.tier]-order[b.tier]||b.drivers-a.drivers);
+  const dm={hot:['Hot demand','#9ec13c'],warm:['Warm','#f0b429'],cool:['Building','#4a90d9']};
+  el.innerHTML=all.map(z=>{const d=dm[z.tier]||dm.cool;return `<button class="cap-sec" onclick="dashOpenArea('${z.id}')" style="border-left-color:${z.colour}" onmouseover="this.style.borderColor='${z.colour}'" onmouseout="this.style.borderColor='var(--ln)'">
+      <div class="cap-sec-top"><span class="cap-sec-nm">${z.name}</span><span class="cap-sec-pill" style="background:${d[1]}22;color:${d[1]}">${d[0]}</span></div>
+      <div class="cap-sec-towns">${z.towns||z.cities}</div>
+      <div class="cap-sec-cta">View area →</div>
+    </button>`;}).join('');
+}
+function dashFullMap(){switchTab('pane-f-cap');setTimeout(()=>{try{capSetView('map');}catch(e){}},140);}
+function dashOpenArea(id){switchTab('pane-f-cap');setTimeout(()=>{try{capSetView('map');capSelect(id);}catch(e){}},220);}
 function initDashMap(){
   const el=document.getElementById('dash-map');
   if(!el||typeof L==='undefined')return;
@@ -4129,8 +4138,8 @@ function capRenderSections(){
   if(cl)cl.textContent=L.length+' regions';
   if(cr)cr.textContent=R.length+' regions';
 }
-/* ── VIEW: plain list/area tiles (default, easiest) vs the full interactive map ── */
-let capView='list';
+/* ── VIEW: the full-map page opens on the MAP (tiles live on the dashboard); List toggle brings the tiles back here too ── */
+let capView='map';
 function capSetView(v){
   capView=v;
   document.getElementById('cview-map').classList.toggle('on',v==='map');
