@@ -2155,8 +2155,14 @@ const EXCH_JOBS={
 };
 
 let _exchRadius='any';
+// Keep the driver's board local — remember their postcode + chosen radius across sessions
+function exchGetPC(){try{return localStorage.getItem('haf_exch_pc')||''}catch(e){return''}}
+function exchSavePC(v){try{localStorage.setItem('haf_exch_pc',v||'')}catch(e){}}
+function exchGetR(){try{return localStorage.getItem('haf_exch_r')||''}catch(e){return''}}
+function exchSaveR(r){try{localStorage.setItem('haf_exch_r',String(r))}catch(e){}}
 function setExchRadius(r,btn){
   _exchRadius=r;
+  exchSaveR(r);
   document.querySelectorAll('#exch-rpills .cap-pill').forEach(p=>p.classList.remove('active'));
   if(btn)btn.classList.add('active');
   filterExchJobs();
@@ -2164,38 +2170,58 @@ function setExchRadius(r,btn){
 window._exchSeq=0;
 async function filterExchJobs(){
   const pcVal=(document.getElementById('exch-pc')||{}).value||'';
+  exchSavePC(pcVal.trim());
+  const role=currentAcc?currentAcc.demo_role:'';
+  const driverMode=role==='driver';
+  const jobLabel=driverMode?'jobs':role==='freight'?'loads':'deliveries';
   const r=_exchRadius;
+  const list=document.getElementById('exch-job-list');
   const cards=Array.from(document.querySelectorAll('#exch-job-list [data-pc]'));
   const total=cards.length;
-  const active=r!=='any'&&pcVal.trim().length>=2;
+  const hasPC=pcVal.trim().length>=2;
   const seq=++window._exchSeq;
   let userPt=null;
-  if(active){userPt=await pcLookup(pcVal);if(userPt==='ERR')userPt=null;if(seq!==window._exchSeq)return;}
-  const jobPts=active?await Promise.all(cards.map(c=>pcLookup(c.getAttribute('data-pc')))):[];
+  if(hasPC){userPt=await pcLookup(pcVal);if(userPt==='ERR')userPt=null;if(seq!==window._exchSeq)return;}
+  const jobPts=hasPC?await Promise.all(cards.map(c=>pcLookup(c.getAttribute('data-pc')))):[];
   if(seq!==window._exchSeq)return;
+  // distance per card (road-adjusted), then radius filter + optional nearest-first
+  const rows=cards.map((card,i)=>{
+    const jp=jobPts[i];
+    const d=hasPC?((userPt&&jp&&jp!=='ERR')?hav(userPt,jp)*1.25:pcDist(pcVal.trim(),card.getAttribute('data-pc'))):null;
+    return {card,d};
+  });
   let shown=0;
-  cards.forEach((card,i)=>{
-    let vis=true;
-    if(active){
-      const jp=jobPts[i];
-      const d=(userPt&&jp&&jp!=='ERR')?hav(userPt,jp)*1.25:pcDist(pcVal.trim(),card.getAttribute('data-pc'));
-      vis=d<=r;
-    }
+  rows.forEach(({card,d})=>{
+    const vis=(r==='any'||!hasPC||d==null)?true:(d<=r);
     card.style.display=vis?'':'none';
     if(vis)shown++;
+    // show "how far from you" so drivers can gauge a job at a glance
+    const badge=card.querySelector('.exch-dist');
+    if(badge)badge.textContent=(driverMode&&hasPC&&d!=null)?('· ~'+Math.round(d)+' mi away'):'';
   });
+  // nearest-first for drivers so local work floats to the top
+  if(driverMode&&hasPC&&list){
+    rows.slice().sort((a,b)=>((a.d==null?1e9:a.d)-(b.d==null?1e9:b.d))).forEach(({card})=>list.appendChild(card));
+  }
   const ct=document.getElementById('exch-count');
   if(ct){
-    if(!active){ct.textContent=total+' jobs';}
+    if(!hasPC){ct.textContent=total+' '+jobLabel;}
     else if(userPt===null&&pcVal.trim().length>=5){ct.textContent='Postcode not recognised';}
+    else if(r==='any'){ct.textContent='Nearest first · '+total+' '+jobLabel+(userPt&&userPt.area?' · from '+userPt.area:'');}
     else{ct.textContent=shown+' of '+total+' within '+r+' mi of '+pcVal.trim().toUpperCase()+(userPt&&userPt.area?' · '+userPt.area:'');}
   }
+  const inner=document.getElementById('exch-count-inner');
+  if(inner&&hasPC&&r!=='any')inner.textContent=shown+' '+jobLabel;
 }
 
 function renderExchange(){
   if(!currentAcc)return;
   const role=currentAcc.demo_role;
-  _exchRadius='any';
+  // Driver-first: keep the PLNA board LOCAL by default so drivers don't see jobs miles away.
+  // Remember their choice; other roles stay on "Any".
+  const _savedR=exchGetR();
+  const _savedPC=exchGetPC();
+  _exchRadius = _savedR!=='' ? (_savedR==='any'?'any':Number(_savedR)) : (role==='driver'?25:'any');
   let h='';
   // Ticker
   h+=`<div style="background:#0a0c0e;border-radius:var(--rs);padding:.55rem 1.1rem;margin-bottom:1.1rem;overflow-x:auto;white-space:nowrap;display:flex;align-items:center;gap:.55rem">
@@ -2219,17 +2245,16 @@ function renderExchange(){
   </div>`;
   // Area filter bar
   const jobLabel=role==='driver'?'jobs':role==='freight'?'loads':'deliveries';
+  const _pills=[['any','Any'],[10,'10 mi'],[25,'25 mi'],[50,'50 mi'],[100,'100 mi']];
+  const _pillsHtml=_pills.map(([v,lbl])=>`<button class="cap-pill${String(_exchRadius)===String(v)?' active':''}" onclick="setExchRadius(${v==='any'?"'any'":v},this)">${lbl}</button>`).join('');
+  const _barTitle=role==='driver'?'Keep jobs local to you':'Filter by area';
+  const _barHint=role==='driver'?`<div style="font-size:.7rem;color:var(--mu);margin-bottom:.6rem">Set your postcode once — we'll keep your board local and remember it, so you only see work near you.</div>`:'';
   h+=`<div class="card" style="margin-bottom:.85rem">
-    <div class="ct" style="margin-bottom:.7rem">Filter by area</div>
+    <div class="ct" style="margin-bottom:.35rem">${_barTitle}</div>
+    ${_barHint}
     <div style="display:flex;align-items:center;gap:.55rem;flex-wrap:wrap">
-      <input id="exch-pc" class="fi2" placeholder="Your postcode e.g. M1" style="max-width:150px;flex-shrink:0;padding:.42rem .75rem;font-size:.82rem" maxlength="8" autocomplete="off" oninput="filterExchJobs()">
-      <div id="exch-rpills" style="display:flex;gap:.3rem;flex-wrap:wrap">
-        <button class="cap-pill active" onclick="setExchRadius('any',this)">Any</button>
-        <button class="cap-pill" onclick="setExchRadius(10,this)">10 mi</button>
-        <button class="cap-pill" onclick="setExchRadius(25,this)">25 mi</button>
-        <button class="cap-pill" onclick="setExchRadius(50,this)">50 mi</button>
-        <button class="cap-pill" onclick="setExchRadius(100,this)">100 mi</button>
-      </div>
+      <input id="exch-pc" class="fi2" value="${(_savedPC||'').replace(/"/g,'')}" placeholder="Your postcode e.g. M1" style="max-width:150px;flex-shrink:0;padding:.42rem .75rem;font-size:.82rem" maxlength="8" autocomplete="off" oninput="filterExchJobs()">
+      <div id="exch-rpills" style="display:flex;gap:.3rem;flex-wrap:wrap">${_pillsHtml}</div>
       <span id="exch-count" style="font-size:.7rem;color:var(--mu);white-space:nowrap;margin-left:auto"></span>
     </div>
   </div>`;
@@ -2242,7 +2267,7 @@ function renderExchange(){
       jh+=`<div class="jc" data-pc="${j.pc}">
         <div class="jdot" style="background:var(--gn)"></div>
         <div class="jm">
-          <div class="jref">${j.ref} · ${isDirect?'<span style="color:var(--or)">Direct invite</span>':'Open job'} · ${j.time}</div>
+          <div class="jref">${j.ref} · ${isDirect?'<span style="color:var(--or)">Direct invite</span>':'Open job'} · ${j.time}<span class="exch-dist" style="color:var(--gn);font-weight:700;margin-left:.4rem"></span></div>
           <div class="jroute">${j.route}</div>
           <div class="jdet">${j.det}</div>
         </div>
@@ -2315,6 +2340,8 @@ function renderExchange(){
   // init filter count
   const ct=document.getElementById('exch-count');
   if(ct){const n=document.querySelectorAll('#exch-job-list [data-pc]').length;ct.textContent=n+' '+jobLabel;}
+  // Apply any saved/default local filter straight away (nearest-first, distance badges, radius)
+  if(_savedPC||role==='driver')setTimeout(filterExchJobs,20);
   setTimeout(initExchMap,80);
 }
 
