@@ -1942,6 +1942,26 @@ textarea.fi2{resize:vertical;min-height:70px}
           </div>
         </div>
 
+        <style>
+        #cap-driverwork .cw-secttl{font-size:.8rem;font-weight:800;color:var(--tx);margin:.5rem 0 .4rem}
+        #cap-driverwork .cw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.55rem}
+        .cap-workcard{text-align:left;background:var(--p2);border:1.5px solid var(--ln);border-radius:14px;padding:.7rem .8rem;cursor:pointer;transition:all .13s;color:var(--tx);display:flex;flex-direction:column;gap:.28rem;font:inherit}
+        .cap-workcard:hover{border-color:var(--or);transform:translateY(-1px)}
+        .cap-workcard.taken{opacity:.6;border-color:#2dab60;pointer-events:none}
+        .cap-workcard .cw-top{display:flex;align-items:center;justify-content:space-between}
+        .cap-workcard .cw-tag{font-size:.56rem;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--or);background:var(--or-d);border:1px solid var(--or-g);border-radius:20px;padding:.12rem .5rem}
+        .cap-workcard .cw-tag.home{color:#39d98a;background:rgba(45,171,96,.12);border-color:rgba(45,171,96,.4)}
+        .cap-workcard .cw-pay{font-weight:900;font-size:1rem}
+        .cap-workcard .cw-route{font-weight:800;font-size:.9rem}
+        .cap-workcard .cw-arw{color:var(--or)}
+        .cap-workcard .cw-meta{font-size:.68rem;color:var(--mu)}
+        .cap-workcard .cw-accept{margin-top:.2rem;font-size:.72rem;font-weight:800;color:var(--or)}
+        </style>
+        <!-- DRIVER-FIRST: simple work panel (drivers only) -->
+        <div id="cap-driverwork" style="display:none;margin-bottom:1rem"></div>
+
+        <!-- Map machinery — hidden for drivers until they tap Full map view -->
+        <div id="cap-mapzone">
         <!-- Filter row above the map -->
         <div class="cap-filters">
           <div class="cap-f cap-f-pcwrap">
@@ -2033,6 +2053,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 
         <!-- Region detail panel (opens when a section is chosen) -->
         <div id="cap-detail" style="display:none;margin-bottom:1rem"></div>
+        </div><!-- /cap-mapzone -->
 
         <!-- Relay station leaderboard (driver view only) -->
         <div class="card" id="cap-lb-card" style="margin-top:1rem">
@@ -3152,7 +3173,7 @@ function switchTab(id){
   const n=document.getElementById('ni-'+id.replace('pane-',''));if(n)n.classList.add('on');
   ct=id;
   if(id==='pane-d-home')setTimeout(initDashMap,80);
-  if(id==='pane-f-cap')setTimeout(initCapMap,80);
+  if(id==='pane-f-cap')setTimeout(capBootPane,80);
   if(id==='pane-livejob')setTimeout(hafRenderLive,60);
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
 }
@@ -3804,23 +3825,82 @@ const IRELAND_FEATURE={type:'Feature',properties:{region:'Ireland'},geometry:{ty
 CAP_REGIONS.forEach(z=>z.side=CAP_SIDE_L.has(z.id)?'l':'r');
 
 let _capSel=null;
+/* ── DRIVER-FIRST WORK VIEW — simple job actions; map stays behind "Full map view" ── */
+let capMapOpen=false;
+const CAP_DRIVER_BASE={name:'Sheffield (S1)'};
+const CAP_WORK_FROM=[
+ {id:'w1',from:'Sheffield S1',to:'Leeds LS1',mi:'38 mi',pay:'£86',veh:'LWB',when:'Today 13:30',tag:'Same-day'},
+ {id:'w2',from:'Sheffield S9',to:'Manchester M60',mi:'41 mi',pay:'£94',veh:'LWB',when:'Today 15:00',tag:'Urgent'},
+ {id:'w3',from:'Rotherham S60',to:'Nottingham NG1',mi:'36 mi',pay:'£78',veh:'SWB',when:'Tomorrow 09:00',tag:'Flexible'}
+];
+const CAP_WORK_HOME=[
+ {id:'h1',from:'Hull HU1',to:'Sheffield S1',mi:'58 mi',pay:'£118',veh:'Luton',when:'Today 16:30',tag:'Backload'},
+ {id:'h2',from:'Leeds LS1',to:'Rotherham S60',mi:'33 mi',pay:'£72',veh:'LWB',when:'Today 17:00',tag:'Near base'}
+];
+function capIsDriver(){return (window.HAF_ROLE||'').toLowerCase()==='driver';}
+function capBootPane(){
+  if(capIsDriver()){
+    const dw=document.getElementById('cap-driverwork');if(dw){dw.style.display='';capRenderDriverWork();}
+    const sub=document.getElementById('cap-sub');if(sub)sub.textContent='Accept a job from your base, or a backload to head home. Map’s one tap away.';
+    const mz=document.getElementById('cap-mapzone');if(mz)mz.style.display='none';
+    const lb=document.getElementById('cap-lb-card');if(lb)lb.style.display='none';
+    capMapOpen=false;
+  }else{
+    const dw=document.getElementById('cap-driverwork');if(dw)dw.style.display='none';
+    const mz=document.getElementById('cap-mapzone');if(mz)mz.style.display='';
+    capMapOpen=true;initCapMap();
+  }
+}
+function capRenderDriverWork(){
+  const el=document.getElementById('cap-driverwork');if(!el)return;
+  const base=CAP_DRIVER_BASE;
+  const card=(j,home)=>`<button class="cap-workcard" id="cw-${j.id}" onclick="capAcceptWork('${j.id}')">
+     <div class="cw-top"><span class="cw-tag${home?' home':''}">${j.tag}</span><span class="cw-pay">${j.pay}</span></div>
+     <div class="cw-route">${j.from} <span class="cw-arw">→</span> ${j.to}</div>
+     <div class="cw-meta">${j.when} · ${j.veh} · ${j.mi}${home?` · <b style="color:#39d98a">gets you home</b>`:''}</div>
+     <div class="cw-accept">Accept →</div>
+   </button>`;
+  el.innerHTML=`
+   <div class="card" style="padding:1rem 1.1rem">
+     <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.35rem">
+       <div><div class="ct" style="margin:0">Your work</div><div style="font-size:.72rem;color:var(--mu)">Base: <b style="color:var(--tx)">${base.name}</b> · <a onclick="capChangeBase()" style="color:var(--or);cursor:pointer">change</a></div></div>
+       <button id="cap-mapviewbtn" class="btn btn-gh btn-sm" onclick="capToggleMapZone()">🗺 Full map view</button>
+     </div>
+     <div class="cw-secttl">Jobs from your base</div>
+     <div class="cw-grid">${CAP_WORK_FROM.map(j=>card(j,false)).join('')}</div>
+     <div class="cw-secttl" style="margin-top:.8rem">Heading home <span style="font-weight:500;color:var(--mu)">— backloads that bring you back toward ${base.name}</span></div>
+     <div class="cw-grid">${CAP_WORK_HOME.map(j=>card(j,true)).join('')}</div>
+     <div style="font-size:.66rem;color:var(--mu);margin-top:.7rem">Sample jobs — the live feed switches on with the WhatsApp number. Accept adds the job to your live jobs.</div>
+   </div>`;
+}
+function capChangeBase(){alert('Set your base postcode — coming with the live driver feed. For now your base is '+CAP_DRIVER_BASE.name+'.');}
+function capAcceptWork(id){
+  const b=document.getElementById('cw-'+id);if(!b)return;
+  b.classList.add('taken');
+  const a=b.querySelector('.cw-accept');if(a){a.textContent='✓ Accepted — added to your live jobs';a.style.color='#2dab60';}
+}
+function capToggleMapZone(open){
+  capMapOpen=(open===undefined)?!capMapOpen:open;
+  const mz=document.getElementById('cap-mapzone');if(mz)mz.style.display=capMapOpen?'':'none';
+  const btn=document.getElementById('cap-mapviewbtn');if(btn)btn.textContent=capMapOpen?'▴ Hide map':'🗺 Full map view';
+  if(capMapOpen){initCapMap();capSetRole('driver');setTimeout(()=>{try{if(capMap)capMap.invalidateSize();}catch(e){}},60);}
+  else{const lb=document.getElementById('cap-lb-card');if(lb)lb.style.display='none';}
+}
 function initCapMap(){
   const el=document.getElementById('cap-map');
   if(!el||typeof L==='undefined')return;
   if(capMap){capMap.invalidateSize();return;}
   /* Real base map (sea, land, roads) with transparent region overlays on top */
-  capMap=L.map('cap-map',{zoomControl:false,scrollWheelZoom:true,attributionControl:false,dragging:true,doubleClickZoom:true,boxZoom:false,minZoom:5,maxZoom:11});
-  /* street/road basemap — shows water, coastlines and all of Ireland underneath */
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
-    subdomains:'abcd',maxZoom:19,detectRetina:true,crossOrigin:true
-  }).addTo(capMap);
+  capMap=L.map('cap-map',{zoomControl:false,scrollWheelZoom:true,attributionControl:false,dragging:true,doubleClickZoom:true,boxZoom:false,minZoom:5,maxZoom:11,maxBoundsViscosity:1.0});
+  /* clean infographic look: flat sea background + coloured UK/Ireland zones only (no other countries) */
+  el.style.background='#12242e';
   /* zoom in/out buttons — bottom-right so they clear the Back button and legend */
   L.control.zoom({position:'bottomright'}).addTo(capMap);
   capRenderSections();
 
   /* keep the island of Britain + all of Ireland in frame, and stop the map drifting off into open sea */
-  const UK_VIEW=L.latLngBounds([49.6,-11.2],[59.6,2.2]);
-  capMap.setMaxBounds(UK_VIEW.pad(0.25));
+  const UK_VIEW=L.latLngBounds([49.7,-11.2],[59.5,2.0]);
+  capMap.setMaxBounds(UK_VIEW);
 
   if(typeof window.UK_GEO==='undefined'){
     /* boundary file didn't load — keep the page usable via the side panels */
@@ -3829,7 +3909,7 @@ function initCapMap(){
     /* add the Republic of Ireland shape once, so it draws as its own region */
     if(!window.UK_GEO.features.some(f=>f.properties.region==='Ireland'))window.UK_GEO.features.push(IRELAND_FEATURE);
     capMap._zoneLayers={};
-    const BASE=.3,HOV=.5;capMap._base=BASE;
+    const BASE=.82,HOV=1;capMap._base=BASE;
     capMap._geo=L.geoJSON(window.UK_GEO,{
       style:(f)=>{const z=CAP_BY_GEO[f.properties.region];return{fillColor:z?z.colour:'#888',color:z?'#334a57':'#0e1113',weight:1.2,fillOpacity:z?BASE:.1,lineJoin:'round'};},
       onEachFeature:(f,layer)=>{const z=CAP_BY_GEO[f.properties.region];if(!z)return;
@@ -3908,7 +3988,7 @@ function capSelect(id){
   _capSel=id;
   /* highlight + zoom into the chosen region */
   if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>{
-    capMap._zoneLayers[k].setStyle({fillOpacity:k===id?.58:.12,weight:k===id?3:1.2,color:k===id?'#0e1113':'#334a57',fillColor:k===id?z.colour:CAP_REGIONS.find(r=>r.id===k).colour});
+    capMap._zoneLayers[k].setStyle({fillOpacity:k===id?.95:.5,weight:k===id?3:1.2,color:k===id?'#0e1113':'#334a57',fillColor:k===id?z.colour:CAP_REGIONS.find(r=>r.id===k).colour});
     if(k===id&&capMap._zoneLayers[k].bringToFront)capMap._zoneLayers[k].bringToFront();
   });
   if(capMap&&capMap._zoneLayers&&capMap._zoneLayers[id]&&capMap._zoneLayers[id].getBounds){
