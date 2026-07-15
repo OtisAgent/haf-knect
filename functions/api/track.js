@@ -49,15 +49,10 @@ export async function onRequestPost({ request, env }) {
   } catch (e) { return j({ ok: false, error: 'upstream' }, 502); }
   if (!job) return j({ ok: false, error: 'bad_token' }, 401);
   const nowIso = new Date().toISOString();
-  const acc = isFinite(Number(b.acc)) ? Number(b.acc) : null;
-  /* append to the journey trail (breadcrumb) — best-effort, never blocks live tracking */
-  try {
-    await fetch(env.SUPA_URL + '/rest/v1/track_history', {
-      method: 'POST',
-      headers: { apikey: env.SUPA_KEY, Authorization: 'Bearer ' + env.SUPA_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-      body: JSON.stringify({ job, token, lat, lng, acc, ts: nowIso })
-    });
-  } catch (e) { /* trail is non-critical to live tracking */ }
+  /* NOTE (Brent, 2026-07-15): movement-trail retention is OFF for now — we use the
+     job's collection/delivery postcodes for internal planning, not a GPS history.
+     Live position below is transient (customer tracker only) and cleared after the job.
+     Re-enable the track_history append here only after a DPIA + sign-off. */
   const row = {
     job, lat, lng,
     kind: b.kind === 'pin' ? 'pin' : 'live',
