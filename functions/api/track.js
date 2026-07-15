@@ -48,11 +48,21 @@ export async function onRequestPost({ request, env }) {
     job = Array.isArray(lrows) && lrows[0] && lrows[0].job;
   } catch (e) { return j({ ok: false, error: 'upstream' }, 502); }
   if (!job) return j({ ok: false, error: 'bad_token' }, 401);
+  const nowIso = new Date().toISOString();
+  const acc = isFinite(Number(b.acc)) ? Number(b.acc) : null;
+  /* append to the journey trail (breadcrumb) — best-effort, never blocks live tracking */
+  try {
+    await fetch(env.SUPA_URL + '/rest/v1/track_history', {
+      method: 'POST',
+      headers: { apikey: env.SUPA_KEY, Authorization: 'Bearer ' + env.SUPA_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ job, token, lat, lng, acc, ts: nowIso })
+    });
+  } catch (e) { /* trail is non-critical to live tracking */ }
   const row = {
     job, lat, lng,
     kind: b.kind === 'pin' ? 'pin' : 'live',
     label: b.label ? String(b.label).slice(0, 80) : null,
-    ts: new Date().toISOString()
+    ts: nowIso
   };
   try {
     const r = await fetch(env.SUPA_URL + '/rest/v1/live_pos?on_conflict=job', {

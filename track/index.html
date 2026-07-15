@@ -69,17 +69,16 @@
       <div class="coords" id="coords"></div>
     </div>
 
-    <div class="consent">By tapping <b>Start</b> you consent to sharing your live location for <b id="jobf">this job</b> while this screen is open. <a href="#" id="terms-toggle">Location terms &amp; privacy</a></div>
+    <div class="consent">By tapping <b>Start</b> you consent to HAF recording and sharing your location for <b id="jobf">this delivery</b> while this screen is open. <a href="#" id="terms-toggle">Location terms &amp; privacy</a></div>
     <button class="btn btn-go" id="btn">Start sharing my location</button>
     <details class="terms" id="terms">
       <summary>Location sharing — terms &amp; privacy</summary>
       <div class="terms-body">
-        <p><b>What we collect:</b> your device’s approximate GPS location, only while this screen is open and sharing is switched on.</p>
-        <p><b>Why:</b> so the customer and HAF can follow this delivery in real time and confirm it was completed.</p>
-        <p><b>Who sees it:</b> only the customer/business for this job and HAF. You appear by your driver name — <b>your phone number is never shown</b>.</p>
-        <p><b>How long:</b> your live position is kept only for this job and is removed once the delivery is completed. We do not build a history of your movements.</p>
-        <p><b>Your control:</b> sharing is voluntary. Tap <b>Stop</b>, or close this page, at any time to end it — nothing is tracked while it is off.</p>
-        <p><b>Data controller:</b> HAF Logistics Ltd (useHAF). Questions or to have your data erased: <a href="mailto:privacy@usehaf.co.uk">privacy@usehaf.co.uk</a>. By tapping Start you confirm you have read and agree to these terms.</p>
+        <p><b>What we record:</b> your device’s location <b>throughout the delivery</b> — a journey trail, with accuracy — captured while this screen is open and sharing is on. This happens only while you are on an active HAF job, never in your own time.</p>
+        <p><b>Live sharing:</b> your current position is shown to the customer/business for this job so they can follow it. You appear by your driver name — <b>your phone number is never shown</b>.</p>
+        <p><b>Internal use &amp; retention:</b> HAF keeps the journey trail to improve routing, ETAs, relay planning and the wider network — used internally, and in aggregated form where possible. It is not sold, and not shared with anyone beyond this job’s customer. Trails are kept for up to <b>12 months</b>, then deleted.</p>
+        <p><b>Your control &amp; rights:</b> sharing is voluntary — tap <b>Stop</b> or close this page at any time to end it; nothing is recorded while it is off. You can request a copy of your data, or have it erased, at any time.</p>
+        <p><b>Data controller:</b> HAF Logistics Ltd (useHAF). Lawful basis: carrying out your delivery work and HAF’s legitimate interest in running and improving the network. Questions, access or erasure: <a href="mailto:privacy@usehaf.co.uk">privacy@usehaf.co.uk</a>. By tapping Start you confirm you have read and agree to these terms.</p>
       </div>
     </details>
   </div>
@@ -120,10 +119,10 @@
     if(!on)el('coords').textContent='';
   }
 
-  function send(lat,lng){
+  function send(lat,lng,acc){
     if(sending)return; sending=true;
     fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({token:TOKEN,lat:lat,lng:lng,kind:'live',label:NAME||'Driver'})})
+      body:JSON.stringify({token:TOKEN,lat:lat,lng:lng,acc:acc,kind:'live',label:NAME||'Driver'})})
       .then(function(r){return r.json();})
       .then(function(d){ if(!d||!d.ok){showErr('Couldn’t reach the tracker just now — retrying.');} else {clearErr();} })
       .catch(function(){showErr('No connection — will keep trying as you move.');})
@@ -134,7 +133,7 @@
     var lat=p.coords.latitude, lng=p.coords.longitude;
     el('coords').textContent=lat.toFixed(4)+', '+lng.toFixed(4)+'  ·  ±'+Math.round(p.coords.accuracy)+'m';
     var now=Date.now();
-    if(now-lastSend>4000){ lastSend=now; send(lat,lng); }
+    if(now-lastSend>4000){ lastSend=now; send(lat,lng,Math.round(p.coords.accuracy)); }
   }
   function onErr(e){
     showErr(e.code===1?'Location permission was blocked. Turn it on for this site and tap Start again.'
