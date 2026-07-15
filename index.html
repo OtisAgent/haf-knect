@@ -3892,8 +3892,15 @@ function initCapMap(){
   if(capMap){capMap.invalidateSize();return;}
   /* Real base map (sea, land, roads) with transparent region overlays on top */
   capMap=L.map('cap-map',{zoomControl:false,scrollWheelZoom:true,attributionControl:false,dragging:true,doubleClickZoom:true,boxZoom:false,minZoom:5,maxZoom:11,maxBoundsViscosity:1.0});
-  /* clean infographic look: flat sea background + coloured UK/Ireland zones only (no other countries) */
-  el.style.background='#12242e';
+  /* Real UK map underneath: sea, land, roads and the actual town/city names.
+     Base tiles have NO labels; the coloured regions sit over them; then a labels-only
+     layer rides ABOVE the colour so Sheffield/Leeds/etc stay crisp through the wash. */
+  el.style.background='#cfe7f3'; /* sea tone while tiles load */
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,detectRetina:true,crossOrigin:true}).addTo(capMap);
+  capMap.createPane('cap-labels');
+  capMap.getPane('cap-labels').style.zIndex=450;            /* above region polygons (overlayPane=400) */
+  capMap.getPane('cap-labels').style.pointerEvents='none';  /* never block region hover/click */
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,detectRetina:true,pane:'cap-labels'}).addTo(capMap);
   /* zoom in/out buttons — bottom-right so they clear the Back button and legend */
   L.control.zoom({position:'bottomright'}).addTo(capMap);
   capRenderSections();
@@ -3909,7 +3916,7 @@ function initCapMap(){
     /* add the Republic of Ireland shape once, so it draws as its own region */
     if(!window.UK_GEO.features.some(f=>f.properties.region==='Ireland'))window.UK_GEO.features.push(IRELAND_FEATURE);
     capMap._zoneLayers={};
-    const BASE=.82,HOV=1;capMap._base=BASE;
+    const BASE=.4,HOV=.62;capMap._base=BASE; /* see-through so the real towns + water read underneath */
     capMap._geo=L.geoJSON(window.UK_GEO,{
       style:(f)=>{const z=CAP_BY_GEO[f.properties.region];return{fillColor:z?z.colour:'#888',color:z?'#334a57':'#0e1113',weight:1.2,fillOpacity:z?BASE:.1,lineJoin:'round'};},
       onEachFeature:(f,layer)=>{const z=CAP_BY_GEO[f.properties.region];if(!z)return;
@@ -3988,7 +3995,7 @@ function capSelect(id){
   _capSel=id;
   /* highlight + zoom into the chosen region */
   if(capMap&&capMap._zoneLayers)Object.keys(capMap._zoneLayers).forEach(k=>{
-    capMap._zoneLayers[k].setStyle({fillOpacity:k===id?.95:.5,weight:k===id?3:1.2,color:k===id?'#0e1113':'#334a57',fillColor:k===id?z.colour:CAP_REGIONS.find(r=>r.id===k).colour});
+    capMap._zoneLayers[k].setStyle({fillOpacity:k===id?.6:.28,weight:k===id?3:1.2,color:k===id?'#0e1113':'#334a57',fillColor:k===id?z.colour:CAP_REGIONS.find(r=>r.id===k).colour});
     if(k===id&&capMap._zoneLayers[k].bringToFront)capMap._zoneLayers[k].bringToFront();
   });
   if(capMap&&capMap._zoneLayers&&capMap._zoneLayers[id]&&capMap._zoneLayers[id].getBounds){
