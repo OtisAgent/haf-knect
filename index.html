@@ -275,6 +275,13 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .cr:last-child{border-bottom:none}
 .ck{color:var(--mu)}.cv{font-weight:600}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+/* Network Pools what-if controls */
+.np-in{width:56px;background:var(--p2);border:1px solid var(--ln);border-radius:6px;color:var(--tx);font-size:.8rem;padding:.2rem .35rem;text-align:right;font-family:var(--fn)}
+.np-in:focus{outline:none;border-color:var(--or)}
+.np-bar{height:7px;border-radius:999px;background:var(--p2);border:1px solid var(--ln);overflow:hidden;margin:.25rem 0 .45rem}
+.np-bar i{display:block;height:100%;background:var(--or)}
+.np-btn{font-size:.72rem;font-weight:700;background:var(--p2);border:1px solid var(--ln);color:var(--mu);border-radius:7px;padding:.3rem .65rem;cursor:pointer}
+.np-btn:hover{color:var(--or);border-color:var(--or)}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.85rem}
 @media(max-width:680px){.g2,.g3{grid-template-columns:1fr}}
 
@@ -2341,10 +2348,12 @@ textarea.fi2{resize:vertical;min-height:70px}
       <div class="tp" id="pane-pools">
         <h1 class="pt">Network Pools</h1><p class="ps">Trial-phase pooling — share of HAF margin routed back into the network. Admin only. Figures from the demo pricing queue.</p>
         <div class="kg" id="pool-kpis"></div>
+        <div class="card"><div class="ct">Job rate levers <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">what-if sandbox · live pricing untouched</span></div><div id="pool-levers"></div></div>
         <div class="g2">
-          <div class="card"><div class="ct">Trial split — 25% of margin</div><div id="pool-trial"></div></div>
+          <div class="card"><div class="ct">Your split — set the %</div><div id="pool-trial"></div></div>
           <div class="card"><div class="ct">If production rules applied — 5% locked</div><div id="pool-prod"></div><div class="cr"><span class="ck" style="color:var(--mu)">Same jobs, both models computed on every one — this is the who-would-get-what audit.</span></div></div>
         </div>
+        <div class="card"><div class="ct">Relay &amp; storage by zone <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">modelled month · demo volumes through the live engine</span></div><div id="pool-zones"></div></div>
         <div class="card"><div class="ct">How it works</div><div class="cr"><span class="ck">Trial phase</span><span class="cv">25% of HAF margin routed back: affiliate 7 · driver 7 · freight 6 · relay &amp; storage 5</span></div><div class="cr"><span class="ck">Production phase</span><span class="cv">locks to 5%: driver 2.5 · relay &amp; storage 2.5 (after builder criteria)</span></div><div class="cr"><span class="ck">Visibility</span><span class="cv">pool data lives on this tab and the owner Network Overview only — never on order screens</span></div></div>
       </div>
 
@@ -4419,7 +4428,9 @@ function xDirectAccept(btn,ref,route,rate){
 </script>
 <script src="admin/pricing-matrix-v3.js"></script>
 <script>
-/* ── Network Pools tab (Super Admin only) — same V3 engine + demo queue as the owner Network Overview ── */
+/* ── Network Pools tab (Super Admin only) — interactive what-if sandbox (Brent 2026-07-20).
+   Rate levers + editable pool % + relay-by-zone, all through the live V3 engine.
+   Sandbox only: live pricing, real orders and every other screen stay untouched. ── */
 (function(){
 if(typeof HAFPricingMatrix==='undefined')return;
 const PM=HAFPricingMatrix;
@@ -4430,27 +4441,86 @@ const DEMO=[
   {ref:'HAF-Q7384',miles:45,vehicleCode:'MWB_VAN',jobTypeCode:'GROUPAGE',plnaTier:'FREE',knectTier:'PAID',weight:'STANDARD',handling:'KERBSIDE'},
   {ref:'HAF-Q7385',miles:22,vehicleCode:'SMALL_VAN',jobTypeCode:'STD_SAMEDAY',plnaTier:'FREE',knectTier:'FREE',weight:'STANDARD',handling:'KERBSIDE',isDirectBooking:true,directBookingsUsedThisMonth:1}
 ];
+const ZONES=[
+  {zone:'London',jobs:140,avgMiles:14},{zone:'South East',jobs:95,avgMiles:38},
+  {zone:'North West',jobs:85,avgMiles:34},{zone:'West Midlands',jobs:75,avgMiles:32},
+  {zone:'Yorkshire and The Humber',jobs:70,avgMiles:36},{zone:'East Midlands',jobs:55,avgMiles:35},
+  {zone:'Eastern',jobs:50,avgMiles:40},{zone:'South West',jobs:45,avgMiles:44},
+  {zone:'Scotland',jobs:40,avgMiles:48},{zone:'North East',jobs:35,avgMiles:30},
+  {zone:'Wales',jobs:30,avgMiles:42},{zone:'Northern Ireland',jobs:15,avgMiles:28}
+];
 const LBL={affiliate:'Affiliate pool',driverPool:'Driver pool',freightPool:'Freight pool',relayStorage:'Relay & storage'};
 const money=n=>'£'+(Math.round(n*100)/100).toFixed(2);
-let marginT=0,tT=0,pT=0;const tBy={},pBy={};
-DEMO.forEach(o=>{
-  const r=PM.price(Object.assign({},o,{operator:'admin'}));
-  marginT+=r.money.hafMarginGbp;
-  tT+=r.pools.comparison.trial.totalGbp;pT+=r.pools.comparison.production.totalGbp;
-  Object.keys(r.pools.comparison.trial.byPool).forEach(k=>tBy[k]=(tBy[k]||0)+r.pools.comparison.trial.byPool[k]);
-  Object.keys(r.pools.comparison.production.byPool).forEach(k=>pBy[k]=(pBy[k]||0)+r.pools.comparison.production.byPool[k]);
-});
-const kp=document.getElementById('pool-kpis');
-if(kp)kp.innerHTML=
-  '<div class="kc"><div class="kc-l">Routed back (trial)</div><div class="kc-v or">'+money(tT)+'</div><div class="kc-d">25% of HAF margin</div></div>'+
-  '<div class="kc"><div class="kc-l">HAF margin (queue)</div><div class="kc-v">'+money(marginT)+'</div><div class="kc-d">'+DEMO.length+' demo jobs</div></div>'+
-  '<div class="kc"><div class="kc-l">HAF net after pools</div><div class="kc-v gn">'+money(marginT-tT)+'</div><div class="kc-d">trial phase</div></div>'+
-  '<div class="kc"><div class="kc-l">Production would route</div><div class="kc-v">'+money(pT)+'</div><div class="kc-d">5% locked · comparison</div></div>';
+const round1=n=>Math.round(n*10)/10;
+const WI=Object.assign({},PM.config.pools.trial.split);
+const RATE={baseMult:1,marginDelta:0};
+const lever=o=>Object.assign({},o,{baseRateMult:RATE.baseMult,marginDeltaPct:RATE.marginDelta,operator:'pool-sandbox'});
+let ZM=null;
+function zoneMargins(){
+  if(ZM)return ZM;
+  ZM=ZONES.map(z=>{
+    const mix=[
+      {miles:Math.max(5,Math.round(z.avgMiles*0.5)),vehicleCode:'SMALL_VAN',jobTypeCode:'STD_SAMEDAY'},
+      {miles:Math.round(z.avgMiles*1.1),vehicleCode:'MWB_VAN',jobTypeCode:'GROUPAGE'},
+      {miles:Math.round(z.avgMiles*1.5),vehicleCode:'LWB_VAN',jobTypeCode:'URGENT'}
+    ];
+    let m=0;
+    mix.forEach(s=>{m+=PM.price(lever(Object.assign({plnaTier:'FREE',knectTier:'FREE',weight:'STANDARD',handling:'KERBSIDE'},s))).money.hafMarginGbp});
+    return Object.assign({},z,{monthMargin:m/mix.length*z.jobs});
+  });
+  return ZM;
+}
 const row=(k,v)=>'<div class="cr"><span class="ck">'+k+'</span><span class="cv">'+v+'</span></div>';
-const tr=document.getElementById('pool-trial');
-if(tr)tr.innerHTML=Object.keys(PM.config.pools.trial.split).map(k=>row(LBL[k]+' · '+PM.config.pools.trial.split[k]+'%',money(tBy[k]||0))).join('')+row('<b>Total routed back</b>','<b>'+money(tT)+'</b>');
-const pr=document.getElementById('pool-prod');
-if(pr)pr.innerHTML=Object.keys(PM.config.pools.production.split).map(k=>row(LBL[k]+' · '+PM.config.pools.production.split[k]+'%',money(pBy[k]||0))).join('')+row('<b>Total routed back</b>','<b>'+money(pT)+'</b>');
+function render(){
+  let marginT=0,pT=0;const pBy={};
+  DEMO.forEach(o=>{
+    const r=PM.price(lever(o));
+    marginT+=r.money.hafMarginGbp;pT+=r.pools.comparison.production.totalGbp;
+    Object.keys(r.pools.comparison.production.byPool).forEach(k=>pBy[k]=(pBy[k]||0)+r.pools.comparison.production.byPool[k]);
+  });
+  const wiTot=Object.keys(WI).reduce((a,k)=>a+WI[k],0);
+  const tT=marginT*wiTot/100;
+  const kp=document.getElementById('pool-kpis');
+  if(kp)kp.innerHTML=
+    '<div class="kc"><div class="kc-l">Routed back (your %)</div><div class="kc-v or">'+money(tT)+'</div><div class="kc-d">'+round1(wiTot)+'% of HAF margin</div></div>'+
+    '<div class="kc"><div class="kc-l">HAF margin (queue)</div><div class="kc-v">'+money(marginT)+'</div><div class="kc-d">'+DEMO.length+' demo jobs</div></div>'+
+    '<div class="kc"><div class="kc-l">HAF net after pools</div><div class="kc-v gn">'+money(marginT-tT)+'</div><div class="kc-d">at your settings</div></div>'+
+    '<div class="kc"><div class="kc-l">Production would route</div><div class="kc-v">'+money(pT)+'</div><div class="kc-d">5% locked · comparison</div></div>';
+  const lv=document.getElementById('pool-levers');
+  if(lv){
+    const dirty=RATE.baseMult!==1||RATE.marginDelta!==0;
+    lv.innerHTML=
+      '<div class="cr"><span class="ck">Base driver rate</span><span class="cv"><input class="np-in" type="number" min="50" max="200" step="5" value="'+Math.round(RATE.baseMult*100)+'" onchange="npRate(\'base\',this)"> % of standard</span></div>'+
+      '<div class="cr"><span class="ck">HAF margin shift</span><span class="cv"><input class="np-in" type="number" min="-15" max="15" step="1" value="'+RATE.marginDelta+'" onchange="npRate(\'margin\',this)"> % pts (floor-protected)</span></div>'+
+      (dirty?'<div class="cr"><span class="ck" style="color:var(--or)">Rates flexed — every figure on this page reflects the new numbers</span><button class="np-btn" onclick="npRateReset()">Reset rates</button></div>':'');
+  }
+  const tr=document.getElementById('pool-trial');
+  if(tr)tr.innerHTML=Object.keys(WI).map(k=>
+      row(LBL[k],'<input class="np-in" type="number" min="0" max="25" step="0.5" value="'+WI[k]+'" onchange="npWi(\''+k+'\',this)"> % · <b>'+money(marginT*WI[k]/100)+'</b>')
+    ).join('')+row('<b>Total routed back · '+round1(wiTot)+'%</b>','<b>'+money(tT)+'</b>')+
+    '<div class="cr"><span class="ck" style="color:var(--mu)">Trial default '+PM.config.pools.trial.totalPctOfMargin+'%</span><button class="np-btn" onclick="npWiReset()">Reset to trial</button></div>';
+  const pr=document.getElementById('pool-prod');
+  if(pr)pr.innerHTML=Object.keys(PM.config.pools.production.split).map(k=>row(LBL[k]+' · '+PM.config.pools.production.split[k]+'%',money(pBy[k]||0))).join('')+row('<b>Total routed back</b>','<b>'+money(pT)+'</b>');
+  const zn=document.getElementById('pool-zones');
+  if(zn){
+    const trPct=WI.relayStorage,prPct=PM.config.pools.production.split.relayStorage;
+    let zt=0,zp=0;
+    const rows=zoneMargins().map(z=>{const t=z.monthMargin*trPct/100,p=z.monthMargin*prPct/100;zt+=t;zp+=p;return Object.assign({},z,{t:t,p:p})});
+    const max=Math.max(...rows.map(r=>r.t),0.01);
+    zn.innerHTML=row('<b>All zones · your '+round1(trPct)+'%</b> vs production '+prPct+'% locked','<b>'+money(zt)+'</b> <span style="color:var(--mu)">/ '+money(zp)+'</span>')+
+      rows.map(r=>'<div class="cr" style="border-bottom:none;padding-bottom:0"><span class="ck">'+r.zone+' <span style="color:var(--mu)">· '+r.jobs+' jobs</span></span><span class="cv"><b>'+money(r.t)+'</b> <span style="color:var(--mu);font-size:.74rem">/ '+money(r.p)+'</span></span></div><div class="np-bar"><i style="width:'+Math.round(r.t/max*100)+'%"></i></div>').join('');
+  }
+}
+window.npWi=function(k,inp){let v=parseFloat(inp.value);if(isNaN(v)||v<0)v=0;if(v>25)v=25;WI[k]=v;inp.value=v;render()};
+window.npWiReset=function(){Object.assign(WI,PM.config.pools.trial.split);render()};
+window.npRate=function(which,inp){
+  let v=parseFloat(inp.value);
+  if(which==='base'){if(isNaN(v)||v<50)v=50;if(v>200)v=200;RATE.baseMult=v/100;inp.value=v}
+  else{if(isNaN(v))v=0;if(v<-15)v=-15;if(v>15)v=15;RATE.marginDelta=v;inp.value=v}
+  ZM=null;render();
+};
+window.npRateReset=function(){RATE.baseMult=1;RATE.marginDelta=0;ZM=null;render()};
+render();
 })();
 </script>
 </body>
