@@ -104,6 +104,15 @@ tr:last-child td{border-bottom:none}
 .go{width:100%;margin-top:1rem;background:var(--or);color:#0e1113;border:none;border-radius:9px;padding:.7rem;font-weight:800;font-size:.9rem;cursor:pointer;font-family:var(--bd)}
 .go:disabled{opacity:.6;cursor:default}
 #app{display:none}
+/* pricing matrix */
+.pm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.6rem;margin:.6rem 0}
+.pm-field{background:var(--p2);border:1px solid var(--lns);border-radius:9px;padding:.55rem .7rem;font-size:.8rem}
+.pm-field label{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);font-weight:700;margin-bottom:.2rem}
+.pm-sub{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);font-weight:700;margin:.8rem 0 .3rem}
+.pm-reasons{margin:.3rem 0 .4rem 1.1rem;font-size:.78rem;color:var(--mu)}
+.pm-reasons li{margin-bottom:.15rem}
+.pm-actions{display:flex;gap:.6rem;margin-top:.7rem;flex-wrap:wrap}
+#pm-detail{display:none;border-top:1px dashed var(--ln);margin-top:.8rem;padding-top:.8rem}
 </style>
 </head>
 <body>
@@ -181,6 +190,24 @@ tr:last-child td{border-bottom:none}
     </div>
   </div>
 
+  <!-- Pricing engine — orders priced by Pricing Matrix V3 as they flow through -->
+  <div class="pipeline-wrap">
+    <h2>Quotes &amp; approvals <span class="hint">Pricing Matrix V3 — demo queue, engine live</span></h2>
+    <div class="tblwrap"><table id="pm-tbl">
+      <thead><tr><th>Ref</th><th>Route</th><th>Job</th><th>Driver tier</th><th>Customer tier</th><th>Driver pay</th><th>HAF margin</th><th>Customer price</th><th>Status</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <div id="pm-detail">
+      <h2 id="pm-title" style="font-size:.85rem"></h2>
+      <div id="pm-body"></div>
+    </div>
+    <div class="pm-sub">Pricing audit trail (this device)</div>
+    <div class="tblwrap"><table id="pm-audit">
+      <thead><tr><th>When</th><th>Ref</th><th>Operator</th><th>Action</th><th>Detail</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+
   <div class="grid">
     <!-- LEFT column -->
     <div>
@@ -205,6 +232,13 @@ tr:last-child td{border-bottom:none}
 
     <!-- RIGHT column -->
     <div>
+      <!-- Trial pooling — owner overview ONLY; never shown on order breakdowns or any other page -->
+      <div class="card">
+        <h2>Network pools — trial phase</h2>
+        <div id="pm-pools"></div>
+        <p class="note" style="margin-top:.5rem">Share of HAF margin routed back into the network during the trial phase. Figures from the demo pricing queue. Visible only here.</p>
+      </div>
+
       <!-- Profile link traffic -->
       <div class="card">
         <h2>Profile link traffic</h2>
@@ -397,6 +431,88 @@ async function loadAll(){
 }
 
 setInterval(()=>{if(sessionStorage.getItem('knect-admin')==='1')loadAll()},60000);
+</script>
+<script src="pricing-matrix-v3.js"></script>
+<script>
+/* ===== Pricing Matrix V3 — quotes & approvals (demo queue through the live engine) ===== */
+(function(){
+if(typeof HAFPricingMatrix==='undefined')return;
+const PM=HAFPricingMatrix;
+const DEMO=[
+  {ref:'HAF-Q7381',from:'Sheffield',to:'Manchester',miles:42,vehicleCode:'SWB_VAN',jobTypeCode:'STD_SAMEDAY',plnaTier:'FREE',knectTier:'FREE',weight:'STANDARD',handling:'KERBSIDE'},
+  {ref:'HAF-Q7382',from:'Leeds',to:'Birmingham',miles:118,vehicleCode:'LWB_VAN',jobTypeCode:'TIMED',plnaTier:'PRO',knectTier:'PAID',weight:'MODERATE',handling:'ASSISTED'},
+  {ref:'HAF-Q7383',from:'London N',to:'Luton',miles:34,vehicleCode:'LUTON',jobTypeCode:'URGENT',plnaTier:'PLUS',knectTier:'FREE',weight:'HEAVY',handling:'DIFFICULT',extraStops:1},
+  {ref:'HAF-Q7384',from:'Bristol',to:'Cardiff',miles:45,vehicleCode:'MWB_VAN',jobTypeCode:'GROUPAGE',plnaTier:'FREE',knectTier:'PAID',weight:'STANDARD',handling:'KERBSIDE'},
+  {ref:'HAF-Q7385',from:'Direct',to:'(repeat customer)',miles:22,vehicleCode:'SMALL_VAN',jobTypeCode:'STD_SAMEDAY',plnaTier:'FREE',knectTier:'FREE',weight:'STANDARD',handling:'KERBSIDE',isDirectBooking:true,directBookingsUsedThisMonth:1}
+];
+const AKEY='haf_pricing_audit_v3';
+const money=n=>'£'+(Math.round(n*100)/100).toFixed(2);
+const st={results:{},overrides:{},statuses:{}};
+const loadAudit=()=>{try{return JSON.parse(localStorage.getItem(AKEY)||'[]')}catch(e){return[]}};
+const saveAudit=a=>{try{localStorage.setItem(AKEY,JSON.stringify(a.slice(-200)))}catch(e){}};
+function logAudit(ref,op,action,detail){const a=loadAudit();a.push({at:new Date().toISOString().replace('T',' ').slice(0,16),ref,op,action,detail});saveAudit(a);renderAudit()}
+function calc(o){const input=Object.assign({},o,{operator:'back-office',calculatedAt:new Date().toISOString()});if(st.overrides[o.ref])input.override=st.overrides[o.ref];const r=PM.price(input);st.results[o.ref]=r;return r}
+function statusOf(o,r){if(st.statuses[o.ref])return st.statuses[o.ref];if(r.manualReviewRequired)return'Manual review';return'Pending'}
+function pmRows(){
+  document.querySelector('#pm-tbl tbody').innerHTML=DEMO.map(o=>{
+    const r=calc(o),s=statusOf(o,r);
+    const cls=s==='Manual review'?'cancelled':(s==='Approved'?'confirmed':'pending');
+    return '<tr><td><b>'+o.ref+'</b></td><td>'+esc(o.from+' → '+o.to+' · '+o.miles+'mi')+'</td><td>'+esc(r.inputs.jobType+(o.isDirectBooking?' · DIRECT':''))+'</td><td>'+esc((PM.config.plnaTiers[o.plnaTier]||{}).name||o.plnaTier)+'</td><td>'+esc((PM.config.knectTiers[o.knectTier]||{}).name||o.knectTier)+'</td><td>'+money(r.money.driverPayGbp)+'</td><td>'+r.money.hafMarginPct+'% ('+money(r.money.hafMarginGbp)+')</td><td><b>'+money(r.money.customerIncVatGbp)+'</b></td><td><span class="pill '+cls+'">'+s+'</span></td><td><button class="ebtn" onclick="pmOpen(\''+o.ref+'\')">Open</button></td></tr>';
+  }).join('');
+  pmPools();
+}
+window.pmOpen=function(ref){
+  const o=DEMO.find(x=>x.ref===ref);if(!o)return;
+  const r=st.results[ref]||calc(o);
+  const jt=PM.config.jobTypes.find(j=>j.code===r.inputs.jobType)||{};
+  $('pm-title').textContent=ref+' — pricing breakdown ('+r.version+')';
+  /* pool split intentionally NOT shown here — trial pooling lives only in the owner pools card */
+  $('pm-body').innerHTML=
+    '<div class="pm-grid">'+
+    '<div class="pm-field"><label>Driver pay</label><b>'+money(r.money.driverPayGbp)+'</b> (base '+money(r.money.driverBasePayGbp)+(r.rates.upliftApplied?' +'+r.rates.upliftPct+'% '+esc(r.rates.upliftSource):'')+')</div>'+
+    '<div class="pm-field"><label>Customer price</label><b>'+money(r.money.customerIncVatGbp)+'</b> inc VAT ('+money(r.money.customerExVatGbp)+' + VAT)</div>'+
+    '<div class="pm-field"><label>HAF margin</label>'+r.money.hafMarginPct+'% = '+money(r.money.hafMarginGbp)+' (floor '+(jt.floorPct||0)+'%)</div>'+
+    '</div>'+
+    '<div class="pm-sub">Why this price</div><ul class="pm-reasons">'+r.reasons.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>'+
+    (r.flags.length?'<div class="pm-sub">Flags</div><div style="font-size:.78rem">'+r.flags.map(esc).join(' · ')+'</div>':'')+
+    '<div class="pm-actions"><button class="obtn" onclick="pmApprove(\''+ref+'\')">Approve price</button><button class="obtn" onclick="pmOverride(\''+ref+'\')">Override margin…</button></div>';
+  $('pm-detail').style.display='block';
+  $('pm-detail').scrollIntoView({behavior:'smooth',block:'nearest'});
+};
+window.pmApprove=function(ref){
+  st.statuses[ref]='Approved';const r=st.results[ref];
+  logAudit(ref,'back-office','APPROVED','Customer '+money(r.money.customerIncVatGbp)+' · driver '+money(r.money.driverPayGbp)+' · margin '+r.money.hafMarginPct+'%');
+  pmRows();pmOpen(ref);
+};
+window.pmOverride=function(ref){
+  const o=DEMO.find(x=>x.ref===ref);if(!o)return;
+  const jt=PM.config.jobTypes.find(j=>j.code===o.jobTypeCode)||{};
+  const pct=prompt('New HAF margin % for '+ref+' (job-type floor '+jt.floorPct+'% — requests below the floor are clamped):');
+  if(pct===null||pct==='')return;
+  const reason=prompt('Reason for this override (required, goes to the audit trail):');
+  if(!reason){alert('Override needs a reason — nothing changed.');return}
+  st.overrides[ref]={marginPct:parseFloat(pct),operator:'back-office',reason};
+  const r=calc(o);
+  logAudit(ref,'back-office','MARGIN_OVERRIDE','Requested '+pct+'% → effective '+r.money.hafMarginPct+'%'+(r.override&&r.override.clamped?' (clamped to floor)':'')+' — '+reason);
+  pmRows();pmOpen(ref);
+};
+function renderAudit(){
+  const a=loadAudit().slice().reverse().slice(0,30);
+  document.querySelector('#pm-audit tbody').innerHTML=a.length?a.map(e=>'<tr><td>'+esc(e.at)+'</td><td>'+esc(e.ref)+'</td><td>'+esc(e.op)+'</td><td>'+esc(e.action)+'</td><td>'+esc(e.detail)+'</td></tr>').join(''):'<tr><td colspan="5" class="empty">No pricing actions logged yet on this device.</td></tr>';
+}
+/* trial pooling — owner pools card ONLY (Brent 2026-07-20) */
+const POOL_LABELS={affiliate:'Affiliate pool',driverPool:'Driver pool',freightPool:'Freight pool',relayStorage:'Relay & storage'};
+function pmPools(){
+  const el=$('pm-pools');if(!el)return;
+  const spec=PM.config.pools.trial;
+  let total=0;const by={};
+  DEMO.forEach(o=>{const r=st.results[o.ref]||calc(o);total+=r.pools.comparison.trial.totalGbp;Object.keys(r.pools.comparison.trial.byPool).forEach(k=>{by[k]=(by[k]||0)+r.pools.comparison.trial.byPool[k]})});
+  const max=Math.max(...Object.values(by),0.01);
+  el.innerHTML='<div class="mrow"><span><b>Routed back to network</b> · '+spec.totalPctOfMargin+'% of margin</span><b>'+money(total)+'</b></div>'+
+    Object.keys(spec.split).map(k=>'<div class="mrow"><span>'+(POOL_LABELS[k]||k)+' · '+spec.split[k]+'%</span><b>'+money(by[k]||0)+'</b></div><div class="bar"><i style="width:'+Math.round((by[k]||0)/max*100)+'%"></i></div>').join('');
+}
+pmRows();renderAudit();
+})();
 </script>
 </body>
 </html>
