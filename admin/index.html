@@ -77,6 +77,9 @@ tr:last-child td{border-bottom:none}
 .pz-btn.active{color:var(--or);border-color:var(--or)}
 .wi-in{width:54px;background:var(--p2);border:1px solid var(--ln);border-radius:6px;color:var(--tx);font-size:.75rem;padding:.18rem .3rem;text-align:right;font-family:var(--bd)}
 .wi-in:focus{outline:none;border-color:var(--or)}
+.rate-box{background:var(--p2);border:1px solid var(--lns);border-radius:9px;padding:.6rem .7rem}
+.rate-hd{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx);margin-bottom:.15rem}
+.rate-hd span{display:block;text-transform:none;letter-spacing:0;font-weight:400;color:var(--mu);font-size:.7rem}
 .mrow{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;margin-top:.45rem;gap:.4rem}
 .mrow b{font-weight:700;flex-shrink:0}
 /* link traffic */
@@ -246,7 +249,7 @@ tr:last-child td{border-bottom:none}
         </div>
         <div id="pm-pools"></div>
         <div id="pm-zones" style="display:none"></div>
-        <p class="note" id="pm-pools-note" style="margin-top:.5rem">What-if sandbox: set your own % per pool and the numbers recompute from the demo pricing queue. Live pricing stays on the trial split until you say otherwise. Visible only here.</p>
+        <p class="note" id="pm-pools-note" style="margin-top:.5rem">What-if sandbox: flex the job rates and the pool % and watch the numbers recompute from the demo queue. Live pricing and the order screens stay untouched until you say otherwise. Visible only here.</p>
       </div>
 
       <!-- Profile link traffic -->
@@ -515,29 +518,49 @@ function renderAudit(){
    Sandbox only — the live engine stays on the configured trial split. */
 const POOL_LABELS={affiliate:'Affiliate pool',driverPool:'Driver pool',freightPool:'Freight pool',relayStorage:'Relay & storage'};
 const WI=Object.assign({},PM.config.pools.trial.split);
+/* RATE = what-if job-rate levers, sandbox only. baseMult scales £/mile,
+   marginDelta shifts HAF margin in points. Live engine + order queue untouched. */
+const RATE={baseMult:1,marginDelta:0};
 const round1=n=>Math.round(n*10)/10;
-function queueMargin(){let m=0;DEMO.forEach(o=>{const r=st.results[o.ref]||calc(o);m+=r.money.hafMarginGbp});return m}
+function rateInput(o){return Object.assign({},o,{baseRateMult:RATE.baseMult,marginDeltaPct:RATE.marginDelta,operator:'pool-sandbox'})}
+/* pooled margin — DEMO priced with the sandbox rate levers, kept SEPARATE from
+   the order queue so the Quotes & approvals screen never shifts. */
+function pooledMargin(){let m=0;DEMO.forEach(o=>{m+=PM.price(rateInput(o)).money.hafMarginGbp});return m}
+function rateControls(){
+  const bm=Math.round(RATE.baseMult*100), md=RATE.marginDelta;
+  const dirty=RATE.baseMult!==1||RATE.marginDelta!==0;
+  return '<div class="rate-box">'+
+    '<div class="rate-hd">Job rate levers <span>what-if · live pricing untouched</span></div>'+
+    '<div class="mrow"><span>Base driver rate</span><span style="display:flex;align-items:center;gap:.35rem"><input class="wi-in" type="number" min="50" max="200" step="5" value="'+bm+'" onchange="rateSet(\'base\',this)">% of standard</span></div>'+
+    '<div class="mrow"><span>HAF margin shift</span><span style="display:flex;align-items:center;gap:.35rem"><input class="wi-in" type="number" min="-15" max="15" step="1" value="'+md+'" onchange="rateSet(\'margin\',this)">% pts</span></div>'+
+    (dirty?'<div class="mrow"><span style="color:var(--or);font-size:.72rem">Rates flexed — pools below reflect the new numbers</span><button class="ebtn" onclick="rateReset()">Reset rates</button></div>':'')+
+    '</div>';
+}
 function pmPools(){
   const el=$('pm-pools');if(!el)return;
-  const margin=queueMargin();
+  const margin=pooledMargin();
   const tot=Object.keys(WI).reduce((a,k)=>a+WI[k],0);
   const max=Math.max(...Object.keys(WI).map(k=>margin*WI[k]/100),0.01);
-  el.innerHTML='<div class="mrow"><span><b>Routed back to network</b> · '+round1(tot)+'% of margin</span><b>'+money(margin*tot/100)+'</b></div>'+
+  el.innerHTML=rateControls()+
+    '<div class="mrow" style="margin-top:.7rem"><span><b>Routed back to network</b> · '+round1(tot)+'% of margin</span><b>'+money(margin*tot/100)+'</b></div>'+
     Object.keys(WI).map(k=>'<div class="mrow"><span>'+(POOL_LABELS[k]||k)+'</span><span style="display:flex;align-items:center;gap:.35rem"><input class="wi-in" type="number" min="0" max="25" step="0.5" value="'+WI[k]+'" onchange="wiSet(\''+k+'\',this)">%<b style="min-width:56px;text-align:right">'+money(margin*WI[k]/100)+'</b></span></div><div class="bar"><i style="width:'+Math.round(margin*WI[k]/100/max*100)+'%"></i></div>').join('')+
     '<div class="mrow" style="border-top:1px dashed var(--ln);padding-top:.5rem"><span>Trial default '+PM.config.pools.trial.totalPctOfMargin+'% · production locked '+PM.config.pools.production.totalPctOfMargin+'%</span><button class="ebtn" onclick="wiReset()">Reset to trial</button></div>';
 }
+function poolRefresh(){pmPools();if($('pm-zones').style.display==='block')pmZones()}
 window.wiSet=function(k,inp){
   let v=parseFloat(inp.value);
   if(isNaN(v)||v<0)v=0;if(v>25)v=25;
   WI[k]=v;inp.value=v;
-  pmPools();
-  if($('pm-zones').style.display==='block')pmZones();
+  poolRefresh();
 };
-window.wiReset=function(){
-  Object.assign(WI,PM.config.pools.trial.split);
-  pmPools();
-  if($('pm-zones').style.display==='block')pmZones();
+window.wiReset=function(){Object.assign(WI,PM.config.pools.trial.split);poolRefresh()};
+window.rateSet=function(which,inp){
+  let v=parseFloat(inp.value);
+  if(which==='base'){if(isNaN(v)||v<50)v=50;if(v>200)v=200;RATE.baseMult=v/100;inp.value=v}
+  else{if(isNaN(v))v=0;if(v<-15)v=-15;if(v>15)v=15;RATE.marginDelta=v;inp.value=v}
+  ZM=null;poolRefresh();
 };
+window.rateReset=function(){RATE.baseMult=1;RATE.marginDelta=0;ZM=null;poolRefresh()};
 /* relay pooling by zone — trial toggle (Brent 2026-07-20). Demo monthly volumes
    per UK zone priced through the live engine; model only, no live jobs. */
 const ZONES=[
@@ -564,7 +587,7 @@ function zoneMargins(){
       {miles:Math.round(z.avgMiles*1.5),vehicleCode:'LWB_VAN',jobTypeCode:'URGENT'}
     ];
     let m=0;
-    mix.forEach(s=>{m+=PM.price(Object.assign({plnaTier:'FREE',knectTier:'FREE',weight:'STANDARD',handling:'KERBSIDE',operator:'zone-model'},s)).money.hafMarginGbp});
+    mix.forEach(s=>{m+=PM.price(rateInput(Object.assign({plnaTier:'FREE',knectTier:'FREE',weight:'STANDARD',handling:'KERBSIDE'},s))).money.hafMarginGbp});
     return Object.assign({},z,{monthMargin:m/mix.length*z.jobs});
   });
   return ZM;
@@ -588,7 +611,7 @@ window.pmPoolView=function(v){
   $('pz-btn-zones').classList.toggle('active',zones);
   $('pm-pools-note').textContent=zones
     ?'By zone: demo monthly volumes priced through the live engine. Bold = relay & storage at YOUR chosen % (set it on the Totals view); grey = the locked production split. Model only — no live jobs. Visible only here.'
-    :'What-if sandbox: set your own % per pool and the numbers recompute from the demo pricing queue. Live pricing stays on the trial split until you say otherwise. Visible only here.';
+    :'What-if sandbox: flex the job rates and the pool % and watch the numbers recompute from the demo queue. Live pricing and the order screens stay untouched until you say otherwise. Visible only here.';
 };
 pmRows();renderAudit();
 })();

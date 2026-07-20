@@ -199,6 +199,14 @@
       baseRate = baseRate * (1 + fuel.upliftPct / 100);
       reasons.push("Fuel protection: base rate +" + fuel.upliftPct + "% (" + fuel.reason + ").");
     }
+    // --- Sandbox base-rate lever (what-if only; defaults off, live pricing unchanged) ---
+    if (input.baseRateMult != null) {
+      var brm = num(input.baseRateMult);
+      if (brm > 0 && brm !== 1) {
+        baseRate = baseRate * brm;
+        reasons.push("What-if base rate " + Math.round(brm * 100) + "% of standard.");
+      }
+    }
 
     // --- Tier uplift: higher of the two sides, never stacked ---
     var upliftPct = Math.max(plna.upliftPct, knect.upliftPct);
@@ -225,6 +233,14 @@
 
     // --- Margin (firm; overridable by admin with reason, never below floor) ---
     var marginPct = direct ? config.directBooking.hafMarginPct : jobType.marginPct;
+    // --- Sandbox margin lever (what-if only; defaults off, floor-protected) ---
+    if (!direct && input.marginDeltaPct != null) {
+      var md = num(input.marginDeltaPct);
+      if (md !== 0) {
+        marginPct = Math.min(90, Math.max(jobType.floorPct, marginPct + md));
+        reasons.push("What-if margin " + (md > 0 ? "+" : "") + md + " pts → " + marginPct + "%.");
+      }
+    }
     var overrideApplied = null;
     if (!direct && input.override && input.override.marginPct != null) {
       var req = num(input.override.marginPct);

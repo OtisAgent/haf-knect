@@ -115,5 +115,21 @@ ok("audit: operator stamped", r.operator === "test-op");
 ok("audit: inputs echoed", r.inputs.plnaTier === "PRO" && r.inputs.knectTier === "PAID");
 ok("audit: reasons non-empty", r.reasons.length > 0);
 
+// 14. Sandbox rate levers: default off = live pricing unchanged; on = moves; floor-protected
+var base = M.price({ miles: 60, vehicleCode: "SWB_VAN", jobTypeCode: "STD_SAMEDAY",
+  plnaTier: "FREE", knectTier: "FREE" });
+r = M.price({ miles: 60, vehicleCode: "SWB_VAN", jobTypeCode: "STD_SAMEDAY",
+  plnaTier: "FREE", knectTier: "FREE", baseRateMult: 1, marginDeltaPct: 0 });
+ok("levers at neutral = identical to baseline", approx(r.money.driverPayGbp, base.money.driverPayGbp) && r.money.hafMarginPct === base.money.hafMarginPct);
+r = M.price({ miles: 60, vehicleCode: "SWB_VAN", jobTypeCode: "STD_SAMEDAY",
+  plnaTier: "FREE", knectTier: "FREE", baseRateMult: 1.2 });
+ok("base rate 120% → driver pay = 51 × 1.2 = £61.20", approx(r.money.driverPayGbp, 61.20), r.money);
+r = M.price({ miles: 60, vehicleCode: "SWB_VAN", jobTypeCode: "STD_SAMEDAY",
+  plnaTier: "FREE", knectTier: "FREE", marginDeltaPct: 5 });
+ok("margin +5 pts → 25%", r.money.hafMarginPct === 25);
+r = M.price({ miles: 60, vehicleCode: "SWB_VAN", jobTypeCode: "STD_SAMEDAY",
+  plnaTier: "FREE", knectTier: "FREE", marginDeltaPct: -20 });
+ok("margin −20 pts clamps to STD floor 15%", r.money.hafMarginPct === 15);
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);
