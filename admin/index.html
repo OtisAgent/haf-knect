@@ -74,6 +74,7 @@ tr:last-child td{border-bottom:none}
 /* bars */
 .bar{height:8px;border-radius:999px;background:var(--p2);border:1px solid var(--lns);overflow:hidden;margin:.3rem 0 .55rem}
 .bar i{display:block;height:100%;background:var(--or)}
+.pz-btn.active{color:var(--or);border-color:var(--or)}
 .mrow{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;margin-top:.45rem;gap:.4rem}
 .mrow b{font-weight:700;flex-shrink:0}
 /* link traffic */
@@ -234,9 +235,16 @@ tr:last-child td{border-bottom:none}
     <div>
       <!-- Trial pooling — owner overview ONLY; never shown on order breakdowns or any other page -->
       <div class="card">
-        <h2>Network pools — trial phase</h2>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap">
+          <h2 style="margin:0">Network pools — trial phase</h2>
+          <div style="display:flex;gap:.35rem">
+            <button class="ebtn pz-btn active" id="pz-btn-totals" onclick="pmPoolView('totals')">Totals</button>
+            <button class="ebtn pz-btn" id="pz-btn-zones" onclick="pmPoolView('zones')">Relay by zone</button>
+          </div>
+        </div>
         <div id="pm-pools"></div>
-        <p class="note" style="margin-top:.5rem">Share of HAF margin routed back into the network during the trial phase. Figures from the demo pricing queue. Visible only here.</p>
+        <div id="pm-zones" style="display:none"></div>
+        <p class="note" id="pm-pools-note" style="margin-top:.5rem">Share of HAF margin routed back into the network during the trial phase. Figures from the demo pricing queue. Visible only here.</p>
       </div>
 
       <!-- Profile link traffic -->
@@ -511,6 +519,58 @@ function pmPools(){
   el.innerHTML='<div class="mrow"><span><b>Routed back to network</b> · '+spec.totalPctOfMargin+'% of margin</span><b>'+money(total)+'</b></div>'+
     Object.keys(spec.split).map(k=>'<div class="mrow"><span>'+(POOL_LABELS[k]||k)+' · '+spec.split[k]+'%</span><b>'+money(by[k]||0)+'</b></div><div class="bar"><i style="width:'+Math.round((by[k]||0)/max*100)+'%"></i></div>').join('');
 }
+/* relay pooling by zone — trial toggle (Brent 2026-07-20). Demo monthly volumes
+   per UK zone priced through the live engine; model only, no live jobs. */
+const ZONES=[
+  {zone:'London',jobs:140,avgMiles:14},
+  {zone:'South East',jobs:95,avgMiles:38},
+  {zone:'North West',jobs:85,avgMiles:34},
+  {zone:'West Midlands',jobs:75,avgMiles:32},
+  {zone:'Yorkshire and The Humber',jobs:70,avgMiles:36},
+  {zone:'East Midlands',jobs:55,avgMiles:35},
+  {zone:'Eastern',jobs:50,avgMiles:40},
+  {zone:'South West',jobs:45,avgMiles:44},
+  {zone:'Scotland',jobs:40,avgMiles:48},
+  {zone:'North East',jobs:35,avgMiles:30},
+  {zone:'Wales',jobs:30,avgMiles:42},
+  {zone:'Northern Ireland',jobs:15,avgMiles:28}
+];
+function zoneRelay(z){
+  const mix=[
+    {miles:Math.max(5,Math.round(z.avgMiles*0.5)),vehicleCode:'SMALL_VAN',jobTypeCode:'STD_SAMEDAY'},
+    {miles:Math.round(z.avgMiles*1.1),vehicleCode:'MWB_VAN',jobTypeCode:'GROUPAGE'},
+    {miles:Math.round(z.avgMiles*1.5),vehicleCode:'LWB_VAN',jobTypeCode:'URGENT'}
+  ];
+  let t=0,p=0;
+  mix.forEach(s=>{
+    const r=PM.price(Object.assign({plnaTier:'FREE',knectTier:'FREE',weight:'STANDARD',handling:'KERBSIDE',operator:'zone-model'},s));
+    t+=r.pools.comparison.trial.byPool.relayStorage;
+    p+=r.pools.comparison.production.byPool.relayStorage;
+  });
+  return {trial:t/mix.length*z.jobs,prod:p/mix.length*z.jobs};
+}
+function pmZones(){
+  const el=$('pm-zones');if(!el||el.dataset.built)return;
+  const tr=PM.config.pools.trial.split.relayStorage,pr=PM.config.pools.production.split.relayStorage;
+  let tt=0,tp=0;
+  const rows=ZONES.map(z=>{const r=zoneRelay(z);tt+=r.trial;tp+=r.prod;return Object.assign({},z,r)});
+  const max=Math.max(...rows.map(r=>r.trial),0.01);
+  el.innerHTML='<div class="mrow"><span><b>Relay &amp; storage — modelled month</b> · trial '+tr+'% of margin</span><b>'+money(tt)+'</b></div>'+
+    rows.map(r=>'<div class="mrow"><span>'+esc(r.zone)+' <span style="color:var(--mu)">· '+r.jobs+' jobs</span></span><span><b>'+money(r.trial)+'</b> <span style="color:var(--mu);font-size:.72rem">/ '+money(r.prod)+'</span></span></div><div class="bar"><i style="width:'+Math.round(r.trial/max*100)+'%"></i></div>').join('')+
+    '<div class="mrow" style="border-top:1px dashed var(--ln);padding-top:.5rem"><span>All zones — trial '+tr+'% vs production '+pr+'% locked</span><span><b>'+money(tt)+'</b> <span style="color:var(--mu);font-size:.72rem">/ '+money(tp)+'</span></span></div>';
+  el.dataset.built='1';
+}
+window.pmPoolView=function(v){
+  const zones=v==='zones';
+  if(zones)pmZones();
+  $('pm-pools').style.display=zones?'none':'block';
+  $('pm-zones').style.display=zones?'block':'none';
+  $('pz-btn-totals').classList.toggle('active',!zones);
+  $('pz-btn-zones').classList.toggle('active',zones);
+  $('pm-pools-note').textContent=zones
+    ?'Trial model by zone: demo monthly volumes priced through the live engine. Bold = relay & storage under the trial phase; grey = the same month under the locked production split. Model only — no live jobs. Visible only here.'
+    :'Share of HAF margin routed back into the network during the trial phase. Figures from the demo pricing queue. Visible only here.';
+};
 pmRows();renderAudit();
 })();
 </script>
