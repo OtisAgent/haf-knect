@@ -282,6 +282,7 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .np-bar i{display:block;height:100%;background:var(--or)}
 .np-btn{font-size:.72rem;font-weight:700;background:var(--p2);border:1px solid var(--ln);color:var(--mu);border-radius:7px;padding:.3rem .65rem;cursor:pointer}
 .np-btn:hover{color:var(--or);border-color:var(--or)}
+.np-rng{width:130px;accent-color:var(--or);vertical-align:middle;cursor:pointer}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.85rem}
 @media(max-width:680px){.g2,.g3{grid-template-columns:1fr}}
 
@@ -4495,7 +4496,10 @@ function render(){
       (dirty?'<div class="cr"><span class="ck" style="color:var(--or)">Rates flexed — every figure on this page reflects the new numbers</span><button class="np-btn" onclick="npRateReset()">Reset rates</button></div>':'');
   }
   const tr=document.getElementById('pool-trial');
-  if(tr)tr.innerHTML=Object.keys(WI).map(k=>
+  if(tr)tr.innerHTML=
+    row('<b>Network share</b> <span style="color:var(--mu)">· 10–30%</span>',
+      '<input class="np-rng" type="range" min="10" max="30" step="0.5" value="'+Math.min(30,Math.max(10,wiTot))+'" oninput="document.getElementById(\'np-share-val\').textContent=this.value+\'%\'" onchange="npShare(this)"> <b id="np-share-val">'+round1(wiTot)+'%</b>')+
+    Object.keys(WI).map(k=>
       row(LBL[k],'<input class="np-in" type="number" min="0" max="25" step="0.5" value="'+WI[k]+'" onchange="npWi(\''+k+'\',this)"> % · <b>'+money(marginT*WI[k]/100)+'</b>')
     ).join('')+row('<b>Total routed back · '+round1(wiTot)+'%</b>','<b>'+money(tT)+'</b>')+
     '<div class="cr"><span class="ck" style="color:var(--mu)">Trial default '+PM.config.pools.trial.totalPctOfMargin+'%</span><button class="np-btn" onclick="npWiReset()">Reset to trial</button></div>';
@@ -4512,6 +4516,18 @@ function render(){
   }
 }
 window.npWi=function(k,inp){let v=parseFloat(inp.value);if(isNaN(v)||v<0)v=0;if(v>25)v=25;WI[k]=v;inp.value=v;render()};
+window.npShare=function(inp){
+  let v=parseFloat(inp.value);if(isNaN(v))v=PM.config.pools.trial.totalPctOfMargin;if(v<10)v=10;if(v>30)v=30;
+  const cur=Object.keys(WI).reduce((a,k)=>a+WI[k],0);
+  const base=cur>0?Object.assign({},WI):Object.assign({},PM.config.pools.trial.split);
+  const bTot=Object.keys(base).reduce((a,k)=>a+base[k],0);
+  const keys=Object.keys(base);let run=0;
+  keys.forEach((k,i)=>{
+    if(i===keys.length-1){WI[k]=Math.max(0,round1(v-run))}
+    else{const x=round1(base[k]*v/bTot);WI[k]=x;run+=x}
+  });
+  render();
+};
 window.npWiReset=function(){Object.assign(WI,PM.config.pools.trial.split);render()};
 window.npRate=function(which,inp){
   let v=parseFloat(inp.value);
