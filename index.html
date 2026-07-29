@@ -588,6 +588,15 @@ textarea.fi2{resize:vertical;min-height:70px}
 .lj-wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:.9rem;align-items:start}
 .lj-mapwrap{position:relative;border:1.5px solid var(--ln);border-radius:var(--r);overflow:hidden}
 #lj-map{height:430px;width:100%;background:#aadaff}
+/* Progress panel shown instead of a map to the account that posted the job —
+   the journey as a bar and stages, never a followable position */
+.lj-prog{padding:1rem 1.1rem}
+.ljp-route{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;font-weight:800;font-size:.95rem;margin-bottom:.6rem}
+.ljp-arw{color:var(--or);font-weight:900}
+.ljp-bar{height:10px;border-radius:20px;background:var(--p2);border:1px solid var(--ln);overflow:hidden}
+.ljp-fill{height:100%;border-radius:20px;transition:width .5s ease}
+.ljp-meta{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;font-size:.74rem;color:var(--mu);margin-top:.45rem}
+.ljp-note{font-size:.72rem;color:var(--mu);margin-top:.55rem;line-height:1.5}
 .lj-side{display:flex;flex-direction:column;gap:.9rem;min-width:0}
 .lj-fields{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
 .lj-field{background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.5rem .6rem}
@@ -1978,7 +1987,11 @@ textarea.fi2{resize:vertical;min-height:70px}
       </div>
 
       <!-- FREIGHT: Network Map -->
-      <div class="tp" id="pane-f-cap">
+      <!-- data-aud: the map is a DRIVER tool (Brent, 29 Jul 2026). For an account that
+           may not see the network this whole page is taken out of the document, so the
+           map cannot be reached by a nav entry, a link, or a typed tab id — there is
+           nothing left to reach. -->
+      <div class="tp" id="pane-f-cap" data-aud="network">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:.7rem">
           <div>
             <h1 class="pt" style="margin-bottom:.2rem">Network Map</h1>
@@ -2152,7 +2165,7 @@ textarea.fi2{resize:vertical;min-height:70px}
       </div>
 
       <!-- FREIGHT: Coverage Board -->
-      <div class="tp" id="pane-f-cover">
+      <div class="tp" id="pane-f-cover" data-aud="network">
         <h1 class="pt">Coverage Board</h1><p class="ps">Uncovered and at-risk loads needing attention.</p>
         <div class="card"><table class="dt"><thead><tr><th>Ref</th><th>Client</th><th>Route</th><th>Collect</th><th>Status</th><th>Action</th></tr></thead><tbody>
           <tr><td>FF-0091</td><td>Acme Ltd</td><td>Manchester → Glasgow</td><td>10 Jul</td><td><span class="chip ca">Awaiting response</span></td><td><button class="btn btn-or btn-xs">Chase</button></td></tr>
@@ -2162,7 +2175,7 @@ textarea.fi2{resize:vertical;min-height:70px}
       </div>
 
       <!-- FREIGHT: Driver Directory -->
-      <div class="tp" id="pane-f-dir">
+      <div class="tp" id="pane-f-dir" data-aud="network">
         <h1 class="pt">Driver Directory</h1>
         <p class="ps">Browse drivers who have opted in to direct contact. Reach them by WhatsApp, email, or book them straight from here without posting to the open network.</p>
         <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem">
@@ -3396,7 +3409,8 @@ function buildNav(tabs){
 let ct=null;
 function switchTab(id){
   if(id==='pane-feedback'){fbPrefill();fbLoad();}
-  if(ct){document.getElementById(ct).classList.remove('on');const n=document.getElementById('ni-'+ct.replace('pane-',''));if(n)n.classList.remove('on');}
+  /* the previous pane may have been taken out of the document by the audience rule */
+  if(ct){const o=document.getElementById(ct);if(o)o.classList.remove('on');const n=document.getElementById('ni-'+ct.replace('pane-',''));if(n)n.classList.remove('on');}
   const p=document.getElementById(id);if(p)p.classList.add('on');
   const n=document.getElementById('ni-'+id.replace('pane-',''));if(n)n.classList.add('on');
   ct=id;
@@ -3553,6 +3567,37 @@ function hafRenderLiveJob(){
  }else{
    actionBlock=`<div style="display:flex;gap:.4rem;flex-wrap:wrap">${cfg.actions.map((a,i)=>`<button class="btn ${i===0?'btn-or':'btn-gh'} btn-sm" onclick="hafLjAction('${hafEsc(a)}')">${a}</button>`).join('')}</div>`;
  }
+ /* ── THE MAP IS THE DRIVER'S ──────────────────────────────────────────────
+    Brent, 29 Jul 2026: only the driver working a job sees a map of it. The driver
+    needs the road — where they are, where they are going, the live dot. An account
+    that POSTED the job needs to know it is on track, which is a progress question,
+    not a location one. So they get the journey as a progress bar and stages, and no
+    map is built for them at all: #lj-map is never placed in the document, so there
+    is no map object, no tile request, and no live position to read off the screen.
+    Addresses on their own job stay exact in the panel beside this — it is their job
+    and they typed those addresses; what they do not get is a pin someone can follow. */
+ const trackBlock=(role==='driver')?`
+      <div class="lj-mapwrap"><div id="lj-map"></div>
+        <div style="position:absolute;top:10px;left:10px;z-index:1000;background:rgba(14,17,19,.82);border-radius:16px;padding:.28rem .6rem;font-size:.62rem;color:#fff;display:flex;align-items:center;gap:.5rem;backdrop-filter:blur(4px)">
+          <span style="display:flex;align-items:center;gap:.28rem"><span style="width:14px;height:3px;border-radius:2px;background:${j.colour}"></span>Done</span>
+          <span style="display:flex;align-items:center;gap:.28rem"><span style="width:14px;height:3px;border-radius:2px;background:${j.colour};opacity:.4"></span>To go</span>
+          <span style="display:flex;align-items:center;gap:.28rem"><span style="width:9px;height:9px;border-radius:50%;background:#fff;border:2px solid ${j.colour}"></span>Driver</span>
+        </div>
+        <div id="lj-liveinfo" style="position:absolute;bottom:10px;left:10px;z-index:1000;background:rgba(14,17,19,.78);border-radius:14px;padding:.22rem .55rem;font-size:.6rem;color:#cfe;backdrop-filter:blur(4px)">Driver location updated ${hafEsc(j.lastUpdate)}</div>
+      </div>
+      <div id="lj-trackctl" style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-top:.55rem">
+        <button class="btn btn-or btn-xs" onclick="hafShareLive()">📍 Share my live location</button>
+        <button class="btn btn-gh btn-xs" onclick="hafPlayDemoRun()">▶ Play a live run <span style="opacity:.55">demo</span></button>
+        <button class="btn btn-gh btn-xs" onclick="hafSimPin()">📌 Driver shared location <span style="opacity:.55">demo</span></button>
+      </div>`
+   :`
+      <div class="card lj-prog">
+        <div class="ct" style="margin:0 0 .55rem">Where this ${role==='freight'?'load':'delivery'} is up to</div>
+        <div class="ljp-route"><span>${hafEsc(j.from.name)}</span><span class="ljp-arw">→</span><span>${hafEsc(j.to.name)}</span></div>
+        <div class="ljp-bar"><div class="ljp-fill" style="width:${Math.max(3,Math.min(100,Number(j.progress)||0))}%;background:${st[1]}"></div></div>
+        <div class="ljp-meta"><span><strong style="color:${st[1]}">${hafEsc(st[0])}</strong></span><span>${Math.max(0,Math.min(100,Number(j.progress)||0))}% of the way</span></div>
+        <div class="ljp-note">${delivered?`Delivered ${hafEsc(j.pod?j.pod.time:j.eta)}.`:`On track for ${hafEsc(j.eta)}. Updated ${hafEsc(j.lastUpdate)}.`} You will see every stage below as it happens.</div>
+      </div>`;
  body.innerHTML=`
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem">
     <div>
@@ -3569,19 +3614,7 @@ function hafRenderLiveJob(){
   </div>
   <div class="lj-wrap">
     <div>
-      <div class="lj-mapwrap"><div id="lj-map"></div>
-        <div style="position:absolute;top:10px;left:10px;z-index:1000;background:rgba(14,17,19,.82);border-radius:16px;padding:.28rem .6rem;font-size:.62rem;color:#fff;display:flex;align-items:center;gap:.5rem;backdrop-filter:blur(4px)">
-          <span style="display:flex;align-items:center;gap:.28rem"><span style="width:14px;height:3px;border-radius:2px;background:${j.colour}"></span>Done</span>
-          <span style="display:flex;align-items:center;gap:.28rem"><span style="width:14px;height:3px;border-radius:2px;background:${j.colour};opacity:.4"></span>To go</span>
-          <span style="display:flex;align-items:center;gap:.28rem"><span style="width:9px;height:9px;border-radius:50%;background:#fff;border:2px solid ${j.colour}"></span>Driver</span>
-        </div>
-        <div id="lj-liveinfo" style="position:absolute;bottom:10px;left:10px;z-index:1000;background:rgba(14,17,19,.78);border-radius:14px;padding:.22rem .55rem;font-size:.6rem;color:#cfe;backdrop-filter:blur(4px)">Driver location updated ${hafEsc(j.lastUpdate)}</div>
-      </div>
-      <div id="lj-trackctl" style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-top:.55rem">
-        ${role==='driver'?`<button class="btn btn-or btn-xs" onclick="hafShareLive()">📍 Share my live location</button>`:`<span style="font-size:.62rem;color:var(--mu)">Live tracking</span>`}
-        <button class="btn btn-gh btn-xs" onclick="hafPlayDemoRun()">▶ Play a live run <span style="opacity:.55">demo</span></button>
-        <button class="btn btn-gh btn-xs" onclick="hafSimPin()">📌 Driver shared location <span style="opacity:.55">demo</span></button>
-      </div>
+      ${trackBlock}
       <div class="card" style="margin-top:.8rem">
         <div class="ct" style="margin:0 0 .5rem">Live updates</div>${updates}
         <div style="font-size:.66rem;color:var(--mu);margin-top:.5rem">Updates post automatically as the driver moves through each stage — no need to call in.</div>
