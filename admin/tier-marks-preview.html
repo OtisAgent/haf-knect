@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>HAF — tier symbols preview</title>
+<style>
+  :root{
+    --orange:#f18e00; --orange-2:#ffb347; --grey:#2f373e;
+    --ink:#12171c; --muted:#6b757e; --line:#e6e8ea; --bg:#f6f7f8;
+    --haf-have:#2f9e5f; --haf-plus:#2f373e; --haf-crown:#f18e00; --haf-locked:#7a838b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif}
+  .wrap{max-width:1120px;margin:0 auto;padding:26px 16px 76px}
+  header.top{background:var(--grey);color:#fff;padding:24px 16px}
+  header.top .wrap{padding:0}
+  header.top h1{margin:0;font-size:21px;letter-spacing:-.01em}
+  header.top p{margin:7px 0 0;color:#c8ced3;font-size:14px;max-width:62ch}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);
+     margin:34px 0 12px;font-weight:800}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}
+
+  /* key */
+  .key{display:flex;gap:26px;flex-wrap:wrap}
+  .key div{display:flex;align-items:center;gap:.5em;font-size:14.5px}
+
+  /* people rows */
+  .rows{display:grid}
+  .row{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .av{width:36px;height:36px;border-radius:50%;flex:0 0 auto;background:#e9ecee;
+      display:flex;align-items:center;justify-content:center;font-weight:700;
+      color:var(--grey);font-size:12.5px}
+  .nm{display:flex;align-items:center;gap:.45em;font-weight:600;flex-wrap:wrap}
+  .sub{color:var(--muted);font-size:13px}
+  .dark{background:var(--grey);color:#fff;border-color:#3d464e}
+  .dark .sub{color:#aeb6bc}
+  .dark .av{background:#48525a;color:#fff}
+  .dark .haf-feat--locked{color:#98a1a8}
+
+  /* side switcher */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+  .tabs button{font:inherit;font-size:14px;font-weight:700;padding:8px 15px;border-radius:999px;
+    border:1px solid var(--line);background:#fff;color:var(--grey);cursor:pointer}
+  .tabs button[aria-pressed="true"]{background:var(--grey);color:#fff;border-color:var(--grey)}
+
+  /* tier cards */
+  .tiers{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));align-items:start}
+  .tier{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;
+        display:flex;flex-direction:column}
+  .tier.is-pro{border-color:color-mix(in srgb,var(--orange) 55%,transparent);
+       box-shadow:0 8px 24px -14px color-mix(in srgb,var(--orange) 75%,transparent)}
+  .tier h3{margin:0;font-size:18px;display:flex;align-items:center;gap:.5em;flex-wrap:wrap}
+  .price{font-size:25px;font-weight:800;margin:9px 0 0}
+  .price small{font-size:13px;font-weight:600;color:var(--muted)}
+  .price .tbd{font-size:14px;font-weight:700;color:var(--muted)}
+  .grp{margin:16px 0 4px;font-size:11.5px;font-weight:800;letter-spacing:.09em;
+       text-transform:uppercase;color:var(--muted)}
+  .feats{margin:0;padding:0;list-style:none;font-size:14.5px}
+  .haf-feat__text{min-width:0}
+  .more{margin-top:16px;padding-top:13px;border-top:1px solid var(--line);
+        font-size:13.5px;color:var(--muted);display:flex;align-items:center;gap:.5em;flex-wrap:wrap}
+  .more strong{color:var(--ink)}
+  .note{margin-top:12px;color:var(--muted);font-size:12.5px}
+  .foot{margin-top:32px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);
+        padding-top:14px}
+  @media (max-width:560px){ .tiers{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <h1>Tier symbols — the crown and the Plus mark</h1>
+  <p>The crown marks a Pro account wherever its name appears. On a tier card, anything
+     you have not got yet carries the symbol of the tier that unlocks it. Preview only —
+     nothing is live.</p>
+</div></header>
+
+<div class="wrap">
+
+  <h2>What the symbols mean</h2>
+  <div class="card key" id="key"></div>
+
+  <h2>The crown beside a name</h2>
+  <div class="card"><div class="rows" id="rows"></div></div>
+
+  <h2>The same rows on a dark header</h2>
+  <div class="card dark"><div class="rows" id="rowsDark"></div></div>
+
+  <h2>What you are missing, per tier</h2>
+  <div class="tabs" id="tabs"></div>
+  <div class="tiers" id="tiers"></div>
+
+  <p class="foot" id="foot"></p>
+</div>
+
+<script src="./pro-crown.js"></script>
+<script src="./tier-marks-v1.js"></script>
+<script src="./account-fees-v1.js"></script>
+<script>
+(function(){
+  var C = window.HAFProCrown, M = window.HAFTierMarks, A = window.HAFAccountFees;
+  C.inject(document); M.inject(document);
+
+  /* ---- key ---------------------------------------------------------------- */
+  document.getElementById("key").innerHTML =
+    '<div>' + M.rowState("LITE","LITE").html + ' <span>Included on this tier</span></div>' +
+    '<div>' + M.rowState("PLUS","LITE").html + ' <span>Comes with Plus</span></div>' +
+    '<div>' + M.rowState("PRO","LITE").html + ' <span>Comes with Pro</span></div>';
+
+  /* ---- the crown beside a name -------------------------------------------- */
+  var people = [
+    { initials:"JW", name:"Jamie Ward",          sub:"Driver · PLNA Pro",  type:"PLNA_PRO"  },
+    { initials:"SD", name:"Sam Doyle",           sub:"Driver · PLNA Plus", type:"PLNA_PLUS" },
+    { initials:"RC", name:"Ravi Chandra",        sub:"Driver · PLNA Lite", type:"PLNA_LITE" },
+    { initials:"NL", name:"Northgate Logistics", sub:"Fleet · Fleet Pro",  type:"FLEET_PRO" },
+    { initials:"BV", name:"Bell Vans",           sub:"Fleet · Fleet Lite", type:"FLEET_LITE"}
+  ];
+  function rowHtml(p, markOnly){
+    return '<div class="row"><div class="av">'+p.initials+'</div><div><div class="nm">'+
+      p.name+' '+C.forAccount(A.identity(p.type),{withLabel:!markOnly})+'</div>'+
+      '<div class="sub">'+p.sub+'</div></div></div>';
+  }
+  document.getElementById("rows").innerHTML     = people.map(function(p){return rowHtml(p,false);}).join("");
+  document.getElementById("rowsDark").innerHTML = people.map(function(p){return rowHtml(p,true);}).join("");
+
+  /* ---- tier cards --------------------------------------------------------- */
+  // Every side now reads from the rulebook by account code — there is no
+  // hand-built card left on this page. Freight's three tiers are registered but
+  // unpriced, so their cards say "Price not set" rather than invent a figure.
+  var SIDES = {
+    DRIVER:  { label:"Driver (PLNA)",     codes:["PLNA_LITE","PLNA_PLUS","PLNA_PRO"] },
+    FLEET:   { label:"Fleet",             codes:["FLEET_LITE","FLEET_PRO"] },
+    FREIGHT: { label:"Freight forwarder", codes:["FREIGHT_LITE","FREIGHT_PLUS","FREIGHT_PRO"] }
+  };
+
+  function featureHtml(f){
+    var st = M.rowState(f.unlocksAt, f._level, { comingSoon: f.comingSoon });
+    var cls = "haf-feat" + (st.included ? "" : " haf-feat--locked") +
+              (f.comingSoon ? " haf-feat--soon" : "");
+    return '<li class="'+cls+'">' + st.html +
+           '<span class="haf-feat__text">'+f.text+'</span></li>';
+  }
+
+  function cardHtml(opts){
+    var feats = opts.features.map(function(f){ f._level = opts.level; return f; });
+    function group(g){
+      var rows = feats.filter(function(f){ return f.group === g; }).map(featureHtml).join("");
+      return '<div class="grp">'+(g === "AI" ? "AI &amp; automation" : "HAF platform")+
+             '</div><ul class="feats">'+rows+'</ul>';
+    }
+    var missing = { PLUS:0, PRO:0 };
+    feats.forEach(function(f){
+      if (!f.included && !f.comingSoon && missing[f.unlocksAt] !== undefined) missing[f.unlocksAt]++;
+    });
+    var more = [];
+    if (missing.PLUS) more.push(M.rowState("PLUS","LITE").html + '<span><strong>'+missing.PLUS+'</strong> more with Plus</span>');
+    if (missing.PRO)  more.push(M.rowState("PRO","LITE").html + '<span><strong>'+missing.PRO+'</strong> more with Pro</span>');
+
+    return '<div class="tier'+(opts.level === "PRO" ? " is-pro" : "")+'">'+
+      // Crown only, no word, on a tier heading: the tier is already called Pro,
+      // and "PLNA Pro Pro" is what you get if the badge repeats it. The labelled
+      // badge is for places where the name does NOT say it — a person's name, an
+      // account row, a chat header.
+      '<h3>'+opts.name+' '+(opts.level === "PRO" ? C.badge({size:19, withLabel:false}) : "")+'</h3>'+
+      '<div class="price">'+opts.price+'</div>'+
+      group("PLATFORM") + group("AI") +
+      (more.length ? '<div class="more">'+more.join('<span aria-hidden="true">·</span>')+'</div>' : "")+
+      (opts.note ? '<p class="note">'+opts.note+'</p>' : "")+
+      '<p class="note">'+A.config.footnotes.ALL+'</p>'+
+    '</div>';
+  }
+
+  function render(side){
+    var s = SIDES[side];
+    var html = s.codes.map(function(code){
+      var t = A.config.accountTypes[code];
+      var price = t.status !== "SET" || t.monthlyGbp === null
+        ? '<span class="tbd">Price not set</span>'
+        : (t.monthlyGbp === 0 ? "Free" : "£"+t.monthlyGbp+' <small>/month</small>');
+      return cardHtml({
+        name: t.name, level: t.level, price: price,
+        features: A.featuresFor(code),
+        note: side === "FLEET" ? A.config.footnotes.FLEET
+            : (side === "FREIGHT"
+                ? "These tiers are not priced yet, so no figure is shown."
+                : "")
+      });
+    }).join("");
+    document.getElementById("tiers").innerHTML = html;
+    Array.prototype.forEach.call(document.querySelectorAll("#tabs button"), function(b){
+      b.setAttribute("aria-pressed", String(b.dataset.side === side));
+    });
+  }
+
+  document.getElementById("tabs").innerHTML = Object.keys(SIDES).map(function(k){
+    return '<button type="button" data-side="'+k+'" aria-pressed="false">'+SIDES[k].label+'</button>';
+  }).join("");
+  document.getElementById("tabs").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (b) render(b.dataset.side);
+  });
+  render("DRIVER");
+
+  var crowned = A.crownedTiers().map(function(c){ return A.config.accountTypes[c].name; });
+  document.getElementById("foot").textContent =
+    "Crown shown for: " + crowned.join(", ") + ". Every symbol on this page is produced by " +
+    "one gate — a feature you already have can never render an upgrade mark, and a non-Pro " +
+    "account can never render a crown. " + C.version + " / " + M.version + " / " + A.version + ".";
+})();
+</script>
+</body>
+</html>
