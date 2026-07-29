@@ -1,0 +1,12 @@
+import { chromium } from 'playwright';
+const URL='https://return-route.knect-demo.pages.dev/';
+const b=await chromium.launch();
+const pg=await b.newPage({viewport:{width:1440,height:900}});
+const errs=[]; pg.on('pageerror',e=>errs.push(String(e)));
+await pg.goto(URL,{waitUntil:'domcontentloaded',timeout:120000});
+await pg.waitForFunction(()=>typeof window.demoLogin==='function',null,{timeout:30000});
+await pg.evaluate(()=>window.demoLogin('DEMO-DRV'));
+await pg.waitForTimeout(1200);
+const r=await pg.evaluate(()=>{const el=document.getElementById('dash-return');return{inDoc:!!el,visible:!!(el&&el.offsetParent!==null),head:el?el.innerText.slice(0,150).replace(/\n/g,' | '):''};});
+console.log(JSON.stringify({live:true,...r,errors:errs}));
+await b.close();

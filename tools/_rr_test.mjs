@@ -13,7 +13,7 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
     const errs = [];
     pg.on('pageerror', e => errs.push(String(e)));
     pg.on('console', m => { if (m.type() === 'error') errs.push('console: ' + m.text()); });
-    await pg.goto(URL, { waitUntil: 'load' });
+    await pg.goto(URL, { waitUntil: 'domcontentloaded', timeout: 90000 });
     await pg.waitForFunction(() => typeof window.demoLogin === 'function', null, { timeout: 20000 });
     await pg.evaluate(a => window.demoLogin(a), acct);
     await pg.waitForTimeout(700);
