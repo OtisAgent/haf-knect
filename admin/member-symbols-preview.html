@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>HAF — Member symbols preview</title>
+<style>
+  :root{
+    --brand-orange:#f18e00; --brand-orange-2:#ffb347; --brand-grey:#2f373e;
+    --ink:#12171c; --muted:#6b757e; --line:#e6e8ea; --bg:#f6f7f8; --green:#2f9e5f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif}
+  .wrap{max-width:960px;margin:0 auto;padding:26px 18px 72px}
+  header.top{background:var(--brand-grey);color:#fff;padding:22px 18px}
+  header.top .wrap{padding:0}
+  header.top h1{margin:0;font-size:20px;letter-spacing:-.01em}
+  header.top p{margin:6px 0 0;color:#c8ced3;font-size:14px}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+     margin:34px 0 10px;font-weight:700}
+  h2 .h2sub{text-transform:none;letter-spacing:0;font-weight:500;color:var(--muted)}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .row{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .av{width:36px;height:36px;border-radius:50%;flex:0 0 auto;background:#e9ecee;
+      display:flex;align-items:center;justify-content:center;font-weight:700;
+      color:var(--brand-grey);font-size:12.5px}
+  .who{min-width:0;flex:1}
+  .nm{display:flex;align-items:center;gap:.4em;font-weight:600;flex-wrap:wrap}
+  .sub{color:var(--muted);font-size:13px}
+  .chip{display:inline-flex;align-items:center;gap:.35em;font-size:12px;font-weight:700;
+        padding:.24em .6em;border-radius:999px;background:#eef0f1;color:#39424a;white-space:nowrap}
+  .chip.co{background:rgba(241,142,0,.13);color:#8a5300}
+  .chip.cg{background:rgba(47,158,95,.13);color:#1d6b3f}
+  .chip.cb{background:rgba(43,108,176,.12);color:#255a91}
+  .dark{background:var(--brand-grey);color:#fff;border-color:#3d464e}
+  .dark .sub{color:#aeb6bc}
+  .dark .av{background:#48525a;color:#fff}
+  .dark .row{border-color:#414b53}
+  .dark .chip{background:#48525a;color:#e7ebee}
+  .hdr{display:flex;align-items:center;gap:14px;padding:4px 2px}
+  .hdr .big{font-size:22px;font-weight:800;display:flex;align-items:center;gap:.4em;flex-wrap:wrap}
+  .note{margin:10px 2px 0;color:var(--muted);font-size:13.5px}
+  .foot{margin-top:36px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+  .scale{display:flex;align-items:center;gap:24px;flex-wrap:wrap;padding:6px 2px}
+  .scale .s{display:inline-flex;align-items:center;gap:.4em}
+  .topbar{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);
+          border-radius:12px;padding:10px 14px;margin-bottom:10px}
+  .topbar .u{font-weight:700;font-size:14px}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <h1>Member symbols</h1>
+  <p>A Plus mark for Plus members, a crown for Pro members — on every account type. Preview only, nothing is live.</p>
+</div></header>
+
+<div class="wrap">
+
+  <h2>Beside a name <span class="h2sub">— how it looks in a list</span></h2>
+  <div class="card" id="rows-light"></div>
+
+  <h2>On a dark screen</h2>
+  <div class="card dark" id="rows-dark"></div>
+
+  <h2>Your own account <span class="h2sub">— top bar, signed in</span></h2>
+  <div id="topbars"></div>
+
+  <h2>On a profile header <span class="h2sub">— with the word, where there is room</span></h2>
+  <div class="card" id="headers"></div>
+
+  <h2>At the sizes it actually gets used</h2>
+  <div class="card"><div class="scale" id="scale"></div></div>
+
+  <h2>Who wears nothing</h2>
+  <div class="card" id="rows-none"></div>
+  <p class="note">Free and Lite accounts carry no mark at all — that is what makes the two marks mean something.
+     An account whose tier we have not been told also shows nothing, rather than guessing.</p>
+
+  <div class="foot">
+    One gate decides who wears what, so a Lite account can never grow a mark and a Plus member can never
+    grow a crown. The crown is drawn once and reused — there is only one crown in the business.
+  </div>
+</div>
+
+<script src="pro-crown.js"></script>
+<script src="tier-marks-v1.js"></script>
+<script src="tier-identity-v1.js"></script>
+<script>
+(function(){
+  var ID=window.HAFTierIdentity;
+  ID.inject(document);
+
+  function mark(level,opts){ return ID.forAccount({level:level},opts||{}); }
+
+  var PEOPLE=[
+    {i:'JW',n:'James Wilson',s:'JW012390 · PLNA driver',t:'PLUS',c:'PLNA Plus',k:'cg'},
+    {i:'DH',n:'David Hughes',s:'DH022641 · PLNA driver',t:'PRO',c:'PLNA Pro',k:'co'},
+    {i:'MR',n:'Redline Logistics',s:'RL4471 · Fleet, 6 drivers',t:'PRO',c:'Fleet Pro',k:'co'},
+    {i:'BT',n:'Bell Transport',s:'BT2210 · Fleet, 3 drivers',t:'PLUS',c:'Fleet Plus',k:'cg'},
+    {i:'NF',n:'Northgate Freight',s:'NF8802 · Freight forwarder',t:'PRO',c:'Freight Forward Pro',k:'co'},
+    {i:'KP',n:'Karen Price',s:'KP041872 · PLNA driver',t:'PLUS',c:'PLNA Plus',k:'cg'}
+  ];
+  var NONE=[
+    {i:'TD',n:'Thomas Dean',s:'TD018392 · PLNA driver',t:'FREE',c:'PLNA Free',k:''},
+    {i:'HW',n:'Hollow Way Supplies',s:'HW3390 · Business account',t:'LITE',c:'Business — Free',k:'cb'},
+    {i:'SC',n:'Sandbrook Couriers',s:'SC7714 · Fleet',t:'LITE',c:'Fleet Lite',k:''},
+    {i:'??',n:'New sign-up',s:'Tier not set yet',t:'',c:'Pending',k:''}
+  ];
+
+  function rowsHtml(list){
+    return list.map(function(p){
+      return '<div class="row"><div class="av">'+p.i+'</div>'+
+        '<div class="who"><div class="nm">'+p.n+mark(p.t,{size:15})+'</div>'+
+        '<div class="sub">'+p.s+'</div></div>'+
+        '<span class="chip '+p.k+'">'+mark(p.t,{size:12})+p.c+'</span></div>';
+    }).join('');
+  }
+  document.getElementById('rows-light').innerHTML=rowsHtml(PEOPLE);
+  document.getElementById('rows-dark').innerHTML=rowsHtml(PEOPLE);
+  document.getElementById('rows-none').innerHTML=rowsHtml(NONE);
+
+  document.getElementById('topbars').innerHTML=[
+    {u:'Demo Driver',r:'Driver',k:'cb',t:'PLUS'},
+    {u:'Demo Freight Pro',r:'Freight Pro',k:'co',t:'PRO'},
+    {u:'Demo Business',r:'Business',k:'cb',t:''}
+  ].map(function(b){
+    return '<div class="topbar"><span class="u">'+b.u+'</span>'+
+      '<span class="chip '+b.k+'">'+mark(b.t,{size:12})+b.r+'</span></div>';
+  }).join('');
+
+  document.getElementById('headers').innerHTML=[
+    {n:'David Hughes',t:'PRO',s:'PLNA Pro · member since March 2026'},
+    {n:'James Wilson',t:'PLUS',s:'PLNA Plus · member since June 2026'}
+  ].map(function(h){
+    return '<div class="hdr"><div class="av">'+h.n.split(' ').map(function(w){return w[0];}).join('')+'</div>'+
+      '<div><div class="big">'+h.n+mark(h.t,{size:20,withLabel:true})+'</div>'+
+      '<div class="sub">'+h.s+'</div></div></div>';
+  }).join('');
+
+  document.getElementById('scale').innerHTML=[11,13,16,22,30].map(function(s){
+    return '<span class="s">'+mark('PLUS',{size:s})+mark('PRO',{size:s})+
+      '<span class="sub">'+s+'px</span></span>';
+  }).join('');
+})();
+</script>
+</body>
+</html>
