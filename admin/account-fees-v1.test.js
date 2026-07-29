@@ -198,8 +198,16 @@ ok("PLNA Pro wears the crown", A.identity("PLNA_PRO").crown === true);
 ok("Fleet Lite does not", A.identity("FLEET_LITE").crown === false);
 ok("PLNA Lite does not", A.identity("PLNA_LITE").crown === false);
 ok("PLNA Plus does not — Plus is not Pro", A.identity("PLNA_PLUS").crown === false);
-ok("exactly the two Pro tiers are crowned today",
-  A.crownedTiers().sort().join(",") === "FLEET_PRO,PLNA_PRO", A.crownedTiers());
+ok("Freight Pro wears the crown too — unpriced, still Pro",
+  A.identity("FREIGHT_PRO").crown === true);
+ok("Freight Plus does not", A.identity("FREIGHT_PLUS").crown === false);
+// Brent 2026-07-29: the crown goes on "the PRO versions on any account type",
+// so every side that HAS a Pro carries it — driver, fleet and freight. Business
+// is absent on purpose: the brief gives it a single tier, so it has no Pro.
+ok("every Pro tier on every side is crowned today",
+  A.crownedTiers().sort().join(",") === "FLEET_PRO,FREIGHT_PRO,PLNA_PRO", A.crownedTiers());
+ok("no business tier is crowned, because none is on the books",
+  Object.keys(A.config.accountTypes).every(function (c) { return c.indexOf("BUSINESS") !== 0; }));
 
 // Identity is not pricing — the crown is earned by level, whatever the figures.
 A.config.accountTypes.TEST_PRO_UNSET = {
@@ -221,7 +229,7 @@ ok("a brand-new Pro type is crowned with no extra wiring",
 ok("and it joins the crowned list automatically",
   A.crownedTiers().indexOf("BUSINESS_PRO_FUTURE") !== -1);
 delete A.config.accountTypes.BUSINESS_PRO_FUTURE;
-ok("test type removed again", A.crownedTiers().length === 2);
+ok("test type removed again", A.crownedTiers().length === 3);
 
 // The renderer must be incapable of showing a crown to a non-Pro.
 ok("renderer: Pro gets markup", C.forAccount(A.identity("FLEET_PRO")).indexOf("haf-crown") !== -1);
@@ -380,6 +388,44 @@ ok("the Lite card ends up with both symbols on it", crowns > 0 && pluses > 0,
 ok("and the Pro card ends up with none",
   M.renderList(A.config.featureCatalogue.DRIVER, "PRO")
     .every(function (r) { return r.state.unlockLabel === null; }));
+
+// Every side, not just the driver card. Brent asked for the marks "per account
+// tier", so each side that has a ladder must show it: a Lite card carries marks
+// for everything above it, a middle tier carries only the crown, a Pro card is
+// clean. This is the one test that would catch a whole account type being left
+// out of the sweep.
+["DRIVER", "FLEET", "FREIGHT"].forEach(function (side) {
+  var levels = A.config.featureCatalogue[side].map(function (f) { return f.unlocksAt; });
+  var lite = M.renderList(A.config.featureCatalogue[side], "LITE");
+  var pro  = M.renderList(A.config.featureCatalogue[side], "PRO");
+  var lockedOnLite = lite.filter(function (r) { return r.state.unlockLabel !== null; });
+
+  // Expected = every feature above the entry level that is actually live. A
+  // coming-soon feature is deliberately excluded: it carries "Soon", never an
+  // upgrade mark, because paying more would not get it any sooner.
+  var expectMarked = A.config.featureCatalogue[side].filter(function (f) {
+    return f.unlocksAt !== "LITE" && !f.comingSoon;
+  }).length;
+  ok(side + ": the entry card marks every rung above it",
+    lockedOnLite.length === expectMarked,
+    { marked: lockedOnLite.length, expected: expectMarked });
+  ok(side + ": the Pro card carries no marks at all",
+    pro.every(function (r) { return r.state.unlockLabel === null; }));
+  // Only sides that actually sell a middle tier get checked for one.
+  if (levels.indexOf("PLUS") !== -1) {
+    var plus = M.renderList(A.config.featureCatalogue[side], "PLUS");
+    var marks = plus.filter(function (r) { return r.state.unlockLabel !== null; });
+    ok(side + ": the middle card is marked with crowns only, never a Plus mark",
+      marks.length > 0 && marks.every(function (r) { return r.state.unlockLabel === "Pro"; }));
+  }
+});
+
+// And the freight account can be asked by its code, exactly like the others —
+// no special-casing at the call site is what stops a surface forgetting it.
+ok("freight reads through the same door as driver and fleet",
+  A.featuresFor("FREIGHT_LITE").length === A.config.featureCatalogue.FREIGHT.length &&
+  A.missingSummary("FREIGHT_LITE").PRO > 0 &&
+  A.missingSummary("FREIGHT_PRO").PRO === 0);
 
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

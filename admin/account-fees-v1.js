@@ -150,7 +150,45 @@
           "Unlimited jobs per driver per day",
           "One weekly invoice for the whole fleet"
         ]
+      },
+
+      // ---- Freight forwarder side -----------------------------------------
+      // REGISTERED FOR IDENTITY ONLY, NOT FOR PRICING. Brent 2026-07-29 asked
+      // for the crown on "the PRO versions on ANY account type" — so a Freight
+      // Pro account has to be able to carry it, and its Lite and Plus cards
+      // have to be able to show what they are missing. None of these tiers has
+      // a price in the brief (the freight sections name the tiers and list the
+      // features, and give no figure), so every figure below stays null with
+      // status UNSET: the engine will draw the crown and the marks, and will
+      // REFUSE to quote a fee, which is the correct behaviour until Brent sets
+      // them. Adding a number here without his say-so is how a made-up price
+      // reaches a customer.
+      FREIGHT_LITE: {
+        name: "Freight Forward Free", side: "FREIGHT", status: "UNSET", level: "LITE",
+        monthlyGbp: null,
+        paymentRunFeeGbp: null,
+        maxDrivers: null
+      },
+      FREIGHT_PLUS: {
+        name: "Freight Forward Plus", side: "FREIGHT", status: "UNSET", level: "PLUS",
+        monthlyGbp: null,
+        paymentRunFeeGbp: null,
+        maxDrivers: null
+      },
+      FREIGHT_PRO: {
+        name: "Freight Forward Pro", side: "FREIGHT", status: "UNSET", level: "PRO",
+        monthlyGbp: null,
+        paymentRunFeeGbp: null,
+        maxDrivers: null
       }
+
+      // ---- Business side ----------------------------------------------------
+      // DELIBERATELY ABSENT. The brief defines exactly ONE business tier
+      // ("Business Free"), so on the business account there is no Plus and no
+      // Pro: nothing to crown, and no locked feature to mark. Registering an
+      // invented Business Pro so the crown had somewhere to sit would be
+      // putting a tier on a page that Brent has never agreed to sell. If he
+      // wants one, he defines it and it drops in here.
     },
 
     // VAT — ANSWERED by Brent 2026-07-29: "plus VAT". Every account fee and
@@ -192,7 +230,11 @@
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Improved terms on eligible jobs" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Best available terms on eligible jobs" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Performance tools" },
-        { unlocksAt: "PRO",  group: "PLATFORM", text: "Your own HAF-powered driver page" },
+        // NOT LISTED, deliberately: the HAF-powered driver page. The brief
+        // (section 7) makes it a PLNA Pro feature, but that was superseded on
+        // 2026-07-29 — it is a separate paid Website Builder, shown coming soon
+        // with no price, and it must never appear as a tier feature line or
+        // carry a tick. Adding it back here would put that promise on a card.
 
         { unlocksAt: "LITE", group: "AI", text: "Guided setup and basic suggestions" },
         { unlocksAt: "PLUS", group: "AI", text: "Planning-level AI help, within fair-use limits" },
