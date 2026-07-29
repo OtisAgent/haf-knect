@@ -736,6 +736,40 @@ textarea.fi2{resize:vertical;min-height:70px}
   .dbf-btns{margin-left:0;width:100%}
   .dbf-btns .btn{flex:1}
 }
+/* ── YOUR RUN BACK ──
+   The loaded return. Plus finds the work and shows it; Pro is the assistant
+   that offers one best run and takes accept or decline in a tap. The tier
+   changes how this is DRAWN, never what the engine may find. */
+#dash-return{display:none;background:var(--p);border:1.5px solid var(--ln);border-left:3px solid var(--or);border-radius:var(--r);padding:.95rem 1.05rem;margin-bottom:.9rem}
+.rr-hd{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.25rem}
+.rr-k{font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--or)}
+.rr-tier{font-size:.55rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.1rem .45rem;border-radius:var(--pill);border:1px solid var(--lns);color:var(--mu)}
+.rr-tier.pro{background:var(--or);border-color:var(--or);color:#fff}
+.rr-demo{margin-left:auto;display:flex;align-items:center;gap:.3rem}
+.rr-demo .dmsw-b{font-size:.55rem;padding:.16rem .5rem;border:1px solid var(--lns);border-radius:var(--pill);background:var(--p2)}
+.rr-demo .dmsw-b.on{background:var(--or);border-color:var(--or);color:#fff}
+.rr-sub{font-size:.75rem;color:var(--mu);margin-bottom:.75rem;line-height:1.5}
+.rr-item{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;padding:.6rem 0;border-top:1px solid var(--ln)}
+.rr-rt{font-weight:800;font-size:.9rem;color:var(--tx)}
+.rr-meta{font-size:.7rem;color:var(--mu);margin-top:.12rem}
+.rr-pay{margin-left:auto;text-align:right}
+.rr-pv{font-size:1.05rem;font-weight:800;color:var(--gn);line-height:1}
+.rr-pl{font-size:.58rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mu)}
+.rr-best{background:var(--p2);border:1px solid var(--or-g);border-radius:var(--rx);padding:.8rem .9rem}
+.rr-why{display:flex;gap:.35rem;flex-wrap:wrap;margin:.55rem 0 .7rem}
+.rr-why span{font-size:.62rem;font-weight:700;color:var(--mu);background:var(--p);border:1px solid var(--ln);border-radius:var(--pill);padding:.16rem .5rem}
+.rr-btns{display:flex;gap:.45rem;flex-wrap:wrap;align-items:center}
+.rr-note{font-size:.68rem;color:var(--mu);margin-top:.6rem;line-height:1.5}
+.rr-up{font-size:.68rem;color:var(--mu);margin-top:.65rem;padding-top:.6rem;border-top:1px dashed var(--ln);line-height:1.5}
+.rr-day{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem}
+.rr-leg{flex:1;min-width:150px;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.5rem .6rem}
+.rr-legk{font-size:.58rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mu)}
+.rr-legv{font-size:.82rem;font-weight:800;color:var(--tx);margin-top:.1rem}
+@media(max-width:768px){
+  .rr-pay{margin-left:0;text-align:left}
+  .rr-btns .btn{flex:1}
+  .rr-demo{margin-left:0;width:100%}
+}
 </style>
 </head>
 <body>
@@ -1401,6 +1435,13 @@ textarea.fi2{resize:vertical;min-height:70px}
         <!-- BASIC MODE FOCUS CARD — built by dashBuildFocus() from the invite already
              rendered below for this account. Reads the page, never a new source. -->
         <div id="dash-basic-focus" data-mode-only="basic" data-mode-display="block"></div>
+
+        <!-- YOUR RUN BACK — the loaded return. Driver work, so it carries the
+             network audience mark and is taken out of the document entirely for
+             an account that posts work. No data-mode-only: a paid run home is
+             money, not detail, so Basic and Advanced both carry it. Built by
+             rrRender() from the run this driver already has on this page. -->
+        <div id="dash-return" data-aud="network"></div>
 
         <!-- Network ticker -->
         <div data-mode-only="advanced" data-aud="network" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.45rem .75rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);margin-bottom:.75rem;font-size:.68rem;color:var(--mu)">
@@ -2917,6 +2958,8 @@ function _setMyTier(level){
 
 function enterKnectApp(u){
   _superUser=u;
+  /* a fresh sheet for whoever just signed in — no previous driver's run back left behind */
+  try{_rrState={declined:[],accepted:null};}catch(e){}
   const isAdmin=u==='BF638793';
   const demo=DEMO_ACCOUNTS[u];
   const displayName=demo?demo.name:u;
@@ -3184,6 +3227,8 @@ function xAccept(btn,ref,route,rate){
   if(card){card.style.opacity='.45';card.style.pointerEvents='none';}
   _xchActiveJob={ref,route,rate,step:0};
   _xchRenderActive();
+  /* the run he just took out is the run he needs bringing back */
+  try{rrRender();}catch(e){}
 }
 function _xchRenderActive(){
   if(!_xchActiveJob)return;
@@ -3332,6 +3377,7 @@ function applyAudience(){
     s('dash-xch-lbl',_audHero.lbl);s('dash-zone-sub',_audHero.sub);s('dash-xch-nums',_audHero.nums);
     const pill=document.getElementById('dash-pill');if(pill)pill.style.display='';
   }
+  try{rrRender();}catch(e){}
 }
 
 /* ═══════════════ LOCATION MASKING ═══════════════
@@ -4207,6 +4253,7 @@ function loadDashMode(){
   let m='basic'; /* calm by default; the choice is remembered per account below */
   try{const s=localStorage.getItem(_dashModeKey());if(s==='basic'||s==='advanced')m=s;}catch(e){}
   _dashMode=m;dashBuildFocus();applyDashMode();
+  try{rrRender();}catch(e){}   /* the run back is drawn after the day it reads */
 }
 function setDashMode(m){
   _dashMode=(m==='advanced')?'advanced':'basic';
@@ -4271,6 +4318,158 @@ function dashBuildFocus(){
       '</div>'+
     '</div>';
 }
+/* ═══════════════ YOUR RUN BACK — the loaded return ═══════════════
+   Brent, 29 Jul 2026: when a driver has a run out in the morning or the
+   afternoon, help them find work on the way back.
+     PLUS — we find the loads and lay them out; the driver takes it from there.
+     PRO  — the assistant in their pocket: one best run offered, accept or
+            decline in a tap, and it moves to the next one on a decline.
+   ONE engine picks the runs for both tiers. The tier decides how the answer is
+   DRAWN, never what the engine is allowed to find — the same discipline as the
+   Basic/Advanced switch. Locations stay at town + outward code, never a full
+   postcode and never a pin, because a run back is still someone's job. */
+const RR_VEH=['SWB','VAN','LWB','LUTON'];            /* small → large; a bigger van can take a smaller load */
+const RR_NEAR={Warrington:['Widnes','Runcorn'],Sheffield:['Rotherham','Barnsley'],Leeds:['Bradford','Wakefield'],Birmingham:['Coventry','Wolverhampton']};
+const RR_HOME={Manchester:['Salford','Stockport','Oldham','Bolton','Trafford'],Salford:['Manchester','Stockport','Oldham','Trafford']};
+const RR_POOL=[
+  {ref:'HAF-3011',fromT:'Warrington',fromA:'WA2',toT:'Manchester',toA:'M17',ready:'16:15',veh:'LWB' ,miles:24,detour:4 ,pay:62 ,goods:'320 kg · 1 pallet · tail lift'},
+  {ref:'HAF-3014',fromT:'Widnes'    ,fromA:'WA8',toT:'Stockport' ,toA:'SK3',ready:'16:40',veh:'LWB' ,miles:31,detour:9 ,pay:74 ,goods:'540 kg · 2 pallets'},
+  {ref:'HAF-3019',fromT:'Runcorn'   ,fromA:'WA7',toT:'Salford'   ,toA:'M50',ready:'17:10',veh:'VAN' ,miles:28,detour:7 ,pay:66 ,goods:'180 kg · 6 cartons'},
+  {ref:'HAF-3022',fromT:'Sheffield' ,fromA:'S9' ,toT:'Manchester',toA:'M40',ready:'11:30',veh:'LWB' ,miles:41,detour:3 ,pay:96 ,goods:'610 kg · 2 pallets · tail lift'},
+  {ref:'HAF-3027',fromT:'Rotherham' ,fromA:'S60',toT:'Oldham'    ,toA:'OL9',ready:'12:15',veh:'LUTON',miles:44,detour:11,pay:108,goods:'900 kg · 3 pallets'},
+  {ref:'HAF-3031',fromT:'Sheffield' ,fromA:'S1' ,toT:'Salford'   ,toA:'M50',ready:'13:00',veh:'VAN' ,miles:43,detour:2 ,pay:88 ,goods:'240 kg · 8 cartons'}
+];
+let _rrState={declined:[],accepted:null};
+function rrTier(){return (window.HAF_TIER==='PRO')?'PRO':'PLUS';}
+function rrSetTier(t){window.HAF_TIER=(t==='PRO')?'PRO':'PLUS';rrRender();}
+function rrMins(t){const m=/(\d{1,2}):(\d{2})/.exec(String(t||''));return m?(+m[1]*60+ +m[2]):null;}
+function rrClock(m){m=Math.max(0,Math.round(m));return String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');}
+function rrPlace(s){const m=/^(.*?)\s+([A-Z]{1,2}\d{1,2}[A-Z]?)$/.exec(String(s||'').trim());return m?{town:m[1].trim(),area:m[2]}:{town:String(s||'').trim(),area:''};}
+/* the run out is READ from the card already on this page — the same single
+   source the Basic focus card reads. No second list of the driver's day. */
+function rrOutbound(){
+  const pane=document.getElementById('pane-d-home');if(!pane)return null;
+  const cards=[...pane.querySelectorAll('.xc.xc-invite')];if(!cards.length)return null;
+  const live=(typeof _xchActiveJob!=='undefined'&&_xchActiveJob)?_xchActiveJob.ref:'';
+  const card=cards.find(c=>{const r=c.querySelector('.xb-ref');return r&&r.textContent.trim()===live;})||cards[0];
+  const txt=s=>{const x=card.querySelector(s);return x?x.textContent.trim():'';};
+  const legs=txt('.xc-route').split('→');
+  const o={ref:txt('.xb-ref'),route:txt('.xc-route'),from:rrPlace(legs[0]),to:rrPlace(legs[1]||''),
+           collect:'',miles:0,veh:'LWB',pay:txt('.xcs.rate .xcs-v'),live:!!(live&&live===txt('.xb-ref'))};
+  card.querySelectorAll('.xcs').forEach(c=>{
+    const kk=(c.querySelector('.xcs-k')||{}).textContent||'',vv=((c.querySelector('.xcs-v')||{}).textContent||'').trim();
+    if(/collect/i.test(kk))o.collect=vv;
+    if(/loaded|miles/i.test(kk))o.miles=parseInt(vv,10)||0;
+    if(/vehicle/i.test(kk))o.veh=vv.toUpperCase();
+  });
+  const c=rrMins(o.collect);
+  o.slot=(c===null)?'today':(c<12*60?'this morning':'this afternoon');
+  /* empty again ≈ collect + drive at 30mph + 20 min on the bay. An estimate, and it says so. */
+  o.freeAt=(c===null)?null:c+Math.round(o.miles/30*60)+20;
+  return o;
+}
+function rrMatches(out){
+  if(!out||out.freeAt===null)return [];
+  const near=[out.to.town].concat(RR_NEAR[out.to.town]||[]);
+  const base=out.from.town,home=[base].concat(RR_HOME[base]||[]);
+  const vi=Math.max(0,RR_VEH.indexOf(out.veh)<0?RR_VEH.indexOf('LWB'):RR_VEH.indexOf(out.veh));
+  return RR_POOL
+    .filter(p=>near.indexOf(p.fromT)>=0)                  /* starts where he drops, or next door */
+    .filter(p=>home.indexOf(p.toT)>=0)                    /* and it takes him home, not further out */
+    .filter(p=>RR_VEH.indexOf(p.veh)<=vi)                 /* his van can carry it */
+    .filter(p=>rrMins(p.ready)>=out.freeAt-15)            /* ready by the time he is empty */
+    .map(p=>{
+      const wait=rrMins(p.ready)-out.freeAt,perMile=p.pay/Math.max(1,p.miles);
+      return Object.assign({},p,{wait,perMile,score:perMile*10-p.detour*0.6-Math.max(0,wait)/25});
+    })
+    .sort((a,b)=>b.score-a.score);
+}
+function rrWhy(p,out){
+  const w=['£'+p.perMile.toFixed(2)+' a mile','back to '+p.toT];
+  w.unshift(p.detour<=4?'barely off your line':p.detour+' miles off your line');
+  if(p.wait<=0)w.push('ready when you are');
+  else if(p.wait<=45)w.push('ready '+p.wait+' min after you drop');
+  else w.push('ready '+p.ready);
+  return w;
+}
+function rrRender(){
+  const el=document.getElementById('dash-return');if(!el)return;
+  if(!hafAud().network){el.style.display='none';return;}   /* driver work only */
+  const out=rrOutbound();
+  const pro=rrTier()==='PRO';
+  const sw='<div class="rr-demo"><span style="font-size:.55rem;color:var(--mu);font-weight:700">Preview as</span>'+
+    '<button type="button" class="dmsw-b'+(pro?'':' on')+'" onclick="rrSetTier(\'PLUS\')">Plus</button>'+
+    '<button type="button" class="dmsw-b'+(pro?' on':'')+'" onclick="rrSetTier(\'PRO\')">Pro</button></div>';
+  const head='<div class="rr-hd"><span class="rr-k">Your run back</span>'+
+    '<span class="rr-tier'+(pro?' pro':'')+'">'+(pro?'Pro · assistant':'Plus')+'</span>'+sw+'</div>';
+  el.style.display='block';
+  if(!out){
+    el.innerHTML=head+'<div class="rr-sub">Nothing out on your sheet yet. Take a run out and I will look for the load that brings you back.</div>';
+    return;
+  }
+  const list=rrMatches(out).filter(p=>_rrState.declined.indexOf(p.ref)<0);
+  const where='You are out to '+hafEsc(out.to.town+' '+out.to.area).trim()+' '+out.slot+
+              (out.freeAt!==null?' — empty again around '+rrClock(out.freeAt):'')+'.';
+  /* PRO — already taken one: the day, closed off */
+  if(pro&&_rrState.accepted){
+    const a=_rrState.accepted,home=rrMins(a.ready)+Math.round(a.miles/30*60)+15;
+    const outPay=parseFloat(String(out.pay).replace(/[^\d.]/g,''))||0;
+    el.innerHTML=head+'<div class="rr-sub">Booked. Your day is loaded both ways.</div>'+
+      '<div class="rr-day">'+
+        '<div class="rr-leg"><div class="rr-legk">Out</div><div class="rr-legv">'+hafEsc(out.route)+'</div><div class="rr-meta">'+hafEsc(out.collect)+' · '+hafEsc(out.pay)+'</div></div>'+
+        '<div class="rr-leg"><div class="rr-legk">Back</div><div class="rr-legv">'+hafEsc(a.fromT+' '+a.fromA)+' → '+hafEsc(a.toT+' '+a.toA)+'</div><div class="rr-meta">'+hafEsc(a.ready)+' · £'+a.pay+'</div></div>'+
+        '<div class="rr-leg"><div class="rr-legk">Day</div><div class="rr-legv">£'+(outPay+a.pay).toFixed(0)+'</div><div class="rr-meta">home about '+rrClock(home)+'</div></div>'+
+      '</div>'+
+      '<div class="rr-note">I will keep an eye on it and tell you if the collection time moves. <button class="btn btn-gh btn-xs" onclick="rrReset()">Undo</button></div>';
+    return;
+  }
+  /* nothing worth the diesel */
+  if(!list.length){
+    el.innerHTML=head+'<div class="rr-sub">'+where+'</div>'+
+      '<div class="rr-note">Nothing heading your way yet.'+
+      (pro?' I am watching '+hafEsc(out.to.town)+' and I will offer you the next one the moment it lands.'
+         :' Flag yourself as heading home and the network will match you.')+'</div>'+
+      '<div class="rr-btns" style="margin-top:.6rem"><button class="btn btn-gh btn-sm" onclick="switchTab(\'pane-d-empty\')">Flag me heading home →</button>'+
+      (_rrState.declined.length?'<button class="btn btn-gh btn-xs" onclick="rrReset()">Show the ones I passed on</button>':'')+'</div>';
+    return;
+  }
+  /* PRO — one best run, accept or decline */
+  if(pro){
+    const p=list[0];
+    el.innerHTML=head+'<div class="rr-sub">'+where+' Best run home for you:</div>'+
+      '<div class="rr-best">'+
+        '<div class="rr-rt">'+hafEsc(p.fromT+' '+p.fromA)+' → '+hafEsc(p.toT+' '+p.toA)+'</div>'+
+        '<div class="rr-meta">'+hafEsc(p.ready)+' collect · '+p.miles+' mi · '+hafEsc(p.veh)+' · '+hafEsc(p.goods)+'</div>'+
+        '<div class="rr-why">'+rrWhy(p,out).map(w=>'<span>'+hafEsc(w)+'</span>').join('')+'</div>'+
+        '<div class="rr-btns"><div><div class="rr-pv">£'+p.pay+'</div><div class="rr-pl">Driver pay</div></div>'+
+          '<div style="display:flex;gap:.45rem;flex-wrap:wrap;margin-left:auto">'+
+            '<button class="btn btn-gh btn-sm" onclick="rrDecline(\''+p.ref+'\')">Not this one</button>'+
+            '<button class="btn btn-or btn-sm" onclick="rrAccept(\''+p.ref+'\')">Accept the run back →</button>'+
+          '</div></div>'+
+      '</div>'+
+      '<div class="rr-note">'+(list.length>1?(list.length-1)+' more behind this one. ':'')+
+      'Pass and I will offer the next best straight away — and keep watching the lane while you drive.</div>';
+    return;
+  }
+  /* PLUS — we found them; the driver takes it from there */
+  el.innerHTML=head+'<div class="rr-sub">'+where+' '+list.length+' load'+(list.length>1?'s':'')+' heading back your way:</div>'+
+    list.slice(0,3).map(p=>
+      '<div class="rr-item"><div>'+
+        '<div class="rr-rt">'+hafEsc(p.fromT+' '+p.fromA)+' → '+hafEsc(p.toT+' '+p.toA)+'</div>'+
+        '<div class="rr-meta">'+hafEsc(p.ready)+' collect · '+p.miles+' mi · '+hafEsc(p.veh)+' · '+hafEsc(p.goods)+'</div>'+
+      '</div><div class="rr-pay"><div class="rr-pv">£'+p.pay+'</div><div class="rr-pl">Driver pay</div></div>'+
+      '<button class="btn btn-gh btn-sm" onclick="switchTab(\'pane-d-invites\')">See the details</button></div>').join('')+
+    '<div class="rr-up"><strong style="color:var(--tx)">On Pro</strong> you would not go looking: the best one is offered to you, and it is yours or gone in one tap — accept or decline, while you are still on the bay.</div>';
+}
+function rrAccept(ref){
+  const p=RR_POOL.find(x=>x.ref===ref);if(!p)return;
+  _rrState.accepted=p;rrRender();
+}
+function rrDecline(ref){
+  if(_rrState.declined.indexOf(ref)<0)_rrState.declined.push(ref);
+  rrRender();
+}
+function rrReset(){_rrState={declined:[],accepted:null};rrRender();}
 /* Accept from Basic runs the SAME accept the card runs — one path, not a copy */
 function dashFocusAccept(){
   const pane=document.getElementById('pane-d-home');
