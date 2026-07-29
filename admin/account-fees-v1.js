@@ -48,11 +48,36 @@
     blocksPerMonth: 4.33,
 
     // --- HOW THE FEE IS COUNTED ON A FLEET INVOICE --------------------------
-    // LOCKED by Brent 2026-07-29: one fee per driver paid on the fleet's
-    // invoice. His reason, verbatim in substance: more drivers is more work for
-    // the network to process. The fleet raises the invoice, not the driver, so
-    // the driver is never charged a second time.
-    fleetFeeBasis: "PER_DRIVER_LINE",
+    // REVISED by Brent 2026-07-29 (supersedes the PER_DRIVER_LINE setting made
+    // earlier the same day). His words: "it's only chargeable per invoice
+    // generated - if the fleet account has 3 drivers, 10, or 100 it's going
+    // through the fleet account holder which is the business and the fleet
+    // account owner will pay the drivers."
+    //
+    // Why this is consistent rather than a contradiction: under the fleet
+    // compliance rule below, a fleet's drivers are the BUSINESS's drivers. HAF
+    // does not pay them — the business does. CleverPay therefore produces ONE
+    // invoice, to the business, and charges once for producing it. The earlier
+    // per-driver basis assumed CleverPay was paying each driver individually,
+    // which is only true for independent PLNA drivers.
+    fleetFeeBasis: "PER_INVOICE",
+
+    // --- WHO MAY SIT UNDER A FLEET ACCOUNT ----------------------------------
+    // LOCKED by Brent 2026-07-29. Not a price — a membership condition, and it
+    // is the reason the fee above is charged once.
+    fleetDriverEligibility: {
+      selfEmployedAllowed: false,
+      requires: [
+        "Driver is engaged by the fleet business, not self-employed",
+        "Vehicle registered to the business holding the fleet account",
+        "Compliance details submitted by the driver through PLNA",
+        "Driver details associated with the business account"
+      ],
+      otherwise: "The driver sets up their own PLNA account and is billed as an " +
+                 "independent driver.",
+      reason: "Brent 2026-07-29: self-employed drivers under a fleet account are " +
+              "difficult to manage and financially unstable."
+    },
 
     accountTypes: {
       // ---- Driver side (PLNA) ---------------------------------------------
@@ -63,15 +88,34 @@
         maxDrivers: 1
       },
       PLNA_PLUS: {
-        name: "PLNA Plus", side: "DRIVER", status: "UNSET", level: "PLUS",
-        monthlyGbp: null,        // brief implies £10 — NOT confirmed, do not assume
-        paymentRunFeeGbp: null,  // never verified against a source; must be filled
+        name: "PLNA Plus", side: "DRIVER", status: "SET", level: "PLUS",
+        // Brent 2026-07-29: "keep as it stands" — £10 confirmed.
+        monthlyGbp: 10,
+        // Amount from PRICING_ENGINE_CONSTANTS §5.8 (Brent-approved 2026-07-18),
+        // which is the record Brent pointed to on 07-29 ("it's on the KNECT
+        // process flow — they get charged when an invoice is generated").
+        paymentRunFeeGbp: 6.00,
         maxDrivers: 1
       },
       PLNA_PRO: {
-        name: "PLNA Pro", side: "DRIVER", status: "UNSET", level: "PRO",
-        monthlyGbp: null,        // brief implies £50 — NOT confirmed, do not assume
-        paymentRunFeeGbp: null,
+        name: "PLNA Pro", side: "DRIVER", status: "SET", level: "PRO",
+        // Brent 2026-07-29: "keep as it stands" — £50 confirmed.
+        monthlyGbp: 50,
+        paymentRunFeeGbp: 0,
+        // ⚠️ UNRESOLVED SOURCE CONFLICT — do not publish this figure without a
+        // yes. PRICING_ENGINE_CONSTANTS §5.8 says PLNA Pro's payment run is £0,
+        // absorbed by HAF. The fee rule Brent locked on 2026-07-29 says the fee
+        // covers CleverPay's real work and must never be waived to make a tier
+        // look cheaper — which is exactly why he moved Fleet Pro off £0 to £5
+        // the same day ("not free as it's more work"). Both cannot be true.
+        sourceConflict: {
+          field: "paymentRunFeeGbp",
+          documented: 0,
+          documentedSource: "PRICING_ENGINE_CONSTANTS §5.8, approved 2026-07-18",
+          conflictsWith: "CleverPay fee rule locked 2026-07-29 (no waivers)",
+          askedOf: "Brent",
+          status: "OPEN"
+        },
         maxDrivers: 1
       },
 
@@ -109,11 +153,146 @@
       }
     },
 
+    // VAT — ANSWERED by Brent 2026-07-29: "plus VAT". Every account fee and
+    // payment-run fee on this engine is quoted and displayed ex-VAT, with VAT
+    // added at config.vatPct. Customer-facing pages must show "+ VAT".
+    vatTreatment: "EX_VAT_PLUS_VAT",
+
+    // =========================================================================
+    // WHAT EACH TIER ACTUALLY GIVES YOU
+    //
+    // Source: Brent's brief OTIS_HAF_PRICING_FREIGHT_FLEET_UPDATE.md (29 Jul
+    // 2026), sections 3, 6 and 7. Nothing here is invented — where the brief's
+    // NUMBERS were superseded by the fleet decisions locked later the same day
+    // (3 drivers not 5, 5 included not 10, the payment-run fee charged not
+    // waived) the text carries a {token} that reads the live figure out of
+    // accountTypes above, so a price change can never leave a feature list
+    // lying about it.
+    //
+    // Two rules from the brief are structural, not decoration:
+    //   1. Platform features and AI features are SEPARATE lists. Never mixed.
+    //   2. Anything not live yet is flagged comingSoon and is never shown as
+    //      included on any tier, however much the customer pays.
+    //
+    // The AI assistant is deliberately unnamed here. The brief calls it JUDD,
+    // the assistant actually live on the driver site is JAKO, and that clash is
+    // still open with Brent — so no name goes public from this file.
+    //
+    // unlocksAt is the LEVEL that unlocks the feature, never a tier code. That
+    // is what lets one catalogue serve Lite/Plus/Pro on any account type.
+    // =========================================================================
+    featureCatalogue: {
+      // ---- Driver side (PLNA) — brief section 7 ----------------------------
+      DRIVER: [
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Driver profile and vehicle details" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Your areas and availability" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Job notifications" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "KNECT eligibility, subject to activation and compliance" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Priority and return-route planning tools" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Improved terms on eligible jobs" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Best available terms on eligible jobs" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Performance tools" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Your own HAF-powered driver page" },
+
+        { unlocksAt: "LITE", group: "AI", text: "Guided setup and basic suggestions" },
+        { unlocksAt: "PLUS", group: "AI", text: "Planning-level AI help, within fair-use limits" },
+        { unlocksAt: "PRO",  group: "AI", text: "The full driver AI assistant" },
+        { unlocksAt: "PRO",  group: "AI", text: "Weekly reviews and approved growth tools" }
+      ],
+
+      // ---- Fleet side — brief section 6, numbers from the locked config -----
+      FLEET: [
+        { unlocksAt: "LITE", group: "PLATFORM", text: "One fleet company account" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Every driver keeps their own PLNA profile" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Up to {FLEET_LITE.maxDrivers} drivers" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "{FLEET_LITE.bookingsPerDriverPerDay} jobs per driver per day" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Driver, vehicle, availability and compliance overview" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Job allocation and fleet history" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Standard support" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "{FLEET_PRO.driversIncluded} drivers included, add more at £{FLEET_PRO.extraDriverMonthlyGbp} each per month" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Unlimited jobs per driver per day" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Central fleet dashboard with roles and permissions" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Advanced driver, vehicle, route and allocation tools" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Fleet reporting, exports and operational history" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Fleet-level compliance overview" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Priority fleet support" },
+
+        { unlocksAt: "LITE", group: "AI", text: "Guided fleet setup" },
+        { unlocksAt: "LITE", group: "AI", text: "Basic driver and vehicle matching suggestions" },
+        { unlocksAt: "LITE", group: "AI", text: "Missing compliance and availability prompts" },
+        { unlocksAt: "PRO",  group: "AI", text: "Fleet manager AI assistant" },
+        { unlocksAt: "PRO",  group: "AI", text: "Daily capacity and allocation planning" },
+        { unlocksAt: "PRO",  group: "AI", text: "Best-driver suggestions from approved area, vehicle and compliance" },
+        { unlocksAt: "PRO",  group: "AI", text: "Return-route and empty-mile prompts" },
+        { unlocksAt: "PRO",  group: "AI", text: "Exception, lateness and missing-POD alerts" },
+        { unlocksAt: "PRO",  group: "AI", text: "Weekly fleet performance summary" }
+      ],
+
+      // ---- Freight forwarder — brief section 3 -----------------------------
+      // Listed so the marks work the day these tiers are switched on. Their
+      // PRICES are deliberately NOT in accountTypes: the brief says £0/£50/£100
+      // and that has not been confirmed since, so this file will not quote them.
+      FREIGHT: [
+        { unlocksAt: "LITE", group: "PLATFORM", text: "One primary user" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Post third-party client loads" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Urgent, same-day and flexible or co-load requests" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Groupage", comingSoon: true },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "The job price shown before you confirm" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Card or CleverPay prepayment before release to the network" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Job status, collection and delivery updates, POD history" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Client and load references" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Three users included, £5 per extra user per month" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Reduced network fee on eligible jobs" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Saved clients, addresses, contacts and load templates" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Repeat and duplicate jobs" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Client load-management dashboard" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Searchable history, reporting and exports" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Priority account support" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Ten users included, £5 per extra user per month" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Lowest freight network-fee band on eligible jobs" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Team roles and permissions" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Client sub-accounts and ownership controls" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Advanced SLA, load, lane and service reporting" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Priority matching review for eligible loads" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Bulk posting and import tools", comingSoon: true },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Dedicated account support" },
+
+        { unlocksAt: "LITE", group: "AI", text: "Guided load entry" },
+        { unlocksAt: "LITE", group: "AI", text: "Missing-information and address checks" },
+        { unlocksAt: "LITE", group: "AI", text: "An automatic job summary before you submit" },
+        { unlocksAt: "LITE", group: "AI", text: "Basic customer update templates" },
+        { unlocksAt: "PLUS", group: "AI", text: "Account-level freight AI assistant" },
+        { unlocksAt: "PLUS", group: "AI", text: "Turn a message, email or note into a draft load" },
+        { unlocksAt: "PLUS", group: "AI", text: "Route, timing and service suggestions" },
+        { unlocksAt: "PLUS", group: "AI", text: "Draft confirmations and customer updates" },
+        { unlocksAt: "PLUS", group: "AI", text: "POD and completed-job summaries" },
+        { unlocksAt: "PLUS", group: "AI", text: "Weekly account activity summary" },
+        { unlocksAt: "PRO",  group: "AI", text: "Full freight operations AI assistant" },
+        { unlocksAt: "PRO",  group: "AI", text: "Multi-load review and prioritisation" },
+        { unlocksAt: "PRO",  group: "AI", text: "Missing-detail, deadline and SLA-risk alerts" },
+        { unlocksAt: "PRO",  group: "AI", text: "Consolidation, co-load and return-route opportunities" },
+        { unlocksAt: "PRO",  group: "AI", text: "Draft client messages on approved channels" },
+        { unlocksAt: "PRO",  group: "AI", text: "Weekly performance and exception report" }
+      ]
+    },
+
+    // What the entry level is CALLED on each side. The mark ladder is the same
+    // everywhere; only the bottom rung's name changes (brief: freight says
+    // "Free", driver and fleet say "Lite").
+    entryLevelLabel: { DRIVER: "Lite", FLEET: "Lite", FREIGHT: "Free" },
+
+    // Footnotes a tier card must carry. Brief section 6, stated plainly.
+    footnotes: {
+      FLEET: "Fleet Pro does not give every driver the full driver AI. Each " +
+             "driver's AI is set by their own PLNA tier.",
+      ALL: "CleverPay only charges when an invoice is generated. No work, no " +
+           "invoice, no charge."
+    },
+
     // Numbers the commercial model still needs before anything goes public.
     openDecisions: [
-      "PLNA_PLUS monthly + payment-run fee",
-      "PLNA_PRO monthly + payment-run fee",
-      "VAT: charged on account fees, yes or no — 'where VAT applies' is not a setting"
+      "PLNA_PRO payment-run fee — £0 documented, conflicts with the no-waiver " +
+      "rule locked 2026-07-29 (see PLNA_PRO.sourceConflict)"
     ]
   };
 
@@ -448,6 +627,96 @@
   }
 
   // ===========================================================================
+  // 6c. FEATURES — WHAT YOU HAVE, AND WHAT YOU ARE MISSING
+  //
+  // Brent 2026-07-29: "put crowns on the missing features per account tier so a
+  // PLUS symbol for the PLUS features that are missing on the LITE version and
+  // the CROWN symbol thats missing the features."
+  //
+  // So a tier's feature list is not a list of what it includes — it is the
+  // WHOLE ladder, with the rungs above you marked by the symbol of the tier
+  // that unlocks them. This file decides has/hasn't; tier-marks-v1.js draws it.
+  // ===========================================================================
+
+  // Feature text may carry {ACCOUNT_TYPE.field} so a number can only ever come
+  // from the priced config above. An unknown token throws rather than printing
+  // "{FLEET_PRO.driversIncluded}" onto a customer's screen.
+  function resolveTokens(text) {
+    return String(text).replace(/\{([A-Z_]+)\.([A-Za-z]+)\}/g, function (_, code, field) {
+      var t = config.accountTypes[code];
+      if (!t || t[field] === undefined || t[field] === null) {
+        throw new Error("Feature text references an unset figure: " + code + "." + field);
+      }
+      return String(t[field]);
+    });
+  }
+
+  function catalogueFor(side) {
+    var list = config.featureCatalogue[String(side || "").toUpperCase()];
+    if (!list) throw new Error("No feature catalogue for side: " + side);
+    return list.map(function (f) {
+      var out = { text: resolveTokens(f.text), group: f.group, unlocksAt: f.unlocksAt };
+      if (f.comingSoon) out.comingSoon = true;
+      return out;
+    });
+  }
+
+  // The full ladder as one account type sees it. Each row says whether it is
+  // included and, when it is not, which level unlocks it — that level is the
+  // symbol the page draws.
+  function featuresFor(code) {
+    var t = tier(code);
+    return featuresForSideLevel(t.side, t.level);
+  }
+
+  // The same thing for a side and level that has no priced tier yet (freight),
+  // so the marks work the day those tiers are switched on.
+  function featuresForSideLevel(side, level) {
+    var have = LEVEL_ORDER.indexOf(String(level || "").toUpperCase());
+    if (have < 0) throw new Error("Unknown level: " + level);
+    return catalogueFor(side).map(function (f) {
+      var need = LEVEL_ORDER.indexOf(f.unlocksAt);
+      var included = have >= need && !f.comingSoon;
+      return {
+        text: f.text,
+        group: f.group,
+        unlocksAt: f.unlocksAt,
+        comingSoon: !!f.comingSoon,
+        included: included,
+        // null when included — the mark exists ONLY on a feature you lack.
+        lockedBy: included || f.comingSoon ? null : f.unlocksAt
+      };
+    });
+  }
+
+  var LEVEL_ORDER = ["LITE", "PLUS", "PRO"];
+
+  // "2 more on Plus, 7 more on Pro" — the honest upgrade line for a card footer.
+  function missingSummary(code) {
+    var counts = { PLUS: 0, PRO: 0 };
+    featuresFor(code).forEach(function (f) {
+      if (f.lockedBy && counts[f.lockedBy] !== undefined) counts[f.lockedBy]++;
+    });
+    return counts;
+  }
+
+  // INVARIANT: the top of a ladder must be missing nothing. If a PRO tier ever
+  // reports a locked feature, a level has been mislabelled somewhere.
+  function ladderCheck() {
+    var breaches = [];
+    Object.keys(config.accountTypes).forEach(function (code) {
+      var t = config.accountTypes[code];
+      if (t.level !== "PRO") return;
+      featuresFor(code).forEach(function (f) {
+        if (f.lockedBy) {
+          breaches.push({ accountType: code, feature: f.text, lockedBy: f.lockedBy });
+        }
+      });
+    });
+    return { ok: breaches.length === 0, breaches: breaches };
+  }
+
+  // ===========================================================================
   // 7. PUBLIC API
   // ===========================================================================
   return {
@@ -455,6 +724,10 @@
     isProTier: isProTier,
     identity: identity,
     crownedTiers: crownedTiers,
+    featuresFor: featuresFor,
+    featuresForSideLevel: featuresForSideLevel,
+    missingSummary: missingSummary,
+    ladderCheck: ladderCheck,
     resolveInvoicingParty: resolveInvoicingParty,
     weeklyInvoice: weeklyInvoice,
     monthlyBill: monthlyBill,
