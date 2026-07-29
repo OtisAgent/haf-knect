@@ -3243,8 +3243,8 @@ function setComp(s,u){
    are the next build, and only they make it proof against a determined person. */
 const HAF_AUD={
   driver  :{network:true , ownJobsOnly:false},
-  business:{network:false, ownJobsOnly:true , hdr:'Deliveries you have booked', noun:'delivery'},
-  freight :{network:false, ownJobsOnly:true , hdr:'Loads you have posted'     , noun:'load'    },
+  business:{network:false, ownJobsOnly:true , hdr:'Deliveries you have booked', noun:'delivery', nounPl:'deliveries'},
+  freight :{network:false, ownJobsOnly:true , hdr:'Loads you have posted'     , noun:'load'    , nounPl:'loads'     },
   admin   :{network:true , ownJobsOnly:false}
 };
 function hafAud(){return HAF_AUD[window.HAF_ROLE]||HAF_AUD.driver;}
@@ -3323,13 +3323,13 @@ function hafMaskSweep(root){
    else's numbers, we count their OWN records: what is moving, what still needs a
    driver, what landed. Every figure here is counted from this account's jobs. */
 function dashOwnHero(){
-  const aud=hafAud(),noun=aud.noun||'job';
+  const aud=hafAud(),noun=aud.noun||'job',nounPl=aud.nounPl||(noun+'s');
   const jobs=(typeof HAF_JOBS!=='undefined'?HAF_JOBS:[]);
   const live=jobs.filter(j=>['assigned','collection','transit','delayed'].indexOf(j.status)>=0).length;
   const waiting=jobs.filter(j=>['awaiting','draft'].indexOf(j.status)>=0).length;
   const done=jobs.filter(j=>j.status==='delivered').length;
   const lbl=document.getElementById('dash-xch-lbl');
-  if(lbl)lbl.textContent='Your '+noun+'s — live';
+  if(lbl)lbl.textContent='Your '+nounPl+' — live';
   const sub=document.getElementById('dash-zone-sub');
   if(sub)sub.textContent=live+' on the move · '+waiting+' waiting for a driver';
   const nums=document.getElementById('dash-xch-nums');
@@ -3347,7 +3347,7 @@ function dashBuildOwnFeed(){
   const aud=hafAud(),freight=window.HAF_ROLE==='freight';
   const mine=(typeof HAF_JOBS!=='undefined'?HAF_JOBS:[]).filter(j=>j.status!=='closed');
   if(!mine.length){
-    el.innerHTML='<div class="card" style="text-align:center;color:var(--mu);font-size:.86rem">No '+(aud.noun||'job')+'s on the go. Post one and it appears here.</div>';
+    el.innerHTML='<div class="card" style="text-align:center;color:var(--mu);font-size:.86rem">No '+(aud.nounPl||'jobs')+' on the go. Post one and it appears here.</div>';
     return;
   }
   el.innerHTML=mine.map(j=>{
