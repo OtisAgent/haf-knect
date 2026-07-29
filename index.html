@@ -411,6 +411,9 @@ textarea.fi2{resize:vertical;min-height:70px}
 .xc{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:.95rem 1.05rem;margin-bottom:.7rem;box-shadow:var(--sd);transition:border-color .18s,box-shadow .18s}
 .xc:hover{border-color:rgba(255,120,0,.35);box-shadow:0 2px 12px rgba(255,120,0,.08)}
 .xc.xc-invite{border-color:var(--or-g)}
+/* a job this account posted — its own work, shown to nobody else */
+.xc.xc-own{border-color:var(--ln)}
+.xc.xc-own .xb.inv{color:#fff}
 .xc-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.5rem}
 .xc-badges{display:flex;gap:.28rem;align-items:center;flex-wrap:wrap}
 .xb{font-size:.57rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;padding:.18rem .5rem;border-radius:4px}
@@ -1356,12 +1359,12 @@ textarea.fi2{resize:vertical;min-height:70px}
           <div class="xch-status">
             <div class="xch-pulse"></div>
             <div>
-              <div class="xch-lbl">HAF KNECT Exchange — Live</div>
+              <div class="xch-lbl" id="dash-xch-lbl">HAF KNECT Exchange — Live</div>
               <div class="xch-sub" id="dash-zone-sub">Manchester · LWB · Accepting jobs now</div>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
-            <div class="xch-nums">
+            <div class="xch-nums" id="dash-xch-nums">
               <div class="xch-num"><div class="xch-nv" id="dash-earn">£142</div><div class="xch-nl">Today</div></div>
               <div class="xch-num neu"><div class="xch-nv" id="dash-jobs-done">3</div><div class="xch-nl">Jobs done</div></div>
               <div class="xch-num neu"><div class="xch-nv" id="dash-miles">84 mi</div><div class="xch-nl">Miles</div></div>
@@ -1377,7 +1380,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         <div id="dash-basic-focus" data-mode-only="basic" data-mode-display="block"></div>
 
         <!-- Network ticker -->
-        <div data-mode-only="advanced" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.45rem .75rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);margin-bottom:.75rem;font-size:.68rem;color:var(--mu)">
+        <div data-mode-only="advanced" data-aud="network" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.45rem .75rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);margin-bottom:.75rem;font-size:.68rem;color:var(--mu)">
           <span style="display:flex;align-items:center;gap:.3rem"><span style="width:7px;height:7px;border-radius:50%;background:#2dab60;display:inline-block;animation:pulse-dot 1.6s ease-in-out infinite"></span><strong style="color:var(--tx)">83</strong> drivers online</span>
           <span style="color:var(--ln)">·</span>
           <span><strong style="color:var(--tx)">12</strong> open jobs</span>
@@ -1391,7 +1394,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         </div>
 
         <!-- Areas across the network — simple tiles; expand into the full map on its own page -->
-        <div class="card" data-mode-only="advanced" style="margin-bottom:.85rem">
+        <div class="card" data-mode-only="advanced" data-aud="network" style="margin-bottom:.85rem">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem">
             <div><div class="ct" style="margin:0">Areas across the network</div><div style="font-size:.72rem;color:var(--mu)">Tap an area for detail — or open the full map.</div></div>
             <button class="btn btn-or btn-sm" onclick="dashFullMap()">🗺 Expand to full map</button>
@@ -1400,7 +1403,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         </div>
 
         <!-- Network stat cards -->
-        <div class="kg" data-mode-only="advanced" style="margin-bottom:.9rem">
+        <div class="kg" data-mode-only="advanced" data-aud="network" style="margin-bottom:.9rem">
           <div class="kc"><div class="kc-l">Drivers live</div><div class="kc-v or">83</div><div class="kc-d">on network now</div></div>
           <div class="kc"><div class="kc-l">Open jobs</div><div class="kc-v co">12</div><div class="kc-d">ready to grab</div></div>
           <div class="kc"><div class="kc-l">Your invites</div><div class="kc-v gn">2</div><div class="kc-d">direct to you</div></div>
@@ -1412,10 +1415,18 @@ textarea.fi2{resize:vertical;min-height:70px}
           <!-- Populated by _buildDashActions() on login -->
         </div>
 
-        <!-- Direct invites preview (driver-relevant) -->
-        <div class="xfeed-hdr" id="dash-feed-hdr">Direct invites <span style="background:var(--or);color:#fff;padding:.1rem .5rem;border-radius:4px;font-size:.58rem;margin-left:.25rem">2</span></div>
+        <!-- YOUR POSTED JOBS — the whole dashboard feed for accounts that post work
+             (business, freight). Built by dashBuildOwnFeed() from this account's own
+             records only; it never reads, and never can read, another account's job. -->
+        <div id="dash-own-wrap" style="display:none">
+          <div class="xfeed-hdr" id="dash-own-hdr">Jobs you have posted</div>
+          <div id="dash-own-feed"></div>
+        </div>
 
-        <div class="xc xc-invite">
+        <!-- Direct invites preview (driver-relevant) -->
+        <div class="xfeed-hdr" id="dash-feed-hdr" data-aud="network">Direct invites <span style="background:var(--or);color:#fff;padding:.1rem .5rem;border-radius:4px;font-size:.58rem;margin-left:.25rem">2</span></div>
+
+        <div class="xc xc-invite" data-aud="network">
           <div class="xc-head">
             <div class="xc-badges"><span class="xb inv">Invite</span><span class="xb urg">Urgent</span><span class="xb-ref">HAF-2858</span></div>
             <div class="xc-viewers"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 3 viewing</div>
@@ -1435,7 +1446,7 @@ textarea.fi2{resize:vertical;min-height:70px}
           </div>
         </div>
 
-        <div class="xc xc-invite">
+        <div class="xc xc-invite" data-aud="network">
           <div class="xc-head">
             <div class="xc-badges"><span class="xb inv">Invite</span><span class="xb sdy">Same-day</span><span class="xb-ref">HAF-2861</span></div>
             <div class="xc-viewers"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 1 viewing</div>
@@ -1456,7 +1467,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 
         <!-- See all CTA — Basic reaches the same places from the focus card and the
              sidebar, so this row stands down there rather than repeating itself -->
-        <div data-mode-only="advanced" style="text-align:center;margin-top:.85rem">
+        <div data-mode-only="advanced" data-aud="network" style="text-align:center;margin-top:.85rem">
           <button onclick="switchTab('pane-d-invites')" class="btn btn-gh btn-sm" style="margin-right:.5rem">View all exchange jobs →</button>
           <button onclick="switchTab('pane-f-cap')" class="btn btn-gh btn-sm">Full network map →</button>
         </div>
@@ -1937,7 +1948,8 @@ textarea.fi2{resize:vertical;min-height:70px}
       </div>
 
       <!-- BUSINESS: Saved Addresses -->
-      <div class="tp" id="pane-b-saved">
+      <!-- data-exact: your own addresses, which you typed — the area rule does not apply -->
+      <div class="tp" id="pane-b-saved" data-exact="1">
         <h1 class="pt">Saved Addresses</h1><p class="ps">Your regular warehouses, shops and delivery points.</p>
         <div class="card"><div class="ct">Saved locations</div><div class="cr"><span class="ck">Main warehouse · Sheffield S9 1AA</span><button class="btn btn-gh btn-xs">Use</button></div><div class="cr"><span class="ck">Manchester depot · M60 1AA</span><button class="btn btn-gh btn-xs">Use</button></div><div class="cr"><span class="ck">Leeds store · LS1 2AB</span><button class="btn btn-gh btn-xs">Use</button></div></div>
         <button class="btn btn-or btn-sm">Add new address</button>
@@ -1959,7 +1971,9 @@ textarea.fi2{resize:vertical;min-height:70px}
       </div>
 
       <!-- LIVE JOB (shared spine — reshapes per role) -->
-      <div class="tp" id="pane-livejob">
+      <!-- data-exact: this is a job you hold — the driver and the customer both need
+           the real address to make the delivery happen, so it is shown in full here -->
+      <div class="tp" id="pane-livejob" data-exact="1">
         <div id="lj-body"></div>
       </div>
 
@@ -3033,7 +3047,9 @@ function _showDemoBar(roleLabel){
   if(bar){bar.style.display='flex';}
   if(lbl)lbl.textContent=roleLabel;
   if(row){
-    const links=DEMO_EXPLORE[roleLabel]||[];
+    let links=DEMO_EXPLORE[roleLabel]||[];
+    /* the demo shortcuts obey the same audience rule as the nav */
+    if(!hafAud().network)links=links.filter(l=>AUD_NETWORK_TABS.indexOf(String(l.t).replace('pane-',''))<0);
     row.innerHTML=links.map(l=>`<button onclick="switchTab('${l.t}')" style="padding:.2rem .55rem;border:1px solid var(--ln);border-radius:20px;background:var(--p);font-size:.65rem;font-weight:700;color:var(--mu);cursor:pointer;transition:all .12s" onmouseover="this.style.borderColor='var(--or)';this.style.color='var(--or)'" onmouseout="this.style.borderColor='var(--ln)';this.style.color='var(--mu)'">${l.l}</button>`).join('');
   }
 }
@@ -3211,9 +3227,160 @@ function setComp(s,u){
   else{['dc-lic','dc-mot','dc-ins','dc-rtw'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=v});const g=document.getElementById('dc-git');if(g)g.innerHTML=p;}
   const un=document.getElementById('dc-uname');if(un)un.textContent=u;
 }
+/* ═══════════════ ACCOUNT AUDIENCE — what this account may see at all ═══════════════
+   Brent, 29 Jul 2026: an account that POSTS work (business, freight forwarder) sees
+   only the jobs it has posted. Not the wider network, not other accounts' work, not
+   the driver directory. Drivers still see the Exchange — that is the job they do.
+
+   This is resolved BEFORE the Basic/Advanced switch, and it does not merely hide:
+   anything marked data-aud="network" is TAKEN OUT of the document for accounts that
+   may not see it, and nav entries they may not have are never built. The detail
+   switch only ever touches nodes currently in the dashboard pane, so it cannot put
+   a single one of them back — there is nothing there to put back.
+
+   Honest limit, unchanged by this: sign-in is still resolved in the browser, so this
+   is a correct audience model, not yet a server-enforced one. Server-side sessions
+   are the next build, and only they make it proof against a determined person. */
+const HAF_AUD={
+  driver  :{network:true , ownJobsOnly:false},
+  business:{network:false, ownJobsOnly:true , hdr:'Deliveries you have booked', noun:'delivery'},
+  freight :{network:false, ownJobsOnly:true , hdr:'Loads you have posted'     , noun:'load'    },
+  admin   :{network:true , ownJobsOnly:false}
+};
+function hafAud(){return HAF_AUD[window.HAF_ROLE]||HAF_AUD.driver;}
+/* nav entries that look outward at the network rather than at your own work */
+const AUD_NETWORK_TABS=['f-cap','f-dir','f-cover'];
+let _audOut=[],_audHero=null;
+function audTakeOut(){
+  document.querySelectorAll('[data-aud="network"]').forEach(el=>{
+    const mk=document.createComment('aud');el.replaceWith(mk);_audOut.push({el,mk});
+  });
+}
+function audPutBack(){
+  _audOut.forEach(({el,mk})=>{if(mk.parentNode)mk.replaceWith(el);});
+  _audOut=[];
+}
+function applyAudience(){
+  const aud=hafAud();
+  if(aud.network)audPutBack();else audTakeOut();
+  const wrap=document.getElementById('dash-own-wrap');
+  if(wrap)wrap.style.display=aud.ownJobsOnly?'block':'none';
+  /* keep the driver's own hero so switching account puts it back exactly */
+  if(!_audHero){
+    const g=id=>{const e=document.getElementById(id);return e?e.innerHTML:null;};
+    _audHero={lbl:g('dash-xch-lbl'),sub:g('dash-zone-sub'),nums:g('dash-xch-nums')};
+  }
+  if(aud.ownJobsOnly){
+    const hdr=document.getElementById('dash-own-hdr');
+    if(hdr)hdr.textContent=aud.hdr||'Jobs you have posted';
+    dashOwnHero();
+    dashBuildOwnFeed();
+  }else{
+    /* leave nothing of the previous account behind on a shared demo box */
+    const feed=document.getElementById('dash-own-feed');if(feed)feed.innerHTML='';
+    const s=(id,v)=>{const e=document.getElementById(id);if(e&&v!==null)e.innerHTML=v;};
+    s('dash-xch-lbl',_audHero.lbl);s('dash-zone-sub',_audHero.sub);s('dash-xch-nums',_audHero.nums);
+    const pill=document.getElementById('dash-pill');if(pill)pill.style.display='';
+  }
+}
+
+/* ═══════════════ LOCATION MASKING ═══════════════
+   Brent, 29 Jul 2026: no full postcodes on screen, and no exact pin on a map, for
+   work that is not yours. We show the AREA instead — the outward half of the
+   postcode, which covers a whole district, and a wide circle rather than a point.
+   A competitor reading the screen cannot find the customer's door from it.
+   The precise address is released to the ONE driver holding the job and to the
+   account that posted it, because they both need it to make the delivery happen. */
+function hafOutward(s){
+  return String(s??'').replace(/\b([A-Z]{1,2}[0-9][A-Z0-9]?)\s*[0-9][A-Z]{2}\b/gi,(m,o)=>o.toUpperCase());
+}
+/* area label for anything shown to someone who does not hold the job */
+function hafArea(s){return hafOutward(s);}
+/* how wide an unassigned job is drawn on a map, in metres — a district, not a door */
+const HAF_AREA_RADIUS=9000;
+/* Backstop so this stays true as the app grows: after a page is drawn, any full
+   postcode still sitting in visible text is cut back to its area. Places that are
+   legitimately exact — the job you are actually delivering, your own saved
+   addresses — opt out by marking the container data-exact="1". */
+const HAF_PC_RX=/\b([A-Z]{1,2}[0-9][A-Z0-9]?)\s*[0-9][A-Z]{2}\b/g;
+function hafMaskSweep(root){
+  const scope=root||document.body;if(!scope||!scope.querySelectorAll)return;
+  const skip=n=>{for(let e=n.parentElement;e;e=e.parentElement){
+    const tg=e.tagName;
+    if(tg==='SCRIPT'||tg==='STYLE'||tg==='TEXTAREA')return true;
+    if(e.hasAttribute&&e.hasAttribute('data-exact'))return true;
+  }return false;};
+  const w=document.createTreeWalker(scope,NodeFilter.SHOW_TEXT,null);
+  const hits=[];
+  for(let n=w.nextNode();n;n=w.nextNode()){
+    if(n.nodeValue&&/[A-Z]{1,2}[0-9][A-Z0-9]?\s*[0-9][A-Z]{2}/.test(n.nodeValue)&&!skip(n))hits.push(n);
+  }
+  hits.forEach(n=>{n.nodeValue=n.nodeValue.replace(HAF_PC_RX,(m,o)=>o.toUpperCase());});
+}
+
+/* The hero strip is written for a driver — today's earnings, miles, an availability
+   pill. An account that posts work has none of those. Rather than show it someone
+   else's numbers, we count their OWN records: what is moving, what still needs a
+   driver, what landed. Every figure here is counted from this account's jobs. */
+function dashOwnHero(){
+  const aud=hafAud(),noun=aud.noun||'job';
+  const jobs=(typeof HAF_JOBS!=='undefined'?HAF_JOBS:[]);
+  const live=jobs.filter(j=>['assigned','collection','transit','delayed'].indexOf(j.status)>=0).length;
+  const waiting=jobs.filter(j=>['awaiting','draft'].indexOf(j.status)>=0).length;
+  const done=jobs.filter(j=>j.status==='delivered').length;
+  const lbl=document.getElementById('dash-xch-lbl');
+  if(lbl)lbl.textContent='Your '+noun+'s — live';
+  const sub=document.getElementById('dash-zone-sub');
+  if(sub)sub.textContent=live+' on the move · '+waiting+' waiting for a driver';
+  const nums=document.getElementById('dash-xch-nums');
+  if(nums)nums.innerHTML=
+    '<div class="xch-num"><div class="xch-nv">'+live+'</div><div class="xch-nl">On the move</div></div>'+
+    '<div class="xch-num neu"><div class="xch-nv">'+waiting+'</div><div class="xch-nl">Awaiting driver</div></div>'+
+    '<div class="xch-num neu"><div class="xch-nv">'+done+'</div><div class="xch-nl">Delivered</div></div>';
+  /* "Online / accepting jobs" is a driver's switch — it means nothing on this account */
+  const pill=document.getElementById('dash-pill');
+  if(pill)pill.style.display='none';
+}
+
+function dashBuildOwnFeed(){
+  const el=document.getElementById('dash-own-feed');if(!el)return;
+  const aud=hafAud(),freight=window.HAF_ROLE==='freight';
+  const mine=(typeof HAF_JOBS!=='undefined'?HAF_JOBS:[]).filter(j=>j.status!=='closed');
+  if(!mine.length){
+    el.innerHTML='<div class="card" style="text-align:center;color:var(--mu);font-size:.86rem">No '+(aud.noun||'job')+'s on the go. Post one and it appears here.</div>';
+    return;
+  }
+  el.innerHTML=mine.map(j=>{
+    const st=(typeof HAF_STATUS!=='undefined'&&HAF_STATUS[j.status])||['—','#8a97a0'];
+    const money=freight
+      ? [['Sell',j.sell],['Buy',j.buy],['Margin',j.margin]]
+      : [['Price',j.price],['VAT',j.vat]];
+    const cells=[['Collect',j.collect],['Vehicle',j.vehicle],['Distance',j.distance]]
+      .concat(money.slice(0,1).map(m=>[m[0],m[1]]));
+    return '<div class="xc xc-own">'+
+      '<div class="xc-head"><div class="xc-badges">'+
+        '<span class="xb inv" style="background:'+st[1]+'">'+hafEsc(st[0])+'</span>'+
+        '<span class="xb-ref">'+hafEsc(j.id)+'</span></div></div>'+
+      '<div class="xc-route">'+hafEsc(hafArea(j.from.name))+' → '+hafEsc(hafArea(j.to.name))+'</div>'+
+      '<div class="xc-sr">'+cells.map((c,i)=>
+        '<div class="xcs'+(i===cells.length-1?' rate':'')+'"><div class="xcs-v">'+hafEsc(c[1]||'—')+'</div><div class="xcs-k">'+hafEsc(c[0])+'</div></div>').join('')+
+      '</div>'+
+      '<div class="xc-goods">'+hafEsc(j.goods)+'</div>'+
+      '<div class="xc-foot"><div class="xc-meta">'+
+        (j.driverName&&j.driverName!=='—'?'Driver '+hafEsc(j.driverName)+' · ':'')+
+        'ETA '+hafEsc(j.eta||'—')+'</div>'+
+        '<div class="xc-btns"><button class="btn btn-or btn-sm" onclick="hafOpenJob(\''+j.id+'\')">Track this '+(aud.noun||'job')+' →</button></div>'+
+      '</div></div>';
+  }).join('');
+}
+
 function buildNav(tabs){
+  /* role first — the audience decides which entries are built at all */
+  window.HAF_ROLE=(tabs===DRIVER_NAV)?'driver':(tabs===BUSINESS_NAV)?'business':(tabs===FREIGHT_NAV||tabs===PERSONAL_NAV)?'freight':'admin';
+  const aud=hafAud();
+  const shown=aud.network?tabs:tabs.filter(t=>AUD_NETWORK_TABS.indexOf(t.id)<0);
   let h='',cs='';
-  tabs.forEach(t=>{
+  shown.forEach(t=>{
     if(t.s!==cs){if(cs)h+='<hr class="sdiv">';h+=`<div class="nav-sec">${t.s}</div>`;cs=t.s;}
     const click=t.id==='livejob'?'hafOpenJobs()':`switchTab('pane-${t.id}')`;
     h+=`<div class="ni" id="ni-${t.id}" onclick="${click}"><svg class="ni-ic" viewBox="0 0 24 24">${t.ico}</svg>${t.l}${t.badge?`<span class="nb">${t.badge}</span>`:''}</div>`;
@@ -3222,8 +3389,8 @@ function buildNav(tabs){
   const promo=document.getElementById('sb-plna');
   if(promo)promo.style.display=(tabs===DRIVER_NAV)?'none':'block';
   _fbRoleGuess=(tabs===DRIVER_NAV)?'driver':(tabs===BUSINESS_NAV)?'business':(tabs===FREIGHT_NAV)?'business':'team';
-  /* one place decides the Live Job view: driver / business / freight (Brent's personal + admin see the freight view) */
-  window.HAF_ROLE=(tabs===DRIVER_NAV)?'driver':(tabs===BUSINESS_NAV)?'business':(tabs===FREIGHT_NAV||tabs===PERSONAL_NAV)?'freight':'admin';
+  /* the Live Job view was decided at the top of this function, with the audience */
+  applyAudience();
   hafRenderLiveWidget();
 }
 let ct=null;
@@ -3236,6 +3403,8 @@ function switchTab(id){
   if(id==='pane-d-home'){setTimeout(renderDashAreas,80);loadDashMode();}
   if(id==='pane-f-cap')setTimeout(capBootPane,80);
   if(id==='pane-livejob')setTimeout(hafRenderLive,60);
+  /* area rule applied to whatever this page just drew */
+  setTimeout(()=>{try{hafMaskSweep(p);}catch(e){}},140);
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
 }
 
@@ -3804,8 +3973,13 @@ function initDashMap(){
     L.circle([z.lat,z.lng],{radius:22000,fillColor:c.fill,color:c.stroke,weight:1,fillOpacity:.18}).addTo(dashMap);
     L.marker([z.lat,z.lng],{icon:L.divIcon({className:'',html:`<div style="text-align:center"><div style="background:${c.fill};color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;border:1.5px solid ${c.stroke};white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.3)">${z.city}</div><div style="font-size:8px;color:${c.stroke};font-weight:700">${z.n} drivers</div></div>`,iconSize:[80,28],iconAnchor:[40,8]})}).addTo(dashMap);
   });
+  /* Open jobs are drawn as an AREA, never a point. Until a job is yours you see the
+     district it is in and nothing sharper — no pin to zoom into, no address in the
+     popup. The exact location is released with the job, to the driver who takes it. */
   [{lat:52.92,lng:-1.48,ref:'HAF-2858',route:'Manchester → Birmingham'},{lat:52.30,lng:-0.88,ref:'HAF-2201',route:'Leeds → London'},{lat:53.44,lng:-2.18,ref:'HAF-2196',route:'Liverpool → Sheffield'},{lat:51.72,lng:-1.08,ref:'HAF-2189',route:'Bristol → London'}].forEach(j=>{
-    L.circleMarker([j.lat,j.lng],{radius:7,fillColor:'#ff7800',color:'#fff',weight:2,fillOpacity:.95}).addTo(dashMap).bindPopup(`<strong style="color:#ff7800">${j.ref}</strong><br>${j.route}`);
+    L.circle([j.lat,j.lng],{radius:HAF_AREA_RADIUS,fillColor:'#ff7800',color:'#ff7800',weight:1.5,fillOpacity:.16,dashArray:'4 3'})
+      .addTo(dashMap)
+      .bindPopup(`<strong style="color:#ff7800">${j.ref}</strong><br>${hafArea(j.route)}<br><span style="color:#8a97a0;font-size:11px">Area shown — exact address on accept</span>`);
   });
 }
 function _buildDashActions(role){
@@ -3831,7 +4005,9 @@ function _buildDashActions(role){
       {l:'Full network map',t:'pane-f-cap',style:'btn-gh'},
     ],
   };
-  const actions=maps[role]||maps.driver;
+  let actions=maps[role]||maps.driver;
+  /* an account that may not see the network never gets a button into it */
+  if(!hafAud().network)actions=actions.filter(a=>AUD_NETWORK_TABS.indexOf(a.t.replace('pane-',''))<0);
   el.innerHTML=actions.map(a=>`<button onclick="switchTab('${a.t}')" class="btn ${a.style} btn-sm">${a.l}</button>`).join('');
 }
 
@@ -3885,25 +4061,33 @@ function applyDashMode(){
 function dashBuildFocus(){
   const el=document.getElementById('dash-basic-focus');if(!el)return;
   const pane=document.getElementById('pane-d-home');
-  const card=pane?pane.querySelector('.xc.xc-invite'):null;
+  /* an invite if this account gets invites; otherwise the account's own top job */
+  const card=!pane?null:(hafAud().ownJobsOnly
+    ? pane.querySelector('.xc.xc-own')
+    : (pane.querySelector('.xc.xc-invite')||pane.querySelector('.xc.xc-own')));
+  const own=!!(card&&card.classList.contains('xc-own'));
   const t=(n,s)=>{const x=n?n.querySelector(s):null;return x?x.textContent.trim():'';};
   if(!card){
-    el.innerHTML='<div class="dbf-k">Next up</div><div class="dbf-none">Nothing waiting on you right now — you are online and the network can reach you.</div>';
+    el.innerHTML='<div class="dbf-k">Next up</div><div class="dbf-none">'+
+      (hafAud().ownJobsOnly?'Nothing on the go right now — post a job and it shows up here.'
+                           :'Nothing waiting on you right now — you are online and the network can reach you.')+'</div>';
     return;
   }
   const route=t(card,'.xc-route'),ref=t(card,'.xb-ref'),goods=t(card,'.xc-goods');
   const pay=t(card,'.xcs.rate .xcs-v'),payLbl=t(card,'.xcs.rate .xcs-k')||'Pay';
   const bits=[...card.querySelectorAll('.xcs')].filter(c=>!c.classList.contains('rate'))
     .map(c=>t(c,'.xcs-k')+' '+t(c,'.xcs-v')).filter(Boolean);
+  const jid=own?(card.querySelector('.xb-ref')||{}).textContent:'';
   el.innerHTML=
-    '<div class="dbf-k">Next up'+(ref?' · '+hafEsc(ref):'')+'</div>'+
+    '<div class="dbf-k">'+(own?'Your next '+hafEsc(hafAud().noun||'job'):'Next up')+(ref?' · '+hafEsc(ref):'')+'</div>'+
     '<div class="dbf-route">'+hafEsc(route)+'</div>'+
     '<div class="dbf-sub">'+hafEsc(bits.join(' · '))+(goods?' · '+hafEsc(goods):'')+'</div>'+
     '<div class="dbf-row">'+
       '<div><div class="dbf-pay">'+hafEsc(pay)+'</div><div class="dbf-payl">'+hafEsc(payLbl)+'</div></div>'+
-      '<div class="dbf-btns">'+
-        '<button class="btn btn-gh btn-sm" onclick="switchTab(\'pane-d-invites\')">See the details</button>'+
-        '<button class="btn btn-or btn-sm" onclick="dashFocusAccept()">Accept this job →</button>'+
+      '<div class="dbf-btns">'+(own
+        ? '<button class="btn btn-or btn-sm" onclick="hafOpenJob(\''+hafEsc(String(jid||'').trim())+'\')">Track this '+hafEsc(hafAud().noun||'job')+' →</button>'
+        : '<button class="btn btn-gh btn-sm" onclick="switchTab(\'pane-d-invites\')">See the details</button>'+
+          '<button class="btn btn-or btn-sm" onclick="dashFocusAccept()">Accept this job →</button>')+
       '</div>'+
     '</div>';
 }
