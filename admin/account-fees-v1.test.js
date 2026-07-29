@@ -138,5 +138,55 @@ ok("flat basis: Lite 3 drivers = £43.26 (not the live basis — per driver is l
 A.config.fleetFeeBasis = savedBasis;
 ok("basis restored to PER_DRIVER_LINE", A.config.fleetFeeBasis === "PER_DRIVER_LINE");
 
+// ---------------------------------------------------------------------------
+console.log("\n9. THE CROWN — Pro identity on any account type");
+// ---------------------------------------------------------------------------
+var C = require("./pro-crown.js");
+
+ok("Fleet Pro wears the crown", A.identity("FLEET_PRO").crown === true);
+ok("PLNA Pro wears the crown", A.identity("PLNA_PRO").crown === true);
+ok("Fleet Lite does not", A.identity("FLEET_LITE").crown === false);
+ok("PLNA Lite does not", A.identity("PLNA_LITE").crown === false);
+ok("PLNA Plus does not — Plus is not Pro", A.identity("PLNA_PLUS").crown === false);
+ok("exactly the two Pro tiers are crowned today",
+  A.crownedTiers().sort().join(",") === "FLEET_PRO,PLNA_PRO", A.crownedTiers());
+
+// Identity is not pricing: PLNA Pro's figures are still UNSET.
+ok("an UNSET Pro tier still earns the crown",
+  A.config.accountTypes.PLNA_PRO.status === "UNSET" && A.identity("PLNA_PRO").crown === true);
+ok("but an UNSET Pro tier still refuses to be quoted",
+  threw(function () { A.monthlyBill({ accountType: "PLNA_PRO", drivers: [] }); }));
+
+// "Any account type" — including ones that do not exist yet.
+A.config.accountTypes.BUSINESS_PRO_FUTURE = {
+  name: "Business Pro", side: "BUSINESS", status: "UNSET", level: "PRO",
+  monthlyGbp: null, paymentRunFeeGbp: null
+};
+ok("a brand-new Pro type is crowned with no extra wiring",
+  A.identity("BUSINESS_PRO_FUTURE").crown === true);
+ok("and it joins the crowned list automatically",
+  A.crownedTiers().indexOf("BUSINESS_PRO_FUTURE") !== -1);
+delete A.config.accountTypes.BUSINESS_PRO_FUTURE;
+ok("test type removed again", A.crownedTiers().length === 2);
+
+// The renderer must be incapable of showing a crown to a non-Pro.
+ok("renderer: Pro gets markup", C.forAccount(A.identity("FLEET_PRO")).indexOf("haf-crown") !== -1);
+ok("renderer: Lite gets nothing at all", C.forAccount(A.identity("FLEET_LITE")) === "");
+ok("renderer: Plus gets nothing at all", C.forAccount(A.identity("PLNA_PLUS")) === "");
+ok("renderer: unknown/absent account gets nothing", C.forAccount(null) === "" && C.forAccount({}) === "");
+ok("renderer: a bare level string works too", C.forAccount("PRO").indexOf("haf-crown") !== -1);
+ok("renderer: level is case-insensitive", C.isPro("pro") === true);
+ok("renderer: 'PROSPECT' is not 'PRO'", C.isPro("PROSPECT") === false);
+
+// It must be drawn artwork, not an emoji, and it must say Pro out loud.
+ok("the crown is a drawn SVG", C.svg().indexOf("<svg") === 0 && C.svg().indexOf("<path") !== -1);
+ok("no emoji anywhere in the badge", C.badge().indexOf("\u{1F451}") === -1);
+ok("screen readers hear 'Pro account'", C.badge().indexOf('aria-label="Pro account"') !== -1);
+ok("mark-only form drops the word but keeps the label for readers",
+  C.badge({ withLabel: false }).indexOf("haf-crown__label") === -1 &&
+  C.badge({ withLabel: false }).indexOf("Pro account") !== -1);
+ok("badge carries the brand accent via its own stylesheet",
+  C.css.indexOf("--haf-crown,#f18e00") !== -1);
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);
