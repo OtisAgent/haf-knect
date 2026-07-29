@@ -49,8 +49,10 @@ w = A.weeklyInvoice({
   fleetAccountType: "FLEET_PRO", driverAccountType: "PLNA_LITE",
   drivers: [{ id: "D1", wasPaid: true }, { id: "D2", wasPaid: true }]
 });
-ok("2 paid fleet drivers = 2 lines, never 4", w.lines.length === 2, w.lines);
-ok("2 paid fleet drivers = £10, not £29.98", approx(w.feeExVatGbp, 10.00), w);
+// Brent 2026-07-29: one invoice goes to the business, so one fee — however many
+// drivers are on it. Never one per driver, and never one each for fleet+driver.
+ok("2 paid fleet drivers = 1 line, never 2 or 4", w.lines.length === 1, w.lines);
+ok("2 paid fleet drivers = £5, not £10 and not £29.98", approx(w.feeExVatGbp, 5.00), w);
 ok("suppression is on the audit trail", w.flags.indexOf("DRIVER_FEE_SUPPRESSED") !== -1);
 
 r = A.resolveInvoicingParty({ driverAccountType: "PLNA_LITE" });
@@ -71,12 +73,22 @@ function fleetMonth(code, n, blocks) {
   return A.monthlyBill({ accountType: code, drivers: A.fullTimeDrivers(n, blocks) });
 }
 ok("Lite, 1 driver every week = £43.26", approx(fleetMonth("FLEET_LITE", 1).totalExVatGbp, 43.26), fleetMonth("FLEET_LITE", 1));
-ok("Lite, 3 drivers every week = £129.77", approx(fleetMonth("FLEET_LITE", 3).totalExVatGbp, 129.77));
-ok("Lite, 3 drivers two weeks each = £59.94", approx(fleetMonth("FLEET_LITE", 3, 2).totalExVatGbp, 59.94));
-ok("Pro, 3 drivers every week = £114.95", approx(fleetMonth("FLEET_PRO", 3).totalExVatGbp, 114.95));
-ok("Pro, 5 drivers every week = £158.25", approx(fleetMonth("FLEET_PRO", 5).totalExVatGbp, 158.25));
-ok("Pro, 10 drivers every week = £291.50", approx(fleetMonth("FLEET_PRO", 10).totalExVatGbp, 291.50));
-ok("Pro, 25 drivers every week = £691.25", approx(fleetMonth("FLEET_PRO", 25).totalExVatGbp, 691.25));
+// One invoice per fleet per week, so the payment-run cost is FLAT no matter how
+// many drivers are on it. Growth revenue comes from seats, never from the fee.
+ok("Lite, 3 drivers every week = £43.26 (same as 1 — one invoice)",
+  approx(fleetMonth("FLEET_LITE", 3).totalExVatGbp, 43.26), fleetMonth("FLEET_LITE", 3));
+ok("Lite, 3 drivers two weeks each = £19.98", approx(fleetMonth("FLEET_LITE", 3, 2).totalExVatGbp, 19.98));
+ok("Pro, 3 drivers every week = £71.65", approx(fleetMonth("FLEET_PRO", 3).totalExVatGbp, 71.65));
+ok("Pro, 5 drivers every week = £71.65", approx(fleetMonth("FLEET_PRO", 5).totalExVatGbp, 71.65));
+ok("Pro, 10 drivers every week = £96.65", approx(fleetMonth("FLEET_PRO", 10).totalExVatGbp, 96.65));
+ok("Pro, 25 drivers every week = £171.65", approx(fleetMonth("FLEET_PRO", 25).totalExVatGbp, 171.65));
+ok("Pro, 100 drivers every week = £546.65", approx(fleetMonth("FLEET_PRO", 100).totalExVatGbp, 546.65),
+  fleetMonth("FLEET_PRO", 100).paymentRuns);
+// The invoice fee must not move with driver count — that is the whole point.
+ok("the payment-run cost is identical at 3, 25 and 100 drivers",
+  approx(fleetMonth("FLEET_PRO", 3).paymentRuns.totalGbp, 21.65) &&
+  approx(fleetMonth("FLEET_PRO", 25).paymentRuns.totalGbp, 21.65) &&
+  approx(fleetMonth("FLEET_PRO", 100).paymentRuns.totalGbp, 21.65));
 
 var p10 = fleetMonth("FLEET_PRO", 10);
 ok("Pro at 10 sells 5 extra seats at £5", p10.subscription.extraSeats === 5 && approx(p10.subscription.extraSeatsGbp, 25), p10.subscription);
@@ -100,19 +112,44 @@ ok("no paid tier charges more per payment run than free", ladder.ok, ladder.brea
 var rec1 = A.recommendTier(1);
 ok("1 full-time driver: free tier is cheapest", rec1.cheapest.accountType === "FLEET_LITE", rec1.options);
 var rec3 = A.recommendTier(3);
-ok("3 full-time drivers: Pro is cheapest", rec3.cheapest.accountType === "FLEET_PRO", rec3.options);
-ok("3 full-time drivers save £14.82 by upgrading", approx(rec3.savingGbp, 14.82), rec3);
+// With one flat invoice fee the free tier is genuinely the cheapest right up to
+// its 3-driver cap. Pro is then sold on features and headroom, never on price.
+ok("3 full-time drivers: free tier is still cheapest", rec3.cheapest.accountType === "FLEET_LITE", rec3.options);
+ok("3 full-time drivers: Pro costs £28.39 more, and we say so", approx(rec3.savingGbp, 28.39), rec3);
+ok("no fleet ever pays more than £43.26 a month on the free tier",
+  approx(fleetMonth("FLEET_LITE", 3).totalExVatGbp, 43.26));
 var rec6 = A.recommendTier(6);
 ok("6 drivers: free tier is not even eligible", rec6.options[0].eligible === false && rec6.cheapest.accountType === "FLEET_PRO");
 
 // ---------------------------------------------------------------------------
 console.log("\n6. NO GUESSING — unset figures refuse to price");
 // ---------------------------------------------------------------------------
-ok("PLNA Plus is not priced yet", A.config.accountTypes.PLNA_PLUS.status === "UNSET");
-ok("quoting PLNA Plus throws rather than inventing a number",
-  threw(function () { A.monthlyBill({ accountType: "PLNA_PLUS", drivers: A.fullTimeDrivers(1) }); }));
-ok("quoting PLNA Pro throws too",
-  threw(function () { A.resolveInvoicingParty({ driverAccountType: "PLNA_PRO" }); }));
+// Confirmed by Brent 2026-07-29 ("keep as it stands"): Plus £10, Pro £50.
+ok("PLNA Plus is priced now", A.config.accountTypes.PLNA_PLUS.status === "SET");
+ok("PLNA Plus is £10 a month", approx(A.config.accountTypes.PLNA_PLUS.monthlyGbp, 10));
+ok("PLNA Pro is £50 a month", approx(A.config.accountTypes.PLNA_PRO.monthlyGbp, 50));
+ok("PLNA Plus, driver paid every week = £35.98 (£10 + 4.33 × £6)",
+  approx(A.monthlyBill({ accountType: "PLNA_PLUS", drivers: A.fullTimeDrivers(1) }).totalExVatGbp, 35.98),
+  A.monthlyBill({ accountType: "PLNA_PLUS", drivers: A.fullTimeDrivers(1) }));
+ok("an independent Plus driver is charged £6 per invoice, not the Lite £9.99",
+  approx(A.resolveInvoicingParty({ driverAccountType: "PLNA_PLUS" }).feeGbp, 6.00));
+
+// PLNA Pro's payment-run fee is documented at £0 but conflicts with the
+// no-waiver rule locked the same day. It must stay visibly flagged until Brent
+// rules on it — a number nobody has reconciled is not a number we publish.
+ok("PLNA Pro's fee still carries its unresolved conflict",
+  A.config.accountTypes.PLNA_PRO.sourceConflict &&
+  A.config.accountTypes.PLNA_PRO.sourceConflict.status === "OPEN",
+  A.config.accountTypes.PLNA_PRO.sourceConflict);
+
+// The no-guessing guard itself must still work for anything genuinely unpriced.
+A.config.accountTypes.TEST_UNSET = {
+  name: "Test Unset", side: "FLEET", status: "UNSET", level: "LITE",
+  monthlyGbp: null, paymentRunFeeGbp: null
+};
+ok("an UNSET type throws rather than inventing a number",
+  threw(function () { A.monthlyBill({ accountType: "TEST_UNSET", drivers: [] }); }));
+delete A.config.accountTypes.TEST_UNSET;
 ok("an unknown account type throws",
   threw(function () { A.monthlyBill({ accountType: "FLEET_GOLD", drivers: [] }); }));
 
@@ -122,21 +159,34 @@ console.log("\n7. VAT AND THE OTHER BASIS");
 w = A.weeklyInvoice({ fleetAccountType: "FLEET_PRO", drivers: [{ id: "D1", wasPaid: true }] });
 ok("£5 + 20% VAT = £6.00", approx(w.vatGbp, 1.00) && approx(w.feeIncVatGbp, 6.00), w);
 
-var savedBasis = A.config.fleetFeeBasis;
-A.config.fleetFeeBasis = "PER_INVOICE";
+// The live basis is one flat fee per invoice. The per-driver basis still exists
+// in the engine so the alternative can be modelled — it is not what we charge.
+ok("the live basis is one fee per invoice", A.config.fleetFeeBasis === "PER_INVOICE");
 w = A.weeklyInvoice({
   fleetAccountType: "FLEET_PRO",
   drivers: [{ id: "D1", wasPaid: true }, { id: "D2", wasPaid: true }, { id: "D3", wasPaid: true }]
 });
-ok("flat basis: 3 paid drivers, one invoice, one £5 fee", w.lines.length === 1 && approx(w.feeExVatGbp, 5.00), w);
-ok("flat basis is flagged on the invoice", w.flags.indexOf("FLAT_FEE_BASIS") !== -1);
-var flat5 = fleetMonth("FLEET_PRO", 5);
-ok("flat basis: Pro 5 drivers = £50 + £21.65 = £71.65", approx(flat5.totalExVatGbp, 71.65), flat5);
-var flatLite3 = fleetMonth("FLEET_LITE", 3);
-ok("flat basis: Lite 3 drivers = £43.26 (not the live basis — per driver is locked)",
-  approx(flatLite3.totalExVatGbp, 43.26), flatLite3);
+ok("live basis: 3 paid drivers, one invoice, one £5 fee", w.lines.length === 1 && approx(w.feeExVatGbp, 5.00), w);
+ok("live basis is flagged on the invoice", w.flags.indexOf("FLAT_FEE_BASIS") !== -1);
+
+var savedBasis = A.config.fleetFeeBasis;
+A.config.fleetFeeBasis = "PER_DRIVER_LINE";
+var perDriver5 = fleetMonth("FLEET_PRO", 5);
+ok("modelled per-driver basis: Pro 5 drivers would be £158.25 (not what we charge)",
+  approx(perDriver5.totalExVatGbp, 158.25), perDriver5);
+var perDriverLite3 = fleetMonth("FLEET_LITE", 3);
+ok("modelled per-driver basis: Lite 3 drivers would be £129.77 (not what we charge)",
+  approx(perDriverLite3.totalExVatGbp, 129.77), perDriverLite3);
 A.config.fleetFeeBasis = savedBasis;
-ok("basis restored to PER_DRIVER_LINE", A.config.fleetFeeBasis === "PER_DRIVER_LINE");
+ok("basis restored to PER_INVOICE", A.config.fleetFeeBasis === "PER_INVOICE");
+
+// The compliance condition that makes one invoice correct in the first place.
+ok("self-employed drivers may not sit under a fleet account",
+  A.config.fleetDriverEligibility.selfEmployedAllowed === false);
+ok("the fleet eligibility rule spells out what is required",
+  A.config.fleetDriverEligibility.requires.length >= 4);
+ok("VAT treatment is settled: prices are ex-VAT, plus VAT",
+  A.config.vatTreatment === "EX_VAT_PLUS_VAT" && A.config.vatPct === 20);
 
 // ---------------------------------------------------------------------------
 console.log("\n9. THE CROWN — Pro identity on any account type");
@@ -151,11 +201,15 @@ ok("PLNA Plus does not — Plus is not Pro", A.identity("PLNA_PLUS").crown === f
 ok("exactly the two Pro tiers are crowned today",
   A.crownedTiers().sort().join(",") === "FLEET_PRO,PLNA_PRO", A.crownedTiers());
 
-// Identity is not pricing: PLNA Pro's figures are still UNSET.
-ok("an UNSET Pro tier still earns the crown",
-  A.config.accountTypes.PLNA_PRO.status === "UNSET" && A.identity("PLNA_PRO").crown === true);
+// Identity is not pricing — the crown is earned by level, whatever the figures.
+A.config.accountTypes.TEST_PRO_UNSET = {
+  name: "Test Pro", side: "FLEET", status: "UNSET", level: "PRO",
+  monthlyGbp: null, paymentRunFeeGbp: null
+};
+ok("an UNSET Pro tier still earns the crown", A.identity("TEST_PRO_UNSET").crown === true);
 ok("but an UNSET Pro tier still refuses to be quoted",
-  threw(function () { A.monthlyBill({ accountType: "PLNA_PRO", drivers: [] }); }));
+  threw(function () { A.monthlyBill({ accountType: "TEST_PRO_UNSET", drivers: [] }); }));
+delete A.config.accountTypes.TEST_PRO_UNSET;
 
 // "Any account type" — including ones that do not exist yet.
 A.config.accountTypes.BUSINESS_PRO_FUTURE = {
@@ -187,6 +241,145 @@ ok("mark-only form drops the word but keeps the label for readers",
   C.badge({ withLabel: false }).indexOf("Pro account") !== -1);
 ok("badge carries the brand accent via its own stylesheet",
   C.css.indexOf("--haf-crown,#f18e00") !== -1);
+
+// ---------------------------------------------------------------------------
+console.log("\n8. THE MISSING-FEATURE MARKS — Plus mark and crown on what you lack");
+// ---------------------------------------------------------------------------
+var M = require("./tier-marks-v1.js");
+
+// --- the ladder itself -----------------------------------------------------
+var liteFeat = A.featuresFor("PLNA_LITE");
+var plusFeat = A.featuresFor("PLNA_PLUS");
+var proFeat = A.featuresFor("PLNA_PRO");
+
+ok("every tier on a side sees the same ladder", liteFeat.length === proFeat.length);
+ok("Lite is missing things", liteFeat.some(function (f) { return f.lockedBy; }));
+ok("Pro is missing nothing", A.ladderCheck().ok, A.ladderCheck().breaches);
+ok("Fleet Pro is missing nothing either",
+  A.featuresFor("FLEET_PRO").every(function (f) { return !f.lockedBy; }));
+
+// The exact thing Brent asked for, stated as a test.
+ok("a Plus feature on the Lite card is marked PLUS",
+  liteFeat.some(function (f) { return f.lockedBy === "PLUS"; }));
+ok("a Pro feature on the Lite card is marked PRO (the crown)",
+  liteFeat.some(function (f) { return f.lockedBy === "PRO"; }));
+ok("on the Plus card the Plus features are no longer marked",
+  plusFeat.every(function (f) { return f.lockedBy !== "PLUS"; }));
+ok("on the Plus card the Pro features still wear the crown",
+  plusFeat.some(function (f) { return f.lockedBy === "PRO"; }));
+
+// The invariant that stops a mark ever meaning "included".
+ok("no included feature carries a mark",
+  liteFeat.concat(plusFeat, proFeat).every(function (f) {
+    return !(f.included && f.lockedBy);
+  }));
+ok("an entry-level feature is never marked on the entry tier",
+  liteFeat.every(function (f) { return f.unlocksAt !== "LITE" || !f.lockedBy; }));
+
+// --- platform and AI stay separate (brief section 1) -----------------------
+ok("features are split into platform and AI",
+  liteFeat.some(function (f) { return f.group === "PLATFORM"; }) &&
+  liteFeat.some(function (f) { return f.group === "AI"; }));
+ok("only PLATFORM and AI groups exist",
+  ["DRIVER", "FLEET", "FREIGHT"].every(function (side) {
+    return A.config.featureCatalogue[side].every(function (f) {
+      return f.group === "PLATFORM" || f.group === "AI";
+    });
+  }));
+
+// --- coming soon is never sold as included ---------------------------------
+var freightPro = A.featuresForSideLevel("FREIGHT", "PRO");
+var soon = freightPro.filter(function (f) { return f.comingSoon; });
+ok("a coming-soon feature is not included even on the top tier",
+  soon.length > 0 && soon.every(function (f) { return f.included === false; }));
+ok("a coming-soon feature is not marked as an upgrade either",
+  soon.every(function (f) { return f.lockedBy === null; }));
+// It must not render a tick on the top tier either — that was the bug the
+// preview caught: "included" logic gave groupage a tick on every freight card.
+["LITE", "PLUS", "PRO"].forEach(function (lvl) {
+  var s = M.rowState("LITE", lvl, { comingSoon: true });
+  ok("coming soon on " + lvl + ": no tick, no upgrade mark, says Soon",
+    s.included === false && s.html.indexOf("haf-mark--have") === -1 &&
+    s.html.indexOf("haf-mark--pro") === -1 && s.html.indexOf("haf-mark--plus") === -1 &&
+    s.html.indexOf(">Soon<") !== -1, s.html);
+});
+ok("renderList marks coming-soon rows without being told the level",
+  M.renderList(A.config.featureCatalogue.FREIGHT, "PRO")
+    .filter(function (r) { return r.comingSoon; })
+    .every(function (r) { return r.state.html.indexOf("haf-mark--soon") !== -1; }));
+
+// --- numbers can never drift from the priced config ------------------------
+ok("fleet driver cap is read from the config, not typed into the copy",
+  A.featuresFor("FLEET_LITE").some(function (f) {
+    return f.text === "Up to " + A.config.accountTypes.FLEET_LITE.maxDrivers + " drivers";
+  }));
+ok("Fleet Pro seat price comes from the config",
+  A.featuresFor("FLEET_PRO").some(function (f) {
+    return f.text.indexOf("£" + A.config.accountTypes.FLEET_PRO.extraDriverMonthlyGbp +
+      " each per month") !== -1;
+  }));
+function withTempFeature(text, fn) {
+  A.config.featureCatalogue.FLEET.push({ unlocksAt: "PRO", group: "PLATFORM", text: text });
+  try { return fn(); } finally { A.config.featureCatalogue.FLEET.pop(); }
+}
+ok("a figure that isn't set throws rather than printing a token", threw(function () {
+  withTempFeature("{FLEET_PRO.notAFigureWeHold} a month", function () {
+    A.featuresFor("FLEET_LITE");
+  });
+}));
+ok("a token pointing at a tier that doesn't exist throws too", threw(function () {
+  withTempFeature("{BUSINESS_PRO.monthlyGbp} a month", function () {
+    A.featuresFor("FLEET_LITE");
+  });
+}));
+ok("no raw token survives into any customer-facing line",
+  ["PLNA_LITE", "PLNA_PLUS", "PLNA_PRO", "FLEET_LITE", "FLEET_PRO"].every(function (c) {
+    return A.featuresFor(c).every(function (f) { return f.text.indexOf("{") === -1; });
+  }));
+
+// --- the upgrade counter ---------------------------------------------------
+var sum = A.missingSummary("PLNA_LITE");
+ok("Lite is told how many more come with Plus and with Pro",
+  sum.PLUS > 0 && sum.PRO > 0, sum);
+ok("Pro is told it is missing nothing",
+  A.missingSummary("PLNA_PRO").PLUS === 0 && A.missingSummary("PLNA_PRO").PRO === 0);
+
+// --- the artwork -----------------------------------------------------------
+ok("the Plus mark is drawn, not an emoji",
+  M.plusSvg().indexOf("<svg") === 0 && M.plusSvg().indexOf("➕") === -1);
+ok("the crown in a feature list is the SAME crown as the badge",
+  M.crownSvg().indexOf('<path d="M3.4 8.2') !== -1);
+ok("Lite has no mark of its own", M.markFor("LITE") === null);
+ok("Plus and Pro both have one",
+  M.markFor("PLUS").label === "Plus" && M.markFor("PRO").label === "Pro");
+
+// --- the renderer gate -----------------------------------------------------
+var have = M.rowState("PLUS", "PRO");
+var lack = M.rowState("PRO", "LITE");
+ok("a feature you have renders a tick, never a mark",
+  have.included === true && have.html.indexOf("haf-mark--have") !== -1 &&
+  have.html.indexOf("haf-mark--pro") === -1);
+ok("a Pro feature you lack renders the crown and the word Pro",
+  lack.included === false && lack.html.indexOf("haf-mark--pro") !== -1 &&
+  lack.html.indexOf(">Pro<") !== -1);
+ok("a Plus feature you lack renders the Plus mark",
+  M.rowState("PLUS", "LITE").html.indexOf("haf-mark--plus") !== -1);
+ok("screen readers are told it is not included",
+  lack.html.indexOf('aria-label="Pro feature — not included on your tier"') !== -1);
+ok("a locked row is never struck through", M.css.indexOf("line-through") === -1);
+ok("unknown levels throw rather than guess",
+  threw(function () { M.rowState("GOLD", "LITE"); }) &&
+  threw(function () { M.rowState("PRO", "GOLD"); }));
+
+// The whole point, end to end: render the Lite card and count its symbols.
+var rendered = M.renderList(A.config.featureCatalogue.DRIVER, "LITE");
+var crowns = rendered.filter(function (r) { return r.state.unlockLabel === "Pro"; }).length;
+var pluses = rendered.filter(function (r) { return r.state.unlockLabel === "Plus"; }).length;
+ok("the Lite card ends up with both symbols on it", crowns > 0 && pluses > 0,
+  { crowns: crowns, pluses: pluses });
+ok("and the Pro card ends up with none",
+  M.renderList(A.config.featureCatalogue.DRIVER, "PRO")
+    .every(function (r) { return r.state.unlockLabel === null; }));
 
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);
