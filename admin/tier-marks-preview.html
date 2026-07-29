@@ -127,12 +127,13 @@
   document.getElementById("rowsDark").innerHTML = people.map(function(p){return rowHtml(p,true);}).join("");
 
   /* ---- tier cards --------------------------------------------------------- */
-  // Driver and fleet read their prices from the rulebook. Freight has no priced
-  // tiers yet, so its cards show the ladder and say so instead of inventing one.
+  // Every side now reads from the rulebook by account code — there is no
+  // hand-built card left on this page. Freight's three tiers are registered but
+  // unpriced, so their cards say "Price not set" rather than invent a figure.
   var SIDES = {
-    DRIVER:  { label:"Driver (PLNA)", codes:["PLNA_LITE","PLNA_PLUS","PLNA_PRO"] },
-    FLEET:   { label:"Fleet",         codes:["FLEET_LITE","FLEET_PRO"] },
-    FREIGHT: { label:"Freight forwarder", levels:["LITE","PLUS","PRO"] }
+    DRIVER:  { label:"Driver (PLNA)",     codes:["PLNA_LITE","PLNA_PLUS","PLNA_PRO"] },
+    FLEET:   { label:"Fleet",             codes:["FLEET_LITE","FLEET_PRO"] },
+    FREIGHT: { label:"Freight forwarder", codes:["FREIGHT_LITE","FREIGHT_PLUS","FREIGHT_PRO"] }
   };
 
   function featureHtml(f){
@@ -159,7 +160,11 @@
     if (missing.PRO)  more.push(M.rowState("PRO","LITE").html + '<span><strong>'+missing.PRO+'</strong> more with Pro</span>');
 
     return '<div class="tier'+(opts.level === "PRO" ? " is-pro" : "")+'">'+
-      '<h3>'+opts.name+' '+(opts.level === "PRO" ? C.badge({size:17}) : "")+'</h3>'+
+      // Crown only, no word, on a tier heading: the tier is already called Pro,
+      // and "PLNA Pro Pro" is what you get if the badge repeats it. The labelled
+      // badge is for places where the name does NOT say it — a person's name, an
+      // account row, a chat header.
+      '<h3>'+opts.name+' '+(opts.level === "PRO" ? C.badge({size:19, withLabel:false}) : "")+'</h3>'+
       '<div class="price">'+opts.price+'</div>'+
       group("PLATFORM") + group("AI") +
       (more.length ? '<div class="more">'+more.join('<span aria-hidden="true">·</span>')+'</div>' : "")+
@@ -169,31 +174,21 @@
   }
 
   function render(side){
-    var s = SIDES[side], html;
-    if (s.codes){
-      html = s.codes.map(function(code){
-        var t = A.config.accountTypes[code];
-        var price = t.status !== "SET" || t.monthlyGbp === null
-          ? '<span class="tbd">Price not set</span>'
-          : (t.monthlyGbp === 0 ? "Free" : "£"+t.monthlyGbp+' <small>/month</small>');
-        return cardHtml({
-          name: t.name, level: t.level, price: price,
-          features: A.featuresFor(code),
-          note: side === "FLEET" ? A.config.footnotes.FLEET : ""
-        });
-      }).join("");
-    } else {
-      html = s.levels.map(function(level){
-        var label = level === "LITE" ? A.config.entryLevelLabel.FREIGHT
-                  : (level === "PLUS" ? "Plus" : "Pro");
-        return cardHtml({
-          name: "Freight Forward " + label, level: level,
-          price: '<span class="tbd">Price not set</span>',
-          features: A.featuresForSideLevel("FREIGHT", level),
-          note: "These tiers are not priced in the rulebook yet, so no figure is shown."
-        });
-      }).join("");
-    }
+    var s = SIDES[side];
+    var html = s.codes.map(function(code){
+      var t = A.config.accountTypes[code];
+      var price = t.status !== "SET" || t.monthlyGbp === null
+        ? '<span class="tbd">Price not set</span>'
+        : (t.monthlyGbp === 0 ? "Free" : "£"+t.monthlyGbp+' <small>/month</small>');
+      return cardHtml({
+        name: t.name, level: t.level, price: price,
+        features: A.featuresFor(code),
+        note: side === "FLEET" ? A.config.footnotes.FLEET
+            : (side === "FREIGHT"
+                ? "These tiers are not priced yet, so no figure is shown."
+                : "")
+      });
+    }).join("");
     document.getElementById("tiers").innerHTML = html;
     Array.prototype.forEach.call(document.querySelectorAll("#tabs button"), function(b){
       b.setAttribute("aria-pressed", String(b.dataset.side === side));
