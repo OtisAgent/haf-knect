@@ -133,7 +133,7 @@ ok("flat basis is flagged on the invoice", w.flags.indexOf("FLAT_FEE_BASIS") !==
 var flat5 = fleetMonth("FLEET_PRO", 5);
 ok("flat basis: Pro 5 drivers = £50 + £21.65 = £71.65", approx(flat5.totalExVatGbp, 71.65), flat5);
 var flatLite3 = fleetMonth("FLEET_LITE", 3);
-ok("flat basis: Lite 3 drivers = £43.26 (this is the fork Brent must settle)",
+ok("flat basis: Lite 3 drivers = £43.26 (not the live basis — per driver is locked)",
   approx(flatLite3.totalExVatGbp, 43.26), flatLite3);
 A.config.fleetFeeBasis = savedBasis;
 ok("basis restored to PER_DRIVER_LINE", A.config.fleetFeeBasis === "PER_DRIVER_LINE");
