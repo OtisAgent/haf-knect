@@ -48,14 +48,10 @@
     blocksPerMonth: 4.33,
 
     // --- HOW THE FEE IS COUNTED ON A FLEET INVOICE --------------------------
-    // Brent confirmed the FLEET raises the invoice, not the driver. That kills
-    // the double charge. It leaves one open choice, parked here as a switch:
-    //   PER_DRIVER_LINE — one fee per driver on the fleet's weekly invoice
-    //                     (more drivers = more work, matching Brent's own
-    //                      reasoning for charging Fleet Pro rather than waiving)
-    //   PER_INVOICE     — one flat fee for the fleet's weekly invoice, whatever
-    //                     the driver count
-    // DEFAULT is PER_DRIVER_LINE. Awaiting Brent's pick — see openDecisions.
+    // LOCKED by Brent 2026-07-29: one fee per driver paid on the fleet's
+    // invoice. His reason, verbatim in substance: more drivers is more work for
+    // the network to process. The fleet raises the invoice, not the driver, so
+    // the driver is never charged a second time.
     fleetFeeBasis: "PER_DRIVER_LINE",
 
     accountTypes: {
@@ -87,7 +83,13 @@
         driversIncluded: 3,
         maxDrivers: 3,                    // hard cap — the upgrade trigger
         extraDriverMonthlyGbp: null,      // no seats sold above the cap
-        bookingsPerDriverPerDay: 2
+        bookingsPerDriverPerDay: 2,
+        // Customer-facing pitch. Capability only — never a price comparison.
+        sellsOn: [
+          "Up to 3 drivers",
+          "2 jobs per driver per day",
+          "No monthly fee"
+        ]
       },
       FLEET_PRO: {
         name: "Fleet Pro", side: "FLEET", status: "SET",
@@ -96,13 +98,19 @@
         driversIncluded: 5,
         maxDrivers: null,                 // unlimited
         extraDriverMonthlyGbp: 5,
-        bookingsPerDriverPerDay: null     // unlimited
+        bookingsPerDriverPerDay: null,    // unlimited
+        // Customer-facing pitch. Capability only — never a price comparison.
+        // Brent 2026-07-29: "the pro is about the features not the price".
+        sellsOn: [
+          "5 drivers included, add more any time",
+          "Unlimited jobs per driver per day",
+          "One weekly invoice for the whole fleet"
+        ]
       }
     },
 
     // Numbers the commercial model still needs before anything goes public.
     openDecisions: [
-      "fleetFeeBasis: PER_DRIVER_LINE (default) or PER_INVOICE",
       "PLNA_PLUS monthly + payment-run fee",
       "PLNA_PRO monthly + payment-run fee",
       "VAT: charged on account fees, yes or no — 'where VAT applies' is not a setting"
@@ -384,7 +392,9 @@
     };
   }
 
-  // At how many full-time drivers does Fleet Pro become the cheaper choice?
+  // INTERNAL MODELLING ONLY — never quote this to a customer.
+  // Brent 2026-07-29: Fleet Pro is sold on what it does, not on being cheaper.
+  // Use tier.sellsOn for anything a customer reads.
   function proBreakEven() {
     for (var n = 1; n <= 50; n++) {
       var lite = monthlyBill({ accountType: "FLEET_LITE", drivers: fullTimeDrivers(n) });
