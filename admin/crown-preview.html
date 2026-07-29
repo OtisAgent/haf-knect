@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>HAF — Pro crown preview</title>
+<style>
+  :root{
+    --brand-orange:#f18e00; --brand-orange-2:#ffb347; --brand-grey:#2f373e;
+    --ink:#12171c; --muted:#6b757e; --line:#e6e8ea; --bg:#f6f7f8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif}
+  .wrap{max-width:960px;margin:0 auto;padding:28px 18px 72px}
+  header.top{background:var(--brand-grey);color:#fff;padding:22px 18px}
+  header.top .wrap{padding:0 0}
+  header.top h1{margin:0;font-size:20px;letter-spacing:-.01em}
+  header.top p{margin:6px 0 0;color:#c8ced3;font-size:14px}
+  h2{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+     margin:38px 0 12px;font-weight:700}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}
+  .rows{display:grid;gap:0}
+  .row{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .av{width:38px;height:38px;border-radius:50%;flex:0 0 auto;background:#e9ecee;
+      display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--brand-grey);font-size:13px}
+  .who{min-width:0}
+  .nm{display:flex;align-items:center;gap:.45em;font-weight:600;flex-wrap:wrap}
+  .sub{color:var(--muted);font-size:13px}
+  .tiers{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .tier{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column}
+  .tier.pro{border-color:color-mix(in srgb,var(--brand-orange) 55%,transparent);
+            box-shadow:0 6px 20px -12px color-mix(in srgb,var(--brand-orange) 70%,transparent)}
+  .tier h3{margin:0;font-size:18px;display:flex;align-items:center;gap:.5em;flex-wrap:wrap}
+  .price{font-size:26px;font-weight:800;margin:10px 0 2px}
+  .price small{font-size:13px;font-weight:600;color:var(--muted)}
+  .tier ul{margin:12px 0 0;padding-left:18px;color:#39424a;font-size:14.5px}
+  .tier li{margin:5px 0}
+  .note{margin-top:14px;color:var(--muted);font-size:13px}
+  .dark{background:var(--brand-grey);color:#fff;border-color:#3d464e}
+  .dark .sub{color:#aeb6bc}
+  .dark .av{background:#48525a;color:#fff}
+  .scale{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+  .scale span.s{display:inline-flex;align-items:center;gap:.4em}
+  .foot{margin-top:34px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <h1>The Pro crown</h1>
+  <p>One symbol, earned by any account on a Pro tier. Preview only — nothing is live.</p>
+</div></header>
+
+<div class="wrap">
+
+  <h2>Beside a name</h2>
+  <div class="card"><div class="rows" id="rows"></div></div>
+
+  <h2>On a dark header</h2>
+  <div class="card dark"><div class="rows" id="rowsDark"></div></div>
+
+  <h2>On the tier cards</h2>
+  <div class="tiers" id="tiers"></div>
+
+  <h2>At every size it gets used</h2>
+  <div class="card scale" id="scale"></div>
+
+  <p class="foot" id="foot"></p>
+</div>
+
+<script src="./pro-crown.js"></script>
+<script src="./account-fees-v1.js"></script>
+<script>
+(function(){
+  var C = window.HAFProCrown, A = window.HAFAccountFees;
+  C.inject(document);
+
+  // Everyone in this list is rendered by the SAME gate the real pages use.
+  var people = [
+    { initials:"JW", name:"Jamie Ward",        sub:"Driver · PLNA Pro",   type:"PLNA_PRO"  },
+    { initials:"SD", name:"Sam Doyle",         sub:"Driver · PLNA Plus",  type:"PLNA_PLUS" },
+    { initials:"RC", name:"Ravi Chandra",      sub:"Driver · PLNA Lite",  type:"PLNA_LITE" },
+    { initials:"NL", name:"Northgate Logistics", sub:"Fleet · Fleet Pro", type:"FLEET_PRO" },
+    { initials:"BV", name:"Bell Vans",         sub:"Fleet · Fleet Lite",  type:"FLEET_LITE"}
+  ];
+
+  function rowHtml(p, markOnly){
+    return '<div class="row"><div class="av">'+p.initials+'</div><div class="who">'+
+      '<div class="nm">'+p.name+' '+C.forAccount(A.identity(p.type),{withLabel:!markOnly})+'</div>'+
+      '<div class="sub">'+p.sub+'</div></div></div>';
+  }
+  document.getElementById("rows").innerHTML = people.map(function(p){return rowHtml(p,false);}).join("");
+  document.getElementById("rowsDark").innerHTML = people.map(function(p){return rowHtml(p,true);}).join("");
+
+  // Tier cards read their words from the rulebook, never from this page.
+  var cards = ["FLEET_LITE","FLEET_PRO"].map(function(code){
+    var t = A.config.accountTypes[code], id = A.identity(code);
+    var crown = C.forAccount(id, { size: 18 });
+    var price = t.monthlyGbp === 0 ? 'Free' : '£'+t.monthlyGbp+' <small>/month</small>';
+    return '<div class="tier'+(id.crown?' pro':'')+'">'+
+      '<h3>'+t.name+' '+crown+'</h3>'+
+      '<div class="price">'+price+'</div>'+
+      '<ul>'+(t.sellsOn||[]).map(function(s){return '<li>'+s+'</li>';}).join('')+'</ul>'+
+      '<p class="note">CleverPay only charges when an invoice is generated. '+
+      'No work, no invoice, no charge.</p></div>';
+  }).join("");
+  document.getElementById("tiers").innerHTML = cards;
+
+  document.getElementById("scale").innerHTML =
+    [12,14,16,20,28,40].map(function(s){
+      return '<span class="s" style="font-size:'+s+'px">'+
+        C.badge({size:s})+'</span>';
+    }).join("");
+
+  var crowned = A.crownedTiers().map(function(c){return A.config.accountTypes[c].name;});
+  document.getElementById("foot").textContent =
+    "Crown shown for: " + crowned.join(", ") +
+    ". Every other tier renders nothing — the badge is produced by one gate that " +
+    "returns empty for anything that is not a Pro level. " + C.version + " / " + A.version + ".";
+})();
+</script>
+</body>
+</html>

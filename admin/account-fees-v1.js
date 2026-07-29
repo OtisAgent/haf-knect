@@ -57,19 +57,19 @@
     accountTypes: {
       // ---- Driver side (PLNA) ---------------------------------------------
       PLNA_LITE: {
-        name: "PLNA Lite", side: "DRIVER", status: "SET",
+        name: "PLNA Lite", side: "DRIVER", status: "SET", level: "LITE",
         monthlyGbp: 0,
         paymentRunFeeGbp: 9.99,
         maxDrivers: 1
       },
       PLNA_PLUS: {
-        name: "PLNA Plus", side: "DRIVER", status: "UNSET",
+        name: "PLNA Plus", side: "DRIVER", status: "UNSET", level: "PLUS",
         monthlyGbp: null,        // brief implies £10 — NOT confirmed, do not assume
         paymentRunFeeGbp: null,  // never verified against a source; must be filled
         maxDrivers: 1
       },
       PLNA_PRO: {
-        name: "PLNA Pro", side: "DRIVER", status: "UNSET",
+        name: "PLNA Pro", side: "DRIVER", status: "UNSET", level: "PRO",
         monthlyGbp: null,        // brief implies £50 — NOT confirmed, do not assume
         paymentRunFeeGbp: null,
         maxDrivers: 1
@@ -77,7 +77,7 @@
 
       // ---- Fleet side ------------------------------------------------------
       FLEET_LITE: {
-        name: "Fleet Lite", side: "FLEET", status: "SET",
+        name: "Fleet Lite", side: "FLEET", status: "SET", level: "LITE",
         monthlyGbp: 0,
         paymentRunFeeGbp: 9.99,
         driversIncluded: 3,
@@ -92,7 +92,7 @@
         ]
       },
       FLEET_PRO: {
-        name: "Fleet Pro", side: "FLEET", status: "SET",
+        name: "Fleet Pro", side: "FLEET", status: "SET", level: "PRO",
         monthlyGbp: 50,
         paymentRunFeeGbp: 5.00,           // Brent 2026-07-29: charged, not waived
         driversIncluded: 5,
@@ -412,10 +412,49 @@
   }
 
   // ===========================================================================
+  // 6b. IDENTITY — WHO WEARS THE CROWN
+  //
+  // Brent 2026-07-29: a crown identity symbol for people on the PRO versions,
+  // on ANY account type. So it is granted by LEVEL, not by tier name — a future
+  // Business Pro or Freight Pro earns it the moment it is added with
+  // level:"PRO", with nothing else to wire up.
+  //
+  // Identity is deliberately independent of pricing: PLNA Pro's figures are
+  // still UNSET and it STILL wears the crown. You can wear it before we can
+  // quote it. The artwork itself lives in pro-crown.js.
+  // ===========================================================================
+  function isProTier(code) {
+    return tier(code).level === "PRO";
+  }
+
+  // The full identity record for an account type. `crown` is the only thing a
+  // rendering surface should ever test — never a tier name, never a price.
+  function identity(code) {
+    var t = tier(code);
+    return {
+      accountType: code,
+      name: t.name,
+      side: t.side,
+      level: t.level || null,
+      crown: t.level === "PRO",
+      badgeLabel: t.level === "PRO" ? "Pro" : null
+    };
+  }
+
+  // Every account type that earns the crown today. Used by the preview page and
+  // by any audit that asks "who is showing a crown, and why".
+  function crownedTiers() {
+    return Object.keys(config.accountTypes).filter(isProTier);
+  }
+
+  // ===========================================================================
   // 7. PUBLIC API
   // ===========================================================================
   return {
     config: config,
+    isProTier: isProTier,
+    identity: identity,
+    crownedTiers: crownedTiers,
     resolveInvoicingParty: resolveInvoicingParty,
     weeklyInvoice: weeklyInvoice,
     monthlyBill: monthlyBill,
