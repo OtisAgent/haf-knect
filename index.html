@@ -684,6 +684,32 @@ textarea.fi2{resize:vertical;min-height:70px}
 .sm-card:active{transform:translateY(0)}
 .sm-va{display:flex;flex-direction:column;align-items:flex-start;gap:.1rem;padding:.65rem .8rem}
 #viewas-banner{display:none}
+
+/* ── DASHBOARD DETAIL MODE (Basic / Advanced) ──
+   Presentation only. The role config above has already decided what this
+   account may see; the switch below can only HIDE what is already on screen.
+   It never adds a field, a job, a figure or a nav item. */
+.dm-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.55rem}
+.dm-lbl{font-family:var(--fn);font-size:.62rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mu)}
+.dmsw{display:inline-flex;align-items:center;gap:0;background:var(--p2);border:1px solid var(--lns);border-radius:var(--pill);padding:2px}
+.dmsw-b{font-family:var(--fn);font-size:.62rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mu);background:none;border:0;border-radius:var(--pill);padding:.22rem .62rem;cursor:pointer;transition:background .14s,color .14s;white-space:nowrap}
+.dmsw-b:hover{color:var(--tx)}
+.dmsw-b.on{background:var(--or);color:#fff}
+#dash-basic-focus{display:none;background:var(--p);border:1.5px solid var(--or-g);border-radius:var(--r);padding:1rem 1.1rem;margin-bottom:.9rem}
+.dbf-k{font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--or);margin-bottom:.35rem}
+.dbf-route{font-size:1.12rem;font-weight:800;color:var(--tx);line-height:1.25;margin-bottom:.15rem}
+.dbf-sub{font-size:.76rem;color:var(--mu);margin-bottom:.8rem}
+.dbf-row{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}
+.dbf-pay{font-size:1.5rem;font-weight:800;color:var(--gn);line-height:1}
+.dbf-payl{font-size:.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mu)}
+.dbf-btns{display:flex;gap:.45rem;flex-wrap:wrap;margin-left:auto}
+.dbf-none{font-size:.86rem;color:var(--mu)}
+@media(max-width:768px){
+  .dmsw-b{font-size:.58rem;padding:.2rem .5rem}
+  .dbf-route{font-size:1rem}
+  .dbf-btns{margin-left:0;width:100%}
+  .dbf-btns .btn{flex:1}
+}
 </style>
 </head>
 <body>
@@ -1316,6 +1342,15 @@ textarea.fi2{resize:vertical;min-height:70px}
       <!-- EXCHANGE DASHBOARD (all member roles) -->
       <div class="tp" id="pane-d-home">
 
+        <!-- Detail switch — lives on the dashboard it controls -->
+        <div class="dm-row">
+          <div class="dm-lbl">Your dashboard</div>
+          <div class="dmsw" id="dash-mode-sw" role="group" aria-label="Dashboard detail level" title="How much detail the dashboard shows">
+            <button type="button" class="dmsw-b on" id="dmsw-basic" onclick="setDashMode('basic')">Basic</button>
+            <button type="button" class="dmsw-b" id="dmsw-adv" onclick="setDashMode('advanced')">Advanced</button>
+          </div>
+        </div>
+
         <!-- Status bar: mirrors the Exchange status bar -->
         <div class="xch-bar" id="dash-xch-bar">
           <div class="xch-status">
@@ -1337,8 +1372,12 @@ textarea.fi2{resize:vertical;min-height:70px}
           </div>
         </div>
 
+        <!-- BASIC MODE FOCUS CARD — built by dashBuildFocus() from the invite already
+             rendered below for this account. Reads the page, never a new source. -->
+        <div id="dash-basic-focus" data-mode-only="basic" data-mode-display="block"></div>
+
         <!-- Network ticker -->
-        <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.45rem .75rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);margin-bottom:.75rem;font-size:.68rem;color:var(--mu)">
+        <div data-mode-only="advanced" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.45rem .75rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);margin-bottom:.75rem;font-size:.68rem;color:var(--mu)">
           <span style="display:flex;align-items:center;gap:.3rem"><span style="width:7px;height:7px;border-radius:50%;background:#2dab60;display:inline-block;animation:pulse-dot 1.6s ease-in-out infinite"></span><strong style="color:var(--tx)">83</strong> drivers online</span>
           <span style="color:var(--ln)">·</span>
           <span><strong style="color:var(--tx)">12</strong> open jobs</span>
@@ -1352,7 +1391,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         </div>
 
         <!-- Areas across the network — simple tiles; expand into the full map on its own page -->
-        <div class="card" style="margin-bottom:.85rem">
+        <div class="card" data-mode-only="advanced" style="margin-bottom:.85rem">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem">
             <div><div class="ct" style="margin:0">Areas across the network</div><div style="font-size:.72rem;color:var(--mu)">Tap an area for detail — or open the full map.</div></div>
             <button class="btn btn-or btn-sm" onclick="dashFullMap()">🗺 Expand to full map</button>
@@ -1361,7 +1400,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         </div>
 
         <!-- Network stat cards -->
-        <div class="kg" style="margin-bottom:.9rem">
+        <div class="kg" data-mode-only="advanced" style="margin-bottom:.9rem">
           <div class="kc"><div class="kc-l">Drivers live</div><div class="kc-v or">83</div><div class="kc-d">on network now</div></div>
           <div class="kc"><div class="kc-l">Open jobs</div><div class="kc-v co">12</div><div class="kc-d">ready to grab</div></div>
           <div class="kc"><div class="kc-l">Your invites</div><div class="kc-v gn">2</div><div class="kc-d">direct to you</div></div>
@@ -1415,8 +1454,9 @@ textarea.fi2{resize:vertical;min-height:70px}
           </div>
         </div>
 
-        <!-- See all CTA -->
-        <div style="text-align:center;margin-top:.85rem">
+        <!-- See all CTA — Basic reaches the same places from the focus card and the
+             sidebar, so this row stands down there rather than repeating itself -->
+        <div data-mode-only="advanced" style="text-align:center;margin-top:.85rem">
           <button onclick="switchTab('pane-d-invites')" class="btn btn-gh btn-sm" style="margin-right:.5rem">View all exchange jobs →</button>
           <button onclick="switchTab('pane-f-cap')" class="btn btn-gh btn-sm">Full network map →</button>
         </div>
@@ -3193,7 +3233,7 @@ function switchTab(id){
   const p=document.getElementById(id);if(p)p.classList.add('on');
   const n=document.getElementById('ni-'+id.replace('pane-',''));if(n)n.classList.add('on');
   ct=id;
-  if(id==='pane-d-home')setTimeout(renderDashAreas,80);
+  if(id==='pane-d-home'){setTimeout(renderDashAreas,80);loadDashMode();}
   if(id==='pane-f-cap')setTimeout(capBootPane,80);
   if(id==='pane-livejob')setTimeout(hafRenderLive,60);
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
@@ -3793,6 +3833,86 @@ function _buildDashActions(role){
   };
   const actions=maps[role]||maps.driver;
   el.innerHTML=actions.map(a=>`<button onclick="switchTab('${a.t}')" class="btn ${a.style} btn-sm">${a.l}</button>`).join('');
+}
+
+/* ═══════════════ DASHBOARD DETAIL MODE — Basic / Advanced ═══════════════
+   Presentation only, and deliberately SUBTRACTIVE. Entitlement is resolved
+   first, upstream: buildNav() picks the account's nav, _buildDashActions()
+   picks its actions, HAF_ROLECFG picks its fields. Only then does this decide
+   how much of that already-authorised result gets drawn.
+   The rule that keeps it honest: applyDashMode() may only hide nodes that are
+   already on the page. It never fetches, never injects a field or a figure,
+   never touches nav, role or entitlement. Advanced therefore cannot reveal
+   anything Basic was hiding from someone who wasn't allowed it in the first
+   place — there is nothing there to reveal. */
+let _dashMode='basic';
+function _dashModeKey(){return 'knect-dash-mode:'+(_superUser||'guest');}
+function loadDashMode(){
+  let m='basic'; /* calm by default; the choice is remembered per account below */
+  try{const s=localStorage.getItem(_dashModeKey());if(s==='basic'||s==='advanced')m=s;}catch(e){}
+  _dashMode=m;dashBuildFocus();applyDashMode();
+}
+function setDashMode(m){
+  _dashMode=(m==='advanced')?'advanced':'basic';
+  try{localStorage.setItem(_dashModeKey(),_dashMode);}catch(e){}
+  applyDashMode();
+}
+function applyDashMode(){
+  const adv=_dashMode==='advanced';
+  const bb=document.getElementById('dmsw-basic'),ab=document.getElementById('dmsw-adv');
+  if(bb)bb.classList.toggle('on',!adv);
+  if(ab)ab.classList.toggle('on',adv);
+  const pane=document.getElementById('pane-d-home');
+  if(!pane)return;
+  pane.querySelectorAll('[data-mode-only]').forEach(el=>{
+    /* remember how the element was laid out BEFORE we ever hid it, so showing
+       it again restores flex/grid rather than flattening it to a block */
+    if(!el.dataset.dispKept){el.dataset.disp=el.style.display||el.getAttribute('data-mode-display')||'';el.dataset.dispKept='1';}
+    el.style.display=((el.getAttribute('data-mode-only')==='advanced')===adv)?el.dataset.disp:'none';
+  });
+  /* fine print inside the job cards — scoped to this pane, the Exchange page is untouched */
+  pane.querySelectorAll('.xc-viewers,.xc-pref,.xc-meta').forEach(el=>{el.style.display=adv?'':'none';});
+  /* Basic carries the top invite in the focus card, so the full feed stands down */
+  pane.querySelectorAll('.xc.xc-invite').forEach(el=>{el.style.display=adv?'':'none';});
+  const hdr=document.getElementById('dash-feed-hdr');
+  if(hdr)hdr.style.display=adv?'':'none';
+  /* quick actions: Basic shows the one that matters, Advanced shows the set */
+  const qa=document.getElementById('dash-quick-actions');
+  if(qa)[...qa.children].forEach((el,i)=>{el.style.display=(adv||i===0)?'':'none';});
+}
+/* builds the Basic focus card by READING the invite already rendered on this
+   pane for this account — same data, drawn calmer. No second source. */
+function dashBuildFocus(){
+  const el=document.getElementById('dash-basic-focus');if(!el)return;
+  const pane=document.getElementById('pane-d-home');
+  const card=pane?pane.querySelector('.xc.xc-invite'):null;
+  const t=(n,s)=>{const x=n?n.querySelector(s):null;return x?x.textContent.trim():'';};
+  if(!card){
+    el.innerHTML='<div class="dbf-k">Next up</div><div class="dbf-none">Nothing waiting on you right now — you are online and the network can reach you.</div>';
+    return;
+  }
+  const route=t(card,'.xc-route'),ref=t(card,'.xb-ref'),goods=t(card,'.xc-goods');
+  const pay=t(card,'.xcs.rate .xcs-v'),payLbl=t(card,'.xcs.rate .xcs-k')||'Pay';
+  const bits=[...card.querySelectorAll('.xcs')].filter(c=>!c.classList.contains('rate'))
+    .map(c=>t(c,'.xcs-k')+' '+t(c,'.xcs-v')).filter(Boolean);
+  el.innerHTML=
+    '<div class="dbf-k">Next up'+(ref?' · '+hafEsc(ref):'')+'</div>'+
+    '<div class="dbf-route">'+hafEsc(route)+'</div>'+
+    '<div class="dbf-sub">'+hafEsc(bits.join(' · '))+(goods?' · '+hafEsc(goods):'')+'</div>'+
+    '<div class="dbf-row">'+
+      '<div><div class="dbf-pay">'+hafEsc(pay)+'</div><div class="dbf-payl">'+hafEsc(payLbl)+'</div></div>'+
+      '<div class="dbf-btns">'+
+        '<button class="btn btn-gh btn-sm" onclick="switchTab(\'pane-d-invites\')">See the details</button>'+
+        '<button class="btn btn-or btn-sm" onclick="dashFocusAccept()">Accept this job →</button>'+
+      '</div>'+
+    '</div>';
+}
+/* Accept from Basic runs the SAME accept the card runs — one path, not a copy */
+function dashFocusAccept(){
+  const pane=document.getElementById('pane-d-home');
+  const btn=pane?pane.querySelector('.xc.xc-invite .xc-btns .btn-or'):null;
+  if(btn)btn.click();
+  setTimeout(()=>{dashBuildFocus();applyDashMode();},60);
 }
 
 /* ── NETWORK CAPACITY MAP ── */
