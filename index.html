@@ -2592,10 +2592,13 @@ function checkGate(){
   }
 }
 (function(){
-  if(localStorage.getItem('haf-knect-access')==='1'){
+  /* PUBLIC LAUNCH 2026-07-31 06:00 — KNECT is open to everyone; the gate never shows.
+     checkGate() is left intact so the code path can be restored by reverting this block alone. */
+  {
     const g=document.getElementById('access-gate');
     if(g)g.style.display='none';
-  }else{
+  }
+  if(false){
     setTimeout(()=>{const c=document.getElementById('ag-code');if(c)c.focus();},120);
   }
 })();
