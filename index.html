@@ -1447,7 +1447,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         <div class="card" data-mode-only="advanced" data-aud="network" style="margin-bottom:.85rem">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem">
             <div><div class="ct" style="margin:0">Areas across the network</div><div style="font-size:.72rem;color:var(--mu)">Tap an area for detail — or open the full map.</div></div>
-            <button class="btn btn-or btn-sm" onclick="dashFullMap()">🗺 Expand to full map</button>
+            <button class="btn btn-or btn-sm" onclick="dashFullMap()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5z"/><path d="M9 4v13"/><path d="M15 6.5v13"/></svg> Expand to full map</button>
           </div>
           <div id="dash-areas" class="cap-listgrid"></div>
         </div>
@@ -2047,7 +2047,7 @@ textarea.fi2{resize:vertical;min-height:70px}
             </div>
             <!-- Map / List view switch -->
             <div style="display:inline-flex;background:var(--p2);border:1.5px solid var(--ln);border-radius:22px;padding:3px">
-              <button id="cview-map" class="cap-role on" onclick="capSetView('map')">🗺 Map</button>
+              <button id="cview-map" class="cap-role on" onclick="capSetView('map')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5z"/><path d="M9 4v13"/><path d="M15 6.5v13"/></svg> Map</button>
               <button id="cview-list" class="cap-role" onclick="capSetView('list')">☰ List</button>
             </div>
           </div>
@@ -2161,7 +2161,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         <div id="cap-listview" style="display:none;margin-bottom:1rem">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem">
             <div style="font-size:.78rem;color:var(--mu)">Tap your area for cover &amp; booking — or open the full map.</div>
-            <button class="btn btn-or btn-sm" onclick="capSetView('map')">🗺 Expand to full map</button>
+            <button class="btn btn-or btn-sm" onclick="capSetView('map')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5z"/><path d="M9 4v13"/><path d="M15 6.5v13"/></svg> Expand to full map</button>
           </div>
           <div id="cap-list" class="cap-listgrid"></div>
         </div>
@@ -2173,7 +2173,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         <!-- Relay station leaderboard (driver view only) -->
         <div class="card" id="cap-lb-card" style="margin-top:1rem">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">
-            <div class="ct" style="margin:0">🏆 Relay Station Leaderboard</div>
+            <div class="ct" style="margin:0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3"/><path d="M17 6h3v1a3 3 0 0 1-3 3"/><path d="M12 14v3"/><path d="M9 20h6"/><path d="M10 17h4l.5 3h-5z"/></svg> Relay Station Leaderboard</div>
             <span class="chip ca" style="font-size:.62rem">Live as drivers log swaps</span>
           </div>
           <p style="font-size:.73rem;color:var(--mu);margin:.35rem 0 .8rem">Ranked by throughput — loads swapped, on-time rate and how fast each station turns a driver around. The top station sets the standard for the network.</p>
@@ -3604,6 +3604,13 @@ function hafRenderJobsList(){
 /* full Peace-of-Mind Live Job page — route, timeline, updates, messaging, POD */
 let ljMap=null,_ljForceJob=null;
 let ljPollTimer=null,ljDemoTimer=null,ljDriverMarker=null,ljDone=null,ljTogo=null,ljPinMarker=null,ljDotIcon=null;
+/* Tracking controls are drawn artwork, never emojis — an emoji renders differently on
+   every phone and none of them are HAF's. Same stroke house style as the rest of the app. */
+const HAF_TRK_ICO={
+ share:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><circle cx="12" cy="12" r="3"/><path d="M5.6 5.6a9 9 0 0 0 0 12.8"/><path d="M18.4 18.4a9 9 0 0 0 0-12.8"/></svg>',
+ play:'<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true" style="vertical-align:-2px"><path d="M8 5.5v13l11-6.5z"/></svg>',
+ pin:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="2.6"/></svg>'
+};
 function hafCurrentJob(){if(_ljForceJob){const j=HAF_JOBS.find(x=>x.id===_ljForceJob);if(j)return j;}return hafActiveJob();}
 function hafRenderLiveJob(){
  const body=document.getElementById('lj-body');if(!body)return;
@@ -3655,9 +3662,9 @@ function hafRenderLiveJob(){
         <div id="lj-liveinfo" style="position:absolute;bottom:10px;left:10px;z-index:1000;background:rgba(14,17,19,.78);border-radius:14px;padding:.22rem .55rem;font-size:.6rem;color:#cfe;backdrop-filter:blur(4px)">Driver location updated ${hafEsc(j.lastUpdate)}</div>
       </div>
       <div id="lj-trackctl" style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-top:.55rem">
-        <button class="btn btn-or btn-xs" onclick="hafShareLive()">📍 Share my live location</button>
-        <button class="btn btn-gh btn-xs" onclick="hafPlayDemoRun()">▶ Play a live run <span style="opacity:.55">demo</span></button>
-        <button class="btn btn-gh btn-xs" onclick="hafSimPin()">📌 Driver shared location <span style="opacity:.55">demo</span></button>
+        <button class="btn btn-or btn-xs" onclick="hafShareLive()">${HAF_TRK_ICO.share} Share my live location</button>
+        <button class="btn btn-gh btn-xs" onclick="hafPlayDemoRun()">${HAF_TRK_ICO.play} Play a live run <span style="opacity:.55">demo</span></button>
+        <button class="btn btn-gh btn-xs" onclick="hafSimPin()">${HAF_TRK_ICO.pin} Driver shared location <span style="opacity:.55">demo</span></button>
       </div>`
    :`
       <div class="card lj-prog">
@@ -3792,7 +3799,7 @@ function ljShowPin(j,d){
  const ago=d.ageSec==null?'':(' · '+(d.ageSec<60?d.ageSec+'s':Math.round(d.ageSec/60)+'m')+' ago');
  ljPinMarker.bindPopup((d.label||'Driver')+' shared this location'+ago);
  const info=document.getElementById('lj-liveinfo');
- if(info)info.innerHTML='📍 '+(d.label||'Driver')+' shared their location'+ago;
+ if(info)info.innerHTML=HAF_TRK_ICO.pin+' '+(d.label||'Driver')+' shared their location'+ago;
 }
 /* issue a short private tracking link for a job (cached per job) — carries no PII */
 let ljTokens={};
@@ -4459,7 +4466,7 @@ function capRenderDriverWork(){
    <div class="card" style="padding:1rem 1.1rem">
      <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.35rem">
        <div><div class="ct" style="margin:0">Your work</div><div style="font-size:.72rem;color:var(--mu)">Base: <b style="color:var(--tx)">${base.name}</b> · <a onclick="capChangeBase()" style="color:var(--or);cursor:pointer">change</a></div></div>
-       <button id="cap-mapviewbtn" class="btn btn-gh btn-sm" onclick="capToggleMapZone()">🗺 Full map view</button>
+       <button id="cap-mapviewbtn" class="btn btn-gh btn-sm" onclick="capToggleMapZone()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5z"/><path d="M9 4v13"/><path d="M15 6.5v13"/></svg> Full map view</button>
      </div>
      <div class="cw-secttl">Jobs from your base</div>
      <div class="cw-grid">${CAP_WORK_FROM.map(j=>card(j,false)).join('')}</div>
@@ -4477,7 +4484,7 @@ function capAcceptWork(id){
 function capToggleMapZone(open){
   capMapOpen=(open===undefined)?!capMapOpen:open;
   const mz=document.getElementById('cap-mapzone');if(mz)mz.style.display=capMapOpen?'':'none';
-  const btn=document.getElementById('cap-mapviewbtn');if(btn)btn.textContent=capMapOpen?'▴ Hide map':'🗺 Full map view';
+  const btn=document.getElementById('cap-mapviewbtn');if(btn)btn.innerHTML=capMapOpen?'▴ Hide map':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5z"/><path d="M9 4v13"/><path d="M15 6.5v13"/></svg> Full map view';
   if(capMapOpen){initCapMap();capSetRole('driver');setTimeout(()=>{try{if(capMap)capMap.invalidateSize();}catch(e){}},60);}
   else{const lb=document.getElementById('cap-lb-card');if(lb)lb.style.display='none';}
 }
@@ -4798,7 +4805,7 @@ function capRenderLeaderboard(){
   const live=all.filter(r=>r.live).map(r=>({...r,score:Math.round(r.swaps*(r.ontime/100)*(30/Math.max(r.dwell,1)))}));
   live.sort((a,b)=>b.score-a.score);
   if(!live.length){el.innerHTML='<div style="font-size:.78rem;color:var(--mu)">No swaps logged yet — the leaderboard fills the moment drivers start using relay points.</div>';return;}
-  const medal=['🥇','🥈','🥉'];
+  const medal=['<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f5c542" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2 6 7l3 1"/><path d="m16 2 2 5-3 1"/><circle cx="12" cy="15" r="6"/></svg>','<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9ccd1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2 6 7l3 1"/><path d="m16 2 2 5-3 1"/><circle cx="12" cy="15" r="6"/></svg>','<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#cd7f32" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2 6 7l3 1"/><path d="m16 2 2 5-3 1"/><circle cx="12" cy="15" r="6"/></svg>'];
   el.innerHTML=live.map((r,i)=>{
     const top=i===0;
     return `<div style="display:flex;align-items:center;gap:.7rem;padding:.55rem .65rem;border-radius:var(--rx);margin-bottom:.4rem;${top?'background:linear-gradient(90deg,rgba(255,184,0,.14),transparent);border:1px solid rgba(255,184,0,.4)':'background:var(--p2);border:1px solid var(--ln)'}">
