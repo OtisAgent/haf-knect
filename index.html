@@ -386,7 +386,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .jtrack-step.on .jts-dot{background:var(--or);border-color:var(--or)}
 .jtrack-step.on .jts-lbl{color:var(--or)}
 .jtrack-line{flex:1;height:2px;background:var(--ln);min-width:20px}
-/* REBATE */
+/* POOLING */
 .reb-bar-wrap{background:var(--p2);border-radius:var(--pill);height:7px;margin:.5rem 0;overflow:hidden}
 .reb-bar-fill{height:100%;background:var(--or);border-radius:var(--pill);transition:width .4s}
 
@@ -1159,8 +1159,8 @@ textarea.fi2{resize:vertical;min-height:70px}
           <option value="">Select an account type…</option>
           <option value="Business Account">Business Account — send your own goods (free)</option>
           <option value="Freight Forward Free">Freight Forward Free — post client loads (free to start)</option>
-          <option value="Freight Forward Plus">Freight Forward Plus — £50/mo · 1% rebate</option>
-          <option value="Freight Forward Pro">Freight Forward Pro — £100/mo · 3% rebate · 3 team seats</option>
+          <option value="Freight Forward Plus">Freight Forward Plus — £50/mo · 1% profit pooling</option>
+          <option value="Freight Forward Pro">Freight Forward Pro — £100/mo · 3% profit pooling · 3 team seats</option>
           <option value="KNECT Founders Member">KNECT Founders Member — network profit share (apply)</option>
           <option value="PLNA Driver">PLNA Driver — join the courier network</option>
           <option value="Not sure yet">Not sure yet</option>
@@ -1241,7 +1241,7 @@ textarea.fi2{resize:vertical;min-height:70px}
           </div>
           <div style="font-weight:800;font-size:.9rem">My Account</div>
         </div>
-        <div style="font-size:.74rem;color:var(--mu);line-height:1.55">Post your own loads, track your deliveries, manage your Freight Pro account and rebate credits.</div>
+        <div style="font-size:.74rem;color:var(--mu);line-height:1.55">Post your own loads, track your deliveries, manage your Freight Pro account and pooling credits.</div>
         <div style="margin-top:.6rem;font-size:.7rem;font-weight:700;color:var(--bl)" data-haf-tier="PRO" data-haf-tier-size="12">Freight Forward Pro · Personal</div>
       </div>
     </div>
@@ -2314,7 +2314,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 
       <!-- FREIGHT: Upgrade (plans & tiers) -->
       <div class="tp" id="pane-f-plans">
-        <h1 class="pt">Upgrade</h1><p class="ps">All freight forwarding accounts can post loads for any client. Your tier sets your network fee, rebate, and tools — upgrade any time.</p>
+        <h1 class="pt">Upgrade</h1><p class="ps">All freight forwarding accounts can post loads for any client. Your tier sets your network fee, profit pooling, and tools — upgrade any time.</p>
         <div class="plg" style="grid-template-columns:repeat(auto-fit,minmax(195px,1fr))">
           <div class="plc">
             <div class="pl-n">Freight Forward Free</div>
@@ -2324,7 +2324,7 @@ textarea.fi2{resize:vertical;min-height:70px}
               <div class="pl-f">12% network fee per job</div>
               <div class="pl-f">Basic load tracking</div>
               <div class="pl-f">Up to 10 active loads</div>
-              <div class="pl-f" style="opacity:.45">Account rebate credit</div>
+              <div class="pl-f" style="opacity:.45">Account pooling credit</div>
               <div class="pl-f" style="opacity:.45">Load history &amp; reporting</div>
               <div class="pl-f" style="opacity:.45">Priority matching</div>
               <div class="pl-f" style="opacity:.45">Team seats</div>
@@ -2339,7 +2339,7 @@ textarea.fi2{resize:vertical;min-height:70px}
             <div class="pl-fs">
               <div class="pl-f">Post unlimited client loads</div>
               <div class="pl-f">10% network fee per job</div>
-              <div class="pl-f"><strong style="color:var(--or)">1% rebate credited per job</strong></div>
+              <div class="pl-f"><strong style="color:var(--or)">1% pooling credited per job</strong> <span style="opacity:.55;font-size:.9em">coming soon</span></div>
               <div class="pl-f">Credit offsets future invoices</div>
               <div class="pl-f">Load history &amp; reporting</div>
               <div class="pl-f">Client load management tools</div>
@@ -2356,7 +2356,7 @@ textarea.fi2{resize:vertical;min-height:70px}
             <div class="pl-fs">
               <div class="pl-f">Post unlimited client loads</div>
               <div class="pl-f">9% network fee per job</div>
-              <div class="pl-f"><strong style="color:var(--gn)">3% rebate credited per job</strong></div>
+              <div class="pl-f"><strong style="color:var(--gn)">3% pooling credited per job</strong> <span style="opacity:.55;font-size:.9em">coming soon</span></div>
               <div class="pl-f">Credit offsets future invoices</div>
               <div class="pl-f">Full load history &amp; analytics</div>
               <div class="pl-f">Client load management tools</div>
@@ -2373,7 +2373,7 @@ textarea.fi2{resize:vertical;min-height:70px}
           <div>
             <div style="font-size:.6rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--or);margin-bottom:.3rem">HAF KNECT Founders Members</div>
             <div style="font-family:var(--dp);font-weight:900;font-size:1rem;color:#fff;margin-bottom:.3rem">Network Profit Share</div>
-            <div style="font-size:.73rem;color:#888;line-height:1.5;max-width:480px">A separate membership above the plans. Founders Members earn a share of the HAF KNECT network revenue — not just a job rebate, a direct cut of the platform's growth. Apply-only. Limited seats.</div>
+            <div style="font-size:.73rem;color:#888;line-height:1.5;max-width:480px">A separate membership above the plans. Founders Members earn a share of the HAF KNECT network revenue — not just per-job pooling, a direct cut of the platform's growth. Apply-only. Limited seats.</div>
           </div>
           <button class="btn btn-sm" style="background:var(--or);color:#fff;white-space:nowrap;flex-shrink:0">Apply for membership →</button>
         </div>
@@ -2383,10 +2383,10 @@ textarea.fi2{resize:vertical;min-height:70px}
       <div class="tp" id="pane-f-account">
         <h1 class="pt">Account Controls</h1><p class="ps">Your commercial terms, credit limit and compliance rules.</p>
         <div class="g2">
-          <div class="card"><div class="ct">Freight Forward account</div><div class="cr"><span class="ck">Plan</span><span class="cv"><span class="chip co" data-haf-tier="PRO">Freight Forward Pro</span></span></div><div class="cr"><span class="ck">Network fee</span><span class="cv" style="font-weight:700;color:var(--mu)">9% per job</span></div><div class="cr"><span class="ck">Rebate rate</span><span class="cv" style="font-weight:700;color:var(--gn)">3% per job → account credit</span></div><div class="cr"><span class="ck">Team seats</span><span class="cv">3 included · <span style="color:var(--gn)">all active</span></span></div><div class="cr"><span class="ck">Active loads</span><span class="cv">Unlimited</span></div><div class="cr"><span class="ck">SLA status</span><span class="cv"><span class="chip cg">On track</span></span></div></div>
+          <div class="card"><div class="ct">Freight Forward account</div><div class="cr"><span class="ck">Plan</span><span class="cv"><span class="chip co" data-haf-tier="PRO">Freight Forward Pro</span></span></div><div class="cr"><span class="ck">Network fee</span><span class="cv" style="font-weight:700;color:var(--mu)">9% per job</span></div><div class="cr"><span class="ck">Pooling rate</span><span class="cv" style="font-weight:700;color:var(--gn)">3% per job → account credit</span></div><div class="cr"><span class="ck">Team seats</span><span class="cv">3 included · <span style="color:var(--gn)">all active</span></span></div><div class="cr"><span class="ck">Active loads</span><span class="cv">Unlimited</span></div><div class="cr"><span class="ck">SLA status</span><span class="cv"><span class="chip cg">On track</span></span></div></div>
           <div class="card"><div class="ct">Compliance rules</div><div class="cr"><span class="ck">Approved lanes</span><span class="cv">All UK</span></div><div class="cr"><span class="ck">Min GIT insurance</span><span class="cv">£50,000</span></div><div class="cr"><span class="ck">Cancellation rate</span><span class="cv"><span class="chip cg">1.2%</span></span></div><div class="cr"><span class="ck">Disputes (90d)</span><span class="cv">1 — resolved</span></div><div class="cr"><span class="ck">Third-party freight</span><span class="cv"><span class="chip cg">Permitted</span></span></div></div>
         </div>
-        <div class="card" style="margin-top:.5rem"><div class="ct">Rebate credit balance</div><div class="cr"><span class="ck">Available credit</span><span class="cv" style="font-size:1.25rem;font-weight:900;color:var(--gn)">£47.20</span></div><div class="cr"><span class="ck">Earned this month</span><span class="cv">£18.60</span></div><div class="cr"><span class="ck">Applied to last invoice</span><span class="cv">£28.60</span></div><table class="dt" style="margin-top:.6rem"><thead><tr><th>Job ref</th><th>Job value</th><th>3% rebate credit</th><th>Date</th></tr></thead><tbody><tr><td>JB-0218</td><td>£620</td><td style="color:var(--gn);font-weight:700">+£18.60</td><td>10 Jul</td></tr><tr><td>JB-0201</td><td>£410</td><td style="color:var(--gn);font-weight:700">+£12.30</td><td>3 Jul</td></tr><tr><td>JB-0196</td><td>£540</td><td style="color:var(--gn);font-weight:700">+£16.20</td><td>28 Jun</td></tr></tbody></table><div style="margin-top:.6rem;font-size:.72rem;color:var(--mu)">Rebate credits are applied automatically to your next invoice. The more you ship, the more credit you build.</div></div>
+        <div class="card" style="margin-top:.5rem"><div class="ct">Pooling credit balance</div><div class="cr"><span class="ck">Available credit</span><span class="cv" style="font-size:1.25rem;font-weight:900;color:var(--gn)">£47.20</span></div><div class="cr"><span class="ck">Earned this month</span><span class="cv">£18.60</span></div><div class="cr"><span class="ck">Applied to last invoice</span><span class="cv">£28.60</span></div><table class="dt" style="margin-top:.6rem"><thead><tr><th>Job ref</th><th>Job value</th><th>3% pooling credit</th><th>Date</th></tr></thead><tbody><tr><td>JB-0218</td><td>£620</td><td style="color:var(--gn);font-weight:700">+£18.60</td><td>10 Jul</td></tr><tr><td>JB-0201</td><td>£410</td><td style="color:var(--gn);font-weight:700">+£12.30</td><td>3 Jul</td></tr><tr><td>JB-0196</td><td>£540</td><td style="color:var(--gn);font-weight:700">+£16.20</td><td>28 Jun</td></tr></tbody></table><div style="margin-top:.6rem;font-size:.72rem;color:var(--mu)">Pooling credits are applied automatically to your next invoice. The more you ship, the more credit you build.</div></div>
       </div>
 
       <!-- SHARED: Payments -->
@@ -2446,7 +2446,7 @@ textarea.fi2{resize:vertical;min-height:70px}
           <div class="kc"><div class="kc-l">Freight Forward</div><div class="kc-v">22</div><div class="kc-d">Free · Plus · Pro</div></div>
         </div>
         <div class="g2">
-          <div class="card"><div class="ct">Freight Forward breakdown</div><div class="cr"><span class="ck">FF Free</span><span class="cv">14 accounts · 12% fee · no rebate</span></div><div class="cr"><span class="ck">FF Plus</span><span class="cv">5 accounts · 10% fee · 1% rebate</span></div><div class="cr"><span class="ck">FF Pro</span><span class="cv">3 accounts · 9% fee · 3% rebate</span></div><div class="cr"><span class="ck">Founders Members</span><span class="cv"><span class="chip ca">0 active · apply-only</span></span></div><div class="cr"><span class="ck">Total rebate credits issued</span><span class="cv" style="color:var(--gn)">£312.40 this month</span></div></div>
+          <div class="card"><div class="ct">Freight Forward breakdown</div><div class="cr"><span class="ck">FF Free</span><span class="cv">14 accounts · 12% fee · no pooling</span></div><div class="cr"><span class="ck">FF Plus</span><span class="cv">5 accounts · 10% fee · 1% pooling</span></div><div class="cr"><span class="ck">FF Pro</span><span class="cv">3 accounts · 9% fee · 3% pooling</span></div><div class="cr"><span class="ck">Founders Members</span><span class="cv"><span class="chip ca">0 active · apply-only</span></span></div><div class="cr"><span class="ck">Total pooling credits issued</span><span class="cv" style="color:var(--gn)">£312.40 this month</span></div></div>
           <div class="card"><div class="ct">System connections</div><div class="cr"><span class="ck">HAF PLNA</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">CleverPay</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">HAF Launch</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">Supabase DB</span><span class="cv"><span class="chip ca">Schema pending</span></span></div></div>
         </div>
         <div class="card"><div class="ct">Quick links</div><div style="display:flex;gap:.45rem;flex-wrap:wrap"><a href="https://plna.usehaf.co.uk/dashboard.html" target="_blank" class="btn btn-gh btn-sm">PLNA</a><a href="https://clever.usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">CleverPay</a><a href="https://launch.usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">Launch site</a><a href="https://usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">usehaf.co.uk</a></div></div>
@@ -2926,7 +2926,7 @@ const PERSONAL_NAV=[
   {id:'livejob',l:'Live Job',s:'My Freight',ico:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'},
   {id:'f-dir',l:'Driver Directory',s:'My Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'f-cap',l:'Network Map',s:'My Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
-  {id:'f-account',l:'Account &amp; Rebate',s:'My Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
+  {id:'f-account',l:'Account &amp; Pooling',s:'My Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
   {id:'billing',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'My Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
   {id:'feedback',l:'Feedback',s:'My Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
@@ -3025,9 +3025,9 @@ function enterMode(mode){
 
   const VA_LABELS={
     'view-driver':'Driver view — PLNA driver on the HAF KNECT exchange',
-    'view-ff-free':'Freight Forward Free — 12% fee, up to 10 loads, no rebate',
-    'view-ff-plus':'Freight Forward Plus — 10% fee, 1% rebate, unlimited loads',
-    'view-ff-pro':'Freight Forward Pro — 9% fee, 3% rebate, 3 team seats',
+    'view-ff-free':'Freight Forward Free — 12% fee, up to 10 loads, no pooling',
+    'view-ff-plus':'Freight Forward Plus — 10% fee, 1% pooling, unlimited loads',
+    'view-ff-pro':'Freight Forward Pro — 9% fee, 3% pooling, 3 team seats',
     'view-business':'Business Account — own goods only, free, fleet on network',
   };
 

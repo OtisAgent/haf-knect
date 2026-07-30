@@ -374,7 +374,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .cap-avail.hi{color:var(--gn)}.cap-avail.med{color:var(--am)}.cap-avail.lo{color:var(--rd)}
 .cap-sub{font-size:.66rem;color:var(--mu);margin-top:.12rem}
 
-/* REBATE */
+/* POOLING */
 .reb-bar-wrap{background:var(--p2);border-radius:var(--pill);height:7px;margin:.5rem 0;overflow:hidden}
 .reb-bar-fill{height:100%;background:var(--or);border-radius:var(--pill);transition:width .4s}
 
@@ -2025,12 +2025,12 @@ function initCapMap(){
   capMap=L.map('cap-map',{zoomControl:true,scrollWheelZoom:false}).setView([52.8,-1.8],6);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18,opacity:.7}).addTo(capMap);
   const ZONES=[
-    {lat:53.48,lng:-2.24,city:'Manchester',n:14,r:28000,tier:'hi',reward:true, bonus:'+0.5% rebate this week'},
+    {lat:53.48,lng:-2.24,city:'Manchester',n:14,r:28000,tier:'hi',reward:true, bonus:'+0.5% extra pooling this week'},
     {lat:53.80,lng:-1.55,city:'Leeds',      n:9, r:22000,tier:'hi',reward:false},
-    {lat:52.49,lng:-1.89,city:'Birmingham', n:11,r:26000,tier:'hi',reward:true, bonus:'+0.5% rebate this week'},
+    {lat:52.49,lng:-1.89,city:'Birmingham', n:11,r:26000,tier:'hi',reward:true, bonus:'+0.5% extra pooling this week'},
     {lat:53.41,lng:-2.99,city:'Liverpool',  n:6, r:20000,tier:'med',reward:false},
     {lat:53.38,lng:-1.47,city:'Sheffield',  n:5, r:18000,tier:'med',reward:false},
-    {lat:51.51,lng:-0.09,city:'London',     n:8, r:32000,tier:'med',reward:true, bonus:'+1% rebate this week'},
+    {lat:51.51,lng:-0.09,city:'London',     n:8, r:32000,tier:'med',reward:true, bonus:'+1% extra pooling this week'},
     {lat:52.95,lng:-1.15,city:'Nottingham', n:2, r:16000,tier:'lo', reward:false},
     {lat:51.45,lng:-2.60,city:'Bristol',    n:3, r:17000,tier:'lo', reward:false},
     {lat:54.98,lng:-1.62,city:'Newcastle',  n:7, r:20000,tier:'med',reward:false},
