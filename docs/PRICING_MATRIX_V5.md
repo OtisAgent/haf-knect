@@ -68,8 +68,15 @@ Pence per loaded mile **added to the vehicle base rate**.
 | Level | Uplift | Earned by |
 |---|---|---|
 | Free driver | +£0.00/mi | PLNA Free · Fleet Lite |
-| Member driver | +£0.10/mi | PLNA Plus · a paid HAF KNECT membership |
+| Member driver | +£0.10/mi | PLNA Plus · Fleet Middle · a paid HAF KNECT membership |
 | Pro driver | +£0.25/mi | PLNA Pro · Fleet Pro |
+
+⚠️ **This supersedes §7 of the 31 July framework**, which says "PLNA tier must
+not change the customer-facing vehicle mileage rate". Brent instructed the uplift
+in chat *after* handing that document over — "add driver base rate uplift per
+account or HAF KNECT Paid members" — and earlier the same day wrote that the
+customer rate "depends on the driver taking the job". Newest instruction wins and
+the old line is marked superseded rather than dropped. **It needs his yes.**
 
 **Highest wins, never stacks.** A driver who is PLNA Pro *and* a KNECT member
 *and* on a Fleet Pro account is +£0.25, not +£0.45. All claims are recorded on
@@ -96,37 +103,57 @@ Percentage points off the job-type fee, for the account **posting** the job.
 
 | Level | Reduction | Who sits here |
 |---|---|---|
-| Free account | −0 pts | Business Free · Freight Free · Fleet Lite |
-| Plus account | −4 pts | Freight Plus · paid HAF KNECT member ⚠️ |
-| Pro account | −7 pts | Freight Pro · Fleet Pro |
+| Free account | −0 pts | Business Free · Freight Free |
+| Plus account | −2.5 pts | Freight Plus · paid HAF KNECT member ⚠️ |
+| Pro account | −5 pts | Freight Pro |
 
-One ladder for every account type — freight forwarder, business, fleet and KNECT
-membership. **Highest wins, never stacks:** a Freight Pro who is also a KNECT
-member gets −7, not −11.
+Figures are §5 of Brent's 31 July framework, including his instruction that it
+is a **percentage-point** reduction, not a percentage off the fee's value: "Do
+not calculate this as a 5% discount from the value of the 20% fee."
+
+⚠️ **These replace the −4 / −7 pair** in PRICING_ENGINE_CONSTANTS §5.5 (approved
+18 July). The 31 July document is newer and is the one Brent handed over as the
+commercial source of truth, so the older pair is recorded as **superseded, not
+deleted**, in `config.supersededAccountLevels` — so nobody re-applies it from
+the old file.
+
+### Brent's live freight matrix — reproduced cell for cell
+
+| Job type | Freight Free | Freight Plus | Freight Pro |
+|---|---|---|---|
+| Urgent / time-critical | 30% | 27.5% | 25% |
+| Same-day | 20% | 17.5% | 15% |
+| Scheduled / flexible / co-load | 20% | 17.5% | 15% |
+| Timed delivery* | 25% | 22.5% | 20% |
+| Groupage | not active | not active | not active |
+
+\* Timed delivery is not in the 31 July document; it is a live V3 job type and
+takes the same reduction.
+
+**Highest wins, never stacks** — §8, one account-tier discount per job. A
+Freight Pro who is also a KNECT member gets −5, not −7.5.
 
 **The reduction comes off HAF only.** Driver pay is untouched, and the fee can
-never breach the job type's floor. Tested across every account × vehicle × job
-type.
+never breach the job type's floor (10/8 groupage, 20/15 flexible, 20/15 same-day,
+25/18 timed, 30/22 urgent). At −2.5 and −5 no floor is currently reached, so the
+floor is a backstop rather than an active constraint — tested either way.
 
-⚠️ **The one figure that is not Brent's.** Which rung a paid HAF KNECT
-membership sits on. He named KNECT members as earning a reduction but never said
-how much. Set to the Plus rung as the entry paid tier, flagged in config,
-one word to change.
+⚠️ **Fleet accounts get NO fee reduction.** §7: "Fleet subscription level must
+not automatically reduce the network fee charged to a freight forwarder or
+business customer." A fleet is a **supply-side** account — it takes work, it does
+not post it — so a fleet's tier is expressed on the **driver** side instead
+(§4 above). Brent's chat line "Fleet account same again" sits in his network-fee
+paragraph and could be read the other way; the document is explicit, so the
+document holds. **This one needs his word.**
 
-### Job-type fees and floors
+⚠️ **Business accounts get NO automatic reduction.** §7: "Do not automatically
+give every business account a permanent percentage discount." Negotiated business
+rates go through the admin override, which already records effective date,
+approving admin and reason.
 
-| Job type | Fee | Floor | Live? |
-|---|---|---|---|
-| Groupage | 10% | 8% | built, switched off |
-| Scheduled / Flexible / Co-load | 20% | 15% | yes |
-| Same-Day | 20% | 15% | yes |
-| Timed Delivery | 25% | 18% | yes |
-| Urgent / Time-Critical | 30% | 22% | yes |
-
-Worked example (the documented one): **Freight Pro, same-day.** 20% − 7 = 13%,
-but the floor is 15%, so the account gets 5 of its 7 points and lands on 15%.
-The audit record says the floor held it. On an **urgent** job there is room:
-30% − 7 = 23%, all seven points land.
+⚠️ **The KNECT-member rung is not in the document at all.** Brent named KNECT
+members as earning a reduction in chat; the framework is silent. Set to the Plus
+rung as the entry paid tier. One word to move.
 
 ---
 
@@ -150,25 +177,47 @@ The audit record says the floor held it. On an **urgent** job there is room:
 
 ---
 
-## 7. What still needs Brent
+## 7. What still needs Brent — five open items, none of them invented
 
-1. **The KNECT-member rung** (§5) — my number, not his.
-2. Whether **Fleet Pro drivers** should sit at the Pro rate automatically, as
-   built. It is the reading of "fleet account same again" that keeps the ladder
-   consistent, but he has not said it in those words.
-3. **Groupage** stays switched off until there is real area data to build it on.
+1. **The driver base-rate uplift itself.** His chat instruction and §7 of his own
+   document say opposite things (§4 above). Built to the chat instruction because
+   it is newer, but this is a decision, not a detail.
+2. **"Fleet account same again"** — does a fleet's tier reduce the network fee
+   (his chat paragraph) or set its drivers' rate (his document §7)? Built the
+   document's way.
+3. **The KNECT-member rung** (§5) — my number, not his.
+4. **Examples D and E** work at a flat £140 transport value; the live engine
+   applies a 1.10 urgent service multiplier inherited from V3, giving £154. Both
+   are defensible under §2 — his document just does not show one. Which is right?
+5. **Fleet bands.** His document §7 says Lite free to 5 · Middle £100 to 25 · Pro
+   £250 to 50. The account-fees module still carries free-to-3 · £50-to-10 from
+   29 July. Two records, one truth needed. *(Not this engine — flagged for
+   whoever owns the account fees.)*
+
+**Groupage** stays switched off until there is real area data to build it on, and
+the co-loaded consignment split has no rule at all yet, so no groupage price can
+be quoted.
 
 ---
 
 ## 8. Where the numbers came from
 
-- Vehicle ladder, minimums, short-run band, fee-on-top: **Brent, 2026-07-31**.
+- Vehicle ladder, minimums, short-run band, fee-on-top, freight reductions:
+  **"HAF KNECT Pricing Matrix and Network Fee Framework", Brent, 2026-07-31** —
+  §2, §4, §5, §7, §8. This is the commercial source of truth.
 - Driver uplift £0.10 / £0.25: **PRICING_ENGINE_CONSTANTS §5.1**, approved
   2026-07-18 — "Member and Pro derive automatically as Free + £0.10 and
-  Free + £0.25".
-- Account reduction −4 / −7 and the floor rule:
-  **PRICING_ENGINE_CONSTANTS §5.5 and §2**, approved 2026-07-18.
-- Job-type fees and floors: **FRAMEWORK-V3**, locked 2026-07-20.
+  Free + £0.25" — applied on Brent's 31 July chat instruction.
+- Job-type floors, zone factor, hindrance, fuel marker, pools:
+  **FRAMEWORK-V3**, locked 2026-07-20.
+
+**Superseded and recorded as such, not deleted:**
+- Account reduction −4 / −7 (PRICING_ENGINE_CONSTANTS §5.5, 18 Jul) → now
+  −2.5 / −5 per the 31 July framework §5.
+- The V4 percentage driver uplift skimmed out of HAF's fee → now a pence-per-mile
+  uplift on the base rate.
+- §7's "PLNA tier must not change the customer-facing vehicle mileage rate" →
+  overtaken by Brent's 31 July chat instruction. **Awaiting his confirmation.**
 
 Nothing commercial is hard-coded into logic. Every figure lives in `config` at
 the top of `admin/pricing-matrix-v3.js` and is mirrored in the customer engine,

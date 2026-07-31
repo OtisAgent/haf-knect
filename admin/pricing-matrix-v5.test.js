@@ -226,18 +226,36 @@ eq("Example A — Small Van, 25 mi, same-day: transport £50", exA.carrier, 50);
 eq("Example A — network fee £10", exA.fee, 10);
 eq("Example A — customer subtotal £60 ex VAT", exA.sub, 60);
 
-var exB = customer(100, "swb", "sday");
+/* Example B — SWB, 100 mi, same-day, FREIGHT PLUS: 17.5% = £15.75, £105.75 */
+var exB = customer(100, "swb", "sday", { account: "plus" });
 eq("Example B — SWB, 100 mi: transport £90", exB.carrier, 90);
-eq("Example B — customer subtotal £108 ex VAT at the standard 20%", exB.sub, 108);
+eq("Example B — Freight Plus network fee £15.75", exB.fee, 15.75);
+eq("Example B — customer subtotal £105.75 ex VAT", exB.sub, 105.75);
 
-var exC = customer(100, "lwb", "flex");
+/* Example C — LWB, 100 mi, scheduled, FREIGHT PRO: 15% = £16.50, £126.50 */
+var exC = customer(100, "lwb", "flex", { account: "pro" });
 eq("Example C — LWB, 100 mi, scheduled: transport £110", exC.carrier, 110);
-eq("Example C — customer subtotal £132 ex VAT at the standard 20%", exC.sub, 132);
+eq("Example C — Freight Pro network fee £16.50", exC.fee, 16.50);
+eq("Example C — customer subtotal £126.50 ex VAT", exC.sub, 126.50);
 
+/* Examples D and E — Luton tail lift, 100 mi, urgent, Freight Free then Pro.
+ * ⚠️ KNOWN DEVIATION, flagged to Brent rather than quietly reconciled. The
+ * document works these at a flat £140 transport value; the live engine has
+ * carried an urgent SERVICE MULTIPLIER of 1.10 since FRAMEWORK-V3 (2026-07-20)
+ * which pays the DRIVER more for time-critical work, giving £154. §2 of the
+ * document does allow "approved service adjustments" on top of the base rate,
+ * so the two are reconcilable — but the worked example does not show one, so
+ * the fee PERCENTAGES are what we assert here, not his subtotal. */
 var exD = customer(100, "lutontl", "urg");
-eq("Example D — Luton tail lift, 100 mi, urgent: transport £154 (urgency pays the driver)",
+eq("Example D — urgent Freight Free network fee is 30% of the transport value",
+   exD.feePct * 100, 30);
+eq("Example D — transport £154 (£140 base + the live 1.10 urgent service multiplier)",
    exD.carrier, 154);
-eq("Example D — network fee is 30% of that", exD.fee, 46.20);
+var exE = customer(100, "lutontl", "urg", { account: "pro" });
+eq("Example E — urgent Freight Pro network fee is 25%, not 30%", exE.feePct * 100, 25);
+eq("Example E — the driver is paid exactly the same as in Example D",
+   exE.carrier, exD.carrier);
+ok("Example E — the Pro discount comes only off HAF", exE.sub < exD.sub);
 
 /* ==========================================================================
  * 7. Customer engine and back office agree (§15)
@@ -257,7 +275,6 @@ var LEVELS = [
   [{ driver: "pro" },                 { plnaTier: "PRO" }],
   [{ account: "plus" },               { accountType: "FREIGHT_PLUS" }],
   [{ account: "pro" },                { accountType: "FREIGHT_PRO" }],
-  [{ account: "pro" },                { accountType: "FLEET_PRO" }],
   [{ account: "plus" },               { knectTier: "PAID" }],
   [{ driver: "pro", account: "pro" }, { plnaTier: "PRO", accountType: "FREIGHT_PRO" }]
 ];
@@ -350,6 +367,9 @@ ok("...and all three claims are on the audit record",
 eq("Fleet Lite drivers sit on the free rate",
    backoffice(100, "LWB_VAN", "STD_SAMEDAY", { driverFleetTier: "FLEET_LITE" })
      .rates.driverUpliftGbpPerMile, 0);
+eq("Fleet Middle drivers sit on the member rate",
+   backoffice(100, "LWB_VAN", "STD_SAMEDAY", { driverFleetTier: "FLEET_MIDDLE" })
+     .rates.driverUpliftGbpPerMile, 0.10);
 eq("Fleet Pro drivers sit on the Pro rate",
    backoffice(100, "LWB_VAN", "STD_SAMEDAY", { driverFleetTier: "FLEET_PRO" })
      .rates.driverUpliftGbpPerMile, 0.25);
@@ -372,42 +392,62 @@ ok("across 7 vehicles x 28 distances the uplift never costs HAF a penny",
  * ======================================================================== */
 section("8c. Account network-fee reduction");
 
-eq("Free account reduces nothing", M.config.accountLevels.LITE.feeReductionPts, 0);
-eq("Plus account is −4 points",    M.config.accountLevels.PLUS.feeReductionPts, 4);
-eq("Pro account is −7 points",     M.config.accountLevels.PRO.feeReductionPts,  7);
+eq("Free account reduces nothing",   M.config.accountLevels.LITE.feeReductionPts, 0);
+eq("Plus account is −2.5 points",    M.config.accountLevels.PLUS.feeReductionPts, 2.5);
+eq("Pro account is −5 points",       M.config.accountLevels.PRO.feeReductionPts,  5);
+ok("the older −4 / −7 pair is recorded as superseded, not silently dropped",
+   M.config.supersededAccountLevels.PLUS === 4 && M.config.supersededAccountLevels.PRO === 7);
 
-/* The documented worked example: same-day 20%, Pro poster −7 → 13%, floor 15%. */
+/* §5 LIVE FREIGHT NETWORK FEE MATRIX — Brent's own table, cell for cell.
+ * Urgent 30 / 27.5 / 25 · Same-day 20 / 17.5 / 15 · Scheduled 20 / 17.5 / 15  */
+[["URGENT", 30, 27.5, 25], ["STD_SAMEDAY", 20, 17.5, 15], ["FLEX_SAMEDAY", 20, 17.5, 15]]
+  .forEach(function (row) {
+    [["FREIGHT_FREE", row[1]], ["FREIGHT_PLUS", row[2]], ["FREIGHT_PRO", row[3]]]
+      .forEach(function (cell) {
+        eq(row[0] + " · " + cell[0] + " = " + cell[1] + "%",
+           backoffice(100, "LWB_VAN", row[0], { accountType: cell[0] }).money.networkFeePct,
+           cell[1]);
+      });
+  });
+
+/* §5: it is a percentage-POINT reduction, not a % off the fee's value. */
 var ffPro = backoffice(100, "LWB_VAN", "STD_SAMEDAY", { accountType: "FREIGHT_PRO" });
-eq("Freight Pro on a same-day job lands on the 15% floor, not 13%",
+eq("Freight Pro same-day is 20 − 5 = 15 points, not 20 × 0.95 = 19",
    ffPro.money.networkFeePct, 15);
-ok("...and the audit says the floor held it",
-   ffPro.account.heldAtFloor === true && ffPro.account.feeReductionRequestedPts === 7 &&
-   ffPro.account.feeReductionAppliedPts === 5, JSON.stringify(ffPro.account));
+ok("...taken in full, with no floor interference",
+   ffPro.account.feeReductionRequestedPts === 5 &&
+   ffPro.account.feeReductionAppliedPts === 5 && ffPro.account.heldAtFloor === false,
+   JSON.stringify(ffPro.account));
 
-/* Urgent has room for the full reduction: 30% − 7 = 23%, floor 22%. */
-eq("Freight Pro on an urgent job gets the full 7 points",
-   backoffice(100, "LWB_VAN", "URGENT", { accountType: "FREIGHT_PRO" }).money.networkFeePct, 23);
-eq("Freight Plus on an urgent job gets 4 points",
-   backoffice(100, "LWB_VAN", "URGENT", { accountType: "FREIGHT_PLUS" }).money.networkFeePct, 26);
+/* §7: business accounts get the standard fee — no automatic discount. */
+eq("a business account pays the standard fee",
+   backoffice(100, "LWB_VAN", "URGENT", { accountType: "BUSINESS_FREE" }).money.networkFeePct, 30);
 
-/* Fleet — same ladder again, per Brent 2026-07-31. */
-eq("Fleet Lite pays the standard fee",
-   backoffice(100, "LWB_VAN", "URGENT", { accountType: "FLEET_LITE" }).money.networkFeePct, 30);
-eq("Fleet Pro gets the same 7 points as Freight Pro",
-   backoffice(100, "LWB_VAN", "URGENT", { accountType: "FLEET_PRO" }).money.networkFeePct, 23);
+/* §7: a fleet's subscription must NOT reduce the network fee. */
+ok("fleet tiers cannot buy a network-fee reduction (framework §7)",
+   M.config.accountLevelFrom.accountType.FLEET_PRO === undefined &&
+   M.config.accountLevelFrom.accountType.FLEET_LITE === undefined);
+eq("a job posted against a fleet account still pays the standard fee",
+   backoffice(100, "LWB_VAN", "URGENT", { accountType: "FLEET_PRO" }).money.networkFeePct, 30);
 
 /* A paid KNECT member account earns the Plus rung. */
-eq("a paid HAF KNECT member account gets 4 points",
-   backoffice(100, "LWB_VAN", "URGENT", { knectTier: "PAID" }).money.networkFeePct, 26);
+eq("a paid HAF KNECT member account gets 2.5 points",
+   backoffice(100, "LWB_VAN", "URGENT", { knectTier: "PAID" }).money.networkFeePct, 27.5);
 
-/* Never stacks: Freight Pro who is ALSO a KNECT member is −7, not −11. */
-eq("Freight Pro + KNECT member is −7 points, never −11",
+/* §8 — one account-tier discount per job. Freight Pro + KNECT member is −5. */
+eq("Freight Pro + KNECT member is −5 points, never −7.5",
    backoffice(100, "LWB_VAN", "URGENT", { accountType: "FREIGHT_PRO", knectTier: "PAID" })
-     .money.networkFeePct, 23);
+     .money.networkFeePct, 25);
+
+/* The floor is still a real backstop if a reduction ever goes further. */
+var deep = backoffice(100, "LWB_VAN", "STD_SAMEDAY",
+  { accountType: "FREIGHT_PRO", marginDeltaPct: -10 });
+ok("the job-type floor still catches a reduction that would go too far",
+   deep.money.networkFeePct >= 15 - 0.001, deep.money.networkFeePct + "%");
 
 /* The reduction comes off HAF, never off the driver. */
 var accBad = 0;
-["FREIGHT_PLUS", "FREIGHT_PRO", "FLEET_PRO"].forEach(function (at) {
+["FREIGHT_PLUS", "FREIGHT_PRO"].forEach(function (at) {
   PAIRS.forEach(function (p) {
     ["STD_SAMEDAY", "TIMED", "URGENT", "FLEX_SAMEDAY"].forEach(function (jt) {
       var base = backoffice(120, p[1], jt);
@@ -430,7 +470,7 @@ section("8d. Double Pro — Pro driver on a Pro account");
 var dp   = backoffice(100, "LWB_VAN", "STD_SAMEDAY", { plnaTier: "PRO", accountType: "FREIGHT_PRO" });
 var flat = backoffice(100, "LWB_VAN", "STD_SAMEDAY");
 ok("the Pro driver is paid more", dp.money.driverPayGbp > flat.money.driverPayGbp);
-eq("the Pro account still lands on the 15% floor", dp.money.networkFeePct, 15);
+eq("the Pro account pays 15% — 20 less 5 points", dp.money.networkFeePct, 15);
 ok("HAF's fee never goes below the floor of the transport value",
    dp.money.hafMarginGbp >= dp.money.carrierTransportValueGbp * 0.15 - 0.01);
 ok("the customer still pays more than the driver is paid",

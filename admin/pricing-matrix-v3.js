@@ -7,13 +7,16 @@
  *
  *   DRIVER SIDE — base-rate uplift, pence per mile
  *     Free driver    +£0.00/mi     (PLNA Free / Fleet Lite)
- *     Member driver  +£0.10/mi     (PLNA Plus, or a paid HAF KNECT member)
+ *     Member driver  +£0.10/mi     (PLNA Plus / Fleet Middle / paid KNECT member)
  *     Pro driver     +£0.25/mi     (PLNA Pro / Fleet Pro)
  *
- *   ACCOUNT SIDE — network fee reduction, percentage points
- *     Free account    −0 pts       (Business Free / Freight Free / Fleet Lite)
- *     Plus account    −4 pts       (Freight Plus, paid HAF KNECT member)
- *     Pro account     −7 pts       (Freight Pro / Fleet Pro)
+ *   ACCOUNT SIDE — network fee reduction, percentage points (framework §5)
+ *     Free account    −0 pts       (Business Free / Freight Free)
+ *     Plus account    −2.5 pts     (Freight Plus, paid HAF KNECT member)
+ *     Pro account     −5 pts       (Freight Pro)
+ *   giving Brent's own matrix: urgent 30/27.5/25, same-day and scheduled
+ *   20/17.5/15. A FLEET tier never reduces the fee (§7) — a fleet is a supply
+ *   account, so its tier is expressed on the driver side instead.
  *
  * Three amounts, always kept apart and never blended into one rate:
  *   1. Carrier Transport Value — what the road work is worth, paid to the driver
@@ -97,38 +100,66 @@
 
     // Which driver level each thing earns. HIGHEST WINS, NEVER STACKS — the
     // same rule as every other benefit on this network.
+    // ⚠️ THIS SUPERSEDES §7 OF THE 31 JUL FRAMEWORK, which says "PLNA tier must
+    //    not change the customer-facing vehicle mileage rate". Brent instructed
+    //    the uplift in chat AFTER handing that document over — "add driver base
+    //    rate uplift per account or HAF KNECT Paid members", and earlier the
+    //    same day "the starting rate to a customer ... depends on the driver
+    //    taking the job". Newest instruction wins; the old line is marked
+    //    superseded here rather than quietly dropped. NEEDS HIS YES.
     driverLevelFrom: {
       plnaTier:  { FREE: "FREE", PLUS: "MEMBER", PRO: "PRO" },
-      fleetTier: { FLEET_LITE: "FREE", FLEET_PRO: "PRO" },
+      // Fleet bands per framework §7: Lite free to 5, Middle £100 to 25,
+      // Pro £250 to 50. A fleet's tier sets the level for its drivers — this is
+      // the reading of "Fleet account same again" that keeps fleet on the
+      // supply side, where §7 puts it. FLAGGED, not confirmed.
+      fleetTier: { FLEET_LITE: "FREE", FLEET_MIDDLE: "MEMBER", FLEET_PRO: "PRO" },
       // A paid HAF KNECT membership on the DRIVER side earns the member rate.
       knectPaidMember: "MEMBER"
     },
 
     // --- NETWORK FEE REDUCTION BY POSTING ACCOUNT (MATRIX-V5) ----------------
-    //     Brent 2026-07-31: "network reduction rates for higher freight
-    //     forwarding accounts, HAF KNECT Members ... Fleet account same again."
-    //     Figures are the ones approved in PRICING_ENGINE_CONSTANTS §5.5
-    //     (2026-07-18): Free 0, Plus −4 points, Pro −7 points. Points come off
-    //     the job-type fee and can NEVER breach that job type's floor.
+    //     SOURCE: Brent's "HAF KNECT Pricing Matrix and Network Fee Framework",
+    //     31 Jul 2026, §5 — Freight Plus 2.5 percentage points, Freight Pro 5
+    //     percentage points, giving his own live matrix:
+    //       Urgent 30 / 27.5 / 25 · Same-day 20 / 17.5 / 15 · Scheduled 20 / 17.5 / 15
+    //     and his explicit instruction: "A percentage-POINT reduction must be
+    //     used. Do not calculate this as a 5% discount from the value of the
+    //     20% fee."
     //
-    //     Driven by LEVEL, not by account type, so one ladder serves every
-    //     account: freight forwarder, business, fleet and KNECT membership.
+    //     ⚠️ SUPERSEDES the −4 / −7 pair in PRICING_ENGINE_CONSTANTS §5.5
+    //     (approved 2026-07-18). The 31 Jul document is newer and is the one
+    //     Brent handed over as the commercial source of truth. The old pair is
+    //     recorded here as superseded, not deleted, so nobody re-applies it.
+    //
+    //     The reduction comes off HAF only — never the driver's transport value
+    //     (§5, §7) — and can never breach the job-type floor.
     accountLevels: {
-      LITE: { name: "Free account", feeReductionPts: 0, rank: 0 },
-      PLUS: { name: "Plus account", feeReductionPts: 4, rank: 1 },
-      PRO:  { name: "Pro account",  feeReductionPts: 7, rank: 2 }
+      LITE: { name: "Free account", feeReductionPts: 0,   rank: 0 },
+      PLUS: { name: "Plus account", feeReductionPts: 2.5, rank: 1 },
+      PRO:  { name: "Pro account",  feeReductionPts: 5,   rank: 2 }
+    },
+    supersededAccountLevels: {                 // 2026-07-18, no longer applied
+      PLUS: 4, PRO: 7,
+      supersededBy: "Pricing Matrix and Network Fee Framework §5, 2026-07-31"
     },
 
     accountLevelFrom: {
+      // ⚠️ FLEET IS DELIBERATELY ABSENT HERE. §7 of the framework: "Fleet
+      // subscription level must not automatically reduce the network fee
+      // charged to a freight forwarder or business customer." A fleet is a
+      // SUPPLY-side account — it takes work, it does not post it — so its tier
+      // is expressed on the DRIVER side instead (driverLevelFrom.fleetTier).
+      // Brent's chat line "Fleet account same again" sits in his network-fee
+      // paragraph and could be read the other way round; the document is
+      // explicit, so the document holds until he says otherwise. FLAGGED.
       accountType: {
-        BUSINESS_FREE: "LITE",
-        FREIGHT_FREE:  "LITE", FREIGHT_PLUS: "PLUS", FREIGHT_PRO: "PRO",
-        FLEET_LITE:    "LITE", FLEET_PRO:    "PRO"
+        BUSINESS_FREE: "LITE",     // §7: business accounts get the standard fee
+        FREIGHT_FREE:  "LITE", FREIGHT_PLUS: "PLUS", FREIGHT_PRO: "PRO"
       },
-      // ⚠️ THE ONE FIGURE NOT IN A SIGNED-OFF DOCUMENT. Brent named KNECT
-      // members as earning a reduction but never said which rung. Set to the
-      // Plus rung because a paid KNECT membership is the entry paid tier.
-      // Flagged to Brent 2026-07-31 and easy to move — one word.
+      // ⚠️ NOT IN THE DOCUMENT AT ALL. Brent named KNECT members as earning a
+      // reduction in chat; the framework is silent on it. Set to the Plus rung
+      // as the entry paid tier. One word to move.
       knectPaidMember: "PLUS"
     },
 
@@ -566,15 +597,15 @@
     { label: "Pro driver — base rate +£0.25/mi, fee rides up with it",
       input: { miles: 60, vehicleCode: "SWB_VAN", jobTypeCode: "STD_SAMEDAY",
                plnaTier: "PRO", knectTier: "FREE", weight: "STANDARD", handling: "KERBSIDE" } },
-    { label: "Freight Pro account — network fee −7 pts, held at the floor",
+    { label: "Freight Pro account — network fee −5 pts (20% → 15%)",
       input: { miles: 100, vehicleCode: "LWB_VAN", jobTypeCode: "STD_SAMEDAY",
                plnaTier: "FREE", knectTier: "FREE", accountType: "FREIGHT_PRO",
                weight: "STANDARD", handling: "KERBSIDE" } },
-    { label: "Freight Plus on urgent — the full 4 points come off",
+    { label: "Freight Plus on urgent — −2.5 pts (30% → 27.5%)",
       input: { miles: 100, vehicleCode: "LWB_VAN", jobTypeCode: "URGENT",
                plnaTier: "FREE", knectTier: "FREE", accountType: "FREIGHT_PLUS",
                weight: "STANDARD", handling: "KERBSIDE" } },
-    { label: "Fleet Pro — same ladder on both sides of the job",
+    { label: "Fleet Pro — drivers on the Pro rate, fee unchanged (framework §7)",
       input: { miles: 100, vehicleCode: "XLWB_VAN", jobTypeCode: "URGENT",
                plnaTier: "FREE", knectTier: "FREE", accountType: "FLEET_PRO",
                driverFleetTier: "FLEET_PRO", weight: "STANDARD", handling: "KERBSIDE" } },
@@ -582,7 +613,7 @@
       input: { miles: 100, vehicleCode: "LWB_VAN", jobTypeCode: "STD_SAMEDAY",
                plnaTier: "PRO", knectTier: "PAID", accountType: "FREIGHT_PRO",
                weight: "STANDARD", handling: "KERBSIDE" } },
-    { label: "KNECT member, no paid account — the Plus rung on both sides",
+    { label: "KNECT member — member driver rate + the Plus fee rung",
       input: { miles: 100, vehicleCode: "LWB_VAN", jobTypeCode: "URGENT",
                plnaTier: "FREE", knectTier: "PAID", driverIsKnectMember: true,
                weight: "STANDARD", handling: "KERBSIDE" } },
