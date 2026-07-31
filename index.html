@@ -2658,7 +2658,13 @@ window.HAF_PRICING_SOURCE='built-in';
     if(!r.ok)return;
     const d=await r.json();
     if(d&&d.ok&&d.config){
-      hafApplyPricingConfig(d.config);
+      /* what was actually poured into the quote engine, so it can be checked
+         from outside rather than taken on trust */
+      window.HAF_PRICING_APPLIED=hafApplyPricingConfig(d.config);
+      window.HAF_PRICING_RATES={smallVan:VAN.small.drv,lutonTail:VAN.lutontl.drv,
+        lutonTailMin:VAN.lutontl.min,proUpliftPerMile:DRV_LEVEL.pro.up,
+        proAccountCutPts:ACC_LEVEL.pro.cut*100,urgentFeePct:URG.urg.fee*100,
+        shortRunFullAtMiles:LOCAL_FULL_AT};
       window.HAF_PRICING_SOURCE='database';
       window.HAF_PRICING_VERSION=d.version||null;
       window.HAF_PRICING_SAVED=d.updatedAt||null;
