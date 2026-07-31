@@ -1190,8 +1190,8 @@ textarea.fi2{resize:vertical;min-height:70px}
           <button id="cpill-" class="cap-pill active" onclick="capSetVeh('')">All</button>
           <button id="cpill-van" class="cap-pill" onclick="capSetVeh('van')">Van</button>
           <button id="cpill-lwb" class="cap-pill" onclick="capSetVeh('lwb')">LWB</button>
-          <button id="cpill-luton" class="cap-pill" onclick="capSetVeh('luton')">Luton</button>
-          <button id="cpill-artic" class="cap-pill" onclick="capSetVeh('artic')">Artic</button>
+          <button id="cpill-luton" class="cap-pill" onclick="capSetVeh('luton')">Luton — box</button>
+          <button id="cpill-lutonc" class="cap-pill" onclick="capSetVeh('lutonc')">Luton — curtain side</button>
           <button id="cpill-fridge" class="cap-pill" onclick="capSetVeh('fridge')">Fridge</button>
           <span style="margin-left:auto;font-size:.72rem;color:var(--mu);white-space:nowrap">Rate: <strong id="cap-rate-lbl" style="color:var(--or)">£1.80–£2.40/mi</strong> · 9% network fee</span>
         </div>
@@ -2014,7 +2014,7 @@ function capFilter(){
   if(capMap&&capMap._relayLayers){
     capMap._relayLayers.forEach(m=>{if(relay){m.addTo(capMap);}else{try{capMap.removeLayer(m);}catch(e){}}});
   }
-  const RATES={van:'£1.60–£2.00',lwb:'£1.80–£2.40',luton:'£2.00–£2.70',artic:'£2.80–£3.80',fridge:'£2.60–£3.50'};
+  const RATES={van:'£1.60–£2.00',lwb:'£1.80–£2.40',luton:'£2.00–£2.70',lutonc:'£2.00–£2.70',fridge:'£2.60–£3.50'};
   const rateEl=document.getElementById('cap-rate-lbl');
   if(rateEl)rateEl.textContent=(RATES[_capVeh]||'£1.80–£2.40')+'/mi';
 }
@@ -2138,7 +2138,7 @@ const EXCH_JOBS={
   ],
   freight:[
     {ref:'FF-0092',route:'Manchester M1 → Birmingham B1',det:'LWB · 640 kg · Driver confirmed · ETD 15:00',status:'cg',label:'Confirmed',pc:'M1'},
-    {ref:'FF-0091',route:'Leeds LS1 → London E1',         det:'Artic · 8t · Awaiting driver response',     status:'ca',label:'Pending',  pc:'LS1'},
+    {ref:'FF-0091',route:'Leeds LS1 → London E1',         det:'Luton — curtain side · Awaiting driver response',     status:'ca',label:'Pending',  pc:'LS1'},
     {ref:'FF-0095',route:'Sheffield S1 → Nottingham NG1', det:'LWB · 500 kg · Open to network',            status:'ca',label:'Open',     pc:'S1'},
     {ref:'FF-0096',route:'Liverpool L1 → Manchester M1',  det:'SWB · 320 kg · Open to network',            status:'ca',label:'Open',     pc:'L1'},
     {ref:'FF-0097',route:'Birmingham B1 → Bristol BS1',   det:'Luton · 780 kg · Driver confirmed',         status:'cg',label:'Confirmed',pc:'B1'},

@@ -1637,7 +1637,7 @@ textarea.fi2{resize:vertical;min-height:70px}
       <div class="tp" id="pane-d-jobs">
         <h1 class="pt">Open Jobs</h1><p class="ps">All open jobs on the network — filter by area, vehicle or urgency.</p>
         <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem">
-          <select class="fi2" style="flex:1;min-width:130px;max-width:180px"><option>All vehicles</option><option>Small van</option><option>SWB</option><option selected>LWB</option><option>XLWB</option><option>Luton</option></select>
+          <select class="fi2" style="flex:1;min-width:130px;max-width:180px"><option>All vehicles</option><option>Small van</option><option>SWB</option><option selected>LWB</option><option>XLWB</option><option>Luton — box</option><option>Luton — curtain side</option></select>
           <select class="fi2" style="flex:1;min-width:130px;max-width:180px"><option>All urgency</option><option>Urgent</option><option>Same-day</option><option>Flexible</option></select>
           <select class="fi2" style="flex:1;min-width:130px;max-width:180px"><option>Any direction</option><option>North</option><option>South</option><option>East</option><option>West</option></select>
           <button class="btn btn-or btn-sm">Filter</button>
@@ -2063,8 +2063,8 @@ textarea.fi2{resize:vertical;min-height:70px}
               <option value="swb">SWB</option>
               <option value="lwb">LWB</option>
               <option value="xlwb">Extra LWB</option>
-              <option value="luton">Luton</option>
-              <option value="artic">Artic</option>
+              <option value="luton">Luton — box</option>
+              <option value="lutonc">Luton — curtain side</option>
             </select>
           </div>
           <div class="cap-f">
@@ -2184,7 +2184,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         <p class="ps">Browse drivers who have opted in to direct contact. Reach them by WhatsApp, email, or book them straight from here without posting to the open network.</p>
         <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem">
           <select class="fi2" style="flex:1;min-width:140px;max-width:200px"><option>All zones</option><option>North West</option><option>Yorkshire &amp; Humber</option><option>West Midlands</option><option>East Midlands</option><option>M25 / Greater London</option><option>South East</option></select>
-          <select class="fi2" style="flex:1;min-width:130px;max-width:200px"><option>All vehicles</option><option>Small van</option><option>SWB</option><option selected>LWB</option><option>Extra LWB</option><option>Luton</option></select>
+          <select class="fi2" style="flex:1;min-width:130px;max-width:200px"><option>All vehicles</option><option>Small van</option><option>SWB</option><option selected>LWB</option><option>Extra LWB</option><option>Luton — box</option><option>Luton — curtain side</option></select>
           <select class="fi2" style="flex:1;min-width:130px;max-width:200px"><option>Any direction</option><option>North</option><option>South</option><option>East</option><option>West</option><option>Backloads</option></select>
           <button class="btn btn-or btn-sm">Filter</button>
         </div>
@@ -3112,13 +3112,15 @@ async function hafAuth(u,s,err,btn){
   const old=btn.textContent;btn.textContent='Signing in…';btn.disabled=true;
   try{
     const hash=await hafSha(isPin?u+':'+s:s);
-    const col=isPin?'pin_hash':'password_hash';
-    const r=await fetch(PLNA_URL+'/rest/v1/plna_drivers?haf_username=eq.'+encodeURIComponent(u)+'&'+col+'=eq.'+hash+'&select=haf_username,full_name,plan,pin_hash',{headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY}});
+    /* The PIN form hashes username+PIN (the relay format), the password form hashes
+       the password alone. plna_auth checks both and returns the profile only on a
+       match, with the stored hashes stripped out. */
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/plna_auth',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify(isPin?{p_username:u,p_hash:null,p_relay:hash}:{p_username:u,p_hash:hash,p_relay:null})});
     const d=await r.json();
     if(!Array.isArray(d)||!d.length){
       hafErr(err,isPin?'That PIN didn\'t match. If you haven\'t set a PIN yet, sign in with your password first.':'Incorrect username or password. Try again.');
       btn.textContent=old;btn.disabled=false;return}
-    if(!isPin&&!d[0].pin_hash){hafPend={u:u,hash:hash};btn.textContent=old;btn.disabled=false;closeLogin();document.getElementById('pin-ov').classList.add('open');document.getElementById('pin-a').focus();return}
+    if(!isPin&&!d[0].has_pin){hafPend={u:u,hash:hash};btn.textContent=old;btn.disabled=false;closeLogin();document.getElementById('pin-ov').classList.add('open');document.getElementById('pin-a').focus();return}
     hafGo(u,hash,isPin?'p':'w');
   }catch(e){hafErr(err,'Connection problem — please try again.');btn.textContent=old;btn.disabled=false}
 }
@@ -4772,7 +4774,9 @@ function capFilter(){
       if(relay){m.addTo(capMap);}else{try{capMap.removeLayer(m);}catch(e){}}
     });
   }
-  const RATES={van:'£1.60–£2.00',swb:'£1.65–£2.10',lwb:'£1.80–£2.40',xlwb:'£1.90–£2.50',luton:'£2.00–£2.70',artic:'£2.80–£3.80',flatbed:'£2.50–£3.40',curtain:'£2.40–£3.20'};
+  /* Box and curtain-side Lutons are the largest vehicles the network carries —
+     no artic, flatbed or curtain-side trailer work. */
+  const RATES={van:'£1.60–£2.00',swb:'£1.65–£2.10',lwb:'£1.80–£2.40',xlwb:'£1.90–£2.50',luton:'£2.00–£2.70',lutonc:'£2.00–£2.70'};
   const rateEl=document.getElementById('cap-rate-lbl');
   if(rateEl)rateEl.textContent=(RATES[_capVeh]||'£1.80–£2.40')+'/mi';
 }
