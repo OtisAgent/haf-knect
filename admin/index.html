@@ -453,9 +453,10 @@ if(typeof HAFPricingMatrix==='undefined')return;
 const PM=HAFPricingMatrix;
 const DEMO=[
   {ref:'HAF-Q7381',from:'Sheffield',to:'Manchester',miles:42,vehicleCode:'SWB_VAN',jobTypeCode:'STD_SAMEDAY',plnaTier:'FREE',knectTier:'FREE',weight:'STANDARD',handling:'KERBSIDE'},
-  {ref:'HAF-Q7382',from:'Leeds',to:'Birmingham',miles:118,vehicleCode:'LWB_VAN',jobTypeCode:'TIMED',plnaTier:'PRO',knectTier:'PAID',weight:'MODERATE',handling:'ASSISTED'},
-  {ref:'HAF-Q7383',from:'London N',to:'Luton',miles:34,vehicleCode:'LUTON',jobTypeCode:'URGENT',plnaTier:'PLUS',knectTier:'FREE',weight:'HEAVY',handling:'DIFFICULT',extraStops:1},
-  {ref:'HAF-Q7384',from:'Bristol',to:'Cardiff',miles:45,vehicleCode:'MWB_VAN',jobTypeCode:'GROUPAGE',plnaTier:'FREE',knectTier:'PAID',weight:'STANDARD',handling:'KERBSIDE'},
+  {ref:'HAF-Q7382',from:'Leeds',to:'Birmingham',miles:118,vehicleCode:'LWB_VAN',jobTypeCode:'TIMED',plnaTier:'PRO',knectTier:'PAID',accountType:'FREIGHT_PRO',weight:'MODERATE',handling:'ASSISTED'},
+  {ref:'HAF-Q7383',from:'London N',to:'Luton',miles:34,vehicleCode:'LUTON',jobTypeCode:'URGENT',plnaTier:'PLUS',knectTier:'FREE',accountType:'FREIGHT_PLUS',weight:'HEAVY',handling:'DIFFICULT',extraStops:1},
+  {ref:'HAF-Q7384',from:'Bristol',to:'Cardiff',miles:45,vehicleCode:'MWB_VAN',jobTypeCode:'GROUPAGE',plnaTier:'FREE',knectTier:'PAID',accountType:'BUSINESS_FREE',weight:'STANDARD',handling:'KERBSIDE'},
+  {ref:'HAF-Q7386',from:'Nottingham',to:'Derby',miles:88,vehicleCode:'XLWB_VAN',jobTypeCode:'URGENT',plnaTier:'FREE',knectTier:'FREE',accountType:'FLEET_PRO',driverFleetTier:'FLEET_PRO',weight:'STANDARD',handling:'KERBSIDE'},
   {ref:'HAF-Q7385',from:'Direct',to:'(repeat customer)',miles:22,vehicleCode:'SMALL_VAN',jobTypeCode:'STD_SAMEDAY',plnaTier:'FREE',knectTier:'FREE',weight:'STANDARD',handling:'KERBSIDE',isDirectBooking:true,directBookingsUsedThisMonth:1}
 ];
 const AKEY='haf_pricing_audit_v3';
@@ -482,9 +483,10 @@ window.pmOpen=function(ref){
   /* pool split intentionally NOT shown here — trial pooling lives only in the owner pools card */
   $('pm-body').innerHTML=
     '<div class="pm-grid">'+
-    '<div class="pm-field"><label>Driver pay</label><b>'+money(r.money.driverPayGbp)+'</b> (base '+money(r.money.driverBasePayGbp)+(r.rates.upliftApplied?' +'+r.rates.upliftPct+'% '+esc(r.rates.upliftSource):'')+')</div>'+
+    '<div class="pm-field"><label>Driver pay</label><b>'+money(r.money.driverPayGbp)+'</b> at £'+r.rates.upliftedBaseRate.toFixed(2)+'/mi'+(r.rates.driverUpliftGbpPerMile>0?' ('+esc(r.rates.driverLevelName)+', +£'+r.rates.driverUpliftGbpPerMile.toFixed(2)+'/mi = '+money(r.money.driverUpliftGbp)+' on this job)':' (free rate)')+'</div>'+
     '<div class="pm-field"><label>Customer price</label><b>'+money(r.money.customerIncVatGbp)+'</b> inc VAT ('+money(r.money.customerExVatGbp)+' + VAT)</div>'+
-    '<div class="pm-field"><label>HAF margin</label>'+r.money.hafMarginPct+'% = '+money(r.money.hafMarginGbp)+' (floor '+(jt.floorPct||0)+'%)</div>'+
+    '<div class="pm-field"><label>HAF network fee</label>'+r.money.hafMarginPct+'% = '+money(r.money.hafMarginGbp)+' (floor '+(jt.floorPct||0)+'%)</div>'+
+    '<div class="pm-field"><label>Posting account</label>'+esc(r.account.levelName)+(r.account.feeReductionAppliedPts>0?' — fee −'+r.account.feeReductionAppliedPts+' pts'+(r.account.heldAtFloor?' (held at the floor; '+r.account.feeReductionRequestedPts+' pts asked for)':''):' — no reduction')+'</div>'+
     '</div>'+
     '<div class="pm-sub">Why this price</div><ul class="pm-reasons">'+r.reasons.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>'+
     (r.flags.length?'<div class="pm-sub">Flags</div><div style="font-size:.78rem">'+r.flags.map(esc).join(' · ')+'</div>':'')+

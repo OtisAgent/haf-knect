@@ -1,18 +1,31 @@
 /* ============================================================================
- * HAF KNECT — Pricing Matrix V3  (FRAMEWORK-V3)
+ * HAF KNECT — Pricing Matrix  (MATRIX-V5)
  *
- * The order-flow pricing brain agreed with Brent 2026-07-20.
- * Sits alongside pricing-engine.js (lane maths) and margin-gate.js (loss gate).
- * This module implements the FINAL commercial framework:
+ * The order-flow pricing brain. Sits alongside pricing-engine.js (lane maths)
+ * and margin-gate.js (loss gate). V5 completes the framework Brent locked on
+ * 2026-07-31 by adding the two levers he asked for on top of the V4 ladder:
  *
- *   PLNA (driver side)      |  HAF MARGIN   |  KNECT (customer side)
- *   Free   0% uplift        |  firm % by    |  Free  0% uplift, limited direct
- *   Plus   2.5% uplift      |  job type,    |  Paid  5% uplift, unlimited direct
- *   Pro    5% uplift        |  floors held  |
+ *   DRIVER SIDE — base-rate uplift, pence per mile
+ *     Free driver    +£0.00/mi     (PLNA Free / Fleet Lite)
+ *     Member driver  +£0.10/mi     (PLNA Plus, or a paid HAF KNECT member)
+ *     Pro driver     +£0.25/mi     (PLNA Pro / Fleet Pro)
+ *
+ *   ACCOUNT SIDE — network fee reduction, percentage points
+ *     Free account    −0 pts       (Business Free / Freight Free / Fleet Lite)
+ *     Plus account    −4 pts       (Freight Plus, paid HAF KNECT member)
+ *     Pro account     −7 pts       (Freight Pro / Fleet Pro)
+ *
+ * Three amounts, always kept apart and never blended into one rate:
+ *   1. Carrier Transport Value — what the road work is worth, paid to the driver
+ *   2. HAF Network Fee — a % of (1), added ON TOP, never skimmed out of it
+ *   3. Customer price — (1) + (2), ex VAT
  *
  * Principles (locked):
- *  - Uplifts raise DRIVER pay only, and only when margin stays viable and the
- *    price stays inside the local market band. Customers are never discounted.
+ *  - A driver's level raises the base rate, so the transport value rises and the
+ *    fee rides up with it. Paying a better driver more never costs HAF money —
+ *    Brent 2026-07-31: the customer rate "depends on the driver taking the job".
+ *  - An account's level takes points off the fee, never off driver pay.
+ *  - Highest wins, never stacks — on both sides.
  *  - HAF margin is always applied on network jobs; firm % by job type, with a
  *    minimum floor that no benefit may breach.
  *  - Direct bookings carry 0% HAF margin but are gated by KNECT tier quota.
@@ -39,7 +52,7 @@
   // 1. EDITABLE CONFIG — mirror of tier_config seed v3 (FRAMEWORK-V3)
   // ===========================================================================
   var config = {
-    version: "MATRIX-V4",
+    version: "MATRIX-V5",
     effectiveFrom: "2026-07-31",
     vatPct: 20,
 
@@ -64,18 +77,72 @@
       { code: "CAR",        name: "Car",        baseRate: null, minTransportValue: null, active: false }
     ],
 
-    // --- PLNA driver tiers: uplift applied to the driver base rate
-    plnaTiers: {
-      FREE: { name: "PLNA Free", upliftPct: 0 },
-      PLUS: { name: "PLNA Plus", upliftPct: 2.5 },
-      PRO:  { name: "PLNA Pro",  upliftPct: 5 }
+    // --- DRIVER BASE-RATE UPLIFT (MATRIX-V5) ---------------------------------
+    //     Brent 2026-07-31: "Driver base rate uplift per account or HAF KNECT
+    //     Paid members." The uplift is PENCE PER LOADED MILE added to the
+    //     vehicle base rate — not a percentage skimmed off HAF's fee. It is the
+    //     model already approved in PRICING_ENGINE_CONSTANTS §5.1 (2026-07-18):
+    //     "Member and Pro derive automatically as Free + £0.10 and Free + £0.25".
+    //
+    //     Because the network fee sits ON TOP of the transport value, a higher
+    //     driver rate raises the transport value, the fee rides up with it, and
+    //     HAF is never out of pocket for paying a better driver more. That is
+    //     Brent's own sentence: the customer rate "depends on the driver taking
+    //     the job".
+    driverLevels: {
+      FREE:   { name: "Free driver",           upliftGbpPerMile: 0.00, rank: 0 },
+      MEMBER: { name: "Member driver",         upliftGbpPerMile: 0.10, rank: 1 },
+      PRO:    { name: "Pro driver",            upliftGbpPerMile: 0.25, rank: 2 }
     },
 
-    // --- KNECT customer tiers: uplift funded from the customer side +
-    //     direct-booking allowance (anti-bypass gate)
+    // Which driver level each thing earns. HIGHEST WINS, NEVER STACKS — the
+    // same rule as every other benefit on this network.
+    driverLevelFrom: {
+      plnaTier:  { FREE: "FREE", PLUS: "MEMBER", PRO: "PRO" },
+      fleetTier: { FLEET_LITE: "FREE", FLEET_PRO: "PRO" },
+      // A paid HAF KNECT membership on the DRIVER side earns the member rate.
+      knectPaidMember: "MEMBER"
+    },
+
+    // --- NETWORK FEE REDUCTION BY POSTING ACCOUNT (MATRIX-V5) ----------------
+    //     Brent 2026-07-31: "network reduction rates for higher freight
+    //     forwarding accounts, HAF KNECT Members ... Fleet account same again."
+    //     Figures are the ones approved in PRICING_ENGINE_CONSTANTS §5.5
+    //     (2026-07-18): Free 0, Plus −4 points, Pro −7 points. Points come off
+    //     the job-type fee and can NEVER breach that job type's floor.
+    //
+    //     Driven by LEVEL, not by account type, so one ladder serves every
+    //     account: freight forwarder, business, fleet and KNECT membership.
+    accountLevels: {
+      LITE: { name: "Free account", feeReductionPts: 0, rank: 0 },
+      PLUS: { name: "Plus account", feeReductionPts: 4, rank: 1 },
+      PRO:  { name: "Pro account",  feeReductionPts: 7, rank: 2 }
+    },
+
+    accountLevelFrom: {
+      accountType: {
+        BUSINESS_FREE: "LITE",
+        FREIGHT_FREE:  "LITE", FREIGHT_PLUS: "PLUS", FREIGHT_PRO: "PRO",
+        FLEET_LITE:    "LITE", FLEET_PRO:    "PRO"
+      },
+      // ⚠️ THE ONE FIGURE NOT IN A SIGNED-OFF DOCUMENT. Brent named KNECT
+      // members as earning a reduction but never said which rung. Set to the
+      // Plus rung because a paid KNECT membership is the entry paid tier.
+      // Flagged to Brent 2026-07-31 and easy to move — one word.
+      knectPaidMember: "PLUS"
+    },
+
+    // --- PLNA driver tiers (subscription identity; rate effect via driverLevels)
+    plnaTiers: {
+      FREE: { name: "PLNA Free" },
+      PLUS: { name: "PLNA Plus" },
+      PRO:  { name: "PLNA Pro" }
+    },
+
+    // --- KNECT tiers: paid membership + direct-booking allowance (anti-bypass)
     knectTiers: {
-      FREE: { name: "KNECT Free",           upliftPct: 0, directBookingsPerMonth: 3 },
-      PAID: { name: "HAF KNECT Member",     upliftPct: 5, directBookingsPerMonth: null } // null = unlimited
+      FREE: { name: "KNECT Free",       paid: false, directBookingsPerMonth: 3 },
+      PAID: { name: "HAF KNECT Member", paid: true,  directBookingsPerMonth: null } // null = unlimited
     },
 
     // --- HAF margin by job type: firm %, hard floor. Never breached by benefits.
@@ -171,6 +238,53 @@
     return config.jobTypes[2]; // Standard Same-Day default
   }
 
+  // ---------------------------------------------------------------------------
+  // LEVEL RESOLVERS — "highest wins, never stacks", applied identically on both
+  // sides of the job. A driver who is PLNA Pro AND a paid KNECT member is a Pro
+  // driver, not a Pro-plus-Member driver. A freight forwarder on Pro who is also
+  // a KNECT member gets −7 points, not −11.
+  // ---------------------------------------------------------------------------
+  function bestOf(levels, candidates) {
+    var best = null;
+    for (var i = 0; i < candidates.length; i++) {
+      var key = candidates[i];
+      var lvl = key && levels[key];
+      if (lvl && (best === null || lvl.rank > levels[best].rank)) best = key;
+    }
+    return best;
+  }
+
+  // Which driver level applies, and every claim that was considered (audit).
+  function resolveDriverLevel(input) {
+    var map = config.driverLevelFrom, claims = [];
+    var candidates = [];
+    var fromPlna = map.plnaTier[input.plnaTier];
+    if (fromPlna) { candidates.push(fromPlna); claims.push({ source: "PLNA " + (input.plnaTier || "FREE"), level: fromPlna }); }
+    var fromFleet = input.driverFleetTier && map.fleetTier[input.driverFleetTier];
+    if (fromFleet) { candidates.push(fromFleet); claims.push({ source: "Fleet " + input.driverFleetTier, level: fromFleet }); }
+    if (input.driverIsKnectMember) {
+      candidates.push(map.knectPaidMember);
+      claims.push({ source: "HAF KNECT member (driver)", level: map.knectPaidMember });
+    }
+    var code = bestOf(config.driverLevels, candidates) || "FREE";
+    return { code: code, level: config.driverLevels[code], claims: claims };
+  }
+
+  // Which posting-account level applies, and every claim considered (audit).
+  function resolveAccountLevel(input) {
+    var map = config.accountLevelFrom, claims = [];
+    var candidates = [];
+    var fromType = input.accountType && map.accountType[input.accountType];
+    if (fromType) { candidates.push(fromType); claims.push({ source: input.accountType, level: fromType }); }
+    var knect = config.knectTiers[input.knectTier];
+    if (knect && knect.paid) {
+      candidates.push(map.knectPaidMember);
+      claims.push({ source: "HAF KNECT member (account)", level: map.knectPaidMember });
+    }
+    var code = bestOf(config.accountLevels, candidates) || "LITE";
+    return { code: code, level: config.accountLevels[code], claims: claims };
+  }
+
   // ===========================================================================
   // 2. FUEL MARKER — automatic driver protection, always reported
   // ===========================================================================
@@ -228,9 +342,18 @@
       }
     }
 
+    // --- Driver base-rate uplift: pence per mile ON the vehicle rate, decided
+    //     by the driver's own tier / fleet tier / KNECT membership. Highest
+    //     wins. This raises the transport value, so the fee rides up with it.
+    var driverLevel = resolveDriverLevel(input);
+    var upliftPerMile = driverLevel.level.upliftGbpPerMile;
+    if (upliftPerMile > 0)
+      reasons.push("Driver rate uplift +£" + upliftPerMile.toFixed(2) + "/mile (" +
+        driverLevel.level.name + ") — the customer rate follows the driver taking the job.");
+
     // --- Fuel marker ---
     var fuel = fuelAdjustment();
-    var baseRate = vehicle.baseRate;
+    var baseRate = vehicle.baseRate + upliftPerMile;
     if (fuel.active) {
       baseRate = baseRate * (1 + fuel.upliftPct / 100);
       reasons.push("Fuel protection: base rate +" + fuel.upliftPct + "% (" + fuel.reason + ").");
@@ -244,10 +367,8 @@
       }
     }
 
-    // --- Tier uplift: higher of the two sides, never stacked ---
-    var upliftPct = Math.max(plna.upliftPct, knect.upliftPct);
-    var upliftSource = upliftPct === 0 ? null
-      : (plna.upliftPct >= knect.upliftPct ? plna.name : knect.name);
+    // --- Posting account level: how many points come off the network fee ---
+    var accountLevel = resolveAccountLevel(input);
 
     // --- Hindrance multiplier (pays the driver) ---
     var wF = config.hindrance.weight[input.weight] || 1.0;
@@ -264,11 +385,29 @@
     var supplements = num(input.extraStops) * config.hindrance.stopFeeGbp
                     + num(input.waitingHours) * config.hindrance.waitingPerHourGbp;
 
-    // --- Driver pay before uplift ---
+    // --- Mileage value at this driver's rate, and at the plain Free rate, so
+    //     the audit can show exactly what the uplift was worth on this job.
     var driverBase = round2(miles * baseRate * mult + supplements);
+    var freeRate = vehicle.baseRate * (baseRate / (vehicle.baseRate + upliftPerMile));
+    var driverBaseAtFreeRate = round2(miles * freeRate * mult + supplements);
 
     // --- Margin (firm; overridable by admin with reason, never below floor) ---
     var marginPct = direct ? config.directBooking.hafMarginPct : jobType.marginPct;
+
+    // --- Account fee reduction: points off the job-type fee, floor-protected.
+    //     A direct booking already carries 0% — there is nothing to reduce.
+    var feeReduction = { requestedPts: 0, appliedPts: 0, floorHeld: false, level: accountLevel.code };
+    if (!direct && accountLevel.level.feeReductionPts > 0) {
+      var wantPts = accountLevel.level.feeReductionPts;
+      var afterPct = Math.max(marginPct - wantPts, jobType.floorPct);
+      feeReduction.requestedPts = wantPts;
+      feeReduction.appliedPts = round2(marginPct - afterPct);
+      feeReduction.floorHeld = feeReduction.appliedPts < wantPts;
+      reasons.push("Network fee −" + feeReduction.appliedPts + " points (" +
+        accountLevel.level.name + ") → " + afterPct + "%" +
+        (feeReduction.floorHeld ? " — held at the " + jobType.floorPct + "% floor" : "") + ".");
+      marginPct = afterPct;
+    }
     // --- Sandbox margin lever (what-if only; defaults off, floor-protected) ---
     if (!direct && input.marginDeltaPct != null) {
       var md = num(input.marginDeltaPct);
@@ -308,33 +447,20 @@
           : ""));
     }
     carrierValue = round2(carrierValue);
+    // The same job priced at the plain Free rate — the uplift's real worth.
+    var carrierValueAtFreeRate = round2(
+      (!direct && driverBaseAtFreeRate < minValue) ? minValue : driverBaseAtFreeRate);
 
     // --- HAF Network Fee: a percentage OF the transport value, added on top.
     //     Never hidden inside the mileage rate, never taken off the driver.
     var networkFeeGbp = round2(carrierValue * marginPct / 100);
 
-    // --- Tier uplift pays the DRIVER out of HAF's own fee, so a driver's PLNA
-    //     tier never moves the customer's price. Withheld if it would take HAF
-    //     below the job-type floor.
+    // --- The driver is paid the whole transport value. The uplift is already
+    //     inside it (it went on the base rate), so there is nothing to skim off
+    //     HAF's fee and no uplift can ever be "withheld" for margin reasons.
     var driverPay = carrierValue;
-    var upliftGbp = 0;
-    var upliftApplied = false;
-    if (upliftPct > 0 && !direct) {
-      var candidate = round2(carrierValue * upliftPct / 100);
-      if (networkFeeGbp - candidate >= carrierValue * jobType.floorPct / 100 - 0.001) {
-        upliftGbp = candidate;
-        driverPay = round2(carrierValue + candidate);
-        upliftApplied = true;
-        reasons.push("Tier uplift +" + upliftPct + "% to the driver (" + upliftSource +
-          "), funded from the network fee — customer price unchanged.");
-      } else {
-        flags.push("UPLIFT_WITHHELD_MARGIN");
-        reasons.push("Tier uplift withheld — would take HAF below the " + jobType.floorPct + "% floor.");
-      }
-    } else if (upliftPct > 0 && direct) {
-      // Direct jobs: driver and customer agreed directly; uplift not applied.
-      reasons.push("Tier uplift not applied on direct bookings.");
-    }
+    // What the uplift was actually worth on this job, for the audit.
+    var upliftGbp = round2(Math.max(0, carrierValue - carrierValueAtFreeRate));
 
     var customerExVat = round2(carrierValue + networkFeeGbp);
 
@@ -373,13 +499,27 @@
       inputs: {
         miles: miles, vehicle: vehicle.code, jobType: jobType.code,
         plnaTier: input.plnaTier || "FREE", knectTier: input.knectTier || "FREE",
+        accountType: input.accountType || null,
+        driverFleetTier: input.driverFleetTier || null,
+        driverIsKnectMember: !!input.driverIsKnectMember,
         weight: input.weight || "STANDARD", handling: input.handling || "KERBSIDE",
         extraStops: num(input.extraStops), waitingHours: num(input.waitingHours),
         isDirectBooking: direct
       },
       fuel: fuel,
-      rates: { vehicleBaseRate: vehicle.baseRate, fuelAdjustedRate: round2(baseRate),
-               upliftPct: upliftPct, upliftSource: upliftSource, upliftApplied: upliftApplied },
+      rates: { vehicleBaseRate: vehicle.baseRate,
+               driverLevel: driverLevel.code,
+               driverLevelName: driverLevel.level.name,
+               driverUpliftGbpPerMile: upliftPerMile,
+               upliftedBaseRate: round2(vehicle.baseRate + upliftPerMile),
+               fuelAdjustedRate: round2(baseRate),
+               levelClaims: driverLevel.claims },
+      account: { level: accountLevel.code,
+                 levelName: accountLevel.level.name,
+                 feeReductionRequestedPts: feeReduction.requestedPts,
+                 feeReductionAppliedPts: feeReduction.appliedPts,
+                 heldAtFloor: feeReduction.floorHeld,
+                 levelClaims: accountLevel.claims },
       hindrance: { weightFactor: wF, handlingFactor: hF, rawMultiplier: round2(rawMult),
                    appliedMultiplier: round2(mult), supplementsGbp: round2(supplements) },
       money: {
@@ -391,10 +531,11 @@
         vatGbp: vat,
         customerIncVatGbp: round2(customerExVat + vat),
         driverBasePayGbp: driverBase,
-        driverUpliftGbp: upliftGbp,
-        driverPayGbp: driverPay,
+        driverUpliftGbp: upliftGbp,               // what the rate uplift was worth here
+        carrierValueAtFreeRateGbp: carrierValueAtFreeRate,
+        driverPayGbp: driverPay,                  // the whole transport value
         hafMarginPct: marginPct,
-        hafMarginGbp: hafMarginGbp,               // fee retained after the uplift
+        hafMarginGbp: hafMarginGbp,               // the network fee, retained in full
         hafNetGbp: hafNetGbp,
         vehicleMinimumGbp: vehicle.minTransportValue,
         minimumAppliedGbp: minApplied ? minValue : null,
@@ -422,9 +563,29 @@
     { label: "Baseline — Free PLNA · Free KNECT",
       input: { miles: 60, vehicleCode: "SWB_VAN", jobTypeCode: "STD_SAMEDAY",
                plnaTier: "FREE", knectTier: "FREE", weight: "STANDARD", handling: "KERBSIDE" } },
-    { label: "Strongest — Pro PLNA · KNECT Member",
+    { label: "Pro driver — base rate +£0.25/mi, fee rides up with it",
       input: { miles: 60, vehicleCode: "SWB_VAN", jobTypeCode: "STD_SAMEDAY",
-               plnaTier: "PRO", knectTier: "PAID", weight: "STANDARD", handling: "KERBSIDE" } },
+               plnaTier: "PRO", knectTier: "FREE", weight: "STANDARD", handling: "KERBSIDE" } },
+    { label: "Freight Pro account — network fee −7 pts, held at the floor",
+      input: { miles: 100, vehicleCode: "LWB_VAN", jobTypeCode: "STD_SAMEDAY",
+               plnaTier: "FREE", knectTier: "FREE", accountType: "FREIGHT_PRO",
+               weight: "STANDARD", handling: "KERBSIDE" } },
+    { label: "Freight Plus on urgent — the full 4 points come off",
+      input: { miles: 100, vehicleCode: "LWB_VAN", jobTypeCode: "URGENT",
+               plnaTier: "FREE", knectTier: "FREE", accountType: "FREIGHT_PLUS",
+               weight: "STANDARD", handling: "KERBSIDE" } },
+    { label: "Fleet Pro — same ladder on both sides of the job",
+      input: { miles: 100, vehicleCode: "XLWB_VAN", jobTypeCode: "URGENT",
+               plnaTier: "FREE", knectTier: "FREE", accountType: "FLEET_PRO",
+               driverFleetTier: "FLEET_PRO", weight: "STANDARD", handling: "KERBSIDE" } },
+    { label: "Double Pro — Pro driver on a Pro account",
+      input: { miles: 100, vehicleCode: "LWB_VAN", jobTypeCode: "STD_SAMEDAY",
+               plnaTier: "PRO", knectTier: "PAID", accountType: "FREIGHT_PRO",
+               weight: "STANDARD", handling: "KERBSIDE" } },
+    { label: "KNECT member, no paid account — the Plus rung on both sides",
+      input: { miles: 100, vehicleCode: "LWB_VAN", jobTypeCode: "URGENT",
+               plnaTier: "FREE", knectTier: "PAID", driverIsKnectMember: true,
+               weight: "STANDARD", handling: "KERBSIDE" } },
     { label: "Heavy handball Luton — hindrance pays the driver",
       input: { miles: 45, vehicleCode: "LUTON", jobTypeCode: "TIMED",
                plnaTier: "PLUS", knectTier: "FREE", weight: "HEAVY", handling: "DIFFICULT",

@@ -1,5 +1,5 @@
 /* ============================================================================
- * HAF KNECT — Pricing Matrix V4 test suite
+ * HAF KNECT — Pricing Matrix V5 test suite
  *
  * Proves the engine against Brent's "HAF KNECT Pricing Matrix and Network Fee
  * Framework" (2026-07-31), including its own §16 required test cases and the
@@ -9,7 +9,7 @@
  * pricing source — by lifting the live customer engine straight out of
  * index.html and running the identical jobs through both.
  *
- *   node admin/pricing-matrix-v4.test.js
+ *   node admin/pricing-matrix-v5.test.js
  * ========================================================================== */
 "use strict";
 
@@ -38,14 +38,16 @@ function slice(from, to) {
   return html.slice(i, j);
 }
 var engineSrc =
+  "var window = {};\n" +          // the block is browser code; stub the one global it sets
   slice("const REF_MPH", "const PC={") +
-  "\nreturn { VAN: VAN, URG: URG, v3Price: v3Price, minTransportValue: minTransportValue, zoneFactorFor: zoneFactorFor };";
+  "\nreturn { VAN: VAN, URG: URG, DRV_LEVEL: DRV_LEVEL, ACC_LEVEL: ACC_LEVEL," +
+  "\n         v3Price: v3Price, minTransportValue: minTransportValue, zoneFactorFor: zoneFactorFor };";
 var CUST = new Function(engineSrc)();
 
 /* Same job, both engines. Destination M = strong zone (factor 1.00) so the two
  * are directly comparable; mins forced so distance wins over time. */
-function customer(miles, vanKey, urgKey) {
-  return CUST.v3Price(miles, miles / 40 * 60, vanKey, urgKey, "M1");
+function customer(miles, vanKey, urgKey, opts) {
+  return CUST.v3Price(miles, miles / 40 * 60, vanKey, urgKey, "M1", opts);
 }
 function backoffice(miles, code, jobType, extra) {
   var input = { miles: miles, vehicleCode: code, jobTypeCode: jobType,
@@ -248,20 +250,39 @@ var JOBS = [
   [30, "timed"], [30, "flex"]
 ];
 var JT = { sday: "STD_SAMEDAY", flex: "FLEX_SAMEDAY", timed: "TIMED", urg: "URGENT" };
-var mismatches = 0;
+/* Every combination of driver level and account level, both engines. */
+var LEVELS = [
+  [{},                                {}],
+  [{ driver: "member" },              { plnaTier: "PLUS" }],
+  [{ driver: "pro" },                 { plnaTier: "PRO" }],
+  [{ account: "plus" },               { accountType: "FREIGHT_PLUS" }],
+  [{ account: "pro" },                { accountType: "FREIGHT_PRO" }],
+  [{ account: "pro" },                { accountType: "FLEET_PRO" }],
+  [{ account: "plus" },               { knectTier: "PAID" }],
+  [{ driver: "pro", account: "pro" }, { plnaTier: "PRO", accountType: "FREIGHT_PRO" }]
+];
+var mismatches = 0, compared = 0;
 PAIRS.forEach(function (p) {
   JOBS.forEach(function (j) {
-    var cq = customer(j[0], p[0], j[1]);
-    var bq = backoffice(j[0], p[1], JT[j[1]]);
-    if (Math.abs(cq.sub - bq.money.customerExVatGbp) > 0.02) {
-      mismatches++;
-      console.log("      mismatch: " + p[0] + " " + j[0] + "mi " + j[1] +
-                  " customer £" + cq.sub.toFixed(2) + " vs back office £" +
-                  bq.money.customerExVatGbp.toFixed(2));
-    }
+    LEVELS.forEach(function (lv) {
+      compared++;
+      var cq = customer(j[0], p[0], j[1], lv[0]);
+      var bq = backoffice(j[0], p[1], JT[j[1]], lv[1]);
+      if (Math.abs(cq.sub - bq.money.customerExVatGbp) > 0.02) {
+        mismatches++;
+        console.log("      mismatch: " + p[0] + " " + j[0] + "mi " + j[1] + " " +
+                    JSON.stringify(lv[0]) + " customer £" + cq.sub.toFixed(2) +
+                    " vs back office £" + bq.money.customerExVatGbp.toFixed(2));
+      }
+      if (Math.abs(cq.carrier - bq.money.driverPayGbp) > 0.02) {
+        mismatches++;
+        console.log("      driver pay mismatch: " + p[0] + " " + j[0] + "mi " +
+                    JSON.stringify(lv[0]) + " £" + cq.carrier + " vs £" + bq.money.driverPayGbp);
+      }
+    });
   });
 });
-ok("all " + (PAIRS.length * JOBS.length) + " jobs price identically on both sides",
+ok("all " + compared + " jobs price identically on both sides, at every account and driver level",
    mismatches === 0, mismatches + " mismatched");
 
 /* ==========================================================================
@@ -280,16 +301,177 @@ PAIRS.forEach(function (p) {
 ok("the customer price always sits above the driver's transport value", under === 0,
    under + " failures");
 
-var bo = backoffice(60, "SWB_VAN", "STD_SAMEDAY", { plnaTier: "PRO", knectTier: "PAID" });
+var bo = backoffice(60, "SWB_VAN", "STD_SAMEDAY", { plnaTier: "PRO" });
 var boFree = backoffice(60, "SWB_VAN", "STD_SAMEDAY");
-eq("a driver's PLNA tier does not move the customer price",
-   bo.money.customerExVatGbp, boFree.money.customerExVatGbp);
-ok("...the uplift comes out of HAF's fee instead",
-   bo.money.driverPayGbp > boFree.money.driverPayGbp &&
-   bo.money.hafMarginGbp < boFree.money.hafMarginGbp,
-   JSON.stringify(bo.money));
-ok("...and HAF still holds its floor",
+ok("a Pro driver is paid more than a Free driver",
+   bo.money.driverPayGbp > boFree.money.driverPayGbp, JSON.stringify(bo.money));
+ok("...the customer rate follows the driver taking the job",
+   bo.money.customerExVatGbp > boFree.money.customerExVatGbp);
+ok("...and HAF earns MORE, not less, for paying a better driver",
+   bo.money.hafMarginGbp > boFree.money.hafMarginGbp,
+   bo.money.hafMarginGbp + " vs " + boFree.money.hafMarginGbp);
+ok("...HAF still holds its floor",
    bo.money.hafMarginGbp >= bo.money.carrierTransportValueGbp * 0.15 - 0.01);
+
+/* ==========================================================================
+ * 8b. DRIVER BASE-RATE UPLIFT (V5) — pence per mile, highest wins
+ * ======================================================================== */
+section("8b. Driver base-rate uplift");
+
+eq("Free driver adds nothing",   M.config.driverLevels.FREE.upliftGbpPerMile,   0.00);
+eq("Member driver adds £0.10",   M.config.driverLevels.MEMBER.upliftGbpPerMile, 0.10);
+eq("Pro driver adds £0.25",      M.config.driverLevels.PRO.upliftGbpPerMile,    0.25);
+
+/* The uplift lands on the rate, for every vehicle, at both member rungs. */
+[["MEMBER", 0.10], ["PRO", 0.25]].forEach(function (lv) {
+  var bad = 0;
+  M.config.vehicles.forEach(function (v) {
+    var r = M.price({ miles: 100, vehicleCode: v.code, jobTypeCode: "STD_SAMEDAY",
+                      plnaTier: lv[0] === "MEMBER" ? "PLUS" : "PRO" });
+    if (Math.abs(r.rates.upliftedBaseRate - (v.baseRate + lv[1])) > 0.001) bad++;
+  });
+  ok(lv[0] + " rate = vehicle rate + £" + lv[1].toFixed(2) + " on all 7 vehicles", bad === 0);
+});
+
+/* A paid KNECT membership on the driver side earns the Member rate. */
+var dKnect = backoffice(100, "LWB_VAN", "STD_SAMEDAY", { driverIsKnectMember: true });
+eq("a paid HAF KNECT member driver earns the member rate",
+   dKnect.rates.driverUpliftGbpPerMile, 0.10);
+
+/* Highest wins, never stacks — the rule that stops benefits compounding. */
+var stacked = backoffice(100, "LWB_VAN", "STD_SAMEDAY",
+  { plnaTier: "PRO", driverIsKnectMember: true, driverFleetTier: "FLEET_PRO" });
+eq("PLNA Pro + KNECT member + Fleet Pro is still £0.25, never £0.45",
+   stacked.rates.driverUpliftGbpPerMile, 0.25);
+ok("...and all three claims are on the audit record",
+   stacked.rates.levelClaims.length === 3, JSON.stringify(stacked.rates.levelClaims));
+
+/* Fleet accounts: the fleet's level sets its drivers' rate — "same again". */
+eq("Fleet Lite drivers sit on the free rate",
+   backoffice(100, "LWB_VAN", "STD_SAMEDAY", { driverFleetTier: "FLEET_LITE" })
+     .rates.driverUpliftGbpPerMile, 0);
+eq("Fleet Pro drivers sit on the Pro rate",
+   backoffice(100, "LWB_VAN", "STD_SAMEDAY", { driverFleetTier: "FLEET_PRO" })
+     .rates.driverUpliftGbpPerMile, 0.25);
+
+/* The uplift is never taken out of HAF's fee — it cannot be "withheld". */
+var uplifted = 0;
+PAIRS.forEach(function (p) {
+  for (var mm = 1; mm <= 300; mm += 11) {
+    var f = backoffice(mm, p[1], "STD_SAMEDAY");
+    var pr = backoffice(mm, p[1], "STD_SAMEDAY", { plnaTier: "PRO" });
+    if (pr.money.driverPayGbp < f.money.driverPayGbp) uplifted++;
+    if (pr.money.hafMarginGbp < f.money.hafMarginGbp - 0.01) uplifted++;
+  }
+});
+ok("across 7 vehicles x 28 distances the uplift never costs HAF a penny",
+   uplifted === 0, uplifted + " failures");
+
+/* ==========================================================================
+ * 8c. ACCOUNT NETWORK-FEE REDUCTION (V5) — points off, floor always held
+ * ======================================================================== */
+section("8c. Account network-fee reduction");
+
+eq("Free account reduces nothing", M.config.accountLevels.LITE.feeReductionPts, 0);
+eq("Plus account is −4 points",    M.config.accountLevels.PLUS.feeReductionPts, 4);
+eq("Pro account is −7 points",     M.config.accountLevels.PRO.feeReductionPts,  7);
+
+/* The documented worked example: same-day 20%, Pro poster −7 → 13%, floor 15%. */
+var ffPro = backoffice(100, "LWB_VAN", "STD_SAMEDAY", { accountType: "FREIGHT_PRO" });
+eq("Freight Pro on a same-day job lands on the 15% floor, not 13%",
+   ffPro.money.networkFeePct, 15);
+ok("...and the audit says the floor held it",
+   ffPro.account.heldAtFloor === true && ffPro.account.feeReductionRequestedPts === 7 &&
+   ffPro.account.feeReductionAppliedPts === 5, JSON.stringify(ffPro.account));
+
+/* Urgent has room for the full reduction: 30% − 7 = 23%, floor 22%. */
+eq("Freight Pro on an urgent job gets the full 7 points",
+   backoffice(100, "LWB_VAN", "URGENT", { accountType: "FREIGHT_PRO" }).money.networkFeePct, 23);
+eq("Freight Plus on an urgent job gets 4 points",
+   backoffice(100, "LWB_VAN", "URGENT", { accountType: "FREIGHT_PLUS" }).money.networkFeePct, 26);
+
+/* Fleet — same ladder again, per Brent 2026-07-31. */
+eq("Fleet Lite pays the standard fee",
+   backoffice(100, "LWB_VAN", "URGENT", { accountType: "FLEET_LITE" }).money.networkFeePct, 30);
+eq("Fleet Pro gets the same 7 points as Freight Pro",
+   backoffice(100, "LWB_VAN", "URGENT", { accountType: "FLEET_PRO" }).money.networkFeePct, 23);
+
+/* A paid KNECT member account earns the Plus rung. */
+eq("a paid HAF KNECT member account gets 4 points",
+   backoffice(100, "LWB_VAN", "URGENT", { knectTier: "PAID" }).money.networkFeePct, 26);
+
+/* Never stacks: Freight Pro who is ALSO a KNECT member is −7, not −11. */
+eq("Freight Pro + KNECT member is −7 points, never −11",
+   backoffice(100, "LWB_VAN", "URGENT", { accountType: "FREIGHT_PRO", knectTier: "PAID" })
+     .money.networkFeePct, 23);
+
+/* The reduction comes off HAF, never off the driver. */
+var accBad = 0;
+["FREIGHT_PLUS", "FREIGHT_PRO", "FLEET_PRO"].forEach(function (at) {
+  PAIRS.forEach(function (p) {
+    ["STD_SAMEDAY", "TIMED", "URGENT", "FLEX_SAMEDAY"].forEach(function (jt) {
+      var base = backoffice(120, p[1], jt);
+      var red  = backoffice(120, p[1], jt, { accountType: at });
+      if (red.money.driverPayGbp !== base.money.driverPayGbp) accBad++;   // driver untouched
+      if (red.money.customerExVatGbp > base.money.customerExVatGbp) accBad++; // never dearer
+      var floorPct = M.config.jobTypes.filter(function (j) { return j.code === jt; })[0].floorPct;
+      if (red.money.networkFeePct < floorPct - 0.001) accBad++;           // floor held
+    });
+  });
+});
+ok("across every account, vehicle and job type the reduction only ever costs HAF",
+   accBad === 0, accBad + " failures");
+
+/* ==========================================================================
+ * 8d. Both levers together — the Double-Pro case
+ * ======================================================================== */
+section("8d. Double Pro — Pro driver on a Pro account");
+
+var dp   = backoffice(100, "LWB_VAN", "STD_SAMEDAY", { plnaTier: "PRO", accountType: "FREIGHT_PRO" });
+var flat = backoffice(100, "LWB_VAN", "STD_SAMEDAY");
+ok("the Pro driver is paid more", dp.money.driverPayGbp > flat.money.driverPayGbp);
+eq("the Pro account still lands on the 15% floor", dp.money.networkFeePct, 15);
+ok("HAF's fee never goes below the floor of the transport value",
+   dp.money.hafMarginGbp >= dp.money.carrierTransportValueGbp * 0.15 - 0.01);
+ok("the customer still pays more than the driver is paid",
+   dp.money.customerExVatGbp > dp.money.driverPayGbp);
+ok("the network pool is still funded", dp.pools.active.totalGbp > 0);
+
+/* ==========================================================================
+ * 8e. The levers are actually WIRED into the live app, not just available
+ * ======================================================================== */
+section("8e. Wiring");
+
+var callers = html.match(/v3Price\([^)]*\)/g) || [];
+/* drop the declaration itself — it is the only one naming the parameters */
+var invocations = callers.filter(function (c) { return c.indexOf("vanKey") < 0; });
+ok("every quote in the app passes the account level through",
+   invocations.length >= 3 &&
+   invocations.every(function (c) { return /quoteOpts\(/.test(c); }),
+   invocations.join(" | "));
+ok("a quote with nobody signed in defaults to the free rung",
+   /HAF_ACCOUNT_LEVEL\s*=\s*'lite'/.test(html));
+ok("signing in sets the account level from the same record as the member badge",
+   /_setMyTier[\s\S]{0,400}HAF_ACCOUNT_LEVEL\s*=/.test(html));
+ok("the customer engine carries both ladders",
+   /DRV_LEVEL\s*=/.test(html) && /ACC_LEVEL\s*=/.test(html));
+
+/* The two ladders must be identical on both sides — one source, not two. */
+eq("customer engine member uplift matches the back office",
+   CUST.DRV_LEVEL.member.up, M.config.driverLevels.MEMBER.upliftGbpPerMile);
+eq("customer engine pro uplift matches the back office",
+   CUST.DRV_LEVEL.pro.up, M.config.driverLevels.PRO.upliftGbpPerMile);
+eq("customer engine plus reduction matches the back office",
+   CUST.ACC_LEVEL.plus.cut * 100, M.config.accountLevels.PLUS.feeReductionPts);
+eq("customer engine pro reduction matches the back office",
+   CUST.ACC_LEVEL.pro.cut * 100, M.config.accountLevels.PRO.feeReductionPts);
+var floorBad = 0;
+M.config.jobTypes.forEach(function (jt) {
+  var key = { GROUPAGE: null, FLEX_SAMEDAY: "flex", STD_SAMEDAY: "sday",
+              TIMED: "timed", URGENT: "urg" }[jt.code];
+  if (key && Math.abs(CUST.URG[key].flr * 100 - jt.floorPct) > 0.001) floorBad++;
+});
+ok("every job-type floor matches on both sides", floorBad === 0, floorBad + " mismatched");
 
 /* ==========================================================================
  * 9. VAT and the pricing snapshot
@@ -301,7 +483,7 @@ eq("VAT is 20% of the ex-VAT subtotal", vt.money.vatGbp, vt.money.customerExVatG
 eq("inc-VAT total adds up", vt.money.customerIncVatGbp,
    vt.money.customerExVatGbp + vt.money.vatGbp);
 ok("every quote carries a full audit record",
-   vt.version === "MATRIX-V4" && vt.money && vt.reasons && vt.inputs &&
+   vt.version === "MATRIX-V5" && vt.money && vt.reasons && vt.inputs &&
    vt.money.carrierTransportValueGbp != null && vt.money.networkFeeGbp != null);
 
 console.log("\n" + (fail === 0 ? "ALL PASS" : "FAILURES") + " — " + pass + " passed, " + fail + " failed\n");

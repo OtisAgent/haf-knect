@@ -2488,8 +2488,26 @@ const VAN={
   luton  :{n:'Luton'            ,drv:1.30,min:75},
   lutontl:{n:'Luton — tail lift',drv:1.40,min:80}
 };
-/* fee = HAF network fee as a % of the carrier transport value · svc = urgency uplift paid to the driver */
-const URG={flex:{n:'Flexible',fee:.20,svc:1},sday:{n:'Same-day',fee:.20,svc:1},urg:{n:'Urgent',fee:.30,svc:1.10},timed:{n:'Timed delivery',fee:.25,svc:1}};
+/* fee = HAF network fee as a % of the carrier transport value · flr = the floor that fee may never drop below · svc = urgency uplift paid to the driver */
+const URG={flex:{n:'Flexible',fee:.20,flr:.15,svc:1},sday:{n:'Same-day',fee:.20,flr:.15,svc:1},urg:{n:'Urgent',fee:.30,flr:.22,svc:1.10},timed:{n:'Timed delivery',fee:.25,flr:.18,svc:1}};
+/* ── DRIVER BASE-RATE UPLIFT ──
+   Pence per loaded mile ON TOP of the vehicle rate, set by the driver taking
+   the job: PLNA tier, fleet tier, or a paid HAF KNECT membership. Highest wins,
+   never stacks. Because the network fee sits on top of the transport value, a
+   better-paid driver raises the customer rate and HAF is never out of pocket. */
+const DRV_LEVEL={free:{n:'Free driver',up:0},member:{n:'Member driver',up:.10},pro:{n:'Pro driver',up:.25}};
+/* ── ACCOUNT NETWORK-FEE REDUCTION ──
+   Percentage points off the job-type fee for the account posting the job —
+   freight forwarder, business, fleet or paid HAF KNECT member. One ladder for
+   every account type. Never breaches the job type's floor. */
+const ACC_LEVEL={lite:{n:'Free account',cut:0},plus:{n:'Plus account',cut:.04},pro:{n:'Pro account',cut:.07}};
+/* The signed-in account's level, set the moment someone signs in. A quote taken
+   before anyone signs in is priced at the free rung — never guessed upwards. */
+window.HAF_ACCOUNT_LEVEL='lite';
+/* Quote options for THIS session. The driver level is deliberately absent: at
+   quote time nobody has taken the job yet, so the customer sees the free-rate
+   price and the rate is re-run against the real driver's level on allocation. */
+function quoteOpts(){return{account:window.HAF_ACCOUNT_LEVEL||'lite'};}
 /* Area-adaptive zone factor — return-load probability by destination postcode area */
 const ZONE_STRONG={M:1,B:1,LS:1,S:1,L:1,NG:1,LE:1,CV:1,BS:1,E:1,EC:1,N:1,NW:1,SE:1,SW:1,W:1,WC:1,G:1,EH:1,NE:1,SR:1,DN:1,WF:1,BD:1,HD:1,OL:1,SK:1,WA:1,WN:1,BL:1,PR:1,ST:1,WS:1,WV:1,DY:1,DE:1,SL:1,RG:1,MK:1,LU:1,WD:1,EN:1,HA:1,UB:1,TW:1,KT:1,SM:1,CR:1,BR:1,RM:1,IG:1};
 const ZONE_REMOTE={IV:1,KW:1,PH:1,HS:1,ZE:1,AB:1,DG:1,TD:1,TR:1,LD:1,SA:1};
@@ -2520,21 +2538,32 @@ function minTransportValue(v,miles){
     f=(1-LOCAL_MAX_OFF)+(LOCAL_MAX_OFF-LOCAL_BAND_OFF)*(m/LOCAL_BAND_AT);
   return Math.round(v.min*f*100)/100;
 }
-/* Core quote: returns the ex-VAT customer subtotal with the three amounts kept apart */
-function v3Price(miles,mins,vanKey,urgKey,toPc){
+/* Core quote: returns the ex-VAT customer subtotal with the three amounts kept apart.
+   opts.driver  = 'free' | 'member' | 'pro'   — the level of the driver taking the job
+   opts.account = 'lite' | 'plus'   | 'pro'   — the level of the account posting it
+   Both default to the free rung, so a quote with no account and no allocated
+   driver prices exactly as it did before these levers existed. */
+function v3Price(miles,mins,vanKey,urgKey,toPc,opts){
   const v=VAN[vanKey]||VAN.lwb,u=URG[urgKey]||URG.sday;
-  const vshr=v.drv*REF_MPH;
+  const o=opts||{};
+  const dl=DRV_LEVEL[o.driver]||DRV_LEVEL.free;
+  const al=ACC_LEVEL[o.account]||ACC_LEVEL.lite;
+  const rate=v.drv+dl.up;                           /* driver uplift rides on the base rate */
+  const vshr=rate*REF_MPH;
   const hours=(mins&&mins>0?mins:miles/32*60)/60;
-  const distCost=miles*v.drv, timeCost=hours*vshr;
+  const distCost=miles*rate, timeCost=hours*vshr;
   const routeBase=Math.max(distCost,timeCost);
   const mult=Math.min(u.svc*zoneFactorFor(toPc),1.40);
   const mileageValue=routeBase*mult;
   const floor=minTransportValue(v,miles);
   const p2=n=>Math.round((n+Number.EPSILON)*100)/100;
   const carrier=p2(Math.max(mileageValue,floor));   /* 1. Carrier Transport Value */
-  const fee=p2(carrier*u.fee);                      /* 2. HAF Network Fee         */
+  const feePct=Math.max(u.fee-al.cut,u.flr);        /*    fee after the account reduction, floor held */
+  const fee=p2(carrier*feePct);                     /* 2. HAF Network Fee         */
   const sub=p2(carrier+fee);                        /* 3. Customer price, ex VAT  */
-  return{sub,carrier,fee,driverPay:carrier,floor,onMinimum:carrier===floor,
+  return{sub,carrier,fee,feePct,driverPay:carrier,floor,onMinimum:carrier===floor,
+         driverRate:p2(rate),driverLevel:dl.n,driverUpliftPerMile:dl.up,
+         accountLevel:al.n,feeCutPts:p2((u.fee-feePct)*100),
          pool:p2(sub*NET_POOL),timeWins:timeCost>distCost,miles,hours};
 }
 const PC={M:[53.48,-2.24],LS:[53.80,-1.55],S:[53.38,-1.47],B:[52.48,-1.90],L:[53.41,-2.98],E:[51.52,-0.05],N:[51.55,-0.10],W:[51.51,-0.20],SE:[51.48,-0.05],SW:[51.46,-0.18],NW:[51.55,-0.16],WA:[53.39,-2.60],SK:[53.41,-2.16],NG:[52.95,-1.15],DE:[52.92,-1.48],CV:[52.41,-1.51],LE:[52.63,-1.13],G:[55.86,-4.25],EH:[55.95,-3.19],CF:[51.48,-3.18],BS:[51.45,-2.60],OX:[51.75,-1.26],CB:[52.21,.12],YO:[53.96,-1.08],HU:[53.74,-.34],DN:[53.52,-1.13],BD:[53.80,-1.75],WF:[53.68,-1.50],SR:[54.91,-1.39],NE:[54.97,-1.61],TS:[54.60,-1.23],LA:[54.05,-2.80],PE:[52.57,-.24],IP:[52.06,1.16]};
@@ -2637,7 +2666,7 @@ async function calcLivePrice(){
     hint.style.display='';priced.style.display='none';return;
   }
   const miles=r.miles;
-  const p=v3Price(miles,r.mins,selVanKey,'sday',to);
+  const p=v3Price(miles,r.mins,selVanKey,'sday',to,quoteOpts());
   const lo=Math.round(p.sub*.9),hi=Math.round(p.sub*1.1);
   const fa=r.from&&r.from.area?(r.google?r.from.area:r.from.area+' ('+fr+')'):fr;
   const ta=r.to&&r.to.area?(r.google?r.to.area:r.to.area+' ('+to+')'):to;
@@ -2780,7 +2809,7 @@ async function fqCalcPrice(){
   const v=VAN[vk]||VAN.lwb;
   const u=URG[uk]||URG.flex;
   const r=await pcDistReal(fr,to);
-  const p=v3Price(r.miles,r.mins,vk,uk,to);
+  const p=v3Price(r.miles,r.mins,vk,uk,to,quoteOpts());
   return{lo:Math.round(p.sub*.9),hi:Math.round(p.sub*1.1),miles:r.miles,v,u,fr,to};
 }
 async function fqShowPrice(){
@@ -2825,7 +2854,7 @@ async function hpEstimate(){
   const v=VAN[vk];
   const r=await pcDistReal(fr,to);
   const miles=r.miles;
-  const p=v3Price(miles,r.mins,vk,'sday',to);
+  const p=v3Price(miles,r.mins,vk,'sday',to,quoteOpts());
   const lo=Math.round(p.sub*.9),hi=Math.round(p.sub*1.1);
   document.getElementById('hp-van-rec').textContent=v.n+' — HAF recommended';
   document.getElementById('hp-pr-range').textContent='£'+lo+'–£'+hi;
@@ -2929,6 +2958,10 @@ let _superUser='';
    in tier-identity-v1.js decides — this only hands it the level. */
 function _setMyTier(level){
   if(window.hafSetMyTier) window.hafSetMyTier(level||null);
+  /* The same level also decides the account's network-fee reduction, so the
+     quote and the badge can never tell the customer two different stories. */
+  const k=String(level||'').toLowerCase();
+  window.HAF_ACCOUNT_LEVEL = ACC_LEVEL[k] ? k : 'lite';
 }
 
 function enterKnectApp(u){
