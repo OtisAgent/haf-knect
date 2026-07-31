@@ -395,8 +395,18 @@ section("8c. Account network-fee reduction");
 eq("Free account reduces nothing",   M.config.accountLevels.LITE.feeReductionPts, 0);
 eq("Plus account is −2.5 points",    M.config.accountLevels.PLUS.feeReductionPts, 2.5);
 eq("Pro account is −5 points",       M.config.accountLevels.PRO.feeReductionPts,  5);
+/* Three older fee models exist in the wild — the −4/−7 pair, the tier_config
+   freight_tier row, and the 1-point KNECT member benefit. Every one must stay
+   on the record so nobody re-applies it by accident. */
+const _prior = M.config.supersededAccountLevels.priorModels;
 ok("the older −4 / −7 pair is recorded as superseded, not silently dropped",
-   M.config.supersededAccountLevels.PLUS === 4 && M.config.supersededAccountLevels.PRO === 7);
+   _prior.some(m => m.PLUS === 4 && m.PRO === 7));
+ok("the legacy freight_tier fee row is recorded as superseded",
+   _prior.some(m => m.PRO === -3 && m.FREE === 4));
+ok("the 1-point KNECT member benefit is recorded as superseded",
+   _prior.some(m => m.MEMBER_PTS === 1));
+ok("the old percentage-multiplier driver model is recorded as superseded",
+   M.config.supersededDriverModels.some(m => m.PRO === 1.08 && m.cap === 1.10));
 
 /* §5 LIVE FREIGHT NETWORK FEE MATRIX — Brent's own table, cell for cell.
  * Urgent 30 / 27.5 / 25 · Same-day 20 / 17.5 / 15 · Scheduled 20 / 17.5 / 15  */

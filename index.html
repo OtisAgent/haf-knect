@@ -2436,6 +2436,80 @@ textarea.fi2{resize:vertical;min-height:70px}
         <div class="card"><div class="ct">How it works</div><div class="cr"><span class="ck">Trial phase</span><span class="cv">25% of HAF margin routed back: affiliate 7 · driver 7 · freight 6 · relay &amp; storage 5</span></div><div class="cr"><span class="ck">Production phase</span><span class="cv">locks to 5%: driver 2.5 · relay &amp; storage 2.5 (after builder criteria)</span></div><div class="cr"><span class="ck">Visibility</span><span class="cv">pool data lives on this tab and the owner Network Overview only — never on order screens</span></div></div>
       </div>
 
+      <style>
+        /* The Pricing Engine is a form, not a report: on a narrow screen the
+           label and its boxes stack instead of being squeezed off the side. */
+        #pane-pricing .cr{flex-wrap:wrap;gap:.35rem .5rem}
+        #pane-pricing .cv{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem;justify-content:flex-end}
+        #pane-pricing input[type=number]{max-width:5.6rem;min-width:0}
+        @media(max-width:560px){
+          #pane-pricing .cr{flex-direction:column;align-items:flex-start}
+          #pane-pricing .cv{justify-content:flex-start;width:100%}
+          #pane-pricing input[type=number]{max-width:4.6rem}
+          #pane-pricing select.fi2{max-width:100%}
+        }
+      </style>
+      <!-- Pricing Engine — Super Admin only. The live rate card, editable.
+           Every number on this page is the one the quote engine actually uses. -->
+      <div class="tp" id="pane-pricing">
+        <h1 class="pt">Pricing Engine</h1>
+        <p class="ps">Every rate the network prices with, in one place. Change a number, watch the test quote move, then save it to the network. Nothing changes for anyone until you press save.</p>
+
+        <div class="card">
+          <div class="ct">Current framework</div>
+          <div id="px-meta"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the saved rates…</span></div></div>
+        </div>
+
+        <div class="card">
+          <div class="ct">Driver pay by vehicle <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">£ per loaded mile · and the least that vehicle may earn on a job</span></div>
+          <div id="px-vehicles"></div>
+          <div class="cr"><span class="ck" style="color:var(--mu)">These seven are the only vehicles on the network. A bigger van can never pay less than a smaller one — the page will stop you.</span></div>
+        </div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="ct">Driver pay uplift <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">pence per mile, on top of the vehicle rate</span></div>
+            <div id="px-driver"></div>
+            <div class="cr"><span class="ck" style="color:var(--mu)">Earned by PLNA tier, fleet tier or paid KNECT membership. The best one applies — they never add together. The network fee rides on top, so a better-paid driver never costs HAF money.</span></div>
+          </div>
+          <div class="card">
+            <div class="ct">Account fee reduction <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">percentage points off the network fee</span></div>
+            <div id="px-account"></div>
+            <div class="cr"><span class="ck" style="color:var(--mu)">Points, not a percentage of the fee: 2.5 off a 20% fee is 17.5%. It comes off HAF only, never off driver pay, and never breaks the floor. Fleet accounts are excluded.</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ct">Network fee by job type <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">HAF's fee, and the floor it may never drop below</span></div>
+          <div id="px-jobtypes"></div>
+        </div>
+
+        <div class="card">
+          <div class="ct">Short local runs <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">a quick job in the area is handling work, not road work</span></div>
+          <div id="px-local"></div>
+          <div class="cr"><span class="ck" style="color:var(--mu)">The vehicle minimum eases down for very short jobs and climbs back to full by the mileage you set. The curve is smooth, so a longer job can never be quoted cheaper than a shorter one.</span></div>
+        </div>
+
+        <div class="card">
+          <div class="ct">Test quote <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">priced live with the numbers above, before you save</span></div>
+          <div id="px-test"></div>
+          <div id="px-result"></div>
+        </div>
+
+        <div class="card">
+          <div class="ct">Save</div>
+          <div id="px-problems" style="display:none"></div>
+          <div class="fg" style="margin-bottom:.6rem"><label class="fl">What changed and why (kept on the record)</label><input class="fi2" id="px-note" placeholder="e.g. Luton tail lift up 5p — fuel"></div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+            <button class="btn btn-or btn-sm" onclick="pxSave()">Save to the network</button>
+            <button class="btn btn-gh btn-sm" onclick="pxBoot(1)">Undo my changes</button>
+            <button class="btn btn-gh btn-sm" onclick="pxDefaults()">Back to the built-in rates</button>
+          </div>
+          <div id="px-saved" style="display:none;margin-top:.6rem"></div>
+          <div class="cr" style="margin-top:.6rem"><span class="ck" style="color:var(--mu)">Saving writes a new version and keeps the old one, with your name and the date on it. Nothing is overwritten, so any change can be traced or put back.</span></div>
+        </div>
+      </div>
+
     </main>
   </div>
 </div>
@@ -2527,7 +2601,72 @@ function zoneFactorFor(pc){
      15–25 mi: easing from 20% below back to full
      25 mi + : the full vehicle minimum
    Above the minimum the mileage calculation takes over on its own. */
-const LOCAL_MAX_OFF=.30, LOCAL_BAND_OFF=.20, LOCAL_BAND_AT=15, LOCAL_FULL_AT=25;
+let LOCAL_MAX_OFF=.30, LOCAL_BAND_OFF=.20, LOCAL_BAND_AT=15, LOCAL_FULL_AT=25;
+/* ── THE DATABASE IS THE SOURCE OF THESE RATES ──
+   Everything above is the built-in safety net — the rates the page falls back
+   to if the network is unreachable. In normal running the saved framework comes
+   down from the database on load and is poured into the constants above, so a
+   rate Brent changes on the Pricing Engine page moves every quote on the site
+   without anyone rebuilding this file.
+   Mapping is by code: the database speaks SMALL_VAN, the quote form speaks
+   'small'. Anything the saved config does not carry keeps its built-in value. */
+const PX_VAN={SMALL_VAN:'small',SWB_VAN:'swb',MWB_VAN:'mwb',LWB_VAN:'lwb',XLWB_VAN:'xlwb',LUTON:'luton',LUTON_TAIL:'lutontl'};
+const PX_JOB={FLEX_SAMEDAY:'flex',STD_SAMEDAY:'sday',URGENT:'urg',TIMED:'timed'};
+const PX_DRV={FREE:'free',MEMBER:'member',PRO:'pro'};
+const PX_ACC={LITE:'lite',PLUS:'plus',PRO:'pro'};
+function hafApplyPricingConfig(cfg){
+  if(!cfg||typeof cfg!=='object')return [];
+  const done=[];
+  if(Array.isArray(cfg.vehicles)){
+    cfg.vehicles.forEach(v=>{const k=PX_VAN[v.code];if(!k||!VAN[k])return;
+      if(typeof v.baseRate==='number')VAN[k].drv=v.baseRate;
+      if(typeof v.minTransportValue==='number')VAN[k].min=v.minTransportValue;});
+    done.push('vehicle rates');
+  }
+  if(Array.isArray(cfg.jobTypes)){
+    cfg.jobTypes.forEach(t=>{const k=PX_JOB[t.code];if(!k||!URG[k])return;
+      if(typeof t.marginPct==='number')URG[k].fee=t.marginPct/100;
+      if(typeof t.floorPct==='number')URG[k].flr=t.floorPct/100;});
+    done.push('network fees');
+  }
+  if(cfg.driverLevels){
+    Object.keys(PX_DRV).forEach(c=>{const l=cfg.driverLevels[c];
+      if(l&&typeof l.upliftGbpPerMile==='number')DRV_LEVEL[PX_DRV[c]].up=l.upliftGbpPerMile;});
+    done.push('driver uplift');
+  }
+  if(cfg.accountLevels){
+    Object.keys(PX_ACC).forEach(c=>{const a=cfg.accountLevels[c];
+      if(a&&typeof a.feeReductionPts==='number')ACC_LEVEL[PX_ACC[c]].cut=a.feeReductionPts/100;});
+    done.push('account reductions');
+  }
+  const h=cfg.localHandling;
+  if(h){
+    if(typeof h.maxReductionPct==='number')LOCAL_MAX_OFF=h.maxReductionPct/100;
+    if(typeof h.bandReductionPct==='number')LOCAL_BAND_OFF=h.bandReductionPct/100;
+    if(typeof h.bandAtMiles==='number')LOCAL_BAND_AT=h.bandAtMiles;
+    if(typeof h.fullMinimumFromMiles==='number')LOCAL_FULL_AT=h.fullMinimumFromMiles;
+    done.push('short-run taper');
+  }
+  return done;
+}
+/* Pull the saved framework once on load. If it is not reachable the built-in
+   rates stand and quoting carries on — a pricing page must never go blank. */
+window.HAF_PRICING_SOURCE='built-in';
+(async function(){
+  try{
+    const r=await fetch('/api/pricing',{cache:'no-store'});
+    if(!r.ok)return;
+    const d=await r.json();
+    if(d&&d.ok&&d.config){
+      hafApplyPricingConfig(d.config);
+      window.HAF_PRICING_SOURCE='database';
+      window.HAF_PRICING_VERSION=d.version||null;
+      window.HAF_PRICING_SAVED=d.updatedAt||null;
+      if(window.HAFPricingMatrix&&window.HAFPricingMatrix.applyConfig)
+        window.HAFPricingMatrix.applyConfig(d.config);
+    }
+  }catch(e){/* offline or not deployed yet — built-in rates stand */}
+})();
 function minTransportValue(v,miles){
   const m=Math.max(0,miles);
   let f;
@@ -2899,6 +3038,7 @@ const DRIVER_NAV=[
 const ADMIN_NAV=[
   {id:'admin',l:'Network Overview',s:'Overview',ico:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
   {id:'pools',l:'Network Pools',s:'Overview',ico:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>'},
+  {id:'pricing',l:'Pricing Engine',s:'Overview',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/><circle cx="12" cy="12" r="10"/>'},
   {id:'f-post',l:'Post a Load',s:'Freight Tools',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'f-loads',l:'Active Loads',s:'Freight Tools',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'f-cap',l:'Network Map',s:'Freight Tools',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
@@ -3507,6 +3647,7 @@ function switchTab(id){
   ct=id;
   if(id==='pane-d-home'){setTimeout(renderDashAreas,80);loadDashMode();}
   if(id==='pane-f-cap')setTimeout(capBootPane,80);
+  if(id==='pane-pricing')setTimeout(()=>{if(window.pxBoot)pxBoot();},60);
   if(id==='pane-livejob')setTimeout(hafRenderLive,60);
   /* area rule applied to whatever this page just drew */
   setTimeout(()=>{try{hafMaskSweep(p);}catch(e){}},140);
@@ -5163,6 +5304,220 @@ window.npRate=function(which,inp){
 };
 window.npRateReset=function(){RATE.baseMult=1;RATE.marginDelta=0;ZM=null;render()};
 render();
+})();
+</script>
+<script>
+/* ── PRICING ENGINE tab (Super Admin only) ──
+   The rate card Brent can actually edit. It loads the saved framework from the
+   database, lets him move any number, prices a test job live against whatever
+   is on screen, and saves a NEW version through /api/pricing (the old one is
+   kept, never overwritten). Nothing on this page changes a quote until save. */
+(function(){
+if(typeof HAFPricingMatrix==='undefined')return;
+const PM=HAFPricingMatrix;
+let W=null;                 /* the working copy — what is on screen right now */
+let META={};                /* what the database told us about the saved one   */
+const clone=o=>JSON.parse(JSON.stringify(o));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>'£'+(Math.round(n*100)/100).toFixed(2);
+const el=i=>document.getElementById(i);
+
+/* one editable number, laid out like every other row on the site */
+function field(id,val,step,prefix,suffix){
+  /* Money reads as money: a rate shows its pennies (0.80, not 0.8) the moment
+     you leave the box. Percentages and mileages are left as typed. */
+  const money=step==='0.01';
+  return '<span style="white-space:nowrap">'+(prefix||'')+
+    '<input class="fi2" id="'+id+'" type="number" step="'+step+'" value="'+(money?Number(val).toFixed(2):val)+'" '+
+    'oninput="pxEdit()"'+(money?' onblur="pxFmt(this)"':'')+
+    ' style="width:5.6rem;display:inline-block;padding:.28rem .4rem;text-align:right">'+
+    (suffix||'')+'</span>';
+}
+window.pxFmt=function(inp){const v=parseFloat(inp.value);if(isFinite(v))inp.value=v.toFixed(2);};
+function row(label,controls){
+  return '<div class="cr"><span class="ck">'+esc(label)+'</span><span class="cv">'+controls+'</span></div>';
+}
+
+function renderAll(){
+  if(!W)return;
+  /* --- vehicles --- */
+  el('px-vehicles').innerHTML=W.vehicles.map((v,i)=>
+    row(v.name, field('px-v-rate-'+i,v.baseRate,'0.01','£','/mile')+
+      '<span style="color:var(--mu);margin:0 .45rem">least per job</span>'+
+      field('px-v-min-'+i,v.minTransportValue,'1','£',''))).join('');
+
+  /* --- driver uplift --- */
+  el('px-driver').innerHTML=['FREE','MEMBER','PRO'].map(k=>
+    row(W.driverLevels[k].name, field('px-d-'+k,W.driverLevels[k].upliftGbpPerMile,'0.01','+£','/mile'))).join('');
+
+  /* --- account fee reduction --- */
+  el('px-account').innerHTML=['LITE','PLUS','PRO'].map(k=>
+    row(W.accountLevels[k].name, field('px-a-'+k,W.accountLevels[k].feeReductionPts,'0.5','−','points'))).join('');
+
+  /* --- job types --- */
+  el('px-jobtypes').innerHTML=W.jobTypes.map((t,i)=>
+    row(t.name+(t.active?'':' (not live yet)'),
+      field('px-j-fee-'+i,t.marginPct,'0.5','','%')+
+      '<span style="color:var(--mu);margin:0 .45rem">floor</span>'+
+      field('px-j-flr-'+i,t.floorPct,'0.5','','%'))).join('');
+
+  /* --- short local runs --- */
+  const h=W.localHandling;
+  el('px-local').innerHTML=
+    row('Reduction at zero miles', field('px-l-max',h.maxReductionPct,'1','','%'))+
+    row('Reduction by this many miles', field('px-l-band',h.bandReductionPct,'1','','%')+
+      '<span style="color:var(--mu);margin:0 .45rem">at</span>'+field('px-l-bandat',h.bandAtMiles,'1','','miles'))+
+    row('Full minimum returns at', field('px-l-full',h.fullMinimumFromMiles,'1','','miles'));
+
+  /* --- test quote controls (drawn once, kept as the user left them) --- */
+  if(!el('px-t-miles')){
+    const opt=(a,sel)=>a.map(o=>'<option value="'+o[0]+'"'+(o[0]===sel?' selected':'')+'>'+esc(o[1])+'</option>').join('');
+    el('px-test').innerHTML=
+      row('Distance', field('px-t-miles',60,'1','','miles'))+
+      row('Vehicle','<select class="fi2" id="px-t-veh" onchange="pxEdit()" style="width:auto;display:inline-block;padding:.28rem .4rem">'+
+        opt(W.vehicles.map(v=>[v.code,v.name]),'LWB_VAN')+'</select>')+
+      row('Job type','<select class="fi2" id="px-t-job" onchange="pxEdit()" style="width:auto;display:inline-block;padding:.28rem .4rem">'+
+        opt(W.jobTypes.filter(t=>t.active).map(t=>[t.code,t.name]),'STD_SAMEDAY')+'</select>')+
+      row('Driver taking it','<select class="fi2" id="px-t-drv" onchange="pxEdit()" style="width:auto;display:inline-block;padding:.28rem .4rem">'+
+        opt([['FREE','Free driver'],['PLUS','Member driver'],['PRO','Pro driver']],'FREE')+'</select>')+
+      row('Account posting it','<select class="fi2" id="px-t-acc" onchange="pxEdit()" style="width:auto;display:inline-block;padding:.28rem .4rem">'+
+        opt([['BUSINESS_FREE','Free account'],['FREIGHT_PLUS','Plus account'],['FREIGHT_PRO','Pro account']],'BUSINESS_FREE')+'</select>');
+  }
+  priceTest();
+}
+
+/* Price the test job with exactly what is on screen. The engine's own config is
+   swapped to the working copy for the calculation and put straight back, so
+   nothing else on the site is ever priced with unsaved numbers. */
+function priceTest(){
+  const out=el('px-result'); if(!out||!el('px-t-miles'))return;
+  const saved=clone(PM.config);
+  let r;
+  try{
+    PM.applyConfig(W);
+    r=PM.price({miles:parseFloat(el('px-t-miles').value)||0,
+      vehicleCode:el('px-t-veh').value, jobTypeCode:el('px-t-job').value,
+      plnaTier:el('px-t-drv').value, knectTier:'FREE',
+      accountType:el('px-t-acc').value, weight:'STANDARD', handling:'KERBSIDE',
+      operator:'pricing-engine-page'});
+  }catch(e){ out.innerHTML='<div class="cr"><span class="ck">Test quote</span><span class="cv">Check the numbers above — one of them is not a valid figure.</span></div>'; PM.applyConfig(saved); return; }
+  PM.applyConfig(saved);
+  const m=r.money;
+  out.innerHTML=
+    row('Driver is paid', '<strong>'+money(m.driverPayGbp)+'</strong>'+
+      (m.minChargeApplied?' <span style="color:var(--mu)">(the vehicle minimum for this distance)</span>':
+       ' <span style="color:var(--mu)">('+money(r.rates.fuelAdjustedRate)+'/mile)</span>'))+
+    row('HAF network fee', '<strong>'+money(m.networkFeeGbp)+'</strong> <span style="color:var(--mu)">('+m.networkFeePct+'%'+
+      (r.account.feeReductionAppliedPts>0?', reduced by '+r.account.feeReductionAppliedPts+' points':'')+')</span>')+
+    row('Customer pays', '<strong>'+money(m.customerExVatGbp)+' + VAT</strong> <span style="color:var(--mu)">= '+money(m.customerIncVatGbp)+'</span>')+
+    (r.flags.length?row('Flagged','<span style="color:var(--mu)">'+esc(r.reasons.slice(-1)[0]||r.flags.join(', '))+'</span>'):'');
+}
+
+/* Every keystroke lands in the working copy, then re-prices the test job. */
+window.pxEdit=function(){
+  if(!W)return;
+  const n=(id,fb)=>{const e=el(id);if(!e)return fb;const v=parseFloat(e.value);return isFinite(v)?v:fb;};
+  W.vehicles.forEach((v,i)=>{v.baseRate=n('px-v-rate-'+i,v.baseRate);v.minTransportValue=n('px-v-min-'+i,v.minTransportValue);});
+  ['FREE','MEMBER','PRO'].forEach(k=>{W.driverLevels[k].upliftGbpPerMile=n('px-d-'+k,W.driverLevels[k].upliftGbpPerMile);});
+  ['LITE','PLUS','PRO'].forEach(k=>{W.accountLevels[k].feeReductionPts=n('px-a-'+k,W.accountLevels[k].feeReductionPts);});
+  W.jobTypes.forEach((t,i)=>{t.marginPct=n('px-j-fee-'+i,t.marginPct);t.floorPct=n('px-j-flr-'+i,t.floorPct);});
+  const h=W.localHandling;
+  h.maxReductionPct=n('px-l-max',h.maxReductionPct); h.bandReductionPct=n('px-l-band',h.bandReductionPct);
+  h.bandAtMiles=n('px-l-bandat',h.bandAtMiles); h.fullMinimumFromMiles=n('px-l-full',h.fullMinimumFromMiles);
+  priceTest(); checkProblems();
+};
+
+/* The same rules the server enforces, said in plain words while he types. */
+function problems(c){
+  const p=[],num=v=>typeof v==='number'&&isFinite(v);
+  let pr=0,pm=0;
+  c.vehicles.forEach(v=>{
+    if(!num(v.baseRate)||v.baseRate<=0)p.push(v.name+' needs a rate above zero.');
+    else if(v.baseRate<pr)p.push(v.name+' pays less per mile than the smaller vehicle above it.');
+    if(!num(v.minTransportValue)||v.minTransportValue<=0)p.push(v.name+' needs a minimum above zero.');
+    else if(v.minTransportValue<pm)p.push(v.name+"'s minimum is below the smaller vehicle above it.");
+    pr=v.baseRate;pm=v.minTransportValue;
+  });
+  const d=c.driverLevels;
+  if(!(d.FREE.upliftGbpPerMile<=d.MEMBER.upliftGbpPerMile&&d.MEMBER.upliftGbpPerMile<=d.PRO.upliftGbpPerMile))
+    p.push('The driver uplifts must rise: free, then member, then pro.');
+  ['LITE','PLUS','PRO'].forEach(k=>{const a=c.accountLevels[k].feeReductionPts;
+    if(!num(a)||a<0||a>20)p.push(c.accountLevels[k].name+' must be between 0 and 20 points.');});
+  c.jobTypes.forEach(t=>{
+    if(!num(t.marginPct)||t.marginPct<0||t.marginPct>90)p.push(t.name+': the fee must be between 0% and 90%.');
+    if(num(t.floorPct)&&num(t.marginPct)&&t.floorPct>t.marginPct)p.push(t.name+': the floor cannot sit above the fee.');
+  });
+  const h=c.localHandling;
+  if(h.bandReductionPct>h.maxReductionPct)p.push('The reduction at 15 miles cannot be bigger than the one at zero miles.');
+  if(h.bandAtMiles>=h.fullMinimumFromMiles)p.push('The full minimum must return AFTER the mid-band mileage.');
+  return p;
+}
+function checkProblems(){
+  const box=el('px-problems'); if(!box)return [];
+  const p=W?problems(W):[];
+  box.style.display=p.length?'block':'none';
+  box.innerHTML=p.length?'<div class="cr"><span class="ck" style="color:var(--rd)">Fix before saving</span><span class="cv">'+
+    p.map(x=>esc(x)).join('<br>')+'</span></div>':'';
+  return p;
+}
+
+function meta(){
+  const src=window.HAF_PRICING_SOURCE==='database'?'the database':'the built-in rates';
+  el('px-meta').innerHTML=
+    row('Version', esc(META.version||PM.config.version))+
+    row('In force from', esc(META.effectiveFrom||PM.config.effectiveFrom))+
+    row('Quotes are priced from', src)+
+    (META.updatedAt?row('Last saved', esc(String(META.updatedAt).slice(0,16).replace('T',' '))):'')+
+    (META.lockedBy?row('Signed off', esc(META.lockedBy)):'');
+}
+
+/* Load the saved framework. Falls back to the built-in rates so the page always
+   draws something Brent can work with, and says which one it is using. */
+window.pxBoot=async function(force){
+  if(W&&!force)return;
+  try{
+    const r=await fetch('/api/pricing',{cache:'no-store'});
+    const d=r.ok?await r.json():null;
+    if(d&&d.ok&&d.config){W=clone(d.config);META={version:d.version,effectiveFrom:d.effectiveFrom,updatedAt:d.updatedAt,lockedBy:d.lockedBy};}
+  }catch(e){}
+  if(!W){W=clone(PM.config);META={};}
+  const s=el('px-saved'); if(s)s.style.display='none';
+  meta();renderAll();checkProblems();
+};
+window.pxDefaults=function(){
+  W=clone(PM.defaults||PM.config);
+  const s=el('px-saved');
+  if(s){s.style.display='block';s.innerHTML='<div class="cr"><span class="ck">Ready</span><span class="cv">Back to the built-in rates on screen. Nothing is saved until you press save.</span></div>';}
+  renderAll();checkProblems();
+};
+window.pxSave=async function(){
+  const p=checkProblems();
+  const s=el('px-saved'); if(!s)return;
+  s.style.display='block';
+  if(p.length){s.innerHTML='<div class="cr"><span class="ck" style="color:var(--rd)">Not saved</span><span class="cv">Fix the points listed above first.</span></div>';return;}
+  s.innerHTML='<div class="cr"><span class="ck">Saving</span><span class="cv">writing the new rates to the network…</span></div>';
+  const user=(typeof _superUser!=='undefined'&&_superUser)||localStorage.getItem('knect-user')||'';
+  let d;
+  try{
+    const r=await fetch('/api/pricing',{method:'POST',headers:{'Content-Type':'application/json','x-haf-user':user},
+      body:JSON.stringify({config:W,user:user,note:(el('px-note')||{}).value||''})});
+    d=await r.json();
+    if(!r.ok||!d.ok){
+      const why=d&&d.error==='not_authorised'?'Only the owner account can change a price.'
+        :d&&d.problems?d.problems.join(' ')
+        :'The network did not accept it. Nothing was changed — try again in a moment.';
+      s.innerHTML='<div class="cr"><span class="ck" style="color:var(--rd)">Not saved</span><span class="cv">'+esc(why)+'</span></div>';return;
+    }
+  }catch(e){
+    s.innerHTML='<div class="cr"><span class="ck" style="color:var(--rd)">Not saved</span><span class="cv">Could not reach the network. Nothing was changed.</span></div>';return;
+  }
+  hafApplyPricingConfig(W);            /* every quote on the site now uses them */
+  PM.applyConfig(W);
+  META={version:d.version,effectiveFrom:W.effectiveFrom,updatedAt:d.savedAt,lockedBy:'Saved by '+d.savedBy};
+  window.HAF_PRICING_SOURCE='database';
+  meta();
+  s.innerHTML='<div class="cr"><span class="ck" style="color:var(--gr,#2e9e5b)">Saved</span><span class="cv">These rates are now live across the site. The previous version is kept on the record.</span></div>';
+};
 })();
 </script>
 </body>

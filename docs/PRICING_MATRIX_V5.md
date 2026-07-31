@@ -217,8 +217,73 @@ be quoted.
 - The V4 percentage driver uplift skimmed out of HAF's fee → now a pence-per-mile
   uplift on the base rate.
 - §7's "PLNA tier must not change the customer-facing vehicle mileage rate" →
-  overtaken by Brent's 31 July chat instruction. **Awaiting his confirmation.**
+  overtaken by Brent's 31 July chat instruction. **CONFIRMED by him the same
+  day: "that's correct, add exactly that".** The customer rate follows the
+  driver who takes the job.
+- The legacy `tier_config` rows carry two more old models that are NOT applied
+  and must not be: `freight_tier.feeAdjPts` (+4 / 0 / −3, seed v1) and
+  `knect_member.FEE_BENEFIT` (1 point, seed v2), plus the `plna_payout`
+  percentage multipliers (1.00 / 1.04 / 1.08, cap 1.10). They are left in place
+  untouched because the OTIS HUB reads them — see §10.
 
 Nothing commercial is hard-coded into logic. Every figure lives in `config` at
 the top of `admin/pricing-matrix-v3.js` and is mirrored in the customer engine,
 with a test that fails if the two ever drift apart.
+
+
+---
+
+## 9. Confirmed and built — 31 July 2026
+
+Brent confirmed both levers in chat on 31 July:
+
+- **"2.5 - 5 is correct"** — the account network-fee reduction is −0 / −2.5 / −5
+  percentage points. The −4 / −7 pair is dead.
+- **"that's correct, add exactly that"** — the driver base-rate uplift stands at
+  +£0.00 / +£0.10 / +£0.25 per mile, overriding §7 of his own document.
+
+**The framework now lives in the database.** It is stored in `public.tier_config`
+in the shared HUB Supabase — the same table that already holds every other tier
+and plan record — under seven new scopes:
+
+| Scope | Rows | What it holds |
+|---|---|---|
+| `vehicle_rate` | 7 | the van ladder: £/mile and the vehicle minimum |
+| `driver_uplift` | 3 | pence per mile by driver level |
+| `account_fee_reduction` | 3 | percentage points off the network fee |
+| `job_type_fee` | 5 | the fee % and the floor it may never breach |
+| `local_handling` | 1 | the short-run taper |
+| `zone_factor` | 1 | return-load probability bands |
+| `pricing_matrix` | 1 | the whole framework as one versioned snapshot |
+
+The KNECT page pulls the active snapshot on load and pours it into the customer
+quote engine, so a rate change moves every quote without a rebuild. If the
+database is unreachable the built-in rates stand and quoting carries on.
+
+**Brent can change any of it himself** from the new **Pricing Engine** page in
+his owner login (Overview → Pricing Engine, Super Admin only). Every rate,
+minimum, uplift, fee, floor and the short-run taper is editable, a test quote
+re-prices as he types, and saving writes a NEW version through `/api/pricing`
+with his name and the date on it — the previous version is retired, never
+overwritten, so any change can be traced or put back.
+
+Guardrails refuse a save that would misprice the network: a bigger van paying
+less than a smaller one, a minimum that goes backwards, a floor above the fee
+itself, a reduction over 20 points, a taper that ends before it starts, or any
+value that is not a number. The same checks run in the page and again on the
+server.
+
+## 10. Open, for Brent — not for Henry to decide
+
+1. **The pricing table accepts writes from the public key.** `tier_config` has no
+   row-level security policy, so the key baked into the KNECT page can write to
+   it. The owner check on `/api/pricing` is a front door on an unlocked house.
+   Fix: an RLS policy plus a server-only key in `SUPA_KEY` on the Pages project.
+2. **Three older fee models are still in the database** (§8) and the OTIS HUB
+   reads them. They were deliberately left untouched. Someone has to decide
+   whether the HUB moves onto the new scopes or the old rows are retired.
+3. The four questions from the 31 July handover remain open: fleet's position on
+   the fee side, the KNECT member rung, and the two number clashes.
+4. **The app scrolls 56px sideways on a 390px phone on every tab** — the Network
+   Overview and Network Pools do it too. Pre-existing shell bug, not this page;
+   worth its own fix.

@@ -100,13 +100,12 @@
 
     // Which driver level each thing earns. HIGHEST WINS, NEVER STACKS — the
     // same rule as every other benefit on this network.
-    // ⚠️ THIS SUPERSEDES §7 OF THE 31 JUL FRAMEWORK, which says "PLNA tier must
-    //    not change the customer-facing vehicle mileage rate". Brent instructed
-    //    the uplift in chat AFTER handing that document over — "add driver base
-    //    rate uplift per account or HAF KNECT Paid members", and earlier the
-    //    same day "the starting rate to a customer ... depends on the driver
-    //    taking the job". Newest instruction wins; the old line is marked
-    //    superseded here rather than quietly dropped. NEEDS HIS YES.
+    // ✅ CONFIRMED BY BRENT 2026-07-31 ("that's correct, add exactly that").
+    //    This SUPERSEDES §7 of the 31 Jul framework, which says "PLNA tier must
+    //    not change the customer-facing vehicle mileage rate". He was shown the
+    //    clash in writing and chose the uplift: the customer rate follows the
+    //    driver who takes the job. §7's line is recorded as superseded here
+    //    rather than quietly dropped, so nobody re-applies it later.
     driverLevelFrom: {
       plnaTier:  { FREE: "FREE", PLUS: "MEMBER", PRO: "PRO" },
       // Fleet bands per framework §7: Lite free to 5, Middle £100 to 25,
@@ -127,10 +126,11 @@
     //     used. Do not calculate this as a 5% discount from the value of the
     //     20% fee."
     //
-    //     ⚠️ SUPERSEDES the −4 / −7 pair in PRICING_ENGINE_CONSTANTS §5.5
-    //     (approved 2026-07-18). The 31 Jul document is newer and is the one
-    //     Brent handed over as the commercial source of truth. The old pair is
-    //     recorded here as superseded, not deleted, so nobody re-applies it.
+    //     ✅ CONFIRMED BY BRENT 2026-07-31: "2.5 - 5 is correct".
+    //     SUPERSEDES the −4 / −7 pair in PRICING_ENGINE_CONSTANTS §5.5 (approved
+    //     2026-07-18) AND the legacy `freight_tier.feeAdjPts` row in tier_config
+    //     (+4 / 0 / −3, seed v1) which is a third, older model again. Both are
+    //     recorded as superseded, not deleted, so nobody re-applies them.
     //
     //     The reduction comes off HAF only — never the driver's transport value
     //     (§5, §7) — and can never breach the job-type floor.
@@ -139,10 +139,20 @@
       PLUS: { name: "Plus account", feeReductionPts: 2.5, rank: 1 },
       PRO:  { name: "Pro account",  feeReductionPts: 5,   rank: 2 }
     },
-    supersededAccountLevels: {                 // 2026-07-18, no longer applied
-      PLUS: 4, PRO: 7,
-      supersededBy: "Pricing Matrix and Network Fee Framework §5, 2026-07-31"
+    // Every older fee model, kept visible so none of them creeps back in.
+    supersededAccountLevels: {
+      supersededBy: "Pricing Matrix and Network Fee Framework §5, 2026-07-31 — confirmed by Brent in chat, same day",
+      priorModels: [
+        { source: "PRICING_ENGINE_CONSTANTS §5.5 (2026-07-18)", PLUS: 4,  PRO: 7 },
+        { source: "tier_config freight_tier.feeAdjPts seed v1",  FREE: 4, PLUS: 0, PRO: -3 },
+        { source: "tier_config knect_member.FEE_BENEFIT seed v2", MEMBER_PTS: 1 }
+      ]
     },
+    // The percentage-multiplier driver model this pence-per-mile uplift replaces.
+    supersededDriverModels: [
+      { source: "tier_config plna_payout seed v2 (multipliers)",
+        LITE: 1.00, PLUS: 1.04, PRO: 1.08, cap: 1.10 }
+    ],
 
     accountLevelFrom: {
       // ⚠️ FLEET IS DELIBERATELY ABSENT HERE. §7 of the framework: "Fleet
@@ -657,10 +667,42 @@
   }
 
   // ===========================================================================
-  // 5. PUBLIC API
+  // 5. LOADING THE LIVE CONFIG FROM THE DATABASE
+  // ===========================================================================
+  /* The numbers above are the built-in defaults — the safety net. In normal
+     running the Pricing Engine page hands us the saved config from tier_config
+     so Brent can move a rate without anyone rebuilding this file.
+
+     applyConfig() merges a saved config over the defaults, one key at a time,
+     and returns the list of keys it actually replaced. Anything the database
+     does not carry keeps its built-in value, so a partial or half-saved record
+     can never leave the engine with a missing rate. */
+  var DEFAULTS = JSON.parse(JSON.stringify(config));
+  function applyConfig(saved) {
+    var applied = [];
+    if (!saved || typeof saved !== "object") return applied;
+    for (var k in saved) {
+      if (!Object.prototype.hasOwnProperty.call(saved, k)) continue;
+      if (saved[k] === undefined || saved[k] === null) continue;
+      config[k] = saved[k];
+      applied.push(k);
+    }
+    return applied;
+  }
+  function resetConfig() {
+    var fresh = JSON.parse(JSON.stringify(DEFAULTS));
+    for (var k in fresh) config[k] = fresh[k];
+    return config;
+  }
+
+  // ===========================================================================
+  // 6. PUBLIC API
   // ===========================================================================
   return {
     config: config,
+    defaults: DEFAULTS,
+    applyConfig: applyConfig,
+    resetConfig: resetConfig,
     price: price,
     fuelAdjustment: fuelAdjustment,
     DEMO_SCENARIOS: DEMO_SCENARIOS,
