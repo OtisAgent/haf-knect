@@ -39,18 +39,29 @@
   // 1. EDITABLE CONFIG — mirror of tier_config seed v3 (FRAMEWORK-V3)
   // ===========================================================================
   var config = {
-    version: "FRAMEWORK-V3",
-    effectiveFrom: "2026-07-20",
+    version: "MATRIX-V4",
+    effectiveFrom: "2026-07-31",
     vatPct: 20,
 
-    // --- Vehicle base rates £/loaded mile (Small Van → Luton ONLY — locked scope)
+    // --- Vehicle matrix — the ONLY seven vehicles on this network.
+    //     baseRate = £ per loaded mile paid to the driver/fleet
+    //     minTransportValue = the vehicle's minimum transport value, £ ex VAT
+    //     Nothing above a Luton exists here: no artic, flatbed, curtain, rigid,
+    //     tractor unit, 7.5t or any other HGV class. (Removal test, §17.)
     vehicles: [
-      { code: "SMALL_VAN", name: "Small Van", baseRate: 0.75 },
-      { code: "SWB_VAN",   name: "SWB Van",   baseRate: 0.85 },
-      { code: "MWB_VAN",   name: "MWB Van",   baseRate: 0.95 },
-      { code: "LWB_VAN",   name: "LWB Van",   baseRate: 1.05 },
-      { code: "XLWB_VAN",  name: "XLWB Van",  baseRate: 1.10 },
-      { code: "LUTON",     name: "Luton Van", baseRate: 1.20 }
+      { code: "SMALL_VAN",   name: "Small Van",         baseRate: 0.80, minTransportValue: 50 },
+      { code: "SWB_VAN",     name: "SWB",               baseRate: 0.90, minTransportValue: 55 },
+      { code: "MWB_VAN",     name: "MWB",               baseRate: 1.00, minTransportValue: 60 },
+      { code: "LWB_VAN",     name: "LWB",               baseRate: 1.10, minTransportValue: 65 },
+      { code: "XLWB_VAN",    name: "XLWB",              baseRate: 1.20, minTransportValue: 70 },
+      { code: "LUTON",       name: "Luton",             baseRate: 1.30, minTransportValue: 75 },
+      { code: "LUTON_TAIL",  name: "Luton — Tail Lift", baseRate: 1.40, minTransportValue: 80 }
+    ],
+
+    // --- Prepared but INACTIVE: never priced, never shown, until approved (§13)
+    inactiveVehicles: [
+      { code: "MOTORCYCLE", name: "Motorcycle", baseRate: null, minTransportValue: null, active: false },
+      { code: "CAR",        name: "Car",        baseRate: null, minTransportValue: null, active: false }
     ],
 
     // --- PLNA driver tiers: uplift applied to the driver base rate
@@ -68,12 +79,15 @@
     },
 
     // --- HAF margin by job type: firm %, hard floor. Never breached by benefits.
+    //     marginPct = the HAF Network Fee as a % of the Carrier Transport Value.
+    //     floorPct   = the least HAF may retain after funding a driver uplift.
+    //     Groupage is built but NOT customer-facing at launch (§12).
     jobTypes: [
-      { code: "GROUPAGE",     name: "Groupage / Flexible",          marginPct: 10, floorPct: 8  },
-      { code: "FLEX_SAMEDAY", name: "Flexible Same-Day / Co-load",  marginPct: 15, floorPct: 10 },
-      { code: "STD_SAMEDAY",  name: "Standard Same-Day",            marginPct: 20, floorPct: 15 },
-      { code: "TIMED",        name: "Timed Delivery",               marginPct: 25, floorPct: 18 },
-      { code: "URGENT",       name: "Urgent / Time-Critical",       marginPct: 30, floorPct: 22 }
+      { code: "GROUPAGE",     name: "Groupage",                     marginPct: 10, floorPct: 8,  active: false },
+      { code: "FLEX_SAMEDAY", name: "Scheduled / Flexible / Co-load", marginPct: 20, floorPct: 15, active: true },
+      { code: "STD_SAMEDAY",  name: "Same-Day",                     marginPct: 20, floorPct: 15, active: true },
+      { code: "TIMED",        name: "Timed Delivery",               marginPct: 25, floorPct: 18, active: true },
+      { code: "URGENT",       name: "Urgent / Time-Critical",       marginPct: 30, floorPct: 22, active: true }
     ],
 
     // --- Driver hindrance multipliers (pay the driver for genuine burden)
@@ -104,8 +118,18 @@
       hafMarginPct: 0                   // HAF takes nothing on direct jobs
     },
 
-    // --- Minimum customer charge on network jobs
-    minCustomerChargeExVat: 40,
+    // --- Minimums step up by VEHICLE, never by distance — one ladder only.
+    //     A genuinely short run in the area is handling work, not road work, so
+    //     that one minimum eases down for very low mileage and returns to full
+    //     by 25 miles. The taper is continuous: no mile where the price jumps.
+    //     The curve is smooth end to end, so no mile ever prices lower than a
+    //     shorter one. 0 mi = 30% below; 15 mi = 20% below; 25 mi = full.
+    localHandling: {
+      maxReductionPct: 30,                 // at zero miles
+      bandReductionPct: 20,                // by this many miles...
+      bandAtMiles: 15,
+      fullMinimumFromMiles: 25             // ...back to the full minimum here
+    },
 
     // --- Pool allocation — % OF HAF MARGIN routed to network pools
     pools: {
@@ -128,6 +152,18 @@
     for (var i = 0; i < config.vehicles.length; i++)
       if (config.vehicles[i].code === code) return config.vehicles[i];
     return config.vehicles[0];
+  }
+  // The vehicle minimum, eased down for a genuinely short in-area run.
+  // Continuous by design: there is no mile at which the price jumps.
+  function minTransportValue(vehicle, miles) {
+    var lh = config.localHandling, m = Math.max(0, miles), f;
+    var maxOff = lh.maxReductionPct / 100, bandOff = lh.bandReductionPct / 100;
+    if (m >= lh.fullMinimumFromMiles) f = 1;
+    else if (m >= lh.bandAtMiles)
+      f = (1 - bandOff) + bandOff * (m - lh.bandAtMiles) / (lh.fullMinimumFromMiles - lh.bandAtMiles);
+    else
+      f = (1 - maxOff) + (maxOff - bandOff) * (m / lh.bandAtMiles);
+    return round2(vehicle.minTransportValue * f);
   }
   function getJobType(code) {
     for (var i = 0; i < config.jobTypes.length; i++)
@@ -258,35 +294,49 @@
         " — " + overrideApplied.reason);
     }
 
-    // --- Uplift viability: apply only if the job-type margin floor still holds ---
-    var driverPay = driverBase;
+    // --- Carrier Transport Value: the greater of the mileage value and the
+    //     vehicle's minimum (eased down for genuinely short in-area work).
+    var minValue = minTransportValue(vehicle, miles);
+    var carrierValue = driverBase;
+    var minApplied = false;
+    if (!direct && carrierValue < minValue) {
+      carrierValue = minValue;
+      minApplied = true;
+      reasons.push("Vehicle minimum applied: " + vehicle.name + " £" + minValue +
+        (miles < config.localHandling.fullMinimumFromMiles
+          ? " (short local run priced as handling, eased down from £" + vehicle.minTransportValue + ")"
+          : ""));
+    }
+    carrierValue = round2(carrierValue);
+
+    // --- HAF Network Fee: a percentage OF the transport value, added on top.
+    //     Never hidden inside the mileage rate, never taken off the driver.
+    var networkFeeGbp = round2(carrierValue * marginPct / 100);
+
+    // --- Tier uplift pays the DRIVER out of HAF's own fee, so a driver's PLNA
+    //     tier never moves the customer's price. Withheld if it would take HAF
+    //     below the job-type floor.
+    var driverPay = carrierValue;
+    var upliftGbp = 0;
     var upliftApplied = false;
     if (upliftPct > 0 && !direct) {
-      var candidatePay = round2(driverBase * (1 + upliftPct / 100));
-      var candidatePrice = candidatePay / (1 - marginPct / 100);
-      var impliedMarginPct = ((candidatePrice - candidatePay) / candidatePrice) * 100;
-      if (impliedMarginPct >= jobType.floorPct - 0.001) {
-        driverPay = candidatePay;
+      var candidate = round2(carrierValue * upliftPct / 100);
+      if (networkFeeGbp - candidate >= carrierValue * jobType.floorPct / 100 - 0.001) {
+        upliftGbp = candidate;
+        driverPay = round2(carrierValue + candidate);
         upliftApplied = true;
-        reasons.push("Tier uplift +" + upliftPct + "% to driver (" + upliftSource + ").");
+        reasons.push("Tier uplift +" + upliftPct + "% to the driver (" + upliftSource +
+          "), funded from the network fee — customer price unchanged.");
       } else {
         flags.push("UPLIFT_WITHHELD_MARGIN");
-        reasons.push("Tier uplift withheld — would breach the " + jobType.floorPct + "% margin floor.");
+        reasons.push("Tier uplift withheld — would take HAF below the " + jobType.floorPct + "% floor.");
       }
     } else if (upliftPct > 0 && direct) {
       // Direct jobs: driver and customer agreed directly; uplift not applied.
       reasons.push("Tier uplift not applied on direct bookings.");
     }
 
-    // --- Customer price (TRUE-margin divide) ---
-    var customerExVat = marginPct < 100 ? driverPay / (1 - marginPct / 100) : driverPay;
-    var minApplied = false;
-    if (!direct && customerExVat < config.minCustomerChargeExVat) {
-      customerExVat = config.minCustomerChargeExVat;
-      minApplied = true;
-      reasons.push("Minimum network charge £" + config.minCustomerChargeExVat + " applied.");
-    }
-    customerExVat = round2(customerExVat);
+    var customerExVat = round2(carrierValue + networkFeeGbp);
 
     // --- Market band guard ---
     if (input.localMarketMedianExVat != null && num(input.localMarketMedianExVat) > 0) {
@@ -333,14 +383,21 @@
       hindrance: { weightFactor: wF, handlingFactor: hF, rawMultiplier: round2(rawMult),
                    appliedMultiplier: round2(mult), supplementsGbp: round2(supplements) },
       money: {
-        driverBasePayGbp: driverBase,
-        driverPayGbp: driverPay,
-        hafMarginPct: marginPct,
-        hafMarginGbp: hafMarginGbp,
-        hafNetGbp: hafNetGbp,
-        customerExVatGbp: customerExVat,
+        // The three amounts, kept apart (§1) — never blended into one rate.
+        carrierTransportValueGbp: carrierValue,   // 1. what the road work is worth
+        networkFeePct: marginPct,                 // 2. the HAF network fee...
+        networkFeeGbp: networkFeeGbp,             //    ...in pounds
+        customerExVatGbp: customerExVat,          // 3. what the customer pays, ex VAT
         vatGbp: vat,
         customerIncVatGbp: round2(customerExVat + vat),
+        driverBasePayGbp: driverBase,
+        driverUpliftGbp: upliftGbp,
+        driverPayGbp: driverPay,
+        hafMarginPct: marginPct,
+        hafMarginGbp: hafMarginGbp,               // fee retained after the uplift
+        hafNetGbp: hafNetGbp,
+        vehicleMinimumGbp: vehicle.minTransportValue,
+        minimumAppliedGbp: minApplied ? minValue : null,
         minChargeApplied: minApplied
       },
       pools: {

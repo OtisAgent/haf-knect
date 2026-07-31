@@ -638,10 +638,13 @@ textarea.fi2{resize:vertical;min-height:70px}
         </div>
         <div class="van-lbl">Van size</div>
         <div class="van-pills" id="van-pills">
-          <button class="vp" onclick="selVan(this,'small')">Small box<span class="vp-sub">up to 400 kg</span></button>
-          <button class="vp" onclick="selVan(this,'swb')">Half van<span class="vp-sub">up to 800 kg</span></button>
-          <button class="vp sel" onclick="selVan(this,'lwb')">Full van<span class="vp-sub">up to 1,200 kg</span></button>
-          <button class="vp" onclick="selVan(this,'luton')">XL Van or Special<span class="vp-sub">Luton + tail-lift</span></button>
+          <button class="vp" onclick="selVan(this,'small')">Small van<span class="vp-sub">up to 400 kg</span></button>
+          <button class="vp" onclick="selVan(this,'swb')">SWB<span class="vp-sub">up to 800 kg</span></button>
+          <button class="vp" onclick="selVan(this,'mwb')">MWB<span class="vp-sub">up to 1,000 kg</span></button>
+          <button class="vp sel" onclick="selVan(this,'lwb')">LWB<span class="vp-sub">up to 1,200 kg</span></button>
+          <button class="vp" onclick="selVan(this,'xlwb')">XLWB<span class="vp-sub">up to 1,400 kg</span></button>
+          <button class="vp" onclick="selVan(this,'luton')">Luton<span class="vp-sub">up to 1,000 kg, 4 pallets</span></button>
+          <button class="vp" onclick="selVan(this,'lutontl')">Luton &#8212; tail lift<span class="vp-sub">up to 1,000 kg, tail lift</span></button>
         </div>
         <!-- LIVE PRICE DISPLAY -->
         <div class="lp-box hint" id="lp-box">
@@ -702,10 +705,13 @@ textarea.fi2{resize:vertical;min-height:70px}
             <div class="fstep on" id="fq-1">
               <div class="slbl">Step 1 of 8 &#8212; Van size</div>
               <div class="ogrid">
-                <button class="oopt" onclick="fqSel(this,'van','small')">Small box<span class="oopt-sub">up to 400 kg, 1 pallet</span></button>
-                <button class="oopt" onclick="fqSel(this,'van','swb')">Half van<span class="oopt-sub">up to 800 kg, 2 pallets</span></button>
-                <button class="oopt" onclick="fqSel(this,'van','lwb')">Full van<span class="oopt-sub">up to 1,200 kg, 3 pallets</span></button>
-                <button class="oopt" onclick="fqSel(this,'van','luton')">XL Van or Special<span class="oopt-sub">Luton + tail-lift, 6 pallets</span></button>
+                <button class="oopt" onclick="fqSel(this,'van','small')">Small van<span class="oopt-sub">up to 400 kg, 1 pallet</span></button>
+                <button class="oopt" onclick="fqSel(this,'van','swb')">SWB<span class="oopt-sub">up to 800 kg, 2 pallets</span></button>
+                <button class="oopt" onclick="fqSel(this,'van','mwb')">MWB<span class="oopt-sub">up to 1,000 kg, 2 pallets</span></button>
+                <button class="oopt" onclick="fqSel(this,'van','lwb')">LWB<span class="oopt-sub">up to 1,200 kg, 3 pallets</span></button>
+                <button class="oopt" onclick="fqSel(this,'van','xlwb')">XLWB<span class="oopt-sub">up to 1,400 kg, 4 pallets</span></button>
+                <button class="oopt" onclick="fqSel(this,'van','luton')">Luton<span class="oopt-sub">up to 1,000 kg, 4 pallets</span></button>
+                <button class="oopt" onclick="fqSel(this,'van','lutontl')">Luton &#8212; tail lift<span class="oopt-sub">up to 1,000 kg, tail lift</span></button>
               </div>
               <div class="fnav"><button class="btn btn-or btn-sm" onclick="fqStep(2)">Next &#8594;</button></div>
             </div>
@@ -1188,12 +1194,14 @@ textarea.fi2{resize:vertical;min-height:70px}
         </div>
         <div style="display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;margin-bottom:.75rem">
           <button id="cpill-" class="cap-pill active" onclick="capSetVeh('')">All</button>
-          <button id="cpill-van" class="cap-pill" onclick="capSetVeh('van')">Van</button>
+          <button id="cpill-van" class="cap-pill" onclick="capSetVeh('van')">Small van</button>
+          <button id="cpill-swb" class="cap-pill" onclick="capSetVeh('swb')">SWB</button>
+          <button id="cpill-mwb" class="cap-pill" onclick="capSetVeh('mwb')">MWB</button>
           <button id="cpill-lwb" class="cap-pill" onclick="capSetVeh('lwb')">LWB</button>
+          <button id="cpill-xlwb" class="cap-pill" onclick="capSetVeh('xlwb')">XLWB</button>
           <button id="cpill-luton" class="cap-pill" onclick="capSetVeh('luton')">Luton</button>
-          <button id="cpill-artic" class="cap-pill" onclick="capSetVeh('artic')">Artic</button>
-          <button id="cpill-fridge" class="cap-pill" onclick="capSetVeh('fridge')">Fridge</button>
-          <span style="margin-left:auto;font-size:.72rem;color:var(--mu);white-space:nowrap">Rate: <strong id="cap-rate-lbl" style="color:var(--or)">£1.80–£2.40/mi</strong> · 9% network fee</span>
+          <button id="cpill-lutontl" class="cap-pill" onclick="capSetVeh('lutontl')">Luton &#8212; tail lift</button>
+          <span style="margin-left:auto;font-size:.72rem;color:var(--mu);white-space:nowrap">Rate: <strong id="cap-rate-lbl" style="color:var(--or)">£1.30–£1.45/mi</strong> · 9% network fee</span>
         </div>
         <div style="border-radius:var(--r);overflow:hidden;border:1.5px solid var(--ln);margin-bottom:1rem;position:relative">
           <div id="cap-map" style="height:460px;width:100%;background:var(--bg)"></div>
@@ -1465,7 +1473,12 @@ textarea.fi2{resize:vertical;min-height:70px}
 
 <script>
 /* ── PRICING ── */
-const VAN={small:{n:'Small van',min:25,ppm:.48},swb:{n:'Short wheelbase',min:32,ppm:.62},lwb:{n:'Long wheelbase',min:40,ppm:.78},xlwb:{n:'Extra long wheelbase',min:50,ppm:.94},luton:{n:'Luton van',min:65,ppm:1.15}};
+/* Seven van sizes only. ppm/min are the CUSTOMER figures: the driver base rate
+   and vehicle minimum from the HAF KNECT Pricing Matrix, plus the 20% network fee. */
+const VAN={small:{n:'Small van',min:60,ppm:.96},swb:{n:'SWB',min:66,ppm:1.08},mwb:{n:'MWB',min:72,ppm:1.20},lwb:{n:'LWB',min:78,ppm:1.32},xlwb:{n:'XLWB',min:84,ppm:1.44},luton:{n:'Luton',min:90,ppm:1.56},lutontl:{n:'Luton — tail lift',min:96,ppm:1.68}};
+/* A really short run in the area is handling work, so the vehicle minimum eases
+   down and climbs back to full by 25 miles. Continuous — no jump at any mile. */
+function vanMin(v,m){var f;if(m<=5)f=.70;else if(m<=10)f=.75;else if(m<=15)f=.80;else if(m<25)f=.80+.20*(m-15)/10;else f=1;return Math.round(v.min*f*100)/100;}
 const URG={flex:{n:'Flexible',m:1},sday:{n:'Same-day',m:1.22},urg:{n:'Urgent',m:1.45},timed:{n:'Timed delivery',m:1.30}};
 const PC={M:[53.48,-2.24],LS:[53.80,-1.55],S:[53.38,-1.47],B:[52.48,-1.90],L:[53.41,-2.98],E:[51.52,-0.05],N:[51.55,-0.10],W:[51.51,-0.20],SE:[51.48,-0.05],SW:[51.46,-0.18],NW:[51.55,-0.16],WA:[53.39,-2.60],SK:[53.41,-2.16],NG:[52.95,-1.15],DE:[52.92,-1.48],CV:[52.41,-1.51],LE:[52.63,-1.13],G:[55.86,-4.25],EH:[55.95,-3.19],CF:[51.48,-3.18],BS:[51.45,-2.60],OX:[51.75,-1.26],CB:[52.21,.12],YO:[53.96,-1.08],HU:[53.74,-.34],DN:[53.52,-1.13],BD:[53.80,-1.75],WF:[53.68,-1.50],SR:[54.91,-1.39],NE:[54.97,-1.61],TS:[54.60,-1.23],LA:[54.05,-2.80],PE:[52.57,-.24],IP:[52.06,1.16]};
 function pcArea(s){return(s.trim().match(/^[A-Z]+/i)||['M'])[0].toUpperCase()}
@@ -1532,7 +1545,7 @@ function toggleTheme(){
 }
 
 /* ── LIVE PRICE CALCULATOR ── */
-const VAN_LABELS={small:'Small box',swb:'Half van',lwb:'Full van',luton:'XL Van or Special'};
+const VAN_LABELS={};
 let selVanKey='lwb';
 
 function selVan(el,key){
@@ -1569,7 +1582,7 @@ async function calcLivePrice(){
     hint.style.display='';priced.style.display='none';return;
   }
   const miles=r.miles;
-  const base=Math.max(v.min,miles*v.ppm*zoneMult(miles));
+  const base=Math.max(vanMin(v,miles),miles*v.ppm*zoneMult(miles));
   const lo=Math.round(base*.9),hi=Math.round(base*1.1);
   const fa=r.from&&r.from.area?(r.google?r.from.area:r.from.area+' ('+fr+')'):fr;
   const ta=r.to&&r.to.area?(r.google?r.to.area:r.to.area+' ('+to+')'):to;
@@ -1644,7 +1657,7 @@ async function fqCalcPrice(){
   const v=VAN[vk]||VAN.lwb;
   const u=URG[uk]||URG.flex;
   const miles=(await pcDistReal(fr,to)).miles;
-  const base=Math.max(v.min,miles*v.ppm*u.m*zoneMult(miles));
+  const base=Math.max(vanMin(v,miles),miles*v.ppm*u.m*zoneMult(miles));
   return{lo:Math.round(base*.9),hi:Math.round(base*1.1),miles,v,u,fr,to};
 }
 async function fqShowPrice(){
@@ -1696,7 +1709,7 @@ async function hpEstimate(){
   const vk=LOAD_VAN[hpData.load||'van']||'lwb';
   const v=VAN[vk];
   const miles=(await pcDistReal(fr,to)).miles;
-  const base=Math.max(v.min,miles*v.ppm*zoneMult(miles));
+  const base=Math.max(vanMin(v,miles),miles*v.ppm*zoneMult(miles));
   const lo=Math.round(base*.9),hi=Math.round(base*1.1);
   document.getElementById('hp-van-rec').textContent=v.n+' — HAF recommended';
   document.getElementById('hp-pr-range').textContent='£'+lo+'–£'+hi;
@@ -2014,9 +2027,9 @@ function capFilter(){
   if(capMap&&capMap._relayLayers){
     capMap._relayLayers.forEach(m=>{if(relay){m.addTo(capMap);}else{try{capMap.removeLayer(m);}catch(e){}}});
   }
-  const RATES={van:'£1.60–£2.00',lwb:'£1.80–£2.40',luton:'£2.00–£2.70',artic:'£2.80–£3.80',fridge:'£2.60–£3.50'};
+  const RATES={van:'£0.95–£1.05',swb:'£1.05–£1.20',mwb:'£1.20–£1.30',lwb:'£1.30–£1.45',xlwb:'£1.40–£1.55',luton:'£1.55–£1.70',lutontl:'£1.65–£1.85'};
   const rateEl=document.getElementById('cap-rate-lbl');
-  if(rateEl)rateEl.textContent=(RATES[_capVeh]||'£1.80–£2.40')+'/mi';
+  if(rateEl)rateEl.textContent=(RATES[_capVeh]||'£1.30–£1.45')+'/mi';
 }
 function initCapMap(){
   const el=document.getElementById('cap-map');
@@ -2138,7 +2151,7 @@ const EXCH_JOBS={
   ],
   freight:[
     {ref:'FF-0092',route:'Manchester M1 → Birmingham B1',det:'LWB · 640 kg · Driver confirmed · ETD 15:00',status:'cg',label:'Confirmed',pc:'M1'},
-    {ref:'FF-0091',route:'Leeds LS1 → London E1',         det:'Artic · 8t · Awaiting driver response',     status:'ca',label:'Pending',  pc:'LS1'},
+    {ref:'FF-0091',route:'Leeds LS1 → London E1',         det:'Luton — tail lift · 900 kg · Awaiting driver response',     status:'ca',label:'Pending',  pc:'LS1'},
     {ref:'FF-0095',route:'Sheffield S1 → Nottingham NG1', det:'LWB · 500 kg · Open to network',            status:'ca',label:'Open',     pc:'S1'},
     {ref:'FF-0096',route:'Liverpool L1 → Manchester M1',  det:'SWB · 320 kg · Open to network',            status:'ca',label:'Open',     pc:'L1'},
     {ref:'FF-0097',route:'Birmingham B1 → Bristol BS1',   det:'Luton · 780 kg · Driver confirmed',         status:'cg',label:'Confirmed',pc:'B1'},
@@ -2232,7 +2245,7 @@ function renderExchange(){
     <span style="color:#364048">·</span>
     <span style="font-size:.7rem;font-weight:600;color:#e8e3db">4 en route</span>
     <span style="color:#364048">·</span>
-    <span style="font-size:.7rem;font-weight:700;color:var(--or)">£1.80–£2.40/mi</span>
+    <span style="font-size:.7rem;font-weight:700;color:var(--or)">£1.30–£1.45/mi</span>
     <span style="color:#364048">·</span>
     <span style="font-size:.7rem;font-weight:700;color:var(--gn)">★ Manchester HIGH DEMAND</span>
   </div>`;

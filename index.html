@@ -785,10 +785,13 @@ textarea.fi2{resize:vertical;min-height:70px}
         </div>
         <div class="van-lbl">Van size</div>
         <div class="van-pills" id="van-pills">
-          <button class="vp" onclick="selVan(this,'small')">Small box<span class="vp-sub">up to 400 kg</span></button>
-          <button class="vp" onclick="selVan(this,'swb')">Half van<span class="vp-sub">up to 800 kg</span></button>
-          <button class="vp sel" onclick="selVan(this,'lwb')">Full van<span class="vp-sub">up to 1,200 kg</span></button>
-          <button class="vp" onclick="selVan(this,'luton')">XL Van or Special<span class="vp-sub">Luton + tail-lift</span></button>
+          <button class="vp" onclick="selVan(this,'small')">Small van<span class="vp-sub">up to 400 kg</span></button>
+          <button class="vp" onclick="selVan(this,'swb')">SWB<span class="vp-sub">up to 800 kg</span></button>
+          <button class="vp" onclick="selVan(this,'mwb')">MWB<span class="vp-sub">up to 1,000 kg</span></button>
+          <button class="vp sel" onclick="selVan(this,'lwb')">LWB<span class="vp-sub">up to 1,200 kg</span></button>
+          <button class="vp" onclick="selVan(this,'xlwb')">XLWB<span class="vp-sub">up to 1,400 kg</span></button>
+          <button class="vp" onclick="selVan(this,'luton')">Luton<span class="vp-sub">up to 1,000 kg, 4 pallets</span></button>
+          <button class="vp" onclick="selVan(this,'lutontl')">Luton — tail lift<span class="vp-sub">up to 1,000 kg, tail lift</span></button>
         </div>
         <!-- LIVE PRICE DISPLAY -->
         <div class="lp-box hint" id="lp-box">
@@ -849,10 +852,13 @@ textarea.fi2{resize:vertical;min-height:70px}
             <div class="fstep on" id="fq-1">
               <div class="slbl">Step 1 of 8 &#8212; Van size</div>
               <div class="ogrid">
-                <button class="oopt" onclick="fqSel(this,'van','small')">Small box<span class="oopt-sub">up to 400 kg, 1 pallet</span></button>
-                <button class="oopt" onclick="fqSel(this,'van','swb')">Half van<span class="oopt-sub">up to 800 kg, 2 pallets</span></button>
-                <button class="oopt" onclick="fqSel(this,'van','lwb')">Full van<span class="oopt-sub">up to 1,200 kg, 3 pallets</span></button>
-                <button class="oopt" onclick="fqSel(this,'van','luton')">XL Van or Special<span class="oopt-sub">Luton + tail-lift, 6 pallets</span></button>
+                <button class="oopt" onclick="fqSel(this,'van','small')">Small van<span class="oopt-sub">up to 400 kg, 1 pallet</span></button>
+                <button class="oopt" onclick="fqSel(this,'van','swb')">SWB<span class="oopt-sub">up to 800 kg, 2 pallets</span></button>
+                <button class="oopt" onclick="fqSel(this,'van','mwb')">MWB<span class="oopt-sub">up to 1,000 kg, 2 pallets</span></button>
+                <button class="oopt" onclick="fqSel(this,'van','lwb')">LWB<span class="oopt-sub">up to 1,200 kg, 3 pallets</span></button>
+                <button class="oopt" onclick="fqSel(this,'van','xlwb')">XLWB<span class="oopt-sub">up to 1,400 kg, 4 pallets</span></button>
+                <button class="oopt" onclick="fqSel(this,'van','luton')">Luton<span class="oopt-sub">up to 1,000 kg, 4 pallets</span></button>
+                <button class="oopt" onclick="fqSel(this,'van','lutontl')">Luton — tail lift<span class="oopt-sub">up to 1,000 kg, tail lift</span></button>
               </div>
               <div class="fstep-err" id="fq-err-1"></div>
               <div class="fnav"><button class="btn btn-or btn-sm" onclick="fqNext(2)">Next &#8594;</button></div>
@@ -1756,7 +1762,7 @@ textarea.fi2{resize:vertical;min-height:70px}
             <div class="fg"><label class="fl">Or contact via email</label><input class="fi2" id="dir-email" placeholder="your@email.com" type="email"></div>
           </div>
           <div class="fr" style="margin:0 0 .65rem">
-            <div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>Short wheelbase</option><option selected>Long wheelbase</option><option>Extra LWB</option><option>Luton / tail-lift</option></select></div>
+            <div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>SWB</option><option>MWB</option><option selected>LWB</option><option>XLWB</option><option>Luton</option><option>Luton &#8212; tail lift</option></select></div>
             <div class="fg"><label class="fl">Home zone</label><select class="fi2"><option>North West</option><option>Yorkshire &amp; Humber</option><option>North East</option><option>East Midlands</option><option>West Midlands</option><option>East of England</option><option>M25 / Greater London</option><option>South East</option><option>South West</option></select></div>
           </div>
           <div class="fg" style="margin-bottom:.7rem"><label class="fl">Run directions (tick all that apply)</label>
@@ -1800,7 +1806,7 @@ textarea.fi2{resize:vertical;min-height:70px}
           <div class="ct">Job details</div>
           <div class="fr"><div class="fg"><label class="fl">Collection address</label><input class="fi2" placeholder="Full address or postcode"></div><div class="fg"><label class="fl">Delivery address</label><input class="fi2" placeholder="Full address or postcode"></div></div>
           <div class="fr"><div class="fg"><label class="fl">Your reference</label><input class="fi2" placeholder="Internal order or PO ref"></div><div class="fg"><label class="fl">Goods description</label><input class="fi2" placeholder="e.g. Retail stock, tools"></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 200"></div><div class="fg"><label class="fl">Vehicle needed</label><select class="fi2"><option>Any</option><option>Small van</option><option>Short wheelbase</option><option>Long wheelbase</option><option>Luton / tail-lift</option></select></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 200"></div><div class="fg"><label class="fl">Vehicle needed</label><select class="fi2"><option>Any</option><option>Small van</option><option>SWB</option><option>MWB</option><option>LWB</option><option>XLWB</option><option>Luton</option><option>Luton &#8212; tail lift</option></select></div></div>
           <div class="fr"><div class="fg"><label class="fl">Date</label><input class="fi2" type="date"></div><div class="fg"><label class="fl">Urgency</label><select class="fi2"><option>Flexible</option><option>Same-day</option><option>Urgent</option><option>Timed window</option></select></div></div>
         </div>
         <!-- Acceptance rules -->
@@ -1884,7 +1890,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         <h1 class="pt">My Fleet</h1><p class="ps">Register your company vehicles on the KNECT network to take inbound deliveries.</p>
         <div class="card" style="max-width:540px">
           <div class="ct">Add a vehicle</div>
-          <div class="fr"><div class="fg"><label class="fl">Registration</label><input class="fi2" placeholder="e.g. AB12 CDE" style="text-transform:uppercase"></div><div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>Short wheelbase</option><option>Long wheelbase</option><option>Extra LWB</option><option>Luton / tail-lift</option></select></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Registration</label><input class="fi2" placeholder="e.g. AB12 CDE" style="text-transform:uppercase"></div><div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>SWB</option><option>MWB</option><option>LWB</option><option>XLWB</option><option>Luton</option><option>Luton &#8212; tail lift</option></select></div></div>
           <div class="fr"><div class="fg"><label class="fl">Driver name</label><input class="fi2" placeholder="Assigned driver"></div><div class="fg"><label class="fl">Base postcode</label><input class="fi2" placeholder="e.g. S9"></div></div>
           <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.76rem;font-weight:600;color:var(--mu);margin:.3rem 0 .7rem"><input type="checkbox" style="accent-color:var(--or)"> Add to KNECT network — accept inbound jobs when available</label>
           <button class="btn btn-or btn-sm">Add vehicle</button>
@@ -1946,7 +1952,7 @@ textarea.fi2{resize:vertical;min-height:70px}
             <div class="fg"><label class="fl">Mobile number</label><input class="fi2" placeholder="07xxx xxxxxx" type="tel"></div>
           </div>
           <div class="fr" style="margin:0 0 .6rem">
-            <div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>Short wheelbase</option><option selected>Long wheelbase</option><option>Extra LWB</option><option>Luton / tail-lift</option></select></div>
+            <div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>SWB</option><option>MWB</option><option selected>LWB</option><option>XLWB</option><option>Luton</option><option>Luton &#8212; tail lift</option></select></div>
             <div class="fg"><label class="fl">Vehicle registration</label><input class="fi2" placeholder="e.g. AB12 CDE" style="text-transform:uppercase"></div>
           </div>
           <div class="fg" style="margin-bottom:.7rem"><label class="fl">Base postcode</label><input class="fi2" placeholder="e.g. S9 1AA" style="max-width:160px"></div>
@@ -2061,10 +2067,11 @@ textarea.fi2{resize:vertical;min-height:70px}
               <option value="">All vehicles</option>
               <option value="van">Small van</option>
               <option value="swb">SWB</option>
+              <option value="mwb">MWB</option>
               <option value="lwb">LWB</option>
-              <option value="xlwb">Extra LWB</option>
+              <option value="xlwb">XLWB</option>
               <option value="luton">Luton</option>
-              <option value="artic">Artic</option>
+              <option value="lutontl">Luton — tail lift</option>
             </select>
           </div>
           <div class="cap-f">
@@ -2457,14 +2464,32 @@ textarea.fi2{resize:vertical;min-height:70px}
 </div>
 
 <script>
-/* ── PRICING — HAF-PRICE-V3.0 driver-first engine ──
-   Route priced two ways (miles × VSBR vs hours × VSHR) — higher wins,
-   protecting slow/congested routes. Customer price built from protected
-   driver pay ÷ driver share. Zone factor adapts to the destination area's
-   return-load probability. £40 hard market floor. */
-const REF_MPH=40, NET_POOL=.05, HARD_FLOOR=40;
-const VAN={small:{n:'Small van',drv:.80},swb:{n:'Short wheelbase',drv:.90},mwb:{n:'Medium wheelbase',drv:1.00},lwb:{n:'Long wheelbase',drv:1.10},xlwb:{n:'Extra long wheelbase',drv:1.15},luton:{n:'Luton van',drv:1.25}};
-const URG={flex:{n:'Flexible',margin:.10,svc:1},sday:{n:'Same-day',margin:.20,svc:1},urg:{n:'Urgent',margin:.30,svc:1.10},timed:{n:'Timed delivery',margin:.25,svc:1}};
+/* ── PRICING — HAF-PRICE-V4.0 driver-first engine ──
+   Source of truth: HAF KNECT Pricing Matrix and Network Fee Framework
+   (Brent Ford, 2026-07-31). Three amounts are kept apart and never blended:
+
+     1. Carrier Transport Value  — what the road work is worth (driver/fleet)
+     2. HAF Network Fee          — a % of that value, for the network itself
+     3. Customer Price           — the two added together, plus VAT
+
+   The route is priced two ways (miles × vehicle rate vs hours × the vehicle's
+   standard hourly rate) and the higher wins, so a slow congested run still
+   pays. The zone factor lifts the transport value where the destination area
+   has a poor chance of a load back. Seven van sizes only — nothing above a
+   Luton exists on this network. */
+const REF_MPH=40, NET_POOL=.05;
+/* drv = £ per loaded mile paid to the driver · min = the vehicle's minimum transport value (£ ex VAT) */
+const VAN={
+  small  :{n:'Small van'        ,drv:.80,min:50},
+  swb    :{n:'SWB'              ,drv:.90,min:55},
+  mwb    :{n:'MWB'              ,drv:1.00,min:60},
+  lwb    :{n:'LWB'              ,drv:1.10,min:65},
+  xlwb   :{n:'XLWB'             ,drv:1.20,min:70},
+  luton  :{n:'Luton'            ,drv:1.30,min:75},
+  lutontl:{n:'Luton — tail lift',drv:1.40,min:80}
+};
+/* fee = HAF network fee as a % of the carrier transport value · svc = urgency uplift paid to the driver */
+const URG={flex:{n:'Flexible',fee:.20,svc:1},sday:{n:'Same-day',fee:.20,svc:1},urg:{n:'Urgent',fee:.30,svc:1.10},timed:{n:'Timed delivery',fee:.25,svc:1}};
 /* Area-adaptive zone factor — return-load probability by destination postcode area */
 const ZONE_STRONG={M:1,B:1,LS:1,S:1,L:1,NG:1,LE:1,CV:1,BS:1,E:1,EC:1,N:1,NW:1,SE:1,SW:1,W:1,WC:1,G:1,EH:1,NE:1,SR:1,DN:1,WF:1,BD:1,HD:1,OL:1,SK:1,WA:1,WN:1,BL:1,PR:1,ST:1,WS:1,WV:1,DY:1,DE:1,SL:1,RG:1,MK:1,LU:1,WD:1,EN:1,HA:1,UB:1,TW:1,KT:1,SM:1,CR:1,BR:1,RM:1,IG:1};
 const ZONE_REMOTE={IV:1,KW:1,PH:1,HS:1,ZE:1,AB:1,DG:1,TD:1,TR:1,LD:1,SA:1};
@@ -2473,7 +2498,29 @@ function zoneFactorFor(pc){
   const a=((pc||'').trim().match(/^[A-Z]+/i)||[''])[0].toUpperCase();
   return ZONE_REMOTE[a]?1.12:ZONE_LIMITED[a]?1.07:ZONE_STRONG[a]?1:1.03;
 }
-/* Core V3 quote: returns ex-VAT customer subtotal + breakdown */
+/* ── MINIMUM TRANSPORT VALUE ──
+   The minimum steps up by VEHICLE, never by distance — one ladder only.
+   A genuinely short run in the area is handling work, not road work, so that
+   one minimum eases down for very low mileage and climbs back to full by 25
+   miles. The curve is smooth end to end — there is no mile at which the price
+   jumps, so a customer can never be quoted less for a longer job:
+     0 mi    : 30% below the vehicle minimum
+     0–15 mi : easing from 30% below to 20% below   (Brent's 20–30% band)
+     15–25 mi: easing from 20% below back to full
+     25 mi + : the full vehicle minimum
+   Above the minimum the mileage calculation takes over on its own. */
+const LOCAL_MAX_OFF=.30, LOCAL_BAND_OFF=.20, LOCAL_BAND_AT=15, LOCAL_FULL_AT=25;
+function minTransportValue(v,miles){
+  const m=Math.max(0,miles);
+  let f;
+  if(m>=LOCAL_FULL_AT) f=1;
+  else if(m>=LOCAL_BAND_AT)
+    f=(1-LOCAL_BAND_OFF)+LOCAL_BAND_OFF*(m-LOCAL_BAND_AT)/(LOCAL_FULL_AT-LOCAL_BAND_AT);
+  else
+    f=(1-LOCAL_MAX_OFF)+(LOCAL_MAX_OFF-LOCAL_BAND_OFF)*(m/LOCAL_BAND_AT);
+  return Math.round(v.min*f*100)/100;
+}
+/* Core quote: returns the ex-VAT customer subtotal with the three amounts kept apart */
 function v3Price(miles,mins,vanKey,urgKey,toPc){
   const v=VAN[vanKey]||VAN.lwb,u=URG[urgKey]||URG.sday;
   const vshr=v.drv*REF_MPH;
@@ -2481,10 +2528,14 @@ function v3Price(miles,mins,vanKey,urgKey,toPc){
   const distCost=miles*v.drv, timeCost=hours*vshr;
   const routeBase=Math.max(distCost,timeCost);
   const mult=Math.min(u.svc*zoneFactorFor(toPc),1.40);
-  const driverPay=routeBase*mult;
-  const share=1-u.margin-NET_POOL;
-  const sub=Math.max(driverPay/share,HARD_FLOOR);
-  return{sub,driverPay,timeWins:timeCost>distCost,miles,hours};
+  const mileageValue=routeBase*mult;
+  const floor=minTransportValue(v,miles);
+  const p2=n=>Math.round((n+Number.EPSILON)*100)/100;
+  const carrier=p2(Math.max(mileageValue,floor));   /* 1. Carrier Transport Value */
+  const fee=p2(carrier*u.fee);                      /* 2. HAF Network Fee         */
+  const sub=p2(carrier+fee);                        /* 3. Customer price, ex VAT  */
+  return{sub,carrier,fee,driverPay:carrier,floor,onMinimum:carrier===floor,
+         pool:p2(sub*NET_POOL),timeWins:timeCost>distCost,miles,hours};
 }
 const PC={M:[53.48,-2.24],LS:[53.80,-1.55],S:[53.38,-1.47],B:[52.48,-1.90],L:[53.41,-2.98],E:[51.52,-0.05],N:[51.55,-0.10],W:[51.51,-0.20],SE:[51.48,-0.05],SW:[51.46,-0.18],NW:[51.55,-0.16],WA:[53.39,-2.60],SK:[53.41,-2.16],NG:[52.95,-1.15],DE:[52.92,-1.48],CV:[52.41,-1.51],LE:[52.63,-1.13],G:[55.86,-4.25],EH:[55.95,-3.19],CF:[51.48,-3.18],BS:[51.45,-2.60],OX:[51.75,-1.26],CB:[52.21,.12],YO:[53.96,-1.08],HU:[53.74,-.34],DN:[53.52,-1.13],BD:[53.80,-1.75],WF:[53.68,-1.50],SR:[54.91,-1.39],NE:[54.97,-1.61],TS:[54.60,-1.23],LA:[54.05,-2.80],PE:[52.57,-.24],IP:[52.06,1.16]};
 function pcArea(s){return(s.trim().match(/^[A-Z]+/i)||['M'])[0].toUpperCase()}
@@ -2550,7 +2601,6 @@ function toggleTheme(){
 }
 
 /* ── LIVE PRICE CALCULATOR ── */
-const VAN_LABELS={small:'Small box',swb:'Half van',lwb:'Full van',luton:'XL Van or Special'};
 let selVanKey='lwb';
 
 function selVan(el,key){
@@ -2593,7 +2643,7 @@ async function calcLivePrice(){
   const ta=r.to&&r.to.area?(r.google?r.to.area:r.to.area+' ('+to+')'):to;
   const dt=r.google&&r.mins?(r.mins>=60?Math.floor(r.mins/60)+'h '+(r.mins%60)+'m':r.mins+' min')+' drive · ':'';
   document.getElementById('lp-range').textContent='£'+lo+'–£'+hi;
-  document.getElementById('lp-info').textContent=(VAN_LABELS[selVanKey]||v.n)+' · '+fa+' → '+ta+' · '+miles+' mi'+(r.google?'':' road est.')+' · '+dt+'±10%';
+  document.getElementById('lp-info').textContent=v.n+' · '+fa+' → '+ta+' · '+miles+' mi'+(r.google?'':' road est.')+' · '+dt+'±10%';
   box.className='lp-box priced';
   hint.style.display='none';
   priced.style.display='flex';
@@ -4150,7 +4200,7 @@ function dashBuildFocus(){
    DRAWN, never what the engine is allowed to find — the same discipline as the
    Basic/Advanced switch. Locations stay at town + outward code, never a full
    postcode and never a pin, because a run back is still someone's job. */
-const RR_VEH=['SWB','VAN','LWB','LUTON'];            /* small → large; a bigger van can take a smaller load */
+const RR_VEH=['VAN','SWB','MWB','LWB','XLWB','LUTON','LUTONTL'];            /* small → large; a bigger van can take a smaller load */
 const RR_NEAR={Warrington:['Widnes','Runcorn'],Sheffield:['Rotherham','Barnsley'],Leeds:['Bradford','Wakefield'],Birmingham:['Coventry','Wolverhampton']};
 const RR_HOME={Manchester:['Salford','Stockport','Oldham','Bolton','Trafford'],Salford:['Manchester','Stockport','Oldham','Trafford']};
 const RR_POOL=[
@@ -4772,9 +4822,10 @@ function capFilter(){
       if(relay){m.addTo(capMap);}else{try{capMap.removeLayer(m);}catch(e){}}
     });
   }
-  const RATES={van:'£1.60–£2.00',swb:'£1.65–£2.10',lwb:'£1.80–£2.40',xlwb:'£1.90–£2.50',luton:'£2.00–£2.70',artic:'£2.80–£3.80',flatbed:'£2.50–£3.40',curtain:'£2.40–£3.20'};
+  /* Customer guide band per loaded mile — driver base rate + the network fee, rounded to a band */
+  const RATES={van:'£0.95–£1.05',swb:'£1.05–£1.20',mwb:'£1.20–£1.30',lwb:'£1.30–£1.45',xlwb:'£1.40–£1.55',luton:'£1.55–£1.70',lutontl:'£1.65–£1.85'};
   const rateEl=document.getElementById('cap-rate-lbl');
-  if(rateEl)rateEl.textContent=(RATES[_capVeh]||'£1.80–£2.40')+'/mi';
+  if(rateEl)rateEl.textContent=(RATES[_capVeh]||'£1.30–£1.45')+'/mi';
 }
 /* Job type / demand / coverage filters — grey out regions that don't match, on both the map and the side panels */
 function _capFV(id){const e=document.getElementById(id);return e?e.value:'all';}

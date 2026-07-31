@@ -1,3 +1,11 @@
+/* RETIRED 2026-07-31 — this suite asserts the FRAMEWORK-V3 model (old 75p–£1.20
+ * rate ladder, a flat £40 customer minimum, and customer price = driver pay ÷
+ * share). That model was replaced by MATRIX-V4 on Brent's written pricing
+ * framework: seven vehicles at 80p–£1.40, a minimum per vehicle, and the
+ * network fee added ON TOP of the transport value instead of divided into it.
+ * Kept for history only. The live suite is admin/pricing-matrix-v4.test.js.
+ * Do not run this as a gate — 9 of its assertions describe pricing we no
+ * longer use. */
 /* Pricing Matrix V3 — regression tests. Run: node pricing-matrix-v3.test.js */
 "use strict";
 var M = require("./pricing-matrix-v3.js");
