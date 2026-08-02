@@ -278,11 +278,21 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .fnd-no{font-size:.58rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#2e2200;background:linear-gradient(135deg,#f0c33c,#d9920b);border-radius:var(--pill);padding:.12rem .45rem}
 .fnd-sub{font-size:.82rem;color:var(--mu);margin-top:.28rem;line-height:1.5}
 .fnd-meta{font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--am);margin-top:.5rem}
+/* The PLNA code block. It has to survive a long code on a 320px screen, so the
+   row wraps and the code itself is allowed to break rather than push the card. */
+.fnd-code{margin-top:.75rem;padding:.7rem .8rem;background:var(--am-d);border:1px solid var(--am);border-radius:var(--rx)}
+.fnd-code-lbl{font-size:.6rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--am)}
+.fnd-code-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-top:.35rem}
+.fnd-code-val{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92rem;font-weight:700;letter-spacing:.06em;color:var(--tx);word-break:break-all;min-width:0}
+.fnd-code-btn{flex:none;font-family:var(--dp);font-weight:900;font-size:.6rem;letter-spacing:.07em;text-transform:uppercase;color:#2e2200;background:linear-gradient(135deg,#f0c33c,#d9920b);border:0;border-radius:var(--pill);padding:.3rem .7rem;cursor:pointer}
+.fnd-code-btn:disabled{opacity:.65;cursor:default}
+.fnd-code-hint{font-size:.7rem;color:var(--mu);margin-top:.4rem;line-height:1.5}
 @media(max-width:600px){
   .fnd-card{padding:.95rem 1rem;gap:.75rem}
   .fnd-mark{width:34px;height:34px}
   .fnd-ttl{font-size:.86rem}
   .fnd-sub{font-size:.76rem}
+  .fnd-code-val{font-size:.84rem}
   /* The top bar is already full on a phone — a fourth item pushes the row off
      the screen. On a small screen the card on the overview is the statement,
      so the top-bar mark stands down rather than breaking the layout. */
@@ -1455,6 +1465,18 @@ textarea.fi2{resize:vertical;min-height:70px}
             <div class="fnd-ttl">Founding Member<span class="fnd-no" id="fnd-no">Founder</span></div>
             <div class="fnd-sub">You backed HAF KNECT before the network opened. Your founding place is permanent, and your account carries full create access — post work and take work on the Exchange.</div>
             <div class="fnd-meta" id="fnd-since">Founding member of the HAF KNECT network</div>
+
+            <!-- The PLNA code that came with the founding membership. Shown here so a
+                 founder never has to go looking through an email for it. Painted by
+                 _setFounder(); stays out of sight if the register has no code. -->
+            <div class="fnd-code" id="fnd-code" hidden>
+              <div class="fnd-code-lbl" id="fnd-code-lbl">Your PLNA discount code</div>
+              <div class="fnd-code-row">
+                <code class="fnd-code-val" id="fnd-code-val"></code>
+                <button type="button" class="fnd-code-btn" id="fnd-code-btn" onclick="fndCopyCode()">Copy</button>
+              </div>
+              <div class="fnd-code-hint" id="fnd-code-hint"></div>
+            </div>
           </div>
         </div>
 
@@ -3620,7 +3642,7 @@ function enterKnectApp(u){
    Who is a founder is a fact in the register, never something the page
    works out for itself. A demo account carries its own flag so the mark
    can be seen without a real founder's login; a real account is checked
-   against the register through knect_founder_status, which answers only
+   against the register through knect_founder_card, which answers only
    for the username asked about and returns nothing at all for everyone
    else. Fail quiet: if the check cannot be made, no mark is shown —
    a missing badge is a small thing, a wrongly awarded one is not. */
@@ -3635,14 +3657,58 @@ function _setFounder(f){
   if(since)since.textContent=f.since
     ? 'Founding member since '+new Date(f.since+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})
     : 'Founding member of the HAF KNECT network';
+  _setFounderCode(f);
   badge.classList.add('on');card.classList.add('on');
+}
+
+/* The PLNA code that came with the £100 membership. A founder should be able to
+   read it straight off their own dashboard rather than dig out a sign-up email,
+   so it sits inside the founder card with a copy button. Once it has been used
+   the code stays on show — it is proof, not a secret to hide — but the wording
+   changes so nobody sits there trying to apply it a second time. */
+function _setFounderCode(f){
+  const box=document.getElementById('fnd-code');
+  if(!box)return;
+  if(!f||!f.plna_code){box.hidden=true;return}
+  const val=document.getElementById('fnd-code-val');
+  const lbl=document.getElementById('fnd-code-lbl');
+  const hint=document.getElementById('fnd-code-hint');
+  const btn=document.getElementById('fnd-code-btn');
+  const months=f.months||6;
+  if(val)val.textContent=f.plna_code;
+  if(f.redeemed_at){
+    if(lbl)lbl.textContent='Your PLNA discount code — already used';
+    if(hint)hint.textContent='This code is on your PLNA account, so your '+months+' months of PLNA Pro are running. It only works once.';
+    if(btn){btn.disabled=true;btn.textContent='Used'}
+  }else{
+    if(lbl)lbl.textContent='Your PLNA discount code';
+    if(hint)hint.textContent='Paste this into PLNA under Settings to switch on your '+months+' months of PLNA Pro, free. It works once, and only on your account.';
+    if(btn){btn.disabled=false;btn.textContent='Copy'}
+  }
+  box.hidden=false;
+}
+
+/* Copy has to work on a phone without the clipboard permission too, hence the
+   fallback: select the code so a long-press "copy" still gets it. */
+function fndCopyCode(){
+  const val=document.getElementById('fnd-code-val');
+  const btn=document.getElementById('fnd-code-btn');
+  if(!val)return;
+  const done=()=>{if(!btn)return;const t=btn.textContent;btn.textContent='Copied';setTimeout(()=>{btn.textContent=t},1600)};
+  const text=val.textContent||'';
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>_fndSelect(val));
+  }else _fndSelect(val);
+}
+function _fndSelect(el){
+  try{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);}catch(e){}
 }
 
 async function hafFounderPaint(u){
   const demo=DEMO_ACCOUNTS[u];
   if(demo){if(demo.founder)_setFounder(demo.founder);return}
   try{
-    const r=await fetch(PLNA_URL+'/rest/v1/rpc/knect_founder_status',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:u})});
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/knect_founder_card',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:u})});
     if(!r.ok)return;
     const d=await r.json();
     if(Array.isArray(d)&&d.length&&d[0].is_founder)_setFounder(d[0]);
@@ -3734,7 +3800,8 @@ const DEMO_ACCOUNTS={
   'DEMO-BIZ':{role:'business',name:'Demo Business',initials:'DB',level:null},
   /* A founder to look at. No real founding member has a network login yet, so
      without this there is nothing on screen to review. */
-  'DEMO-FND':{role:'driver',name:'Demo Founding Member',initials:'DF',level:'PLUS',founder:{member_no:1,since:'2026-07-03'}},
+  'DEMO-FND':{role:'driver',name:'Demo Founding Member',initials:'DF',level:'PLUS',founder:{member_no:1,since:'2026-07-03',plna_code:'H6PRO-DEMO24',months:6,redeemed_at:null}},
+  'DEMO-FNU':{role:'driver',name:'Demo Founder Used',initials:'DU',level:'PRO',founder:{member_no:2,since:'2026-07-04',plna_code:'H6PRO-DEMO77',months:6,redeemed_at:'2026-07-30T10:00:00Z'}},
 };
 function demoLogin(u){
   closeLogin();
