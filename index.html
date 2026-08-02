@@ -517,6 +517,8 @@ textarea.fi2{resize:vertical;min-height:70px}
 .lp-range{font-family:var(--dp);font-weight:900;font-size:1.55rem;letter-spacing:-.05em}
 .lp-vat{font-size:.74rem;font-weight:600;color:var(--mu)}
 .lp-info{font-size:.72rem;color:var(--mu);margin-top:.18rem}
+.lp-why{font-size:.72rem;color:var(--mu);margin-top:.45rem;padding-top:.45rem;border-top:1px dashed var(--ln);line-height:1.5;max-width:46ch}
+.lp-why strong{display:block;color:var(--or-g);font-weight:700;margin-bottom:.15rem}
 
 /* ── PATH TILES ───────────────────────────────────────────── */
 .path-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem}
@@ -860,6 +862,8 @@ textarea.fi2{resize:vertical;min-height:70px}
               <span class="lp-vat">+ VAT</span>
             </div>
             <div class="lp-info" id="lp-info"></div>
+            <!-- why this road and not the short one — only shown when we actually had a choice -->
+            <div class="lp-why" id="lp-why" style="display:none"></div>
           </div>
         </div>
         <p class="pf-disc">Guide price only. Final confirmed after full delivery details are reviewed.</p>
@@ -2985,14 +2989,38 @@ async function pcLookup(raw){
   return out;
 }
 function hav(a,b){const R=3959,dLa=(b.lat-a.lat)*Math.PI/180,dLo=(b.lng-a.lng)*Math.PI/180;const x=Math.sin(dLa/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLo/2)**2;return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
-/* Distance engine order: HAF gateway (Google driving matrix, shared by every
-   quote section) -> postcodes.io straight-line x1.25 -> offline area table */
+/* Distance engine order: HAF gateway route chooser -> HAF gateway driving
+   matrix -> postcodes.io straight-line x1.25 -> offline area table.
+
+   The chooser is step 1 because a long job usually has two, three or four
+   sensible ways to drive it, and the shortest is regularly the worst one — a
+   few miles saved on single carriageways through town centres can cost the
+   driver the best part of an hour. Brent's rule, 2 Aug 2026: pick the most
+   driver-friendly road, then tell the customer why, so the mileage on their
+   quote is something we can explain rather than something they have to accept.
+   `why` comes back written for a customer to read; put it on the screen.
+
+   Each rung falls through to the next, so the day the gateway is slow or the
+   chooser is not deployed yet, this behaves exactly as it did before. */
 const DMX='https://haf-distance.pages.dev/';
 async function pcDistReal(a,b){
   /* 1) validate both against the UK postcode database (catches gibberish) */
   const [pa,pb]=await Promise.all([pcLookup(a),pcLookup(b)]);
   if(pa===null||pb===null)return{miles:0,exact:false,from:pa,to:pb};  // null = not a real postcode
-  /* 2) accurate driving distance from the HAF gateway (Google) */
+  const area=p=>(p&&p!=='ERR'&&p.area)?{area:p.area}:undefined;
+  /* 2) the route chooser: every sensible road compared, the driver-friendly
+        one picked, and a sentence a customer can read about the trade. */
+  try{
+    const g=await fetch(DMX+'routes?from='+encodeURIComponent(a.trim())+'&to='+encodeURIComponent(b.trim()));
+    if(g.ok){
+      const d=await g.json();
+      if(d.ok&&d.chosen)return{miles:Math.max(1,Math.round(d.chosen.miles)),mins:d.chosen.mins,exact:true,google:true,
+        basis:d.chosen.basis,why:d.why,options:d.options,routeCount:d.count,
+        polyline:d.chosen.polyline,roads:d.chosen.roads,avgMph:d.chosen.avgMph,
+        from:area(pa)||{area:''},to:area(pb)||{area:''}};
+    }
+  }catch(e){}
+  /* 3) driving distance from the HAF gateway (Google), one road, no choice */
   try{
     const g=await fetch(DMX+'?from='+encodeURIComponent(a.trim())+'&to='+encodeURIComponent(b.trim()));
     if(g.ok){
@@ -3001,7 +3029,7 @@ async function pcDistReal(a,b){
         basis:'GOOGLE_ROAD',from:{area:d.from},to:{area:d.to}};
     }
   }catch(e){}
-  /* 3) offline fallback: straight-line x1.25, or area table if lookup errored.
+  /* 4) offline fallback: straight-line x1.25, or area table if lookup errored.
      ⚠️ These are ESTIMATES and must never be stamped exact:true. A straight line
      is a lie about the road wherever an estuary sits between two points — Hull
      HU1 1AA to Grimsby DN31 1AA is 33.3 real road miles (measured on Google's
@@ -3143,6 +3171,17 @@ async function calcLivePrice(){
   const dt=r.google&&r.mins?(r.mins>=60?Math.floor(r.mins/60)+'h '+(r.mins%60)+'m':r.mins+' min')+' drive · ':'';
   document.getElementById('lp-range').textContent='£'+lo+'–£'+hi;
   document.getElementById('lp-info').textContent=v.n+' · '+fa+' → '+ta+' · '+miles+' mi'+(r.google?'':' road est.')+' · '+dt+'±10%';
+  /* Why this road and not the short one. The customer is being charged for
+     mileage they did not choose, so they are owed the reason in the same box
+     as the number — not buried in terms. Only appears when the chooser
+     answered; a fallback estimate has no trade to explain. */
+  const why=document.getElementById('lp-why');
+  if(why){
+    if(r.why&&r.why.headline){
+      why.innerHTML='<strong>'+hafEsc(r.why.headline)+'</strong>'+hafEsc(r.why.detail);
+      why.style.display='';
+    }else{why.style.display='none';why.textContent='';}
+  }
   box.className='lp-box priced';
   hint.style.display='none';
   priced.style.display='flex';
@@ -4318,6 +4357,74 @@ function hafLjAction(label){
  if(/navigation/i.test(label)){window.open('https://www.google.com/maps/dir/?api=1&destination='+j.to.lat+','+j.to.lng,'_blank');return;}
  alert(label+' — coming in the next build slice.');
 }
+/* ── THE ROAD, NOT THE CROW'S FLIGHT ──────────────────────────────────────
+   Until now every job on this map was two straight lines: collection to van,
+   van to delivery. On a Hull → Grimsby job that draws a line straight across
+   the Humber, which is water, and a customer watching it sees a van that
+   appears to be nowhere near the road it is on. The gateway now hands back the
+   shape of the road Google actually routed, so we draw that instead.
+
+   Deliberately NOT Google's own map library: that bills per page view — every
+   visitor, booking or not. Google supplies the line; the map stays ours. */
+function hafDecodePoly(str){
+  const pts=[];let i=0,lat=0,lng=0;
+  while(i<str.length){
+    let b,sh=0,res=0;
+    do{b=str.charCodeAt(i++)-63;res|=(b&0x1f)<<sh;sh+=5;}while(b>=0x20);
+    lat+=(res&1)?~(res>>1):(res>>1);
+    sh=0;res=0;
+    do{b=str.charCodeAt(i++)-63;res|=(b&0x1f)<<sh;sh+=5;}while(b>=0x20);
+    lng+=(res&1)?~(res>>1):(res>>1);
+    pts.push([lat/1e5,lng/1e5]);
+  }
+  return pts;
+}
+/* One request per job per session, shared by every caller — the promise is
+   cached, not the answer, so two panels opening at once ask Google once. */
+const HAF_ROADS={};
+function hafJobRoad(j){
+  const k=j.from.lat+','+j.from.lng+'>'+j.to.lat+','+j.to.lng;
+  if(!HAF_ROADS[k])HAF_ROADS[k]=(async()=>{
+    try{
+      const r=await fetch(DMX+'routes?from='+j.from.lat+','+j.from.lng+'&to='+j.to.lat+','+j.to.lng);
+      if(!r.ok)return null;
+      const d=await r.json();
+      if(!d.ok||!d.chosen||!d.chosen.polyline)return null;
+      const path=hafDecodePoly(d.chosen.polyline);
+      return path.length>1?{path,miles:d.chosen.miles,mins:d.chosen.mins,roads:d.chosen.roads,why:d.why}:null;
+    }catch(e){return null;}
+  })();
+  return HAF_ROADS[k];
+}
+/* Where the van is ON the road — the nearest point of the line, not the
+   nearest end. Longitude is squeezed by latitude or everything north of the
+   Wash measures wrong. */
+function hafSplitRoad(path,pos){
+  let bi=0,bd=Infinity;
+  const kx=Math.cos(pos[0]*Math.PI/180);
+  for(let i=0;i<path.length;i++){
+    const dy=path[i][0]-pos[0],dx=(path[i][1]-pos[1])*kx;
+    const d=dy*dy+dx*dx;
+    if(d<bd){bd=d;bi=i;}
+  }
+  return [path.slice(0,bi+1).concat([pos]),[pos].concat(path.slice(bi))];
+}
+function hafLjApplyRoad(j,pos){
+  if(!j._road||!ljDone||!ljTogo)return false;
+  const s=hafSplitRoad(j._road,pos);
+  ljDone.setLatLngs(s[0]);ljTogo.setLatLngs(s[1]);
+  return true;
+}
+async function hafLjDrawRoad(j){
+  const road=await hafJobRoad(j);
+  /* the panel may have moved to another job while Google was thinking */
+  if(!road||!ljMap||hafCurrentJob().id!==j.id)return;
+  j._road=road.path;
+  hafLjApplyRoad(j,[j.driverPos.lat,j.driverPos.lng]);
+  try{ljMap.fitBounds(L.polyline(road.path).getBounds(),{padding:[40,40]});}catch(e){}
+  const info=document.getElementById('lj-liveinfo');
+  if(info&&road.roads)info.innerHTML=info.innerHTML+' · via '+hafEsc(road.roads);
+}
 function hafInitLjMap(j){
  const el=document.getElementById('lj-map');if(!el||typeof L==='undefined')return;
  ljStopPoll();ljPinMarker=null;
@@ -4334,6 +4441,9 @@ function hafInitLjMap(j){
  ljDriverMarker=L.marker([j.driverPos.lat,j.driverPos.lng],{icon:ljDotIcon('#fff'),zIndexOffset:500}).addTo(ljMap).bindPopup('Driver · '+j.driverName+' ('+j.progress+'%)');
  try{ljMap.fitBounds(line.getBounds(),{padding:[40,40]});}catch(e){}
  setTimeout(()=>{try{ljMap.invalidateSize();}catch(e){}},80);
+ /* straight lines are up already so the panel never waits; the real road
+    replaces them a moment later, and if it never arrives nothing is lost */
+ j._road=null;hafLjDrawRoad(j);
  ljStartPoll(j);
 }
 /* ── LIVE TRACKING FEED — driver's phone (via /track) → the gateway → this dot ── */
@@ -4353,8 +4463,11 @@ function ljApplyLive(j,d){
  if(!ljMap||!ljDriverMarker)return;
  const p=[d.lat,d.lng];
  ljDriverMarker.setLatLng(p);
- if(ljDone)ljDone.setLatLngs([[j.from.lat,j.from.lng],p]);
- if(ljTogo)ljTogo.setLatLngs([p,[j.to.lat,j.to.lng]]);
+ /* follow the road if we have it, straight lines if we do not */
+ if(!hafLjApplyRoad(j,p)){
+   if(ljDone)ljDone.setLatLngs([[j.from.lat,j.from.lng],p]);
+   if(ljTogo)ljTogo.setLatLngs([p,[j.to.lat,j.to.lng]]);
+ }
  const info=document.getElementById('lj-liveinfo');
  if(info)info.innerHTML='<span style="color:#39d98a">● Live</span> · driver location updated '+((d.ageSec||0)<5?'just now':d.ageSec+'s ago');
 }
