@@ -83,9 +83,34 @@ below 15 — his bands, hit without inventing a single number.
 | C — LWB 100 mi scheduled, Freight Pro | £110 *(unchanged)* | £126.50 | **£129.41** | 13.0% → **15%** |
 
 **The driver is paid exactly the same in every case.** Only HAF's share of the
-total moved, and only to the number Brent asked for. `config.feeBasis` switches
-the engine back to the V5 add-on model in one word if he prefers his subtotals
-to his bands — but he cannot have both.
+total moved, and only to the number Brent asked for.
+
+### The ruling, 2026-08-02 — this is now settled
+
+Brent was asked which definition wins and handed the decision back: *"find the
+right solution - and make a choice OTIS - you can fix it"*. **The choice is
+KEEP**, and it is now locked rather than configurable:
+
+* **ADDED cannot deliver his bands.** Measured, not argued — under the add-on
+  reading, scheduled/flexible and same-day (the two job types that carry the
+  bulk of the network) fall **below** the 20–30% band at every vehicle and
+  every distance; timed clears the 20% line by under a tenth of a point; only
+  urgent has real room. Read the same way, his paid band's 10% marker would be
+  9.1% kept — under his own stated minimum.
+* **KEEP meets every band exactly**, with no invented number.
+* **The driver is paid the identical pound either way** — proved across 196
+  jobs — so the ruling moves only what HAF retains, never the network's money.
+* **The cost is the ~4% in the table above**, and it is stated rather than
+  buried. The document's arithmetic is what changes, not the bands he wrote.
+
+`ADDED_TO_TRANSPORT_VALUE` is deliberately left working so the counterfactual
+can be **run** rather than debated — `admin/fee-basis-lock.test.js` runs it and
+shows the bands failing. It is not a supported setting: changing
+`config.feeBasis` fails that suite on purpose (44 checks).
+
+**§6 of the 31 July document is therefore superseded on this one point.** Its
+bands stand; its worked subtotals do not. Anyone quoting £60 / £105.75 / £126.50
+is quoting the old arithmetic — the live figures are £62.50 / £109.09 / £129.41.
 
 **The trial pools.** 25% of the margin currently flows back into the four
 network pools (Brent's own 20 July trial setting). So on a 20% job HAF keeps
