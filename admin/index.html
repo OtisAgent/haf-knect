@@ -80,8 +80,12 @@ tr:last-child td{border-bottom:none}
 .rate-box{background:var(--p2);border:1px solid var(--lns);border-radius:9px;padding:.6rem .7rem}
 .rate-hd{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx);margin-bottom:.15rem}
 .rate-hd span{display:block;text-transform:none;letter-spacing:0;font-weight:400;color:var(--mu);font-size:.7rem}
-.mrow{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;margin-top:.45rem;gap:.4rem}
-.mrow b{font-weight:700;flex-shrink:0}
+/* The gross-profit line carries its own explanation ("£10.31 (15% of the
+   customer price)"), which is wider than a phone. The number must never break
+   mid-way, so the row wraps and the value drops onto its own line instead. */
+.mrow{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;margin-top:.45rem;gap:.4rem;flex-wrap:wrap}
+.mrow>span{min-width:0}
+.mrow b{font-weight:700;flex-shrink:0;margin-left:auto;text-align:right}
 /* link traffic */
 .lt-row{margin:.5rem 0}
 .lt-top{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;gap:.4rem;margin-bottom:.18rem}
