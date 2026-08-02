@@ -45,25 +45,48 @@ const b = await chromium.launch({
   args: ['--no-sandbox']
 });
 
+let pass = 0, fail = 0;
+const ok = (n, c, d) => { if (c) { pass++; console.log('  ✓ ' + n); } else { fail++; console.log('  ✗ ' + n + (d ? '  — ' + d : '')); } };
+
 for (const [label, w, h] of [['desktop', 1440, 1400], ['phone', 390, 1200]]) {
+  console.log(`\n── ${label} (${w}px) ──`);
   const page = await b.newPage({ viewport: { width: w, height: h } });
   await page.goto('http://127.0.0.1:8822/admin/', { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(1500);
-  const shown = await page.evaluate(() => {
+  const m = await page.evaluate(() => {
     document.getElementById('gate').style.display = 'none';
     document.getElementById('app').style.display = 'block';
-    if (typeof pmRows === 'function') pmRows();
     const first = document.querySelector('#pm-tbl .ebtn');
     if (first) first.click();
+    window.scrollTo(9999, 0); const sideways = window.scrollX; window.scrollTo(0, 0);
     const el = document.getElementById('pm-revenue');
     if (el) el.scrollIntoView({ block: 'center' });
-    return !!(el && el.querySelectorAll('tbody tr').length === 4);
+    return {
+      streams: el ? el.querySelectorAll('tbody tr').length : 0,
+      sideways,
+      cols: getComputedStyle(document.querySelector('.grid')).gridTemplateColumns,
+      /* the wide tables must scroll inside their own frames, not drag the page */
+      wrapsThatScroll: [...document.querySelectorAll('.tblwrap')].filter(x => x.scrollWidth > x.clientWidth).length,
+      rowsOver: [...document.querySelectorAll('#pm-detail .mrow')].filter(r => r.scrollWidth - r.clientWidth > 1).length,
+      profitLine: [...document.querySelectorAll('#pm-detail .mrow')].map(r => r.innerText).find(t => /gross profit/i.test(t)) || ''
+    };
   });
-  await page.waitForTimeout(800);
+  ok('the four revenue streams are on screen', m.streams === 4, m.streams + ' rows');
+  ok('the overview does not scroll sideways', m.sideways === 0, m.sideways + 'px');
+  ok('the wide tables scroll inside their own frames', m.wrapsThatScroll > 0, String(m.wrapsThatScroll));
+  ok('no fee-to-profit line runs off the edge', m.rowsOver === 0, String(m.rowsOver));
+  ok('the gross-profit line reads in full', /gross profit/i.test(m.profitLine) && /%\s*of the customer price\)/.test(m.profitLine), m.profitLine.replace(/\n/g, ' '));
+  if (label === 'desktop') ok('the two-column layout still splits 2:1', /^\d+(\.\d+)?px \d+(\.\d+)?px$/.test(m.cols) &&
+    Math.abs(parseFloat(m.cols.split(' ')[0]) / parseFloat(m.cols.split(' ')[1]) - 2) < 0.02, m.cols);
+  else ok('the phone drops to a single column', m.cols.split(' ').length === 1, m.cols);
+
+  await page.waitForTimeout(600);
   await page.screenshot({ path: `_rev_shot_${label}.png`, fullPage: false });
-  console.log(`  · ${label}: revenue panel present = ${shown} → _rev_shot_${label}.png`);
   await page.close();
 }
 
 await b.close();
 srv.close();
+console.log('\n' + '='.repeat(66));
+console.log(`DEPLOYED-BYTES CHECK: ${pass} passed, ${fail} failed  (${BASE})`);
+if (fail) process.exitCode = 1;

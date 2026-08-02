@@ -50,8 +50,13 @@ a{color:var(--or)}
 .pcancelled{display:flex;align-items:center;gap:.6rem;border-top:1px dashed var(--ln);margin-top:.7rem;padding-top:.6rem;font-size:.8rem;color:var(--mu)}
 .pcancelled .ps-n{font-family:var(--dp);font-weight:900;font-size:1.1rem;color:var(--rd);letter-spacing:-.02em}
 /* grid */
-.grid{display:grid;grid-template-columns:2fr 1fr;gap:.9rem;align-items:start}
-@media(max-width:860px){.grid{grid-template-columns:1fr}}
+/* A grid track is allowed to grow to its widest child unless it is told not
+   to, and the quote table is 1180px wide. That made every card on this page
+   610px on a 390px phone and the whole overview scrolled sideways. The tables
+   already scroll inside their own wrappers; the page must not. */
+.grid{display:grid;grid-template-columns:2fr minmax(0,1fr);gap:.9rem;align-items:start}
+.grid>*{min-width:0}
+@media(max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
 .card{background:var(--p);border:1px solid var(--lns);border-radius:var(--r);padding:1.05rem 1.1rem;margin-bottom:.9rem}
 .card h2{font-family:var(--dp);font-weight:900;font-size:.95rem;letter-spacing:-.02em;margin-bottom:.75rem;display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
 .card h2 .hint{font-size:.7rem;color:var(--mu);font-weight:600;margin-right:auto}
