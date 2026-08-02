@@ -207,7 +207,9 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 #app{display:none;min-height:100vh;flex-direction:column}
 #app.open{display:flex}
 .topbar{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 1.4rem;height:var(--tb);background:var(--p);border-bottom:1px solid var(--ln);box-shadow:var(--sd)}
-.tb-l{display:flex;align-items:center;gap:.8rem}
+/* min-width:0 on both halves, or neither side can give and the row runs off
+   the right of a phone screen — which it did, on production, before this. */
+.tb-l{display:flex;align-items:center;gap:.8rem;min-width:0}
 .tlogo{display:flex;align-items:center;gap:.45rem;text-decoration:none}
 .tlogo-m{width:26px;height:26px;background:var(--or);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:.82rem;color:#0e1113}
 .tlogo-t{font-family:var(--dp);font-weight:900;font-size:.92rem;letter-spacing:-.04em;color:var(--tx)}
