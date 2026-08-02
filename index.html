@@ -256,6 +256,33 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .cr{display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--ln);font-size:.84rem}
 .cr:last-child{border-bottom:none}
 .ck{color:var(--mu)}.cv{font-weight:600}
+
+/* ── FOUNDING MEMBER ───────────────────────────────────────────────
+   The people who paid the £100 HAF KNECT activation before the network
+   opened. Gold is theirs and nothing else on the dashboard uses it, so
+   the mark reads as a status the moment it appears. Hidden by default:
+   it is only ever switched on by a live founder check, never by a guess. */
+.fnd-badge{display:none;align-items:center;gap:.3rem;font-family:var(--dp);font-weight:900;font-size:.55rem;letter-spacing:.09em;text-transform:uppercase;color:#2e2200;background:linear-gradient(135deg,#f0c33c,#d9920b);border-radius:var(--pill);padding:.2rem .55rem;white-space:nowrap;flex:none}
+.fnd-badge.on{display:inline-flex}
+.fnd-badge svg{flex:none}
+.fnd-badge .fnd-short{display:none}
+
+.fnd-card{display:none;gap:1rem;align-items:flex-start;background:linear-gradient(105deg,rgba(217,146,11,.11),rgba(217,146,11,0) 62%),var(--p);border:1px solid var(--am);border-left:4px solid var(--am);border-radius:var(--rs);padding:1.1rem 1.2rem;margin-bottom:1rem;box-shadow:var(--sd)}
+.fnd-card.on{display:flex}
+.fnd-mark{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--am-d);color:var(--am);border:1px solid var(--am)}
+.fnd-body{min-width:0}
+.fnd-ttl{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;font-family:var(--dp);font-weight:900;font-size:.95rem;letter-spacing:-.02em;color:var(--tx)}
+.fnd-no{font-size:.58rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#2e2200;background:linear-gradient(135deg,#f0c33c,#d9920b);border-radius:var(--pill);padding:.12rem .45rem}
+.fnd-sub{font-size:.82rem;color:var(--mu);margin-top:.28rem;line-height:1.5}
+.fnd-meta{font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--am);margin-top:.5rem}
+@media(max-width:600px){
+  .fnd-card{padding:.95rem 1rem;gap:.75rem}
+  .fnd-mark{width:34px;height:34px}
+  .fnd-ttl{font-size:.86rem}
+  .fnd-sub{font-size:.76rem}
+  .fnd-badge .fnd-long{display:none}
+  .fnd-badge .fnd-short{display:inline}
+}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
 /* Network Pools what-if controls */
 .np-in{width:56px;background:var(--p2);border:1px solid var(--ln);border-radius:6px;color:var(--tx);font-size:.8rem;padding:.2rem .35rem;text-align:right;font-family:var(--fn)}
@@ -1342,6 +1369,10 @@ textarea.fi2{resize:vertical;min-height:70px}
     </div>
     <div class="tb-r">
       <span class="tb-user" id="tb-user">—</span>
+      <span class="fnd-badge" id="tb-founder" title="Founding Member of the HAF KNECT network">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span class="fnd-long">Founding Member</span><span class="fnd-short">Founder</span>
+      </span>
       <span class="role-chip chip" id="tb-role">—</span>
       <button id="mode-pill" onclick="showModeSelector()" style="display:none;align-items:center;gap:.3rem;font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--p2);border:1px solid var(--lns);border-radius:var(--pill);padding:.22rem .6rem;cursor:pointer;color:var(--tx);transition:background .14s" title="Switch mode">
         <span id="mode-pill-lbl">—</span>
@@ -1406,6 +1437,21 @@ textarea.fi2{resize:vertical;min-height:70px}
 
       <!-- EXCHANGE DASHBOARD (all member roles) -->
       <div class="tp" id="pane-d-home">
+
+        <!-- FOUNDING MEMBER — first thing a founder sees on the overview, above
+             the detail switch, so it is never hidden by Basic mode. Switched on
+             only by hafFounderPaint() after a live check against the founders
+             register; for everyone else this stays out of sight entirely. -->
+        <div class="fnd-card" id="fnd-card">
+          <div class="fnd-mark">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="fnd-body">
+            <div class="fnd-ttl">Founding Member<span class="fnd-no" id="fnd-no">Founder</span></div>
+            <div class="fnd-sub">You backed HAF KNECT before the network opened. Your founding place is permanent, and your account carries full create access — post work and take work on the Exchange.</div>
+            <div class="fnd-meta" id="fnd-since">Founding member of the HAF KNECT network</div>
+          </div>
+        </div>
 
         <!-- Detail switch — lives on the dashboard it controls -->
         <div class="dm-row">
@@ -3501,6 +3547,9 @@ function enterKnectApp(u){
   _superUser=u;
   /* a fresh sheet for whoever just signed in — no previous driver's run back left behind */
   try{_rrState={declined:[],accepted:null};}catch(e){}
+  /* and no previous founder's gold left behind either — cleared before anything
+     is drawn, so the mark can only ever come back from a live check. */
+  _setFounder(null);
   const isAdmin=u==='BF638793';
   const demo=DEMO_ACCOUNTS[u];
   const displayName=demo?demo.name:u;
@@ -3559,6 +3608,40 @@ function enterKnectApp(u){
     switchTab('pane-d-home');
     _setModePill('','');
   }
+  hafFounderPaint(u);
+}
+
+/* ── FOUNDING MEMBERS ──────────────────────────────────────────────
+   Who is a founder is a fact in the register, never something the page
+   works out for itself. A demo account carries its own flag so the mark
+   can be seen without a real founder's login; a real account is checked
+   against the register through knect_founder_status, which answers only
+   for the username asked about and returns nothing at all for everyone
+   else. Fail quiet: if the check cannot be made, no mark is shown —
+   a missing badge is a small thing, a wrongly awarded one is not. */
+function _setFounder(f){
+  const badge=document.getElementById('tb-founder');
+  const card=document.getElementById('fnd-card');
+  if(!badge||!card)return;
+  if(!f){badge.classList.remove('on');card.classList.remove('on');return}
+  const no=document.getElementById('fnd-no');
+  const since=document.getElementById('fnd-since');
+  if(no)no.textContent=f.member_no?('Founder No. '+f.member_no):'Founder';
+  if(since)since.textContent=f.since
+    ? 'Founding member since '+new Date(f.since+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})
+    : 'Founding member of the HAF KNECT network';
+  badge.classList.add('on');card.classList.add('on');
+}
+
+async function hafFounderPaint(u){
+  const demo=DEMO_ACCOUNTS[u];
+  if(demo){if(demo.founder)_setFounder(demo.founder);return}
+  try{
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/knect_founder_status',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:u})});
+    if(!r.ok)return;
+    const d=await r.json();
+    if(Array.isArray(d)&&d.length&&d[0].is_founder)_setFounder(d[0]);
+  }catch(e){/* no answer means no mark */}
 }
 
 function showModeSelector(){
@@ -3644,6 +3727,9 @@ const DEMO_ACCOUNTS={
   'DEMO-DRV':{role:'driver',name:'Demo Driver',initials:'DD',level:'PLUS'},
   'DEMO-PRO':{role:'freight-pro',name:'Demo Freight Pro',initials:'DF',level:'PRO'},
   'DEMO-BIZ':{role:'business',name:'Demo Business',initials:'DB',level:null},
+  /* A founder to look at. No real founding member has a network login yet, so
+     without this there is nothing on screen to review. */
+  'DEMO-FND':{role:'driver',name:'Demo Founding Member',initials:'DF',level:'PLUS',founder:{member_no:1,since:'2026-07-03'}},
 };
 function demoLogin(u){
   closeLogin();
