@@ -1,16 +1,19 @@
-# HAF KNECT — Pricing Framework V6
+# HAF KNECT — Pricing Framework V7
 
 **The one framework.** Supersedes FRAMEWORK-V3 (20 Jul), the V4 ladder,
-PRICING MATRIX V5 (31 Jul) and Henry's parallel V4 build. Where any of those
+PRICING MATRIX V5 (31 Jul), Henry's parallel V4 build and V6. Where any of those
 disagree with this page, this page wins.
 
-**Status:** built and tested on the preview branch `framework-v6`. **Not live.**
-**Engine version string:** `MATRIX-V6` · **Effective from:** 2026-08-02
+**Status: LIVE.** Brent 2026-08-02: "go live push one framework - we can alter
+and adapt as we develop the next work".
+**Engine version string:** `MATRIX-V7` · **Effective from:** 2026-08-02
 **Source:** `admin/pricing-matrix-v3.js` (order flow) · `admin/lane-factors-v1.js`
 (lanes) · the quote block in `index.html` (customer). The three are tested
 against each other on every run.
-**Tests:** `node admin/pricing-framework-v6.test.js` (145) ·
-`node admin/lane-and-margin-v6.test.js` (50).
+**Tests:** `node admin/pricing-framework-v6.test.js` (170) ·
+`node admin/lane-and-margin-v6.test.js` (50) ·
+`node admin/account-fees-v1.test.js` (126) · `node admin/tier-identity-v1.test.js` (51) ·
+`node tools/load-picker.test.mjs` (137) · `node admin/pricing-database.test.mjs` (24).
 
 ---
 
@@ -135,13 +138,42 @@ Pence per loaded mile **added to the vehicle base rate**.
 *and* on a Fleet Pro account is +£0.25, not +£0.45. Every claim is on the audit
 record.
 
-Because HAF's share is a share of the total, a higher driver rate raises the
-transport value and HAF's fee rides up with it — **paying a better driver more
-never costs HAF money**, and the driver's benefit can never be withheld to
-protect margin.
+### V7: the reward is PAUSED, and HAF — never the customer — funds it
 
-At quote time no driver has been allocated, so a customer quote is priced at the
-free rate and re-run against the real driver's level on allocation.
+Brent, 2026-08-02: *"i wouldn't say charging more for a better driver ... for
+now offering more for a driver isn't right - i'm happy to take less margin for
+HAF then make the customers pay more."*
+
+Two rules come out of that, and both are in the engine:
+
+1. **Paused.** `driverReward.enabled = false`. Every driver is paid the same
+   rate today, whatever their tier. Member and Pro still earn everything else
+   their tier carries — priority matching, relay eligibility, account benefits.
+   The rungs above are the *shape* of the reward, held at zero, so switching it
+   back on is one word rather than a rebuild. Pro's value comes from the
+   features Brent is adding later (gap insurance and the rest), not from a
+   mileage rate.
+
+2. **When it runs, HAF pays for it.** `driverReward.fundedBy = "HAF_MARGIN"`.
+   The customer price is calculated on the **plain vehicle rate**, so which
+   driver accepts a job can never move what the customer is quoted. The extra
+   comes out of HAF's own share. This is §7 of the 31 July framework honoured
+   literally, and it closes Henry's finding that a Pro driver was costing the
+   customer £45 inc VAT on a 100-mile same-day small van.
+
+**The one limit on "happy to take less".** HAF funds the reward down to
+`minRetainedPctOfCustomer` (8%) of the customer price and no further. Past that
+the reward is **trimmed to what HAF can afford, flagged `REWARD_TRIMMED`, and
+sent for manual review** — loudly, never silently. The customer price still does
+not move. This matters on long jobs: £0.25/mile over 300 miles is £75, which no
+20% share can absorb.
+
+**What this replaced.** V5/V6 let the reward raise the transport value so the
+fee rode up with it. That is now deleted from the engine and from the test
+suite — the old assertions ("the customer rate follows the driver taking the
+job", "HAF earns MORE for paying a better driver") were replaced by their
+opposites rather than skipped, so nobody can reinstate the behaviour by
+accident.
 
 ---
 

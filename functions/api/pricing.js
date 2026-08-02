@@ -34,7 +34,7 @@ const j = (o, s) => new Response(JSON.stringify(o), { status: s || 200, headers:
 const PUB_URL = 'https://jsdwvogsxlnczzbefwgp.supabase.co';
 const PUB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzZHd2b2dzeGxuY3p6YmVmd2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODgyMzYsImV4cCI6MjA5Njk2NDIzNn0.pxqM-Oh4f_3PlqCbKIKvcKZnNRUZ1ASKqqdNg78M_4M';
 
-const SCOPES = ['vehicle_rate', 'driver_reward', 'account_fee_reduction',
+const SCOPES = ['vehicle_rate', 'driver_reward', 'driver_reward_funding', 'account_fee_reduction',
                 'job_type_fee', 'local_handling', 'zone_factor'];
 
 function db(env) {
@@ -150,6 +150,14 @@ function validate(c) {
     if (l.FREE && l.MEMBER && l.PRO && !(l.FREE.rewardGbpPerMile <= l.MEMBER.rewardGbpPerMile && l.MEMBER.rewardGbpPerMile <= l.PRO.rewardGbpPerMile))
       p.push('The driver rewards must rise: free, then member, then pro.');
   }
+  if (c.driverReward) {
+    const d = c.driverReward;
+    if (typeof d.enabled !== 'boolean') p.push('The driver reward must be either on or off.');
+    if (d.fundedBy !== 'HAF_MARGIN' && d.fundedBy !== 'CUSTOMER')
+      p.push('The driver reward must be funded by HAF or by the customer — nothing else.');
+    if (!n(d.minRetainedPctOfCustomer) || d.minRetainedPctOfCustomer < 0 || d.minRetainedPctOfCustomer > 90)
+      p.push('The share HAF keeps when it funds a reward must be between 0% and 90%.');
+  }
   if (c.accountLevels) {
     for (const k of ['LITE', 'PLUS', 'PRO']) {
       const a = c.accountLevels[k];
@@ -193,6 +201,9 @@ async function mirrorFlat(url, h, c) {
   (c.jobTypes || []).forEach((t, i) =>
     add('job_type_fee', t.code, t.name, { networkFeePct: t.marginPct, floorPct: t.floorPct, active: t.active }, i + 1));
   if (c.localHandling) add('local_handling', 'CURVE', 'Short-run handling taper', c.localHandling, 1);
+  /* FRAMEWORK-V7 — who funds a driver reward. Mirrored flat so the rule is
+     readable straight from the table, not only inside the config blob. */
+  if (c.driverReward) add('driver_reward_funding', 'RULE', 'Who funds the driver reward', c.driverReward, 1);
 
   const scopes = [...new Set(rows.map(r => r.scope))];
   for (const s of scopes)

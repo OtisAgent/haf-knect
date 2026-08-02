@@ -43,7 +43,7 @@ function slice(from, to) {
 var engineSrc =
   "var window = {};\n" +          // the block is browser code; stub the one global it sets
   slice("const REF_MPH", "const PC={") +
-  "\nreturn { VAN: VAN, URG: URG, DRV_LEVEL: DRV_LEVEL, ACC_LEVEL: ACC_LEVEL," +
+  "\nreturn { VAN: VAN, URG: URG, DRV_LEVEL: DRV_LEVEL, ACC_LEVEL: ACC_LEVEL, DRV_REWARD: DRV_REWARD," +
   "\n         v3Price: v3Price, minTransportValue: minTransportValue, zoneFactorFor: zoneFactorFor };";
 var CUST = new Function(engineSrc)();
 
@@ -349,15 +349,19 @@ PAIRS.forEach(function (p) {
 ok("the customer price always sits above the driver's transport value", under === 0,
    under + " failures");
 
+/* FRAMEWORK-V7 (Brent 2026-08-02): "i wouldn't say charging more for a better
+   driver ... for now offering more for a driver isn't right - i'm happy to take
+   less margin for HAF then make the customers pay more."
+   The old V5/V6 assertions here — that the customer rate follows the driver and
+   HAF earns MORE for a better driver — are DELETED, not skipped: they asserted
+   exactly the behaviour he has now ruled out. Replaced by their opposites. */
 var bo = backoffice(60, "SWB_VAN", "STD_SAMEDAY", { plnaTier: "PRO" });
 var boFree = backoffice(60, "SWB_VAN", "STD_SAMEDAY");
-ok("a Pro driver is paid more than a Free driver",
-   bo.money.driverPayGbp > boFree.money.driverPayGbp, JSON.stringify(bo.money));
-ok("...the customer rate follows the driver taking the job",
-   bo.money.customerExVatGbp > boFree.money.customerExVatGbp);
-ok("...and HAF earns MORE, not less, for paying a better driver",
-   bo.money.hafMarginGbp > boFree.money.hafMarginGbp,
-   bo.money.hafMarginGbp + " vs " + boFree.money.hafMarginGbp);
+eq("a Pro driver costs the customer exactly the same as a Free driver",
+   bo.money.customerIncVatGbp, boFree.money.customerIncVatGbp);
+eq("...and is paid the same today, because the reward is paused",
+   bo.money.driverPayGbp, boFree.money.driverPayGbp);
+eq("...so the reward is worth nothing on the job", bo.money.driverRewardGbp, 0);
 ok("...HAF still holds its floor",
    bo.money.hafMarginGbp >= bo.money.carrierTransportValueGbp * 0.15 - 0.01);
 
@@ -369,6 +373,22 @@ section("8b. Driver base-rate uplift");
 eq("Free driver adds nothing",   M.config.driverLevels.FREE.rewardGbpPerMile,   0.00);
 eq("Member driver adds £0.10",   M.config.driverLevels.MEMBER.rewardGbpPerMile, 0.10);
 eq("Pro driver adds £0.25",      M.config.driverLevels.PRO.rewardGbpPerMile,    0.25);
+
+/* Held at zero on every live quote today. */
+eq("the reward is paused", M.config.driverReward.enabled, false);
+ok("and when it runs, HAF pays for it, not the customer",
+   M.config.driverReward.fundedBy === "HAF_MARGIN", M.config.driverReward.fundedBy);
+["PLUS", "PRO"].forEach(function (t) {
+  eq("a " + t + " driver's live quote carries a £0.00 reward",
+     backoffice(100, "LWB_VAN", "STD_SAMEDAY", { plnaTier: t }).rates.driverRewardGbpPerMile, 0);
+});
+
+/* Everything from here to the end of 8b describes the reward SWITCHED ON, so
+   the shape survives intact for the day Brent turns it back on. */
+function rewardOn() {
+  M.applyConfig({ driverReward: { enabled: true, fundedBy: "HAF_MARGIN", minRetainedPctOfCustomer: 8 } });
+}
+rewardOn();
 
 /* The uplift lands on the rate, for every vehicle, at both member rungs. */
 [["MEMBER", 0.10], ["PRO", 0.25]].forEach(function (lv) {
@@ -405,18 +425,43 @@ eq("Fleet Pro drivers sit on the Pro rate",
    backoffice(100, "LWB_VAN", "STD_SAMEDAY", { driverFleetTier: "FLEET_PRO" })
      .rates.driverRewardGbpPerMile, 0.25);
 
-/* The uplift is never taken out of HAF's fee — it cannot be "withheld". */
-var uplifted = 0;
+/* V7: with the reward running, the CUSTOMER never pays a penny more for a
+   better driver, the driver is never paid less, and HAF never funds itself
+   below its floor share. That is the whole ruling, swept across the grid. */
+var priceMoved = 0, driverShort = 0, belowFloor = 0, funded = 0;
 PAIRS.forEach(function (p) {
   for (var mm = 1; mm <= 300; mm += 11) {
     var f = backoffice(mm, p[1], "STD_SAMEDAY");
     var pr = backoffice(mm, p[1], "STD_SAMEDAY", { plnaTier: "PRO" });
-    if (pr.money.driverPayGbp < f.money.driverPayGbp) uplifted++;
-    if (pr.money.hafMarginGbp < f.money.hafMarginGbp - 0.01) uplifted++;
+    if (Math.abs(pr.money.customerIncVatGbp - f.money.customerIncVatGbp) > 0.01) priceMoved++;
+    if (pr.money.driverPayGbp < f.money.driverPayGbp - 0.01) driverShort++;
+    if (pr.money.hafKeepsPctOfCustomer < M.config.driverReward.minRetainedPctOfCustomer - 0.01) belowFloor++;
+    if (pr.money.driverRewardGbp > 0) funded++;
   }
 });
-ok("across 7 vehicles x 28 distances the uplift never costs HAF a penny",
-   uplifted === 0, uplifted + " failures");
+ok("across 7 vehicles x 28 distances a Pro driver never changes the customer's price",
+   priceMoved === 0, priceMoved + " failures");
+ok("...and the driver is never paid less than a free driver would be",
+   driverShort === 0, driverShort + " failures");
+ok("...and HAF never funds a reward below its floor share",
+   belowFloor === 0, belowFloor + " failures");
+ok("...and the reward really was being paid on those jobs", funded > 0, funded + " funded");
+
+/* The floor is real: on a long job a £0.25/mile reward outruns a 20% share, so
+   it is trimmed to what HAF can afford, flagged, and sent for a human to see —
+   and even then the customer's price does not move. */
+var longFree = backoffice(300, "SMALL_VAN", "STD_SAMEDAY");
+var longPro  = backoffice(300, "SMALL_VAN", "STD_SAMEDAY", { plnaTier: "PRO" });
+eq("an unaffordable reward still does not move the customer's price",
+   longPro.money.customerIncVatGbp, longFree.money.customerIncVatGbp);
+ok("...it is trimmed to what HAF can afford", longPro.money.driverRewardTrimmedGbp > 0);
+ok("...and flagged for a human rather than absorbed silently",
+   longPro.flags.indexOf("REWARD_TRIMMED") >= 0 && longPro.manualReviewRequired === true);
+eq("...leaving HAF exactly on its floor, never under it",
+   longPro.money.hafKeepsPctOfCustomer, M.config.driverReward.minRetainedPctOfCustomer);
+
+M.resetConfig();   /* back to the live setting: the reward is paused */
+eq("the suite leaves the engine on the live setting", M.config.driverReward.enabled, false);
 
 /* ==========================================================================
  * 8c. ACCOUNT NETWORK-FEE REDUCTION (V5) — points off, floor always held
@@ -510,7 +555,11 @@ section("8d. Double Pro — Pro driver on a Pro account");
 
 var dp   = backoffice(100, "LWB_VAN", "STD_SAMEDAY", { plnaTier: "PRO", accountType: "FREIGHT_PRO" });
 var flat = backoffice(100, "LWB_VAN", "STD_SAMEDAY");
-ok("the Pro driver is paid more", dp.money.driverPayGbp > flat.money.driverPayGbp);
+var dpFreeDriver = backoffice(100, "LWB_VAN", "STD_SAMEDAY", { accountType: "FREIGHT_PRO" });
+eq("the Pro driver costs the customer nothing extra (V7)",
+   dp.money.customerIncVatGbp, dpFreeDriver.money.customerIncVatGbp);
+ok("...the Pro ACCOUNT still pays less than a free account, as it should",
+   dp.money.customerIncVatGbp < flat.money.customerIncVatGbp);
 eq("the Pro account pays 15% — 20 less 5 points", dp.money.networkFeePct, 15);
 ok("HAF's fee never goes below the floor of the transport value",
    dp.money.hafMarginGbp >= dp.money.carrierTransportValueGbp * 0.15 - 0.01);
@@ -564,9 +613,59 @@ eq("VAT is 20% of the ex-VAT subtotal", vt.money.vatGbp, vt.money.customerExVatG
 eq("inc-VAT total adds up", vt.money.customerIncVatGbp,
    vt.money.customerExVatGbp + vt.money.vatGbp);
 ok("every quote carries a full audit record",
-   vt.version === "MATRIX-V6" && vt.money && vt.reasons && vt.inputs && vt.lane &&
+   vt.version === "MATRIX-V7" && vt.money && vt.reasons && vt.inputs && vt.lane &&
    vt.money.carrierTransportValueGbp != null && vt.money.networkFeeGbp != null &&
    vt.money.hafKeepsPctOfCustomer != null);
+
+/* ==========================================================================
+ * 10. FRAMEWORK-V7 — which driver takes the job never changes the price
+ *     Brent 2026-08-02. Both engines, swept, because the customer-facing quote
+ *     and the back office each hold their own copy of this rule and the last
+ *     time they drifted (the urgency premium) nobody noticed for a fortnight.
+ * ======================================================================== */
+section("10. V7 — the driver never moves the customer's price");
+
+ok("the customer engine has the reward paused too", CUST.DRV_REWARD.on === false);
+ok("...and funds it from HAF when it runs", CUST.DRV_REWARD.fundedBy === "HAF", CUST.DRV_REWARD.fundedBy);
+eq("...on the same floor share as the back office",
+   CUST.DRV_REWARD.floor * 100, M.config.driverReward.minRetainedPctOfCustomer);
+
+var drift = 0, custMoved = 0, boMoved = 0, checked = 0;
+["sday", "timed", "urg", "flex"].forEach(function (urg) {
+  var jt = { sday: "STD_SAMEDAY", timed: "TIMED", urg: "URGENT", flex: "FLEX_SAMEDAY" }[urg];
+  PAIRS.forEach(function (p) {
+    [5, 40, 120, 250].forEach(function (mi) {
+      var cf = customer(mi, p[0], urg), cp = customer(mi, p[0], urg, { driver: "pro" });
+      var bf = backoffice(mi, p[1], jt), bp = backoffice(mi, p[1], jt, { plnaTier: "PRO" });
+      if (Math.abs(cf.sub - cp.sub) > 0.01) custMoved++;
+      if (Math.abs(bf.money.customerExVatGbp - bp.money.customerExVatGbp) > 0.01) boMoved++;
+      if (Math.abs(cf.sub - bf.money.customerExVatGbp) > 0.02) drift++;
+      checked++;
+    });
+  });
+});
+ok("across " + checked + " quotes the customer page never charges more for a Pro driver",
+   custMoved === 0, custMoved + " failures");
+ok("...and neither does the back office", boMoved === 0, boMoved + " failures");
+ok("...and the two engines still agree on the price to the penny",
+   drift === 0, drift + " failures");
+
+/* Switched on, in both engines at once: HAF pays, the customer does not. */
+M.applyConfig({ driverReward: { enabled: true, fundedBy: "HAF_MARGIN", minRetainedPctOfCustomer: 8 } });
+CUST.DRV_REWARD.on = true;
+var cOnFree = customer(100, "lwb", "sday"), cOnPro = customer(100, "lwb", "sday", { driver: "pro" });
+var bOnFree = backoffice(100, "LWB_VAN", "STD_SAMEDAY"), bOnPro = backoffice(100, "LWB_VAN", "STD_SAMEDAY", { plnaTier: "PRO" });
+eq("switched on, the customer page still quotes one price", cOnPro.sub, cOnFree.sub);
+eq("switched on, the back office still quotes one price",
+   bOnPro.money.customerExVatGbp, bOnFree.money.customerExVatGbp);
+ok("...the Pro driver really is paid more", cOnPro.driverPay > cOnFree.driverPay &&
+   bOnPro.money.driverPayGbp > bOnFree.money.driverPayGbp);
+ok("...and HAF is the one paying for it",
+   bOnPro.money.hafMarginGbp < bOnFree.money.hafMarginGbp &&
+   cOnPro.fee < cOnFree.fee);
+eq("...both engines fund exactly the same amount", cOnPro.rewardGbp, bOnPro.money.driverRewardGbp);
+M.resetConfig(); CUST.DRV_REWARD.on = false;
+eq("the suite hands back a paused reward", M.config.driverReward.enabled, false);
 
 console.log("\n" + (fail === 0 ? "ALL PASS" : "FAILURES") + " — " + pass + " passed, " + fail + " failed\n");
 process.exit(fail === 0 ? 0 : 1);
