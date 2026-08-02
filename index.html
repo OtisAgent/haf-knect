@@ -839,14 +839,21 @@ textarea.fi2{resize:vertical;min-height:70px}
 [data-theme=dark]{--hv-s:#8c9bad;--hv-s-bg:rgba(140,155,173,.08);--hv-s-ln:rgba(140,155,173,.38)}
 
 .hv-tile{position:relative}
-.hv-tile .xc-head,.hv-tile .cap-sec-top,.hv-tile .sb-lj-top{padding-right:1.55rem}
+.hv-tile .xc-head,.hv-tile .cap-sec-top,.hv-tile .sb-lj-top,
+.hv-tile .dbf-k,.hv-tile .rr-hd{padding-right:1.55rem}
 
-.xc.hv-sample,.cap-sec.hv-sample,#sb-livejob.hv-sample{
+/* the chip on tiles that have no badge row of their own — it sits on its own
+   line at the top so the card still reads cleanly */
+.hv-chip-solo{display:inline-block;margin-bottom:.4rem}
+
+.xc.hv-sample,.cap-sec.hv-sample,#sb-livejob.hv-sample,
+#dash-basic-focus.hv-sample,#dash-return.hv-sample{
   border-style:dashed!important;border-color:var(--hv-s-ln)!important;
   background-image:linear-gradient(var(--hv-s-bg),var(--hv-s-bg))}
 .xc.hv-sample:hover{border-color:var(--hv-s-ln)!important;box-shadow:var(--sd)}
 .xc.hv-sample .xc-route,.cap-sec.hv-sample .cap-sec-nm,
-#sb-livejob.hv-sample .sb-lj-route{color:var(--hv-s)}
+#sb-livejob.hv-sample .sb-lj-route,
+#dash-basic-focus.hv-sample .dbf-route,#dash-return.hv-sample .rr-rt{color:var(--hv-s)}
 .xc.hv-sample .xb.inv{background:rgba(120,136,155,.16);color:var(--hv-s);border-color:var(--hv-s-ln)}
 .hv-stag{font-size:.53rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
   padding:.16rem .42rem;border-radius:4px;background:rgba(120,136,155,.16);
@@ -6248,10 +6255,26 @@ window.pxSave=async function(){
       if (m) return m[0];
       return t.split(/[·—]/)[0].trim();
     }
+    /* the dashboard cards print the reference into their own heading rather
+       than a ref element — "Next up · HAF-2858" */
+    var head = el.querySelector('.dbf-k, .rr-hd');
+    if (head) {
+      var hm = (head.textContent || '').match(/[A-Z]{2,3}-\d{4,6}/);
+      if (hm) return hm[0];
+    }
     if (el.id) return el.id;
     return '';
   }
   function isSample(ref){ return !!(ref && SAMPLE[ref]); }
+
+  /* Panels that summarise runs rather than list them - the next-up card and the
+     run-back panel. They carry seeded data today and may carry a real job
+     tomorrow, and they never show a reference of their own, so an unknown
+     reference has to read as SAMPLE: calling seeded data "live" is the exact
+     confusion this work exists to remove. */
+  function isSummaryPanel(el){
+    return el.id === 'dash-basic-focus' || el.id === 'dash-return';
+  }
 
   /* ── decorate one tile ── */
   function decorate(el){
@@ -6267,7 +6290,10 @@ window.pxSave=async function(){
     if (ref) el.setAttribute('data-hv-ref', ref);
 
     var isCap = el.classList.contains('cap-sec');
-    var sample = isCap ? true : isSample(ref);
+    var panel = isSummaryPanel(el);
+    var sample = isCap ? true
+      : panel ? (ref === el.id ? true : isSample(ref))
+      : isSample(ref);
     /* a card can be decorated before it has drawn its reference and again after,
        so always clear the opposite verdict — never leave it reading both ways */
     el.classList.remove(sample ? 'hv-real' : 'hv-sample');
@@ -6277,10 +6303,16 @@ window.pxSave=async function(){
        which already carry their own status pill */
     if (!isCap && ref) {
       var badges = el.querySelector('.xc-badges');
-      if (badges) {
-        var chip = badges.querySelector('.hv-stag,.hv-live');
-        if (!chip) { chip = document.createElement('span'); badges.appendChild(chip); }
-        chip.className = sample ? 'hv-stag' : 'hv-live';
+      var solo = !badges;
+      if (badges || panel) {
+        var chip = (badges || el).querySelector(':scope > .hv-stag, :scope > .hv-live')
+          || (badges ? badges.querySelector('.hv-stag,.hv-live') : null);
+        if (!chip) {
+          chip = document.createElement('span');
+          if (badges) badges.appendChild(chip);
+          else el.insertBefore(chip, el.firstChild);
+        }
+        chip.className = (sample ? 'hv-stag' : 'hv-live') + (solo ? ' hv-chip-solo' : '');
         chip.textContent = sample ? 'Sample' : 'Live';
         chip.title = sample
           ? 'Sample data — not a real job'
@@ -6453,7 +6485,11 @@ window.pxSave=async function(){
       syncUser();
       /* the sidebar live-job card is included on purpose: it sits on screen the
          whole time, so it is the first thing you want soft on a shared screen */
-      var tiles = [].slice.call(document.querySelectorAll('.xc, .cap-sec, #sb-livejob'));
+      /* the sidebar live-job card is included on purpose, and so are the two
+         dashboard panels that summarise runs: they sit on screen the whole
+         time, so they are the first thing you want soft on a shared screen */
+      var tiles = [].slice.call(document.querySelectorAll(
+        '.xc, .cap-sec, #sb-livejob, #dash-basic-focus, #dash-return'));
       tiles.forEach(decorate);
 
       /* group tiles by pane so each pane gets its own bar and wrapper */
@@ -6466,7 +6502,11 @@ window.pxSave=async function(){
       Object.keys(byPane).forEach(function(id){
         var g = byPane[id];
         if (g.tiles.length < 2) return;   /* a single tile needs no view switcher */
-        ensureWrap(g.tiles);
+        /* only the run cards themselves lay out in columns — the dashboard
+           panels keep their own shape in every format */
+        ensureWrap(g.tiles.filter(function(t){
+          return t.classList.contains('xc') || t.classList.contains('cap-sec');
+        }));
         ensureBar(g.pane);
       });
       ensureTopButton();

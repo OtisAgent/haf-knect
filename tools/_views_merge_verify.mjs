@@ -140,6 +140,34 @@ for (const [w, h] of widths) {
     check(`${tag} sidebar live job is covered`, all.sidebarIsTile && all.sidebarEye, all);
     check(`${tag} sidebar live job actually blurs`, !all.sidebarFilter || /blur/.test(all.sidebarFilter), all);
     check(`${tag} run tiles actually blur`, !all.sampleFilter || /blur/.test(all.sampleFilter), all);
+    /* 4b. the dashboard's own run panels — the next-up job and the run back.
+       They are on screen the whole time, so blur all has to reach them, and
+       seeded data in them must not read as a real job. */
+    const panels = await pg.evaluate(() => {
+      const out = {};
+      ['dash-basic-focus', 'dash-return'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el || el.offsetParent === null) { out[id] = { absent: true }; return; }
+        const kid = [...el.children].find(c => !c.classList.contains('hv-eye') && !c.classList.contains('hv-stag') && !c.classList.contains('hv-live'));
+        out[id] = {
+          tile: el.classList.contains('hv-tile'),
+          sample: el.classList.contains('hv-sample'),
+          live: el.classList.contains('hv-real'),
+          eye: !!el.querySelector(':scope > .hv-eye'),
+          chip: (el.querySelector(':scope > .hv-stag, :scope > .hv-live') || {}).textContent || '',
+          filter: kid ? getComputedStyle(kid).filter : null,
+        };
+      });
+      return out;
+    });
+    for (const [id, p] of Object.entries(panels)) {
+      if (p.absent) continue;
+      const label = id === 'dash-return' ? 'run-back panel' : 'next-up card';
+      check(`${tag} ${label} is covered`, p.tile && p.eye, p);
+      check(`${tag} ${label} reads as sample, not live`, p.sample && !p.live && p.chip === 'Sample', p);
+      check(`${tag} ${label} blurs with blur all`, /blur/.test(p.filter || ''), p);
+    }
+
     await pg.evaluate(() => window.HAF_VIEW.blurAll(false));
 
     // 5. view formats switch and are remembered
