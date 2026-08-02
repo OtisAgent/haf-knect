@@ -470,6 +470,12 @@ textarea.fi2{resize:vertical;min-height:70px}
 /* HAF's own suggestion, before the customer touches the van row */
 .vp.rec{border-color:var(--or);box-shadow:0 0 0 1px var(--or-g)}
 .van-lbl .van-hint{font-weight:500;letter-spacing:0;text-transform:none;color:var(--su)}
+/* The van row is a fixed grid, not a wrapping flex line: every vehicle gets the
+   same width whatever the fleet list is, so a long name can never squash the
+   others or leave one stranded across a whole row on its own. */
+#van-pills{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+#van-pills .vp{flex:none;min-width:0;border-radius:var(--rx);padding:.5rem .55rem}
+@media(max-width:700px){#van-pills{grid-template-columns:repeat(2,1fr)}}
 /* ── LOAD PICKER (how heavy / how big) ── */
 .lp-tile{background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.55rem .5rem .5rem;cursor:pointer;transition:all .14s;flex:1;min-width:96px;text-align:center;line-height:1.3;display:flex;flex-direction:column;align-items:center;gap:.3rem}
 .lp-tile:hover{border-color:var(--or)}
