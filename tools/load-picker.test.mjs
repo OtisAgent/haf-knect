@@ -230,6 +230,71 @@ for (const [w, vp] of [['desktop', { width: 1440, height: 1000 }], ['phone', { w
   await p.close();
 }
 
+/* ── 9. THE VEHICLE CARDS ──
+   Brent, 2 Aug, pointing at speedyfreight.com/vehicles: same five facts on every
+   vehicle — load space, pallets, max weight — in the same order, drawn not
+   written. Everything here is read out of the rendered browser, never the source,
+   and every figure is compared back to the vehicle table so a card can never
+   drift away from the rates the quote is actually built on. */
+for (const [w, vp] of [['desktop', { width: 1440, height: 1000 }], ['phone', { width: 390, height: 844 }]]) {
+  console.log('\n── vehicle cards, ' + w + ' ──');
+  const p = await b.newPage({ viewport: vp });
+  p.on('pageerror', e => errs.push('cards ' + w + ': ' + e.message));
+  await p.goto('http://localhost:8801/', { waitUntil: 'networkidle' });
+  await p.waitForFunction('typeof openFlow==="function"', null, { timeout: 15000 });
+
+  const read = await p.evaluate(() => {
+    const cards = sel => [...document.querySelectorAll(sel)].map(c => ({
+      van: c.dataset.van,
+      name: (c.querySelector('.vp-n') || {}).textContent || '',
+      fits: (c.querySelector('.vp-sub') || {}).textContent || '',
+      rows: [...c.querySelectorAll('.vp-row')].map(r => ({ text: r.textContent.trim(), drawn: !!r.querySelector('svg') })),
+      box: c.getBoundingClientRect()
+    }));
+    return {
+      front: cards('#van-pills .vp'),
+      /* step 2 will not open until both load questions are answered, and a card
+         that is not on screen has no size to measure — so answer them first */
+      fast: (openFlow('fast'),
+             document.querySelectorAll('#fq-wt .oopt')[0].click(),
+             document.querySelectorAll('#fq-sz .oopt')[0].click(),
+             fqNext(2), cards('#fq-van .oopt')),
+      table: VAN_ORDER.map(k => ({ k, n: VAN[k].n, L: VAN[k].L, W: VAN[k].W, H: VAN[k].H, pal: VAN[k].pal, kg: VAN[k].kg })),
+      guides: document.querySelectorAll('.van-guide').length,
+      overflow: (closeInlineFlow(), document.documentElement.scrollWidth - document.documentElement.clientWidth)
+    };
+  });
+
+  for (const [where, list] of [['front calculator', read.front], ['fast quote', read.fast]]) {
+    ok(where + ': a card for every vehicle', list.length === read.table.length, list.length + ' of ' + read.table.length);
+    ok(where + ': the ladder ends at the Luton tail lift',
+       list.map(c => c.van).join(',') === read.table.map(v => v.k).join(','), list.map(c => c.van).join(','));
+    ok(where + ': every card says what fits in everyday words', list.every(c => c.fits.length > 10 && !/cm|inch|m³|cubic/i.test(c.fits)));
+    ok(where + ': every card carries all three spec rows', list.every(c => c.rows.length === 3), list.map(c => c.rows.length).join(','));
+    ok(where + ': every spec row is drawn, not an emoji', list.every(c => c.rows.every(r => r.drawn && !/\p{Extended_Pictographic}/u.test(r.text))));
+    ok(where + ': the figures match the vehicle table exactly', list.every((c, i) => {
+      const v = read.table[i];
+      const dim = r => r.replace(/\s/g, '');
+      return dim(c.rows[0].text) === (v.L.toFixed(2).replace(/0$/, '') + '×' + v.W.toFixed(2).replace(/0$/, '') + '×' + v.H.toFixed(2).replace(/0$/, '') + 'm')
+        && c.rows[1].text === v.pal + (v.pal === 1 ? ' pallet' : ' pallets')
+        && c.rows[2].text === v.kg.toLocaleString('en-GB') + ' kg max';
+    }), list.map(c => c.rows.map(r => r.text).join('/')).join(' | '));
+    ok(where + ': load space only ever grows down the ladder',
+       list.every((c, i) => i === 0 || read.table[i].L * read.table[i].W * read.table[i].H >= read.table[i - 1].L * read.table[i - 1].W * read.table[i - 1].H - 1e-9));
+    ok(where + ': pallet capacity never goes backwards',
+       list.every((c, i) => i === 0 || read.table[i].pal >= read.table[i - 1].pal));
+    ok(where + ': every card is big enough to tap', list.every(c => c.box.height >= 44 && c.box.width >= 60));
+    ok(where + ': no card is cut off the screen', list.every(c => c.box.left >= -1 && c.box.right <= vp.width + 1));
+  }
+  ok('both quote paths carry the same guide-figures note', read.guides === 2, read.guides);
+  ok('the cards do not push the page sideways', read.overflow <= 0, read.overflow);
+  ok('the curtain-side Luton is on the ladder', read.front.some(c => c.van === 'lutonc'));
+  ok('and nothing above a Luton is', !read.front.some(c => /artic|flatbed|7\.5|hgv|rigid/i.test(c.name)));
+
+  await p.locator('#van-pills').screenshot({ path: ROOT + '/_vans_' + w + '.png' });
+  await p.close();
+}
+
 await b.close(); srv.close();
 if (errs.length) { console.log('\n  browser errors:'); errs.forEach(e => console.log('   ! ' + e)); }
 console.log('\n' + (fail === 0 && errs.length === 0 ? '✓ ALL ' + pass + ' CHECKS PASS' : '✗ ' + fail + ' failed, ' + pass + ' passed, ' + errs.length + ' browser errors'));

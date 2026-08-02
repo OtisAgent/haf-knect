@@ -476,6 +476,22 @@ textarea.fi2{resize:vertical;min-height:70px}
 #van-pills{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
 #van-pills .vp{flex:none;min-width:0;border-radius:var(--rx);padding:.5rem .55rem}
 @media(max-width:700px){#van-pills{grid-template-columns:repeat(2,1fr)}}
+/* ── VEHICLE CARDS ──
+   Brent's reference (speedyfreight.com/vehicles): every vehicle states its load
+   space, its pallets and its max weight, in the same order, with a drawn icon on
+   each row. Same card on the front calculator and inside Fast Quote. */
+.vp.vcard,.oopt.vcard{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:.08rem}
+.vp-n{font-weight:700;display:block;line-height:1.25}
+.oopt.vcard .vp-n{font-size:.88rem}
+.vcard .vp-sub{font-size:.62rem;font-weight:400;color:var(--su);display:block;line-height:1.3}
+.vp.sel.vcard .vp-sub{color:rgba(14,17,19,.68)}
+.oopt.vcard.sel .vp-sub{color:inherit;opacity:.8}
+.vp-spec{display:flex;flex-direction:column;gap:.1rem;margin-top:.32rem;width:100%}
+.vp-row{display:flex;align-items:center;gap:.3rem;font-size:.6rem;font-weight:600;color:var(--su);line-height:1.4}
+.vp-row svg{width:11px;height:11px;flex:none;stroke:currentColor;fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
+.vp.sel .vp-row{color:rgba(14,17,19,.72)}
+.oopt.vcard.sel .vp-row,.oopt.vcard:hover .vp-row{color:inherit;opacity:.78}
+.van-guide{font-size:.62rem;color:var(--su);line-height:1.45;margin:-.6rem 0 1rem}
 /* ── LOAD PICKER (how heavy / how big) ── */
 .lp-tile{background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.55rem .5rem .5rem;cursor:pointer;transition:all .14s;flex:1;min-width:96px;text-align:center;line-height:1.3;display:flex;flex-direction:column;align-items:center;gap:.3rem}
 .lp-tile:hover{border-color:var(--or)}
@@ -829,16 +845,11 @@ textarea.fi2{resize:vertical;min-height:70px}
         <div class="van-pills" id="sz-pills"></div>
         <div class="ld-note" id="ld-note" style="display:none"></div>
         <div class="van-lbl">Van size <span class="van-hint">— we pick this for you, change it if you know better</span></div>
-        <div class="van-pills" id="van-pills">
-          <button class="vp" data-van="small" onclick="selVan(this,'small')">Small van<span class="vp-sub">a few boxes · 400 kg</span></button>
-          <button class="vp" data-van="swb" onclick="selVan(this,'swb')">SWB<span class="vp-sub">1 pallet · 800 kg</span></button>
-          <button class="vp" data-van="mwb" onclick="selVan(this,'mwb')">MWB<span class="vp-sub">1 pallet · 1,000 kg</span></button>
-          <button class="vp sel" data-van="lwb" onclick="selVan(this,'lwb')">LWB<span class="vp-sub">a few pallets · 1,200 kg</span></button>
-          <button class="vp" data-van="xlwb" onclick="selVan(this,'xlwb')">XLWB<span class="vp-sub">a few pallets · 1,400 kg</span></button>
-          <button class="vp" data-van="luton" onclick="selVan(this,'luton')">Luton — box<span class="vp-sub">full van load · 1,000 kg</span></button>
-          <button class="vp" data-van="lutonc" onclick="selVan(this,'lutonc')">Luton — curtain side<span class="vp-sub">full van load · side loading</span></button>
-          <button class="vp" data-van="lutontl" onclick="selVan(this,'lutontl')">Luton — tail lift<span class="vp-sub">full van load · tail lift</span></button>
-        </div>
+        <!-- Vehicle cards: load space, pallets and max weight on every one, in
+             the same order on every one. Drawn from the vehicle table so a rate
+             or a capacity is only ever edited in one place. -->
+        <div class="van-pills" id="van-pills"></div>
+        <p class="van-guide">Load figures are a guide — we confirm the exact vehicle before your job is booked.</p>
         <!-- LIVE PRICE DISPLAY -->
         <div class="lp-box hint" id="lp-box">
           <div id="lp-hint-txt" class="lp-hint-txt">Enter both postcodes to see your guide price</div>
@@ -909,16 +920,8 @@ textarea.fi2{resize:vertical;min-height:70px}
             <div class="fstep" id="fq-2">
               <div class="slbl">Step 2 of 8 &#8212; Van size</div>
               <div class="ld-note" id="fq-note" style="display:none;margin:0 0 .7rem"></div>
-              <div class="ogrid" id="fq-van">
-                <button class="oopt" data-van="small" onclick="fqSelVan(this,'small')">Small van<span class="oopt-sub">a few boxes · 400 kg</span></button>
-                <button class="oopt" data-van="swb" onclick="fqSelVan(this,'swb')">SWB<span class="oopt-sub">1 pallet · 800 kg</span></button>
-                <button class="oopt" data-van="mwb" onclick="fqSelVan(this,'mwb')">MWB<span class="oopt-sub">1 pallet · 1,000 kg</span></button>
-                <button class="oopt" data-van="lwb" onclick="fqSelVan(this,'lwb')">LWB<span class="oopt-sub">a few pallets · 1,200 kg</span></button>
-                <button class="oopt" data-van="xlwb" onclick="fqSelVan(this,'xlwb')">XLWB<span class="oopt-sub">a few pallets · 1,400 kg</span></button>
-                <button class="oopt" data-van="luton" onclick="fqSelVan(this,'luton')">Luton — box<span class="oopt-sub">full van load · 1,000 kg</span></button>
-                <button class="oopt" data-van="lutonc" onclick="fqSelVan(this,'lutonc')">Luton — curtain side<span class="oopt-sub">full van load · side loading</span></button>
-                <button class="oopt" data-van="lutontl" onclick="fqSelVan(this,'lutontl')">Luton — tail lift<span class="oopt-sub">full van load · tail lift</span></button>
-              </div>
+              <div class="ogrid" id="fq-van"></div>
+              <p class="van-guide">Load figures are a guide — we confirm the exact vehicle before your job is booked.</p>
               <div class="fstep-err" id="fq-err-2"></div>
               <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(1)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqNext(3)">Next &#8594;</button></div>
             </div>
@@ -2612,19 +2615,36 @@ const VAN={
   lutontl:{n:'Luton — tail lift'   ,drv:1.40,min:80}
 };
 /* ── WHAT EACH VAN CAN ACTUALLY CARRY ──
-   kg  = payload the vehicle is rated to carry
-   vol = the biggest load-size band it will hold (see SZ_BAND below)
-   tl  = it has a tail lift
+   Brent, 2 Aug, pointing at speedyfreight.com/vehicles: "use this as a
+   reference for sizing of the question — fantastic layout, just change the
+   sizing and what can fit." So every vehicle now carries the same five facts
+   they publish — load length, width, height, pallets, max weight — with our
+   own ladder and nothing above a Luton.
+     L/W/H = usable load space in metres
+     pal   = standard UK pallets it will take
+     kg    = payload the vehicle is rated to carry
+     vol   = the biggest load-size band it will hold (see SZ_BAND below)
+     tl    = it has a tail lift
+     fits  = the same thing said in everyday words, for the tile
    Capability, not price. This exists so a customer can never be quoted a
-   vehicle that physically cannot take what they have just described. */
-VAN.small.kg=400;    VAN.small.vol=2;   /* a few boxes   */
-VAN.swb.kg=800;      VAN.swb.vol=3;     /* one pallet    */
-VAN.mwb.kg=1000;     VAN.mwb.vol=3;     /* one pallet    */
-VAN.lwb.kg=1200;     VAN.lwb.vol=4;     /* a few pallets */
-VAN.xlwb.kg=1400;    VAN.xlwb.vol=4;    /* a few pallets */
-VAN.luton.kg=1000;   VAN.luton.vol=5;   /* full van load */
-if(VAN.lutonc){VAN.lutonc.kg=1000; VAN.lutonc.vol=5;}
-VAN.lutontl.kg=1000; VAN.lutontl.vol=5; VAN.lutontl.tl=true;
+   vehicle that physically cannot take what they have just described.
+   Figures follow the reference for the five vehicles it lists. MWB is not on
+   it, so it sits between SWB and LWB. The one deliberate departure is XLWB:
+   the reference publishes a payload BELOW its own LWB, which would make the
+   longer, dearer van the weaker one — ours keeps climbing. */
+function vanSpec(k,L,W,H,pal,kg,vol,fits){
+  const v=VAN[k]; if(!v)return;
+  v.L=L; v.W=W; v.H=H; v.pal=pal; v.kg=kg; v.vol=vol; v.fits=fits;
+}
+vanSpec('small'  ,1.3,1.2,1.00,1, 400,3,'a boot-load of boxes, or one light pallet');
+vanSpec('swb'    ,2.1,1.2,1.40,2, 800,3,'a couple of pallets, or a small move');
+vanSpec('mwb'    ,2.4,1.2,1.50,2,1000,3,'a couple of pallets, taller loads');
+vanSpec('lwb'    ,3.3,1.2,1.70,3,1200,4,'a few pallets, or a room of furniture');
+vanSpec('xlwb'   ,4.2,1.2,1.75,4,1400,4,'long loads, up to four pallets');
+vanSpec('luton'  ,4.2,2.0,2.10,6,1000,5,'a full van load, floor to roof');
+vanSpec('lutonc' ,4.2,2.0,2.10,6,1000,5,'a full van load, loaded from the side');
+vanSpec('lutontl',4.2,2.0,2.10,6,1000,5,'a full van load, with a tail lift');
+VAN.lutontl.tl=true;
 /* Cheapest first — a recommendation always lands on the least the job needs */
 const VAN_ORDER=['small','swb','mwb','lwb','xlwb','luton','lutonc','lutontl'];
 
@@ -2667,6 +2687,42 @@ const SZ_FILL=[
 ];
 function szIcon(i){
   return '<svg viewBox="0 0 40 24" aria-hidden="true"><rect x="1" y="1" width="38" height="22" rx="3"/>'+SZ_FILL[i]+'</svg>';
+}
+/* ── THE VEHICLE CARD ──
+   Every van says the same three things in the same order, drawn the same way:
+   the space inside it, the pallets it takes, the weight it is rated to. Drawn
+   icons, never emoji. Built from the table above, so a figure is changed in one
+   place and every card, every quote path and every test moves with it. */
+const SPEC_ICO={
+  dim:'<path d="M8 2.2 14 5.4v5.2L8 13.8 2 10.6V5.4z"/><path d="M2 5.4 8 8.6l6-3.2"/><path d="M8 8.6v5.2"/>',
+  pal:'<rect x="2" y="5" width="12" height="2.4" rx=".4"/><rect x="2" y="8.4" width="12" height="2.4" rx=".4"/><path d="M3.8 10.8v1.8M12.2 10.8v1.8"/>',
+  wt :'<path d="M4.6 6h6.8l1.5 7.2H3.1z"/><path d="M6.4 6a1.6 1.6 0 0 1 3.2 0"/>'
+};
+function specIco(k){return '<svg viewBox="0 0 16 16" aria-hidden="true">'+SPEC_ICO[k]+'</svg>';}
+const m1=n=>n.toFixed(2).replace(/0$/,'');
+/* The three spec rows, in the reference's order: how big, how many, how heavy */
+function vanSpecRows(k){
+  const v=VAN[k];
+  if(!v||!v.L)return '';
+  return '<span class="vp-spec">'
+    +'<span class="vp-row">'+specIco('dim')+m1(v.L)+' &#215; '+m1(v.W)+' &#215; '+m1(v.H)+' m</span>'
+    +'<span class="vp-row">'+specIco('pal')+v.pal+(v.pal===1?' pallet':' pallets')+'</span>'
+    +'<span class="vp-row">'+specIco('wt')+v.kg.toLocaleString('en-GB')+' kg max</span>'
+    +'</span>';
+}
+/* One vehicle card. `cls` and `fn` differ between the front calculator and Fast
+   Quote; everything a customer reads is identical on both. */
+function vanCardHTML(k,cls,fn){
+  const v=VAN[k];
+  return '<button class="'+cls+' vcard" type="button" data-van="'+k+'" onclick="'+fn+'(this,\''+k+'\')">'
+    +'<span class="vp-n">'+v.n+'</span>'
+    +'<span class="vp-sub">'+(v.fits||'')+'</span>'
+    +vanSpecRows(k)+'</button>';
+}
+function buildVanCards(mountId,cls,fn){
+  const el=document.getElementById(mountId);
+  if(!el)return;
+  el.innerHTML=VAN_ORDER.map(k=>vanCardHTML(k,cls,fn)).join('');
 }
 /* The smallest — and so the cheapest — van that will genuinely take this load.
    Weight and space are both hard limits; neither is allowed to be fudged. */
@@ -2924,6 +2980,9 @@ function buildLoadPickers(){
   sp.innerHTML=SZ_BAND.map((b,i)=>
     '<button class="lp-tile" type="button" data-sz="'+b.k+'" aria-pressed="false" onclick="selLoad(this,\'sz\',\''+b.k+'\')">'
     +szIcon(i)+'<span class="lp-tile-n">'+b.n+'</span><span class="lp-tile-s">'+b.s+'</span></button>').join('');
+  buildVanCards('van-pills','vp','selVan');
+  const d=document.querySelector('#van-pills .vp[data-van="'+selVanKey+'"]');
+  if(d)d.classList.add('sel');
 }
 
 function selLoad(el,kind,key){
@@ -3101,6 +3160,7 @@ function fqBuildLoad(){
   sp.innerHTML=SZ_BAND.map((b,i)=>
     '<button class="oopt gauge" type="button" onclick="fqSel(this,\'size\',\''+b.k+'\')">'
     +szIcon(i)+'<span>'+b.n+'<span class="oopt-sub">'+b.s+'</span></span></button>').join('');
+  buildVanCards('fq-van','oopt','fqSelVan');
 }
 fqBuildLoad();
 

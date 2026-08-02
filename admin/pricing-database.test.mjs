@@ -153,8 +153,15 @@ head('4. The page is wired into the app');
   ok('the customer quote engine reads the saved framework', html.includes('hafApplyPricingConfig'));
   ok('the quote engine still works if the database is unreachable', /HAF_PRICING_SOURCE='built-in'/.test(html));
   ok('saving goes through the gateway, not straight at the database', html.includes("fetch('/api/pricing',{method:'POST'"));
+  /* Nothing above a Luton, ever. "Curtain" is the one word that needs a second
+     look rather than a flat ban: a curtain-side LUTON is approved (Brent,
+     2026-08-02 — "Lutons - tail lift + box + curtain side"), a curtain-sided
+     trailer is not. So the word is allowed, but only ever inside a Luton. */
   ok('no vehicle beyond a Luton is anywhere on the page',
-     !/\b(artic|flatbed|curtain|7\.5t|tractor unit)\b/i.test(html));
+     !/\b(artic|flatbed|7\.5t|tractor unit|curtainsider|curtain-sided|rigid|hgv)\b/i.test(html));
+  const stray = [...html.matchAll(/curtain/gi)]
+    .filter(m => !/luton[^]{0,40}$/i.test(html.slice(Math.max(0, m.index - 60), m.index)));
+  ok('the only curtain side on the network is a Luton body', stray.length === 0);
 }
 
 console.log('\n' + (fail ? 'FAILURES' : 'ALL PASS') + ' — ' + pass + ' passed, ' + fail + ' failed');
