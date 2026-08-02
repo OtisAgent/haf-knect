@@ -207,6 +207,9 @@ tr:last-child td{border-bottom:none}
       <h2 id="pm-title" style="font-size:.85rem"></h2>
       <div id="pm-body"></div>
     </div>
+    <div class="pm-sub">Where the money comes from</div>
+    <div id="pm-revenue"></div>
+    <p class="note" id="pm-revenue-note" style="margin-top:.5rem">The delivery figure is the network fee on the demo queue above. Subscriptions, payment-run fees and service charges are recorded on their own lines and are never counted as delivery margin.</p>
     <div class="pm-sub">Pricing audit trail (this device)</div>
     <div class="tblwrap"><table id="pm-audit">
       <thead><tr><th>When</th><th>Ref</th><th>Operator</th><th>Action</th><th>Detail</th></tr></thead>
@@ -452,6 +455,7 @@ async function loadAll(){
 setInterval(()=>{if(sessionStorage.getItem('knect-admin')==='1')loadAll()},60000);
 </script>
 <script src="pricing-matrix-v3.js"></script>
+<script src="revenue-model-v1.js"></script>
 <script>
 /* ===== Pricing Matrix V3 — quotes & approvals (demo queue through the live engine) ===== */
 (function(){
@@ -497,6 +501,7 @@ window.pmOpen=function(ref){
     '</div>'+
     '<div class="pm-sub">Why this price</div><ul class="pm-reasons">'+r.reasons.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>'+
     (r.flags.length?'<div class="pm-sub">Flags</div><div style="font-size:.78rem">'+r.flags.map(esc).join(' · ')+'</div>':'')+
+    pmJobRevenue(r)+
     '<div class="pm-actions"><button class="obtn" onclick="pmApprove(\''+ref+'\')">Approve price</button><button class="obtn" onclick="pmOverride(\''+ref+'\')">Override margin…</button></div>';
   $('pm-detail').style.display='block';
   $('pm-detail').scrollIntoView({behavior:'smooth',block:'nearest'});

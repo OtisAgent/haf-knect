@@ -265,7 +265,6 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .fnd-badge{display:none;align-items:center;gap:.3rem;font-family:var(--dp);font-weight:900;font-size:.55rem;letter-spacing:.09em;text-transform:uppercase;color:#2e2200;background:linear-gradient(135deg,#f0c33c,#d9920b);border-radius:var(--pill);padding:.2rem .55rem;white-space:nowrap;flex:none}
 .fnd-badge.on{display:inline-flex}
 .fnd-badge svg{flex:none}
-.fnd-badge .fnd-short{display:none}
 
 .fnd-card{display:none;gap:1rem;align-items:flex-start;background:linear-gradient(105deg,rgba(217,146,11,.11),rgba(217,146,11,0) 62%),var(--p);border:1px solid var(--am);border-left:4px solid var(--am);border-radius:var(--rs);padding:1.1rem 1.2rem;margin-bottom:1rem;box-shadow:var(--sd)}
 .fnd-card.on{display:flex}
@@ -280,8 +279,10 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
   .fnd-mark{width:34px;height:34px}
   .fnd-ttl{font-size:.86rem}
   .fnd-sub{font-size:.76rem}
-  .fnd-badge .fnd-long{display:none}
-  .fnd-badge .fnd-short{display:inline}
+  /* The top bar is already full on a phone — a fourth item pushes the row off
+     the screen. On a small screen the card on the overview is the statement,
+     so the top-bar mark stands down rather than breaking the layout. */
+  .fnd-badge.on{display:none}
 }
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
 /* Network Pools what-if controls */
@@ -1371,7 +1372,7 @@ textarea.fi2{resize:vertical;min-height:70px}
       <span class="tb-user" id="tb-user">—</span>
       <span class="fnd-badge" id="tb-founder" title="Founding Member of the HAF KNECT network">
         <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <span class="fnd-long">Founding Member</span><span class="fnd-short">Founder</span>
+        <span>Founding Member</span>
       </span>
       <span class="role-chip chip" id="tb-role">—</span>
       <button id="mode-pill" onclick="showModeSelector()" style="display:none;align-items:center;gap:.3rem;font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--p2);border:1px solid var(--lns);border-radius:var(--pill);padding:.22rem .6rem;cursor:pointer;color:var(--tx);transition:background .14s" title="Switch mode">

@@ -312,18 +312,28 @@ resetAll();
 // ===========================================================================
 section("Both fee bases produce a coherent, reconciling breakdown");
 // ===========================================================================
+var byBasis = {};
 ["SHARE_OF_CUSTOMER_PRICE", "ADDED_TO_TRANSPORT_VALUE"].forEach(function (basis) {
   Engine.resetConfig();
   Engine.applyConfig({ feeBasis: basis });
   var q = Engine.price({ miles: 100, vehicleCode: "SMALL_VAN", jobTypeCode: "STD_SAMEDAY" });
   var r = Rev.jobRevenue(q);
+  byBasis[basis] = r.breakdown;
   var b = r.breakdown;
   near(basis + ": driver + fee = customer",
     Rev.round2(b.driverPayableGbp + b.hafNetworkFeeGbp), b.customerExVatGbp);
-  ok(basis + ": the driver is paid the same either way", b.driverPayableGbp === 120);
   ok(basis + ": the basis is recorded on the record", r.feeBasis === basis);
   ok(basis + ": the reason explains it in plain words", r.reasons.length >= 2);
 });
+near("the driver is paid identically under both frameworks",
+  byBasis.SHARE_OF_CUSTOMER_PRICE.driverPayableGbp,
+  byBasis.ADDED_TO_TRANSPORT_VALUE.driverPayableGbp);
+ok("only the customer price and HAF's share move between them",
+  byBasis.SHARE_OF_CUSTOMER_PRICE.customerExVatGbp >
+  byBasis.ADDED_TO_TRANSPORT_VALUE.customerExVatGbp);
+console.log("  → 100mi small van same-day: driver £" + byBasis.SHARE_OF_CUSTOMER_PRICE.driverPayableGbp +
+  " either way · customer £" + byBasis.ADDED_TO_TRANSPORT_VALUE.customerExVatGbp +
+  " (add-on) vs £" + byBasis.SHARE_OF_CUSTOMER_PRICE.customerExVatGbp + " (keep)");
 Engine.resetConfig();
 
 // The one number that differs between the two bases, on Brent's own §8 shape.
