@@ -4,7 +4,11 @@ import http from 'node:http';
 import fs from 'node:fs';
 import { chromium } from 'playwright-core';
 
-const ROOT = '/agent/workspace/knect-pricing';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+/* the repo this file lives in — never a hardcoded path, or a stale checkout
+   gets tested and passes while the real one is untouched */
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const KEY = process.env.SUPA_KEY;
 const SUPA = 'https://jsdwvogsxlnczzbefwgp.supabase.co/rest/v1/tier_config';
 const H = { apikey: KEY, Authorization: 'Bearer ' + KEY };

@@ -3676,13 +3676,15 @@ async function hafAuth(u,s,err,btn){
   const old=btn.textContent;btn.textContent='Signing in…';btn.disabled=true;
   try{
     const hash=await hafSha(isPin?u+':'+s:s);
-    const col=isPin?'pin_hash':'password_hash';
-    const r=await fetch(PLNA_URL+'/rest/v1/plna_drivers?haf_username=eq.'+encodeURIComponent(u)+'&'+col+'=eq.'+hash+'&select=haf_username,full_name,plan,pin_hash',{headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY}});
+    /* The PIN form hashes username+PIN (the relay format), the password form hashes
+       the password alone. plna_auth checks both and returns the profile only on a
+       match, with the stored hashes stripped out. */
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/plna_auth',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify(isPin?{p_username:u,p_hash:null,p_relay:hash}:{p_username:u,p_hash:hash,p_relay:null})});
     const d=await r.json();
     if(!Array.isArray(d)||!d.length){
       hafErr(err,isPin?'That PIN didn\'t match. If you haven\'t set a PIN yet, sign in with your password first.':'Incorrect username or password. Try again.');
       btn.textContent=old;btn.disabled=false;return}
-    if(!isPin&&!d[0].pin_hash){hafPend={u:u,hash:hash};btn.textContent=old;btn.disabled=false;closeLogin();document.getElementById('pin-ov').classList.add('open');document.getElementById('pin-a').focus();return}
+    if(!isPin&&!d[0].has_pin){hafPend={u:u,hash:hash};btn.textContent=old;btn.disabled=false;closeLogin();document.getElementById('pin-ov').classList.add('open');document.getElementById('pin-a').focus();return}
     hafGo(u,hash,isPin?'p':'w');
   }catch(e){hafErr(err,'Connection problem — please try again.');btn.textContent=old;btn.disabled=false}
 }

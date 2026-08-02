@@ -300,6 +300,11 @@ const HKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI
 const $=id=>document.getElementById(id);
 async function sha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
 function pf(path,key){return fetch(path,{headers:{'apikey':key,'Authorization':'Bearer '+key}}).then(r=>r.json())}
+/* Driver and booking data is no longer readable from the browser. Everything
+   personal comes back through plna_admin_overview, which checks the owner
+   credential inside the database before it returns a single row. */
+function prpc(fn,args){return fetch(PLNA+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'apikey':PKEY,'Authorization':'Bearer '+PKEY,'Content-Type':'application/json'},body:JSON.stringify(args)}).then(r=>r.json())}
+function adminCred(){try{return JSON.parse(sessionStorage.getItem('knect-admin-cred')||'null')}catch(e){return null}}
 
 /* theme */
 const saved=localStorage.getItem('knect-admin-theme')||'day';
@@ -316,16 +321,17 @@ async function gateLogin(){
   try{
     const isPin=/^\d{4,6}$/.test(s);
     const hash=await sha(isPin?u+':'+s:s);
-    const col=isPin?'pin_hash':'password_hash';
-    const d=await pf(PLNA+'/rest/v1/plna_drivers?haf_username=eq.'+u+'&'+col+'=eq.'+hash+'&select=haf_username',PKEY);
+    const cred=isPin?{p_username:u,p_hash:null,p_relay:hash}:{p_username:u,p_hash:hash,p_relay:null};
+    const d=await prpc('plna_admin_overview',cred);
     if(!Array.isArray(d)||!d.length){err.textContent=isPin?'That PIN didn\'t match.':'Incorrect password.';err.style.display='block';btn.disabled=false;btn.textContent='Open overview →';return}
     sessionStorage.setItem('knect-admin','1');
+    sessionStorage.setItem('knect-admin-cred',JSON.stringify(cred));
     enter();
   }catch(e){err.textContent='Connection problem — please try again.';err.style.display='block';btn.disabled=false;btn.textContent='Open overview →'}
 }
 function enter(){$('gate').style.display='none';$('app').style.display='block';loadAll()}
-function signOut(){sessionStorage.removeItem('knect-admin');location.reload()}
-if(sessionStorage.getItem('knect-admin')==='1') enter();
+function signOut(){sessionStorage.removeItem('knect-admin');sessionStorage.removeItem('knect-admin-cred');location.reload()}
+if(sessionStorage.getItem('knect-admin')==='1'&&adminCred()) enter();
 
 /* helpers */
 function esc(x){const d=document.createElement('div');d.textContent=x==null?'':String(x);return d.innerHTML}
@@ -356,14 +362,14 @@ async function loadAll(){
   $('stamp').textContent='Updating…';
   const today=new Date().toISOString().slice(0,10);
   try{
-    const [drivers,bookings,avail]=await Promise.all([
-      pf(PLNA+'/rest/v1/plna_drivers?select=haf_username,full_name,plan,city,confirmed_this_month,cancelled_this_month,conv_rate,page_views&order=confirmed_this_month.desc',PKEY),
-      pf(PLNA+'/rest/v1/plna_bookings?select=ref,customer_first,customer_last,customer_phone,from_postcode,to_postcode,preferred_date,driver_username,status,created_at&order=created_at.desc&limit=50',PKEY),
-      pf(PLNA+'/rest/v1/plna_availability?date=eq.'+today+'&is_available=eq.true&select=driver_id,shift_start,shift_end,area,vehicle_type',PKEY)
-    ]);
+    const cred=adminCred();
+    if(!cred){signOut();return}
+    const ov=await prpc('plna_admin_overview',cred);
+    if(!Array.isArray(ov)||!ov.length){signOut();return}
+    const {drivers,bookings,availability}=ov[0];
     _drivers=Array.isArray(drivers)?drivers:[];
     _bookings=Array.isArray(bookings)?bookings:[];
-    const _avail=Array.isArray(avail)?avail:[];
+    const _avail=Array.isArray(availability)?availability:[];
 
     let ideas=[];
     try{ideas=await pf(HUB+'/rest/v1/knect_feedback_board?select=*&limit=6',HKEY);if(!Array.isArray(ideas))ideas=[]}catch(e){ideas=[]}
