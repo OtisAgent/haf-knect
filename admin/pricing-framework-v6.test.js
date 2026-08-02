@@ -1,9 +1,12 @@
 /* ============================================================================
- * HAF KNECT — Pricing Matrix V5 test suite
+ * HAF KNECT — Pricing FRAMEWORK V6 test suite
  *
  * Proves the engine against Brent's "HAF KNECT Pricing Matrix and Network Fee
- * Framework" (2026-07-31), including its own §16 required test cases and the
- * §17 removal test.
+ * Framework" (2026-07-31) as amended by his 2026-08-02 rulings, including its
+ * own §16 required test cases and the §17 removal test.
+ *
+ * The lane layer and the margin bands have their own suite:
+ *   node admin/lane-and-margin-v6.test.js
  *
  * It also proves §15 — customer engine and back office must use the SAME
  * pricing source — by lifting the live customer engine straight out of
@@ -220,31 +223,51 @@ ok("groupage is built but switched off for customers",
 
 var c = customer(100, "lwb", "sday");
 eq("transport value and fee add up to the customer price", c.carrier + c.fee, c.sub);
-eq("the fee is 20% of the transport value, not of the price", c.fee, c.carrier * 0.20);
-ok("the fee is never buried in the mileage rate",
-   Math.abs(c.carrier - 110) < 0.005 && Math.abs(c.fee - 22) < 0.005, JSON.stringify(c));
+/* FRAMEWORK-V6: the percentage is the share of the CUSTOMER PRICE HAF keeps,
+   not a percentage added to the transport value. This is the one change that
+   makes Brent's own bands true — see §6. */
+eq("the fee is 20% of the customer price — what Brent's bands actually mean",
+   c.fee, c.sub * 0.20);
+ok("the fee is never buried in the mileage rate — the driver still gets it all",
+   Math.abs(c.carrier - 110) < 0.005 && Math.abs(c.fee - 27.50) < 0.005, JSON.stringify(c));
 
 /* ==========================================================================
- * 6. §6 worked examples — the numbers Brent wrote down
+ * 6. §6 worked examples — Brent's own jobs, re-worked under FRAMEWORK-V6
+ *
+ * ⚠️ HIS DOCUMENT CONTRADICTS ITSELF AND THIS IS WHERE IT SHOWS. His §6
+ * examples are worked by ADDING the percentage to the transport value
+ * (£50 + 20% = £60). His margin bands say free accounts must be "20% - 30%"
+ * and paid accounts never below 10-15%. Adding 20% to £50 leaves HAF keeping
+ * 16.7% of £60 — his band cannot be met at any job type, on any vehicle.
+ *
+ * Brent, 2026-08-02: "build the system to allow for the figures above - find a
+ * solution". The bands are the figures, so the bands win and the subtotals in
+ * his §6 move up by about 4%. THE DRIVER IS PAID EXACTLY THE SAME in every
+ * example — only HAF's share of the total changes, and only to the number he
+ * asked for. His transport values are asserted unchanged below to prove it.
  * ======================================================================== */
-section("6. Brent's worked examples (§6)");
+section("6. Brent's worked examples, re-worked under V6 (§6)");
 
 var exA = customer(25, "small", "sday");
-eq("Example A — Small Van, 25 mi, same-day: transport £50", exA.carrier, 50);
-eq("Example A — network fee £10", exA.fee, 10);
-eq("Example A — customer subtotal £60 ex VAT", exA.sub, 60);
+eq("Example A — Small Van, 25 mi, same-day: transport £50, unchanged", exA.carrier, 50);
+eq("Example A — network fee £12.50, which IS 20% of the price", exA.fee, 12.50);
+eq("Example A — customer subtotal £62.50 ex VAT (his £60 kept only 16.7%)", exA.sub, 62.50);
+eq("Example A — HAF keeps exactly 20%", exA.fee / exA.sub * 100, 20);
 
-/* Example B — SWB, 100 mi, same-day, FREIGHT PLUS: 17.5% = £15.75, £105.75 */
+/* Example B — SWB, 100 mi, same-day, FREIGHT PLUS: 17.5% kept */
 var exB = customer(100, "swb", "sday", { account: "plus" });
-eq("Example B — SWB, 100 mi: transport £90", exB.carrier, 90);
-eq("Example B — Freight Plus network fee £15.75", exB.fee, 15.75);
-eq("Example B — customer subtotal £105.75 ex VAT", exB.sub, 105.75);
+eq("Example B — SWB, 100 mi: transport £90, unchanged", exB.carrier, 90);
+eq("Example B — Freight Plus network fee £19.09", exB.fee, 19.09);
+eq("Example B — customer subtotal £109.09 ex VAT", exB.sub, 109.09);
+eq("Example B — HAF keeps 17.5%", Math.round(exB.fee / exB.sub * 1000) / 10, 17.5);
 
-/* Example C — LWB, 100 mi, scheduled, FREIGHT PRO: 15% = £16.50, £126.50 */
+/* Example C — LWB, 100 mi, scheduled, FREIGHT PRO: 15% kept */
 var exC = customer(100, "lwb", "flex", { account: "pro" });
-eq("Example C — LWB, 100 mi, scheduled: transport £110", exC.carrier, 110);
-eq("Example C — Freight Pro network fee £16.50", exC.fee, 16.50);
-eq("Example C — customer subtotal £126.50 ex VAT", exC.sub, 126.50);
+eq("Example C — LWB, 100 mi, scheduled: transport £110, unchanged", exC.carrier, 110);
+eq("Example C — Freight Pro network fee £19.41", exC.fee, 19.41);
+eq("Example C — customer subtotal £129.41 ex VAT", exC.sub, 129.41);
+eq("Example C — HAF keeps 15% — the bottom of his paid band",
+   Math.round(exC.fee / exC.sub * 1000) / 10, 15);
 
 /* Examples D and E — Luton tail lift, 100 mi, urgent, Freight Free then Pro.
  * ⚠️ KNOWN DEVIATION, flagged to Brent rather than quietly reconciled. The
@@ -541,8 +564,9 @@ eq("VAT is 20% of the ex-VAT subtotal", vt.money.vatGbp, vt.money.customerExVatG
 eq("inc-VAT total adds up", vt.money.customerIncVatGbp,
    vt.money.customerExVatGbp + vt.money.vatGbp);
 ok("every quote carries a full audit record",
-   vt.version === "MATRIX-V5" && vt.money && vt.reasons && vt.inputs &&
-   vt.money.carrierTransportValueGbp != null && vt.money.networkFeeGbp != null);
+   vt.version === "MATRIX-V6" && vt.money && vt.reasons && vt.inputs && vt.lane &&
+   vt.money.carrierTransportValueGbp != null && vt.money.networkFeeGbp != null &&
+   vt.money.hafKeepsPctOfCustomer != null);
 
 console.log("\n" + (fail === 0 ? "ALL PASS" : "FAILURES") + " — " + pass + " passed, " + fail + " failed\n");
 process.exit(fail === 0 ? 0 : 1);
