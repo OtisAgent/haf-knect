@@ -3071,12 +3071,21 @@ async function pcDistReal(a,b){
     if(g.ok){
       const d=await g.json();
       if(d.ok)return{miles:Math.max(1,Math.round(d.miles)),mins:d.mins,exact:true,google:true,
-        from:{area:d.from},to:{area:d.to}};
+        basis:'GOOGLE_ROAD',from:{area:d.from},to:{area:d.to}};
     }
   }catch(e){}
-  /* 3) offline fallback: straight-line x1.25, or area table if lookup errored */
-  if(pa==='ERR'||pb==='ERR')return{miles:pcDist(a,b),exact:false,from:undefined,to:undefined};
-  return{miles:Math.max(1,Math.round(hav(pa,pb)*1.25)),exact:true,from:pa,to:pb};
+  /* 3) offline fallback: straight-line x1.25, or area table if lookup errored.
+     ⚠️ These are ESTIMATES and must never be stamped exact:true. A straight line
+     is a lie about the road wherever an estuary sits between two points — Hull
+     HU1 1AA to Grimsby DN31 1AA is 33.3 real road miles (measured on Google's
+     road network 2026-08-02) and the straight-line guess says 20. That is a
+     driver doing 33 miles paid for 20, and nobody gets an alarm. The trigger is
+     not a code change, it is this gateway being slow or throttled on an
+     otherwise ordinary day, so an honest flag is the only thing standing
+     between a hiccup and a bad job. Anything downstream that prices, pays or
+     dispatches on `miles` must check `exact` before it treats it as a road. */
+  if(pa==='ERR'||pb==='ERR')return{miles:pcDist(a,b),exact:false,basis:'ESTIMATED_AREA_TABLE',from:undefined,to:undefined};
+  return{miles:Math.max(1,Math.round(hav(pa,pb)*1.25)),exact:false,basis:'ESTIMATED_STRAIGHT_LINE',from:pa,to:pb};
 }
 
 

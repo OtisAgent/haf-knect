@@ -263,8 +263,49 @@
     //     never fall below 15 — his bands, hit without inventing a number.
     //     The driver is unaffected: they are still paid the whole transport
     //     value, and the fee still sits on top of it rather than inside the
-    //     mileage rate. Set to "ADDED_TO_TRANSPORT_VALUE" to price the V5 way.
+    //     mileage rate.
+    //
+    // --- RULING, 2026-08-02: this is now LOCKED, not a preference ------------
+    //     Brent's pricing document defines the fee the other way round (his
+    //     §6 worked examples add the percentage to driver pay: driver £115 at
+    //     20% = £138 to the customer). Asked which definition wins, he handed
+    //     the decision back — "find the right solution - and make a choice
+    //     OTIS - you can fix it" — so it is made here, on his numbers:
+    //
+    //       · ADDED cannot express his own bands. Adding 20% to the transport
+    //         value leaves HAF keeping 16.7% of what the customer pays, so
+    //         scheduled/flexible and same-day — the two job types that carry
+    //         the bulk of the network — land BELOW his stated 20–30% band at
+    //         every vehicle and every distance. Timed scrapes the 20% line
+    //         with under a tenth of a point to spare and urgent is the only
+    //         one with real room. Nothing in the engine can lift the other
+    //         two back: the definition itself is what fails. (Read the same
+    //         way, his paid band's 10% marker would be 9.1% kept — under his
+    //         own stated minimum.) A rule that cannot be satisfied is not a
+    //         rule. All of this is measured, not asserted:
+    //         node admin/fee-basis-lock.test.js
+    //       · KEEP meets every band exactly and needs no invented number.
+    //       · The driver is paid identically either way (proved in
+    //         fee-basis-lock.test.js), so the choice costs the network
+    //         nothing — it is purely what HAF retains.
+    //       · The cost of the ruling is honest and small: his three §6 worked
+    //         examples rise ~4% (£60→£62.50, £105.75→£109.09, £126.50→
+    //         £129.41). The document's arithmetic is what changes, not the
+    //         bands he wrote.
+    //
+    //     ADDED_TO_TRANSPORT_VALUE is deliberately left working so the
+    //     counterfactual can be TESTED rather than argued — the lock suite
+    //     runs it and shows the bands failing. It is not a supported setting:
+    //     changing this line breaks fee-basis-lock.test.js on purpose.
     feeBasis: "SHARE_OF_CUSTOMER_PRICE",
+    // The bands the ruling has to satisfy, kept as data so the guard below and
+    // the lock suite check the SAME numbers Brent stated, not a copy of them.
+    feeBasisRuling: {
+      lockedOn: "2026-08-02",
+      lockedBy: "Brent — decision delegated to Otis",
+      freeAccountKeepBandPct: [20, 30],   // "the free accounts needs to be 20% - 30%"
+      paidAccountKeepFloorPct: 10         // "minimum 10% - 15% per job paid accounts"
+    },
 
     // --- HAF margin by job type: firm %, hard floor. Never breached by benefits.
     //     marginPct = the share of the customer price HAF keeps (see feeBasis).
