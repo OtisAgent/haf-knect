@@ -96,7 +96,10 @@ export async function onRequestPost({ request, env }) {
 
   const { url, h } = db(env);
   const stamp = new Date().toISOString();
-  const version = 'MATRIX_V5_' + stamp.slice(0, 19).replace(/[-:T]/g, '');
+  /* The label follows the framework being saved rather than a hard-coded V5,
+     which had every V7 save filed under the wrong name. */
+  const version = String((cfg.version || 'MATRIX-V5')).replace(/-/g, '_') + '_' +
+    stamp.slice(0, 19).replace(/[-:T]/g, '');
 
   try {
     /* 1. retire the current snapshot (history is kept, never overwritten) */
