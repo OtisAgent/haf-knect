@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="admin/lane-factors-v1.js"></script>
 <script src="uk-regions.js"></script>
 <style>
 /* ── TOKENS ─────────────────────────────────────────────────── */
@@ -2618,9 +2619,9 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
 
         <div class="g2">
           <div class="card">
-            <div class="ct">Driver reward rate <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">pence per mile, on top of the vehicle rate</span></div>
+            <div class="ct">Driver reward rate <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">pence per mile — paused, held at zero</span></div>
             <div id="px-driver"></div>
-            <div class="cr"><span class="ck" style="color:var(--mu)">Earned by PLNA tier, fleet tier or paid KNECT membership. The best one applies — they never add together. The network fee rides on top, so a better-paid driver never costs HAF money.</span></div>
+            <div class="cr"><span class="ck" style="color:var(--mu)">Paused for now: every driver is paid the same, whatever their tier. Tiers still earn priority matching, relay eligibility and their account benefits. When it is switched back on, HAF funds it out of its own share — the customer is always quoted the plain vehicle rate, so which driver takes a job can never change what they pay.</span></div>
           </div>
           <div class="card">
             <div class="ct">Account fee reduction <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">percentage points off the network fee</span></div>
@@ -2858,8 +2859,13 @@ const URG={flex:{n:'Flexible',fee:.20,flr:.15,svc:1},sday:{n:'Same-day',fee:.20,
 /* ── DRIVER REWARD RATE ──
    Pence per loaded mile ON TOP of the vehicle rate, set by the driver taking
    the job: PLNA tier, fleet tier, or a paid HAF KNECT membership. Highest wins,
-   never stacks. Because the network fee sits on top of the transport value, a
-   better-paid driver raises the customer rate and HAF is never out of pocket. */
+   never stacks.
+   FRAMEWORK-V7 (Brent 2026-08-02): held at £0.00/mile for now — "for now
+   offering more for a driver isn't right" — and if it is ever switched back on,
+   HAF funds it out of its own share rather than the customer's price:
+   "i'm happy to take less margin for HAF then make the customers pay more".
+   DRV_REWARD.on flips it; DRV_REWARD.floor is the least HAF may retain. */
+const DRV_REWARD={on:false,fundedBy:'HAF',floor:.08};
 const DRV_LEVEL={free:{n:'Free driver',up:0},member:{n:'Member driver',up:.10},pro:{n:'Pro driver',up:.25}};
 /* ── ACCOUNT NETWORK-FEE REDUCTION ──
    Percentage points off the job-type fee for the account posting the job —
@@ -2872,8 +2878,24 @@ window.HAF_ACCOUNT_LEVEL='lite';
 /* Quote options for THIS session. The driver level is deliberately absent: at
    quote time nobody has taken the job yet, so the customer sees the free-rate
    price and the rate is re-run against the real driver's level on allocation. */
-function quoteOpts(){return{account:window.HAF_ACCOUNT_LEVEL||'lite'};}
-/* Area-adaptive zone factor — return-load probability by destination postcode area */
+/* fromPc lets the lane adjustment see where the job STARTS, not just where it
+   ends — Sheffield→Manchester and Sheffield→Birmingham are different lanes. */
+function quoteOpts(fromPc){return{account:window.HAF_ACCOUNT_LEVEL||'lite',fromPc:fromPc||null};}
+/* ── LANE ADJUSTMENT (FRAMEWORK-V6) ──
+   The route's own small adjustment — how the road really drives, how likely a
+   paid load back is, how busy the lane is, and what drivers and customers say
+   about it. Loaded from /admin/lane-factors-v1.js so the customer quote and the
+   back office read the SAME rules from the SAME file and can never drift apart.
+   If it is unavailable the quote falls back to the destination-area grade
+   below, which is exactly how the site has always priced. */
+function laneAdjust(fromPc,toPc,miles,mins){
+  const L=window.HAFLaneFactors;
+  if(!L||!toPc)return{factor:zoneFactorFor(toPc),basis:'AREA_DEFAULT',reasons:[]};
+  try{return L.laneFactor(fromPc,toPc,{miles:miles,minutes:mins});}
+  catch(e){return{factor:zoneFactorFor(toPc),basis:'AREA_DEFAULT',reasons:[]};}
+}
+/* Area-adaptive zone factor — return-load probability by destination postcode area.
+   Still here as the bottom rung of the lane ladder and the offline fallback. */
 const ZONE_STRONG={M:1,B:1,LS:1,S:1,L:1,NG:1,LE:1,CV:1,BS:1,E:1,EC:1,N:1,NW:1,SE:1,SW:1,W:1,WC:1,G:1,EH:1,NE:1,SR:1,DN:1,WF:1,BD:1,HD:1,OL:1,SK:1,WA:1,WN:1,BL:1,PR:1,ST:1,WS:1,WV:1,DY:1,DE:1,SL:1,RG:1,MK:1,LU:1,WD:1,EN:1,HA:1,UB:1,TW:1,KT:1,SM:1,CR:1,BR:1,RM:1,IG:1};
 const ZONE_REMOTE={IV:1,KW:1,PH:1,HS:1,ZE:1,AB:1,DG:1,TD:1,TR:1,LD:1,SA:1};
 const ZONE_LIMITED={LL:1,SY:1,EX:1,TQ:1,PL:1,DT:1,TA:1,LN:1,NR:1,IP:1,CT:1,TN:1,BN:1,PO:1,CA:1,LA:1,FY:1,YO:1,HU:1,CO:1,CM:1};
@@ -2925,6 +2947,12 @@ function hafApplyPricingConfig(cfg){
       if(l&&typeof l.rewardGbpPerMile==='number')DRV_LEVEL[PX_DRV[c]].up=l.rewardGbpPerMile;});
     done.push('driver reward');
   }
+  if(cfg.driverReward){
+    if(typeof cfg.driverReward.enabled==='boolean')DRV_REWARD.on=cfg.driverReward.enabled;
+    if(cfg.driverReward.fundedBy)DRV_REWARD.fundedBy=cfg.driverReward.fundedBy==='CUSTOMER'?'CUSTOMER':'HAF';
+    if(typeof cfg.driverReward.minRetainedPctOfCustomer==='number')DRV_REWARD.floor=cfg.driverReward.minRetainedPctOfCustomer/100;
+    done.push('reward funding');
+  }
   if(cfg.accountLevels){
     Object.keys(PX_ACC).forEach(c=>{const a=cfg.accountLevels[c];
       if(a&&typeof a.feeReductionPts==='number')ACC_LEVEL[PX_ACC[c]].cut=a.feeReductionPts/100;});
@@ -2953,7 +2981,7 @@ window.HAF_PRICING_SOURCE='built-in';
          from outside rather than taken on trust */
       window.HAF_PRICING_APPLIED=hafApplyPricingConfig(d.config);
       window.HAF_PRICING_RATES={smallVan:VAN.small.drv,lutonTail:VAN.lutontl.drv,
-        lutonTailMin:VAN.lutontl.min,proRewardPerMile:DRV_LEVEL.pro.up,
+        lutonTailMin:VAN.lutontl.min,proRewardPerMile:DRV_REWARD.on?DRV_LEVEL.pro.up:0,rewardOn:DRV_REWARD.on,rewardFundedBy:DRV_REWARD.fundedBy,
         proAccountCutPts:ACC_LEVEL.pro.cut*100,urgentFeePct:URG.urg.fee*100,
         shortRunFullAtMiles:LOCAL_FULL_AT};
       window.HAF_PRICING_SOURCE='database';
@@ -2984,21 +3012,45 @@ function v3Price(miles,mins,vanKey,urgKey,toPc,opts){
   const o=opts||{};
   const dl=DRV_LEVEL[o.driver]||DRV_LEVEL.free;
   const al=ACC_LEVEL[o.account]||ACC_LEVEL.lite;
-  const rate=v.drv+dl.up;                           /* driver reward rides on the base rate */
-  const vshr=rate*REF_MPH;
+  /* FRAMEWORK-V7: the reward is what the DRIVER is paid; the customer is priced
+     on the plain vehicle rate, so which driver accepts a job never moves the
+     quote. Held at zero today (DRV_REWARD.on === false). */
+  const reward=DRV_REWARD.on?dl.up:0;
+  const rate=v.drv+reward;                          /* what the driver is paid per mile */
   const hours=(mins&&mins>0?mins:miles/32*60)/60;
-  const distCost=miles*rate, timeCost=hours*vshr;
-  const routeBase=Math.max(distCost,timeCost);
-  const mult=Math.min(u.svc*zoneFactorFor(toPc),1.40);
-  const mileageValue=routeBase*mult;
-  const floor=minTransportValue(v,miles);
+  const lane=laneAdjust(o.fromPc,toPc,miles,mins);
+  const mult=Math.min(u.svc*lane.factor,1.40);
+  /* The lane lifts the vehicle minimum too, or a hard lane that happens to be
+     short would price the same as an easy one — the minimum would swallow the
+     whole adjustment. */
+  const floor=minTransportValue(v,miles)*lane.factor;
   const p2=n=>Math.round((n+Number.EPSILON)*100)/100;
-  const carrier=p2(Math.max(mileageValue,floor));   /* 1. Carrier Transport Value */
+  const transportAt=r=>{const rb=Math.max(miles*r,hours*r*REF_MPH);return p2(Math.max(rb*mult,floor));};
+  let carrier=transportAt(rate);                    /* 1. Carrier Transport Value, driver's rate */
+  const carrierFree=transportAt(v.drv);             /*    the same job at the plain vehicle rate */
+  const distCost=miles*rate, timeCost=hours*rate*REF_MPH;
   const feePct=Math.max(u.fee-al.cut,u.flr);        /*    fee after the account reduction, floor held */
-  const fee=p2(carrier*feePct);                     /* 2. HAF Network Fee         */
-  const sub=p2(carrier+fee);                        /* 3. Customer price, ex VAT  */
-  return{sub,carrier,fee,feePct,driverPay:carrier,floor,onMinimum:carrier===floor,
-         driverRate:p2(rate),driverLevel:dl.n,driverRewardPerMile:dl.up,
+  /* ── WHAT THE PERCENTAGE MEANS (FRAMEWORK-V6) ──
+     It is the share of the customer price HAF KEEPS, so the customer price is
+     the transport value grossed up. That is the only reading under which
+     Brent's own bands — 20–30% free accounts, never below 15% paid — are true.
+     The driver is still paid the whole transport value and the fee still sits
+     on top of it; only the meaning of the number changed. */
+  /* V7: priced on the free-driver value when HAF funds the reward, so two
+     drivers on two tiers quote one price. */
+  const basis=DRV_REWARD.fundedBy==='HAF'?carrierFree:carrier;
+  const sub=p2(basis/(1-Math.min(feePct,.95)));     /* 3. Customer price, ex VAT  */
+  /* HAF funds the reward down to its floor share and no further — past that it
+     is trimmed and flagged, and the customer price still does not move. */
+  let rewardGbp=p2(Math.max(0,carrier-carrierFree)),rewardTrimmed=0;
+  if(DRV_REWARD.fundedBy==='HAF'&&rewardGbp>0){
+    const afford=p2(sub-sub*DRV_REWARD.floor-carrierFree);
+    if(afford<rewardGbp){rewardTrimmed=p2(rewardGbp-Math.max(0,afford));rewardGbp=p2(Math.max(0,afford));carrier=p2(carrierFree+rewardGbp);}
+  }
+  const fee=p2(sub-carrier);                        /* 2. HAF Network Fee         */
+  return{sub,carrier,fee,feePct,lane,driverPay:carrier,floor,onMinimum:carrier===p2(floor),
+         carrierFree,rewardGbp,rewardTrimmed,rewardFundedBy:DRV_REWARD.fundedBy,
+         driverRate:p2(rate),driverLevel:dl.n,driverRewardPerMile:reward,
          accountLevel:al.n,feeCutPts:p2((u.fee-feePct)*100),
          pool:p2(sub*NET_POOL),timeWins:timeCost>distCost,miles,hours};
 }
@@ -3175,7 +3227,7 @@ async function calcLivePrice(){
     hint.style.display='';priced.style.display='none';return;
   }
   const miles=r.miles;
-  const p=v3Price(miles,r.mins,selVanKey,'sday',to,quoteOpts());
+  const p=v3Price(miles,r.mins,selVanKey,'sday',to,quoteOpts(fr));
   const lo=Math.round(p.sub*.9),hi=Math.round(p.sub*1.1);
   const fa=r.from&&r.from.area?(r.google?r.from.area:r.from.area+' ('+fr+')'):fr;
   const ta=r.to&&r.to.area?(r.google?r.to.area:r.to.area+' ('+to+')'):to;
@@ -3377,7 +3429,7 @@ async function fqCalcPrice(){
   const v=VAN[vk]||VAN.lwb;
   const u=URG[uk]||URG.flex;
   const r=await pcDistReal(fr,to);
-  const p=v3Price(r.miles,r.mins,vk,uk,to,quoteOpts());
+  const p=v3Price(r.miles,r.mins,vk,uk,to,quoteOpts(fr));
   return{lo:Math.round(p.sub*.9),hi:Math.round(p.sub*1.1),miles:r.miles,v,u,fr,to};
 }
 async function fqShowPrice(){
@@ -3434,7 +3486,7 @@ async function hpEstimate(){
   const v=VAN[vk];
   const r=await pcDistReal(fr,to);
   const miles=r.miles;
-  const p=v3Price(miles,r.mins,vk,'sday',to,quoteOpts());
+  const p=v3Price(miles,r.mins,vk,'sday',to,quoteOpts(fr));
   const lo=Math.round(p.sub*.9),hi=Math.round(p.sub*1.1);
   document.getElementById('hp-van-rec').textContent=v.n+' — HAF recommended';
   document.getElementById('hp-pr-range').textContent='£'+lo+'–£'+hi;

@@ -489,7 +489,8 @@ window.pmOpen=function(ref){
   /* pool split intentionally NOT shown here — trial pooling lives only in the owner pools card */
   $('pm-body').innerHTML=
     '<div class="pm-grid">'+
-    '<div class="pm-field"><label>Driver pay</label><b>'+money(r.money.driverPayGbp)+'</b> at £'+r.rates.rewardedBaseRate.toFixed(2)+'/mi'+(r.rates.driverRewardGbpPerMile>0?' ('+esc(r.rates.driverLevelName)+', +£'+r.rates.driverRewardGbpPerMile.toFixed(2)+'/mi = '+money(r.money.driverRewardGbp)+' on this job)':' (free rate)')+'</div>'+
+    '<div class="pm-field"><label>Driver pay</label><b>'+money(r.money.driverPayGbp)+'</b> at £'+r.rates.rewardedBaseRate.toFixed(2)+'/mi'+(r.rates.driverRewardGbpPerMile>0?' ('+esc(r.rates.driverLevelName)+', +£'+r.rates.driverRewardGbpPerMile.toFixed(2)+'/mi = '+money(r.money.driverRewardGbp)+' on this job, paid by HAF'+(r.money.driverRewardTrimmedGbp>0?', trimmed by '+money(r.money.driverRewardTrimmedGbp)+' to hold HAF\'s floor':'')+')':' — every driver is paid the same rate; the reward is paused')+'</div>'+
+    '<div class="pm-field"><label>Who the driver\'s tier costs</label>'+(r.money.driverRewardGbp>0?'HAF — the customer is quoted the plain vehicle rate either way':'Nobody — this price is the same whichever driver takes the job')+'</div>'+
     '<div class="pm-field"><label>Customer price</label><b>'+money(r.money.customerIncVatGbp)+'</b> inc VAT ('+money(r.money.customerExVatGbp)+' + VAT)</div>'+
     '<div class="pm-field"><label>HAF network fee</label>'+r.money.hafMarginPct+'% = '+money(r.money.hafMarginGbp)+' (floor '+(jt.floorPct||0)+'%)</div>'+
     '<div class="pm-field"><label>Posting account</label>'+esc(r.account.levelName)+(r.account.feeReductionAppliedPts>0?' — fee −'+r.account.feeReductionAppliedPts+' pts'+(r.account.heldAtFloor?' (held at the floor; '+r.account.feeReductionRequestedPts+' pts asked for)':''):' — no reduction')+'</div>'+
