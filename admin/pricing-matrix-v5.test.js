@@ -64,11 +64,12 @@ var PAIRS = [
   ["lwb",     "LWB_VAN"],
   ["xlwb",    "XLWB_VAN"],
   ["luton",   "LUTON"],
+  ["lutonc",  "LUTON_CURTAIN"],
   ["lutontl", "LUTON_TAIL"]
 ];
 
 /* ==========================================================================
- * 1. The approved vehicle matrix (§2) — seven, and only seven
+ * 1. The approved vehicle matrix (§2) — eight, and only eight
  * ======================================================================== */
 section("1. Approved vehicle matrix");
 
@@ -78,12 +79,13 @@ var WANT = [
   ["MWB_VAN",    "MWB",               1.00, 60],
   ["LWB_VAN",    "LWB",               1.10, 65],
   ["XLWB_VAN",   "XLWB",              1.20, 70],
-  ["LUTON",      "Luton",             1.30, 75],
-  ["LUTON_TAIL", "Luton — Tail Lift", 1.40, 80]
+  ["LUTON",          "Luton — Box",          1.30, 75],
+  ["LUTON_CURTAIN", "Luton — Curtain Side", 1.30, 75],
+  ["LUTON_TAIL",    "Luton — Tail Lift",    1.40, 80]
 ];
-ok("back office lists exactly 7 vehicles", M.config.vehicles.length === 7,
+ok("back office lists exactly 8 vehicles", M.config.vehicles.length === 8,
    "found " + M.config.vehicles.length);
-ok("customer engine lists exactly 7 vehicles", Object.keys(CUST.VAN).length === 7,
+ok("customer engine lists exactly 8 vehicles", Object.keys(CUST.VAN).length === 8,
    "found " + Object.keys(CUST.VAN).length);
 WANT.forEach(function (w, i) {
   var v = M.config.vehicles[i];
@@ -98,9 +100,9 @@ PAIRS.forEach(function (p, i) {
      JSON.stringify(cv) + " vs " + bv.baseRate + "/" + bv.minTransportValue);
 });
 eq("rate ladder starts at 80p", M.config.vehicles[0].baseRate, 0.80);
-eq("rate ladder ends at £1.40", M.config.vehicles[6].baseRate, 1.40);
+eq("rate ladder ends at £1.40", M.config.vehicles[7].baseRate, 1.40);
 eq("minimum ladder starts at £50", M.config.vehicles[0].minTransportValue, 50);
-eq("minimum ladder ends at £80", M.config.vehicles[6].minTransportValue, 80);
+eq("minimum ladder ends at £80", M.config.vehicles[7].minTransportValue, 80);
 ok("cars and motorcycles are present but inactive and unpriced",
    M.config.inactiveVehicles.length === 2 &&
    M.config.inactiveVehicles.every(function (v) { return v.active === false && v.baseRate === null; }));
@@ -112,13 +114,17 @@ section("2. Removal test — prohibited vehicle types");
 
 var BANNED = ["artic", "articulated", "hgv", "flatbed", "tractor unit",
               "rigid", "7.5 tonne", "7.5t", "18 tonne", "26 tonne",
-              "44 tonne", "specialist haulage", "curtain", "fridge"];
+              "44 tonne", "specialist haulage", "fridge",
+              /* a curtain-side LUTON is approved (Brent 2026-08-02); a curtain-side
+                 TRAILER is still banned, so ban the trailer, not the word */
+              "curtainsider", "curtain-sider", "curtain sider",
+              "curtain side trailer", "curtain-side trailer", "curtain trailer"];
 var SURFACES = ["index.html", "demo/index.html", "admin/index.html",
                 "admin/pricing-matrix-v3.js"];
 SURFACES.forEach(function (f) {
   var body = fs.readFileSync(path.join(__dirname, "..", f), "utf8").toLowerCase();
   /* strip the comment that lists the banned words so the ban itself isn't a hit */
-  body = body.replace(/no artic, flatbed, curtain, rigid,[\s\S]*?removal test[^)]*\)/g, "");
+  body = body.replace(/nothing above a luton exists here[\s\S]*?removal test[^)]*\)/g, "");
   var hits = BANNED.filter(function (w) { return body.indexOf(w) >= 0; });
   ok(f + " — no prohibited vehicle type", hits.length === 0, "found: " + hits.join(", "));
 });
@@ -140,10 +146,12 @@ ok("...and the minimum is not in play", b.onMinimum === false);
 
 /* the minimum must rise with the vehicle, at the same distance */
 var mins = PAIRS.map(function (p) { return customer(25, p[0], "sday").carrier; });
-ok("at 25 miles the floor rises with every vehicle size",
-   mins.every(function (v, i) { return i === 0 || v > mins[i - 1]; }), mins.join(" < "));
+ok("at 25 miles the floor never drops as the vehicle gets bigger",
+   mins.every(function (v, i) { return i === 0 || v >= mins[i - 1]; }), mins.join(" <= "));
+ok("box and curtain side share one floor — same payload, same price",
+   mins[5] === mins[6], mins[5] + " vs " + mins[6]);
 eq("Small Van floor at 25 mi", mins[0], 50);
-eq("Luton tail lift floor at 25 mi", mins[6], 80);
+eq("Luton tail lift floor at 25 mi", mins[7], 80);
 
 /* ==========================================================================
  * 4. Short local runs — handling work, 20–30% below the minimum
@@ -335,9 +343,9 @@ ok("...HAF still holds its floor",
  * ======================================================================== */
 section("8b. Driver base-rate uplift");
 
-eq("Free driver adds nothing",   M.config.driverLevels.FREE.upliftGbpPerMile,   0.00);
-eq("Member driver adds £0.10",   M.config.driverLevels.MEMBER.upliftGbpPerMile, 0.10);
-eq("Pro driver adds £0.25",      M.config.driverLevels.PRO.upliftGbpPerMile,    0.25);
+eq("Free driver adds nothing",   M.config.driverLevels.FREE.rewardGbpPerMile,   0.00);
+eq("Member driver adds £0.10",   M.config.driverLevels.MEMBER.rewardGbpPerMile, 0.10);
+eq("Pro driver adds £0.25",      M.config.driverLevels.PRO.rewardGbpPerMile,    0.25);
 
 /* The uplift lands on the rate, for every vehicle, at both member rungs. */
 [["MEMBER", 0.10], ["PRO", 0.25]].forEach(function (lv) {
@@ -345,7 +353,7 @@ eq("Pro driver adds £0.25",      M.config.driverLevels.PRO.upliftGbpPerMile,   
   M.config.vehicles.forEach(function (v) {
     var r = M.price({ miles: 100, vehicleCode: v.code, jobTypeCode: "STD_SAMEDAY",
                       plnaTier: lv[0] === "MEMBER" ? "PLUS" : "PRO" });
-    if (Math.abs(r.rates.upliftedBaseRate - (v.baseRate + lv[1])) > 0.001) bad++;
+    if (Math.abs(r.rates.rewardedBaseRate - (v.baseRate + lv[1])) > 0.001) bad++;
   });
   ok(lv[0] + " rate = vehicle rate + £" + lv[1].toFixed(2) + " on all 7 vehicles", bad === 0);
 });
@@ -353,26 +361,26 @@ eq("Pro driver adds £0.25",      M.config.driverLevels.PRO.upliftGbpPerMile,   
 /* A paid KNECT membership on the driver side earns the Member rate. */
 var dKnect = backoffice(100, "LWB_VAN", "STD_SAMEDAY", { driverIsKnectMember: true });
 eq("a paid HAF KNECT member driver earns the member rate",
-   dKnect.rates.driverUpliftGbpPerMile, 0.10);
+   dKnect.rates.driverRewardGbpPerMile, 0.10);
 
 /* Highest wins, never stacks — the rule that stops benefits compounding. */
 var stacked = backoffice(100, "LWB_VAN", "STD_SAMEDAY",
   { plnaTier: "PRO", driverIsKnectMember: true, driverFleetTier: "FLEET_PRO" });
 eq("PLNA Pro + KNECT member + Fleet Pro is still £0.25, never £0.45",
-   stacked.rates.driverUpliftGbpPerMile, 0.25);
+   stacked.rates.driverRewardGbpPerMile, 0.25);
 ok("...and all three claims are on the audit record",
    stacked.rates.levelClaims.length === 3, JSON.stringify(stacked.rates.levelClaims));
 
 /* Fleet accounts: the fleet's level sets its drivers' rate — "same again". */
 eq("Fleet Lite drivers sit on the free rate",
    backoffice(100, "LWB_VAN", "STD_SAMEDAY", { driverFleetTier: "FLEET_LITE" })
-     .rates.driverUpliftGbpPerMile, 0);
+     .rates.driverRewardGbpPerMile, 0);
 eq("Fleet Middle drivers sit on the member rate",
    backoffice(100, "LWB_VAN", "STD_SAMEDAY", { driverFleetTier: "FLEET_MIDDLE" })
-     .rates.driverUpliftGbpPerMile, 0.10);
+     .rates.driverRewardGbpPerMile, 0.10);
 eq("Fleet Pro drivers sit on the Pro rate",
    backoffice(100, "LWB_VAN", "STD_SAMEDAY", { driverFleetTier: "FLEET_PRO" })
-     .rates.driverUpliftGbpPerMile, 0.25);
+     .rates.driverRewardGbpPerMile, 0.25);
 
 /* The uplift is never taken out of HAF's fee — it cannot be "withheld". */
 var uplifted = 0;
@@ -508,9 +516,9 @@ ok("the customer engine carries both ladders",
 
 /* The two ladders must be identical on both sides — one source, not two. */
 eq("customer engine member uplift matches the back office",
-   CUST.DRV_LEVEL.member.up, M.config.driverLevels.MEMBER.upliftGbpPerMile);
+   CUST.DRV_LEVEL.member.up, M.config.driverLevels.MEMBER.rewardGbpPerMile);
 eq("customer engine pro uplift matches the back office",
-   CUST.DRV_LEVEL.pro.up, M.config.driverLevels.PRO.upliftGbpPerMile);
+   CUST.DRV_LEVEL.pro.up, M.config.driverLevels.PRO.rewardGbpPerMile);
 eq("customer engine plus reduction matches the back office",
    CUST.ACC_LEVEL.plus.cut * 100, M.config.accountLevels.PLUS.feeReductionPts);
 eq("customer engine pro reduction matches the back office",

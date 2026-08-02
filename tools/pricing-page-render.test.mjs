@@ -12,9 +12,18 @@ const H = { apikey: KEY, Authorization: 'Bearer ' + KEY };
 const srv = http.createServer(async (req, res) => {
   const u = new URL(req.url, 'http://x');
   if (u.pathname === '/api/pricing') {                     /* the real function's job */
-    const r = await fetch(SUPA + '?scope=eq.pricing_matrix&is_active=is.true&select=code,value,updated_at&limit=1', { headers: H });
-    const d = await r.json();
-    const rec = d[0];
+    /* Normally we read the live row. When the raw database key is not in this
+       container, pass the row in with SNAPSHOT=<file> — the same bytes read back
+       out of the database — so the page is still rendered against real data
+       rather than a hand-written fixture. */
+    let rec;
+    if (process.env.SNAPSHOT) {
+      rec = JSON.parse(fs.readFileSync(process.env.SNAPSHOT, 'utf8'))[0];
+    } else {
+      const r = await fetch(SUPA + '?scope=eq.pricing_matrix&is_active=is.true&select=code,value,updated_at&limit=1', { headers: H });
+      const d = await r.json();
+      rec = d[0];
+    }
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ ok: true, version: rec.value.version, effectiveFrom: rec.value.effectiveFrom,
       lockedBy: rec.value.lockedBy, updatedAt: rec.updated_at, config: rec.value.config, rates: [] }));
@@ -66,8 +75,8 @@ for (const [name, vp] of [['desktop', { width: 1440, height: 1000 }], ['phone', 
   r.baseline = baseline;
   console.log('\n' + name + ' (' + vp.width + 'px)  shell baseline overflow: ' + baseline + 'px');
   ok('the page opens from the owner menu', r.visible);
-  ok('seven vehicles, rate and minimum each (14 boxes)', r.vehicleRows === 14);
-  ok('three driver uplift boxes', r.driverRows === 3);
+  ok('eight vehicles, rate and minimum each (16 boxes)', r.vehicleRows === 16);
+  ok('three driver reward boxes', r.driverRows === 3);
   ok('three account reduction boxes', r.accRows === 3);
   ok('five job types, fee and floor each (10 boxes)', r.jobRows === 10);
   ok('it says the rates came from the database', /database/i.test(r.meta) && r.source === 'database');

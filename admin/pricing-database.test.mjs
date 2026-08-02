@@ -54,7 +54,7 @@ ok('the locked framework itself passes', validate(good()).length === 0);
   ok('anything other than the seven vehicles is refused', validate(c).length > 0);
 }
 {
-  const c = good(); c.driverLevels.PRO.upliftGbpPerMile = 0.05;
+  const c = good(); c.driverLevels.PRO.rewardGbpPerMile = 0.05;
   ok('a pro driver paid less than a member is refused', validate(c).length > 0);
 }
 {
@@ -96,11 +96,11 @@ else {
   });
   ok('every rate and minimum in the database matches the engine to the penny', ladderOk);
 
-  const drv = await get('scope=eq.driver_uplift&select=code,value');
-  ok('the driver uplift is 0p / 10p / 25p in the database',
-     near(drv.find(r => r.code === 'FREE').value.upliftGbpPerMile, 0) &&
-     near(drv.find(r => r.code === 'MEMBER').value.upliftGbpPerMile, 0.10) &&
-     near(drv.find(r => r.code === 'PRO').value.upliftGbpPerMile, 0.25));
+  const drv = await get('scope=eq.driver_reward&select=code,value');
+  ok('the driver reward is 0p / 10p / 25p in the database',
+     near(drv.find(r => r.code === 'FREE').value.rewardGbpPerMile, 0) &&
+     near(drv.find(r => r.code === 'MEMBER').value.rewardGbpPerMile, 0.10) &&
+     near(drv.find(r => r.code === 'PRO').value.rewardGbpPerMile, 0.25));
 
   const acc = await get('scope=eq.account_fee_reduction&select=code,value');
   ok("the account reduction is Brent's 0 / 2.5 / 5 points in the database",

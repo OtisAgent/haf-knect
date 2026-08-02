@@ -6,7 +6,7 @@
  * own private island. Rows are written under NEW scopes only:
  *
  *   vehicle_rate           7 rows   the van ladder: rate + minimum
- *   driver_uplift          3 rows   pence-per-mile on the driver's base rate
+ *   driver_reward          3 rows   pence-per-mile on the driver's base rate
  *   account_fee_reduction  3 rows   percentage POINTS off the network fee
  *   job_type_fee           5 rows   fee % and the floor it may never breach
  *   local_handling         1 row    the short-run taper
@@ -48,8 +48,8 @@ c.vehicles.forEach((v, i) =>
       { baseRateGbpPerMile: v.baseRate, minTransportValueGbp: v.minTransportValue }, i + 1));
 
 ['FREE', 'MEMBER', 'PRO'].forEach((k, i) =>
-  add('driver_uplift', k, c.driverLevels[k].name,
-      { upliftGbpPerMile: c.driverLevels[k].upliftGbpPerMile, rank: c.driverLevels[k].rank,
+  add('driver_reward', k, c.driverLevels[k].name,
+      { rewardGbpPerMile: c.driverLevels[k].rewardGbpPerMile, rank: c.driverLevels[k].rank,
         note: 'Added to the vehicle base rate. Highest wins, never stacks.' }, i + 1));
 
 ['LITE', 'PLUS', 'PRO'].forEach((k, i) =>
@@ -80,13 +80,26 @@ add('pricing_matrix', c.version.replace(/-/g, '_'), 'HAF KNECT Pricing Framework
 
 const SCOPES = [...new Set(rows.map(r => r.scope))];
 
+/* Scopes this seeder used to write and no longer does. They are cleared on every
+   run so a rename never leaves stale rows behind for the API to pick up.
+   driver_uplift → driver_reward (Brent 2026-08-02: different wording). */
+const RETIRED_SCOPES = ['driver_uplift'];
+
+/* --emit writes the rows to stdout as JSON instead of touching the database, so
+   the same rows can be pushed through the credential vault when the raw key is
+   not available in this container. Nothing is written in emit mode. */
+if (process.argv.includes('--emit')) {
+  console.log(JSON.stringify({ scopes: SCOPES, retired: RETIRED_SCOPES, rows }));
+  process.exit(0);
+}
+
 /* ---- write ----------------------------------------------------------------- */
 async function go() {
   console.log('Target : ' + SUPA);
   console.log('Scopes : ' + SCOPES.join(', '));
   console.log('Rows   : ' + rows.length + '\n');
 
-  for (const scope of SCOPES) {
+  for (const scope of [...SCOPES, ...RETIRED_SCOPES]) {
     const d = await fetch(REST + '?scope=eq.' + encodeURIComponent(scope), { method: 'DELETE', headers: H });
     if (!d.ok && d.status !== 404) throw new Error('clear ' + scope + ' failed: ' + d.status + ' ' + await d.text());
   }

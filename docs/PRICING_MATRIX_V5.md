@@ -1,6 +1,6 @@
 # HAF KNECT — Pricing Matrix V5
 
-**Status:** built and on preview, awaiting Brent's yes.
+**Status:** approved by Brent 2026-08-02 and taken live.
 **Effective from:** 2026-07-31 · **Engine version string:** `MATRIX-V5`
 **Preview:** https://pricing-matrix-v5.knect-demo.pages.dev/
 **Source:** `admin/pricing-matrix-v3.js` (back office) + the quote block in `index.html` (customer).
@@ -24,7 +24,7 @@ VAT is 20% on the customer price. Everything below is quoted **ex VAT**.
 
 ---
 
-## 2. The vehicle ladder — the only seven vehicles on this network
+## 2. The vehicle ladder — the only eight vehicles on this network
 
 | Vehicle | Driver rate (free level) | Minimum transport value |
 |---|---|---|
@@ -33,11 +33,20 @@ VAT is 20% on the customer price. Everything below is quoted **ex VAT**.
 | MWB | £1.00/mi | £60 |
 | LWB | £1.10/mi | £65 |
 | XLWB | £1.20/mi | £70 |
-| Luton | £1.30/mi | £75 |
+| Luton — box | £1.30/mi | £75 |
+| Luton — curtain side | £1.30/mi | £75 |
 | Luton — tail lift | £1.40/mi | £80 |
 
-No artic, flatbed, curtain, fridge, rigid, tractor unit, 7.5t or any HGV class,
-anywhere. A removal test in the suite fails the build if one reappears.
+Brent, 2026-08-02: **"Lutons - tail lift + box + curtain side"**. Those three
+bodies are the top of the ladder and the only place the word "curtain" is
+allowed — a curtain-side *Luton* is approved, anything on a trailer is not.
+
+Box and curtain side carry the same payload, so they price the same. The live
+rate card has always quoted the two identically, so this changes no price. If
+Brent wants curtain side to earn more, it is one edit on the Pricing Engine page.
+
+No artic, flatbed, fridge, rigid, tractor unit, 7.5t, trailer work or any HGV
+class, anywhere. A removal test in the suite fails the build if one reappears.
 Cars and motorcycles exist in the back office but are **inactive and unpriced**.
 
 **Minimums step up by VEHICLE, never by distance.** One ladder, not two.
@@ -54,29 +63,32 @@ and climbs back to full by 25 miles:
 - 25 miles and beyond → **the full minimum**
 
 The curve is continuous, so **no job is ever quoted less than a shorter one** —
-that is tested across all seven vehicles at every mile to 300.
+that is tested across all eight vehicles at every mile to 300.
 
 Small Van worked example: 0 mi £35 · 3 mi £36 · 8 mi £37.67 · 15 mi £40 ·
 20 mi £45 · 25 mi £50.
 
 ---
 
-## 4. Driver base-rate uplift — the driver side
+## 4. Driver reward rate — the driver side
 
 Pence per loaded mile **added to the vehicle base rate**.
 
-| Level | Uplift | Earned by |
+Brent, 2026-08-02, on the clash with §7: **"using different wording then uplift
+if needed"**. The money is unchanged; the name is not. It is the **driver reward
+rate** on every surface — page, back office, database scope and audit record.
+
+| Level | Reward | Earned by |
 |---|---|---|
 | Free driver | +£0.00/mi | PLNA Free · Fleet Lite |
 | Member driver | +£0.10/mi | PLNA Plus · Fleet Middle · a paid HAF KNECT membership |
 | Pro driver | +£0.25/mi | PLNA Pro · Fleet Pro |
 
-⚠️ **This supersedes §7 of the 31 July framework**, which says "PLNA tier must
-not change the customer-facing vehicle mileage rate". Brent instructed the uplift
-in chat *after* handing that document over — "add driver base rate uplift per
-account or HAF KNECT Paid members" — and earlier the same day wrote that the
-customer rate "depends on the driver taking the job". Newest instruction wins and
-the old line is marked superseded rather than dropped. **It needs his yes.**
+✅ **This supersedes §7 of the 31 July framework**, which says "PLNA tier must
+not change the customer-facing vehicle mileage rate". Brent was shown that clash
+in writing on 2026-08-02 and chose to keep the driver's extra pence per mile
+under a different name rather than drop it. Newest instruction wins and the old
+line is marked superseded rather than quietly dropped.
 
 **Highest wins, never stacks.** A driver who is PLNA Pro *and* a KNECT member
 *and* on a Fleet Pro account is +£0.25, not +£0.45. All claims are recorded on
@@ -84,8 +96,8 @@ the audit record so the decision is always explainable.
 
 **Why this never costs HAF money.** The fee sits on top of the transport value,
 so a higher driver rate raises the transport value and the fee rides up with it.
-Tested across 7 vehicles × 28 distances: HAF's fee never falls when the driver's
-level rises. This is the change from V4, where the uplift was a percentage
+Tested across all eight vehicles × 28 distances: HAF's fee never falls when the
+driver's level rises. This is the change from V4, where it was a percentage
 skimmed out of HAF's fee and could be *withheld* at the floor — a driver's
 benefit can no longer be cancelled by the margin.
 
@@ -177,11 +189,10 @@ rung as the entry paid tier. One word to move.
 
 ---
 
-## 7. What still needs Brent — five open items, none of them invented
+## 7. What still needs Brent — four open items, none of them invented
 
-1. **The driver base-rate uplift itself.** His chat instruction and §7 of his own
-   document say opposite things (§4 above). Built to the chat instruction because
-   it is newer, but this is a decision, not a detail.
+~~1. **The driver reward rate itself.**~~ **CLOSED 2026-08-02.** Brent kept it and
+   renamed it: "using different wording then uplift if needed". §4 above.
 2. **"Fleet account same again"** — does a fleet's tier reduce the network fee
    (his chat paragraph) or set its drivers' rate (his document §7)? Built the
    document's way.
@@ -205,7 +216,7 @@ be quoted.
 - Vehicle ladder, minimums, short-run band, fee-on-top, freight reductions:
   **"HAF KNECT Pricing Matrix and Network Fee Framework", Brent, 2026-07-31** —
   §2, §4, §5, §7, §8. This is the commercial source of truth.
-- Driver uplift £0.10 / £0.25: **PRICING_ENGINE_CONSTANTS §5.1**, approved
+- Driver reward £0.10 / £0.25: **PRICING_ENGINE_CONSTANTS §5.1**, approved
   2026-07-18 — "Member and Pro derive automatically as Free + £0.10 and
   Free + £0.25" — applied on Brent's 31 July chat instruction.
 - Job-type floors, zone factor, hindrance, fuel marker, pools:
@@ -215,7 +226,7 @@ be quoted.
 - Account reduction −4 / −7 (PRICING_ENGINE_CONSTANTS §5.5, 18 Jul) → now
   −2.5 / −5 per the 31 July framework §5.
 - The V4 percentage driver uplift skimmed out of HAF's fee → now a pence-per-mile
-  uplift on the base rate.
+  reward on the base rate.
 - §7's "PLNA tier must not change the customer-facing vehicle mileage rate" →
   overtaken by Brent's 31 July chat instruction. **CONFIRMED by him the same
   day: "that's correct, add exactly that".** The customer rate follows the
@@ -239,7 +250,7 @@ Brent confirmed both levers in chat on 31 July:
 
 - **"2.5 - 5 is correct"** — the account network-fee reduction is −0 / −2.5 / −5
   percentage points. The −4 / −7 pair is dead.
-- **"that's correct, add exactly that"** — the driver base-rate uplift stands at
+- **"that's correct, add exactly that"** — the driver reward rate stands at
   +£0.00 / +£0.10 / +£0.25 per mile, overriding §7 of his own document.
 
 **The framework now lives in the database.** It is stored in `public.tier_config`
@@ -249,7 +260,7 @@ and plan record — under seven new scopes:
 | Scope | Rows | What it holds |
 |---|---|---|
 | `vehicle_rate` | 7 | the van ladder: £/mile and the vehicle minimum |
-| `driver_uplift` | 3 | pence per mile by driver level |
+| `driver_reward` | 3 | pence per mile by driver level |
 | `account_fee_reduction` | 3 | percentage points off the network fee |
 | `job_type_fee` | 5 | the fee % and the floor it may never breach |
 | `local_handling` | 1 | the short-run taper |
@@ -262,7 +273,7 @@ database is unreachable the built-in rates stand and quoting carries on.
 
 **Brent can change any of it himself** from the new **Pricing Engine** page in
 his owner login (Overview → Pricing Engine, Super Admin only). Every rate,
-minimum, uplift, fee, floor and the short-run taper is editable, a test quote
+minimum, reward, fee, floor and the short-run taper is editable, a test quote
 re-prices as he types, and saving writes a NEW version through `/api/pricing`
 with his name and the date on it — the previous version is retired, never
 overwritten, so any change can be traced or put back.

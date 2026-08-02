@@ -5,7 +5,7 @@
 
    Store: public.tier_config in the HUB Supabase. The framework lives as one
    versioned snapshot under scope 'pricing_matrix'; the individual rates are
-   ALSO written out to the flat scopes (vehicle_rate, driver_uplift,
+   ALSO written out to the flat scopes (vehicle_rate, driver_reward,
    account_fee_reduction, job_type_fee, local_handling) so every other HAF
    system can read a single rate without parsing the whole framework.
 
@@ -34,7 +34,7 @@ const j = (o, s) => new Response(JSON.stringify(o), { status: s || 200, headers:
 const PUB_URL = 'https://jsdwvogsxlnczzbefwgp.supabase.co';
 const PUB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzZHd2b2dzeGxuY3p6YmVmd2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODgyMzYsImV4cCI6MjA5Njk2NDIzNn0.pxqM-Oh4f_3PlqCbKIKvcKZnNRUZ1ASKqqdNg78M_4M';
 
-const SCOPES = ['vehicle_rate', 'driver_uplift', 'account_fee_reduction',
+const SCOPES = ['vehicle_rate', 'driver_reward', 'account_fee_reduction',
                 'job_type_fee', 'local_handling', 'zone_factor'];
 
 function db(env) {
@@ -129,8 +129,8 @@ export async function onRequestPost({ request, env }) {
 function validate(c) {
   const p = [];
   const n = v => typeof v === 'number' && isFinite(v);
-  if (!Array.isArray(c.vehicles) || c.vehicles.length !== 7)
-    p.push('There must be exactly seven vehicles — small van through Luton tail lift.');
+  if (!Array.isArray(c.vehicles) || c.vehicles.length !== 8)
+    p.push('There must be exactly eight vehicles — small van through Luton tail lift.');
   else {
     let prevRate = 0, prevMin = 0;
     for (const v of c.vehicles) {
@@ -145,10 +145,10 @@ function validate(c) {
   if (c.driverLevels) {
     const l = c.driverLevels;
     for (const k of ['FREE', 'MEMBER', 'PRO'])
-      if (!l[k] || !n(l[k].upliftGbpPerMile) || l[k].upliftGbpPerMile < 0)
-        p.push('Driver uplift ' + k + ' must be zero or more.');
-    if (l.FREE && l.MEMBER && l.PRO && !(l.FREE.upliftGbpPerMile <= l.MEMBER.upliftGbpPerMile && l.MEMBER.upliftGbpPerMile <= l.PRO.upliftGbpPerMile))
-      p.push('The driver uplifts must rise: free, then member, then pro.');
+      if (!l[k] || !n(l[k].rewardGbpPerMile) || l[k].rewardGbpPerMile < 0)
+        p.push('Driver reward ' + k + ' must be zero or more.');
+    if (l.FREE && l.MEMBER && l.PRO && !(l.FREE.rewardGbpPerMile <= l.MEMBER.rewardGbpPerMile && l.MEMBER.rewardGbpPerMile <= l.PRO.rewardGbpPerMile))
+      p.push('The driver rewards must rise: free, then member, then pro.');
   }
   if (c.accountLevels) {
     for (const k of ['LITE', 'PLUS', 'PRO']) {
@@ -184,7 +184,7 @@ async function mirrorFlat(url, h, c) {
     add('vehicle_rate', v.code, v.name, { baseRateGbpPerMile: v.baseRate, minTransportValueGbp: v.minTransportValue }, i + 1));
   ['FREE', 'MEMBER', 'PRO'].forEach((k, i) => {
     const l = c.driverLevels && c.driverLevels[k]; if (!l) return;
-    add('driver_uplift', k, l.name, { upliftGbpPerMile: l.upliftGbpPerMile, rank: l.rank }, i + 1);
+    add('driver_reward', k, l.name, { rewardGbpPerMile: l.rewardGbpPerMile, rank: l.rank }, i + 1);
   });
   ['LITE', 'PLUS', 'PRO'].forEach((k, i) => {
     const a = c.accountLevels && c.accountLevels[k]; if (!a) return;

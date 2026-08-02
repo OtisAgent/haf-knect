@@ -463,6 +463,28 @@ textarea.fi2{resize:vertical;min-height:70px}
 .vp.sel{background:var(--or);border-color:var(--or);color:#0e1113}
 .vp-sub{font-size:.62rem;font-weight:400;color:var(--su);display:block}
 .vp.sel .vp-sub{color:rgba(14,17,19,.65)}
+/* A van that cannot take what the customer has told us — still choosable, but
+   plainly marked so nobody quotes a job the vehicle physically cannot carry. */
+.vp.toosmall{opacity:.42;border-style:dashed}
+.vp.toosmall:hover{opacity:.7}
+/* HAF's own suggestion, before the customer touches the van row */
+.vp.rec{border-color:var(--or);box-shadow:0 0 0 1px var(--or-g)}
+.van-lbl .van-hint{font-weight:500;letter-spacing:0;text-transform:none;color:var(--su)}
+/* ── LOAD PICKER (how heavy / how big) ── */
+.lp-tile{background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.55rem .5rem .5rem;cursor:pointer;transition:all .14s;flex:1;min-width:96px;text-align:center;line-height:1.3;display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.lp-tile:hover{border-color:var(--or)}
+.lp-tile.sel{background:var(--or-d);border-color:var(--or)}
+.lp-tile svg{width:38px;height:23px;flex-shrink:0;color:var(--su);stroke:currentColor;fill:none;stroke-width:1.6}
+.lp-tile.sel svg{color:var(--or)}
+.lp-tile svg .fill{fill:currentColor;stroke:none}
+.lp-tile-n{font-size:.74rem;font-weight:700;color:var(--mu)}
+.lp-tile.sel .lp-tile-n{color:var(--tx)}
+.lp-tile-s{font-size:.6rem;font-weight:400;color:var(--su)}
+@media(max-width:500px){.lp-tile{min-width:88px;padding:.45rem .35rem}.lp-tile svg{width:32px;height:20px}.lp-tile-n{font-size:.68rem}.lp-tile-s{font-size:.56rem}}
+/* The plain-English line under the pickers: what HAF worked out from the answers */
+.ld-note{font-size:.72rem;line-height:1.5;color:var(--mu);background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.5rem .7rem;margin:-.5rem 0 1rem}
+.ld-note strong{color:var(--tx);font-weight:700}
+.ld-note.warn{border-color:var(--or-g);background:var(--or-d)}
 .lp-box{border-radius:var(--rx);padding:.9rem 1.1rem;margin-bottom:.85rem;display:flex;align-items:flex-start;gap:.65rem;min-height:52px;transition:background .2s,border-color .2s}
 .lp-box.hint{background:var(--p2);border:1.5px dashed var(--ln)}
 .lp-box.priced{background:var(--or-d);border:1.5px solid var(--or-g)}
@@ -495,6 +517,14 @@ textarea.fi2{resize:vertical;min-height:70px}
 .oopt:hover,.oopt.sel{border-color:var(--or);background:var(--or-d);color:var(--or)}
 .oopt-sub{font-size:.7rem;color:var(--mu);display:block;margin-top:.1rem}
 .oopt.sel .oopt-sub{color:inherit;opacity:.75}
+.olbl{font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--mu);text-transform:uppercase;margin-bottom:.4rem}
+/* option buttons that carry a drawn gauge alongside the words */
+.oopt.gauge{display:flex;align-items:center;gap:.6rem}
+.oopt.gauge svg{width:34px;height:21px;flex-shrink:0;color:var(--su);stroke:currentColor;fill:none;stroke-width:1.6}
+.oopt.gauge.sel svg{color:var(--or)}
+.oopt.gauge svg .fill{fill:currentColor;stroke:none}
+.oopt.toosmall{opacity:.42;border-style:dashed}
+.oopt.toosmall:hover{opacity:.75}
 .fnav{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.85rem}
 .booked-hero{text-align:center;padding:.5rem 0 .8rem}
 .booked-ref{font-family:var(--dp);font-weight:900;font-size:1.65rem;letter-spacing:-.04em;color:var(--or);margin:.5rem 0 .4rem}
@@ -783,15 +813,25 @@ textarea.fi2{resize:vertical;min-height:70px}
             <input class="fi-inp" id="pc-to" placeholder="e.g. M1 1AA" maxlength="8" autocomplete="off" oninput="onPcInput()">
           </div>
         </div>
-        <div class="van-lbl">Van size</div>
+        <!-- ── LOAD PICKER — two plain questions before any van jargon ──
+             Nobody has to measure anything: each choice is drawn as a gauge and
+             described with something everyday. The van is worked out from the
+             two answers and can still be changed by hand. -->
+        <div class="van-lbl">How heavy is it?</div>
+        <div class="van-pills" id="wt-pills"></div>
+        <div class="van-lbl">How much is there?</div>
+        <div class="van-pills" id="sz-pills"></div>
+        <div class="ld-note" id="ld-note" style="display:none"></div>
+        <div class="van-lbl">Van size <span class="van-hint">— we pick this for you, change it if you know better</span></div>
         <div class="van-pills" id="van-pills">
-          <button class="vp" onclick="selVan(this,'small')">Small van<span class="vp-sub">up to 400 kg</span></button>
-          <button class="vp" onclick="selVan(this,'swb')">SWB<span class="vp-sub">up to 800 kg</span></button>
-          <button class="vp" onclick="selVan(this,'mwb')">MWB<span class="vp-sub">up to 1,000 kg</span></button>
-          <button class="vp sel" onclick="selVan(this,'lwb')">LWB<span class="vp-sub">up to 1,200 kg</span></button>
-          <button class="vp" onclick="selVan(this,'xlwb')">XLWB<span class="vp-sub">up to 1,400 kg</span></button>
-          <button class="vp" onclick="selVan(this,'luton')">Luton<span class="vp-sub">up to 1,000 kg, 4 pallets</span></button>
-          <button class="vp" onclick="selVan(this,'lutontl')">Luton — tail lift<span class="vp-sub">up to 1,000 kg, tail lift</span></button>
+          <button class="vp" data-van="small" onclick="selVan(this,'small')">Small van<span class="vp-sub">a few boxes · 400 kg</span></button>
+          <button class="vp" data-van="swb" onclick="selVan(this,'swb')">SWB<span class="vp-sub">1 pallet · 800 kg</span></button>
+          <button class="vp" data-van="mwb" onclick="selVan(this,'mwb')">MWB<span class="vp-sub">1 pallet · 1,000 kg</span></button>
+          <button class="vp sel" data-van="lwb" onclick="selVan(this,'lwb')">LWB<span class="vp-sub">a few pallets · 1,200 kg</span></button>
+          <button class="vp" data-van="xlwb" onclick="selVan(this,'xlwb')">XLWB<span class="vp-sub">a few pallets · 1,400 kg</span></button>
+          <button class="vp" data-van="luton" onclick="selVan(this,'luton')">Luton — box<span class="vp-sub">full van load · 1,000 kg</span></button>
+          <button class="vp" data-van="lutonc" onclick="selVan(this,'lutonc')">Luton — curtain side<span class="vp-sub">full van load · side loading</span></button>
+          <button class="vp" data-van="lutontl" onclick="selVan(this,'lutontl')">Luton — tail lift<span class="vp-sub">full van load · tail lift</span></button>
         </div>
         <!-- LIVE PRICE DISPLAY -->
         <div class="lp-box hint" id="lp-box">
@@ -849,27 +889,29 @@ textarea.fi2{resize:vertical;min-height:70px}
 
           <!-- ── FAST QUOTE STEPS ── -->
           <div id="if-fast" style="display:none">
+            <!-- Questions anyone can answer come first; the van is worked out
+                 from them on the next step, already chosen. -->
             <div class="fstep on" id="fq-1">
-              <div class="slbl">Step 1 of 8 &#8212; Van size</div>
-              <div class="ogrid">
-                <button class="oopt" onclick="fqSel(this,'van','small')">Small van<span class="oopt-sub">up to 400 kg, 1 pallet</span></button>
-                <button class="oopt" onclick="fqSel(this,'van','swb')">SWB<span class="oopt-sub">up to 800 kg, 2 pallets</span></button>
-                <button class="oopt" onclick="fqSel(this,'van','mwb')">MWB<span class="oopt-sub">up to 1,000 kg, 2 pallets</span></button>
-                <button class="oopt" onclick="fqSel(this,'van','lwb')">LWB<span class="oopt-sub">up to 1,200 kg, 3 pallets</span></button>
-                <button class="oopt" onclick="fqSel(this,'van','xlwb')">XLWB<span class="oopt-sub">up to 1,400 kg, 4 pallets</span></button>
-                <button class="oopt" onclick="fqSel(this,'van','luton')">Luton<span class="oopt-sub">up to 1,000 kg, 4 pallets</span></button>
-                <button class="oopt" onclick="fqSel(this,'van','lutontl')">Luton — tail lift<span class="oopt-sub">up to 1,000 kg, tail lift</span></button>
-              </div>
+              <div class="slbl">Step 1 of 8 &#8212; What are you sending?</div>
+              <div class="olbl">How heavy is it?</div>
+              <div class="ogrid" id="fq-wt"></div>
+              <div class="olbl" style="margin-top:.7rem">How much is there?</div>
+              <div class="ogrid" id="fq-sz"></div>
               <div class="fstep-err" id="fq-err-1"></div>
               <div class="fnav"><button class="btn btn-or btn-sm" onclick="fqNext(2)">Next &#8594;</button></div>
             </div>
             <div class="fstep" id="fq-2">
-              <div class="slbl">Step 2 of 8 &#8212; Approx weight</div>
-              <div class="ogrid">
-                <button class="oopt" onclick="fqSel(this,'weight','10')">Up to 10 kg<span class="oopt-sub">small parcels</span></button>
-                <button class="oopt" onclick="fqSel(this,'weight','100')">Up to 100 kg<span class="oopt-sub">a few boxes</span></button>
-                <button class="oopt" onclick="fqSel(this,'weight','250')">Up to 250 kg<span class="oopt-sub">half a van load</span></button>
-                <button class="oopt" onclick="fqSel(this,'weight','500')">250 kg+<span class="oopt-sub">heavy or full van</span></button>
+              <div class="slbl">Step 2 of 8 &#8212; Van size</div>
+              <div class="ld-note" id="fq-note" style="display:none;margin:0 0 .7rem"></div>
+              <div class="ogrid" id="fq-van">
+                <button class="oopt" data-van="small" onclick="fqSelVan(this,'small')">Small van<span class="oopt-sub">a few boxes · 400 kg</span></button>
+                <button class="oopt" data-van="swb" onclick="fqSelVan(this,'swb')">SWB<span class="oopt-sub">1 pallet · 800 kg</span></button>
+                <button class="oopt" data-van="mwb" onclick="fqSelVan(this,'mwb')">MWB<span class="oopt-sub">1 pallet · 1,000 kg</span></button>
+                <button class="oopt" data-van="lwb" onclick="fqSelVan(this,'lwb')">LWB<span class="oopt-sub">a few pallets · 1,200 kg</span></button>
+                <button class="oopt" data-van="xlwb" onclick="fqSelVan(this,'xlwb')">XLWB<span class="oopt-sub">a few pallets · 1,400 kg</span></button>
+                <button class="oopt" data-van="luton" onclick="fqSelVan(this,'luton')">Luton — box<span class="oopt-sub">full van load · 1,000 kg</span></button>
+                <button class="oopt" data-van="lutonc" onclick="fqSelVan(this,'lutonc')">Luton — curtain side<span class="oopt-sub">full van load · side loading</span></button>
+                <button class="oopt" data-van="lutontl" onclick="fqSelVan(this,'lutontl')">Luton — tail lift<span class="oopt-sub">full van load · tail lift</span></button>
               </div>
               <div class="fstep-err" id="fq-err-2"></div>
               <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(1)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqNext(3)">Next &#8594;</button></div>
@@ -975,12 +1017,10 @@ textarea.fi2{resize:vertical;min-height:70px}
           <div id="if-pick" style="display:none">
             <div class="fstep on" id="hp-1">
               <div class="slbl">Step 1 of 5 &#8212; What is the load?</div>
-              <div class="ogrid">
-                <button class="oopt" onclick="hpSel(this,'load','boxes')">A few boxes<span class="oopt-sub">small parcels or bags</span></button>
-                <button class="oopt" onclick="hpSel(this,'load','van')">A van's worth<span class="oopt-sub">room full or house move</span></button>
-                <button class="oopt" onclick="hpSel(this,'load','big')">Big items<span class="oopt-sub">furniture or appliances</span></button>
-                <button class="oopt" onclick="hpSel(this,'load','pallet')">Pallet or lots<span class="oopt-sub">heavy or palletised</span></button>
-              </div>
+              <div class="olbl">How heavy is it?</div>
+              <div class="ogrid" id="hp-wt"></div>
+              <div class="olbl" style="margin-top:.7rem">How much is there?</div>
+              <div class="ogrid" id="hp-sz"></div>
               <div class="fstep-err" id="hp-err-1"></div>
               <div class="fnav"><button class="btn btn-or btn-sm" onclick="hpNext(2)">Next &#8594;</button></div>
             </div>
@@ -1643,7 +1683,7 @@ textarea.fi2{resize:vertical;min-height:70px}
       <div class="tp" id="pane-d-jobs">
         <h1 class="pt">Open Jobs</h1><p class="ps">All open jobs on the network — filter by area, vehicle or urgency.</p>
         <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem">
-          <select class="fi2" style="flex:1;min-width:130px;max-width:180px"><option>All vehicles</option><option>Small van</option><option>SWB</option><option selected>LWB</option><option>XLWB</option><option>Luton</option></select>
+          <select class="fi2" style="flex:1;min-width:130px;max-width:180px"><option>All vehicles</option><option>Small van</option><option>SWB</option><option selected>LWB</option><option>XLWB</option><option>Luton &#8212; box</option><option>Luton &#8212; curtain side</option><option>Luton &#8212; tail lift</option></select>
           <select class="fi2" style="flex:1;min-width:130px;max-width:180px"><option>All urgency</option><option>Urgent</option><option>Same-day</option><option>Flexible</option></select>
           <select class="fi2" style="flex:1;min-width:130px;max-width:180px"><option>Any direction</option><option>North</option><option>South</option><option>East</option><option>West</option></select>
           <button class="btn btn-or btn-sm">Filter</button>
@@ -1762,7 +1802,7 @@ textarea.fi2{resize:vertical;min-height:70px}
             <div class="fg"><label class="fl">Or contact via email</label><input class="fi2" id="dir-email" placeholder="your@email.com" type="email"></div>
           </div>
           <div class="fr" style="margin:0 0 .65rem">
-            <div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>SWB</option><option>MWB</option><option selected>LWB</option><option>XLWB</option><option>Luton</option><option>Luton &#8212; tail lift</option></select></div>
+            <div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>SWB</option><option>MWB</option><option selected>LWB</option><option>XLWB</option><option>Luton &#8212; box</option><option>Luton &#8212; curtain side</option><option>Luton &#8212; tail lift</option></select></div>
             <div class="fg"><label class="fl">Home zone</label><select class="fi2"><option>North West</option><option>Yorkshire &amp; Humber</option><option>North East</option><option>East Midlands</option><option>West Midlands</option><option>East of England</option><option>M25 / Greater London</option><option>South East</option><option>South West</option></select></div>
           </div>
           <div class="fg" style="margin-bottom:.7rem"><label class="fl">Run directions (tick all that apply)</label>
@@ -1806,7 +1846,7 @@ textarea.fi2{resize:vertical;min-height:70px}
           <div class="ct">Job details</div>
           <div class="fr"><div class="fg"><label class="fl">Collection address</label><input class="fi2" placeholder="Full address or postcode"></div><div class="fg"><label class="fl">Delivery address</label><input class="fi2" placeholder="Full address or postcode"></div></div>
           <div class="fr"><div class="fg"><label class="fl">Your reference</label><input class="fi2" placeholder="Internal order or PO ref"></div><div class="fg"><label class="fl">Goods description</label><input class="fi2" placeholder="e.g. Retail stock, tools"></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 200"></div><div class="fg"><label class="fl">Vehicle needed</label><select class="fi2"><option>Any</option><option>Small van</option><option>SWB</option><option>MWB</option><option>LWB</option><option>XLWB</option><option>Luton</option><option>Luton &#8212; tail lift</option></select></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 200"></div><div class="fg"><label class="fl">Vehicle needed</label><select class="fi2"><option>Any</option><option>Small van</option><option>SWB</option><option>MWB</option><option>LWB</option><option>XLWB</option><option>Luton &#8212; box</option><option>Luton &#8212; curtain side</option><option>Luton &#8212; tail lift</option></select></div></div>
           <div class="fr"><div class="fg"><label class="fl">Date</label><input class="fi2" type="date"></div><div class="fg"><label class="fl">Urgency</label><select class="fi2"><option>Flexible</option><option>Same-day</option><option>Urgent</option><option>Timed window</option></select></div></div>
         </div>
         <!-- Acceptance rules -->
@@ -1890,7 +1930,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         <h1 class="pt">My Fleet</h1><p class="ps">Register your company vehicles on the KNECT network to take inbound deliveries.</p>
         <div class="card" style="max-width:540px">
           <div class="ct">Add a vehicle</div>
-          <div class="fr"><div class="fg"><label class="fl">Registration</label><input class="fi2" placeholder="e.g. AB12 CDE" style="text-transform:uppercase"></div><div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>SWB</option><option>MWB</option><option>LWB</option><option>XLWB</option><option>Luton</option><option>Luton &#8212; tail lift</option></select></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Registration</label><input class="fi2" placeholder="e.g. AB12 CDE" style="text-transform:uppercase"></div><div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>SWB</option><option>MWB</option><option>LWB</option><option>XLWB</option><option>Luton &#8212; box</option><option>Luton &#8212; curtain side</option><option>Luton &#8212; tail lift</option></select></div></div>
           <div class="fr"><div class="fg"><label class="fl">Driver name</label><input class="fi2" placeholder="Assigned driver"></div><div class="fg"><label class="fl">Base postcode</label><input class="fi2" placeholder="e.g. S9"></div></div>
           <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.76rem;font-weight:600;color:var(--mu);margin:.3rem 0 .7rem"><input type="checkbox" style="accent-color:var(--or)"> Add to KNECT network — accept inbound jobs when available</label>
           <button class="btn btn-or btn-sm">Add vehicle</button>
@@ -1952,7 +1992,7 @@ textarea.fi2{resize:vertical;min-height:70px}
             <div class="fg"><label class="fl">Mobile number</label><input class="fi2" placeholder="07xxx xxxxxx" type="tel"></div>
           </div>
           <div class="fr" style="margin:0 0 .6rem">
-            <div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>SWB</option><option>MWB</option><option selected>LWB</option><option>XLWB</option><option>Luton</option><option>Luton &#8212; tail lift</option></select></div>
+            <div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>SWB</option><option>MWB</option><option selected>LWB</option><option>XLWB</option><option>Luton &#8212; box</option><option>Luton &#8212; curtain side</option><option>Luton &#8212; tail lift</option></select></div>
             <div class="fg"><label class="fl">Vehicle registration</label><input class="fi2" placeholder="e.g. AB12 CDE" style="text-transform:uppercase"></div>
           </div>
           <div class="fg" style="margin-bottom:.7rem"><label class="fl">Base postcode</label><input class="fi2" placeholder="e.g. S9 1AA" style="max-width:160px"></div>
@@ -1982,7 +2022,7 @@ textarea.fi2{resize:vertical;min-height:70px}
           <div class="fg"><label class="fl">Customer reference</label><input class="fi2" placeholder="Your client's job ref"></div>
           <div class="fr"><div class="fg"><label class="fl">Collection address</label><input class="fi2" placeholder="Address or postcode"></div><div class="fg"><label class="fl">Delivery address</label><input class="fi2" placeholder="Address or postcode"></div></div>
           <div class="fr"><div class="fg"><label class="fl">Goods type</label><input class="fi2" placeholder="e.g. Pallets, boxes, hazmat"></div><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 850"></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Vehicle required</label><select class="fi2"><option>Small van</option><option>SWB</option><option>LWB</option><option>XLWB</option><option>Luton</option></select></div><div class="fg"><label class="fl">Urgency</label><select class="fi2"><option>Flexible</option><option>Same-day</option><option>Urgent</option><option>Timed</option></select></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Vehicle required</label><select class="fi2"><option>Small van</option><option>SWB</option><option>LWB</option><option>XLWB</option><option>Luton &#8212; box</option><option>Luton &#8212; curtain side</option><option>Luton &#8212; tail lift</option></select></div><div class="fg"><label class="fl">Urgency</label><select class="fi2"><option>Flexible</option><option>Same-day</option><option>Urgent</option><option>Timed</option></select></div></div>
           <div class="fr"><div class="fg"><label class="fl">Buy rate (max, £)</label><input class="fi2" type="number" placeholder="Your carrier cost ceiling"></div><div class="fg"><label class="fl">Client sell rate (£)</label><input class="fi2" type="number" placeholder="What your client pays"></div></div>
           <div class="fg"><label class="fl">Special instructions</label><textarea class="fi2" placeholder="Tail lift, fragile, hazmat class, access..."></textarea></div>
           <button class="btn btn-or btn-wide" style="margin-top:.3rem">Post load to network →</button>
@@ -2070,7 +2110,8 @@ textarea.fi2{resize:vertical;min-height:70px}
               <option value="mwb">MWB</option>
               <option value="lwb">LWB</option>
               <option value="xlwb">XLWB</option>
-              <option value="luton">Luton</option>
+              <option value="luton">Luton — box</option>
+              <option value="lutonc">Luton — curtain side</option>
               <option value="lutontl">Luton — tail lift</option>
             </select>
           </div>
@@ -2191,7 +2232,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         <p class="ps">Browse drivers who have opted in to direct contact. Reach them by WhatsApp, email, or book them straight from here without posting to the open network.</p>
         <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem">
           <select class="fi2" style="flex:1;min-width:140px;max-width:200px"><option>All zones</option><option>North West</option><option>Yorkshire &amp; Humber</option><option>West Midlands</option><option>East Midlands</option><option>M25 / Greater London</option><option>South East</option></select>
-          <select class="fi2" style="flex:1;min-width:130px;max-width:200px"><option>All vehicles</option><option>Small van</option><option>SWB</option><option selected>LWB</option><option>Extra LWB</option><option>Luton</option></select>
+          <select class="fi2" style="flex:1;min-width:130px;max-width:200px"><option>All vehicles</option><option>Small van</option><option>SWB</option><option selected>LWB</option><option>Extra LWB</option><option>Luton &#8212; box</option><option>Luton &#8212; curtain side</option><option>Luton &#8212; tail lift</option></select>
           <select class="fi2" style="flex:1;min-width:130px;max-width:200px"><option>Any direction</option><option>North</option><option>South</option><option>East</option><option>West</option><option>Backloads</option></select>
           <button class="btn btn-or btn-sm">Filter</button>
         </div>
@@ -2463,12 +2504,12 @@ textarea.fi2{resize:vertical;min-height:70px}
         <div class="card">
           <div class="ct">Driver pay by vehicle <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">£ per loaded mile · and the least that vehicle may earn on a job</span></div>
           <div id="px-vehicles"></div>
-          <div class="cr"><span class="ck" style="color:var(--mu)">These seven are the only vehicles on the network. A bigger van can never pay less than a smaller one — the page will stop you.</span></div>
+          <div class="cr"><span class="ck" style="color:var(--mu)">These eight are the only vehicles on the network. A bigger van can never pay less than a smaller one — the page will stop you.</span></div>
         </div>
 
         <div class="g2">
           <div class="card">
-            <div class="ct">Driver pay uplift <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">pence per mile, on top of the vehicle rate</span></div>
+            <div class="ct">Driver reward rate <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">pence per mile, on top of the vehicle rate</span></div>
             <div id="px-driver"></div>
             <div class="cr"><span class="ck" style="color:var(--mu)">Earned by PLNA tier, fleet tier or paid KNECT membership. The best one applies — they never add together. The network fee rides on top, so a better-paid driver never costs HAF money.</span></div>
           </div>
@@ -2549,8 +2590,9 @@ textarea.fi2{resize:vertical;min-height:70px}
    The route is priced two ways (miles × vehicle rate vs hours × the vehicle's
    standard hourly rate) and the higher wins, so a slow congested run still
    pays. The zone factor lifts the transport value where the destination area
-   has a poor chance of a load back. Seven van sizes only — nothing above a
-   Luton exists on this network. */
+   has a poor chance of a load back. Eight sizes only — five van sizes and a
+   Luton in its three approved bodies (box, curtain side, tail lift). Nothing
+   above a Luton exists on this network. */
 const REF_MPH=40, NET_POOL=.05;
 /* drv = £ per loaded mile paid to the driver · min = the vehicle's minimum transport value (£ ex VAT) */
 const VAN={
@@ -2559,12 +2601,99 @@ const VAN={
   mwb    :{n:'MWB'              ,drv:1.00,min:60},
   lwb    :{n:'LWB'              ,drv:1.10,min:65},
   xlwb   :{n:'XLWB'             ,drv:1.20,min:70},
-  luton  :{n:'Luton'            ,drv:1.30,min:75},
-  lutontl:{n:'Luton — tail lift',drv:1.40,min:80}
+  luton  :{n:'Luton — box'         ,drv:1.30,min:75},
+  lutonc :{n:'Luton — curtain side',drv:1.30,min:75},
+  lutontl:{n:'Luton — tail lift'   ,drv:1.40,min:80}
 };
-/* fee = HAF network fee as a % of the carrier transport value · flr = the floor that fee may never drop below · svc = urgency uplift paid to the driver */
+/* ── WHAT EACH VAN CAN ACTUALLY CARRY ──
+   kg  = payload the vehicle is rated to carry
+   vol = the biggest load-size band it will hold (see SZ_BAND below)
+   tl  = it has a tail lift
+   Capability, not price. This exists so a customer can never be quoted a
+   vehicle that physically cannot take what they have just described. */
+VAN.small.kg=400;    VAN.small.vol=2;   /* a few boxes   */
+VAN.swb.kg=800;      VAN.swb.vol=3;     /* one pallet    */
+VAN.mwb.kg=1000;     VAN.mwb.vol=3;     /* one pallet    */
+VAN.lwb.kg=1200;     VAN.lwb.vol=4;     /* a few pallets */
+VAN.xlwb.kg=1400;    VAN.xlwb.vol=4;    /* a few pallets */
+VAN.luton.kg=1000;   VAN.luton.vol=5;   /* full van load */
+if(VAN.lutonc){VAN.lutonc.kg=1000; VAN.lutonc.vol=5;}
+VAN.lutontl.kg=1000; VAN.lutontl.vol=5; VAN.lutontl.tl=true;
+/* Cheapest first — a recommendation always lands on the least the job needs */
+const VAN_ORDER=['small','swb','mwb','lwb','xlwb','luton','lutonc','lutontl'];
+
+/* ── THE LOAD PICKER ──
+   Two questions anybody can answer without a tape measure or a set of scales.
+   Each band carries an everyday comparison and a drawn gauge, so the choice is
+   read at a glance rather than worked out. `kg` is the top of the weight band;
+   `lvl` is the size ladder the vehicle table above is measured against. */
+const WT_BAND=[
+  {k:'w50'  ,n:'Up to 50 kg' ,s:'one person can lift it'  ,kg:50  ,bars:1},
+  {k:'w100' ,n:'Up to 100 kg',s:'two people, or a trolley',kg:100 ,bars:2},
+  {k:'w250' ,n:'Up to 250 kg',s:'a part-loaded pallet'    ,kg:250 ,bars:3},
+  {k:'w500' ,n:'Up to 500 kg',s:'a full pallet'           ,kg:500 ,bars:4},
+  {k:'w1000',n:'1 tonne +'   ,s:'two full pallets or more',kg:1000,bars:5}
+];
+const SZ_BAND=[
+  {k:'s1',n:'Small box'    ,s:'fits on a car seat'      ,lvl:1},
+  {k:'s2',n:'A few boxes'  ,s:'fills a car boot'        ,lvl:2},
+  {k:'s3',n:'One pallet'   ,s:'about a washing machine' ,lvl:3},
+  {k:'s4',n:'A few pallets',s:'a room of furniture'     ,lvl:4},
+  {k:'s5',n:'Full van load',s:'floor to roof'           ,lvl:5}
+];
+/* Heaviness gauge — five bars, the chosen band's worth filled in */
+function wtIcon(bars){
+  let o='';
+  for(let i=0;i<5;i++){
+    const h=5+i*3;
+    o+='<rect'+(i<bars?' class="fill"':'')+' x="'+(4+i*7)+'" y="'+(20-h)+'" width="5" height="'+h+'" rx="1"/>';
+  }
+  return '<svg viewBox="0 0 40 24" aria-hidden="true">'+o+'</svg>';
+}
+/* Space gauge — the same van outline every time, filling up as the load grows,
+   so the five choices read as one picture rather than five separate ones */
+const SZ_FILL=[
+  '<rect class="fill" x="5" y="15" width="6" height="5" rx="1"/>',
+  '<rect class="fill" x="5" y="15" width="6" height="5" rx="1"/><rect class="fill" x="12" y="15" width="6" height="5" rx="1"/><rect class="fill" x="5" y="9" width="6" height="5" rx="1"/>',
+  '<rect class="fill" x="5" y="8" width="11" height="12" rx="1"/>',
+  '<rect class="fill" x="5" y="8" width="11" height="12" rx="1"/><rect class="fill" x="17" y="8" width="11" height="12" rx="1"/>',
+  '<rect class="fill" x="5" y="5" width="30" height="15" rx="1"/>'
+];
+function szIcon(i){
+  return '<svg viewBox="0 0 40 24" aria-hidden="true"><rect x="1" y="1" width="38" height="22" rx="3"/>'+SZ_FILL[i]+'</svg>';
+}
+/* The smallest — and so the cheapest — van that will genuinely take this load.
+   Weight and space are both hard limits; neither is allowed to be fudged. */
+function recommendVan(wtKey,szKey){
+  const w=WT_BAND.find(b=>b.k===wtKey), z=SZ_BAND.find(b=>b.k===szKey);
+  if(!w||!z)return null;
+  return VAN_ORDER.find(k=>VAN[k].kg>=w.kg&&VAN[k].vol>=z.lvl)||null;
+}
+/* A pallet-sized load with real weight on it has to come off the van somehow.
+   We say so in plain words rather than quietly charging for a tail lift. */
+function needsTailLiftHint(wtKey,szKey){
+  const w=WT_BAND.find(b=>b.k===wtKey), z=SZ_BAND.find(b=>b.k===szKey);
+  return !!(w&&z&&w.kg>=250&&z.lvl>=3);
+}
+/* The top weight band is open-ended — "1 tonne +" could be 1.1 or 1.4 tonnes.
+   We price the tonne and say out loud that heavier steps up a van, rather than
+   quoting a vehicle that would turn up and not be able to take it. */
+function openBandNote(wtKey,vanKey){
+  const w=WT_BAND[WT_BAND.length-1];
+  if(wtKey!==w.k)return '';
+  const v=VAN[vanKey];
+  if(!v)return '';
+  /* only a van that is bigger BOTH ways is a real step up — more payload in a
+     smaller body would be worse advice than saying nothing */
+  const bigger=VAN_ORDER.map(k=>VAN[k]).find(x=>x.kg>v.kg&&x.vol>=v.vol);
+  const t=(v.kg/1000).toFixed(1);
+  return ' “'+w.n+'” is open-ended — if it is over '+t+' tonnes '+(bigger
+    ?'tell us and we will step up to the '+bigger.n+'.'
+    :'tell us: that is this van at its limit and we will check it before confirming.');
+}
+/* fee = HAF network fee as a % of the carrier transport value · flr = the floor that fee may never drop below · svc = urgency premium paid to the driver */
 const URG={flex:{n:'Flexible',fee:.20,flr:.15,svc:1},sday:{n:'Same-day',fee:.20,flr:.15,svc:1},urg:{n:'Urgent',fee:.30,flr:.22,svc:1.10},timed:{n:'Timed delivery',fee:.25,flr:.18,svc:1}};
-/* ── DRIVER BASE-RATE UPLIFT ──
+/* ── DRIVER REWARD RATE ──
    Pence per loaded mile ON TOP of the vehicle rate, set by the driver taking
    the job: PLNA tier, fleet tier, or a paid HAF KNECT membership. Highest wins,
    never stacks. Because the network fee sits on top of the transport value, a
@@ -2610,7 +2739,7 @@ let LOCAL_MAX_OFF=.30, LOCAL_BAND_OFF=.20, LOCAL_BAND_AT=15, LOCAL_FULL_AT=25;
    without anyone rebuilding this file.
    Mapping is by code: the database speaks SMALL_VAN, the quote form speaks
    'small'. Anything the saved config does not carry keeps its built-in value. */
-const PX_VAN={SMALL_VAN:'small',SWB_VAN:'swb',MWB_VAN:'mwb',LWB_VAN:'lwb',XLWB_VAN:'xlwb',LUTON:'luton',LUTON_TAIL:'lutontl'};
+const PX_VAN={SMALL_VAN:'small',SWB_VAN:'swb',MWB_VAN:'mwb',LWB_VAN:'lwb',XLWB_VAN:'xlwb',LUTON:'luton',LUTON_CURTAIN:'lutonc',LUTON_TAIL:'lutontl'};
 const PX_JOB={FLEX_SAMEDAY:'flex',STD_SAMEDAY:'sday',URGENT:'urg',TIMED:'timed'};
 const PX_DRV={FREE:'free',MEMBER:'member',PRO:'pro'};
 const PX_ACC={LITE:'lite',PLUS:'plus',PRO:'pro'};
@@ -2631,8 +2760,8 @@ function hafApplyPricingConfig(cfg){
   }
   if(cfg.driverLevels){
     Object.keys(PX_DRV).forEach(c=>{const l=cfg.driverLevels[c];
-      if(l&&typeof l.upliftGbpPerMile==='number')DRV_LEVEL[PX_DRV[c]].up=l.upliftGbpPerMile;});
-    done.push('driver uplift');
+      if(l&&typeof l.rewardGbpPerMile==='number')DRV_LEVEL[PX_DRV[c]].up=l.rewardGbpPerMile;});
+    done.push('driver reward');
   }
   if(cfg.accountLevels){
     Object.keys(PX_ACC).forEach(c=>{const a=cfg.accountLevels[c];
@@ -2662,7 +2791,7 @@ window.HAF_PRICING_SOURCE='built-in';
          from outside rather than taken on trust */
       window.HAF_PRICING_APPLIED=hafApplyPricingConfig(d.config);
       window.HAF_PRICING_RATES={smallVan:VAN.small.drv,lutonTail:VAN.lutontl.drv,
-        lutonTailMin:VAN.lutontl.min,proUpliftPerMile:DRV_LEVEL.pro.up,
+        lutonTailMin:VAN.lutontl.min,proRewardPerMile:DRV_LEVEL.pro.up,
         proAccountCutPts:ACC_LEVEL.pro.cut*100,urgentFeePct:URG.urg.fee*100,
         shortRunFullAtMiles:LOCAL_FULL_AT};
       window.HAF_PRICING_SOURCE='database';
@@ -2693,7 +2822,7 @@ function v3Price(miles,mins,vanKey,urgKey,toPc,opts){
   const o=opts||{};
   const dl=DRV_LEVEL[o.driver]||DRV_LEVEL.free;
   const al=ACC_LEVEL[o.account]||ACC_LEVEL.lite;
-  const rate=v.drv+dl.up;                           /* driver uplift rides on the base rate */
+  const rate=v.drv+dl.up;                           /* driver reward rides on the base rate */
   const vshr=rate*REF_MPH;
   const hours=(mins&&mins>0?mins:miles/32*60)/60;
   const distCost=miles*rate, timeCost=hours*vshr;
@@ -2707,7 +2836,7 @@ function v3Price(miles,mins,vanKey,urgKey,toPc,opts){
   const fee=p2(carrier*feePct);                     /* 2. HAF Network Fee         */
   const sub=p2(carrier+fee);                        /* 3. Customer price, ex VAT  */
   return{sub,carrier,fee,feePct,driverPay:carrier,floor,onMinimum:carrier===floor,
-         driverRate:p2(rate),driverLevel:dl.n,driverUpliftPerMile:dl.up,
+         driverRate:p2(rate),driverLevel:dl.n,driverRewardPerMile:dl.up,
          accountLevel:al.n,feeCutPts:p2((u.fee-feePct)*100),
          pool:p2(sub*NET_POOL),timeWins:timeCost>distCost,miles,hours};
 }
@@ -2776,13 +2905,83 @@ function toggleTheme(){
 
 /* ── LIVE PRICE CALCULATOR ── */
 let selVanKey='lwb';
+let selWtKey=null, selSzKey=null, vanPickedByHand=false;
+
+/* Draw the two load rows from the bands above — one place to change a band, and
+   the gauge, the name and the everyday comparison all move together. */
+function buildLoadPickers(){
+  const wp=document.getElementById('wt-pills'), sp=document.getElementById('sz-pills');
+  if(!wp||!sp)return;
+  wp.innerHTML=WT_BAND.map(b=>
+    '<button class="lp-tile" type="button" data-wt="'+b.k+'" aria-pressed="false" onclick="selLoad(this,\'wt\',\''+b.k+'\')">'
+    +wtIcon(b.bars)+'<span class="lp-tile-n">'+b.n+'</span><span class="lp-tile-s">'+b.s+'</span></button>').join('');
+  sp.innerHTML=SZ_BAND.map((b,i)=>
+    '<button class="lp-tile" type="button" data-sz="'+b.k+'" aria-pressed="false" onclick="selLoad(this,\'sz\',\''+b.k+'\')">'
+    +szIcon(i)+'<span class="lp-tile-n">'+b.n+'</span><span class="lp-tile-s">'+b.s+'</span></button>').join('');
+}
+
+function selLoad(el,kind,key){
+  el.parentElement.querySelectorAll('.lp-tile').forEach(b=>{b.classList.remove('sel');b.setAttribute('aria-pressed','false');});
+  el.classList.add('sel');el.setAttribute('aria-pressed','true');
+  if(kind==='wt')selWtKey=key; else selSzKey=key;
+  vanPickedByHand=false;          /* answering either question hands the van back to HAF */
+  applyLoadToVans();
+  calcLivePrice();
+}
+
+/* Turn the two answers into a van, a marked-up van row, and one plain line of
+   English saying what we worked out and why. */
+function applyLoadToVans(){
+  const note=document.getElementById('ld-note');
+  const pills=[...document.querySelectorAll('#van-pills .vp')];
+  const w=WT_BAND.find(b=>b.k===selWtKey), z=SZ_BAND.find(b=>b.k===selSzKey);
+  const rec=recommendVan(selWtKey,selSzKey);
+
+  pills.forEach(p=>{
+    const v=VAN[p.dataset.van]; if(!v)return;
+    const fits=!w||!z||(v.kg>=w.kg&&v.vol>=z.lvl);
+    p.classList.toggle('toosmall',!fits);
+    p.classList.toggle('rec',!vanPickedByHand&&p.dataset.van===rec);
+  });
+  if(rec&&!vanPickedByHand){
+    pills.forEach(p=>p.classList.toggle('sel',p.dataset.van===rec));
+    selVanKey=rec;
+  }
+
+  if(!note)return;
+  if(!w||!z){note.style.display='none';note.innerHTML='';return;}
+  const chosen=VAN[selVanKey];
+  let msg,warn=false;
+  if(!rec){
+    msg='That is more than a Luton will take. Give us the details and we will price '
+       +'it as a multi-van or freight job — nothing is turned away.';
+    warn=true;
+  }else if(chosen&&(chosen.kg<w.kg||chosen.vol<z.lvl)){
+    msg='A <strong>'+chosen.n+'</strong> will not take '+w.n.toLowerCase()+' of '
+       +z.n.toLowerCase()+'. The smallest that will is a <strong>'+VAN[rec].n+'</strong>.';
+    warn=true;
+  }else{
+    msg='<strong>'+w.n+'</strong>, <strong>'+z.n.toLowerCase()+'</strong> — that is a '
+       +'<strong>'+chosen.n+'</strong>'
+       +(vanPickedByHand&&selVanKey!==rec?' (your choice; a '+VAN[rec].n+' would do it)':'')+'.';
+  }
+  if(needsTailLiftHint(selWtKey,selSzKey)&&!(chosen||{}).tl)
+    msg+=' If there is no forklift or loading bay at either end, pick the tail lift.';
+  if(!warn)msg+=openBandNote(selWtKey,selVanKey);
+  note.innerHTML=msg;
+  note.className='ld-note'+(warn?' warn':'');
+  note.style.display='';
+}
 
 function selVan(el,key){
   document.querySelectorAll('#van-pills .vp').forEach(b=>b.classList.remove('sel'));
   el.classList.add('sel');
   selVanKey=key;
+  vanPickedByHand=true;
+  applyLoadToVans();
   calcLivePrice();
 }
+buildLoadPickers();
 
 let pcTimer=null;
 function onPcInput(){clearTimeout(pcTimer);pcTimer=setTimeout(calcLivePrice,600);}
@@ -2885,12 +3084,70 @@ function fqSel(el,key,val){
 }
 function fqToggle(el,key){el.classList.toggle('sel');fqData[key]=el.classList.contains('sel');}
 
+/* ── FAST QUOTE STEP 1 — the same two load questions as the front calculator,
+   drawn from the same bands so the two surfaces can never drift apart. ── */
+function fqBuildLoad(){
+  const wp=document.getElementById('fq-wt'), sp=document.getElementById('fq-sz');
+  if(!wp||!sp)return;
+  wp.innerHTML=WT_BAND.map(b=>
+    '<button class="oopt gauge" type="button" onclick="fqSel(this,\'weight\',\''+b.k+'\')">'
+    +wtIcon(b.bars)+'<span>'+b.n+'<span class="oopt-sub">'+b.s+'</span></span></button>').join('');
+  sp.innerHTML=SZ_BAND.map((b,i)=>
+    '<button class="oopt gauge" type="button" onclick="fqSel(this,\'size\',\''+b.k+'\')">'
+    +szIcon(i)+'<span>'+b.n+'<span class="oopt-sub">'+b.s+'</span></span></button>').join('');
+}
+fqBuildLoad();
+
+/* Step 2 opens with the right van already chosen and anything too small marked,
+   so a customer only ever has to disagree — never work it out. */
+function fqApplyRec(){
+  const rec=recommendVan(fqData.weight,fqData.size);
+  const w=WT_BAND.find(b=>b.k===fqData.weight), z=SZ_BAND.find(b=>b.k===fqData.size);
+  const note=document.getElementById('fq-note');
+  document.querySelectorAll('#fq-van .oopt').forEach(p=>{
+    const v=VAN[p.dataset.van]; if(!v)return;
+    p.classList.toggle('toosmall',!!(w&&z)&&!(v.kg>=w.kg&&v.vol>=z.lvl));
+    if(!fqData.vanByHand)p.classList.toggle('sel',p.dataset.van===rec);
+  });
+  if(rec&&!fqData.vanByHand)fqData.van=rec;
+  if(!note)return;
+  if(!rec){
+    note.className='ld-note warn';
+    note.innerHTML='That is more than a Luton will take — carry on and we will price it as a multi-van or freight job.';
+    note.style.display=(w&&z)?'':'none';
+    return;
+  }
+  const chosen=VAN[fqData.van]||VAN[rec];
+  const bad=chosen.kg<w.kg||chosen.vol<z.lvl;
+  let msg=bad
+    ? 'A <strong>'+chosen.n+'</strong> will not take '+w.n.toLowerCase()+' of '+z.n.toLowerCase()
+      +'. The smallest that will is a <strong>'+VAN[rec].n+'</strong>.'
+    : '<strong>'+w.n+'</strong>, <strong>'+z.n.toLowerCase()+'</strong> — we have picked the <strong>'
+      +chosen.n+'</strong>. Change it if you know better.';
+  if(needsTailLiftHint(fqData.weight,fqData.size)&&!chosen.tl)
+    msg+=' No forklift or loading bay at either end? Pick the tail lift.';
+  if(!bad)msg+=openBandNote(fqData.weight,fqData.van);
+  note.innerHTML=msg;
+  note.className='ld-note'+(bad?' warn':'');
+  note.style.display='';
+}
+function fqSelVan(el,key){
+  document.querySelectorAll('#fq-van .oopt').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  fqData.van=key; fqData.vanByHand=true;
+  fqApplyRec();
+}
+
 /* ── FLOW VALIDATION ── */
 function fErr(id,msg){const el=document.getElementById(id);if(!el)return;el.textContent=msg||'';el.style.display=msg?'block':'none';}
 
 function fqNext(toStep){
-  if(toStep===2){if(!fqData.van){fErr('fq-err-1','Please select a van size to continue.');return;}fErr('fq-err-1','');}
-  if(toStep===3){if(!fqData.weight){fErr('fq-err-2','Please select a weight to continue.');return;}fErr('fq-err-2','');}
+  if(toStep===2){
+    if(!fqData.weight||!fqData.size){fErr('fq-err-1','Please choose how heavy it is and how much there is.');return;}
+    fErr('fq-err-1','');
+    fqApplyRec();                      /* arrive on the van step with it already chosen */
+  }
+  if(toStep===3){if(!fqData.van){fErr('fq-err-2','Please select a van size to continue.');return;}fErr('fq-err-2','');}
   if(toStep===5){
     const fr=document.getElementById('fq-from').value.trim(),to=document.getElementById('fq-to').value.trim();
     if(!fr||!to){fErr('fq-err-4','Please enter both a collection and delivery postcode.');return;}
@@ -2929,7 +3186,7 @@ function roBookV(){
 }
 
 function hpNext(toStep){
-  if(toStep===2){if(!hpData.load){fErr('hp-err-1','Please select what you are moving.');return;}fErr('hp-err-1','');}
+  if(toStep===2){if(!hpData.weight||!hpData.size){fErr('hp-err-1','Please choose how heavy it is and how much there is.');return;}fErr('hp-err-1','');}
   if(toStep===3){if(!hpData.when){fErr('hp-err-2','Please select a delivery timescale.');return;}fErr('hp-err-2','');}
   hpStep(toStep);
 }
@@ -2982,7 +3239,18 @@ function roBook(){openDemoGate();}
 
 /* HAF PICK */
 const hpData={};
-const LOAD_VAN={boxes:'small',van:'lwb',big:'swb',pallet:'luton'};
+/* "Help me pick" asks the same two questions and uses the same engine, so all
+   three ways into a quote land on the same van for the same load. */
+function hpBuildLoad(){
+  const wp=document.getElementById('hp-wt'), sp=document.getElementById('hp-sz');
+  if(!wp||!sp)return;
+  wp.innerHTML=WT_BAND.map(b=>
+    '<button class="oopt gauge" type="button" onclick="hpSel(this,\'weight\',\''+b.k+'\')">'
+    +wtIcon(b.bars)+'<span>'+b.n+'<span class="oopt-sub">'+b.s+'</span></span></button>').join('');
+  sp.innerHTML=SZ_BAND.map((b,i)=>
+    '<button class="oopt gauge" type="button" onclick="hpSel(this,\'size\',\''+b.k+'\')">'
+    +szIcon(i)+'<span>'+b.n+'<span class="oopt-sub">'+b.s+'</span></span></button>').join('');
+}
 function hpStep(n){
   document.querySelectorAll('#if-pick .fstep').forEach(s=>s.classList.remove('on'));
   const el=document.getElementById('hp-'+n);if(el)el.classList.add('on');
@@ -2992,10 +3260,11 @@ function hpSel(el,key,val){
   if(g)g.querySelectorAll('.oopt').forEach(b=>b.classList.remove('sel'));
   el.classList.add('sel');hpData[key]=val;
 }
+hpBuildLoad();
 async function hpEstimate(){
   const fr=(document.getElementById('hp-from').value||'M1').trim().toUpperCase();
   const to=(document.getElementById('hp-to').value||'LS1').trim().toUpperCase();
-  const vk=LOAD_VAN[hpData.load||'van']||'lwb';
+  const vk=recommendVan(hpData.weight,hpData.size)||'lwb';
   const v=VAN[vk];
   const r=await pcDistReal(fr,to);
   const miles=r.miles;
@@ -4380,7 +4649,7 @@ function dashBuildFocus(){
    DRAWN, never what the engine is allowed to find — the same discipline as the
    Basic/Advanced switch. Locations stay at town + outward code, never a full
    postcode and never a pin, because a run back is still someone's job. */
-const RR_VEH=['VAN','SWB','MWB','LWB','XLWB','LUTON','LUTONTL'];            /* small → large; a bigger van can take a smaller load */
+const RR_VEH=['VAN','SWB','MWB','LWB','XLWB','LUTON','LUTONC','LUTONTL'];            /* small → large; a bigger van can take a smaller load */
 const RR_NEAR={Warrington:['Widnes','Runcorn'],Sheffield:['Rotherham','Barnsley'],Leeds:['Bradford','Wakefield'],Birmingham:['Coventry','Wolverhampton']};
 const RR_HOME={Manchester:['Salford','Stockport','Oldham','Bolton','Trafford'],Salford:['Manchester','Stockport','Oldham','Trafford']};
 const RR_POOL=[
@@ -5003,7 +5272,7 @@ function capFilter(){
     });
   }
   /* Customer guide band per loaded mile — driver base rate + the network fee, rounded to a band */
-  const RATES={van:'£0.95–£1.05',swb:'£1.05–£1.20',mwb:'£1.20–£1.30',lwb:'£1.30–£1.45',xlwb:'£1.40–£1.55',luton:'£1.55–£1.70',lutontl:'£1.65–£1.85'};
+  const RATES={van:'£0.95–£1.05',swb:'£1.05–£1.20',mwb:'£1.20–£1.30',lwb:'£1.30–£1.45',xlwb:'£1.40–£1.55',luton:'£1.55–£1.70',lutonc:'£1.55–£1.70',lutontl:'£1.65–£1.85'};
   const rateEl=document.getElementById('cap-rate-lbl');
   if(rateEl)rateEl.textContent=(RATES[_capVeh]||'£1.30–£1.45')+'/mi';
 }
@@ -5352,9 +5621,9 @@ function renderAll(){
       '<span style="color:var(--mu);margin:0 .45rem">least per job</span>'+
       field('px-v-min-'+i,v.minTransportValue,'1','£',''))).join('');
 
-  /* --- driver uplift --- */
+  /* --- driver reward --- */
   el('px-driver').innerHTML=['FREE','MEMBER','PRO'].map(k=>
-    row(W.driverLevels[k].name, field('px-d-'+k,W.driverLevels[k].upliftGbpPerMile,'0.01','+£','/mile'))).join('');
+    row(W.driverLevels[k].name, field('px-d-'+k,W.driverLevels[k].rewardGbpPerMile,'0.01','+£','/mile'))).join('');
 
   /* --- account fee reduction --- */
   el('px-account').innerHTML=['LITE','PLUS','PRO'].map(k=>
@@ -5424,7 +5693,7 @@ window.pxEdit=function(){
   if(!W)return;
   const n=(id,fb)=>{const e=el(id);if(!e)return fb;const v=parseFloat(e.value);return isFinite(v)?v:fb;};
   W.vehicles.forEach((v,i)=>{v.baseRate=n('px-v-rate-'+i,v.baseRate);v.minTransportValue=n('px-v-min-'+i,v.minTransportValue);});
-  ['FREE','MEMBER','PRO'].forEach(k=>{W.driverLevels[k].upliftGbpPerMile=n('px-d-'+k,W.driverLevels[k].upliftGbpPerMile);});
+  ['FREE','MEMBER','PRO'].forEach(k=>{W.driverLevels[k].rewardGbpPerMile=n('px-d-'+k,W.driverLevels[k].rewardGbpPerMile);});
   ['LITE','PLUS','PRO'].forEach(k=>{W.accountLevels[k].feeReductionPts=n('px-a-'+k,W.accountLevels[k].feeReductionPts);});
   W.jobTypes.forEach((t,i)=>{t.marginPct=n('px-j-fee-'+i,t.marginPct);t.floorPct=n('px-j-flr-'+i,t.floorPct);});
   const h=W.localHandling;
@@ -5445,8 +5714,8 @@ function problems(c){
     pr=v.baseRate;pm=v.minTransportValue;
   });
   const d=c.driverLevels;
-  if(!(d.FREE.upliftGbpPerMile<=d.MEMBER.upliftGbpPerMile&&d.MEMBER.upliftGbpPerMile<=d.PRO.upliftGbpPerMile))
-    p.push('The driver uplifts must rise: free, then member, then pro.');
+  if(!(d.FREE.rewardGbpPerMile<=d.MEMBER.rewardGbpPerMile&&d.MEMBER.rewardGbpPerMile<=d.PRO.rewardGbpPerMile))
+    p.push('The driver rewards must rise: free, then member, then pro.');
   ['LITE','PLUS','PRO'].forEach(k=>{const a=c.accountLevels[k].feeReductionPts;
     if(!num(a)||a<0||a>20)p.push(c.accountLevels[k].name+' must be between 0 and 20 points.');});
   c.jobTypes.forEach(t=>{

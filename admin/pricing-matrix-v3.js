@@ -5,7 +5,7 @@
  * and margin-gate.js (loss gate). V5 completes the framework Brent locked on
  * 2026-07-31 by adding the two levers he asked for on top of the V4 ladder:
  *
- *   DRIVER SIDE — base-rate uplift, pence per mile
+ *   DRIVER SIDE — driver reward rate, pence per mile
  *     Free driver    +£0.00/mi     (PLNA Free / Fleet Lite)
  *     Member driver  +£0.10/mi     (PLNA Plus / Fleet Middle / paid KNECT member)
  *     Pro driver     +£0.25/mi     (PLNA Pro / Fleet Pro)
@@ -59,19 +59,29 @@
     effectiveFrom: "2026-07-31",
     vatPct: 20,
 
-    // --- Vehicle matrix — the ONLY seven vehicles on this network.
+    // --- Vehicle matrix — the ONLY eight vehicles on this network.
     //     baseRate = £ per loaded mile paid to the driver/fleet
     //     minTransportValue = the vehicle's minimum transport value, £ ex VAT
-    //     Nothing above a Luton exists here: no artic, flatbed, curtain, rigid,
-    //     tractor unit, 7.5t or any other HGV class. (Removal test, §17.)
+    //     The top of the ladder is a Luton in its three approved bodies —
+    //     box, curtain side and tail lift (Brent 2026-08-02: "Lutons - tail
+    //     lift + box + curtain side").
+    //     Nothing above a Luton exists here: no artic, flatbed, rigid, tractor
+    //     unit, 7.5t, anything drawn on a trailer, or any other HGV class.
+    //     (Removal test, §17.)
+    //
+    //     Box and curtain side carry the same payload, so they price the same.
+    //     That mirrors the live rate card, which has always quoted the two
+    //     identically. Brent can split them on the Pricing Engine page if he
+    //     ever wants curtain side to earn more.
     vehicles: [
-      { code: "SMALL_VAN",   name: "Small Van",         baseRate: 0.80, minTransportValue: 50 },
-      { code: "SWB_VAN",     name: "SWB",               baseRate: 0.90, minTransportValue: 55 },
-      { code: "MWB_VAN",     name: "MWB",               baseRate: 1.00, minTransportValue: 60 },
-      { code: "LWB_VAN",     name: "LWB",               baseRate: 1.10, minTransportValue: 65 },
-      { code: "XLWB_VAN",    name: "XLWB",              baseRate: 1.20, minTransportValue: 70 },
-      { code: "LUTON",       name: "Luton",             baseRate: 1.30, minTransportValue: 75 },
-      { code: "LUTON_TAIL",  name: "Luton — Tail Lift", baseRate: 1.40, minTransportValue: 80 }
+      { code: "SMALL_VAN",     name: "Small Van",           baseRate: 0.80, minTransportValue: 50 },
+      { code: "SWB_VAN",       name: "SWB",                 baseRate: 0.90, minTransportValue: 55 },
+      { code: "MWB_VAN",       name: "MWB",                 baseRate: 1.00, minTransportValue: 60 },
+      { code: "LWB_VAN",       name: "LWB",                 baseRate: 1.10, minTransportValue: 65 },
+      { code: "XLWB_VAN",      name: "XLWB",                baseRate: 1.20, minTransportValue: 70 },
+      { code: "LUTON",         name: "Luton — Box",         baseRate: 1.30, minTransportValue: 75 },
+      { code: "LUTON_CURTAIN", name: "Luton — Curtain Side", baseRate: 1.30, minTransportValue: 75 },
+      { code: "LUTON_TAIL",    name: "Luton — Tail Lift",   baseRate: 1.40, minTransportValue: 80 }
     ],
 
     // --- Prepared but INACTIVE: never priced, never shown, until approved (§13)
@@ -80,9 +90,12 @@
       { code: "CAR",        name: "Car",        baseRate: null, minTransportValue: null, active: false }
     ],
 
-    // --- DRIVER BASE-RATE UPLIFT (MATRIX-V5) ---------------------------------
-    //     Brent 2026-07-31: "Driver base rate uplift per account or HAF KNECT
-    //     Paid members." The uplift is PENCE PER LOADED MILE added to the
+    // --- DRIVER REWARD RATE (MATRIX-V5) --------------------------------------
+    //     Brent 2026-07-31 asked for a driver base-rate rise "per account or
+    //     HAF KNECT Paid members", then on 2026-08-02 asked for it to carry
+    //     different wording from "uplift" so it stops reading as a contradiction
+    //     of §7. Same money, one name everywhere: the DRIVER REWARD RATE.
+    //     It is PENCE PER LOADED MILE added to the
     //     vehicle base rate — not a percentage skimmed off HAF's fee. It is the
     //     model already approved in PRICING_ENGINE_CONSTANTS §5.1 (2026-07-18):
     //     "Member and Pro derive automatically as Free + £0.10 and Free + £0.25".
@@ -93,9 +106,9 @@
     //     Brent's own sentence: the customer rate "depends on the driver taking
     //     the job".
     driverLevels: {
-      FREE:   { name: "Free driver",           upliftGbpPerMile: 0.00, rank: 0 },
-      MEMBER: { name: "Member driver",         upliftGbpPerMile: 0.10, rank: 1 },
-      PRO:    { name: "Pro driver",            upliftGbpPerMile: 0.25, rank: 2 }
+      FREE:   { name: "Free driver",           rewardGbpPerMile: 0.00, rank: 0 },
+      MEMBER: { name: "Member driver",         rewardGbpPerMile: 0.10, rank: 1 },
+      PRO:    { name: "Pro driver",            rewardGbpPerMile: 0.25, rank: 2 }
     },
 
     // Which driver level each thing earns. HIGHEST WINS, NEVER STACKS — the
@@ -103,7 +116,7 @@
     // ✅ CONFIRMED BY BRENT 2026-07-31 ("that's correct, add exactly that").
     //    This SUPERSEDES §7 of the 31 Jul framework, which says "PLNA tier must
     //    not change the customer-facing vehicle mileage rate". He was shown the
-    //    clash in writing and chose the uplift: the customer rate follows the
+    //    clash in writing and chose the reward rate: the customer rate follows the
     //    driver who takes the job. §7's line is recorded as superseded here
     //    rather than quietly dropped, so nobody re-applies it later.
     driverLevelFrom: {
@@ -148,7 +161,7 @@
         { source: "tier_config knect_member.FEE_BENEFIT seed v2", MEMBER_PTS: 1 }
       ]
     },
-    // The percentage-multiplier driver model this pence-per-mile uplift replaces.
+    // The percentage-multiplier driver model this pence-per-mile reward rate replaces.
     supersededDriverModels: [
       { source: "tier_config plna_payout seed v2 (multipliers)",
         LITE: 1.00, PLUS: 1.04, PRO: 1.08, cap: 1.10 }
@@ -188,7 +201,7 @@
 
     // --- HAF margin by job type: firm %, hard floor. Never breached by benefits.
     //     marginPct = the HAF Network Fee as a % of the Carrier Transport Value.
-    //     floorPct   = the least HAF may retain after funding a driver uplift.
+    //     floorPct   = the least HAF may retain after funding a driver reward.
     //     Groupage is built but NOT customer-facing at launch (§12).
     jobTypes: [
       { code: "GROUPAGE",     name: "Groupage",                     marginPct: 10, floorPct: 8,  active: false },
@@ -383,18 +396,18 @@
       }
     }
 
-    // --- Driver base-rate uplift: pence per mile ON the vehicle rate, decided
+    // --- Driver reward rate: pence per mile ON the vehicle rate, decided
     //     by the driver's own tier / fleet tier / KNECT membership. Highest
     //     wins. This raises the transport value, so the fee rides up with it.
     var driverLevel = resolveDriverLevel(input);
-    var upliftPerMile = driverLevel.level.upliftGbpPerMile;
-    if (upliftPerMile > 0)
-      reasons.push("Driver rate uplift +£" + upliftPerMile.toFixed(2) + "/mile (" +
+    var rewardPerMile = driverLevel.level.rewardGbpPerMile;
+    if (rewardPerMile > 0)
+      reasons.push("Driver reward +£" + rewardPerMile.toFixed(2) + "/mile (" +
         driverLevel.level.name + ") — the customer rate follows the driver taking the job.");
 
     // --- Fuel marker ---
     var fuel = fuelAdjustment();
-    var baseRate = vehicle.baseRate + upliftPerMile;
+    var baseRate = vehicle.baseRate + rewardPerMile;
     if (fuel.active) {
       baseRate = baseRate * (1 + fuel.upliftPct / 100);
       reasons.push("Fuel protection: base rate +" + fuel.upliftPct + "% (" + fuel.reason + ").");
@@ -427,9 +440,9 @@
                     + num(input.waitingHours) * config.hindrance.waitingPerHourGbp;
 
     // --- Mileage value at this driver's rate, and at the plain Free rate, so
-    //     the audit can show exactly what the uplift was worth on this job.
+    //     the audit can show exactly what the reward was worth on this job.
     var driverBase = round2(miles * baseRate * mult + supplements);
-    var freeRate = vehicle.baseRate * (baseRate / (vehicle.baseRate + upliftPerMile));
+    var freeRate = vehicle.baseRate * (baseRate / (vehicle.baseRate + rewardPerMile));
     var driverBaseAtFreeRate = round2(miles * freeRate * mult + supplements);
 
     // --- Margin (firm; overridable by admin with reason, never below floor) ---
@@ -488,7 +501,7 @@
           : ""));
     }
     carrierValue = round2(carrierValue);
-    // The same job priced at the plain Free rate — the uplift's real worth.
+    // The same job priced at the plain Free rate — the reward's real worth.
     var carrierValueAtFreeRate = round2(
       (!direct && driverBaseAtFreeRate < minValue) ? minValue : driverBaseAtFreeRate);
 
@@ -496,12 +509,12 @@
     //     Never hidden inside the mileage rate, never taken off the driver.
     var networkFeeGbp = round2(carrierValue * marginPct / 100);
 
-    // --- The driver is paid the whole transport value. The uplift is already
+    // --- The driver is paid the whole transport value. The reward is already
     //     inside it (it went on the base rate), so there is nothing to skim off
-    //     HAF's fee and no uplift can ever be "withheld" for margin reasons.
+    //     HAF's fee and no reward can ever be "withheld" for margin reasons.
     var driverPay = carrierValue;
-    // What the uplift was actually worth on this job, for the audit.
-    var upliftGbp = round2(Math.max(0, carrierValue - carrierValueAtFreeRate));
+    // What the reward was actually worth on this job, for the audit.
+    var rewardGbp = round2(Math.max(0, carrierValue - carrierValueAtFreeRate));
 
     var customerExVat = round2(carrierValue + networkFeeGbp);
 
@@ -551,8 +564,8 @@
       rates: { vehicleBaseRate: vehicle.baseRate,
                driverLevel: driverLevel.code,
                driverLevelName: driverLevel.level.name,
-               driverUpliftGbpPerMile: upliftPerMile,
-               upliftedBaseRate: round2(vehicle.baseRate + upliftPerMile),
+               driverRewardGbpPerMile: rewardPerMile,
+               rewardedBaseRate: round2(vehicle.baseRate + rewardPerMile),
                fuelAdjustedRate: round2(baseRate),
                levelClaims: driverLevel.claims },
       account: { level: accountLevel.code,
@@ -572,7 +585,7 @@
         vatGbp: vat,
         customerIncVatGbp: round2(customerExVat + vat),
         driverBasePayGbp: driverBase,
-        driverUpliftGbp: upliftGbp,               // what the rate uplift was worth here
+        driverRewardGbp: rewardGbp,               // what the reward rate was worth here
         carrierValueAtFreeRateGbp: carrierValueAtFreeRate,
         driverPayGbp: driverPay,                  // the whole transport value
         hafMarginPct: marginPct,

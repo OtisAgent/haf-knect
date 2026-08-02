@@ -483,7 +483,7 @@ window.pmOpen=function(ref){
   /* pool split intentionally NOT shown here — trial pooling lives only in the owner pools card */
   $('pm-body').innerHTML=
     '<div class="pm-grid">'+
-    '<div class="pm-field"><label>Driver pay</label><b>'+money(r.money.driverPayGbp)+'</b> at £'+r.rates.upliftedBaseRate.toFixed(2)+'/mi'+(r.rates.driverUpliftGbpPerMile>0?' ('+esc(r.rates.driverLevelName)+', +£'+r.rates.driverUpliftGbpPerMile.toFixed(2)+'/mi = '+money(r.money.driverUpliftGbp)+' on this job)':' (free rate)')+'</div>'+
+    '<div class="pm-field"><label>Driver pay</label><b>'+money(r.money.driverPayGbp)+'</b> at £'+r.rates.rewardedBaseRate.toFixed(2)+'/mi'+(r.rates.driverRewardGbpPerMile>0?' ('+esc(r.rates.driverLevelName)+', +£'+r.rates.driverRewardGbpPerMile.toFixed(2)+'/mi = '+money(r.money.driverRewardGbp)+' on this job)':' (free rate)')+'</div>'+
     '<div class="pm-field"><label>Customer price</label><b>'+money(r.money.customerIncVatGbp)+'</b> inc VAT ('+money(r.money.customerExVatGbp)+' + VAT)</div>'+
     '<div class="pm-field"><label>HAF network fee</label>'+r.money.hafMarginPct+'% = '+money(r.money.hafMarginGbp)+' (floor '+(jt.floorPct||0)+'%)</div>'+
     '<div class="pm-field"><label>Posting account</label>'+esc(r.account.levelName)+(r.account.feeReductionAppliedPts>0?' — fee −'+r.account.feeReductionAppliedPts+' pts'+(r.account.heldAtFloor?' (held at the floor; '+r.account.feeReductionRequestedPts+' pts asked for)':''):' — no reduction')+'</div>'+
