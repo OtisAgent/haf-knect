@@ -24,7 +24,9 @@ for(const [w,h,tag] of [[1440,950,'desktop'],[390,844,'phone']]){
     await pg.evaluate(()=>window.demoLogin('DEMO-FND'));
     await pg.waitForTimeout(700);
     ok(`${tag}/${theme} founder: card visible`, await pg.isVisible('#fnd-card'));
-    ok(`${tag}/${theme} founder: badge visible`, await pg.isVisible('#tb-founder'));
+    // by design the top-bar mark stands down on a phone; the card carries it there
+    const wantBadge = w > 600;
+    ok(`${tag}/${theme} founder: top-bar mark ${wantBadge?'shown':'stands down'}`, (await pg.isVisible('#tb-founder'))===wantBadge);
     const txt=await pg.textContent('#fnd-card');
     ok(`${tag}/${theme} says "Founding Member"`, /Founding Member/.test(txt));
     ok(`${tag}/${theme} shows founder number`, /Founder No\. 1/.test(txt));
@@ -43,9 +45,10 @@ for(const [w,h,tag] of [[1440,950,'desktop'],[390,844,'phone']]){
     // no horizontal overflow
     const ovf=await pg.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
     ok(`${tag}/${theme} no sideways scroll (${ovf}px)`, ovf<=1);
+    const topRight=await pg.evaluate(()=>Math.round(document.querySelector('.tb-r').getBoundingClientRect().right));
+    ok(`${tag}/${theme} top bar inside screen (right=${topRight})`, topRight<=w+1);
     // badge fits the top bar
-    const bb=await (await pg.$('#tb-founder')).boundingBox();
-    ok(`${tag}/${theme} badge inside viewport`, bb && bb.x>=0 && bb.x+bb.width<=w+1);
+    if(wantBadge){const bb=await (await pg.$('#tb-founder')).boundingBox();ok(`${tag}/${theme} badge inside viewport`, !!bb && bb.x>=0 && bb.x+bb.width<=w+1);}
 
     // 3. REAL register check over the live network, for a real paid founder
     const real=await pg.evaluate(async()=>{await window.hafFounderPaint('IW908093');return document.getElementById('fnd-card').classList.contains('on')?document.getElementById('fnd-no').textContent:'NOT SHOWN'});

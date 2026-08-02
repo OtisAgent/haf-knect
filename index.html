@@ -213,8 +213,10 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .tlogo-t{font-family:var(--dp);font-weight:900;font-size:.92rem;letter-spacing:-.04em;color:var(--tx)}
 .tlogo-t span{color:var(--or)}
 .menu-btn{display:none;width:30px;height:30px;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln);align-items:center;justify-content:center;color:var(--mu);cursor:pointer}
-.tb-r{display:flex;align-items:center;gap:.45rem}
-.tb-user{font-size:.76rem;font-weight:600;color:var(--mu)}
+.tb-r{display:flex;align-items:center;gap:.45rem;min-width:0}
+/* A long real name used to push the whole right-hand row off a phone screen.
+   The name gives up its space first — everything after it is a control. */
+.tb-user{font-size:.76rem;font-weight:600;color:var(--mu);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .role-chip{font-size:.64rem;font-weight:700;letter-spacing:.06em;padding:.13rem .5rem;border-radius:var(--pill);text-transform:uppercase}
 .ib{width:28px;height:28px;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;color:var(--mu);transition:all .14s;cursor:pointer}
 .ib:hover{color:var(--tx);background:var(--p3)}

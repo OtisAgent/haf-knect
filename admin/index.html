@@ -484,6 +484,7 @@ function pmRows(){
     return '<tr><td><b>'+o.ref+'</b></td><td>'+esc(o.from+' → '+o.to+' · '+o.miles+'mi')+'</td><td>'+esc(r.inputs.jobType+(o.isDirectBooking?' · DIRECT':''))+'</td><td>'+esc((PM.config.plnaTiers[o.plnaTier]||{}).name||o.plnaTier)+'</td><td>'+esc((PM.config.knectTiers[o.knectTier]||{}).name||o.knectTier)+'</td><td>'+money(r.money.driverPayGbp)+'</td><td>'+r.money.hafMarginPct+'% ('+money(r.money.hafMarginGbp)+')</td><td><b>'+money(r.money.customerIncVatGbp)+'</b></td><td><span class="pill '+cls+'">'+s+'</span></td><td><button class="ebtn" onclick="pmOpen(\''+o.ref+'\')">Open</button></td></tr>';
   }).join('');
   pmPools();
+  pmRevenue();
 }
 window.pmOpen=function(ref){
   const o=DEMO.find(x=>x.ref===ref);if(!o)return;
@@ -506,6 +507,53 @@ window.pmOpen=function(ref){
   $('pm-detail').style.display='block';
   $('pm-detail').scrollIntoView({behavior:'smooth',block:'nearest'});
 };
+/* ===== REVENUE-V1 — what HAF actually EARNS on a job, not just what it charges.
+   Brent's "HAF Network Pricing Formula" §11: the network fee is revenue, not
+   profit. Every deduction is shown, each one exactly once. ===== */
+const RM=(typeof HAFRevenueModel!=='undefined')?HAFRevenueModel:null;
+function pmJobRevenue(r){
+  if(!RM)return'';
+  const v=RM.jobRevenue(r),b=v.breakdown,g=v.grossProfit;
+  const row=(l,val,strong)=>'<div class="mrow"><span>'+esc(l)+'</span><b>'+(strong?'<u>':'')+val+(strong?'</u>':'')+'</b></div>';
+  return '<div class="pm-sub">What HAF earns on this job</div>'+
+    row('Driver payable',money(b.driverPayableGbp))+
+    row('HAF network fee',money(b.hafNetworkFeeGbp))+
+    (b.otherChargesGbp>0?row('Other charges (passed straight through)',money(b.otherChargesGbp)):'')+
+    row('Customer price ex VAT',money(b.customerExVatGbp))+
+    row('VAT',money(b.vatGbp))+
+    row('Final customer price',money(b.customerIncVatGbp))+
+    '<div class="pm-sub">Fee → profit</div>'+
+    row('Network fee before HAF-funded costs',money(g.networkFeeBeforeFundedCostsGbp))+
+    (g.lessHafFundedJobCostsGbp>0?row('less driver reward HAF funded itself','−'+money(g.lessHafFundedJobCostsGbp)):'')+
+    (g.lessPaymentProcessingGbp>0?row('less payment processing','−'+money(g.lessPaymentProcessingGbp)):'')+
+    row('less back into the network pools','−'+money(g.lessNetworkPoolContributionGbp))+
+    (g.lessApprovedDiscountsGbp>0?row('less approved discount','−'+money(g.lessApprovedDiscountsGbp)):'')+
+    row('HAF gross profit',money(b.hafGrossProfitGbp)+' ('+g.grossProfitPctOfCustomer+'% of the customer price)',true)+
+    (v.context.revenueForegoneByAccountGbp>0
+      ?'<p class="note" style="margin-top:.4rem">This account\'s '+v.context.accountFeeReductionPts+'-point reduction gave away '+money(v.context.revenueForegoneByAccountGbp)+' of fee on this job. It is already inside the percentage above, so it is shown rather than deducted twice.</p>'
+      :'')+
+    (g.processingBasis==='SUPPLIED_PER_INVOICE'
+      ?'<p class="note" style="margin-top:.4rem">No payment processing is charged here: CleverPay bills only when an invoice is generated, per driver per payment run — never assumed against a delivery.</p>':'');
+}
+/* The four streams (§10). Only delivery is earned per job — the other three are
+   recorded on their own lines and can never be reported as delivery margin. */
+function pmRevenue(){
+  const el=$('pm-revenue');if(!el||!RM)return;
+  const led=RM.createLedger();
+  DEMO.forEach(o=>{const r=st.results[o.ref]||calc(o);led.recordJob(RM.jobRevenue(r),o.ref)});
+  const by=led.byStream(),delivery=led.deliveryMargin();
+  const S=[
+    ['A','Delivery network revenue','the network fee on every job moved',money(delivery),'from the '+DEMO.length+' quotes above'],
+    ['B','Account subscriptions','PLNA, Freight, Fleet and paid KNECT memberships','—','recorded per account, not per job'],
+    ['C','Payroll &amp; processing','payment-run block fees and transaction fees','—','recorded per invoice, never inside a delivery fee'],
+    ['D','Additional services','relay, storage, credit, compliance, pages, AI, admin','—','recorded per service']
+  ];
+  el.innerHTML='<div class="tblwrap"><table><thead><tr><th></th><th>Stream</th><th>What it is</th><th>On this screen</th><th>Where it is earned</th></tr></thead><tbody>'+
+    S.map(s=>'<tr><td><b>'+s[0]+'</b></td><td><b>'+s[1]+'</b></td><td>'+s[2]+'</td><td>'+s[3]+'</td><td>'+s[4]+'</td></tr>').join('')+
+    '</tbody></table></div>';
+  if(by.SUBSCRIPTION.gbp||by.PAYROLL.gbp||by.SERVICES.gbp)
+    console.warn('Non-delivery revenue reached the job ledger — check the stream mapping.');
+}
 window.pmApprove=function(ref){
   st.statuses[ref]='Approved';const r=st.results[ref];
   logAudit(ref,'back-office','APPROVED','Customer '+money(r.money.customerIncVatGbp)+' · driver '+money(r.money.driverPayGbp)+' · margin '+r.money.hafMarginPct+'%');
