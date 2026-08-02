@@ -3,9 +3,17 @@
    selectable, the saved framework (not the built-in fallback) driving the
    quote, and the retired "uplift" wording gone. */
 import { chromium } from 'playwright-core';
+import { existsSync } from 'node:fs';
 
 const URL = 'https://knect.usehaf.co.uk/';
-const b = await chromium.launch({ executablePath: '/agent/home/.cache/ms-playwright/chromium-1228/chrome-linux64/chrome', args: ['--no-sandbox'] });
+/* The pinned browser build moves whenever this box is rebuilt, so take the
+   first one actually on disk instead of a version number that goes stale. */
+const CHROME = [
+  '/agent/home/.cache/ms-playwright/chromium-1228/chrome-linux64/chrome',
+  '/agent/home/.cache/ms-playwright/chromium-1140/chrome-linux/chrome',
+].find(existsSync);
+if (!CHROME) { console.error('no browser on this box — the eyes-on check cannot run'); process.exit(2); }
+const b = await chromium.launch({ executablePath: CHROME, args: ['--no-sandbox'] });
 let fail = 0;
 const ok = (n, c, x) => { console.log((c ? '  ✓ ' : '  ✗ ') + n + (c ? '' : '  — ' + x)); if (!c) fail++; };
 
@@ -37,10 +45,14 @@ for (const [name, vp] of [['desktop', { width: 1440, height: 1000 }], ['phone', 
   const e = await p.evaluate(() => ({ src: window.HAF_PRICING_SOURCE, ver: window.HAF_PRICING_VERSION,
     applied: window.HAF_PRICING_APPLIED, rates: window.HAF_PRICING_RATES }));
   ok('the quote engine loaded the saved framework', e.src === 'database', String(e.src));
-  ok('it is the approved framework version', e.ver === 'MATRIX-V5', String(e.ver));
+  ok('it is the approved framework version', e.ver === 'MATRIX-V7', String(e.ver));
   ok('the driver reward rung is what the engine took in', Array.isArray(e.applied) && e.applied.includes('driver reward'), JSON.stringify(e.applied));
   ok('tail lift is the top rung — £1.40/mi, £80 minimum', e.rates && e.rates.lutonTail === 1.4 && e.rates.lutonTailMin === 80, JSON.stringify(e.rates));
-  ok('a Pro driver earns +25p a mile', e.rates && e.rates.proRewardPerMile === 0.25, JSON.stringify(e.rates && e.rates.proRewardPerMile));
+  /* V7 holds the driver reward rate at zero until Brent switches it on. The
+     rungs still exist, so switching it on is one setting, not a rebuild. */
+  ok('the driver reward rate is paused, as agreed', e.rates && e.rates.rewardOn === false && e.rates.proRewardPerMile === 0,
+     JSON.stringify({ on: e.rates && e.rates.rewardOn, pro: e.rates && e.rates.proRewardPerMile }));
+  ok('when it runs, HAF funds it — never the customer', e.rates && e.rates.rewardFundedBy === 'HAF', String(e.rates && e.rates.rewardFundedBy));
   ok('a Pro account pays 5 points less fee', e.rates && e.rates.proAccountCutPts === 5, JSON.stringify(e.rates && e.rates.proAccountCutPts));
 
   /* 4. wording */
