@@ -3501,7 +3501,11 @@ function closeLogin(){document.getElementById('login-ov').classList.remove('open
 async function hafSha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
 let hafPend=null; /* password-verified user waiting on PIN setup: {u, hash} */
 function hafErr(el,msg){el.textContent=msg;el.style.display='block'}
-function hafGo(u,k,t){localStorage.setItem('knect-user',u);enterKnectApp(u);}
+/* Held for this tab only, never stored: it is what lets the page ask the network
+   for THIS member's own discount code. A username alone must never be enough —
+   HAF usernames are guessable, and a code is worth six months of Pro. */
+let _hafCred=null;
+function hafGo(u,k,t){localStorage.setItem('knect-user',u);_hafCred={hash:t==='p'?null:k,relay:t==='p'?k:null};enterKnectApp(u);}
 const DRIVER_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
   {id:'d-invites',l:'Exchange',s:'KNECT Jobs',badge:'2',ico:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>'},
@@ -3762,8 +3766,27 @@ async function hafFounderPaint(u){
     _setMyTier(s.account_level);
     _setMemberAccess(s);
     /* the founder card only for someone whose £100 is really on the register */
-    if(s.paid_membership)_setFounder({member_no:s.member_no,since:s.since,plna_code:s.plna_code,months:s.plna_code_months,redeemed_at:s.plna_code_redeemed_at});
+    if(s.paid_membership){
+      _setFounder({member_no:s.member_no,since:s.since,months:s.plna_code_months});
+      if(s.has_code)_paintMyCode(u,s);
+    }
   }catch(e){/* no answer means the free rung and no mark */}
+}
+
+/* The code itself is asked for separately, with the credentials this person
+   signed in with. Anyone can ask whether a username is a member; only that
+   member can read the code that came with it. If we cannot prove it — a session
+   restored from an earlier visit, say — the card simply shows no code rather
+   than showing someone else's. */
+async function _paintMyCode(u,s){
+  if(!_hafCred)return;
+  try{
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/knect_my_code',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:u,p_hash:_hafCred.hash,p_relay:_hafCred.relay})});
+    if(!r.ok)return;
+    const c=await r.json();
+    if(!c||!c.ok)return;
+    _setFounderCode({member_no:s.member_no,plna_code:c.plna_code,months:c.months,redeemed_at:c.redeemed_at});
+  }catch(e){/* no code shown beats the wrong code shown */}
 }
 
 function showModeSelector(){
