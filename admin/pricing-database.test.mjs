@@ -153,8 +153,10 @@ head('4. The page is wired into the app');
   ok('the customer quote engine reads the saved framework', html.includes('hafApplyPricingConfig'));
   ok('the quote engine still works if the database is unreachable', /HAF_PRICING_SOURCE='built-in'/.test(html));
   ok('saving goes through the gateway, not straight at the database', html.includes("fetch('/api/pricing',{method:'POST'"));
+  /* a curtain-side LUTON is approved (Brent 2026-08-02); a curtain-side TRAILER
+     is still banned, so ban the trailer by name rather than the bare word */
   ok('no vehicle beyond a Luton is anywhere on the page',
-     !/\b(artic|flatbed|curtain|7\.5t|tractor unit)\b/i.test(html));
+     !/\b(artic|flatbed|7\.5t|tractor unit|curtain[- ]?siders?|curtain[- ]?side trailer|curtain trailer)\b/i.test(html));
 }
 
 console.log('\n' + (fail ? 'FAILURES' : 'ALL PASS') + ' — ' + pass + ' passed, ' + fail + ' failed');
