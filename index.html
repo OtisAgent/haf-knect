@@ -796,13 +796,14 @@ textarea.fi2{resize:vertical;min-height:70px}
 [data-theme=dark]{--hv-s:#8c9bad;--hv-s-bg:rgba(140,155,173,.08);--hv-s-ln:rgba(140,155,173,.38)}
 
 .hv-tile{position:relative}
-.hv-tile .xc-head,.hv-tile .cap-sec-top{padding-right:1.55rem}
+.hv-tile .xc-head,.hv-tile .cap-sec-top,.hv-tile .sb-lj-top{padding-right:1.55rem}
 
-.xc.hv-sample,.cap-sec.hv-sample{
+.xc.hv-sample,.cap-sec.hv-sample,#sb-livejob.hv-sample{
   border-style:dashed!important;border-color:var(--hv-s-ln)!important;
   background-image:linear-gradient(var(--hv-s-bg),var(--hv-s-bg))}
 .xc.hv-sample:hover{border-color:var(--hv-s-ln)!important;box-shadow:var(--sd)}
-.xc.hv-sample .xc-route,.cap-sec.hv-sample .cap-sec-nm{color:var(--hv-s)}
+.xc.hv-sample .xc-route,.cap-sec.hv-sample .cap-sec-nm,
+#sb-livejob.hv-sample .sb-lj-route{color:var(--hv-s)}
 .xc.hv-sample .xb.inv{background:rgba(120,136,155,.16);color:var(--hv-s);border-color:var(--hv-s-ln)}
 .hv-stag{font-size:.53rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
   padding:.16rem .42rem;border-radius:4px;background:rgba(120,136,155,.16);
@@ -6020,7 +6021,7 @@ window.pxSave=async function(){
 
   /* ── identify a tile ── */
   function tileRef(el){
-    var r = el.querySelector('.xb-ref');
+    var r = el.querySelector('.xb-ref') || el.querySelector('.sb-lj-ref');
     if (r) {
       var t = (r.textContent || '').trim();
       /* refs are written as "HAF-2853 · 2.1 mi from you" or "JW012390 — James Wilson" */
@@ -6035,7 +6036,11 @@ window.pxSave=async function(){
 
   /* ── decorate one tile ── */
   function decorate(el){
-    if (el.getAttribute('data-hv')) return;
+    /* The sidebar live-job card redraws itself from scratch on every tick, which
+       throws away anything we put inside it. So "already decorated" also has to
+       mean "the eye is still there" — otherwise a redraw would silently leave
+       that card with no way to blur it, which is the one card always on screen. */
+    if (el.getAttribute('data-hv') && el.querySelector(':scope > .hv-eye')) return;
     el.setAttribute('data-hv','1');
     el.classList.add('hv-tile');
 
@@ -6044,20 +6049,23 @@ window.pxSave=async function(){
 
     var isCap = el.classList.contains('cap-sec');
     var sample = isCap ? true : isSample(ref);
+    /* a card can be decorated before it has drawn its reference and again after,
+       so always clear the opposite verdict — never leave it reading both ways */
+    el.classList.remove(sample ? 'hv-real' : 'hv-sample');
     el.classList.add(sample ? 'hv-sample' : 'hv-real');
 
     /* a chip on the run cards so it reads at a glance, not on region tiles
        which already carry their own status pill */
     if (!isCap && ref) {
       var badges = el.querySelector('.xc-badges');
-      if (badges && !badges.querySelector('.hv-stag,.hv-live')) {
-        var chip = document.createElement('span');
+      if (badges) {
+        var chip = badges.querySelector('.hv-stag,.hv-live');
+        if (!chip) { chip = document.createElement('span'); badges.appendChild(chip); }
         chip.className = sample ? 'hv-stag' : 'hv-live';
         chip.textContent = sample ? 'Sample' : 'Live';
         chip.title = sample
           ? 'Sample data — not a real job'
           : 'A real job on the network';
-        badges.appendChild(chip);
       }
     }
 
@@ -6224,7 +6232,9 @@ window.pxSave=async function(){
     if (observer) observer.disconnect();
     try {
       syncUser();
-      var tiles = [].slice.call(document.querySelectorAll('.xc, .cap-sec'));
+      /* the sidebar live-job card is included on purpose: it sits on screen the
+         whole time, so it is the first thing you want soft on a shared screen */
+      var tiles = [].slice.call(document.querySelectorAll('.xc, .cap-sec, #sb-livejob'));
       tiles.forEach(decorate);
 
       /* group tiles by pane so each pane gets its own bar and wrapper */
