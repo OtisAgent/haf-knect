@@ -278,6 +278,9 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .fnd-no{font-size:.58rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#2e2200;background:linear-gradient(135deg,#f0c33c,#d9920b);border-radius:var(--pill);padding:.12rem .45rem}
 .fnd-sub{font-size:.82rem;color:var(--mu);margin-top:.28rem;line-height:1.5}
 .fnd-meta{font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--am);margin-top:.5rem}
+/* What the membership actually switched on. Wraps rather than scrolls, because
+   on a narrow phone a list of benefits that runs off the edge reads as broken. */
+.fnd-active{margin-top:.5rem;font-size:.7rem;font-weight:700;color:var(--gn);line-height:1.5;overflow-wrap:anywhere}
 /* The PLNA code block. It has to survive a long code on a 320px screen, so the
    row wraps and the code itself is allowed to break rather than push the card. */
 .fnd-code{margin-top:.75rem;padding:.7rem .8rem;background:var(--am-d);border:1px solid var(--am);border-radius:var(--rx)}
@@ -1465,6 +1468,10 @@ textarea.fi2{resize:vertical;min-height:70px}
             <div class="fnd-ttl">Founding Member<span class="fnd-no" id="fnd-no">Founder</span></div>
             <div class="fnd-sub">You backed HAF KNECT before the network opened. Your founding place is permanent, and your account carries full create access — post work and take work on the Exchange.</div>
             <div class="fnd-meta" id="fnd-since">Founding member of the HAF KNECT network</div>
+
+            <!-- What the paid tier switched on for this account. Written from the
+                 live standing, never from the page's own idea of who is paid. -->
+            <div class="fnd-active" id="fnd-active" hidden></div>
 
             <!-- The PLNA code that came with the founding membership. Shown here so a
                  founder never has to go looking through an email for it. Painted by
@@ -3659,7 +3666,7 @@ function _setFounder(f){
   const badge=document.getElementById('tb-founder');
   const card=document.getElementById('fnd-card');
   if(!badge||!card)return;
-  if(!f){badge.classList.remove('on');card.classList.remove('on');return}
+  if(!f){badge.classList.remove('on');card.classList.remove('on');_setMemberAccess(null);return}
   const no=document.getElementById('fnd-no');
   const since=document.getElementById('fnd-since');
   if(no)no.textContent=f.member_no?('Founder No. '+f.member_no):'Founder';
@@ -3713,15 +3720,50 @@ function _fndSelect(el){
   try{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);}catch(e){}
 }
 
+/* ── WHAT A PAID TIER SWITCHES ON ──────────────────────────────────
+   Buying a tier used to show a badge and change nothing else: a real sign-in
+   was priced as a free account whatever the person had paid. One live read now
+   answers "what has this account actually paid for?" and everything on the
+   page follows that one answer, so the badge, the benefits and the quote can
+   never tell three different stories.
+
+   The rungs are FRAMEWORK-V7's, not this page's: a paid HAF KNECT membership
+   is the Plus rung on the account ladder and the Member rung on the driver
+   ladder (paused today and HAF-funded when it returns, so no customer price
+   moves either way), with direct booking unlimited. Highest wins and never
+   stacks — a member who is also PLNA Pro is Pro, not both.
+
+   Fail quiet, and only ever downwards: if the check cannot be made the account
+   stays on the free rung. A missing benefit is a small thing; charging the
+   network for one nobody paid for is not. */
+function _setMemberAccess(s){
+  const el=document.getElementById('fnd-active');
+  if(!el)return;
+  if(!s||!s.active){el.hidden=true;el.textContent='';return}
+  const on=['Full network access'];
+  if(s.priority_matching)on.push('priority matching');
+  if(s.direct_booking==='unlimited')on.push('unlimited direct booking');
+  if(s.account_level==='pro')on.push('Pro account rate');
+  else if(s.account_level==='plus')on.push('Plus account rate');
+  el.textContent='Membership active — '+on.join(' · ');
+  el.hidden=false;
+}
+
 async function hafFounderPaint(u){
   const demo=DEMO_ACCOUNTS[u];
-  if(demo){if(demo.founder)_setFounder(demo.founder);return}
+  if(demo){if(demo.founder){_setFounder(demo.founder);_setMemberAccess({active:true,priority_matching:true,direct_booking:'unlimited',account_level:demo.level?String(demo.level).toLowerCase():'plus'});}return}
   try{
-    const r=await fetch(PLNA_URL+'/rest/v1/rpc/knect_founder_card',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:u})});
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/knect_member_standing',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:u})});
     if(!r.ok)return;
-    const d=await r.json();
-    if(Array.isArray(d)&&d.length&&d[0].is_founder)_setFounder(d[0]);
-  }catch(e){/* no answer means no mark */}
+    const s=await r.json();
+    if(!s||!s.active)return;
+    /* the rung first: it decides the mark beside their name AND the account
+       rate their quotes are worked out at */
+    _setMyTier(s.account_level);
+    _setMemberAccess(s);
+    /* the founder card only for someone whose £100 is really on the register */
+    if(s.paid_membership)_setFounder({member_no:s.member_no,since:s.since,plna_code:s.plna_code,months:s.plna_code_months,redeemed_at:s.plna_code_redeemed_at});
+  }catch(e){/* no answer means the free rung and no mark */}
 }
 
 function showModeSelector(){
