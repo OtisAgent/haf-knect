@@ -87,6 +87,40 @@ for (const [label, w, h] of [['desktop', 1440, 900], ['phone', 390, 844]]) {
      Math.abs(sheffield.smKeeps - 20) < 0.05 && Math.abs(sheffield.sbKeeps - 20) < 0.05,
      `${sheffield.smKeeps.toFixed(2)}% / ${sheffield.sbKeeps.toFixed(2)}%`);
 
+  /* FRAMEWORK-V7, read off the live page: which driver takes the job must not
+     move the customer's price. Checked on the deployed bytes, not the source,
+     because that is the only copy customers ever see. */
+  const v7 = await page.evaluate(() => {
+    const on = typeof DRV_REWARD !== 'undefined' ? DRV_REWARD.on : null;
+    const fundedBy = typeof DRV_REWARD !== 'undefined' ? DRV_REWARD.fundedBy : null;
+    const out = { on, fundedBy, moved: 0, checked: 0, tiers: {} };
+    ['free', 'member', 'pro'].forEach(d => {
+      const q = v3Price(100, 150, 'lwb', 'sday', 'M1 1AA', { account: 'lite', fromPc: 'S1 2HH', driver: d });
+      out.tiers[d] = { sub: q.sub, driverPay: q.driverPay, reward: q.rewardGbp };
+    });
+    ['small', 'lwb', 'lutontl'].forEach(v => {
+      [5, 60, 200].forEach(mi => {
+        ['sday', 'urg'].forEach(u => {
+          const f = v3Price(mi, mi / 40 * 60, v, u, 'M1 1AA', { account: 'lite', driver: 'free' });
+          const p = v3Price(mi, mi / 40 * 60, v, u, 'M1 1AA', { account: 'lite', driver: 'pro' });
+          if (Math.abs(f.sub - p.sub) > 0.01) out.moved++;
+          out.checked++;
+        });
+      });
+    });
+    return out;
+  });
+  ok('the live page has the driver reward paused', v7.on === false, String(v7.on));
+  ok('...and funds it from HAF, not the customer, when it runs',
+     v7.fundedBy === 'HAF', String(v7.fundedBy));
+  ok('a free, a member and a pro driver all quote the same price',
+     v7.tiers.free.sub === v7.tiers.member.sub && v7.tiers.free.sub === v7.tiers.pro.sub,
+     JSON.stringify(v7.tiers));
+  ok('...and all three are paid the same today',
+     v7.tiers.free.driverPay === v7.tiers.pro.driverPay, JSON.stringify(v7.tiers));
+  ok(`across ${v7.checked} live quotes a Pro driver never costs the customer more`,
+     v7.moved === 0, v7.moved + ' failures');
+
   /* Brent's bands, read off the live page rather than the source. */
   const bands = await page.evaluate(() => {
     const out = {};
