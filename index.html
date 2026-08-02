@@ -207,14 +207,18 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 #app{display:none;min-height:100vh;flex-direction:column}
 #app.open{display:flex}
 .topbar{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 1.4rem;height:var(--tb);background:var(--p);border-bottom:1px solid var(--ln);box-shadow:var(--sd)}
-.tb-l{display:flex;align-items:center;gap:.8rem}
+/* min-width:0 on both halves, or neither side can give and the row runs off
+   the right of a phone screen — which it did, on production, before this. */
+.tb-l{display:flex;align-items:center;gap:.8rem;min-width:0}
 .tlogo{display:flex;align-items:center;gap:.45rem;text-decoration:none}
 .tlogo-m{width:26px;height:26px;background:var(--or);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:.82rem;color:#0e1113}
 .tlogo-t{font-family:var(--dp);font-weight:900;font-size:.92rem;letter-spacing:-.04em;color:var(--tx)}
 .tlogo-t span{color:var(--or)}
 .menu-btn{display:none;width:30px;height:30px;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln);align-items:center;justify-content:center;color:var(--mu);cursor:pointer}
-.tb-r{display:flex;align-items:center;gap:.45rem}
-.tb-user{font-size:.76rem;font-weight:600;color:var(--mu)}
+.tb-r{display:flex;align-items:center;gap:.45rem;min-width:0}
+/* A long real name used to push the whole right-hand row off a phone screen.
+   The name gives up its space first — everything after it is a control. */
+.tb-user{font-size:.76rem;font-weight:600;color:var(--mu);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .role-chip{font-size:.64rem;font-weight:700;letter-spacing:.06em;padding:.13rem .5rem;border-radius:var(--pill);text-transform:uppercase}
 .ib{width:28px;height:28px;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;color:var(--mu);transition:all .14s;cursor:pointer}
 .ib:hover{color:var(--tx);background:var(--p3)}
@@ -256,6 +260,44 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .cr{display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--ln);font-size:.84rem}
 .cr:last-child{border-bottom:none}
 .ck{color:var(--mu)}.cv{font-weight:600}
+
+/* ── FOUNDING MEMBER ───────────────────────────────────────────────
+   The people who paid the £100 HAF KNECT activation before the network
+   opened. Gold is theirs and nothing else on the dashboard uses it, so
+   the mark reads as a status the moment it appears. Hidden by default:
+   it is only ever switched on by a live founder check, never by a guess. */
+.fnd-badge{display:none;align-items:center;gap:.3rem;font-family:var(--dp);font-weight:900;font-size:.55rem;letter-spacing:.09em;text-transform:uppercase;color:#2e2200;background:linear-gradient(135deg,#f0c33c,#d9920b);border-radius:var(--pill);padding:.2rem .55rem;white-space:nowrap;flex:none}
+.fnd-badge.on{display:inline-flex}
+.fnd-badge svg{flex:none}
+
+.fnd-card{display:none;gap:1rem;align-items:flex-start;background:linear-gradient(105deg,rgba(217,146,11,.11),rgba(217,146,11,0) 62%),var(--p);border:1px solid var(--am);border-left:4px solid var(--am);border-radius:var(--rs);padding:1.1rem 1.2rem;margin-bottom:1rem;box-shadow:var(--sd)}
+.fnd-card.on{display:flex}
+.fnd-mark{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--am-d);color:var(--am);border:1px solid var(--am)}
+.fnd-body{min-width:0}
+.fnd-ttl{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;font-family:var(--dp);font-weight:900;font-size:.95rem;letter-spacing:-.02em;color:var(--tx)}
+.fnd-no{font-size:.58rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#2e2200;background:linear-gradient(135deg,#f0c33c,#d9920b);border-radius:var(--pill);padding:.12rem .45rem}
+.fnd-sub{font-size:.82rem;color:var(--mu);margin-top:.28rem;line-height:1.5}
+.fnd-meta{font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--am);margin-top:.5rem}
+/* The PLNA code block. It has to survive a long code on a 320px screen, so the
+   row wraps and the code itself is allowed to break rather than push the card. */
+.fnd-code{margin-top:.75rem;padding:.7rem .8rem;background:var(--am-d);border:1px solid var(--am);border-radius:var(--rx)}
+.fnd-code-lbl{font-size:.6rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--am)}
+.fnd-code-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-top:.35rem}
+.fnd-code-val{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92rem;font-weight:700;letter-spacing:.06em;color:var(--tx);word-break:break-all;min-width:0}
+.fnd-code-btn{flex:none;font-family:var(--dp);font-weight:900;font-size:.6rem;letter-spacing:.07em;text-transform:uppercase;color:#2e2200;background:linear-gradient(135deg,#f0c33c,#d9920b);border:0;border-radius:var(--pill);padding:.3rem .7rem;cursor:pointer}
+.fnd-code-btn:disabled{opacity:.65;cursor:default}
+.fnd-code-hint{font-size:.7rem;color:var(--mu);margin-top:.4rem;line-height:1.5}
+@media(max-width:600px){
+  .fnd-card{padding:.95rem 1rem;gap:.75rem}
+  .fnd-mark{width:34px;height:34px}
+  .fnd-ttl{font-size:.86rem}
+  .fnd-sub{font-size:.76rem}
+  .fnd-code-val{font-size:.84rem}
+  /* The top bar is already full on a phone — a fourth item pushes the row off
+     the screen. On a small screen the card on the overview is the statement,
+     so the top-bar mark stands down rather than breaking the layout. */
+  .fnd-badge.on{display:none}
+}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
 /* Network Pools what-if controls */
 .np-in{width:56px;background:var(--p2);border:1px solid var(--ln);border-radius:6px;color:var(--tx);font-size:.8rem;padding:.2rem .35rem;text-align:right;font-family:var(--fn)}
@@ -1442,6 +1484,10 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
     </div>
     <div class="tb-r">
       <span class="tb-user" id="tb-user">—</span>
+      <span class="fnd-badge" id="tb-founder" title="Founding Member of the HAF KNECT network">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>Founding Member</span>
+      </span>
       <span class="role-chip chip" id="tb-role">—</span>
       <button id="mode-pill" onclick="showModeSelector()" style="display:none;align-items:center;gap:.3rem;font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--p2);border:1px solid var(--lns);border-radius:var(--pill);padding:.22rem .6rem;cursor:pointer;color:var(--tx);transition:background .14s" title="Switch mode">
         <span id="mode-pill-lbl">—</span>
@@ -1506,6 +1552,33 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
 
       <!-- EXCHANGE DASHBOARD (all member roles) -->
       <div class="tp" id="pane-d-home">
+
+        <!-- FOUNDING MEMBER — first thing a founder sees on the overview, above
+             the detail switch, so it is never hidden by Basic mode. Switched on
+             only by hafFounderPaint() after a live check against the founders
+             register; for everyone else this stays out of sight entirely. -->
+        <div class="fnd-card" id="fnd-card">
+          <div class="fnd-mark">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="fnd-body">
+            <div class="fnd-ttl">Founding Member<span class="fnd-no" id="fnd-no">Founder</span></div>
+            <div class="fnd-sub">You backed HAF KNECT before the network opened. Your founding place is permanent, and your account carries full create access — post work and take work on the Exchange.</div>
+            <div class="fnd-meta" id="fnd-since">Founding member of the HAF KNECT network</div>
+
+            <!-- The PLNA code that came with the founding membership. Shown here so a
+                 founder never has to go looking through an email for it. Painted by
+                 _setFounder(); stays out of sight if the register has no code. -->
+            <div class="fnd-code" id="fnd-code" hidden>
+              <div class="fnd-code-lbl" id="fnd-code-lbl">Your PLNA discount code</div>
+              <div class="fnd-code-row">
+                <code class="fnd-code-val" id="fnd-code-val"></code>
+                <button type="button" class="fnd-code-btn" id="fnd-code-btn" onclick="fndCopyCode()">Copy</button>
+              </div>
+              <div class="fnd-code-hint" id="fnd-code-hint"></div>
+            </div>
+          </div>
+        </div>
 
         <!-- Detail switch — lives on the dashboard it controls -->
         <div class="dm-row">
@@ -3098,12 +3171,21 @@ async function pcDistReal(a,b){
     if(g.ok){
       const d=await g.json();
       if(d.ok)return{miles:Math.max(1,Math.round(d.miles)),mins:d.mins,exact:true,google:true,
-        from:{area:d.from},to:{area:d.to}};
+        basis:'GOOGLE_ROAD',from:{area:d.from},to:{area:d.to}};
     }
   }catch(e){}
-  /* 3) offline fallback: straight-line x1.25, or area table if lookup errored */
-  if(pa==='ERR'||pb==='ERR')return{miles:pcDist(a,b),exact:false,from:undefined,to:undefined};
-  return{miles:Math.max(1,Math.round(hav(pa,pb)*1.25)),exact:true,from:pa,to:pb};
+  /* 3) offline fallback: straight-line x1.25, or area table if lookup errored.
+     ⚠️ These are ESTIMATES and must never be stamped exact:true. A straight line
+     is a lie about the road wherever an estuary sits between two points — Hull
+     HU1 1AA to Grimsby DN31 1AA is 33.3 real road miles (measured on Google's
+     road network 2026-08-02) and the straight-line guess says 20. That is a
+     driver doing 33 miles paid for 20, and nobody gets an alarm. The trigger is
+     not a code change, it is this gateway being slow or throttled on an
+     otherwise ordinary day, so an honest flag is the only thing standing
+     between a hiccup and a bad job. Anything downstream that prices, pays or
+     dispatches on `miles` must check `exact` before it treats it as a road. */
+  if(pa==='ERR'||pb==='ERR')return{miles:pcDist(a,b),exact:false,basis:'ESTIMATED_AREA_TABLE',from:undefined,to:undefined};
+  return{miles:Math.max(1,Math.round(hav(pa,pb)*1.25)),exact:false,basis:'ESTIMATED_STRAIGHT_LINE',from:pa,to:pb};
 }
 
 
@@ -3601,6 +3683,9 @@ function enterKnectApp(u){
   _superUser=u;
   /* a fresh sheet for whoever just signed in — no previous driver's run back left behind */
   try{_rrState={declined:[],accepted:null};}catch(e){}
+  /* and no previous founder's gold left behind either — cleared before anything
+     is drawn, so the mark can only ever come back from a live check. */
+  _setFounder(null);
   const isAdmin=u==='BF638793';
   const demo=DEMO_ACCOUNTS[u];
   const displayName=demo?demo.name:u;
@@ -3659,6 +3744,84 @@ function enterKnectApp(u){
     switchTab('pane-d-home');
     _setModePill('','');
   }
+  hafFounderPaint(u);
+}
+
+/* ── FOUNDING MEMBERS ──────────────────────────────────────────────
+   Who is a founder is a fact in the register, never something the page
+   works out for itself. A demo account carries its own flag so the mark
+   can be seen without a real founder's login; a real account is checked
+   against the register through knect_founder_card, which answers only
+   for the username asked about and returns nothing at all for everyone
+   else. Fail quiet: if the check cannot be made, no mark is shown —
+   a missing badge is a small thing, a wrongly awarded one is not. */
+function _setFounder(f){
+  const badge=document.getElementById('tb-founder');
+  const card=document.getElementById('fnd-card');
+  if(!badge||!card)return;
+  if(!f){badge.classList.remove('on');card.classList.remove('on');return}
+  const no=document.getElementById('fnd-no');
+  const since=document.getElementById('fnd-since');
+  if(no)no.textContent=f.member_no?('Founder No. '+f.member_no):'Founder';
+  if(since)since.textContent=f.since
+    ? 'Founding member since '+new Date(f.since+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})
+    : 'Founding member of the HAF KNECT network';
+  _setFounderCode(f);
+  badge.classList.add('on');card.classList.add('on');
+}
+
+/* The PLNA code that came with the £100 membership. A founder should be able to
+   read it straight off their own dashboard rather than dig out a sign-up email,
+   so it sits inside the founder card with a copy button. Once it has been used
+   the code stays on show — it is proof, not a secret to hide — but the wording
+   changes so nobody sits there trying to apply it a second time. */
+function _setFounderCode(f){
+  const box=document.getElementById('fnd-code');
+  if(!box)return;
+  if(!f||!f.plna_code){box.hidden=true;return}
+  const val=document.getElementById('fnd-code-val');
+  const lbl=document.getElementById('fnd-code-lbl');
+  const hint=document.getElementById('fnd-code-hint');
+  const btn=document.getElementById('fnd-code-btn');
+  const months=f.months||6;
+  if(val)val.textContent=f.plna_code;
+  if(f.redeemed_at){
+    if(lbl)lbl.textContent='Your PLNA discount code — already used';
+    if(hint)hint.textContent='This code is on your PLNA account, so your '+months+' months of PLNA Pro are running. It only works once.';
+    if(btn){btn.disabled=true;btn.textContent='Used'}
+  }else{
+    if(lbl)lbl.textContent='Your PLNA discount code';
+    if(hint)hint.textContent='Paste this into PLNA under Settings to switch on your '+months+' months of PLNA Pro, free. It works once, and only on your account.';
+    if(btn){btn.disabled=false;btn.textContent='Copy'}
+  }
+  box.hidden=false;
+}
+
+/* Copy has to work on a phone without the clipboard permission too, hence the
+   fallback: select the code so a long-press "copy" still gets it. */
+function fndCopyCode(){
+  const val=document.getElementById('fnd-code-val');
+  const btn=document.getElementById('fnd-code-btn');
+  if(!val)return;
+  const done=()=>{if(!btn)return;const t=btn.textContent;btn.textContent='Copied';setTimeout(()=>{btn.textContent=t},1600)};
+  const text=val.textContent||'';
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>_fndSelect(val));
+  }else _fndSelect(val);
+}
+function _fndSelect(el){
+  try{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);}catch(e){}
+}
+
+async function hafFounderPaint(u){
+  const demo=DEMO_ACCOUNTS[u];
+  if(demo){if(demo.founder)_setFounder(demo.founder);return}
+  try{
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/knect_founder_card',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:u})});
+    if(!r.ok)return;
+    const d=await r.json();
+    if(Array.isArray(d)&&d.length&&d[0].is_founder)_setFounder(d[0]);
+  }catch(e){/* no answer means no mark */}
 }
 
 function showModeSelector(){
@@ -3744,6 +3907,10 @@ const DEMO_ACCOUNTS={
   'DEMO-DRV':{role:'driver',name:'Demo Driver',initials:'DD',level:'PLUS'},
   'DEMO-PRO':{role:'freight-pro',name:'Demo Freight Pro',initials:'DF',level:'PRO'},
   'DEMO-BIZ':{role:'business',name:'Demo Business',initials:'DB',level:null},
+  /* A founder to look at. No real founding member has a network login yet, so
+     without this there is nothing on screen to review. */
+  'DEMO-FND':{role:'driver',name:'Demo Founding Member',initials:'DF',level:'PLUS',founder:{member_no:1,since:'2026-07-03',plna_code:'H6PRO-DEMO24',months:6,redeemed_at:null}},
+  'DEMO-FNU':{role:'driver',name:'Demo Founder Used',initials:'DU',level:'PRO',founder:{member_no:2,since:'2026-07-04',plna_code:'H6PRO-DEMO77',months:6,redeemed_at:'2026-07-30T10:00:00Z'}},
 };
 function demoLogin(u){
   closeLogin();
