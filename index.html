@@ -1241,6 +1241,23 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <button class="btn btn-gh btn-wide" onclick="closeInlineFlow()">&#8592; Back to start</button>
           </div>
 
+          <!-- ── PAYMENT STEP ──
+               Nothing reaches the network unpaid. The amount shown here is
+               worked out again on HAF's own server; it is never taken from
+               this page, because a page can be edited by the person reading
+               it and a price cannot. -->
+          <div id="pay-gate" style="display:none;text-align:center;padding:1.2rem 0 .8rem">
+            <div style="width:52px;height:52px;border-radius:50%;background:var(--or-d);border:2px solid var(--or-g);display:flex;align-items:center;justify-content:center;margin:0 auto .9rem">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div id="pg-title" style="font-family:var(--dp);font-weight:900;font-size:1.15rem;letter-spacing:-.04em;margin-bottom:.4rem">Working out your price…</div>
+            <div id="pg-amt" style="font-family:var(--dp);font-weight:900;font-size:2rem;letter-spacing:-.04em;color:var(--or);margin:.5rem 0 .2rem"></div>
+            <div id="pg-basis" style="font-size:.78rem;color:var(--mu);margin-bottom:.9rem"></div>
+            <p id="pg-msg" style="font-size:.84rem;color:var(--mu);line-height:1.7;margin-bottom:1.4rem;max-width:320px;margin-left:auto;margin-right:auto">One moment.</p>
+            <button id="pg-btn" class="btn btn-or btn-wide" style="margin-bottom:.5rem;display:none" onclick="hafGoPay()">Choose how to pay &#8594;</button>
+            <button class="btn btn-gh btn-wide" onclick="closeInlineFlow()">&#8592; Back to start</button>
+          </div>
+
         </div><!-- /calc-box -->
       </div><!-- /inline-flow -->
 
@@ -2783,6 +2800,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
    has a poor chance of a load back. Eight sizes only — five van sizes and a
    Luton in its three approved bodies (box, curtain side, tail lift). Nothing
    above a Luton exists on this network. */
+/* PRICING-CORE:START — sliced verbatim into functions/_pricing-core.js by tools/build_pricing_core.py so the server prices a job with the SAME maths the page quotes. Move a marker and you move what the server trusts. */
 const REF_MPH=40, NET_POOL=.05;
 /* drv = £ per loaded mile paid to the driver · min = the vehicle's minimum transport value (£ ex VAT) */
 const VAN={
@@ -2900,11 +2918,13 @@ function vanCardHTML(k,cls,fn){
     +'<span class="vp-sub">'+(v.fits||'')+'</span>'
     +vanSpecRows(k)+'</button>';
 }
+/* PRICING-CORE:PAUSE — draws the cards on the page; nothing to do with price. */
 function buildVanCards(mountId,cls,fn){
   const el=document.getElementById(mountId);
   if(!el)return;
   el.innerHTML=VAN_ORDER.map(k=>vanCardHTML(k,cls,fn)).join('');
 }
+/* PRICING-CORE:RESUME */
 /* The smallest — and so the cheapest — van that will genuinely take this load.
    Weight and space are both hard limits; neither is allowed to be fudged. */
 function recommendVan(wtKey,szKey){
@@ -3048,6 +3068,7 @@ function hafApplyPricingConfig(cfg){
   }
   return done;
 }
+/* PRICING-CORE:PAUSE — browser-only: fetches the saved framework. The server applies it its own way. */
 /* Pull the saved framework once on load. If it is not reachable the built-in
    rates stand and quoting carries on — a pricing page must never go blank. */
 window.HAF_PRICING_SOURCE='built-in';
@@ -3072,6 +3093,7 @@ window.HAF_PRICING_SOURCE='built-in';
     }
   }catch(e){/* offline or not deployed yet — built-in rates stand */}
 })();
+/* PRICING-CORE:RESUME */
 function minTransportValue(v,miles){
   const m=Math.max(0,miles);
   let f;
@@ -3134,6 +3156,7 @@ function v3Price(miles,mins,vanKey,urgKey,toPc,opts){
          accountLevel:al.n,feeCutPts:p2((u.fee-feePct)*100),
          pool:p2(sub*NET_POOL),timeWins:timeCost>distCost,miles,hours};
 }
+/* PRICING-CORE:END */
 const PC={M:[53.48,-2.24],LS:[53.80,-1.55],S:[53.38,-1.47],B:[52.48,-1.90],L:[53.41,-2.98],E:[51.52,-0.05],N:[51.55,-0.10],W:[51.51,-0.20],SE:[51.48,-0.05],SW:[51.46,-0.18],NW:[51.55,-0.16],WA:[53.39,-2.60],SK:[53.41,-2.16],NG:[52.95,-1.15],DE:[52.92,-1.48],CV:[52.41,-1.51],LE:[52.63,-1.13],G:[55.86,-4.25],EH:[55.95,-3.19],CF:[51.48,-3.18],BS:[51.45,-2.60],OX:[51.75,-1.26],CB:[52.21,.12],YO:[53.96,-1.08],HU:[53.74,-.34],DN:[53.52,-1.13],BD:[53.80,-1.75],WF:[53.68,-1.50],SR:[54.91,-1.39],NE:[54.97,-1.61],TS:[54.60,-1.23],LA:[54.05,-2.80],PE:[52.57,-.24],IP:[52.06,1.16]};
 function pcArea(s){return(s.trim().match(/^[A-Z]+/i)||['M'])[0].toUpperCase()}
 function pcDist(a,b){const ca=PC[pcArea(a)]||[52.5,-1.5],cb=PC[pcArea(b)]||[53.0,-1.0];const R=3959,dLa=(cb[0]-ca[0])*Math.PI/180,dLo=(cb[1]-ca[1])*Math.PI/180;const x=Math.sin(dLa/2)**2+Math.cos(ca[0]*Math.PI/180)*Math.cos(cb[0]*Math.PI/180)*Math.sin(dLo/2)**2;return Math.round(2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)))||28;}
@@ -3527,7 +3550,21 @@ async function fqShowPrice(){
   document.getElementById('fq-pr-basis').textContent=r.v.n+' · '+r.fr+' → '+r.to+' · ~'+r.miles+' mi · '+r.u.n;
   fqStep(6);
 }
-function fqBook(){openDemoGate();}
+async function fqBook(){
+  const q=await fqCalcPrice();
+  hafBookAndPay({
+    from:(document.getElementById('fq-from').value||'').trim(),
+    to:(document.getElementById('fq-to').value||'').trim(),
+    van:fqData.van||'lwb',
+    urgency:fqData.urg||'flex',
+    customer_name:(document.getElementById('fq-name').value||'').trim(),
+    customer_email:(document.getElementById('fq-email').value||'').trim(),
+    /* The mid-point of the range the customer was just shown. The server
+       re-prices it anyway; this only ever raises the figure, never lowers it,
+       so an edited page cannot buy a job cheap. */
+    quoted_pence:Math.round((q.lo+q.hi)/2*100)
+  });
+}
 
 /* REPEAT ORDER */
 const RO_DB={'HAF-2847':{route:'Manchester M1 → Leeds LS1',van:'Long wheelbase',date:'5 Jul 2026',amount:'£94'},'KN-471293':{route:'Sheffield S9 → Nottingham NG1',van:'Short wheelbase',date:'2 Jul 2026',amount:'£67'}};
@@ -3582,12 +3619,86 @@ async function hpEstimate(){
   document.getElementById('hp-pr-basis').textContent=fr+' → '+to+' · est. '+miles+' mi';
   hpStep(4);
 }
-function hpBook(){openDemoGate();}
+function hpBook(){
+  hafBookAndPay({
+    from:(document.getElementById('hp-from').value||'').trim(),
+    to:(document.getElementById('hp-to').value||'').trim(),
+    van:recommendVan(hpData.weight,hpData.size)||'lwb',
+    urgency:'sday',
+    customer_name:(document.getElementById('hp-name').value||'').trim(),
+    customer_email:(document.getElementById('hp-email').value||'').trim(),
+    quoted_pence:0
+  });
+}
+
+/* ── BOOK AND PAY ──
+   Every job on this network is paid for before it reaches a driver. This asks
+   HAF's own server to price the job and raise the payment, then sends the
+   customer to their private payment page, where they choose card or bank
+   transfer. The money is held against the job and returned in full if nobody
+   picks it up. An account given a credit limit at sign-up skips the payment
+   and posts straight away — the server decides that, not this page. */
+let hafPayUrl=null;
+function hafShowPayStep(){
+  document.getElementById('if-title').textContent='Payment';
+  ['fast','repeat','pick'].forEach(t=>{
+    const w=document.getElementById('if-'+t);if(w)w.style.display='none';
+  });
+  const g=document.getElementById('demo-gate');if(g)g.style.display='none';
+  document.getElementById('pay-gate').style.display='block';
+}
+function hafPaySay(title,amount,basis,msg,showBtn){
+  document.getElementById('pg-title').textContent=title;
+  document.getElementById('pg-amt').textContent=amount||'';
+  document.getElementById('pg-basis').textContent=basis||'';
+  document.getElementById('pg-msg').textContent=msg||'';
+  document.getElementById('pg-btn').style.display=showBtn?'':'none';
+}
+function hafGoPay(){if(hafPayUrl)window.location=hafPayUrl;}
+async function hafBookAndPay(job){
+  hafPayUrl=null;
+  hafShowPayStep();
+  hafPaySay('Working out your price…','','','One moment.',false);
+  let d;
+  try{
+    const r=await fetch('/api/book',{method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify(Object.assign({
+        account_ref:localStorage.getItem('knect-user')||'GUEST',
+        account_type:'customer',
+        account_level:window.HAF_ACCOUNT_LEVEL||'lite'
+      },job))});
+    d=await r.json();
+  }catch(e){
+    hafPaySay('We could not reach the booking desk','','',
+      'Your details are safe and nothing has been charged. Please try again in a moment.',false);
+    return;
+  }
+  if(!d||!d.ok){
+    hafPaySay('We have not taken any payment','','',
+      (d&&d.error)||'Something went wrong raising this booking. Please try again.',false);
+    return;
+  }
+  const basis=d.vehicle+' · '+d.miles+' mi · ref '+d.job_ref;
+  if(d.status==='on_credit'){
+    hafPaySay('Booked on your account','£'+d.amount_gbp,basis,
+      'Your account is on credit terms, so this job goes onto the network now and '
+      +'the amount is added to your account. Keep your reference.',false);
+    return;
+  }
+  hafPayUrl=d.pay_url;
+  hafPaySay('One step left','£'+d.amount_gbp,basis,
+    'Pay by card or bank transfer to put this job on the network. The money is held '
+    +'against the job and refunded in full if no driver picks it up.',true);
+}
+
 function openDemoGate(){
   document.getElementById('if-title').textContent='Demo only';
   ['fast','repeat','pick'].forEach(t=>{
     const w=document.getElementById('if-'+t);if(w)w.style.display='none';
   });
+  const pay=document.getElementById('pay-gate');
+  if(pay)pay.style.display='none';
   const gate=document.getElementById('demo-gate');
   if(gate)gate.style.display='block';
 }
