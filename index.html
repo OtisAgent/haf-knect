@@ -832,6 +832,113 @@ textarea.fi2{resize:vertical;min-height:70px}
   .rr-btns .btn{flex:1}
   .rr-demo{margin-left:0;width:100%}
 }
+/* ── SAMPLE vs LIVE, PRIVACY BLUR, VIEW FORMATS ─────────────── */
+/* Sample runs are deliberately desaturated and dashed so a real
+   run — which keeps the normal brand colours — stands out at a glance. */
+:root{--hv-s:#78889b;--hv-s-bg:rgba(120,136,155,.07);--hv-s-ln:rgba(120,136,155,.45)}
+[data-theme=dark]{--hv-s:#8c9bad;--hv-s-bg:rgba(140,155,173,.08);--hv-s-ln:rgba(140,155,173,.38)}
+
+.hv-tile{position:relative}
+.hv-tile .xc-head,.hv-tile .cap-sec-top,.hv-tile .sb-lj-top,
+.hv-tile .dbf-k,.hv-tile .rr-hd{padding-right:1.55rem}
+
+/* the chip on tiles that have no badge row of their own — it sits on its own
+   line at the top so the card still reads cleanly */
+.hv-chip-solo{display:inline-block;margin-bottom:.4rem}
+
+.xc.hv-sample,.cap-sec.hv-sample,#sb-livejob.hv-sample,
+#dash-basic-focus.hv-sample,#dash-return.hv-sample{
+  border-style:dashed!important;border-color:var(--hv-s-ln)!important;
+  background-image:linear-gradient(var(--hv-s-bg),var(--hv-s-bg))}
+.xc.hv-sample:hover{border-color:var(--hv-s-ln)!important;box-shadow:var(--sd)}
+.xc.hv-sample .xc-route,.cap-sec.hv-sample .cap-sec-nm,
+#sb-livejob.hv-sample .sb-lj-route,
+#dash-basic-focus.hv-sample .dbf-route,#dash-return.hv-sample .rr-rt{color:var(--hv-s)}
+.xc.hv-sample .xb.inv{background:rgba(120,136,155,.16);color:var(--hv-s);border-color:var(--hv-s-ln)}
+.hv-stag{font-size:.53rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  padding:.16rem .42rem;border-radius:4px;background:rgba(120,136,155,.16);
+  color:var(--hv-s);border:1px dashed var(--hv-s-ln);white-space:nowrap}
+.hv-live{font-size:.53rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  padding:.16rem .42rem;border-radius:4px;background:var(--gn-d);color:var(--gn);white-space:nowrap}
+
+/* privacy blur — the eye stays sharp and clickable, everything else goes soft */
+.hv-tile.hv-blur > :not(.hv-eye),
+body.hv-blur-all .hv-tile > :not(.hv-eye){
+  filter:blur(7px);opacity:.75;user-select:none;pointer-events:none}
+@media print{.hv-tile.hv-blur > :not(.hv-eye){filter:blur(9px)}}
+
+.hv-eye{position:absolute;top:.5rem;right:.5rem;z-index:6;display:inline-flex;
+  align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;
+  border:1px solid var(--ln);background:var(--p2);color:var(--mu);cursor:pointer;
+  transition:all .14s;line-height:0}
+.hv-eye:hover{color:var(--or);border-color:var(--or-g);background:var(--or-d)}
+.hv-tile.hv-blur .hv-eye{color:var(--or);border-color:var(--or-g);background:var(--or-d)}
+.hv-eye svg{width:12px;height:12px;pointer-events:none}
+
+/* the view-format bar injected at the top of each pane that holds runs */
+.hv-bar{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;
+  margin:0 0 .7rem;padding:.4rem .5rem;background:var(--p2);
+  border:1px solid var(--ln);border-radius:var(--rs)}
+.hv-bar-lbl{font-size:.57rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--su);margin-right:.1rem}
+.hv-b{font-size:.62rem;font-weight:700;padding:.24rem .55rem;border-radius:var(--pill);
+  border:1px solid var(--ln);background:var(--p);color:var(--mu);cursor:pointer;transition:all .14s}
+.hv-b:hover{color:var(--tx);border-color:var(--lns)}
+.hv-b.on{background:var(--or);border-color:var(--or);color:#fff}
+.hv-bar-sp{flex:1 1 auto}
+.hv-b.hv-bl.on{background:var(--tx);border-color:var(--tx);color:var(--p)}
+
+/* ── FORMAT: compact ── */
+.hvf-compact .xc{padding:.6rem .7rem;margin-bottom:.45rem}
+.hvf-compact .xc-route{font-size:.86rem;margin-bottom:.35rem}
+.hvf-compact .xc-goods,.hvf-compact .xc-pref,.hvf-compact .xc-viewers{display:none!important}
+.hvf-compact .xc-sr{grid-template-columns:repeat(2,1fr);margin-bottom:.35rem}
+.hvf-compact .cap-sec{padding:.5rem .6rem}
+.hvf-compact .cap-sec-towns{display:none!important}
+
+/* ── FORMAT: list — one line per run ── */
+.hvf-list .xc{padding:.5rem .7rem;margin-bottom:.3rem;display:grid;
+  grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);align-items:center;gap:.3rem .7rem}
+.hvf-list .xc-head{margin-bottom:0;grid-column:1;justify-content:flex-start}
+.hvf-list .xc-route{font-size:.8rem;margin-bottom:0;grid-column:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hvf-list .xc-sr{grid-column:2;grid-row:1 / span 2;margin-bottom:0;
+  border:0;background:transparent;grid-template-columns:repeat(4,1fr)}
+.hvf-list .xc-goods,.hvf-list .xc-pref,.hvf-list .xc-viewers,
+.hvf-list .xc-foot{display:none!important}
+.hvf-list .cap-sec{padding:.45rem .6rem}
+.hvf-list .cap-sec-towns,.hvf-list .cap-sec-cta{display:none!important}
+
+/* ── FORMAT: grid — two columns side by side on wide screens ── */
+@media(min-width:900px){
+  .hvf-grid .hv-wrap{display:grid;grid-template-columns:1fr 1fr;gap:0 .7rem;align-items:start}
+}
+
+/* The top bar's right-hand cluster already ran past the screen edge on a
+   phone before this work (username + role chip + pills never shrank). The
+   blur switch would have made that worse, so: it steps aside on small
+   screens - "Blur all" still sits in every view bar - and the cluster is
+   allowed to shrink so nothing spills off the edge at any width. */
+@media(max-width:640px){
+  #hv-top-blur{display:none}
+  .topbar{padding:0 .7rem;gap:.4rem}
+  /* the brand keeps its full width; the username is what gives way */
+  .tb-l{flex:0 0 auto}
+  .tlogo-t{white-space:nowrap}
+  .tb-r{min-width:0;flex:1 1 auto;justify-content:flex-end;gap:.32rem}
+  .tb-user{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 1 auto}
+}
+
+/* every format collapses back to single-column cards on a phone */
+@media(max-width:640px){
+  .hvf-list .xc{display:block}
+  .hvf-list .xc-head{margin-bottom:.4rem}
+  .hvf-list .xc-route{white-space:normal}
+  .hvf-list .xc-sr{margin-bottom:.4rem;border:1px solid var(--ln);background:var(--bg)}
+  .hv-bar{padding:.35rem .4rem}
+  .hv-bar-lbl{display:none}
+}
+
 </style>
 </head>
 <body>
@@ -1175,6 +1282,7 @@ textarea.fi2{resize:vertical;min-height:70px}
         </div>
         <div class="sc-err" id="sc-err"></div>
         <button class="btn btn-or btn-wide" onclick="scLogin()" style="margin-top:.3rem">Log in →</button>
+        <p class="sc-foot"><a href="https://clever.usehaf.co.uk/reset.html" target="_blank">Forgotten your PIN?</a></p>
         <p class="sc-foot">No account? <a href="https://clever.usehaf.co.uk" target="_blank">Create one via CleverPay</a></p>
         <div style="border-top:1px solid var(--ln);padding-top:.7rem;margin-top:.7rem;text-align:center">
           <a href="https://demo.knect.usehaf.co.uk" target="_blank" class="btn btn-or btn-wide" style="display:inline-flex;align-items:center;justify-content:center;gap:.4rem;font-size:.72rem;text-decoration:none">Try a live demo →</a>
@@ -1252,6 +1360,7 @@ textarea.fi2{resize:vertical;min-height:70px}
     <div class="of"><label class="ol">PIN or password</label><input class="oi" id="l-pass" placeholder="4–6 digit PIN or password" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div class="oe" id="l-err"></div>
     <button class="btn btn-or btn-wide" onclick="doLogin()">Sign in →</button>
+    <p style="margin:.7rem 0 0;font-size:.7rem;text-align:center"><a href="https://clever.usehaf.co.uk/reset.html" target="_blank" style="color:var(--mu)">Forgotten your PIN?</a></p>
     <div style="margin-top:1.1rem;border-top:1px solid var(--ln);padding-top:.9rem;text-align:center">
       <a href="https://demo.knect.usehaf.co.uk" target="_blank" class="btn btn-or btn-wide" style="display:inline-flex;align-items:center;justify-content:center;gap:.4rem;text-decoration:none">Try a live demo →</a>
       <p style="margin:.5rem 0 0;font-size:.62rem;color:var(--mu)">No login needed · Driver, Freight &amp; Business views</p>
@@ -3494,7 +3603,11 @@ function closeLogin(){document.getElementById('login-ov').classList.remove('open
 async function hafSha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
 let hafPend=null; /* password-verified user waiting on PIN setup: {u, hash} */
 function hafErr(el,msg){el.textContent=msg;el.style.display='block'}
-function hafGo(u,k,t){localStorage.setItem('knect-user',u);enterKnectApp(u);}
+/* Held for this tab only, never stored: it is what lets the page ask the network
+   for THIS member's own discount code. A username alone must never be enough —
+   HAF usernames are guessable, and a code is worth six months of Pro. */
+let _hafCred=null;
+function hafGo(u,k,t){localStorage.setItem('knect-user',u);_hafCred={hash:t==='p'?null:k,relay:t==='p'?k:null};enterKnectApp(u);}
 const DRIVER_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
   {id:'d-invites',l:'Exchange',s:'KNECT Jobs',badge:'2',ico:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>'},
@@ -3713,6 +3826,22 @@ function _fndSelect(el){
   try{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);}catch(e){}
 }
 
+/* The code itself is asked for separately, with the credentials this person
+   signed in with. Anyone can ask whether a username is a founder; only that
+   founder can read the code that came with it. If we cannot prove it — a session
+   restored from an earlier visit, say — the card simply shows no code rather
+   than showing someone else's. */
+async function _paintMyCode(u,f){
+  if(!_hafCred)return;
+  try{
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/knect_my_code',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:u,p_hash:_hafCred.hash,p_relay:_hafCred.relay})});
+    if(!r.ok)return;
+    const c=await r.json();
+    if(!c||!c.ok)return;
+    _setFounderCode({member_no:f.member_no,plna_code:c.plna_code,months:c.months,redeemed_at:c.redeemed_at});
+  }catch(e){/* no code shown beats the wrong code shown */}
+}
+
 async function hafFounderPaint(u){
   const demo=DEMO_ACCOUNTS[u];
   if(demo){if(demo.founder)_setFounder(demo.founder);return}
@@ -3720,7 +3849,7 @@ async function hafFounderPaint(u){
     const r=await fetch(PLNA_URL+'/rest/v1/rpc/knect_founder_card',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:u})});
     if(!r.ok)return;
     const d=await r.json();
-    if(Array.isArray(d)&&d.length&&d[0].is_founder)_setFounder(d[0]);
+    if(Array.isArray(d)&&d.length&&d[0].is_founder){_setFounder(d[0]);_paintMyCode(u,d[0]);}
   }catch(e){/* no answer means no mark */}
 }
 
@@ -3897,14 +4026,22 @@ async function hafAuth(u,s,err,btn){
     const hash=await hafSha(isPin?u+':'+s:s);
     /* The PIN form hashes username+PIN (the relay format), the password form hashes
        the password alone. plna_auth checks both and returns the profile only on a
-       match, with the stored hashes stripped out. */
-    const r=await fetch(PLNA_URL+'/rest/v1/rpc/plna_auth',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify(isPin?{p_username:u,p_hash:null,p_relay:hash}:{p_username:u,p_hash:hash,p_relay:null})});
+       match, with the stored hashes stripped out.
+       A third form goes with them: the same PIN hashed the way CleverPay hashed it
+       when the person chose it on their application. A hash cannot be turned back
+       into a PIN, so the application's own hash has to be recognised in its own
+       right — that is what lets somebody sign in here with the PIN they already
+       set, instead of being sent away to invent a second one. */
+    const cp=isPin?await hafSha('HAF-CP|'+u+'|'+s):null;
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/plna_auth',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify(isPin?{p_username:u,p_hash:null,p_relay:hash,p_cp:cp}:{p_username:u,p_hash:hash,p_relay:null,p_cp:null})});
     const d=await r.json();
     if(!Array.isArray(d)||!d.length){
-      hafErr(err,isPin?'That PIN didn\'t match. If you haven\'t set a PIN yet, sign in with your password first.':'Incorrect username or password. Try again.');
+      hafErr(err,isPin?'That PIN didn\'t match. Use the PIN you chose on your application — or reset it below.':'Incorrect username or password. Try again.');
       btn.textContent=old;btn.disabled=false;return}
     if(!isPin&&!d[0].has_pin){hafPend={u:u,hash:hash};btn.textContent=old;btn.disabled=false;closeLogin();document.getElementById('pin-ov').classList.add('open');document.getElementById('pin-a').focus();return}
-    hafGo(u,hash,isPin?'p':'w');
+    /* keep whichever hash actually opened the account: later calls (bookings,
+       usage, profile) prove who they are by sending it back */
+    hafGo(u,d[0].cred==='cleverpay'?cp:hash,isPin?'p':'w');
   }catch(e){hafErr(err,'Connection problem — please try again.');btn.textContent=old;btn.disabled=false}
 }
 function doLogin(){hafAuth(document.getElementById('l-user').value,document.getElementById('l-pass').value,document.getElementById('l-err'),document.querySelector('#login-ov .btn-wide'))}
@@ -6080,6 +6217,369 @@ window.pxSave=async function(){
   meta();
   s.innerHTML='<div class="cr"><span class="ck" style="color:var(--gr,#2e9e5b)">Saved</span><span class="cv">These rates are now live across the site. The previous version is kept on the record.</span></div>';
 };
+})();
+</script>
+<script>
+/* ══ RUN VISIBILITY ═══════════════════════════════════════════════════════
+   Three things live here, all additive — this module only ever ADDS classes
+   and controls, it never hides or removes anything the app rendered:
+     1. sample vs live      — seeded demo runs are shaded apart from real ones
+     2. privacy blur        — per-tile eye, plus a blur-everything switch
+     3. view formats        — cards / compact / list / grid, remembered per user
+   ═══════════════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+
+  /* Every reference that ships as seeded sample data. Anything NOT in here is
+     treated as a real run, so the first genuine job stands out on its own. */
+  var SAMPLE_REFS = ['HAF-2189','HAF-2196','HAF-2201','HAF-2804','HAF-2819','HAF-2820',
+    'HAF-2831','HAF-2840','HAF-2847','HAF-2848','HAF-2851','HAF-2853','HAF-2855',
+    'HAF-2856','HAF-2858','HAF-2859','HAF-2860','HAF-2861','HAF-2862','HAF-2864',
+    'HAF-2870','HAF-3011','HAF-3014','HAF-3019','HAF-3022','HAF-3027','HAF-3031',
+    'KN-471293','JW012390','DH022641','KP041872','PK041872','TD018392'];
+  var SAMPLE = Object.create(null);
+  SAMPLE_REFS.forEach(function(r){ SAMPLE[r] = 1; });
+
+  var FORMATS = [
+    {id:'cards',   label:'Cards'},
+    {id:'compact', label:'Compact'},
+    {id:'list',    label:'List'},
+    {id:'grid',    label:'Grid'}
+  ];
+  var FMT_CLASS = 'hvf-';
+
+  var EYE_OPEN  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var EYE_SHUT  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+  /* the same identity the rest of the app uses for its own saved preferences,
+     so each person - demo or real - keeps their own views and blur choices */
+  function user(){
+    try {
+      return (typeof _superUser !== 'undefined' && _superUser)
+        || localStorage.getItem('knect-user')
+        || 'guest';
+    } catch(e){ return 'guest'; }
+  }
+  function readJSON(key, fallback){
+    try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch(e){ return fallback; }
+  }
+  function writeJSON(key, val){
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch(e){}
+  }
+  function blurKey(){ return 'knect-blur:' + user(); }
+  function allKey(){ return 'knect-blurall:' + user(); }
+  function fmtKey(pane){ return 'knect-view:' + user() + ':' + pane; }
+
+  /* ── which runs are blurred right now ── */
+  var blurred = {};
+  function loadBlurred(){ blurred = readJSON(blurKey(), {}); }
+  function saveBlurred(){ writeJSON(blurKey(), blurred); }
+
+  /* ── identify a tile ── */
+  function tileRef(el){
+    var r = el.querySelector('.xb-ref') || el.querySelector('.sb-lj-ref');
+    if (r) {
+      var t = (r.textContent || '').trim();
+      /* refs are written as "HAF-2853 · 2.1 mi from you" or "JW012390 — James Wilson" */
+      var m = t.match(/^[A-Z]{2,3}-?\d{4,6}/);
+      if (m) return m[0];
+      return t.split(/[·—]/)[0].trim();
+    }
+    /* the dashboard cards print the reference into their own heading rather
+       than a ref element — "Next up · HAF-2858" */
+    var head = el.querySelector('.dbf-k, .rr-hd');
+    if (head) {
+      var hm = (head.textContent || '').match(/[A-Z]{2,3}-\d{4,6}/);
+      if (hm) return hm[0];
+    }
+    if (el.id) return el.id;
+    return '';
+  }
+  function isSample(ref){ return !!(ref && SAMPLE[ref]); }
+
+  /* Panels that summarise runs rather than list them - the next-up card and the
+     run-back panel. They carry seeded data today and may carry a real job
+     tomorrow, and they never show a reference of their own, so an unknown
+     reference has to read as SAMPLE: calling seeded data "live" is the exact
+     confusion this work exists to remove. */
+  function isSummaryPanel(el){
+    return el.id === 'dash-basic-focus' || el.id === 'dash-return';
+  }
+
+  /* ── decorate one tile ── */
+  function decorate(el){
+    /* The sidebar live-job card redraws itself from scratch on every tick, which
+       throws away anything we put inside it. So "already decorated" also has to
+       mean "the eye is still there" — otherwise a redraw would silently leave
+       that card with no way to blur it, which is the one card always on screen. */
+    if (el.getAttribute('data-hv') && el.querySelector(':scope > .hv-eye')) return;
+    el.setAttribute('data-hv','1');
+    el.classList.add('hv-tile');
+
+    var ref = tileRef(el);
+    if (ref) el.setAttribute('data-hv-ref', ref);
+
+    var isCap = el.classList.contains('cap-sec');
+    var panel = isSummaryPanel(el);
+    var sample = isCap ? true
+      : panel ? (ref === el.id ? true : isSample(ref))
+      : isSample(ref);
+    /* a card can be decorated before it has drawn its reference and again after,
+       so always clear the opposite verdict — never leave it reading both ways */
+    el.classList.remove(sample ? 'hv-real' : 'hv-sample');
+    el.classList.add(sample ? 'hv-sample' : 'hv-real');
+
+    /* a chip on the run cards so it reads at a glance, not on region tiles
+       which already carry their own status pill */
+    if (!isCap && ref) {
+      var badges = el.querySelector('.xc-badges');
+      var solo = !badges;
+      if (badges || panel) {
+        var chip = (badges || el).querySelector(':scope > .hv-stag, :scope > .hv-live')
+          || (badges ? badges.querySelector('.hv-stag,.hv-live') : null);
+        if (!chip) {
+          chip = document.createElement('span');
+          if (badges) badges.appendChild(chip);
+          else el.insertBefore(chip, el.firstChild);
+        }
+        chip.className = (sample ? 'hv-stag' : 'hv-live') + (solo ? ' hv-chip-solo' : '');
+        chip.textContent = sample ? 'Sample' : 'Live';
+        chip.title = sample
+          ? 'Sample data — not a real job'
+          : 'A real job on the network';
+      }
+    }
+
+    /* the eye */
+    var eye = document.createElement('span');
+    eye.className = 'hv-eye';
+    eye.setAttribute('role','button');
+    eye.setAttribute('tabindex','0');
+    eye.innerHTML = EYE_OPEN;
+    eye.title = 'Blur this out for screen sharing';
+    function toggle(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      var on = el.classList.toggle('hv-blur');
+      var k = el.getAttribute('data-hv-ref') || '';
+      if (k) { if (on) blurred[k] = 1; else delete blurred[k]; saveBlurred(); }
+      paintEye(el, eye);
+    }
+    eye.addEventListener('click', toggle);
+    eye.addEventListener('keydown', function(ev){
+      if (ev.key === 'Enter' || ev.key === ' ') toggle(ev);
+    });
+    el.appendChild(eye);
+
+    if (ref && blurred[ref]) el.classList.add('hv-blur');
+    paintEye(el, eye);
+  }
+  function paintEye(el, eye){
+    var on = el.classList.contains('hv-blur');
+    eye.innerHTML = on ? EYE_SHUT : EYE_OPEN;
+    eye.title = on ? 'Show this again' : 'Blur this out for screen sharing';
+    eye.setAttribute('aria-label', eye.title);
+  }
+
+  /* ── the view-format bar, injected once per pane that holds runs ── */
+  function paneOf(el){
+    var p = el.closest ? el.closest('[id^="pane-"]') : null;
+    return p;
+  }
+  function applyFormat(pane, fmt){
+    FORMATS.forEach(function(f){ pane.classList.remove(FMT_CLASS + f.id); });
+    pane.classList.add(FMT_CLASS + fmt);
+    var bar = pane.querySelector(':scope > .hv-bar');
+    if (bar) {
+      bar.querySelectorAll('.hv-b[data-fmt]').forEach(function(b){
+        b.classList.toggle('on', b.getAttribute('data-fmt') === fmt);
+      });
+    }
+    try { localStorage.setItem(fmtKey(pane.id), fmt); } catch(e){}
+  }
+  function ensureBar(pane){
+    if (pane.querySelector(':scope > .hv-bar')) return;
+
+    var bar = document.createElement('div');
+    bar.className = 'hv-bar';
+
+    var lbl = document.createElement('span');
+    lbl.className = 'hv-bar-lbl';
+    lbl.textContent = 'View';
+    bar.appendChild(lbl);
+
+    FORMATS.forEach(function(f){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'hv-b';
+      b.setAttribute('data-fmt', f.id);
+      b.textContent = f.label;
+      b.addEventListener('click', function(){ applyFormat(pane, f.id); });
+      bar.appendChild(b);
+    });
+
+    var sp = document.createElement('span');
+    sp.className = 'hv-bar-sp';
+    bar.appendChild(sp);
+
+    var blurAll = document.createElement('button');
+    blurAll.type = 'button';
+    blurAll.className = 'hv-b hv-bl';
+    blurAll.innerHTML = 'Blur all';
+    blurAll.title = 'Blur every run on the page — for screen sharing';
+    blurAll.addEventListener('click', function(){ setBlurAll(!document.body.classList.contains('hv-blur-all')); });
+    bar.appendChild(blurAll);
+
+    pane.insertBefore(bar, pane.firstChild);
+
+    var saved = 'cards';
+    try { saved = localStorage.getItem(fmtKey(pane.id)) || 'cards'; } catch(e){}
+    applyFormat(pane, saved);
+  }
+
+  /* the grid format needs a wrapper around the run of tiles to lay them out */
+  function ensureWrap(tiles){
+    var parents = [];
+    tiles.forEach(function(t){
+      if (parents.indexOf(t.parentNode) < 0) parents.push(t.parentNode);
+    });
+    parents.forEach(function(p){ if (p && p.classList) p.classList.add('hv-wrap'); });
+  }
+
+  /* ── blur everything ── */
+  function setBlurAll(on){
+    document.body.classList.toggle('hv-blur-all', on);
+    try { localStorage.setItem(allKey(), on ? '1' : '0'); } catch(e){}
+    document.querySelectorAll('.hv-b.hv-bl').forEach(function(b){
+      b.classList.toggle('on', on);
+      b.textContent = on ? 'Show all' : 'Blur all';
+    });
+    var top = document.getElementById('hv-top-blur');
+    if (top) {
+      top.classList.toggle('on', on);
+      top.innerHTML = on ? EYE_SHUT : EYE_OPEN;
+      top.title = on ? 'Show everything again' : 'Blur every run — for screen sharing';
+    }
+  }
+
+  /* a permanent switch in the top bar, so it is reachable from any page */
+  function ensureTopButton(){
+    if (document.getElementById('hv-top-blur')) return;
+    var host = document.querySelector('.topbar .tb-r');
+    if (!host) return;
+    var b = document.createElement('button');
+    b.id = 'hv-top-blur';
+    b.className = 'ib';
+    b.title = 'Blur every run — for screen sharing';
+    b.innerHTML = EYE_OPEN;
+    b.addEventListener('click', function(){
+      setBlurAll(!document.body.classList.contains('hv-blur-all'));
+    });
+    var theme = host.querySelector('.ib');
+    host.insertBefore(b, theme || host.lastChild);
+  }
+
+  /* ── the sweep ── */
+  var observer = null;
+  var pending = null;
+  var lastUser = null;
+
+  /* signing in changes who "you" are, so re-read that person's saved
+     views and blur choices and re-apply them across every pane */
+  function syncUser(){
+    var u = user();
+    if (u === lastUser) return;
+    lastUser = u;
+    loadBlurred();
+    document.querySelectorAll('[id^="pane-"]').forEach(function(pane){
+      if (!pane.querySelector(':scope > .hv-bar')) return;
+      var saved = 'cards';
+      try { saved = localStorage.getItem(fmtKey(pane.id)) || 'cards'; } catch(e){}
+      applyFormat(pane, saved);
+    });
+    document.querySelectorAll('.hv-tile').forEach(function(t){
+      var k = t.getAttribute('data-hv-ref') || '';
+      var on = !!(k && blurred[k]);
+      t.classList.toggle('hv-blur', on);
+      var eye = t.querySelector('.hv-eye');
+      if (eye) paintEye(t, eye);
+    });
+    var wasAll = false;
+    try { wasAll = localStorage.getItem(allKey()) === '1'; } catch(e){}
+    setBlurAll(wasAll);
+  }
+
+  function sweep(){
+    if (observer) observer.disconnect();
+    try {
+      syncUser();
+      /* the sidebar live-job card is included on purpose: it sits on screen the
+         whole time, so it is the first thing you want soft on a shared screen */
+      /* the sidebar live-job card is included on purpose, and so are the two
+         dashboard panels that summarise runs: they sit on screen the whole
+         time, so they are the first thing you want soft on a shared screen */
+      var tiles = [].slice.call(document.querySelectorAll(
+        '.xc, .cap-sec, #sb-livejob, #dash-basic-focus, #dash-return'));
+      tiles.forEach(decorate);
+
+      /* group tiles by pane so each pane gets its own bar and wrapper */
+      var byPane = {};
+      tiles.forEach(function(t){
+        var p = paneOf(t);
+        if (!p || !p.id) return;
+        (byPane[p.id] = byPane[p.id] || {pane:p, tiles:[]}).tiles.push(t);
+      });
+      Object.keys(byPane).forEach(function(id){
+        var g = byPane[id];
+        if (g.tiles.length < 2) return;   /* a single tile needs no view switcher */
+        /* only the run cards themselves lay out in columns — the dashboard
+           panels keep their own shape in every format */
+        ensureWrap(g.tiles.filter(function(t){
+          return t.classList.contains('xc') || t.classList.contains('cap-sec');
+        }));
+        ensureBar(g.pane);
+      });
+      ensureTopButton();
+    } catch(e) {
+      /* never let decoration break the app */
+      if (window.console && console.warn) console.warn('run-visibility sweep skipped:', e);
+    }
+    if (observer) observer.observe(document.body, {childList:true, subtree:true});
+  }
+  function scheduleSweep(){
+    if (pending) clearTimeout(pending);
+    pending = setTimeout(sweep, 120);
+  }
+
+  function boot(){
+    loadBlurred();
+    sweep();
+
+    observer = new MutationObserver(scheduleSweep);
+    observer.observe(document.body, {childList:true, subtree:true});
+
+    /* the app re-renders panes on tab switch — re-read the saved blur set for
+       whoever is signed in now, then sweep */
+    if (typeof window.switchTab === 'function') {
+      var orig = window.switchTab;
+      window.switchTab = function(){
+        var r = orig.apply(this, arguments);
+        scheduleSweep();
+        return r;
+      };
+    }
+  }
+
+  /* exposed so the rest of the app (and I) can drive it */
+  window.HAF_VIEW = {
+    sweep: scheduleSweep,
+    blurAll: setBlurAll,
+    isSample: isSample,
+    formats: FORMATS
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
 </script>
 </body>
