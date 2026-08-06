@@ -255,6 +255,39 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .kc-v{font-family:var(--dp);font-weight:900;font-size:1.6rem;letter-spacing:-.04em}
 .kc-v.or{color:var(--or)}.kc-v.gn{color:var(--gn)}.kc-v.rd{color:var(--rd)}.kc-v.am{color:var(--am)}
 .kc-d{font-size:.68rem;font-weight:600;margin-top:.12rem}.kc-d.pos{color:var(--gn)}.kc-d.neg{color:var(--rd)}
+/* ── Network Overview + Account Activity ──────────────────────────────────
+   The source line sits above the numbers, not in a footnote: on a page that
+   once showed invented figures, where they come from is part of the reading. */
+.ov-src{font-size:.72rem;color:var(--mu);margin:-.6rem 0 1.1rem;display:flex;
+        align-items:center;gap:.4rem;flex-wrap:wrap}
+.ov-src .dot{width:7px;height:7px;border-radius:50%;background:var(--gn);flex-shrink:0}
+.ov-src.stale .dot{background:var(--am)}
+.ov-src.bad .dot{background:var(--rd)}
+.aa-filters{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.aa-filters .fi2{flex:1 1 170px;min-width:0}
+.aa-count{font-size:.72rem;color:var(--mu);margin-top:.6rem}
+/* The list can be long; it scrolls inside its card rather than pushing the
+   page down, and on a phone each row stacks instead of being squeezed off. */
+.aa-wrap{max-height:26rem;overflow:auto;margin:-.2rem -.3rem;padding:0 .3rem}
+.aa-row{display:flex;align-items:center;gap:.6rem;padding:.6rem 0;
+        border-bottom:1px solid var(--ln)}
+.aa-row:last-child{border-bottom:none}
+.aa-main{min-width:0;flex:1}
+.aa-name{font-weight:700;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aa-sub{font-size:.7rem;color:var(--mu);margin-top:.12rem}
+.aa-right{display:flex;align-items:center;gap:.35rem;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.aa-empty{font-size:.8rem;color:var(--mu);padding:.9rem 0;text-align:center}
+.aa-test{opacity:.62}
+.aa-ev{display:flex;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--ln);font-size:.78rem}
+.aa-ev:last-child{border-bottom:none}
+.aa-ev-t{color:var(--mu);font-size:.7rem;white-space:nowrap;flex-shrink:0;min-width:6.6rem}
+@media(max-width:560px){
+  .aa-row{flex-direction:column;align-items:flex-start;gap:.35rem}
+  .aa-right{justify-content:flex-start}
+  .aa-ev{flex-direction:column;gap:.15rem}
+  .aa-ev-t{min-width:0}
+  .aa-wrap{max-height:22rem}
+}
 .card{background:var(--p);border:1px solid var(--ln);border-radius:var(--rs);padding:1.2rem;margin-bottom:1rem;box-shadow:var(--sd)}
 .ct{font-family:var(--dp);font-weight:900;font-size:.95rem;letter-spacing:-.03em;margin-bottom:.85rem}
 .cr{display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--ln);font-size:.84rem}
@@ -2639,21 +2672,75 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
 
       <!-- ADMIN -->
       <div class="tp" id="pane-admin">
-        <h1 class="pt">OTIS Control</h1><p class="ps">Full platform view. Admin only.</p>
-        <div class="kg">
-          <div class="kc"><div class="kc-l">PLNA Drivers</div><div class="kc-v">340</div><div class="kc-d">on the network</div></div>
-          <div class="kc"><div class="kc-l">GMV all time</div><div class="kc-v or">£148k</div></div>
-          <div class="kc"><div class="kc-l">Active jobs</div><div class="kc-v gn">14</div></div>
-          <div class="kc"><div class="kc-l">Pending compliance</div><div class="kc-v am">22</div></div>
-          <div class="kc"><div class="kc-l">Business accounts</div><div class="kc-v">128</div><div class="kc-d">free · own goods only</div></div>
-          <div class="kc"><div class="kc-l">Freight Forward</div><div class="kc-v">22</div><div class="kc-d">Free · Plus · Pro</div></div>
+        <h1 class="pt">Network Overview</h1><p class="ps">Every account on HAF, read from the live systems. Admin only.</p>
+
+        <!-- Where these numbers come from and when they were last true. The old
+             version of this page carried figures typed in by hand months ago;
+             naming the source out loud is what stops that happening again. -->
+        <div id="ov-src" class="ov-src">Reading the network…</div>
+
+        <div class="kg" id="ov-kpis"></div>
+
+        <div class="card" id="ov-todo-card" style="display:none">
+          <div class="ct">Waiting on someone</div>
+          <div id="ov-todo"></div>
+        </div>
+
+        <div class="g2">
+          <div class="card"><div class="ct">Accounts by type</div><div id="ov-types"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
+          <div class="card"><div class="ct">Accounts by status</div><div id="ov-status"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
         </div>
         <div class="g2">
-          <div class="card"><div class="ct">Freight Forward breakdown</div><div class="cr"><span class="ck">FF Free</span><span class="cv">14 accounts · 12% fee · no pooling</span></div><div class="cr"><span class="ck">FF Plus</span><span class="cv">5 accounts · 10% fee · 1% pooling</span></div><div class="cr"><span class="ck">FF Pro</span><span class="cv">3 accounts · 9% fee · 3% pooling</span></div><div class="cr"><span class="ck">Founders Members</span><span class="cv"><span class="chip ca">0 active · apply-only</span></span></div><div class="cr"><span class="ck">Total pooling credits issued</span><span class="cv" style="color:var(--gn)">£312.40 this month</span></div></div>
-          <div class="card"><div class="ct">System connections</div><div class="cr"><span class="ck">HAF PLNA</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">CleverPay</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">HAF Launch</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">Supabase DB</span><span class="cv"><span class="chip ca">Schema pending</span></span></div></div>
+          <div class="card"><div class="ct">Accounts by tier</div><div id="ov-tiers"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
+          <div class="card"><div class="ct">System connections</div><div class="cr"><span class="ck">HAF PLNA</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">CleverPay</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">HAF Launch</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">Account ledger</span><span class="cv" id="ov-ledger"><span class="chip ca">checking…</span></span></div></div>
         </div>
         <div class="card"><div class="ct">Quick links</div><div style="display:flex;gap:.45rem;flex-wrap:wrap"><a href="https://plna.usehaf.co.uk/dashboard.html" target="_blank" class="btn btn-gh btn-sm">PLNA</a><a href="https://clever.usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">CleverPay</a><a href="https://launch.usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">Launch site</a><a href="https://usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">usehaf.co.uk</a></div></div>
         <div class="ig"><a class="ic" href="https://plna.usehaf.co.uk" target="_blank"><div class="ic-l">Driver network</div><div class="ic-n">HAF PLNA</div><div class="ic-s">Live</div></a><a class="ic" href="https://clever.usehaf.co.uk" target="_blank"><div class="ic-l">Compliance</div><div class="ic-n">CleverPay</div><div class="ic-s">Live</div></a><a class="ic" href="https://launch.usehaf.co.uk" target="_blank"><div class="ic-l">Marketing</div><div class="ic-n">HAF Launch</div><div class="ic-s">Live</div></a></div>
+      </div>
+
+      <!-- ══ ACCOUNT ACTIVITY — Super Admin only ═══════════════════════════
+           Brent asked for one place that shows everything happening on the
+           accounts: who is on the network, what stage each one is at, and what
+           has moved. Every row here is a real record; nothing is illustrative.
+           No document, no PIN and no home address ever reaches this page. -->
+      <div class="tp" id="pane-accounts">
+        <h1 class="pt">Account Activity</h1>
+        <p class="ps">Every account on the network and everything that has happened to it. Admin only.</p>
+
+        <div class="card">
+          <div class="ct">Find an account</div>
+          <div class="aa-filters">
+            <select class="fi2" id="aa-type" onchange="aaLoad()">
+              <option value="">All account types</option>
+              <option value="driver">Drivers (PLNA)</option>
+              <option value="freight">Freight forwarders</option>
+              <option value="business">Business accounts</option>
+              <option value="fleet">Fleet accounts</option>
+              <option value="fleet_driver">Drivers inside fleets</option>
+            </select>
+            <select class="fi2" id="aa-status" onchange="aaLoad()">
+              <option value="">Any status</option>
+              <option value="active">Active</option>
+              <option value="on_hold">On hold</option>
+              <option value="missing_documents">Missing documents</option>
+              <option value="rejected">Rejected</option>
+              <option value="blocked">Blocked</option>
+            </select>
+            <input class="fi2" id="aa-q" placeholder="Name, username or reference" oninput="aaDebounce()">
+            <button class="btn btn-gh btn-sm" onclick="aaLoad(true)">Refresh</button>
+          </div>
+          <div class="aa-count" id="aa-count"></div>
+        </div>
+
+        <div class="card">
+          <div class="ct">Accounts</div>
+          <div class="aa-wrap"><div id="aa-list"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
+        </div>
+
+        <div class="card">
+          <div class="ct">What has happened <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">newest first</span></div>
+          <div class="aa-wrap"><div id="aa-feed"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
+        </div>
       </div>
 
       <!-- Network Pools — Super Admin only (linked from ADMIN_NAV only; pooling never shows to any other role) -->
@@ -3625,6 +3712,7 @@ const DRIVER_NAV=[
 ];
 const ADMIN_NAV=[
   {id:'admin',l:'Network Overview',s:'Overview',ico:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
+  {id:'accounts',l:'Account Activity',s:'Overview',ico:'<path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M4 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'pools',l:'Network Pools',s:'Overview',ico:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>'},
   {id:'pricing',l:'Pricing Engine',s:'Overview',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/><circle cx="12" cy="12" r="10"/>'},
   {id:'f-post',l:'Post a Load',s:'Freight Tools',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
@@ -4347,11 +4435,198 @@ function switchTab(id){
   if(id==='pane-d-home'){setTimeout(renderDashAreas,80);loadDashMode();}
   if(id==='pane-f-cap')setTimeout(capBootPane,80);
   if(id==='pane-pricing')setTimeout(()=>{if(window.pxBoot)pxBoot();},60);
+  if(id==='pane-admin')setTimeout(()=>{if(window.ovLoad)ovLoad();},60);
+  if(id==='pane-accounts')setTimeout(()=>{if(window.aaBoot)aaBoot();},60);
   if(id==='pane-livejob')setTimeout(hafRenderLive,60);
   /* area rule applied to whatever this page just drew */
   setTimeout(()=>{try{hafMaskSweep(p);}catch(e){}},140);
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
 }
+
+/* ═══════════════ NETWORK OVERVIEW + ACCOUNT ACTIVITY ═══════════════
+   Brent's master view. Every figure below is read from the account ledger on
+   the PLNA database, which a half-hourly job rebuilds from CleverPay and from
+   the network's own tables. Nothing on these two panes is illustrative.
+
+   Two rules this code exists to keep:
+   1. If the numbers cannot be read, the page SAYS SO. It never falls back to a
+      sample, because a plausible wrong number is worse than a blank.
+   2. Test and demo accounts are counted separately and shown greyed. They are
+      never folded into a total Brent might plan off.
+
+   The report functions are owner-only in the database itself: they check the
+   username AND the credential that opened this session before returning a
+   single row, so the published key in this page opens nothing on its own. */
+let _ovCache=null,_aaTimer=null;
+
+function _netCred(){
+  const u=(localStorage.getItem('knect-user')||'').toUpperCase();
+  if(!u||!_hafCred)return null;
+  /* Whichever hash opened the session is sent in both the relay and the
+     application slot — only the right one can match, and this way a person who
+     signed in with their CleverPay PIN is recognised just the same. */
+  return {p_username:u,p_hash:_hafCred.hash,
+          p_relay:_hafCred.relay,p_cp:_hafCred.relay};
+}
+async function _netRpc(name,extra){
+  const c=_netCred();
+  if(!c)return {denied:true,rows:[]};
+  const r=await fetch(PLNA_URL+'/rest/v1/rpc/'+name,{method:'POST',
+    headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify(Object.assign({},c,extra||{}))});
+  if(!r.ok)throw new Error('rpc '+r.status);
+  const d=await r.json();
+  return {denied:false,rows:Array.isArray(d)?d:[]};
+}
+function _esc(s){return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]))}
+function _ago(iso){
+  if(!iso)return '';
+  const s=Math.max(0,(Date.now()-new Date(iso).getTime())/1000);
+  if(s<90)return 'just now';
+  if(s<5400)return Math.round(s/60)+' min ago';
+  if(s<172800)return Math.round(s/3600)+' hours ago';
+  return Math.round(s/86400)+' days ago';
+}
+function _when(iso){
+  if(!iso)return '—';
+  const d=new Date(iso);
+  return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+
+         d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+const _STATUS_CHIP={active:'cg',on_hold:'ca',missing_documents:'ca',rejected:'cr',blocked:'cr'};
+const _STATUS_LBL={active:'Active',on_hold:'On hold',missing_documents:'Missing documents',
+                   rejected:'Rejected',blocked:'Blocked'};
+const _TYPE_LBL={driver:'Driver',freight:'Freight forwarder',business:'Business',
+                 fleet:'Fleet',fleet_driver:'Fleet driver'};
+const _EVENT_LBL={signed_up:'applied',email_confirmed:'confirmed their email',
+                  approved:'was approved',released:'was let into the network',
+                  paid:'paid',logged_in:'signed in',rejected:'was turned down',
+                  blocked:'was blocked'};
+
+function _rows(el,items){
+  document.getElementById(el).innerHTML=items.map(i=>
+    '<div class="cr"><span class="ck">'+_esc(i.label)+'</span><span class="cv">'+i.value+'</span></div>').join('');
+}
+function _noCred(msg){
+  const s=document.getElementById('ov-src');
+  if(s){s.className='ov-src bad';s.innerHTML='<span class="dot"></span>'+_esc(msg);}
+}
+
+async function ovLoad(){
+  const src=document.getElementById('ov-src');
+  try{
+    const {denied,rows}=await _netRpc('haf_network_overview');
+    if(denied){_noCred('Sign in with your own HAF username and PIN to see the live network — a demo login cannot read real accounts.');return}
+    if(!rows.length){_noCred('These figures are for the account owner only. This login cannot read them.');return}
+    const d=_ovCache=rows[0];
+
+    const stale=d.synced_at?((Date.now()-new Date(d.synced_at).getTime())>75*60*1000):true;
+    src.className='ov-src'+(stale?' stale':'');
+    src.innerHTML='<span class="dot"></span><span>Read live from CleverPay and the driver network'+
+      (d.synced_at?' &middot; last refreshed '+_esc(_ago(d.synced_at)):'')+
+      (stale?' &middot; <strong>this is older than it should be — the half-hourly refresh may have stopped</strong>':'')+
+      (d.test_rows?' &middot; '+d.test_rows+' test account'+(d.test_rows===1?'':'s')+' excluded from every figure below':'')+
+      '</span>';
+
+    const f=d.funnel,n=d.needs_you,by=k=>Object.fromEntries((d[k]||[]).map(x=>[x.type||x.status||x.tier,x.count]));
+    const T=by('by_type'),S=by('by_status');
+    document.getElementById('ov-kpis').innerHTML=[
+      ['Accounts on the network',d.total,'','every type, test accounts excluded'],
+      ['Active',S.active||0,'gn','signed in and able to work'],
+      ['On hold',S.on_hold||0,'am','waiting on something'],
+      ['Missing documents',S.missing_documents||0,'am','nothing uploaded yet'],
+      ['Let in',f.released,'gn','released onto the network'],
+      ['Paying',f.paying,'or','on a paid tier today']
+    ].map(k=>'<div class="kc"><div class="kc-l">'+k[0]+'</div><div class="kc-v'+(k[2]?' '+k[2]:'')+'">'+
+        k[1]+'</div><div class="kc-d" style="color:var(--mu)">'+k[3]+'</div></div>').join('');
+
+    _rows('ov-types',(d.by_type||[]).map(t=>({label:t.label,
+      value:t.count?'<strong>'+t.count+'</strong>':'<span style="color:var(--mu)">0 — none yet</span>'})));
+    _rows('ov-status',(d.by_status||[]).map(s=>({label:s.label,
+      value:s.count?'<span class="chip '+(_STATUS_CHIP[s.status]||'ca')+'">'+s.count+'</span>'
+                   :'<span style="color:var(--mu)">0</span>'})));
+    _rows('ov-tiers',(d.by_tier||[]).map(t=>({label:t.label,
+      value:t.count?'<strong>'+t.count+'</strong>':'<span style="color:var(--mu)">0 — none yet</span>'})));
+
+    /* Only the things a person can act on, and only when there are any. */
+    const todo=[
+      [n.approved_not_released,'approved and waiting for the CleverPay team to press release'],
+      [n.released_never_signed_in,'let in but has never signed in'],
+      [n.no_documents,'have sent no documents at all'],
+      [n.email_unconfirmed,'have not confirmed their email address']
+    ].filter(x=>x[0]>0);
+    document.getElementById('ov-todo-card').style.display=todo.length?'':'none';
+    if(todo.length)_rows('ov-todo',todo.map(x=>({label:x[1].charAt(0).toUpperCase()+x[1].slice(1),
+      value:'<span class="chip ca">'+x[0]+'</span>'})));
+
+    const led=document.getElementById('ov-ledger');
+    if(led)led.innerHTML='<span class="chip '+(stale?'ca':'cg')+'">'+(stale?'Refresh overdue':'Live')+'</span>';
+  }catch(e){
+    src.className='ov-src bad';
+    src.innerHTML='<span class="dot"></span>Could not read the network just now. Nothing below is showing a made-up number — try Refresh in a moment.';
+  }
+}
+
+function aaBoot(){aaLoad();aaFeed();}
+function aaDebounce(){clearTimeout(_aaTimer);_aaTimer=setTimeout(aaLoad,300);}
+async function aaLoad(alsoFeed){
+  const list=document.getElementById('aa-list'),cnt=document.getElementById('aa-count');
+  try{
+    const {denied,rows}=await _netRpc('haf_network_accounts',{
+      p_type:document.getElementById('aa-type').value,
+      p_status:document.getElementById('aa-status').value,
+      p_q:document.getElementById('aa-q').value.trim()});
+    if(denied){
+      list.innerHTML='<div class="aa-empty">Sign in with your own HAF username and PIN to see real accounts.</div>';
+      cnt.textContent='';return}
+    if(!rows.length){list.innerHTML='<div class="aa-empty">No account matches that.</div>';cnt.textContent='';return}
+    const real=rows.filter(r=>!r.is_test).length;
+    cnt.textContent=real+' account'+(real===1?'':'s')+
+      (rows.length-real?' · plus '+(rows.length-real)+' test account'+(rows.length-real===1?'':'s')+', greyed below':'');
+    list.innerHTML=rows.map(r=>
+      '<div class="aa-row'+(r.is_test?' aa-test':'')+'">'+
+        '<div class="aa-main">'+
+          '<div class="aa-name">'+_esc(r.name||r.username)+(r.is_test?' <span class="chip ca">test</span>':'')+'</div>'+
+          '<div class="aa-sub">'+_esc(r.username||'—')+' &middot; '+_esc(_TYPE_LBL[r.type]||r.type)+
+            ' &middot; '+_esc(r.why||'')+'</div>'+
+        '</div>'+
+        '<div class="aa-right">'+
+          '<span class="chip '+(_STATUS_CHIP[r.status]||'ca')+'">'+_esc(_STATUS_LBL[r.status]||r.status)+'</span>'+
+          '<span class="chip">'+_esc(r.tier)+'</span>'+
+          (r.docs?'<span class="chip">'+r.docs+' docs</span>':'')+
+          (r.has_login?'':'<span class="chip ca">no login</span>')+
+        '</div>'+
+      '</div>').join('');
+    if(alsoFeed)aaFeed();
+  }catch(e){
+    list.innerHTML='<div class="aa-empty">Could not read the accounts just now — nothing here is invented, so it is showing nothing rather than a guess.</div>';
+  }
+}
+async function aaFeed(){
+  const feed=document.getElementById('aa-feed');
+  try{
+    const {denied,rows}=await _netRpc('haf_network_activity',{p_limit:100});
+    if(denied){feed.innerHTML='<div class="aa-empty">Sign in with your own HAF username and PIN to see activity.</div>';return}
+    if(!rows.length){feed.innerHTML='<div class="aa-empty">Nothing has happened yet.</div>';return}
+    /* One plain sentence per line. The stored detail is only shown when it adds
+       something the sentence does not already say — a rejection reason, which
+       sign-in page, the type applied for — otherwise the line reads twice. */
+    feed.innerHTML=rows.map(e=>{
+      const who=_esc(e.name||e.username||'Someone');
+      const said=_esc(_EVENT_LBL[e.event]||e.event);
+      let extra='';
+      if(e.event==='signed_up')      extra=' as a '+_esc(_TYPE_LBL[e.type]||e.type).toLowerCase();
+      else if(e.event==='rejected'&&e.detail) extra=' — '+_esc(e.detail);
+      else if(e.event==='logged_in'&&e.detail) extra=' '+_esc(e.detail.replace(/^Signed in /,''));
+      return '<div class="aa-ev"><span class="aa-ev-t">'+_esc(_when(e.at))+'</span>'+
+             '<span><strong>'+who+'</strong> '+said+
+             (extra?'<span style="color:var(--mu)">'+extra+'</span>':'')+'</span></div>';
+    }).join('');
+  }catch(e){
+    feed.innerHTML='<div class="aa-empty">Could not read the activity just now.</div>';
+  }
+}
+window.ovLoad=ovLoad;window.aaBoot=aaBoot;window.aaLoad=aaLoad;window.aaDebounce=aaDebounce;
 
 /* ═══════════════ HAF LIVE JOB SPINE ═══════════════
    One delivery record, stored once. Each role sees its own permitted slice.
