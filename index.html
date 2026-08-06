@@ -4142,8 +4142,13 @@ async function pinSave(){
   if(a!==b){hafErr(err,'The two PINs don\'t match — try again.');return}
   btn.textContent='Saving…';btn.disabled=true;
   try{
+    /* Store the PIN in BOTH the forms the network reads — the relay format and
+       the one a CleverPay application uses. The reset page already writes both;
+       when this box wrote only one, the two could disagree about the same
+       person's PIN and the person was the one who found out. */
     const ph=await hafSha(hafPend.u+':'+a);
-    const r=await fetch(PLNA_URL+'/rest/v1/rpc/set_driver_pin',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:hafPend.u,p_password_hash:hafPend.hash,p_pin_hash:ph})});
+    const pc=await hafSha('HAF-CP|'+hafPend.u+'|'+a);
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/set_driver_pin',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:hafPend.u,p_password_hash:hafPend.hash,p_pin_hash:ph,p_cp:pc})});
     const ok=await r.json();
     if(ok!==true){hafErr(err,'Couldn\'t save your PIN — please try again.');btn.textContent='Save PIN and continue';btn.disabled=false;return}
     hafGo(hafPend.u,hafPend.hash,'w');
