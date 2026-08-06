@@ -1282,6 +1282,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
         </div>
         <div class="sc-err" id="sc-err"></div>
         <button class="btn btn-or btn-wide" onclick="scLogin()" style="margin-top:.3rem">Log in →</button>
+        <p class="sc-foot"><a href="https://clever.usehaf.co.uk/reset.html" target="_blank">Forgotten your PIN?</a></p>
         <p class="sc-foot">No account? <a href="https://clever.usehaf.co.uk" target="_blank">Create one via CleverPay</a></p>
         <div style="border-top:1px solid var(--ln);padding-top:.7rem;margin-top:.7rem;text-align:center">
           <a href="https://demo.knect.usehaf.co.uk" target="_blank" class="btn btn-or btn-wide" style="display:inline-flex;align-items:center;justify-content:center;gap:.4rem;font-size:.72rem;text-decoration:none">Try a live demo →</a>
@@ -1359,6 +1360,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
     <div class="of"><label class="ol">PIN or password</label><input class="oi" id="l-pass" placeholder="4–6 digit PIN or password" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div class="oe" id="l-err"></div>
     <button class="btn btn-or btn-wide" onclick="doLogin()">Sign in →</button>
+    <p style="margin:.7rem 0 0;font-size:.7rem;text-align:center"><a href="https://clever.usehaf.co.uk/reset.html" target="_blank" style="color:var(--mu)">Forgotten your PIN?</a></p>
     <div style="margin-top:1.1rem;border-top:1px solid var(--ln);padding-top:.9rem;text-align:center">
       <a href="https://demo.knect.usehaf.co.uk" target="_blank" class="btn btn-or btn-wide" style="display:inline-flex;align-items:center;justify-content:center;gap:.4rem;text-decoration:none">Try a live demo →</a>
       <p style="margin:.5rem 0 0;font-size:.62rem;color:var(--mu)">No login needed · Driver, Freight &amp; Business views</p>
@@ -4024,14 +4026,22 @@ async function hafAuth(u,s,err,btn){
     const hash=await hafSha(isPin?u+':'+s:s);
     /* The PIN form hashes username+PIN (the relay format), the password form hashes
        the password alone. plna_auth checks both and returns the profile only on a
-       match, with the stored hashes stripped out. */
-    const r=await fetch(PLNA_URL+'/rest/v1/rpc/plna_auth',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify(isPin?{p_username:u,p_hash:null,p_relay:hash}:{p_username:u,p_hash:hash,p_relay:null})});
+       match, with the stored hashes stripped out.
+       A third form goes with them: the same PIN hashed the way CleverPay hashed it
+       when the person chose it on their application. A hash cannot be turned back
+       into a PIN, so the application's own hash has to be recognised in its own
+       right — that is what lets somebody sign in here with the PIN they already
+       set, instead of being sent away to invent a second one. */
+    const cp=isPin?await hafSha('HAF-CP|'+u+'|'+s):null;
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/plna_auth',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify(isPin?{p_username:u,p_hash:null,p_relay:hash,p_cp:cp}:{p_username:u,p_hash:hash,p_relay:null,p_cp:null})});
     const d=await r.json();
     if(!Array.isArray(d)||!d.length){
-      hafErr(err,isPin?'That PIN didn\'t match. If you haven\'t set a PIN yet, sign in with your password first.':'Incorrect username or password. Try again.');
+      hafErr(err,isPin?'That PIN didn\'t match. Use the PIN you chose on your application — or reset it below.':'Incorrect username or password. Try again.');
       btn.textContent=old;btn.disabled=false;return}
     if(!isPin&&!d[0].has_pin){hafPend={u:u,hash:hash};btn.textContent=old;btn.disabled=false;closeLogin();document.getElementById('pin-ov').classList.add('open');document.getElementById('pin-a').focus();return}
-    hafGo(u,hash,isPin?'p':'w');
+    /* keep whichever hash actually opened the account: later calls (bookings,
+       usage, profile) prove who they are by sending it back */
+    hafGo(u,d[0].cred==='cleverpay'?cp:hash,isPin?'p':'w');
   }catch(e){hafErr(err,'Connection problem — please try again.');btn.textContent=old;btn.disabled=false}
 }
 function doLogin(){hafAuth(document.getElementById('l-user').value,document.getElementById('l-pass').value,document.getElementById('l-err'),document.querySelector('#login-ov .btn-wide'))}
