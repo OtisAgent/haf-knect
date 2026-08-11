@@ -554,7 +554,7 @@ textarea.fi2{resize:vertical;min-height:70px}
       <span class="dp-s">Own goods · free</span>
     </button>
     <button class="dp" onclick="demoLogin('freight-pro')">
-      <span class="dp-n">Freight Forward Pro</span>
+      <span class="dp-n">HAF KNECT Pro</span>
       <span class="dp-s">Load board · £100/mo</span>
     </button>
   </div>
@@ -1256,7 +1256,7 @@ textarea.fi2{resize:vertical;min-height:70px}
       <div class="tp" id="pane-f-account">
         <h1 class="pt">Account Controls</h1><p class="ps">Your commercial terms, credit limit and compliance rules.</p>
         <div class="g2">
-          <div class="card"><div class="ct">Commercial account</div><div class="cr"><span class="ck">Type</span><span class="cv">Freight Forward Plus</span></div><div class="cr"><span class="ck">Network fee</span><span class="cv">10%</span></div><div class="cr"><span class="ck">Payment terms</span><span class="cv">Net 14</span></div><div class="cr"><span class="ck">Credit limit</span><span class="cv">£25,000</span></div><div class="cr"><span class="ck">SLA status</span><span class="cv"><span class="chip cg">On track</span></span></div></div>
+          <div class="card"><div class="ct">Commercial account</div><div class="cr"><span class="ck">Type</span><span class="cv">HAF KNECT Plus</span></div><div class="cr"><span class="ck">Network fee</span><span class="cv">10%</span></div><div class="cr"><span class="ck">Payment terms</span><span class="cv">Net 14</span></div><div class="cr"><span class="ck">Credit limit</span><span class="cv">£25,000</span></div><div class="cr"><span class="ck">SLA status</span><span class="cv"><span class="chip cg">On track</span></span></div></div>
           <div class="card"><div class="ct">Compliance rules</div><div class="cr"><span class="ck">Approved lanes</span><span class="cv">All UK</span></div><div class="cr"><span class="ck">Min GIT insurance</span><span class="cv">£50,000</span></div><div class="cr"><span class="ck">Cancellation rate</span><span class="cv"><span class="chip cg">1.2%</span></span></div><div class="cr"><span class="ck">Disputes (90d)</span><span class="cv">1 — resolved</span></div></div>
         </div>
       </div>
@@ -1754,7 +1754,7 @@ function renderPlnaCust(tier){
   const dayStep=(tier==='lite')
     ?`<div class="card" style="max-width:560px"><div class="ct">Step 2 — When</div>
        <div style="font-size:.78rem;font-weight:700">Same-day only</div>
-       <div style="font-size:.7rem;color:var(--mu);margin-top:.3rem">On PLNA Lite your customers book for today. The availability calendar unlocks on Plus.</div></div>`
+       <div style="font-size:.7rem;color:var(--mu);margin-top:.3rem">On HAF KNECT Free your customers book for today. The availability calendar unlocks on Plus.</div></div>`
     :`<div class="card" style="max-width:560px"><div class="ct">Step 2 — Pick a day</div>
        <div style="display:flex;gap:.45rem;flex-wrap:wrap">
          <button class="btn btn-or btn-xs" onclick="plnaCustDay(this)">Today</button><button class="btn btn-gh btn-xs" onclick="plnaCustDay(this)">Fri</button><button class="btn btn-gh btn-xs" onclick="plnaCustDay(this)">Mon</button><button class="btn btn-gh btn-xs" onclick="plnaCustDay(this)">Tue</button><button class="btn btn-gh btn-xs" onclick="plnaCustDay(this)">Wed</button>
@@ -1800,7 +1800,7 @@ function renderPlnaBook(tier){
     el.innerHTML=linkCard+capCard(3,10)+
       `<div class="card" style="max-width:560px"><div class="ct">Services on your page — 1 of 4 (Lite)</div>${svcCards(1)}</div>
       <div class="card" style="max-width:560px"><div class="ct">Unlock full booking features</div>
-        <div style="font-size:.76rem;color:var(--mu);margin-bottom:.75rem">Customer calendar, all 4 services, WhatsApp alerts and 50 bookings a month on PLNA Plus — £10/mo.</div>
+        <div style="font-size:.76rem;color:var(--mu);margin-bottom:.75rem">Customer calendar, all 4 services, WhatsApp alerts and 50 bookings a month on HAF KNECT Plus — £10/mo.</div>
         <button class="btn btn-or btn-sm" onclick="showUpgrade('Full booking features')">Upgrade to Plus</button></div>`;
   }else if(tier==='plus'){
     el.innerHTML=linkCard+capCard(12,50)+
@@ -1864,11 +1864,11 @@ const TIER_DEFS={
      unlock:['exchange','f-post','f-cap','f-lanes','f-loads','f-cover','f-account','billing','support','feedback']},
   ],
   plna:[
-    {key:'lite',    label:'Lite',    cls:'pb-lite',    plan:'PLNA Lite', next:'Plus',
+    {key:'lite',    label:'Lite',    cls:'pb-lite',    plan:'HAF KNECT Free', next:'Plus',
      unlock:['exchange','f-cap','d-home','d-book','d-cust','d-comp','billing','support','feedback']},
-    {key:'plus',    label:'Plus',    cls:'pb-plus',    plan:'PLNA Plus', next:'Pro',
+    {key:'plus',    label:'Plus',    cls:'pb-plus',    plan:'HAF KNECT Plus', next:'Pro',
      unlock:['exchange','f-cap','d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support','feedback']},
-    {key:'pro',     label:'Pro',     cls:'pb-pro',     plan:'PLNA Pro',  next:null,
+    {key:'pro',     label:'Pro',     cls:'pb-pro',     plan:'HAF KNECT Pro',  next:null,
      unlock:['exchange','f-cap','d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support','feedback']},
   ],
   knect:[
@@ -1889,18 +1889,18 @@ const ACCS={
     tabIds:['exchange','f-cap','b-book','b-del','b-spend','b-saved','billing','support','feedback'],def:'exchange',cp:'green',
     persona:'Business Account',ver:'HAF Demo',
     account_environment:'demo',is_demo_account:true,demo_role:'business',demo_persona:'Business Account'},
-  'freight-pro': {n:'NorthFreight UK',  u:'NF992190',i:'NF',r:'Freight Forward Pro',rc:'cb',tierGroup:'freight', initTier:'pro',
+  'freight-pro': {n:'NorthFreight UK',  u:'NF992190',i:'NF',r:'HAF KNECT Pro',rc:'cb',tierGroup:'freight', initTier:'pro',
     tabIds:['exchange','f-cap','f-post','f-lanes','f-loads','f-cover','f-account','billing','support','feedback'],def:'exchange',cp:'green',
     persona:'Freight Forward — Pro',ver:'HAF Demo',
-    account_environment:'demo',is_demo_account:true,demo_role:'freight',demo_persona:'Freight Forward Pro'},
+    account_environment:'demo',is_demo_account:true,demo_role:'freight',demo_persona:'HAF KNECT Pro'},
   'plna-new':    {n:'Alex Thompson',    u:'AT229184',i:'AT',r:'PLNA Driver',       rc:'ca',tierGroup:null,      initTier:null,
     tabIds:['f-cap','d-home','d-comp','billing','support'],def:'d-comp',cp:'amber',
     persona:'New Driver — Compliance Pending',ver:'DRV-1.4',
     account_environment:'demo',is_demo_account:true,demo_role:'driver',demo_persona:'New Driver'},
   'plna-plus':   {n:'Marcus Reid',      u:'MR668793',i:'MR',r:'PLNA Driver',      rc:'cg',tierGroup:'plna',    initTier:'plus',
     tabIds:['exchange','f-cap','d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','whats-new','billing','support','feedback'],def:'exchange',cp:'green',
-    persona:'Clever Checked Driver — PLNA Plus',ver:'DRV-1.4',
-    account_environment:'demo',is_demo_account:true,demo_role:'driver',demo_persona:'PLNA Plus Driver'},
+    persona:'Clever Checked Driver — HAF KNECT Plus',ver:'DRV-1.4',
+    account_environment:'demo',is_demo_account:true,demo_role:'driver',demo_persona:'HAF KNECT Plus Driver'},
   'knect-free':  {n:'Sam Patel',        u:'SP881291',i:'SP',r:'KNECT Member',      rc:'cb',tierGroup:'knect',   initTier:'free',
     tabIds:['exchange','f-cap','b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback'],def:'exchange',cp:'green',
     persona:'KNECT Member — Free',ver:'HAF Demo',
@@ -2098,10 +2098,10 @@ function switchTab(id){
 
 /* ── DIRECT-TO-DRIVER JOBS ── */
 const DEMO_DRIVERS={
-  MR668793:{name:'Marcus Reid',info:'PLNA Plus · Manchester · Clever Checked'},
+  MR668793:{name:'Marcus Reid',info:'HAF KNECT Plus · Manchester · Clever Checked'},
   AT229184:{name:'Alex Thompson',info:'New driver · compliance pending'},
-  KP041872:{name:'Kim Park',info:'PLNA Pro · Liverpool · Clever Checked'},
-  TD018392:{name:'Tom Drake',info:'PLNA Plus · Bristol · Clever Checked'},
+  KP041872:{name:'Kim Park',info:'HAF KNECT Pro · Liverpool · Clever Checked'},
+  TD018392:{name:'Tom Drake',info:'HAF KNECT Plus · Bristol · Clever Checked'},
 };
 let _dtMode={f:'open'};
 function dtMode(p,mode){
