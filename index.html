@@ -583,6 +583,16 @@ textarea.fi2{resize:vertical;min-height:70px}
 .ld-note{font-size:.72rem;line-height:1.5;color:var(--mu);background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.5rem .7rem;margin:-.5rem 0 1rem}
 .ld-note strong{color:var(--tx);font-weight:700}
 .ld-note.warn{border-color:var(--or-g);background:var(--or-d)}
+/* ── LOAD POSTING PAUSED ───────────────────────────────────────────────
+   Single switch: LOAD_POSTING_LOCKED in the main script (search that name).
+   The markup ships LOCKED, so if the script never runs the form stays shut.
+   Built only from existing tokens — amber notice, greyed controls. */
+.lk-note{display:flex;align-items:flex-start;gap:.6rem;background:var(--am-d);border:1.5px solid var(--am);border-radius:var(--rx);padding:.8rem .95rem;margin:0 0 1rem;font-size:.8rem;line-height:1.55;color:var(--tx)}
+.lk-note svg{width:18px;height:18px;flex:0 0 18px;margin-top:.1rem;stroke:var(--am);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.lk-note strong{display:block;font-weight:800;margin-bottom:.15rem}
+.lk-note[hidden]{display:none}
+#pane-f-post .fi2:disabled,#dir-book-ov .fi2:disabled{background:var(--p3);color:var(--mu);cursor:not-allowed;opacity:.75}
+#pane-f-post .btn:disabled,#dir-book-ov .btn:disabled{background:var(--p3);color:var(--mu);box-shadow:none;cursor:not-allowed}
 .lp-box{border-radius:var(--rx);padding:.9rem 1.1rem;margin-bottom:.85rem;display:flex;align-items:flex-start;gap:.65rem;min-height:52px;transition:background .2s,border-color .2s}
 .lp-box.hint{background:var(--p2);border:1.5px dashed var(--ln)}
 .lp-box.priced{background:var(--or-d);border:1.5px solid var(--or-g)}
@@ -2244,13 +2254,18 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
         <h1 class="pt">Post a Load</h1><p class="ps">List freight for your clients on the HAF KNECT network.</p>
         <div class="card" style="max-width:580px">
           <div class="ct">Load details</div>
-          <div class="fg"><label class="fl">Customer reference</label><input class="fi2" placeholder="Your client's job ref"></div>
-          <div class="fr"><div class="fg"><label class="fl">Collection address</label><input class="fi2" placeholder="Address or postcode"></div><div class="fg"><label class="fl">Delivery address</label><input class="fi2" placeholder="Address or postcode"></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Goods type</label><input class="fi2" placeholder="e.g. Pallets, boxes, hazmat"></div><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 850"></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Vehicle required</label><select class="fi2"><option>Small van</option><option>SWB</option><option>LWB</option><option>XLWB</option><option>Luton &#8212; box</option><option>Luton &#8212; curtain side</option><option>Luton &#8212; tail lift</option></select></div><div class="fg"><label class="fl">Urgency</label><select class="fi2"><option>Flexible</option><option>Same-day</option><option>Urgent</option><option>Timed</option></select></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Buy rate (max, £)</label><input class="fi2" type="number" placeholder="Your carrier cost ceiling"></div><div class="fg"><label class="fl">Client sell rate (£)</label><input class="fi2" type="number" placeholder="What your client pays"></div></div>
-          <div class="fg"><label class="fl">Special instructions</label><textarea class="fi2" placeholder="Tail lift, fragile, hazmat class, access..."></textarea></div>
-          <button class="btn btn-or btn-wide" style="margin-top:.3rem">Post load to network →</button>
+          <!-- Ships LOCKED on purpose. Unlock = LOAD_POSTING_LOCKED in the main script. -->
+          <div class="lk-note" id="f-post-lock-note">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="10" y1="9" x2="10" y2="15"/><line x1="14" y1="9" x2="14" y2="15"/></svg>
+            <div><strong>Posting paused</strong>Posting loads is paused while we rebuild the sign-up journey. Your account is unaffected — we&#8217;ll email you the moment it reopens.</div>
+          </div>
+          <div class="fg"><label class="fl">Customer reference</label><input class="fi2" placeholder="Your client's job ref" disabled></div>
+          <div class="fr"><div class="fg"><label class="fl">Collection address</label><input class="fi2" placeholder="Address or postcode" disabled></div><div class="fg"><label class="fl">Delivery address</label><input class="fi2" placeholder="Address or postcode" disabled></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Goods type</label><input class="fi2" placeholder="e.g. Pallets, boxes, hazmat" disabled></div><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 850" disabled></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Vehicle required</label><select class="fi2" disabled><option>Small van</option><option>SWB</option><option>LWB</option><option>XLWB</option><option>Luton &#8212; box</option><option>Luton &#8212; curtain side</option><option>Luton &#8212; tail lift</option></select></div><div class="fg"><label class="fl">Urgency</label><select class="fi2" disabled><option>Flexible</option><option>Same-day</option><option>Urgent</option><option>Timed</option></select></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Buy rate (max, £)</label><input class="fi2" type="number" placeholder="Your carrier cost ceiling" disabled></div><div class="fg"><label class="fl">Client sell rate (£)</label><input class="fi2" type="number" placeholder="What your client pays" disabled></div></div>
+          <div class="fg"><label class="fl">Special instructions</label><textarea class="fi2" placeholder="Tail lift, fragile, hazmat class, access..." disabled></textarea></div>
+          <button class="btn btn-or btn-wide" style="margin-top:.3rem" id="f-post-submit" data-label-open="Post load to network &#8594;" disabled>Posting paused</button>
         </div>
       </div>
 
@@ -2840,24 +2855,61 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
     <button class="dr-box-close" onclick="closeDirBook()">✕</button>
     <h2>Book a driver directly</h2>
     <p class="dr-box-sub" id="db-driver-lbl">Booking driver: —</p>
-    <div class="fg" style="margin-bottom:.55rem"><label class="fl">Collection postcode or address</label><input class="fi2" id="db-from" placeholder="e.g. M4 1HQ"></div>
-    <div class="fg" style="margin-bottom:.55rem"><label class="fl">Delivery postcode or address</label><input class="fi2" id="db-to" placeholder="e.g. B1 1BB"></div>
+    <!-- Ships LOCKED on purpose. Unlock = LOAD_POSTING_LOCKED in the main script. -->
+    <div class="lk-note" id="db-lock-note">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="10" y1="9" x2="10" y2="15"/><line x1="14" y1="9" x2="14" y2="15"/></svg>
+      <div><strong>Posting paused</strong>Posting loads is paused while we rebuild the sign-up journey. Your account is unaffected — we&#8217;ll email you the moment it reopens.</div>
+    </div>
+    <div class="fg" style="margin-bottom:.55rem"><label class="fl">Collection postcode or address</label><input class="fi2" id="db-from" placeholder="e.g. M4 1HQ" disabled></div>
+    <div class="fg" style="margin-bottom:.55rem"><label class="fl">Delivery postcode or address</label><input class="fi2" id="db-to" placeholder="e.g. B1 1BB" disabled></div>
     <div style="display:flex;gap:.5rem;margin-bottom:.55rem">
-      <div class="fg" style="flex:1"><label class="fl">Date needed</label><input class="fi2" id="db-date" type="date"></div>
-      <div class="fg" style="flex:1"><label class="fl">Collect by</label><input class="fi2" id="db-time" type="time" value="09:00"></div>
+      <div class="fg" style="flex:1"><label class="fl">Date needed</label><input class="fi2" id="db-date" type="date" disabled></div>
+      <div class="fg" style="flex:1"><label class="fl">Collect by</label><input class="fi2" id="db-time" type="time" value="09:00" disabled></div>
     </div>
     <div style="display:flex;gap:.5rem;margin-bottom:.55rem">
-      <div class="fg" style="flex:1"><label class="fl">Load type</label><input class="fi2" id="db-goods" placeholder="e.g. Pallets, boxes"></div>
-      <div class="fg" style="flex:1"><label class="fl">Weight (kg)</label><input class="fi2" id="db-weight" type="number" placeholder="e.g. 500"></div>
+      <div class="fg" style="flex:1"><label class="fl">Load type</label><input class="fi2" id="db-goods" placeholder="e.g. Pallets, boxes" disabled></div>
+      <div class="fg" style="flex:1"><label class="fl">Weight (kg)</label><input class="fi2" id="db-weight" type="number" placeholder="e.g. 500" disabled></div>
     </div>
-    <div class="fg" style="margin-bottom:.7rem"><label class="fl">Your reference (optional)</label><input class="fi2" id="db-ref" placeholder="Client or PO reference"></div>
+    <div class="fg" style="margin-bottom:.7rem"><label class="fl">Your reference (optional)</label><input class="fi2" id="db-ref" placeholder="Client or PO reference" disabled></div>
     <div id="db-err" style="display:none;font-size:.76rem;color:var(--rd);font-weight:600;margin-bottom:.5rem"></div>
-    <button class="btn btn-or btn-wide" onclick="submitDirBook()">Send booking request →</button>
+    <button class="btn btn-or btn-wide" id="db-submit" data-label-open="Send booking request &#8594;" onclick="submitDirBook()" disabled>Posting paused</button>
     <p style="font-size:.7rem;color:var(--mu);margin-top:.55rem;text-align:center">The driver sees this in their job invites. You can track the status in Active Loads.</p>
   </div>
 </div>
 
 <script>
+/* ══ LOAD POSTING LOCK ═══════════════════════════════════════════════════
+   Brent, 2026-08-13: all load posting stops until the sign-up customer
+   journey is rebuilt.
+
+   THIS IS THE ONLY SWITCH. Flip it to false and posting reopens everywhere:
+   the Post a Load form, the Book a driver directly modal, and the guard
+   inside submitDirBook(). Nothing else needs editing.
+
+   The HTML ships with the fields already disabled, so if this script fails
+   to run the form stays shut rather than springing open (fail closed). */
+const LOAD_POSTING_LOCKED = true;
+
+(function applyLoadPostingLock(){
+  var open = !LOAD_POSTING_LOCKED;
+  [['pane-f-post','f-post-lock-note','f-post-submit'],
+   ['dir-book-ov','db-lock-note','db-submit']].forEach(function(ids){
+    var scope = document.getElementById(ids[0]);
+    if(!scope) return;                       /* pane removed for this role */
+    var note = document.getElementById(ids[1]);
+    var btn  = document.getElementById(ids[2]);
+    scope.querySelectorAll('input,select,textarea').forEach(function(el){
+      el.disabled = !open;
+    });
+    if(note) note.hidden = open;
+    if(btn){
+      btn.disabled = !open;
+      btn.textContent = open ? (btn.dataset.labelOpen || 'Post load to network →')
+                             : 'Posting paused';
+    }
+  });
+})();
+
 /* ── PRICING — HAF-PRICE-V4.0 driver-first engine ──
    Source of truth: HAF KNECT Pricing Matrix and Network Fee Framework
    (Brent Ford, 2026-07-31). Three amounts are kept apart and never blended:
@@ -6052,6 +6104,14 @@ function closeDirBook(){
 const _directBookings=[];
 let _dbCounter=100;
 function submitDirBook(){
+  /* Load posting lock — the one switch is LOAD_POSTING_LOCKED at the top of
+     the main script. Re-checked here so a disabled button is not the only
+     thing standing between a user and a posted load. */
+  if(LOAD_POSTING_LOCKED){
+    const e=document.getElementById('db-err');
+    if(e){e.textContent='Posting loads is paused while we rebuild the sign-up journey.';e.style.display='block';}
+    return;
+  }
   const from=(document.getElementById('db-from').value||'').trim();
   const to=(document.getElementById('db-to').value||'').trim();
   const date=document.getElementById('db-date').value;
