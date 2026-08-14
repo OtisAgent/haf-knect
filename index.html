@@ -3532,6 +3532,32 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
           <div id="ov-todo"></div>
         </div>
 
+        <!-- Who can drive, and on whose say-so.
+             This is the one place that answers "why does this person have a
+             PLNA and that one not". The list is the record itself, not a count
+             of it: every HAF account appears, KNECT shown as open because it
+             always is, and PLNA shown with the Clever check that opened it.
+             Approve and Deny both live here, so a decision made in a hurry can
+             be undone in the same place. Approve reinstates a Clever check that
+             is already on file; it cannot invent one. A username that has never
+             been checked has no Approve button at all, because the only thing
+             that can open that door is the team portal. -->
+        <div class="card" id="ov-access-card">
+          <div class="ct">Who can drive on the network
+            <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">PLNA access, and what opened it</span>
+          </div>
+          <div id="ov-access-sum" class="ov-src" style="margin:0 0 12px">Reading the access record…</div>
+          <div id="ov-access-tools" style="display:none;margin-bottom:10px">
+            <input id="ov-access-q" placeholder="Find a username or name…"
+                   style="max-width:320px;width:100%;padding:.5rem .75rem;border-radius:var(--rx);
+                          border:1px solid var(--ln);background:var(--p2);color:var(--tx);font-size:.85rem">
+            <label style="margin-left:10px;font-size:.85rem;color:var(--mu);white-space:nowrap">
+              <input type="checkbox" id="ov-access-only"> only accounts that can drive
+            </label>
+          </div>
+          <div id="ov-access-list"></div>
+        </div>
+
         <div class="g2">
           <div class="card"><div class="ct">Accounts by type</div><div id="ov-types"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
           <div class="card"><div class="ct">Accounts by status</div><div id="ov-status"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
@@ -7390,11 +7416,145 @@ async function ovLoad(){
 
     const led=document.getElementById('ov-ledger');
     if(led)led.innerHTML='<span class="chip '+(stale?'ca':'cg')+'">'+(stale?'Refresh overdue':'Live')+'</span>';
+
+    /* Its own read and its own failure. The access record is the thing Brent
+       cannot launch without, so it must never be left looking fine because the
+       figures above it loaded. */
+    accessLoad();
   }catch(e){
     src.className='ov-src bad';
     src.innerHTML='<span class="dot"></span>Could not read the network just now. Nothing below is showing a made-up number — try Refresh in a moment.';
   }
 }
+
+/* ══ WHO CAN DRIVE ON THE NETWORK ═════════════════════════════════════════════
+   The access record, on screen. Two separate answers per account and they are
+   never merged: HAF KNECT is open to every account that exists, and PLNA is
+   shut until a Clever check in the team portal opens it.
+
+   The panel can deny anyone, and can approve anyone whose Clever check is
+   already on file — a withdrawal keeps the paperwork, so undoing one is putting
+   the same check back rather than writing a new one. What it cannot do is open
+   PLNA for somebody who was never checked: the function refuses in writing and
+   names the team portal, so the rule holds whether it is asked from here, from a
+   script, or by hand. The owner override is the one other way in, and it is
+   labelled as an override everywhere it appears, never as a check.  */
+let _accCache=[];
+
+function _accChip(a){
+  if(!a.plna) return '<span class="chip cr">No PLNA</span>';
+  if(a.basis==='owner_override') return '<span class="chip ca">Owner override</span>';
+  return '<span class="chip cg">Clever checked</span>';
+}
+function _accWhy(a){
+  if(a.basis==='clever_check')
+    return 'Released on '+_esc(a.clever_ref||'a CleverPay application')+
+           (a.granted_by?' by '+_esc(a.granted_by):'')+
+           (a.granted_at?' &middot; '+_esc(_when(a.granted_at)):'');
+  if(a.basis==='owner_override')
+    return 'Owner access, not a Clever check'+(a.changed_at?' &middot; '+_esc(_when(a.changed_at)):'');
+  const e=a.last_event;
+  if(e&&e.action==='withdrawn')
+    return 'Withdrawn'+(e.at?' '+_esc(_ago(e.at)):'')+(e.reason?' &middot; '+_esc(e.reason):'');
+  return 'Never been Clever checked';
+}
+
+function accessRender(){
+  const q=(document.getElementById('ov-access-q').value||'').trim().toUpperCase();
+  const only=document.getElementById('ov-access-only').checked;
+  const list=_accCache.filter(a=>
+    (!only||a.plna) &&
+    (!q||String(a.username||'').toUpperCase().includes(q)||String(a.name||'').toUpperCase().includes(q)));
+
+  const el=document.getElementById('ov-access-list');
+  if(!list.length){
+    el.innerHTML='<div class="cr"><span class="ck" style="color:var(--mu)">'+
+      (q||only?'No account matches that.':'No accounts on file yet.')+'</span></div>';
+    return;
+  }
+  el.innerHTML=list.map(a=>
+    '<div class="cr" style="align-items:flex-start;gap:12px">'+
+      '<span class="ck" style="flex:1 1 auto">'+
+        '<strong>'+_esc(a.username)+'</strong>'+(a.name?' &middot; '+_esc(a.name):'')+
+        (a.is_test?' <span class="chip ca">test</span>':'')+
+        '<div style="color:var(--mu);font-size:.78rem;margin-top:2px">'+
+          (_TYPE_LBL[a.account_type]||_esc(a.account_type||'Account'))+
+          ' &middot; HAF KNECT open &middot; '+_accWhy(a)+
+        '</div>'+
+      '</span>'+
+      '<span class="cv" style="white-space:nowrap">'+_accChip(a)+
+        (a.plna
+          ? ' <button class="btn btn-gh btn-xs" data-acc-off="'+_esc(a.username)+'">Deny</button>'
+          : (a.can_approve
+              ? ' <button class="btn btn-gh btn-xs" data-acc-on="'+_esc(a.username)+'">Approve</button>'
+              : ' <span style="color:var(--mu);font-size:.74rem">Needs a Clever check</span>'))+
+      '</span>'+
+    '</div>').join('');
+
+  el.querySelectorAll('[data-acc-off]').forEach(b=>b.onclick=()=>accessSet(b.getAttribute('data-acc-off'),false));
+  el.querySelectorAll('[data-acc-on]').forEach(b=>b.onclick=()=>accessSet(b.getAttribute('data-acc-on'),true));
+}
+
+async function accessLoad(){
+  const sum=document.getElementById('ov-access-sum');
+  try{
+    const {denied,rows}=await _netRpc('haf_access_control_list');
+    if(denied||!rows.length){
+      sum.className='ov-src bad';
+      sum.innerHTML='<span class="dot"></span>The access record is for the account owner only. This login cannot read it.';
+      document.getElementById('ov-access-list').innerHTML='';
+      return;
+    }
+    const d=rows[0],c=d.counts||{};
+    _accCache=d.accounts||[];
+    sum.className='ov-src';
+    sum.innerHTML='<span class="dot"></span><span><strong>'+(c.knect_open||0)+'</strong> of '+
+      (c.accounts||0)+' accounts can post jobs and see the HAF KNECT dashboard &mdash; that is all of them. '+
+      '<strong>'+(c.plna_checked||0)+'</strong> can drive on a Clever check'+
+      (c.plna_override?', '+c.plna_override+' on the owner override':'')+
+      '. <strong>'+(c.plna_closed||0)+'</strong> have no PLNA.'+
+      (c.test_rows?' '+c.test_rows+' test account'+(c.test_rows===1?'':'s')+' included and marked.':'')+
+      '</span>';
+    document.getElementById('ov-access-tools').style.display='';
+    accessRender();
+  }catch(e){
+    sum.className='ov-src bad';
+    sum.innerHTML='<span class="dot"></span>Could not read the access record just now. Nothing below is a guess — try Refresh in a moment.';
+    document.getElementById('ov-access-list').innerHTML='';
+  }
+}
+
+async function accessSet(username,on){
+  /* Closing a door is reversible but it is somebody's living, so it is asked
+     for out loud and the reason is kept with the record. */
+  const row=_accCache.find(a=>a.username===username)||{};
+  const why=on
+    ? (row.approve_basis==='owner_override'
+        ? 'Switch the owner override back on for '+username+'?\n\nThis is not a Clever check — it is owner access to the PLNA app.'
+        : 'Approve a HAF PLNA for '+username+'?\n\nThis puts back the Clever check '+
+          (row.held_ref?'('+row.held_ref+') ':'')+'that was already on file for them. '+
+          'It does not create a new approval — only the team portal can do that.')
+    : 'Deny PLNA for '+username+'?\n\nThey keep HAF KNECT: they can still post jobs and see their dashboard. '+
+      'You can approve them again here, or release them in the team portal.';
+  if(!confirm(why))return;
+  const reason=on
+    ? (row.approve_basis==='owner_override'
+        ? 'Owner override switched on from the Master Overview'
+        : 'Approved from the Master Overview on the Clever check already on file')
+    : (prompt('Why is this being denied? (kept on the record)')||'').trim();
+  if(!on&&!reason){alert('A reason is needed — it stays on the record.');return}
+  try{
+    const {denied,rows}=await _netRpc('haf_access_set_plna',
+      {p_target:username,p_on:!!on,p_reason:reason});
+    if(denied||!rows.length){alert('That login cannot change access.');return}
+    const r=rows[0];
+    alert(r.ok?r.message:r.error);
+    accessLoad();
+  }catch(e){ alert('Could not change access just now — nothing was altered.'); }
+}
+
+document.addEventListener('input',e=>{ if(e.target&&e.target.id==='ov-access-q')accessRender(); });
+document.addEventListener('change',e=>{ if(e.target&&e.target.id==='ov-access-only')accessRender(); });
 
 /* ── MEMBERSHIP AND FOUNDER ──
    Free / Plus / Pro is the whole ladder. Founder is counted from the founding
