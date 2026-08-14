@@ -96,7 +96,7 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 /* On a phone the side column stacks under the form. The login box drops out
    (the Driver / Account login links below the form already cover it) but the
    ways-to-book card must NOT — it is now the only route to repeat and email. */
-@media(max-width:860px){.land-body{grid-template-columns:1fr;padding:.4rem 1.2rem 1.5rem}.land-side{order:2}#side-login{display:none}}
+@media(max-width:860px){.land-body{grid-template-columns:1fr;padding:.4rem 1.2rem 1.5rem}.land-side{order:2}.land-body>.sec-acts{order:3;margin-top:.2rem;justify-content:center}#side-login{display:none}}
 
 /* MAIN */
 .land-main{display:flex;flex-direction:column;gap:1.8rem}
@@ -173,6 +173,9 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 
 /* SECONDARY ACTIONS */
 .sec-acts{display:flex;align-items:center;gap:1.2rem;padding:.3rem 0}
+/* It sits in the grid alongside the two columns: on a wide screen under the
+   form (column one, row two); on a phone last of all, after the ways to book. */
+.land-body>.sec-acts{grid-column:1;margin-top:-.6rem}
 .sec-link{font-size:.8rem;font-weight:600;color:var(--mu);cursor:pointer;transition:color .14s}
 .sec-link:hover{color:var(--or)}
 .sec-sep{color:var(--su);font-size:.7rem}
@@ -1718,14 +1721,6 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
         </div>
       </div>
 
-      <!-- SECONDARY -->
-      <div class="sec-acts">
-        <span class="sec-link" onclick="openLogin()">Driver login</span>
-        <span class="sec-sep">|</span>
-        <span class="sec-link" onclick="openLogin()">Account login</span>
-        <span class="sec-sep">|</span>
-        <span class="sec-link" onclick="toggleTrack()">Track delivery</span>
-      </div>
     </div>
 
     <!-- RIGHT: Side panel -->
@@ -1807,6 +1802,17 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
           Request a demo
         </button>
       </div>
+    </div>
+
+    <!-- SECONDARY — a sibling of both columns, not a child of the form column,
+         so on a phone it lands UNDER the ways-to-book card instead of splitting
+         the page in half with what looks like a footer. -->
+    <div class="sec-acts">
+      <span class="sec-link" onclick="openLogin()">Driver login</span>
+      <span class="sec-sep">|</span>
+      <span class="sec-link" onclick="openLogin()">Account login</span>
+      <span class="sec-sep">|</span>
+      <span class="sec-link" onclick="toggleTrack()">Track delivery</span>
     </div>
 
   </div>

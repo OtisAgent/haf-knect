@@ -1,0 +1,217 @@
+          <!-- ══ THE ORDER FLOW ══════════════════════════════════════════
+               Brent's addendum, 14 Aug 2026. Seven stages, in his order:
+                 1 where is it going · 2 what are we collecting · 3 what vehicle
+                 4 when · 5 full collection & delivery details · 6 price · 7 book
+               Stage 2 is the important one. It is not there to price the job —
+               it becomes the consignment record, so the driver turns up knowing
+               exactly what they are collecting. ═══════════════════════════ -->
+          <div id="if-fast" style="display:none">
+
+            <!-- ── 1 · WHERE IS IT GOING? ── -->
+            <div class="fstep on" id="fq-1">
+              <div class="slbl">Step 1 of 7 &#8212; Where is it going?</div>
+              <div class="of" style="margin-bottom:.55rem"><label class="ol">Collection postcode</label><input class="oi" id="fq-from" placeholder="e.g. S9 1AA" maxlength="8" autocomplete="off"></div>
+              <div class="of"><label class="ol">Delivery postcode</label><input class="oi" id="fq-to" placeholder="e.g. M1 1AA" maxlength="8" autocomplete="off"></div>
+              <div class="fstep-err" id="fq-err-1"></div>
+              <div class="fnav"><button class="btn btn-or btn-sm" onclick="fqNext(2)">Next &#8594;</button></div>
+            </div>
+
+            <!-- ── 2 · WHAT ARE WE COLLECTING? ──
+                 Everything on this step does four jobs at once: it helps the
+                 customer describe the load, it allocates the vehicle, it tells
+                 the accepting driver what they are picking up, and it keeps a
+                 job away from a van that cannot take it. -->
+            <div class="fstep" id="fq-2">
+              <div class="slbl">Step 2 of 7 &#8212; What are we collecting?</div>
+
+              <div class="olbl">How heavy is it?</div>
+              <div class="ogrid" id="fq-wt"></div>
+              <div class="xtra">
+                <label for="fq-exact">Exact weight if known</label>
+                <input class="oi" id="fq-exact" type="number" min="1" max="5000" step="1" placeholder="kg" oninput="fqLoadChanged()">
+                <span style="font-size:.72rem;color:var(--su)">kg</span>
+              </div>
+
+              <div class="sub-q">How much is there?</div>
+              <div class="ogrid" id="fq-sz"></div>
+              <div class="g2" style="margin-bottom:.2rem">
+                <div class="of"><label class="ol">Quantity</label><input class="oi" id="fq-qty" type="number" min="1" max="99" step="1" placeholder="e.g. 3" oninput="fqLoadChanged()"></div>
+                <div class="of"><label class="ol">Type</label>
+                  <select class="osel" id="fq-unit" onchange="fqLoadChanged()"></select>
+                </div>
+              </div>
+
+              <div class="sub-q">Describe the goods</div>
+              <textarea class="ta" id="fq-goods" placeholder="e.g. 3 pallets of boxed clothing / office furniture / engineering parts / 12 boxes of stock" oninput="fqLoadChanged()"></textarea>
+              <p style="font-size:.68rem;color:var(--su);line-height:1.5;margin-top:.3rem">This is what the driver sees before they accept your job.</p>
+
+              <div class="sub-q">Largest item or pallet<span class="opt-tag">optional for parcels</span></div>
+              <div id="fq-dims-wrap">
+                <div class="g3">
+                  <div class="of"><label class="ol">Length</label><input class="oi" id="fq-dl" type="number" min="1" step="1" placeholder="0" oninput="fqLoadChanged()"></div>
+                  <div class="of"><label class="ol">Width</label><input class="oi" id="fq-dw" type="number" min="1" step="1" placeholder="0" oninput="fqLoadChanged()"></div>
+                  <div class="of"><label class="ol">Height</label><input class="oi" id="fq-dh" type="number" min="1" step="1" placeholder="0" oninput="fqLoadChanged()"></div>
+                </div>
+                <div class="xtra">
+                  <label for="fq-dunit">Measured in</label>
+                  <select class="osel" id="fq-dunit" style="max-width:120px" onchange="fqLoadChanged()">
+                    <option value="cm">centimetres</option>
+                    <option value="m">metres</option>
+                    <option value="ft">feet</option>
+                  </select>
+                </div>
+              </div>
+              <label class="ckline"><input type="checkbox" id="fq-dnk" onchange="fqDimsUnknown()"> I don't know the dimensions</label>
+
+              <div class="sub-q">Loading and handling</div>
+              <div class="tgl-wrap" id="fq-reqs"></div>
+
+              <div class="sub-q">Anything else the driver needs to know?<span class="opt-tag">optional</span></div>
+              <textarea class="ta" id="fq-notes" placeholder="e.g. Pallets cannot be stacked. Collection is round the back, ring the buzzer." oninput="fqLoadChanged()"></textarea>
+
+              <div class="sub-q">Add photos of the goods<span class="opt-tag">optional</span></div>
+              <div class="ph-drop" onclick="document.getElementById('fq-photos').click()">
+                <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.2"/><path d="M8 5l1.5-2h5L16 5"/></svg>
+                <div class="ph-drop-t">Add photos</div>
+                <div class="ph-drop-s">Useful for furniture, machinery, pallets and awkward loads</div>
+              </div>
+              <input type="file" id="fq-photos" accept="image/*" multiple style="display:none" onchange="fqAddPhotos(this)">
+              <div class="ph-strip" id="fq-ph-strip"></div>
+
+              <div class="fstep-err" id="fq-err-2"></div>
+              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(1)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqNext(3)">Next &#8594;</button></div>
+            </div>
+
+            <!-- ── 3 · WHAT VEHICLE IS NEEDED? ──
+                 HAF Pick is the default. The list is there for anyone who knows
+                 vans, and a vehicle that cannot take the load is stopped. -->
+            <div class="fstep" id="fq-3">
+              <div class="slbl">Step 3 of 7 &#8212; What vehicle is needed?</div>
+              <div class="hpick">
+                <div class="hpick-ico">
+                  <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                </div>
+                <div class="hpick-b">
+                  <div class="hpick-k">HAF Pick</div>
+                  <div class="hpick-v" id="fq-pick-v">&#8212;</div>
+                  <div class="hpick-w" id="fq-pick-w">We'll select the safest suitable vehicle from the information you've provided.</div>
+                </div>
+              </div>
+              <button class="veh-open" type="button" id="fq-veh-open" onclick="fqToggleVeh()">Choose vehicle myself</button>
+              <div class="veh-list" id="fq-veh-list">
+                <div class="ogrid" id="fq-van" style="margin-top:.55rem"></div>
+                <p class="van-guide">Load figures are a guide — we confirm the exact vehicle before your job is booked.</p>
+              </div>
+              <div class="too-small" id="fq-toosmall" style="display:none">
+                <div class="too-small-h">This vehicle may be too small</div>
+                <div class="too-small-p" id="fq-toosmall-p"></div>
+                <div class="too-small-b">
+                  <button class="btn btn-or btn-sm" type="button" onclick="fqUseHafPick()">Use HAF recommendation</button>
+                  <button class="btn btn-gh btn-sm" type="button" onclick="fqStep(2)">Review load details</button>
+                </div>
+              </div>
+              <div class="fstep-err" id="fq-err-3"></div>
+              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(2)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqNext(4)">Next &#8594;</button></div>
+            </div>
+
+            <!-- ── 4 · WHEN DOES IT NEED MOVING? ── -->
+            <div class="fstep" id="fq-4">
+              <div class="slbl">Step 4 of 7 &#8212; When does it need moving?</div>
+              <div class="ogrid">
+                <button class="oopt" onclick="fqSel(this,'urg','urg')">Urgent<span class="oopt-sub">next available driver</span></button>
+                <button class="oopt" onclick="fqSel(this,'urg','sday')">Same-day<span class="oopt-sub">collected today</span></button>
+                <button class="oopt" onclick="fqSel(this,'urg','flex')">Flexible<span class="oopt-sub">best value</span></button>
+                <button class="oopt" onclick="fqSel(this,'urg','timed')">Pre-book<span class="oopt-sub">specific window</span></button>
+              </div>
+              <div class="g2">
+                <div class="of"><label class="ol">Collection date<span class="opt-tag"></span></label><input class="oi" id="fq-cdate" type="date"></div>
+                <div class="of"><label class="ol">Collect from</label><input class="oi" id="fq-ctime" type="time"></div>
+              </div>
+              <div class="of" style="margin-top:.5rem"><label class="ol">Delivery requirement<span class="opt-tag"></span></label><input class="oi" id="fq-dreq" placeholder="e.g. must be on site before 4pm"></div>
+              <div class="fstep-err" id="fq-err-4"></div>
+              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(3)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqNext(5)">Next &#8594;</button></div>
+            </div>
+
+            <!-- ── 5 · FULL COLLECTION & DELIVERY DETAILS ── -->
+            <div class="fstep" id="fq-5">
+              <div class="slbl">Step 5 of 7 &#8212; Collection and delivery details</div>
+              <div class="olbl">Collection</div>
+              <div class="of" style="margin-bottom:.45rem"><label class="ol">Full address</label><input class="oi" id="fq-caddr" placeholder="Street, town, postcode" autocomplete="off"></div>
+              <div class="g2" style="margin-bottom:.45rem">
+                <div class="of"><label class="ol">Contact name</label><input class="oi" id="fq-cname" placeholder="Who the driver asks for"></div>
+                <div class="of"><label class="ol">Contact number</label><input class="oi" id="fq-cphone" type="tel" placeholder="07xxx xxxxxx"></div>
+              </div>
+              <div class="of" style="margin-bottom:.45rem"><label class="ol">Collection instructions<span class="opt-tag"></span></label><input class="oi" id="fq-cnote" placeholder="e.g. Goods-in at the rear, ring the buzzer"></div>
+              <div class="of"><label class="ol">what3words<span class="opt-tag"></span></label><input class="oi" id="fq-cw3w" placeholder="///lamp.tiger.road"></div>
+
+              <div class="olbl" style="margin-top:1rem">Delivery</div>
+              <div class="of" style="margin-bottom:.45rem"><label class="ol">Full address</label><input class="oi" id="fq-daddr" placeholder="Street, town, postcode" autocomplete="off"></div>
+              <div class="g2" style="margin-bottom:.45rem">
+                <div class="of"><label class="ol">Contact name</label><input class="oi" id="fq-dname" placeholder="Who receives it"></div>
+                <div class="of"><label class="ol">Contact number</label><input class="oi" id="fq-dphone" type="tel" placeholder="07xxx xxxxxx"></div>
+              </div>
+              <div class="of" style="margin-bottom:.45rem"><label class="ol">Delivery instructions<span class="opt-tag"></span></label><input class="oi" id="fq-dnote" placeholder="e.g. Book in on arrival, no forklift on site"></div>
+              <div class="of"><label class="ol">what3words<span class="opt-tag"></span></label><input class="oi" id="fq-dw3w" placeholder="///bench.grass.cloud"></div>
+              <div class="fstep-err" id="fq-err-5"></div>
+              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(4)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqShowPriceV()">See price &#8594;</button></div>
+            </div>
+
+            <!-- ── 6 · CONFIRM PRICE ──
+                 And the one thing no booking screen usually shows: exactly what
+                 the driver will read before they accept it. -->
+            <div class="fstep" id="fq-6">
+              <div class="slbl">Step 6 of 7 &#8212; Confirm your price</div>
+              <div style="background:var(--or-d);border:1.5px solid var(--or-g);border-radius:var(--rx);padding:1rem 1.2rem;margin-bottom:.9rem">
+                <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;color:var(--or);text-transform:uppercase;margin-bottom:.28rem">Estimated price</div>
+                <div style="display:flex;align-items:baseline;gap:.35rem"><span style="font-family:var(--dp);font-weight:900;font-size:1.55rem;letter-spacing:-.05em" id="fq-pr-range">&#8212;</span><span style="font-size:.72rem;font-weight:600;color:var(--mu)">+ VAT</span></div>
+                <div style="font-size:.7rem;color:var(--mu);margin-top:.2rem" id="fq-pr-basis">&#8212;</div>
+              </div>
+
+              <div class="olbl">What the driver will see</div>
+              <div id="fq-jobcard"></div>
+              <p style="font-size:.68rem;color:var(--su);line-height:1.5;margin:.4rem 0 .9rem">Only vehicles that can carry this load are offered the job.</p>
+
+              <!-- ── KNOW THE DRIVER? ──
+                   Brent, 14 Aug. Somebody who has used a HAF driver before can
+                   send the job straight to them instead of onto the open
+                   network. We never confirm who holds a username to a stranger —
+                   the job is simply offered to them first. -->
+              <div class="dd-box" style="margin-top:0">
+                <div class="dd-h">
+                  <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11l-3 3-2-2"/></svg>
+                  <div class="dd-t">Know the driver?</div>
+                </div>
+                <p class="dd-p">Send this job straight to a HAF driver you have used before. Enter their HAF username and they get first refusal &#8212; if they cannot take it, it goes to the network as normal.</p>
+                <div class="dd-row">
+                  <input class="oi" id="fq-dduser" placeholder="e.g. JW012390" maxlength="12" autocomplete="off" oninput="ddClear()">
+                  <button class="btn btn-or btn-sm" type="button" onclick="ddSetDirect()">Send direct</button>
+                </div>
+                <div class="dd-err" id="fq-dd-err"></div>
+                <div class="dd-ok" id="fq-dd-ok" style="display:none"></div>
+              </div>
+
+              <p style="font-size:.71rem;color:var(--su);line-height:1.6;margin:.9rem 0 0">Guide price only. Final confirmed after full details are reviewed. No payment taken now.</p>
+              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(5)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqStep(7)">Book this &#8594;</button></div>
+            </div>
+
+            <!-- ── 7 · BOOK ── -->
+            <div class="fstep" id="fq-7">
+              <div class="slbl">Step 7 of 7 &#8212; Your details</div>
+              <p style="font-size:.77rem;color:var(--mu);margin-bottom:.85rem;line-height:1.6">No account needed. We will send you delivery updates by text or WhatsApp.</p>
+              <div class="of" style="margin-bottom:.48rem"><label class="ol">Full name</label><input class="oi" id="fq-name" placeholder="Your name" autocomplete="name"></div>
+              <div class="of" style="margin-bottom:.48rem"><label class="ol">Email</label><input class="oi" id="fq-email" placeholder="your@email.co.uk" type="email" autocomplete="email"></div>
+              <div class="of" style="margin-bottom:.48rem"><label class="ol">Mobile</label><input class="oi" id="fq-mobile" placeholder="07xxx xxxxxx" type="tel" autocomplete="tel"></div>
+              <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.73rem;font-weight:600;color:var(--mu)"><input type="checkbox" id="fq-wa" checked style="accent-color:var(--or)"> Send updates via WhatsApp</label>
+              <div class="fstep-err" id="fq-err-7"></div>
+              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(6)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqBookV()">Confirm and book &#8594;</button></div>
+            </div>
+
+            <div class="fstep" id="fq-done">
+              <div style="text-align:center;padding:.6rem 0 .9rem">
+                <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto .6rem"><circle cx="22" cy="22" r="22" fill="var(--gn-d)"/><polyline points="13,23 20,30 31,15" stroke="var(--gn)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div style="font-family:var(--dp);font-weight:900;font-size:1.55rem;letter-spacing:-.04em;color:var(--or);margin:.4rem 0 .35rem" id="fq-ref">HAF-XXXX</div>
+                <p style="font-size:.79rem;color:var(--mu);line-height:1.65">Your delivery is booked. HAF will assign a driver and confirm by text within 15 minutes. Save your reference above.</p>
+              </div>
+              <button class="btn btn-or btn-wide" onclick="closeInlineFlow()">Done</button>
+            </div>
+          </div>

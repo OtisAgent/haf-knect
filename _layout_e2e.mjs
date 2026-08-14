@@ -35,8 +35,28 @@ for (const [tag, vp] of [['desktop', { width: 1280, height: 1000 }], ['phone', {
   const doors = await p.evaluate(() =>
     [...document.querySelectorAll('.ptile')].map(e => (e.querySelector('.ptile-h') || {}).textContent || ''));
   ok(doors.length === 0, `[${tag}] the three pathway tiles are gone (found ${doors.length})`);
-  ok(!(await p.evaluate(() => /HAF Pick/.test(document.body.innerText))),
-    `[${tag}] no "HAF Pick" panel left on the page`);
+  /* Case matters here: the card is styled in capitals, so a case-sensitive test
+     would pass on a page that still shows it. Ask case-INSENSITIVELY, then name
+     every place the words survive — the only allowed one is the recommended-
+     vehicle card, which IS the allocation Brent asked us to keep. */
+  const pickText = await p.evaluate(() => {
+    const hits = [];
+    const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
+    for (let e = walk.nextNode(); e; e = walk.nextNode()) {
+      if (e.children.length) continue;
+      const t = (e.innerText || '').trim();
+      if (!/haf\s*pick/i.test(t)) continue;
+      const r = e.getBoundingClientRect(), st = getComputedStyle(e);
+      if (st.display === 'none' || st.visibility === 'hidden' || !r.width || !r.height) continue;
+      hits.push((e.closest('#cf-veh, .hpick') ? 'recommended-vehicle' : 'ELSEWHERE:' + t));
+    }
+    return hits;
+  });
+  const strays = pickText.filter(h => h !== 'recommended-vehicle');
+  ok(strays.length === 0,
+    `[${tag}] the HAF Pick booking door is off the page — the words survive only on the recommended-vehicle card${strays.length ? ' — STRAY: ' + strays.join(' | ') : ''}`);
+  ok(!(await p.evaluate(() => !!document.querySelector('#if-pick.on, [data-flow="pick"].on'))),
+    `[${tag}] its own booking flow is not reachable from the page`);
   /* but the engine it used is still there and still allocating */
   ok(await p.evaluate(() => typeof allocateVehicle === 'function' && typeof openFlow === 'function'),
     `[${tag}] the allocation engine and the flow it fed are both still wired`);

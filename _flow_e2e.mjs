@@ -130,14 +130,38 @@ for (const [tag, vp] of [['desktop', { width: 1280, height: 1000 }], ['phone', {
   await p.fill('#fq-name', 'Brent Ford'); await p.fill('#fq-email', 'admin@usehaf.co.uk');
   await p.fill('#fq-mobile', '07700 900999');
   await shot('7-book');
-  // On this site the last button hands over to the Demo Centre gate — the same
-  // as it does on the live app today. Real booking is behind that gate.
-  await p.evaluate(() => fqBookV()); await p.waitForTimeout(400);
+  // Missing details must stop the order before it ever reaches the server.
+  await p.fill('#fq-mobile', '');
+  await p.evaluate(() => { window.__posted = false;
+    const f = window.fetch; window.fetch = (...a) => { window.__posted = true; return f(...a); }; });
+  await p.evaluate(() => fqBookV()); await p.waitForTimeout(250);
+  const guard = await p.evaluate(() => ({
+    err: ((document.getElementById('fq-err-7') || {}).textContent || '').trim(),
+    posted: !!window.__posted
+  }));
+  ok(/mobile/i.test(guard.err) && !guard.posted,
+     `[${tag}] missing details stop the order before it is sent: "${guard.err}"`);
+  await p.fill('#fq-mobile', '07700 900999');
+
+  // The button now places a REAL order against the booking engine. Opened from a
+  // file, that engine is not there — so what this proves is the honest failure:
+  // it tells the customer plainly and gives the button back, rather than showing
+  // a confirmation for an order nobody took. The happy path is proven against the
+  // running engine on the preview, not here.
+  await p.evaluate(() => fqBookV()); await p.waitForTimeout(1200);
   const done = await p.evaluate(() => {
-    const g = document.getElementById('demo-gate');
-    return { gate: !!g && g.style.display !== 'none', err: (document.getElementById('fq-err-7')||{}).textContent };
+    const b = document.querySelector('#fq-7 .fnav .btn-or');
+    const d = document.getElementById('fq-done');
+    return {
+      posted: !!window.__posted,
+      err: ((document.getElementById('fq-err-7') || {}).textContent || '').trim(),
+      label: b ? b.textContent.trim() : '', disabled: b ? !!b.disabled : true,
+      onDone: !!(d && d.classList.contains('on'))
+    };
   });
-  ok(done.gate && !done.err, `[${tag}] step 7 validates, then hands over to the demo gate (unchanged behaviour)`);
+  ok(done.posted, `[${tag}] step 7 validates, then sends the order to the booking engine`);
+  ok(done.err && !done.onDone && !done.disabled && /confirm/i.test(done.label),
+     `[${tag}] engine unreachable: says so plainly and gives the button back — no false confirmation`);
   await shot('8-booked');
 
   // the email route
