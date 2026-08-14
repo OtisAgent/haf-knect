@@ -1243,6 +1243,15 @@ textarea.fi2{resize:vertical;min-height:70px}
   .rr-btns .btn{flex:1}
   .rr-demo{margin-left:0;width:100%}
 }
+/* ── SEEDED DEMO WORK: THE DEMO KEEPS IT, A REAL ACCOUNT NEVER SEES IT ──
+   One rule decides for the whole app. Marked blocks stay in the file for the
+   demo; the body class is set at sign-in and nothing downstream has to ask. */
+body.haf-no-seed [data-seed]{display:none!important}
+[data-seed-none]{display:none}
+body.haf-no-seed [data-seed-none]{display:block}
+.seed-none{background:var(--p);border:1px dashed var(--lns);border-radius:var(--rx);
+  padding:.85rem 1rem;font-size:.78rem;color:var(--mu);line-height:1.55;margin-bottom:.9rem}
+
 /* ── SAMPLE vs LIVE, PRIVACY BLUR, VIEW FORMATS ─────────────── */
 /* Sample runs are deliberately desaturated and dashed so a real
    run — which keeps the normal brand colours — stands out at a glance. */
@@ -5666,8 +5675,45 @@ function hafAddSection(acc){
             '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'));
 }
 
+/* ══ SEEDED RUNS BELONG TO THE DEMO, NOT TO A REAL ACCOUNT ════════════════
+   Brent, 14 Aug: "clear the whole account on the main one i actually use —
+   only have test runs on the demo centre."
+
+   This app ships with a full set of made-up work — exchange cards, a driver
+   directory, active loads, earnings, fleet drivers, a coverage board. It was
+   written so there was something to look at while the network was empty, and
+   it reads exactly like real work to whoever is signed in. On a walkthrough
+   that is the point. On the owner's own account it is noise at best and a
+   wrong number at worst.
+
+   So the seed is switched at the door, ONCE, by whoever just signed in:
+     demo account, or the Demo Centre pane  → seeded runs show
+     a real account, the owner's own, or a  → nothing seeded, ever
+     preview of a member's screen
+
+   Nothing is deleted from the file: the demo still needs it, and one switch
+   that can be read in one place beats thirteen screens each deciding for
+   themselves. The pruning itself lives with the run-visibility layer at the
+   foot of this file, which already knows which references are seeded — one
+   list, never two. */
+window.HAF_SEED_OK=false;
+function hafSetSeed(ok){
+  window.HAF_SEED_OK=(ok===true);
+  try{document.body.classList.toggle('haf-no-seed',!window.HAF_SEED_OK);}catch(e){}
+  try{if(window.HAF_VIEW&&window.HAF_VIEW.sweep)window.HAF_VIEW.sweep();}catch(e){}
+}
+function hafSeedOK(){return window.HAF_SEED_OK===true;}
+/* is this block on screen for whoever is signed in right now? */
+function hafSeedShown(el){
+  if(!el)return false;
+  if(hafSeedOK())return true;
+  return !(el.closest&&el.closest('[data-seed]'));
+}
+
 function enterKnectApp(u,acct){
   _superUser=u;
+  /* the seed is decided before a single pane is drawn */
+  hafSetSeed(!!DEMO_ACCOUNTS[u]);
   /* a fresh sheet for whoever just signed in — no previous driver's run back left behind */
   try{_rrState={declined:[],accepted:null};}catch(e){}
   /* and no previous founder's gold left behind either — cleared before anything
@@ -5885,6 +5931,9 @@ function enterMode(mode){
   if(plnaBtn)plnaBtn.style.display='none';
   if(vaBanner)vaBanner.style.display='none';
 
+  /* the Demo Centre is the one room the seeded runs are allowed in */
+  hafSetSeed(mode==='demo');
+
   /* The old "view as" modes are gone. Each of them carried a fee percentage
      written into this file by hand — 12%, 10%, 9% — and every one of those
      numbers had already stopped being true. Their replacement is the Demo
@@ -5938,6 +5987,7 @@ function viewAsMember(type,released){
   if(ov)ov.style.display='none';
   document.getElementById('app').classList.add('open');
   _hideDemoBar();
+  hafSetSeed(false);                   // a preview of a real screen shows real work
   _setMyTier(null);                    // no membership level is being previewed
   _setFounder(null);                   // and no founder's mark either
 
@@ -6551,7 +6601,7 @@ async function pinSave(){
   }catch(e){hafErr(err,'Connection problem — please try again.');btn.textContent='Save PIN and continue';btn.disabled=false}
 }
 function goLanding(){document.getElementById('app').classList.remove('open');document.getElementById('landing').style.display='flex'}
-function signOut(){localStorage.removeItem('knect-user');_hafCred=null;_hafAcct=null;goLanding();}
+function signOut(){localStorage.removeItem('knect-user');_hafCred=null;_hafAcct=null;hafSetSeed(false);goLanding();}
 /* EXCHANGE */
 let _xchOnline=true;
 let _xchActiveJob=null;
@@ -8463,15 +8513,19 @@ function initDashMap(){
     {lat:55.86,lng:-4.25,city:'Glasgow',n:5,tier:'med'},
   ];
   const TC={hi:{fill:'#2dab60',stroke:'#1e7a45'},med:{fill:'#e88c00',stroke:'#b36b00'},lo:{fill:'#cc3333',stroke:'#992222'}};
+  /* The driver counts under each city were typed into this file by hand. On the
+     demo they illustrate; on a real account they are a number the owner could
+     repeat to somebody, so the city stays and the invented count does not. */
+  const seed=(typeof hafSeedOK==='function')?hafSeedOK():false;
   ZONES.forEach(z=>{
     const c=TC[z.tier];
     L.circle([z.lat,z.lng],{radius:22000,fillColor:c.fill,color:c.stroke,weight:1,fillOpacity:.18}).addTo(dashMap);
-    L.marker([z.lat,z.lng],{icon:L.divIcon({className:'',html:`<div style="text-align:center"><div style="background:${c.fill};color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;border:1.5px solid ${c.stroke};white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.3)">${z.city}</div><div style="font-size:8px;color:${c.stroke};font-weight:700">${z.n} drivers</div></div>`,iconSize:[80,28],iconAnchor:[40,8]})}).addTo(dashMap);
+    L.marker([z.lat,z.lng],{icon:L.divIcon({className:'',html:`<div style="text-align:center"><div style="background:${c.fill};color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;border:1.5px solid ${c.stroke};white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.3)">${z.city}</div><div style="font-size:8px;color:${c.stroke};font-weight:700">${seed?z.n+' drivers':''}</div></div>`,iconSize:[80,28],iconAnchor:[40,8]})}).addTo(dashMap);
   });
   /* Open jobs are drawn as an AREA, never a point. Until a job is yours you see the
      district it is in and nothing sharper — no pin to zoom into, no address in the
      popup. The exact location is released with the job, to the driver who takes it. */
-  [{lat:52.92,lng:-1.48,ref:'HAF-2858',route:'Manchester → Birmingham'},{lat:52.30,lng:-0.88,ref:'HAF-2201',route:'Leeds → London'},{lat:53.44,lng:-2.18,ref:'HAF-2196',route:'Liverpool → Sheffield'},{lat:51.72,lng:-1.08,ref:'HAF-2189',route:'Bristol → London'}].forEach(j=>{
+  (seed?[{lat:52.92,lng:-1.48,ref:'HAF-2858',route:'Manchester → Birmingham'},{lat:52.30,lng:-0.88,ref:'HAF-2201',route:'Leeds → London'},{lat:53.44,lng:-2.18,ref:'HAF-2196',route:'Liverpool → Sheffield'},{lat:51.72,lng:-1.08,ref:'HAF-2189',route:'Bristol → London'}]:[]).forEach(j=>{
     L.circle([j.lat,j.lng],{radius:HAF_AREA_RADIUS,fillColor:'#ff7800',color:'#ff7800',weight:1.5,fillOpacity:.16,dashArray:'4 3'})
       .addTo(dashMap)
       .bindPopup(`<strong style="color:#ff7800">${j.ref}</strong><br>${hafArea(j.route)}<br><span style="color:#8a97a0;font-size:11px">Area shown — exact address on accept</span>`);
@@ -8567,9 +8621,14 @@ function dashBuildFocus(){
   const el=document.getElementById('dash-basic-focus');if(!el)return;
   const pane=document.getElementById('pane-d-home');
   /* an invite if this account gets invites; otherwise the account's own top job */
+  /* a card this account is not allowed to see is not a card it can summarise */
+  const pick=sel=>{
+    if(!pane)return null;
+    return [...pane.querySelectorAll(sel)].find(c=>hafSeedShown(c))||null;
+  };
   const card=!pane?null:(hafAud().ownJobsOnly
-    ? pane.querySelector('.xc.xc-own')
-    : (pane.querySelector('.xc.xc-invite')||pane.querySelector('.xc.xc-own')));
+    ? pick('.xc.xc-own')
+    : (pick('.xc.xc-invite')||pick('.xc.xc-own')));
   const own=!!(card&&card.classList.contains('xc-own'));
   const t=(n,s)=>{const x=n?n.querySelector(s):null;return x?x.textContent.trim():'';};
   if(!card){
@@ -8627,7 +8686,8 @@ function rrPlace(s){const m=/^(.*?)\s+([A-Z]{1,2}\d{1,2}[A-Z]?)$/.exec(String(s|
    source the Basic focus card reads. No second list of the driver's day. */
 function rrOutbound(){
   const pane=document.getElementById('pane-d-home');if(!pane)return null;
-  const cards=[...pane.querySelectorAll('.xc.xc-invite')];if(!cards.length)return null;
+  const cards=[...pane.querySelectorAll('.xc.xc-invite')].filter(c=>hafSeedShown(c));
+  if(!cards.length)return null;
   const live=(typeof _xchActiveJob!=='undefined'&&_xchActiveJob)?_xchActiveJob.ref:'';
   const card=cards.find(c=>{const r=c.querySelector('.xb-ref');return r&&r.textContent.trim()===live;})||cards[0];
   const txt=s=>{const x=card.querySelector(s);return x?x.textContent.trim():'';};
@@ -8647,6 +8707,9 @@ function rrOutbound(){
   return o;
 }
 function rrMatches(out){
+  /* the run-back pool is seeded work — a real account is offered real loads or
+     none, never a made-up load dressed as a way home */
+  if(!hafSeedOK())return [];
   if(!out||out.freeAt===null)return [];
   const near=[out.to.town].concat(RR_NEAR[out.to.town]||[]);
   const base=out.from.town,home=[base].concat(RR_HOME[base]||[]);
@@ -9884,6 +9947,171 @@ window.pxSave=async function(){
   }
   function isSample(ref){ return !!(ref && SAMPLE[ref]); }
 
+  /* ── SEEDED CONTENT, ON THE DEMO ONLY ──────────────────────────────────
+     Brent, 14 Aug: his own account must carry real work or nothing.
+
+     The seeded runs are not the whole of it. The same demo shipped invented
+     drivers, invented clients, invented loads and invented earnings, written
+     straight into the markup so there was something to look at before the
+     network had anybody on it. Those read as fact to whoever is signed in.
+
+     What is seeded is decided from the SAME list of references above plus the
+     handful of made-up people and companies that appear beside them — one
+     source, not a second opinion. Nothing is deleted: a block is MARKED once,
+     and a single stylesheet rule decides whether this session may see it. So
+     the demo keeps everything, a real account sees none of it, and switching
+     between them needs no reload and can never half-apply. */
+  var SEED_NAMES = ['James Worthington','James Wilson','James W.','Karen Price',
+    'David Hughes','David H.','Priya K.','Tom Doherty','Tom D.','Acme Ltd',
+    'Northern Pack','City Supplies','Metro Dist','Greenway Co','Humber Depot',
+    'Mersey Retail','ABC Trade Ltd','Bristol DC'];
+  var SEED_REF = /\b(?:[A-Z]{2,3}-\d{4,6}|[A-Z]{2}\d{6})\b/g;
+
+  function seedy(text){
+    var t = String(text || '');
+    if (!t) return false;
+    var m = t.match(SEED_REF);
+    if (m) {
+      for (var i = 0; i < m.length; i++) {
+        /* FF- loads are the freight demo's own invention, top to bottom */
+        if (isSample(m[i]) || /^FF-\d{4}$/.test(m[i])) return true;
+      }
+    }
+    for (var j = 0; j < SEED_NAMES.length; j++) {
+      if (t.indexOf(SEED_NAMES[j]) >= 0) return true;
+    }
+    return false;
+  }
+
+  /* the smallest thing worth taking off the screen: a table row, a run card, a
+     load card, else the block sitting directly inside its card or its pane —
+     never so far up that a working form goes with it */
+  function seedBlock(el, pane){
+    var row = el.closest ? el.closest('tr') : null;
+    if (row && pane.contains(row)) return row;
+    var tile = el.closest ? el.closest('.xc, .ldc, .cap-sec') : null;
+    if (tile && pane.contains(tile)) return tile;
+    var card = el.closest ? el.closest('.card') : null;
+    var n = el;
+    while (n && n.parentElement && n.parentElement !== pane && n.parentElement !== card) {
+      n = n.parentElement;
+    }
+    return (n && n !== pane) ? n : null;
+  }
+
+  var NONE_TEXT = 'Nothing here yet. Real work appears on this screen as it comes through the network.';
+
+  /* A heading that counts is a claim: "Direct invites 2", "Open jobs near you —
+     3 matching your LWB". Take the cards away and the claim is still sitting
+     there over an empty stretch of page, which is worse than the cards were.
+     So every counting heading is re-read from what is actually underneath it,
+     each sweep, and a section with nothing under it says so in words. */
+  function tidyHeaders(){
+    [].slice.call(document.querySelectorAll('.xfeed-hdr')).forEach(function(hdr){
+      var n = 0, sib = hdr.nextElementSibling;
+      while (sib && !sib.classList.contains('xfeed-hdr')) {
+        if (sib.classList.contains('xc')) {
+          var hidden = sib.getAttribute('data-seed') === '1'
+            && document.body.classList.contains('haf-no-seed');
+          if (!hidden && sib.style.display !== 'none') n++;
+        }
+        sib = sib.nextElementSibling;
+      }
+      /* the badge beside the heading */
+      var badge = hdr.querySelector('span');
+      if (badge && /^\d+$/.test((badge.textContent || '').trim())) {
+        badge.textContent = String(n);
+        badge.style.display = n ? '' : 'none';
+      }
+      /* "— 3 matching your LWB" written into the heading itself */
+      var first = hdr.firstChild;
+      /* the ORIGINAL wording is the thing to test, never what is on screen now:
+         once "— 3 matching your LWB" has been taken off an empty section, the
+         words are gone and a test against them would never put them back */
+      if (first && first.nodeType === 3 &&
+          (hdr.getAttribute('data-hdr-src') || /—\s*\d+\s+matching/i.test(first.nodeValue))) {
+        if (!hdr.getAttribute('data-hdr-src')) hdr.setAttribute('data-hdr-src', first.nodeValue);
+        var src = hdr.getAttribute('data-hdr-src');
+        first.nodeValue = n
+          ? src.replace(/—\s*\d+/, '— ' + n)
+          : src.replace(/\s*—\s*\d+\s+matching[^]*$/i, '');
+      }
+      /* and a line under an empty section, rather than a gap */
+      var note = hdr.nextElementSibling;
+      var has = note && note.getAttribute && note.getAttribute('data-seed-gap') === '1';
+      if (!n && !has) {
+        var el = document.createElement('div');
+        el.setAttribute('data-seed-gap','1');
+        el.className = 'seed-none';
+        el.textContent = NONE_TEXT;
+        hdr.parentElement.insertBefore(el, hdr.nextSibling);
+      } else if (n && has) {
+        note.remove();
+      }
+    });
+  }
+
+  function markSeeded(){
+    /* the cheap pass, every sweep: run cards and capacity tiles are redrawn by
+       the app, so a card that comes back has to be judged again */
+    [].slice.call(document.querySelectorAll('.xc, .ldc, .cap-sec')).forEach(function(t){
+      if (t.getAttribute('data-seed') === '1') return;
+      if (t.classList.contains('cap-sec') || seedy(t.textContent)) t.setAttribute('data-seed','1');
+    });
+
+    /* the deep pass, once per pane: reads every leaf of the static markup */
+    var panes = [].slice.call(document.querySelectorAll('.tp'));
+    panes.forEach(function(pane){
+      if (pane.getAttribute('data-seed-done') === '1') return;
+      var blocks = [];
+      var all = pane.querySelectorAll('*');
+      for (var i = 0; i < all.length; i++) {
+        var el = all[i];
+        if (el.children.length) continue;              /* the text sits on the leaves */
+        if (!seedy(el.textContent)) continue;
+        var b = seedBlock(el, pane);
+        if (b && blocks.indexOf(b) < 0) blocks.push(b);
+      }
+      /* the capacity tiles carry invented driver counts rather than a reference,
+         so they are named here rather than found by their text */
+      [].slice.call(pane.querySelectorAll('.cap-sec')).forEach(function(t){
+        if (blocks.indexOf(t) < 0) blocks.push(t);
+      });
+      /* the same goes for the totals strips — "£142 today, 3 jobs, 84 miles" and
+         the counter tiles beside them. They were typed in, they read as this
+         account's own figures, and they are the numbers most likely to be
+         repeated to somebody as fact. They only go when the work they claim to
+         count is going with them. */
+      if (blocks.length) {
+        [].slice.call(pane.querySelectorAll('.xch-nums, .kc')).forEach(function(t){
+          if (blocks.indexOf(t) < 0) blocks.push(t);
+        });
+      }
+      /* drop anything already inside another block — one mark, at the top */
+      blocks = blocks.filter(function(b){
+        return !blocks.some(function(o){ return o !== b && o.contains(b); });
+      });
+      if (!blocks.length) { pane.setAttribute('data-seed-done','1'); return; }
+
+      blocks.forEach(function(b){ b.setAttribute('data-seed','1'); });
+
+      /* one honest line where the invented work used to be */
+      var first = blocks[0];
+      var host = first.closest ? (first.closest('table') || first) : first;
+      var anchor = (host.tagName === 'TABLE') ? (host.closest('.card') || host) : host;
+      /* a pane built from sections gets its line under the section that is
+         empty, not one line for the whole screen */
+      if (!pane.querySelector('.xfeed-hdr') && !pane.querySelector(':scope [data-seed-none]')) {
+        var none = document.createElement('div');
+        none.setAttribute('data-seed-none','1');
+        none.className = 'seed-none';
+        none.textContent = NONE_TEXT;
+        if (anchor.parentElement) anchor.parentElement.insertBefore(none, anchor);
+      }
+      pane.setAttribute('data-seed-done','1');
+    });
+  }
+
   /* Panels that summarise runs rather than list them - the next-up card and the
      run-back panel. They carry seeded data today and may carry a real job
      tomorrow, and they never show a reference of their own, so an unknown
@@ -10129,6 +10357,10 @@ window.pxSave=async function(){
     if (observer) observer.disconnect();
     try {
       syncUser();
+      /* seeded work is marked before anything is decorated, so a card that is
+         not allowed on this account never gets an eye or a chip either */
+      markSeeded();
+      tidyHeaders();
       /* the sidebar live-job card is included on purpose: it sits on screen the
          whole time, so it is the first thing you want soft on a shared screen */
       /* the sidebar live-job card is included on purpose, and so are the two
