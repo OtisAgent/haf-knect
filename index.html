@@ -281,6 +281,25 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .aa-ev{display:flex;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--ln);font-size:.78rem}
 .aa-ev:last-child{border-bottom:none}
 .aa-ev-t{color:var(--mu);font-size:.7rem;white-space:nowrap;flex-shrink:0;min-width:6.6rem}
+/* An account row opens its own record, so it has to look like it can be opened. */
+.aa-row.aa-open{cursor:pointer;border-radius:var(--rx);padding-left:.4rem;padding-right:.4rem;
+                margin-left:-.4rem;margin-right:-.4rem;transition:background .12s}
+.aa-row.aa-open:hover{background:var(--ln)}
+/* ── CRM record ── */
+.crm-box{max-width:44rem;width:calc(100% - 2rem);max-height:88vh;overflow:auto}
+.crm-hd{display:flex;align-items:flex-start;gap:.7rem;flex-wrap:wrap;margin-bottom:.2rem}
+.crm-nm{font-family:var(--dp);font-weight:900;font-size:1.05rem;color:var(--tx)}
+.crm-sub{font-size:.74rem;color:var(--mu);margin-top:.15rem}
+.crm-chips{display:flex;gap:.3rem;flex-wrap:wrap;margin:.55rem 0 .9rem}
+.crm-sec{font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;color:var(--mu);
+         font-weight:800;margin:1.05rem 0 .4rem}
+.crm-warn{font-size:.75rem;background:var(--am-d,rgba(232,140,0,.12));border:1px solid rgba(232,140,0,.3);
+          border-radius:var(--rx);padding:.55rem .7rem;color:var(--tx);margin:.5rem 0}
+/* ── Money rows ── */
+.mo-row{display:flex;align-items:center;gap:.6rem;padding:.6rem 0;border-bottom:1px solid var(--ln)}
+.mo-row:last-child{border-bottom:none}
+.mo-main{min-width:0;flex:1}
+.mo-amt{font-weight:800;font-size:.85rem;white-space:nowrap}
 @media(max-width:560px){
   .aa-row{flex-direction:column;align-items:flex-start;gap:.35rem}
   .aa-right{justify-content:flex-start}
@@ -1538,6 +1557,18 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
 </div>
 
 <!-- ══ DEMO FEEDBACK OVERLAY ═════════════════════════════════════ -->
+<!-- ══ CRM RECORD — one master record per network member ═════════════════════
+     Brief section 6. Opened by clicking any row on Account Activity. Read-only
+     on purpose: this is the place to understand an account, not to quietly edit
+     one. No document, no PIN, no bank detail and no home address ever loads
+     here — the record RPC does not return them, so they cannot leak from it. -->
+<div class="overlay" id="crm-ov" onclick="if(event.target===this)crmClose()">
+  <div class="obox crm-box">
+    <button class="obox-close" onclick="crmClose()">×</button>
+    <div id="crm-body"><div class="aa-empty">Opening the record…</div></div>
+  </div>
+</div>
+
 <div class="overlay" id="demo-fb-ov" onclick="if(event.target===this)closeDemoFeedback()">
   <div class="obox">
     <button class="obox-close" onclick="closeDemoFeedback()">×</button>
@@ -2845,6 +2876,20 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
           <div class="card"><div class="ct">Accounts by type</div><div id="ov-types"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
           <div class="card"><div class="ct">Accounts by status</div><div id="ov-status"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
         </div>
+        <!-- Membership and Founder are deliberately two separate cards. Founder
+             is a status somebody holds alongside Free, Plus or Pro — showing it
+             in the same list as a membership is what made it look like a fourth
+             tier in the first place. -->
+        <div class="g2">
+          <div class="card"><div class="ct">Membership <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">one ladder</span></div><div id="ov-memb"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
+          <div class="card"><div class="ct">Founder status <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">held beside a membership</span></div><div id="ov-founder"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
+        </div>
+
+        <div class="g2">
+          <div class="card"><div class="ct">Jobs across the network</div><div id="ov-jobs"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
+          <div class="card"><div class="ct">Money</div><div id="ov-money"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
+        </div>
+
         <div class="g2">
           <div class="card"><div class="ct">Accounts by tier</div><div id="ov-tiers"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
           <div class="card"><div class="ct">System connections</div><div class="cr"><span class="ck">HAF PLNA</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">CleverPay</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">HAF Launch</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">Account ledger</span><span class="cv" id="ov-ledger"><span class="chip ca">checking…</span></span></div></div>
@@ -2895,6 +2940,49 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
         <div class="card">
           <div class="ct">What has happened <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">newest first</span></div>
           <div class="aa-wrap"><div id="aa-feed"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
+        </div>
+      </div>
+
+      <!-- ══ PAYMENTS & PAYOUTS — Super Admin only ══════════════════════════
+           Brief section 8. One line per movement of money, from the customer
+           paying to the driver being paid. Every row is a real record; when a
+           source table is empty the page says it is empty rather than filling
+           the space with an example. Demo money can never reach this page —
+           the sandbox never writes to any of these tables. -->
+      <div class="tp" id="pane-money">
+        <h1 class="pt">Payments &amp; Payouts</h1>
+        <p class="ps">Where the money is on every job — what the customer owes, what HAF keeps, what the driver is due. Admin only.</p>
+        <div id="mo-src" class="ov-src">Reading the money…</div>
+        <div class="kg" id="mo-kpis"></div>
+        <div class="card">
+          <div class="ct">Every movement <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">newest first</span></div>
+          <div class="aa-filters">
+            <select class="fi2" id="mo-status" onchange="moLoad()">
+              <option value="">Any payout state</option>
+              <option value="Paid out">Paid out</option>
+              <option value="Driver payout scheduled">Payout scheduled</option>
+              <option value="Funds held">Funds held</option>
+              <option value="Held for review">Held for review</option>
+              <option value="Not due yet">Not due yet</option>
+            </select>
+            <button class="btn btn-gh btn-sm" onclick="moLoad()">Refresh</button>
+          </div>
+          <div class="aa-wrap"><div id="mo-list"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the money…</span></div></div></div>
+        </div>
+      </div>
+
+      <!-- ══ FEEDBACK CONTROL — Super Admin only ════════════════════════════
+           Brief section 7. The same ideas board members post to, seen as a
+           product pipeline: what was asked for, by whom, how much support it
+           has, and what stage it is at. -->
+      <div class="tp" id="pane-fbadmin">
+        <h1 class="pt">Feedback Control</h1>
+        <p class="ps">Everything the network has asked for, as a pipeline you can move. Admin only.</p>
+        <div id="fa-src" class="ov-src">Reading the board…</div>
+        <div class="kg" id="fa-kpis"></div>
+        <div class="card">
+          <div class="ct">Ideas and requests <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">most supported first</span></div>
+          <div class="aa-wrap"><div id="fa-list"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the board…</span></div></div></div>
         </div>
       </div>
 
@@ -3911,6 +3999,8 @@ const DRIVER_NAV=[
 const ADMIN_NAV=[
   {id:'admin',l:'Network Overview',s:'Overview',ico:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
   {id:'accounts',l:'Account Activity',s:'Overview',ico:'<path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M4 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
+  {id:'money',l:'Payments &amp; Payouts',s:'Overview',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
+  {id:'fbadmin',l:'Feedback Control',s:'Overview',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {id:'pools',l:'Network Pools',s:'Overview',ico:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>'},
   {id:'pricing',l:'Pricing Engine',s:'Overview',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/><circle cx="12" cy="12" r="10"/>'},
   {id:'f-post',l:'Post a Load',s:'Freight Tools',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
@@ -5020,6 +5110,8 @@ function switchTab(id){
   if(id==='pane-dc-compare')setTimeout(()=>dcOpen('compare'),40);
   if(id==='pane-dc-sim')setTimeout(()=>dcOpen('sim'),40);
   if(id==='pane-accounts')setTimeout(()=>{if(window.aaBoot)aaBoot();},60);
+  if(id==='pane-money')setTimeout(()=>{if(window.moLoad)moLoad();},60);
+  if(id==='pane-fbadmin')setTimeout(()=>{if(window.faLoad)faLoad();},60);
   if(id==='pane-livejob')setTimeout(hafRenderLive,60);
   /* area rule applied to whatever this page just drew */
   setTimeout(()=>{try{hafMaskSweep(p);}catch(e){}},140);
@@ -5093,6 +5185,12 @@ function _rows(el,items){
 function _noCred(msg){
   const s=document.getElementById('ov-src');
   if(s){s.className='ov-src bad';s.innerHTML='<span class="dot"></span>'+_esc(msg);}
+  /* A card left saying "loading…" reads as a page still working. It is not —
+     it is a page that was refused. Every panel says so plainly instead. */
+  ['ov-memb','ov-founder','ov-jobs','ov-money','ov-types','ov-status','ov-tiers'].forEach(id=>{
+    const e=document.getElementById(id);
+    if(e)e.innerHTML='<div class="cr"><span class="ck" style="color:var(--mu)">Not readable from this login</span></div>';
+  });
 }
 
 async function ovLoad(){
@@ -5119,9 +5217,13 @@ async function ovLoad(){
       ['On hold',S.on_hold||0,'am','waiting on something'],
       ['Missing documents',S.missing_documents||0,'am','nothing uploaded yet'],
       ['Let in',f.released,'gn','released onto the network'],
+      ['Active users',d.active_users==null?'—':d.active_users,'gn','let in and seen in the last 30 days'],
       ['Paying',f.paying,'or','on a paid tier today']
     ].map(k=>'<div class="kc"><div class="kc-l">'+k[0]+'</div><div class="kc-v'+(k[2]?' '+k[2]:'')+'">'+
         k[1]+'</div><div class="kc-d" style="color:var(--mu)">'+k[3]+'</div></div>').join('');
+
+    _ovMembership(d);
+    _ovJobsMoney(d);
 
     _rows('ov-types',(d.by_type||[]).map(t=>({label:t.label,
       value:t.count?'<strong>'+t.count+'</strong>':'<span style="color:var(--mu)">0 — none yet</span>'})));
@@ -5150,6 +5252,233 @@ async function ovLoad(){
   }
 }
 
+/* ── MEMBERSHIP AND FOUNDER ──
+   Free / Plus / Pro is the whole ladder. Founder is counted from the founding
+   members table, next to it and never inside it. A row still carrying
+   "founder" in the membership column is named as a data fault, because that is
+   what it is — nobody's membership is "Founder". */
+function _money0(n){return '£'+Number(n||0).toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:0})}
+function _ovMembership(d){
+  const m=d.membership||{},fd=d.founder||{};
+  const memb=[
+    ['HAF KNECT Free',m.free],
+    ['HAF KNECT Plus',m.plus],
+    ['HAF KNECT Pro',m.pro]
+  ].map(x=>({label:x[0],value:x[1]?'<strong>'+x[1]+'</strong>':'<span style="color:var(--mu)">0 — none yet</span>'}));
+  _rows('ov-memb',memb);
+  if(m.misfiled_as_founder>0){
+    document.getElementById('ov-memb').insertAdjacentHTML('beforeend',
+      '<div class="crm-warn">'+m.misfiled_as_founder+' account'+(m.misfiled_as_founder===1?' is':'s are')+
+      ' still recorded with <strong>Founder</strong> as the membership. Founder is a status, not a membership — '+
+      (m.misfiled_as_founder===1?'that account needs':'those accounts need')+' a real Free, Plus or Pro setting.</div>');
+  }
+  _rows('ov-founder',[
+    {label:'Founder places paid for',value:fd.paid?'<strong>'+fd.paid+'</strong> &middot; '+_money0(fd.paid_value):'<span style="color:var(--mu)">0 — none yet</span>'},
+    {label:'Linked to a HAF account',value:(fd.linked_to_account||0)+' of '+(fd.paid||0)},
+    {label:'PLNA codes issued',value:String(fd.code_issued||0)},
+    {label:'Codes redeemed',value:fd.code_redeemed?String(fd.code_redeemed):'<span style="color:var(--mu)">0 — none redeemed yet</span>'}
+  ]);
+}
+
+/* Jobs and money. Every one of these tables is empty today, so the honest
+   reading is a zero with the reason beside it — never a placeholder figure. */
+function _ovJobsMoney(d){
+  const j=d.jobs||{},mo=d.money||{},none='<span style="color:var(--mu)">0 — no jobs have run yet</span>';
+  _rows('ov-jobs',[
+    {label:'Jobs posted',value:j.posted?'<strong>'+j.posted+'</strong>':none},
+    {label:'Accepted',value:j.accepted?String(j.accepted):'<span style="color:var(--mu)">0</span>'},
+    {label:'Completed',value:j.completed?String(j.completed):'<span style="color:var(--mu)">0</span>'},
+    {label:'Cancelled',value:j.cancelled?String(j.cancelled):'<span style="color:var(--mu)">0</span>'},
+    {label:'Total network job value',value:j.value?'<strong>'+_money0(j.value)+'</strong>':'<span style="color:var(--mu)">£0</span>'}
+  ]);
+  _rows('ov-money',[
+    {label:'Driver payouts',value:mo.driver_payouts?_money0(mo.driver_payouts):'<span style="color:var(--mu)">£0 — nothing paid out yet</span>'},
+    {label:'HAF network income',value:mo.haf_income?'<strong>'+_money0(mo.haf_income)+'</strong>':'<span style="color:var(--mu)">£0</span>'},
+    {label:'Referral share accrued',value:mo.referral_accrued?_money0(mo.referral_accrued):'<span style="color:var(--mu)">£0</span>'},
+    {label:'Awaiting payout',value:mo.awaiting_payout?'<span class="chip ca">'+mo.awaiting_payout+'</span>':'<span style="color:var(--mu)">none</span>'},
+    {label:'Held for review',value:mo.held_for_review?'<span class="chip cr">'+mo.held_for_review+'</span>':'<span style="color:var(--mu)">none</span>'}
+  ]);
+}
+
+/* ── CRM RECORD ── */
+function crmClose(){const o=document.getElementById('crm-ov');if(o)o.classList.remove('open')}
+async function crmOpen(ref){
+  const o=document.getElementById('crm-ov'),b=document.getElementById('crm-body');
+  if(!o||!b)return;
+  o.classList.add('open');
+  b.innerHTML='<div class="aa-empty">Opening the record…</div>';
+  let r=null;
+  try{
+    const {denied,rows}=await _netRpc('haf_network_record',{p_ref:ref});
+    if(denied){b.innerHTML='<div class="aa-empty">Sign in with your own HAF username and PIN to open a record.</div>';return}
+    if(!rows.length){b.innerHTML='<div class="aa-empty">No record found for that account.</div>';return}
+    r=rows[0];
+  }catch(e){
+    b.innerHTML='<div class="aa-empty">Could not open that record just now. Nothing here is invented, so it is showing nothing rather than a guess.</div>';return;
+  }
+
+  const chip=(t,c)=>'<span class="chip'+(c?' '+c:'')+'">'+_esc(t)+'</span>';
+  let h='<div class="crm-hd"><div style="flex:1;min-width:0">'+
+        '<div class="crm-nm">'+_esc(r.name||r.username||r.ref)+'</div>'+
+        '<div class="crm-sub">'+_esc(r.username||'no username')+' &middot; '+_esc(r.ref||'')+
+        (r.email?' &middot; '+_esc(r.email):'')+'</div></div></div>';
+
+  h+='<div class="crm-chips">';
+  h+=chip(_STATUS_LBL[r.status]||r.status,_STATUS_CHIP[r.status]||'ca');
+  h+=chip(_TYPE_LBL[r.account_type]||r.account_type||'—');
+  h+=chip(r.membership?('HAF KNECT '+r.membership.charAt(0).toUpperCase()+r.membership.slice(1)):'Membership not set',r.membership?'':'ca');
+  if(r.founder)h+=chip('★ Founder #'+r.founder.member_no,'cg');
+  h+=chip(r.email_confirmed?'Email confirmed':'Email not confirmed',r.email_confirmed?'cg':'ca');
+  h+=chip(r.has_login?'Can sign in':'No login yet',r.has_login?'cg':'ca');
+  if(r.is_test)h+=chip('Test account','ca');
+  h+='</div>';
+
+  if(r.membership_note)h+='<div class="crm-warn">'+_esc(r.membership_note)+'</div>';
+
+  const dt=r.dates||{};
+  h+='<div class="crm-sec">Where they have got to</div>';
+  [['Applied',dt.applied],['Confirmed email',dt.confirmed],['Approved',dt.approved],
+   ['Let into the network',dt.released],['Paid',dt.paid],['Last seen',dt.last_seen]].forEach(x=>{
+    h+='<div class="cr"><span class="ck">'+x[0]+'</span><span class="cv">'+(x[1]?_esc(_when(x[1])):'<span style="color:var(--mu)">not yet</span>')+'</span></div>';
+  });
+  h+='<div class="cr"><span class="ck">Documents uploaded</span><span class="cv">'+(r.docs_count||0)+'</span></div>';
+  if(r.status_reason)h+='<div class="cr"><span class="ck">Reason on file</span><span class="cv">'+_esc(r.status_reason)+'</span></div>';
+
+  if(r.founder){
+    h+='<div class="crm-sec">Founder status</div>';
+    h+='<div class="cr"><span class="ck">Founder number</span><span class="cv">#'+_esc(r.founder.member_no)+'</span></div>';
+    h+='<div class="cr"><span class="ck">Paid</span><span class="cv">'+_money0(r.founder.paid)+(r.founder.paid_at?' on '+_esc(_when(r.founder.paid_at)):'')+'</span></div>';
+    h+='<div class="cr"><span class="ck">PLNA code</span><span class="cv">'+(r.founder.code_issued?(r.founder.code_redeemed_at?'redeemed '+_esc(_when(r.founder.code_redeemed_at)):'issued, not redeemed'):'not issued')+'</span></div>';
+    h+='<div class="crm-warn">Founder sits <strong>beside</strong> this account\'s membership. It is not a membership of its own, and today the live pricing matrix carries no founder adjustment — so it changes no price.</div>';
+  }
+
+  const list=(title,arr,fmt,empty)=>{
+    h+='<div class="crm-sec">'+title+'</div>';
+    if(!arr||!arr.length){h+='<div class="aa-empty">'+empty+'</div>';return}
+    arr.slice(0,40).forEach(x=>{h+=fmt(x)});
+  };
+
+  list('Jobs',r.jobs,j=>'<div class="aa-row"><div class="aa-main"><div class="aa-name">'+_esc(j.ref||'—')+
+       '</div><div class="aa-sub">'+_esc(j.source||'')+(j.from?' &middot; '+_esc(j.from)+' to '+_esc(j.to):'')+
+       (j.at?' &middot; '+_esc(_when(j.at)):'')+'</div></div><div class="aa-right">'+
+       (j.driver_amount!=null?'<span class="mo-amt">'+_money0(j.driver_amount)+'</span>':'')+
+       '<span class="chip">'+_esc(j.status||'—')+'</span></div></div>',
+       'No jobs on this account. The network has not run a live job yet, so this is empty for everyone.');
+
+  list('Payouts',r.payouts,p=>'<div class="aa-row"><div class="aa-main"><div class="aa-name">'+_esc(p.ref||'—')+
+       '</div><div class="aa-sub">'+_esc(p.basis||'')+(p.pct?' &middot; '+p.pct+'%':'')+
+       (p.payable_from?' &middot; payable from '+_esc(p.payable_from):'')+'</div></div>'+
+       '<div class="aa-right"><span class="mo-amt">'+_money0(p.amount)+'</span><span class="chip">'+_esc(p.status||'—')+'</span></div></div>',
+       'Nothing owed or paid on this account.');
+
+  list('Account changes',r.entitlement_changes,c=>'<div class="aa-ev"><span class="aa-ev-t">'+_esc(_when(c.at))+
+       '</span><span>'+_esc(c.reason||c.source||'changed')+(c.by?' <span style="color:var(--mu)">by '+_esc(c.by)+'</span>':'')+'</span></div>',
+       'No membership or entitlement change recorded.');
+
+  list('Everything that has happened',r.timeline,e=>'<div class="aa-ev"><span class="aa-ev-t">'+_esc(_when(e.at))+
+       '</span><span>'+_esc(_EVENT_LBL[e.event]||e.event)+(e.detail?' <span style="color:var(--mu)">— '+_esc(e.detail)+'</span>':'')+'</span></div>',
+       'Nothing recorded against this account yet.');
+
+  h+='<div class="dc-note" style="margin-top:1rem">Read-only. Documents, PINs, bank details and home addresses are never loaded into this record.</div>';
+  b.innerHTML=h;
+}
+window.crmOpen=crmOpen;window.crmClose=crmClose;
+
+/* ── PAYMENTS & PAYOUTS ── */
+const _MO_CHIP={'Paid out':'cg','Driver payout scheduled':'ca','Funds held':'ca',
+                'Held for review':'cr','Not due yet':''};
+async function moLoad(){
+  const src=document.getElementById('mo-src'),list=document.getElementById('mo-list');
+  if(!list)return;
+  try{
+    const {denied,rows}=await _netRpc('haf_network_money',{p_limit:200});
+    if(denied){
+      src.className='ov-src bad';src.innerHTML='<span class="dot"></span>Sign in with your own HAF username and PIN to see the money.';
+      list.innerHTML='<div class="aa-empty">Not readable from this login.</div>';return}
+    const want=document.getElementById('mo-status').value;
+    const all=rows,shown=want?rows.filter(r=>r.payout_status===want):rows;
+    const sum=k=>all.reduce((t,r)=>t+Number(r[k]||0),0);
+    document.getElementById('mo-kpis').innerHTML=[
+      ['Movements',all.length,'','every payment and payout on record'],
+      ['HAF fees',_money0(sum('haf_fee')),'or','what HAF has earned'],
+      ['Driver amounts',_money0(sum('driver_amount')),'gn','what drivers are due or have had'],
+      ['Paid out',all.filter(r=>r.payout_status==='Paid out').length,'gn','settled'],
+      ['Held for review',all.filter(r=>r.payout_status==='Held for review').length,'am','needs a decision']
+    ].map(k=>'<div class="kc"><div class="kc-l">'+k[0]+'</div><div class="kc-v'+(k[2]?' '+k[2]:'')+'">'+
+        k[1]+'</div><div class="kc-d" style="color:var(--mu)">'+k[3]+'</div></div>').join('');
+
+    src.className='ov-src';
+    src.innerHTML='<span class="dot"></span>Read live from the job, handover and referral records. Sandbox and demo activity never writes to any of them, so nothing here can be demo money.';
+
+    if(!shown.length){
+      list.innerHTML='<div class="aa-empty">'+(all.length
+        ?'No movement is in that state.'
+        :'No money has moved on the network yet — no job has run, so there is nothing to pay or pay out. This fills itself the moment the first job completes.')+'</div>';
+      return;
+    }
+    list.innerHTML=shown.map(r=>
+      '<div class="mo-row"><div class="mo-main">'+
+        '<div class="aa-name">'+_esc(r.ref||'—')+'</div>'+
+        '<div class="aa-sub">'+_esc(r.kind||'')+(r.counterparty?' &middot; '+_esc(r.counterparty):'')+
+        (r.at?' &middot; '+_esc(_when(r.at)):'')+
+        (r.payout_due?' &middot; due '+_esc(r.payout_due):'')+'</div></div>'+
+      '<div class="aa-right">'+
+        (r.haf_fee!=null?'<span class="chip">HAF '+_money0(r.haf_fee)+'</span>':'')+
+        (r.driver_amount!=null?'<span class="mo-amt">'+_money0(r.driver_amount)+'</span>':'')+
+        '<span class="chip">'+_esc(r.payment_status||'—')+'</span>'+
+        '<span class="chip '+(_MO_CHIP[r.payout_status]||'')+'">'+_esc(r.payout_status||'—')+'</span>'+
+      '</div></div>').join('');
+  }catch(e){
+    src.className='ov-src bad';
+    src.innerHTML='<span class="dot"></span>Could not read the payments just now — showing nothing rather than a guess.';
+    list.innerHTML='<div class="aa-empty">Try Refresh in a moment.</div>';
+  }
+}
+window.moLoad=moLoad;
+
+/* ── FEEDBACK CONTROL ──
+   The same board members post to, read as a product pipeline. */
+const _FA_STAGE={planned:'Planned',reviewing:'Reviewing',building:'Building',
+                 released:'Released',rejected:'Rejected',open:'Reviewing'};
+async function faLoad(){
+  const src=document.getElementById('fa-src'),list=document.getElementById('fa-list');
+  if(!list)return;
+  try{
+    const r=await fetch(FB_URL+'/knect_feedback_board?select=*&order=votes.desc,created_at.desc&limit=200',{headers:FB_H});
+    if(!r.ok)throw new Error('board '+r.status);
+    const rows=await r.json();
+    const stage=x=>_FA_STAGE[(x.status||'open').toLowerCase()]||'Reviewing';
+    const count=s=>rows.filter(x=>stage(x)===s).length;
+    document.getElementById('fa-kpis').innerHTML=[
+      ['Ideas on the board',rows.length,'','submitted by the network'],
+      ['Reviewing',count('Reviewing'),'am','not yet decided'],
+      ['Building',count('Building'),'or','in progress'],
+      ['Released',count('Released'),'gn','shipped'],
+      ['Total votes',rows.reduce((t,x)=>t+Number(x.votes||0),0),'','support across every idea']
+    ].map(k=>'<div class="kc"><div class="kc-l">'+k[0]+'</div><div class="kc-v'+(k[2]?' '+k[2]:'')+'">'+
+        k[1]+'</div><div class="kc-d" style="color:var(--mu)">'+k[3]+'</div></div>').join('');
+    src.className='ov-src';
+    src.innerHTML='<span class="dot"></span>Read live from the KNECT feedback board — the same board members post to.';
+    if(!rows.length){list.innerHTML='<div class="aa-empty">Nobody has posted an idea yet.</div>';return}
+    list.innerHTML=rows.map(x=>
+      '<div class="aa-row"><div class="aa-main">'+
+        '<div class="aa-name">'+_esc(x.title||x.idea||'Untitled')+'</div>'+
+        '<div class="aa-sub">'+_esc(x.category||'Uncategorised')+
+        (x.author||x.name?' &middot; '+_esc(x.author||x.name):'')+
+        (x.created_at?' &middot; '+_esc(_when(x.created_at)):'')+'</div>'+
+        (x.detail||x.body?'<div class="aa-sub" style="margin-top:.25rem;color:var(--tx)">'+_esc(String(x.detail||x.body).slice(0,220))+'</div>':'')+
+      '</div><div class="aa-right">'+
+        '<span class="chip">'+(Number(x.votes)||0)+' votes</span>'+
+        '<span class="chip '+(stage(x)==='Released'?'cg':stage(x)==='Rejected'?'cr':'ca')+'">'+stage(x)+'</span>'+
+      '</div></div>').join('');
+  }catch(e){
+    src.className='ov-src bad';
+    src.innerHTML='<span class="dot"></span>Could not read the feedback board just now.';
+    list.innerHTML='<div class="aa-empty">Nothing is shown rather than a guess — try again in a moment.</div>';
+  }
+}
+window.faLoad=faLoad;
+
 function aaBoot(){aaLoad();aaFeed();}
 function aaDebounce(){clearTimeout(_aaTimer);_aaTimer=setTimeout(aaLoad,300);}
 async function aaLoad(alsoFeed){
@@ -5166,8 +5495,10 @@ async function aaLoad(alsoFeed){
     const real=rows.filter(r=>!r.is_test).length;
     cnt.textContent=real+' account'+(real===1?'':'s')+
       (rows.length-real?' · plus '+(rows.length-real)+' test account'+(rows.length-real===1?'':'s')+', greyed below':'');
+    /* Every row opens its own CRM record — brief section 6. */
     list.innerHTML=rows.map(r=>
-      '<div class="aa-row'+(r.is_test?' aa-test':'')+'">'+
+      '<div class="aa-row aa-open'+(r.is_test?' aa-test':'')+'" onclick="crmOpen(\''+
+        _esc(r.ref||r.username).replace(/'/g,'')+'\')" title="Open this account\'s record">'+
         '<div class="aa-main">'+
           '<div class="aa-name">'+_esc(r.name||r.username)+(r.is_test?' <span class="chip ca">test</span>':'')+'</div>'+
           '<div class="aa-sub">'+_esc(r.username||'—')+' &middot; '+_esc(_TYPE_LBL[r.type]||r.type)+
