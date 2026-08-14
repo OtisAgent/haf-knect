@@ -93,7 +93,10 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 
 /* BODY SPLIT */
 .land-body{display:grid;grid-template-columns:1fr 310px;gap:2rem;flex:1;max-width:1060px;margin:0 auto;width:100%;padding:.6rem 1.8rem 2rem}
-@media(max-width:860px){.land-body{grid-template-columns:1fr;padding:.4rem 1.2rem 1.5rem}.land-side{display:none}}
+/* On a phone the side column stacks under the form. The login box drops out
+   (the Driver / Account login links below the form already cover it) but the
+   ways-to-book card must NOT — it is now the only route to repeat and email. */
+@media(max-width:860px){.land-body{grid-template-columns:1fr;padding:.4rem 1.2rem 1.5rem}.land-side{order:2}#side-login{display:none}}
 
 /* MAIN */
 .land-main{display:flex;flex-direction:column;gap:1.8rem}
@@ -155,7 +158,7 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 
 /* TILE FOCUS MODE — show only the step flow + login card */
 body.tile-focus #tiles-wrap{display:none!important}
-body.tile-focus #side-talk{display:none!important}
+body.tile-focus #side-ways{display:none!important}
 body.tile-focus .land-main>.calc-box{display:none!important}
 body.tile-focus .land-side{display:flex!important}
 /* stretch flow panel to match login card height */
@@ -734,6 +737,38 @@ textarea.fi2{resize:vertical;min-height:70px}
 .owb-p{font-size:.8rem;color:var(--mu);line-height:1.55;margin-bottom:.65rem}
 .owb-a{font-size:.82rem;color:var(--or);font-weight:800}
 .owb-soon{position:absolute;top:.9rem;right:.95rem;font-size:.58rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mu);background:var(--p3);border:1px solid var(--ln);border-radius:999px;padding:.2rem .5rem}
+/* ══ WAYS TO BOOK — one card, sitting under the login ═══════════════════
+   Brent, 14 Aug: the three ways to book move under the login box and the
+   Talk to HAF panel folds in with them. The whole right column becomes
+   "how else do I reach HAF"; the left column is the consignment itself.
+   Same tokens as the tiles they replace — only the density changes. */
+.wtb{display:flex;flex-direction:column;gap:.55rem}
+.wtb-c{display:flex;gap:.65rem;align-items:flex-start;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.7rem .8rem;text-align:left;width:100%;font:inherit;color:inherit;transition:background .15s,border-color .15s;position:relative}
+.wtb-c.live{cursor:pointer}
+.wtb-c.live:hover{background:var(--p3);border-color:var(--or)}
+.wtb-c.soon{opacity:.7;cursor:default}
+.wtb-ico{width:26px;height:26px;border-radius:var(--rx);background:var(--or-d);display:flex;align-items:center;justify-content:center;flex:none;margin-top:.05rem}
+.wtb-ico svg{width:13px;height:13px;stroke:var(--or);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wtb-c.soon .wtb-ico{background:var(--p3)}
+.wtb-c.soon .wtb-ico svg{stroke:var(--mu)}
+/* These are spans inside a <button> — a button may not contain a <div> — so
+   every one of them has to be told to be a block itself, or the heading, the
+   sentence and the arrow all run together on one line. */
+.wtb-b{flex:1;min-width:0;display:block}
+.wtb-h{display:block;font-family:var(--dp);font-weight:900;font-size:.88rem;letter-spacing:-.03em;line-height:1.25}
+.wtb-p{display:block;font-size:.72rem;color:var(--mu);line-height:1.45;margin-top:.15rem}
+.wtb-a{display:block;font-size:.74rem;color:var(--or);font-weight:800;margin-top:.32rem}
+
+.wtb-c.soon .wtb-a{color:var(--mu)}
+/* The badge sits ON ITS OWN LINE above the heading rather than floating in the
+   corner. Floated, it overlapped the title at narrow widths; stacked, it
+   cannot collide with anything at any width. */
+.wtb-soon{display:inline-block;font-size:.52rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mu);background:var(--p3);border:1px solid var(--ln);border-radius:999px;padding:.14rem .42rem;margin-bottom:.25rem}
+.wtb-sep{height:1px;background:var(--ln);margin:1rem 0 .85rem}
+.wtb-sub{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--su);margin-bottom:.55rem}
+/* The one button that starts a consignment. It replaces the three doors:
+   the form above it already IS step one, so the flow just carries on. */
+.cf-go{margin-bottom:.5rem}
 /* ── LOAD POSTING PAUSED ───────────────────────────────────────────────
    Single switch: LOAD_POSTING_LOCKED in the main script (search that name).
    The markup ships LOCKED, so if the script never runs the form stays shut.
@@ -1293,65 +1328,16 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <div class="lp-info" id="lp-info"></div>
           </div>
         </div>
+        <!-- ── ONE DOOR INTO THE CONSIGNMENT ──
+             Brent, 14 Aug: the HAF Pick panel comes off the page. Everything it
+             did stays — the form above has already chosen the vehicle — so the
+             customer just carries straight on into the seven stages instead of
+             choosing between three doors that led to the same place. -->
+        <button class="btn btn-or btn-wide cf-go" type="button" id="cf-go" onclick="startConsignment()">Continue to book &#8594;</button>
         <p class="pf-disc">Guide price only. Final confirmed after full delivery details are reviewed.</p>
       </div>
 
-      <!-- 3 PATHWAY TILES — always visible -->
       <div id="tiles-wrap">
-        <div class="land-kicker" style="margin-bottom:.7rem">Book without an account</div>
-        <div class="path-tiles">
-          <div class="ptile" onclick="openFlow('fast')">
-            <div class="ptile-icon">
-              <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            </div>
-            <div class="ptile-h">Fast Quote</div>
-            <p class="ptile-p">Tell us the basics and get a confirmed price in under 2 minutes.</p>
-            <div class="ptile-arr">Book now &#8594;</div>
-          </div>
-          <div class="ptile" onclick="openFlow('repeat')">
-            <div class="ptile-icon">
-              <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.54"/></svg>
-            </div>
-            <div class="ptile-h">Repeat an order</div>
-            <p class="ptile-p">Enter your reference number and rebook a previous delivery in seconds.</p>
-            <div class="ptile-arr">Rebook &#8594;</div>
-          </div>
-          <div class="ptile" onclick="openFlow('pick')">
-            <div class="ptile-icon">
-              <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            </div>
-            <div class="ptile-h">HAF Pick</div>
-            <p class="ptile-p">Tell us what you have &#8212; HAF picks the right van and driver for you.</p>
-            <div class="ptile-arr">Let HAF decide &#8594;</div>
-          </div>
-        </div>
-
-        <!-- ── OTHER WAYS TO BOOK ──
-             Not everybody wants to fill in a form. Email is live now: we hand
-             the customer a ready-written quote request with everything we need
-             already listed, so nothing comes back half-answered. WhatsApp is
-             marked coming soon and does nothing until it genuinely works. -->
-        <div class="land-kicker" style="margin:1.4rem 0 .7rem">Other ways to book</div>
-        <div class="owb">
-          <div class="owb-c live" onclick="openEmailQuote()">
-            <div class="owb-ico">
-              <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2.5 6.5 12 13l9.5-6.5"/></svg>
-            </div>
-            <div class="owb-h">Book by email</div>
-            <p class="owb-p">We'll write the email for you. Fill in the blanks, send it, and we come back with a price.</p>
-            <div class="owb-a">Get my quote email &#8594;</div>
-          </div>
-          <div class="owb-c soon">
-            <span class="owb-soon">Coming soon</span>
-            <div class="owb-ico">
-              <svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.2-5.2A8.5 8.5 0 1 1 21 11.5z"/></svg>
-            </div>
-            <div class="owb-h">Book on WhatsApp</div>
-            <p class="owb-p">Message HAF and book the whole job in a chat. We're building this now &#8212; it isn't switched on yet.</p>
-            <div class="owb-a" style="color:var(--mu)">Not available yet</div>
-          </div>
-        </div>
-
         <!-- The ready-written quote request. Pre-filled with whatever the
              customer has already told the calculator above. -->
         <div class="calc-box" id="email-quote" style="display:none;margin-top:.9rem">
@@ -1744,7 +1730,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
 
     <!-- RIGHT: Side panel -->
     <div class="land-side">
-      <div class="side-card">
+      <div class="side-card" id="side-login">
         <div class="sc-title">Log in to your account</div>
         <div class="sc-fi">
           <span class="sc-lbl">HAF username</span>
@@ -1763,8 +1749,49 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
           <p style="margin:.45rem 0 0;font-size:.58rem;color:var(--mu)">No login needed · Driver, Freight &amp; Business views</p>
         </div>
       </div>
-      <div class="side-card" id="side-talk">
-        <div class="sc-title">Talk to HAF</div>
+      <!-- ══ OTHER WAYS TO BOOK ══════════════════════════════════════════
+           Brent, 14 Aug: the three ways to book sit under the login, and the
+           Talk to HAF panel merges into the same card. Repeat and email are
+           live now. WhatsApp is drawn but does nothing — it is marked coming
+           soon and stays that way until ManyChat is genuinely switched on, so
+           nobody sends a job into a channel that cannot answer them. -->
+      <div class="side-card" id="side-ways">
+        <div class="sc-title">Other ways to book</div>
+        <div class="wtb">
+          <button class="wtb-c live" type="button" id="wtb-repeat" onclick="openFlow('repeat')">
+            <span class="wtb-ico">
+              <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.54"/></svg>
+            </span>
+            <span class="wtb-b">
+              <span class="wtb-h">Repeat an order</span>
+              <span class="wtb-p">Enter your reference number and rebook a previous delivery in seconds.</span>
+              <span class="wtb-a">Rebook &#8594;</span>
+            </span>
+          </button>
+          <button class="wtb-c live" type="button" id="wtb-email" onclick="openEmailQuote()">
+            <span class="wtb-ico">
+              <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2.5 6.5 12 13l9.5-6.5"/></svg>
+            </span>
+            <span class="wtb-b">
+              <span class="wtb-h">Order by email</span>
+              <span class="wtb-p">We write the email for you. Fill in the blanks, send it, and we come back with a price.</span>
+              <span class="wtb-a">Get my quote email &#8594;</span>
+            </span>
+          </button>
+          <div class="wtb-c soon" id="wtb-whatsapp" aria-disabled="true">
+            <span class="wtb-ico">
+              <svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.2-5.2A8.5 8.5 0 1 1 21 11.5z"/></svg>
+            </span>
+            <span class="wtb-b">
+              <span class="wtb-soon">Coming soon</span>
+              <span class="wtb-h">Order on WhatsApp</span>
+              <span class="wtb-p">Message HAF and book the whole job in a chat. We're building this now — it isn't switched on yet.</span>
+              <span class="wtb-a">Not available yet</span>
+            </span>
+          </div>
+        </div>
+        <div class="wtb-sep"></div>
+        <div class="wtb-sub">Talk to HAF</div>
         <div class="sc-btns">
           <a href="tel:+447354764642" class="sc-contact-btn">
             <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 5.51 5.51l.98-.88a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
@@ -1775,7 +1802,6 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             WhatsApp HAF
           </a>
         </div>
-        <div style="height:1px;background:var(--ln);margin:.9rem 0"></div>
         <button class="dr-btn" onclick="openDemoReq()">
           <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
           Request a demo
@@ -4439,7 +4465,29 @@ function doTrack(){
 }
 
 /* ── CUSTOMER FLOWS (inline, no modal) ── */
-const FLOW_TITLES={fast:'Fast Quote',repeat:'Repeat an order',pick:'HAF Pick'};
+const FLOW_TITLES={fast:'Your consignment',repeat:'Repeat an order',pick:'HAF Pick'};
+
+/* ── THE ONE DOOR INTO THE CONSIGNMENT ─────────────────────────────────
+   Brent, 14 Aug: the HAF Pick panel is off the page, but nothing it did has
+   been lost. The front form has already asked the two load questions and let
+   the engine choose the van, so this carries all of it into stage one instead
+   of asking the same thing twice. openFlow('pick') is left intact and still
+   works — it simply has no panel of its own any more. */
+function startConsignment(){
+  openFlow('fast');
+  const set=(id,v)=>{const e=document.getElementById(id);if(e&&v)e.value=v;};
+  set('fq-from',(_v('pc-from')||'').toUpperCase());
+  set('fq-to',(_v('pc-to')||'').toUpperCase());
+  /* Carry the bands over by pressing the matching buttons, so the allocation,
+     the van card and the too-small stop all recalculate exactly as they would
+     if the customer had chosen them on this step themselves. */
+  const press=(wrap,k)=>{if(!k)return;const b=document.querySelector('#'+wrap+' .oopt[data-k="'+k+'"]');if(b)b.click();};
+  press('fq-wt',selWtKey);
+  press('fq-sz',selSzKey);
+  /* Both postcodes already in? Then stage one is answered — don't make them
+     read it back. Anything missing and they land on stage one as normal. */
+  if(_v('pc-from')&&_v('pc-to'))fqNext(2);
+}
 function openFlow(type){
   document.body.classList.add('tile-focus');
   const flow=document.getElementById('inline-flow');
@@ -4490,10 +4538,10 @@ function fqBuildLoad(){
   const wp=document.getElementById('fq-wt'), sp=document.getElementById('fq-sz');
   if(!wp||!sp)return;
   wp.innerHTML=WT_BAND.map(b=>
-    '<button class="oopt gauge" type="button" onclick="fqSel(this,\'weight\',\''+b.k+'\');fqLoadChanged()">'
+    '<button class="oopt gauge" type="button" data-k="'+b.k+'" onclick="fqSel(this,\'weight\',\''+b.k+'\');fqLoadChanged()">'
     +wtIcon(b.bars)+'<span>'+b.n+'<span class="oopt-sub">'+b.s+'</span></span></button>').join('');
   sp.innerHTML=SZ_BAND.map((b,i)=>
-    '<button class="oopt gauge" type="button" onclick="fqSel(this,\'size\',\''+b.k+'\');fqLoadChanged()">'
+    '<button class="oopt gauge" type="button" data-k="'+b.k+'" onclick="fqSel(this,\'size\',\''+b.k+'\');fqLoadChanged()">'
     +szIcon(i)+'<span>'+b.n+'<span class="oopt-sub">'+b.s+'</span></span></button>').join('');
   const us=document.getElementById('fq-unit');
   if(us)us.innerHTML='<option value="">Choose&#8230;</option>'+UNIT.map(u=>'<option value="'+u.k+'">'+u.n+'</option>').join('');
