@@ -1596,9 +1596,21 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
               <div style="text-align:center;padding:.6rem 0 .9rem">
                 <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto .6rem"><circle cx="22" cy="22" r="22" fill="var(--gn-d)"/><polyline points="13,23 20,30 31,15" stroke="var(--gn)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <div style="font-family:var(--dp);font-weight:900;font-size:1.55rem;letter-spacing:-.04em;color:var(--or);margin:.4rem 0 .35rem" id="fq-ref">HAF-XXXX</div>
-                <p style="font-size:.79rem;color:var(--mu);line-height:1.65">Your delivery is booked. HAF will assign a driver and confirm by text within 15 minutes. Save your reference above.</p>
+                <p style="font-size:.79rem;color:var(--mu);line-height:1.65" id="fq-done-msg">Your order is placed. Save your reference above.</p>
               </div>
-              <button class="btn btn-or btn-wide" onclick="closeInlineFlow()">Done</button>
+              <!-- The holding deposit. It is what sends the job to the network, so it
+                   is the only button on this panel until it has been paid. -->
+              <div id="fq-dep" style="display:none;background:var(--p2);border:1px solid var(--ln);border-radius:12px;padding:.9rem 1rem;margin-bottom:.9rem">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;margin-bottom:.45rem">
+                  <span style="font-size:.7rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mu)">Holding deposit</span>
+                  <span style="font-family:var(--dp);font-weight:900;font-size:1.2rem;color:var(--tx)" id="fq-dep-amt">£0.00</span>
+                </div>
+                <p style="font-size:.73rem;color:var(--mu);line-height:1.6;margin:0" id="fq-dep-note"></p>
+              </div>
+              <a class="btn btn-or btn-wide" id="fq-pay" style="display:none;margin-bottom:.5rem" target="_blank" rel="noopener">Pay the holding deposit &#8594;</a>
+              <a class="btn btn-gh btn-wide" id="fq-track" style="display:none;margin-bottom:.5rem" target="_blank" rel="noopener">Track this delivery</a>
+              <div class="fstep-err" id="fq-err-done"></div>
+              <button class="btn btn-gh btn-wide" onclick="closeInlineFlow()">Done</button>
             </div>
           </div>
 
@@ -4740,7 +4752,7 @@ function ddSetDirect(){
   inp.value=u;
   fqData.direct=u;
   ok.innerHTML='This job will be offered to <strong>'+u+'</strong> first. '
-    +'If they have not accepted within 20 minutes it goes to the wider HAF network automatically, '
+    +'If they have not accepted within 10 minutes it goes to the wider HAF network automatically, '
     +'so your delivery is never left waiting on one driver.';
   ok.style.display='';
 }
@@ -4859,7 +4871,79 @@ async function fqShowPrice(){
   if(card)card.innerHTML=jobCardHTML(fqData.consignment);
   fqStep(6);
 }
-function fqBook(){openDemoGate();}
+/* ══ PLACE THE ORDER ══════════════════════════════════════════════════════
+   Brent's 11 Aug flow, from this button onwards: complete details -> processed
+   order -> HOLDING DEPOSIT -> out to the network.
+
+   The browser sends what the customer typed and nothing else. It does NOT send
+   a price: the server works the price out again from the postcodes, using the
+   same rate card this page quotes from, so a page that has been edited cannot
+   name its own price. What comes back is the reference, the deposit and the two
+   links — pay, and track.
+
+   The job does not reach a driver here. It reaches a driver when the deposit is
+   held, which is why this panel offers the deposit and nothing else.
+   ══════════════════════════════════════════════════════════════════════════ */
+const HAF_FIRST_REFUSAL_MINS=10;
+function fqOrderPayload(){
+  const cons=fqData.consignment||null;
+  return{
+    customer_name:_v('fq-name'), customer_email:_v('fq-email'), customer_phone:_v('fq-mobile'),
+    collect_postcode:_v('fq-from'), deliver_postcode:_v('fq-to'),
+    collect_address:_v('fq-caddr'), deliver_address:_v('fq-daddr'),
+    collect_on:_v('fq-cdate')||null, collect_window:[_v('fq-ctime'),_v('fq-dreq')].filter(Boolean).join(' · '),
+    goods:_v('fq-goods'), notes:_v('fq-notes'),
+    vehicle_code:fqData.van, job_type_code:fqData.urg,
+    direct_username:fqData.direct||null,
+    consignment:cons,
+    whatsapp_updates:!!(document.getElementById('fq-wa')||{}).checked
+  };
+}
+async function fqBook(){
+  /* The public demo carries its own door (#pd-gate) and must never place a real
+     order or take a real payment. Asking the page what it IS beats a build flag
+     that can be forgotten. */
+  if(document.getElementById('pd-gate'))return openDemoGate();
+  const btns=document.querySelectorAll('#fq-7 .fnav .btn-or');
+  btns.forEach(b=>{b.disabled=true;b.textContent='Placing your order…';});
+  fErr('fq-err-7','');
+  let d=null;
+  try{
+    const r=await fetch('/api/order/place',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(fqOrderPayload())});
+    d=await r.json();
+    if(!r.ok||!d||!d.ok)throw new Error((d&&d.error)||'We could not place that order just now.');
+  }catch(e){
+    btns.forEach(b=>{b.disabled=false;b.textContent='Confirm and book →';});
+    fErr('fq-err-7',(e&&e.message)||'We could not place that order just now. Please try again, or call us.');
+    return;
+  }
+  fqPaintBooked(d);
+  fqStep('done');
+}
+function fqPaintBooked(d){
+  const gbp=p=>'£'+(p/100).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('fq-ref').textContent=d.job_ref;
+  const dep=document.getElementById('fq-dep');
+  if(dep){
+    dep.style.display='';
+    document.getElementById('fq-dep-amt').textContent=gbp(d.deposit_pence);
+    document.getElementById('fq-dep-note').textContent=
+      'This holds the job while the network is asked. The balance of '+gbp(d.balance_pence)
+      +' is due once a driver has accepted, and the deposit comes back in full if nobody takes it.';
+  }
+  const pay=document.getElementById('fq-pay');
+  if(pay&&d.pay_url){pay.href=d.pay_url;pay.style.display='';}
+  const trk=document.getElementById('fq-track');
+  if(trk&&d.track_url){trk.href=d.track_url;trk.style.display='';}
+  const mins=d.first_refusal_minutes||HAF_FIRST_REFUSAL_MINS;
+  document.getElementById('fq-done-msg').textContent=
+    'Your order is placed and we have emailed you a copy. Pay the holding deposit and your job goes '
+    +(d.direct_username
+        ? 'to '+d.direct_username+' first — they have '+mins+' minutes, then it opens to the whole HAF network.'
+        : 'out to the HAF network.')
+    +' Save your reference above.';
+}
 
 /* REPEAT ORDER */
 const RO_DB={'HAF-2847':{route:'Manchester M1 → Leeds LS1',van:'Long wheelbase',date:'5 Jul 2026',amount:'£94'},'KN-471293':{route:'Sheffield S9 → Nottingham NG1',van:'Short wheelbase',date:'2 Jul 2026',amount:'£67'}};
