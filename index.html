@@ -1532,22 +1532,49 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
       </div>
     </div>
 
-    <!-- ══ DOOR THREE — DEMO CENTRE ══════════════════════════════════════
-         This replaces the old "view as FF Free / FF Plus / FF Pro / Business"
-         cards. Those cards sold a ROLE as if it were a product and each one
-         carried a fee percentage typed into the page by hand. There is one
-         membership ladder now — Free, Plus, Pro — and the role is chosen
-         inside the demo, so a card can no longer disagree with the matrix. -->
-    <div class="card sm-card" onclick="enterMode('demo')" style="cursor:pointer;border:1px dashed var(--lns)">
-      <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.5rem">
-        <div style="background:var(--lns);border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--tx)" stroke-width="2.2"><path d="M2 3h20v14H2z"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+    <!-- ══ DOORS THREE AND FOUR ══════════════════════════════════════════
+         Brent, 14 Aug: "the master log in --> is my own HAF PLNA panel for me
+         to click --> the demo centre should take me directly to
+         demo.usehaf.co.uk".
+
+         So the master screen is now four doors, and two of them leave this app
+         on purpose. His PLNA panel is a different site with his own driver
+         account behind it; the demo is a different site with an email door in
+         front of it. Rebuilding either one inside here would be a second copy
+         that drifts away from the first — the same mistake the old demo made.
+         Both open in a new tab so the master screen is still behind them.
+
+         DOOR THREE — MY PLNA PANEL. Same master login as here. -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+      <div class="card sm-card" onclick="openPlnaPanel()" style="cursor:pointer">
+        <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.5rem">
+          <div style="background:var(--gr,#3f9d6d);border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </div>
+          <div style="font-weight:800;font-size:.9rem">My PLNA panel</div>
+          <span class="chip" style="background:var(--lns);color:var(--mu);font-size:.6rem">Opens PLNA</span>
         </div>
-        <div style="font-weight:800;font-size:.9rem">Demo Centre</div>
-        <span class="chip" style="background:var(--lns);color:var(--mu);font-size:.6rem">Sandbox · no live data</span>
+        <div style="font-size:.74rem;color:var(--mu);line-height:1.55">Your own driver panel on the PLNA network — your jobs, your day, your referral code and your JAKO record. Signs in with this same login.</div>
+        <div style="margin-top:.6rem;font-size:.7rem;font-weight:700;color:var(--gr,#3f9d6d)">plna.usehaf.co.uk · your account</div>
       </div>
-      <div style="font-size:.74rem;color:var(--mu);line-height:1.55">See exactly what Free, Plus and Pro receive, compare the same job across account combinations, and work out any job on the mileage &amp; margin simulator. Every figure comes from the live pricing matrix.</div>
-      <div style="margin-top:.6rem;font-size:.7rem;font-weight:700;color:var(--mu)">Nothing here touches real jobs, money or accounts</div>
+
+      <!-- DOOR FOUR — DEMO CENTRE, which is now demo.usehaf.co.uk.
+           This replaces the old "view as FF Free / FF Plus / FF Pro / Business"
+           cards. Those cards sold a ROLE as if it were a product and each one
+           carried a fee percentage typed into the page by hand. There is one
+           membership ladder now — Free, Plus, Pro — and the role is chosen
+           inside the demo, so a card can no longer disagree with the matrix. -->
+      <div class="card sm-card" onclick="openDemoCentre()" style="cursor:pointer;border:1px dashed var(--lns)">
+        <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.5rem">
+          <div style="background:var(--lns);border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--tx)" stroke-width="2.2"><path d="M2 3h20v14H2z"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+          </div>
+          <div style="font-weight:800;font-size:.9rem">Demo Centre</div>
+          <span class="chip" style="background:var(--lns);color:var(--mu);font-size:.6rem">Sandbox · no live data</span>
+        </div>
+        <div style="font-size:.74rem;color:var(--mu);line-height:1.55">The demo you show people — Free, Plus and Pro side by side, the screen each one gets, and the same job compared across account combinations. Every figure comes from the live pricing matrix.</div>
+        <div style="margin-top:.6rem;font-size:.7rem;font-weight:700;color:var(--mu)">demo.usehaf.co.uk · your code is HAFDEMO</div>
+      </div>
     </div>
 
     <div style="margin-top:1rem;text-align:center">
@@ -4246,6 +4273,24 @@ function showModeSelector(){
   const ov=document.getElementById('super-mode');
   if(ov)ov.style.display='flex';
   document.getElementById('app').classList.remove('open');
+}
+
+/* ── the two doors that leave this app ────────────────────────────────────
+   Brent, 14 Aug. His PLNA panel and the demo are separate sites, so these
+   open there rather than pretending to be them in here. New tab on purpose:
+   the master screen is still sitting behind, so one click comes back.
+
+   The demo lives behind an email door. HAFDEMO is Brent's own code — a row in
+   the lead table marked as his, never mailed and never counted as a lead — so
+   carrying it in the link means his own door opens on the first click instead
+   of asking the owner of the network for an email address. */
+const PLNA_PANEL_URL = 'https://plna.usehaf.co.uk';
+const DEMO_CENTRE_URL = 'https://demo.usehaf.co.uk';
+const DEMO_MASTER_CODE = 'HAFDEMO';
+
+function openPlnaPanel(){ window.open(PLNA_PANEL_URL, '_blank', 'noopener'); }
+function openDemoCentre(){
+  window.open(DEMO_CENTRE_URL + '/?code=' + DEMO_MASTER_CODE, '_blank', 'noopener');
 }
 
 function enterMode(mode){

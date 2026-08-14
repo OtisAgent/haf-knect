@@ -224,7 +224,24 @@ GATE = r"""
     ['landing','login-ov','pin-ov','super-mode'].forEach(function(id){
       var e=document.getElementById(id); if(e)e.style.display='none';
     });
-    var saved=null; try{saved=localStorage.getItem(KEY)}catch(e){}
+
+    /* A code can arrive in the address itself — that is how the Demo Centre
+       tile on Brent's master screen opens his own demo in one click instead of
+       asking the owner of the network for an email address.
+
+       Two things matter here. The code is still checked by the database, so a
+       link is not a way past the door; and it is wiped out of the address bar
+       the moment it is used, because he opens this in front of an audience and
+       his master code should not be sitting on the screen behind him. */
+    var fromLink=null;
+    try{
+      var m=(window.location.search||'').match(/[?&]code=([A-Za-z0-9]{4,12})\b/);
+      if(m)fromLink=m[1].toUpperCase();
+      if(fromLink&&window.history&&history.replaceState)
+        history.replaceState(null,'',window.location.pathname);
+    }catch(e){}
+
+    var saved=fromLink; if(!saved){try{saved=localStorage.getItem(KEY)}catch(e){}}
     if(saved){
       /* a code that was revoked should not keep working, so it is re-checked
          against the database rather than trusted from the browser */
