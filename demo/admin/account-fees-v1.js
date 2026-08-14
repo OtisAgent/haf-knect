@@ -350,6 +350,25 @@
       //         2026-07-29 "separate Website Builder" ruling — flagged to Brent).
       DRIVER: [
         // ---- §4 Driver / PLNA -------------------------------------------
+        // Brent 2026-08-14: "drivers PLNA is an add on to the account type",
+        // and (same day) "the driver PLNA is an add on that opens up once
+        // approved by clever checked."
+        //
+        // So PLNA is NOT a plan of its own and NOT a rung you buy — it is
+        // switched on alongside whatever account someone holds, on every
+        // level. What the plan changes is the tools inside it, which is why
+        // every row below still carries its own unlocksAt. The add-on line
+        // itself unlocks at LITE so no page can imply you must PAY to have a
+        // PLNA.
+        //
+        // The gate is COMPLIANCE, not price, and that distinction is the whole
+        // point: money never opens the PLNA and being approved is never for
+        // sale. It is the same door the network already runs on — no account
+        // reaches a job without a named CleverPay release — so the page says
+        // the true reason a PLNA is closed rather than leaving a reader to
+        // assume they need a bigger plan.
+        { unlocksAt: "LITE", group: "PLNA", text: "Your driver PLNA is an add-on to your HAF account — add it to any account type" },
+        { unlocksAt: "LITE", group: "PLNA", text: "Opens once you are approved by Clever Checked — compliance, never the plan you pay for" },
         { unlocksAt: "LITE", group: "PLNA", text: "Create your HAF and PLNA driver profile" },
         { unlocksAt: "LITE", group: "PLNA", text: "Clever Checked compliance" },
         { unlocksAt: "LITE", group: "PLNA", text: "Add your vehicle details" },
@@ -367,6 +386,13 @@
 
         // ---- §3 Posting work onto the network ---------------------------
         { unlocksAt: "LITE", group: "POSTING", text: "Post your own work onto HAF KNECT — up to {PERM_LITE.posting_daily_limit} jobs a day" , slot: "posting" },
+        // Brent 2026-08-14: "all accounts allow freight to be posted." Freight
+        // is a KIND OF WORK anyone may post, not a walled account type — the
+        // Freight Forward ladder is for businesses whose whole trade is
+        // forwarding, and it buys volume and client tools, never the right to
+        // post a load. tierPermissions.freight_forwarding is already true on
+        // every level; this is the customer-facing half of the same fact.
+        { unlocksAt: "LITE", group: "POSTING", text: "Move freight — freight posting is on every account type, within your plan's allowance and the network rules" },
         { unlocksAt: "LITE", group: "POSTING", text: "Standard full-order posting" },
         { unlocksAt: "LITE", group: "POSTING", text: "Guide price before you post" },
         { unlocksAt: "LITE", group: "POSTING", text: "Edit the draft before you submit it" },
@@ -456,6 +482,9 @@
 
         // ---- §3 Posting work onto the network ---------------------------
         { unlocksAt: "LITE", group: "POSTING", text: "Post jobs to HAF KNECT — up to {PERM_LITE.posting_daily_limit} a day" , slot: "posting" },
+        // Same ruling as the driver side (Brent 2026-08-14) — a courier company
+        // may post freight without a Freight Forward account.
+        { unlocksAt: "LITE", group: "POSTING", text: "Move freight — freight posting is on every account type, within your plan's allowance and the network rules" },
         { unlocksAt: "LITE", group: "POSTING", text: "Guide price, full-order posting and repeat by reference" },
         { unlocksAt: "LITE", group: "POSTING", text: "See active postings and job status" },
         { unlocksAt: "LITE", group: "POSTING", text: "Cancel a posting, with full audit history" },
@@ -528,6 +557,10 @@
       // never by the forwarder's subscription tier.
       FREIGHT: [
         // ---- Your account ------------------------------------------------
+        // Brent 2026-08-14: freight posting is open to everyone, so this ladder
+        // has to say what it is actually FOR, or a reader assumes they need it
+        // before they can post a load.
+        { unlocksAt: "LITE", group: "ACCOUNT", text: "For businesses whose trade is forwarding — any HAF account can post freight without one, to its own plan's allowance and rules" },
         { unlocksAt: "LITE", group: "ACCOUNT", text: "Create your freight-forwarding profile" },
         { unlocksAt: "LITE", group: "ACCOUNT", text: "One primary user" },
         { unlocksAt: "LITE", group: "ACCOUNT", text: "Client and load references" },
@@ -1079,7 +1112,7 @@
     DASHBOARD: "Your account",
     PLATFORM: "Your account",
     POSTING: "Posting work onto the network",
-    PLNA: "Driver and PLNA",
+    PLNA: "Driver PLNA — an add-on to your account",
     ROUTES: "Return and filler route planning",
     CALENDAR: "Calendar and driver diary",
     FLEET: "Fleet and driver management",
@@ -1087,6 +1120,38 @@
     PRICING: "Pricing and utilisation",
     BRANDING: "Branding and business tools",
     AI: "JAKO AI"
+  };
+
+  // A sentence a SECTION carries wherever it is rendered, so the one thing a
+  // customer must understand about that section cannot be left off a page by
+  // whoever builds the next surface. Only sections that genuinely need one
+  // appear here — a note on every heading is noise, and noise gets skipped.
+  var GROUP_NOTES = {
+    PLNA: "The driver PLNA is an add-on to your HAF account, not a plan of " +
+          "its own — add it to any account type. It opens once you are " +
+          "approved by Clever Checked, and what your plan changes is the " +
+          "tools inside it.",
+    // The second sentence exists to stop this section contradicting the plan
+    // card beside it: a business account is sold as "send your own goods", so
+    // an unqualified "every account can post freight" would read as two
+    // opposite promises on one page.
+    //
+    // The boundary is the ACCOUNT TYPE, not the plan — and the first draft of
+    // this note got that wrong, saying third-party client posting "starts on
+    // Plus". Nothing supports that: there is no business Plus at all (the
+    // brief defines exactly one business tier), and no feature row on any
+    // ladder gates whose goods you may move. What Plus actually adds around
+    // clients is TOOLING — saved clients, addresses and load templates. So
+    // the note names the real line: a business account moves its own goods, a
+    // freight-forwarding account moves its clients'; the plan only ever moves
+    // the allowance and the tools.
+    POSTING: "Posting is on every account type, freight included. What a plan " +
+             "buys is your daily allowance and the tools around posting — " +
+             "never permission to post. Whose goods you may move is set by " +
+             "your account type, not your plan: a business account sends its " +
+             "own goods, a freight-forwarding account moves its clients’. " +
+             "Every load follows the network rules on vehicle, compliance and " +
+             "payment."
   };
 
   // Features for a side and level, already split into the labelled sections a
@@ -1177,6 +1242,7 @@
     featuresForSideLevel: featuresForSideLevel,
     featureSections: featureSections,
     groupLabels: GROUP_LABELS,
+    groupNotes: GROUP_NOTES,
     groupOrder: GROUP_ORDER,
     missingSummary: missingSummary,
     ladderCheck: ladderCheck,
