@@ -7820,7 +7820,7 @@ window.pxSave=async function(){
     <div id="pd-step-email">
       <h1>See exactly what you get<br>before you join.</h1>
       <p class="pd-sub">A working sandbox of the network — Free, Plus and Pro side by side, the
-        real pricing matrix behind every figure, and a simulator you can put your own job through.
+        screen you get on each one, and the real pricing matrix behind every figure.
         Nothing here creates a job, notifies a driver or takes a payment.</p>
       <div class="pd-card">
         <label for="pd-email">Your email address</label>
@@ -7837,7 +7837,7 @@ window.pxSave=async function(){
       <p class="pd-sub">The code you were given when you first asked for the demo.</p>
       <div class="pd-card">
         <label for="pd-codein">Access code</label>
-        <input id="pd-codein" maxlength="6" autocapitalize="characters" placeholder="ABC123"
+        <input id="pd-codein" maxlength="8" autocapitalize="characters" placeholder="ABC123"
           style="letter-spacing:.22em;text-transform:uppercase"
           oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')pdCheck()">
         <div class="pd-err" id="pd-code-err"></div>
@@ -7848,7 +7848,8 @@ window.pxSave=async function(){
 
     <div id="pd-step-issued" style="display:none">
       <h1 id="pd-issued-h">Here is your access code.</h1>
-      <p class="pd-sub" id="pd-issued-sub">Write it down — it lets you back in any time, on any device.</p>
+      <p class="pd-sub" id="pd-issued-sub">Write it down — it lets you back in any time, on any device.
+        We have emailed you a copy as well; if it is not in your inbox, please check your junk mail.</p>
       <div class="pd-card">
         <div id="pd-code">------</div>
         <button class="btn btn-or btn-wide" style="margin-top:.9rem" onclick="pdEnter()">Open the demo →</button>
@@ -7866,6 +7867,10 @@ window.pxSave=async function(){
    the key this page holds — that was proved before this file shipped. */
 (function(){
   var URL_=PLNA_URL+'/rest/v1/rpc/', K=PLNA_KEY, KEY='haf_demo_code';
+
+  /* The four sections the public demo keeps, captured ONCE before anything is
+     trimmed, so opening the door twice cannot shrink the menu twice. */
+  var PD_NAV=(typeof DEMO_NAV!=='undefined')?DEMO_NAV.slice(0,4):[];
 
   function rpc(fn,body){
     return fetch(URL_+fn,{method:'POST',headers:{'apikey':K,'Authorization':'Bearer '+K,
@@ -7893,7 +7898,8 @@ window.pxSave=async function(){
       document.getElementById('pd-code').textContent=d.code;
       if(d.returning_visitor){
         document.getElementById('pd-issued-h').textContent='Welcome back.';
-        document.getElementById('pd-issued-sub').textContent='Same code as last time — it does not expire.';
+        document.getElementById('pd-issued-sub').textContent='Same code as last time — it does not expire. '
+          +'We have emailed you a copy as well; if it is not in your inbox, please check your junk mail.';
       }
       try{localStorage.setItem(KEY,d.code)}catch(e){}
       pdShow('issued');
@@ -7927,6 +7933,17 @@ window.pxSave=async function(){
     var u=document.getElementById('tb-user'), v=document.getElementById('tb-av');
     if(u)u.textContent='Guest'; if(v)v.textContent='HK';
     var f=document.getElementById('tb-founder'); if(f)f.style.display='none';
+    /* Brent, 14 Aug, in two goes. First: "i dont need the guide price showing
+       on there just the dashboards on the demo centre" — so the app's own
+       customer quote flow stays unreachable behind this door. Then: "keep the
+       network pricing account to account pricing examples thats good" — so
+       Account Comparison stays. What goes is the Mileage & Margin Simulator:
+       it is the one screen left that quotes a job, and quoting a job is the
+       thing he asked not to show here.
+
+       Trimming the nav rather than editing the app file means the app itself
+       is untouched and the demo cannot drift away from it. */
+    try{ DEMO_NAV.length=0; DEMO_NAV.push.apply(DEMO_NAV,PD_NAV); }catch(e){}
     try{ enterMode('demo'); }catch(e){}
     /* the mode pill is a switcher in the app; here it is only a label */
     var p=document.getElementById('mode-pill');
@@ -7963,6 +7980,103 @@ window.pxSave=async function(){
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);
   else start();
+})();
+</script>
+
+<!-- ══ WHAT YOU SEE WHEN YOU SIGN IN ═══════════════════════════════════════
+     Brent, 14 Aug: "i should be able to see an account HAF KNECT - Free
+     version, Plus version & Pro version when i load up the demo.usehaf.co.uk
+     --> dashboard viewing to show what users would see if they signed up ...
+     so people can use it".
+
+     A visitor picking between Free, Plus and Pro is really asking one question:
+     what will actually be on my screen. The entitlement cards answered it in
+     prose. This answers it by showing the menu itself — the SAME arrays the
+     app builds a real member's sidebar from, not a picture of one and not a
+     list retyped here. If a tab is added to the driver app tomorrow, it
+     appears on this demo tomorrow, because there is only one copy of it. -->
+<style>
+.pd-menu{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.45rem;margin-top:.55rem}
+.pd-mi{display:flex;align-items:center;gap:.5rem;background:var(--bg);border:1px solid var(--ln);
+  border-radius:9px;padding:.5rem .6rem;font-size:.79rem;font-weight:600}
+.pd-mi svg{flex:0 0 auto;opacity:.75}
+.pd-grp{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--mu);margin:.85rem 0 .1rem}
+
+/* The sidebar's live-job tracker is sample data. Inside the app that is
+   obvious, because you signed in and it is your job. On a public demo it reads
+   as a real delivery happening on the network right now — which is exactly the
+   kind of thing the old demo got wrong with its 340 drivers. It stays hidden
+   here until there is a real one to show. */
+#sb-livejob{display:none !important}
+</style>
+<script>
+(function(){
+  /* The app has no separate fleet menu yet — a fleet account is driven from the
+     driver app with the fleet tools switched on. Saying so is better than
+     inventing a menu that does not exist anywhere in the product. */
+  function navFor(role){
+    try{
+      if(role==='driver')  return {nav:DRIVER_NAV , note:null};
+      if(role==='business')return {nav:BUSINESS_NAV, note:null};
+      if(role==='freight') return {nav:FREIGHT_NAV , note:null};
+      if(role==='fleet')   return {nav:DRIVER_NAV , note:'A fleet account signs in to the driver app with the fleet tools switched on; it does not have a menu of its own yet.'};
+    }catch(e){}
+    return {nav:[],note:null};
+  }
+
+  function block(tier){
+    var view; try{view=DC_VIEW[tier]}catch(e){} if(!view)return '';
+    var roleDef; try{roleDef=DC_ROLES.filter(function(r){return r.k===view.role})[0]}catch(e){}
+    if(!roleDef)return '';
+    var got=navFor(view.role), nav=got.nav||[];
+    if(!nav.length)return '';
+
+    var T; try{T=DC_TIERS[tier]}catch(e){} T=T||{label:tier};
+    var h='<div class="card"><div class="ct">What you see when you sign in &mdash; '
+        + roleDef.l + ' on ' + T.label + '</div>';
+    h+='<div class="dc-note" style="margin-top:.2rem">This is the real menu the app builds for a '
+      + roleDef.l.toLowerCase() + ' account, read straight from the live app. Membership decides '
+      + 'the features listed further down this page, not which menu you get.</div>';
+
+    var seen={}, order=[];
+    nav.forEach(function(t){ if(!seen[t.s]){seen[t.s]=[];order.push(t.s)} seen[t.s].push(t); });
+    order.forEach(function(group){
+      h+='<div class="pd-grp">'+group+'</div><div class="pd-menu">';
+      seen[group].forEach(function(t){
+        h+='<div class="pd-mi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" '
+         + 'stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+         + t.ico + '</svg><span>' + t.l + '</span></div>';
+      });
+      h+='</div>';
+    });
+    if(got.note)h+='<div class="dc-note" style="margin-top:.7rem">'+got.note+'</div>';
+    return h+'</div>';
+  }
+
+  /* dcOpen redraws the whole screen from scratch every time the role or the
+     founder switch changes, so this has to run after it rather than once. */
+  function hook(){
+    if(typeof window.dcOpen!=='function'){setTimeout(hook,120);return}
+    var inner=window.dcOpen;
+    window.dcOpen=function(tier){
+      var out=inner.apply(this,arguments);
+      try{
+        if(tier==='free'||tier==='plus'||tier==='pro'){
+          var host=document.getElementById('dc-host-'+tier);
+          var band=host&&host.querySelector('.dc-band');
+          var html=block(tier);
+          if(band&&html){
+            var wrap=document.createElement('div');
+            wrap.innerHTML=html;
+            band.parentNode.insertBefore(wrap.firstChild,band.nextSibling);
+          }
+        }
+      }catch(e){}
+      return out;
+    };
+  }
+  hook();
 })();
 </script>
 
