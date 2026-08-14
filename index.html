@@ -5691,11 +5691,47 @@ function hafLockOpen(id){
   switchTab('pane-membership');
 }
 
+/* ── THE MENU THIS ACCOUNT GETS, AS DATA ──────────────────────────────────
+   One question — "what does this account actually see?" — with one answer,
+   held in one place.
+
+   It used to be answered twice. The sidebar worked it out here, and the Demo
+   Centre worked it out again from three hand-written lists of its own. Two
+   answers to one question is one answer waiting to go stale, and it did: the
+   Demo Centre was still telling people a fleet account "does not have a menu
+   of its own yet" weeks after it got one, and it knew nothing about Clever —
+   so it showed a driver every driving screen before anybody had checked them.
+
+   So the deciding lives here and returns plain data. The sidebar draws it.
+   The Demo Centre draws it. Neither can drift from the other, because neither
+   is deciding anything any more — and a demo that disagrees with the product
+   is worse than no demo, because people believe it. */
+function hafNavModel(acc){
+  if(!acc)return [];
+  const P=hafPerms(acc),aud=hafAud(),out=[];
+  HAF_NAV_V1.forEach(sec=>{
+    const locked=!!(sec.need&&!P[sec.need]);
+    let why=null;
+    /* A locked section with no honest reason to give is left out entirely —
+       the third state: not open, not padlocked, simply not this account's. */
+    if(locked){ why=hafLockWhy(sec.id,acc); if(!why)return; }
+    const kids=(sec.tabs||[]).filter(t=>{
+      if(t.need&&!P[t.need])return false;
+      if(!aud.network&&AUD_NETWORK_TABS.indexOf(t.id)>=0)return false;
+      return true;
+    });
+    if(!locked&&!kids.length)return;
+    out.push({id:sec.id,l:sec.l,ico:sec.ico,g:sec.g,flat:!!sec.flat,
+              locked:locked,why:why,tabs:kids});
+  });
+  return out;
+}
+window.hafNavModel=hafNavModel;
+
 function buildNavV1(acc,keepOpen){
   if(!acc)return;
   window._hafAccView=acc;
   window.HAF_ROLE=acc.type==='fleet'?'fleet':acc.released?'driver':acc.type==='freight_forwarder'?'freight':'business';
-  const P=hafPerms(acc),aud=hafAud();
   /* the section holding the pane you are looking at opens itself, so the
      sidebar never disagrees with the screen */
   if(!keepOpen){
@@ -5704,17 +5740,8 @@ function buildNavV1(acc,keepOpen){
     _navOpen=owner?owner.id:'home';
   }
   let h='',cg='';
-  HAF_NAV_V1.forEach(sec=>{
-    const open=(sec.need&&!P[sec.need]);
-    let why=null;
-    if(open){ why=hafLockWhy(sec.id,acc); if(!why)return; }   // NOT RELEVANT
-    /* the screens this account can actually reach inside the section */
-    const kids=(sec.tabs||[]).filter(t=>{
-      if(t.need&&!P[t.need])return false;
-      if(!aud.network&&AUD_NETWORK_TABS.indexOf(t.id)>=0)return false;
-      return true;
-    });
-    if(!open&&!kids.length)return;
+  hafNavModel(acc).forEach(sec=>{
+    const open=sec.locked,why=sec.why,kids=sec.tabs;
     if(sec.g!==cg){ if(cg)h+='<hr class="sdiv">'; h+='<div class="nav-sec">'+sec.g+'</div>'; cg=sec.g; }
     if(open){
       h+='<div class="ni ni-lock" id="ni-sec-'+sec.id+'" onclick="hafLockOpen(\''+sec.id+'\')">'+

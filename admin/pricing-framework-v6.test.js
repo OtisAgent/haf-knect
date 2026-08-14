@@ -572,12 +572,38 @@ ok("the network pool is still funded", dp.pools.active.totalGbp > 0);
  * ======================================================================== */
 section("8e. Wiring");
 
-var callers = html.match(/v3Price\([^)]*\)/g) || [];
-/* drop the declaration itself — it is the only one naming the parameters */
-var invocations = callers.filter(function (c) { return c.indexOf("vanKey") < 0; });
+/* Read every REAL call site. The old one-line regex stopped at the first ")",
+   so a call whose own arguments contained brackets — dcQuote's
+   v3Price(Number(j.miles)||1, ...) — was cut in half and looked like it had
+   dropped the account, and a mention of "v3Price()" in a comment counted as a
+   call with no arguments at all. Both were false alarms about live pricing,
+   which is the last thing a pricing test should cry wolf about. So: match the
+   brackets properly, and ignore anything that is not an actual call. */
+function v3PriceCallSites(src) {
+  var sites = [], i = 0;
+  while ((i = src.indexOf("v3Price(", i)) !== -1) {
+    var open = i + "v3Price(".length, depth = 1, j = open;
+    while (j < src.length && depth > 0) {
+      if (src[j] === "(") depth++;
+      else if (src[j] === ")") depth--;
+      j++;
+    }
+    sites.push(src.slice(i, j));
+    i = j;
+  }
+  return sites;
+}
+var invocations = v3PriceCallSites(html).filter(function (c) {
+  if (c.indexOf("vanKey") !== -1) return false;             // the declaration
+  return /^v3Price\(\s*[^)\s]/.test(c);                     // not prose: has arguments
+});
+/* The account level may arrive built by quoteOpts() or handed over as a plain
+   options object — what matters is that it arrives, never how it was packed. */
 ok("every quote in the app passes the account level through",
    invocations.length >= 3 &&
-   invocations.every(function (c) { return /quoteOpts\(/.test(c); }),
+   invocations.every(function (c) {
+     return /quoteOpts\(/.test(c) || /\baccount\s*:/.test(c);
+   }),
    invocations.join(" | "));
 ok("a quote with nobody signed in defaults to the free rung",
    /HAF_ACCOUNT_LEVEL\s*=\s*'lite'/.test(html));

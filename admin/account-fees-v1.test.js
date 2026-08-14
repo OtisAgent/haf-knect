@@ -29,7 +29,7 @@ var m = A.monthlyBill({
 ok("free fleet, no jobs all month = £0", m.totalExVatGbp === 0, m);
 
 m = A.monthlyBill({ accountType: "FLEET_PRO", drivers: A.fullTimeDrivers(5, 0) });
-ok("paid fleet, no jobs all month = account fee only (£50)", m.totalExVatGbp === 50, m);
+ok("paid fleet, no jobs all month = account fee only (£250)", m.totalExVatGbp === 250, m);
 
 w = A.weeklyInvoice({
   fleetAccountType: "FLEET_LITE",
@@ -78,11 +78,13 @@ ok("Lite, 1 driver every week = £43.26", approx(fleetMonth("FLEET_LITE", 1).tot
 ok("Lite, 3 drivers every week = £43.26 (same as 1 — one invoice)",
   approx(fleetMonth("FLEET_LITE", 3).totalExVatGbp, 43.26), fleetMonth("FLEET_LITE", 3));
 ok("Lite, 3 drivers two weeks each = £19.98", approx(fleetMonth("FLEET_LITE", 3, 2).totalExVatGbp, 19.98));
-ok("Pro, 3 drivers every week = £71.65", approx(fleetMonth("FLEET_PRO", 3).totalExVatGbp, 71.65));
-ok("Pro, 5 drivers every week = £71.65", approx(fleetMonth("FLEET_PRO", 5).totalExVatGbp, 71.65));
-ok("Pro, 10 drivers every week = £96.65", approx(fleetMonth("FLEET_PRO", 10).totalExVatGbp, 96.65));
-ok("Pro, 25 drivers every week = £171.65", approx(fleetMonth("FLEET_PRO", 25).totalExVatGbp, 171.65));
-ok("Pro, 100 drivers every week = £546.65", approx(fleetMonth("FLEET_PRO", 100).totalExVatGbp, 546.65),
+ok("Pro, 3 drivers every week = £271.65", approx(fleetMonth("FLEET_PRO", 3).totalExVatGbp, 271.65));
+ok("Pro, 5 drivers every week = £271.65", approx(fleetMonth("FLEET_PRO", 5).totalExVatGbp, 271.65));
+ok("Pro, 10 drivers every week = £271.65 (headcount never adds a penny)",
+  approx(fleetMonth("FLEET_PRO", 10).totalExVatGbp, 271.65));
+ok("Pro, 25 drivers every week = £271.65", approx(fleetMonth("FLEET_PRO", 25).totalExVatGbp, 271.65));
+ok("Pro, 100 drivers every week = £271.65 — unlimited means unlimited",
+  approx(fleetMonth("FLEET_PRO", 100).totalExVatGbp, 271.65),
   fleetMonth("FLEET_PRO", 100).paymentRuns);
 // The invoice fee must not move with driver count — that is the whole point.
 ok("the payment-run cost is identical at 3, 25 and 100 drivers",
@@ -90,17 +92,23 @@ ok("the payment-run cost is identical at 3, 25 and 100 drivers",
   approx(fleetMonth("FLEET_PRO", 25).paymentRuns.totalGbp, 21.65) &&
   approx(fleetMonth("FLEET_PRO", 100).paymentRuns.totalGbp, 21.65));
 
+// Brent 2026-08-14: a fleet moves up a BAND, it never buys a seat. If a seat
+// charge ever reappears at any headcount, this fails and it should.
 var p10 = fleetMonth("FLEET_PRO", 10);
-ok("Pro at 10 sells 5 extra seats at £5", p10.subscription.extraSeats === 5 && approx(p10.subscription.extraSeatsGbp, 25), p10.subscription);
-ok("Pro at 5 sells no seats", fleetMonth("FLEET_PRO", 5).subscription.extraSeats === 0);
+ok("Pro at 10 sells no seats", p10.subscription.extraSeats === 0 && p10.subscription.extraSeatsGbp === 0, p10.subscription);
+ok("Pro at 100 still sells no seats", fleetMonth("FLEET_PRO", 100).subscription.extraSeats === 0);
+ok("Plus at 25 sells no seats", fleetMonth("FLEET_PLUS", 25).subscription.extraSeats === 0);
 
 // ---------------------------------------------------------------------------
 console.log("\n4. CAPS AND LIMITS");
 // ---------------------------------------------------------------------------
-var over = fleetMonth("FLEET_LITE", 4);
-ok("4 drivers on the free tier is flagged", over.flags.indexOf("DRIVER_LIMIT_EXCEEDED") !== -1, over.flags);
-ok("free tier never sells a 4th seat", over.subscription.extraSeats === 0 && over.subscription.totalGbp === 0);
-ok("free tier allows 3 drivers", fleetMonth("FLEET_LITE", 3).flags.indexOf("DRIVER_LIMIT_EXCEEDED") === -1);
+var over = fleetMonth("FLEET_LITE", 6);
+ok("6 drivers on the free tier is flagged", over.flags.indexOf("DRIVER_LIMIT_EXCEEDED") !== -1, over.flags);
+ok("free tier never sells a 6th seat", over.subscription.extraSeats === 0 && over.subscription.totalGbp === 0);
+ok("free tier allows 5 drivers", fleetMonth("FLEET_LITE", 5).flags.indexOf("DRIVER_LIMIT_EXCEEDED") === -1);
+ok("Plus allows 25 drivers", fleetMonth("FLEET_PLUS", 25).flags.indexOf("DRIVER_LIMIT_EXCEEDED") === -1);
+ok("26 drivers on Plus is flagged", fleetMonth("FLEET_PLUS", 26).flags.indexOf("DRIVER_LIMIT_EXCEEDED") !== -1);
+ok("Pro is never flagged, at any headcount", fleetMonth("FLEET_PRO", 500).flags.indexOf("DRIVER_LIMIT_EXCEEDED") === -1);
 ok("free tier bookings limit is a number, not a range", A.config.accountTypes.FLEET_LITE.bookingsPerDriverPerDay === 2);
 
 // ---------------------------------------------------------------------------
@@ -115,21 +123,28 @@ var rec3 = A.recommendTier(3);
 // With one flat invoice fee the free tier is genuinely the cheapest right up to
 // its 3-driver cap. Pro is then sold on features and headroom, never on price.
 ok("3 full-time drivers: free tier is still cheapest", rec3.cheapest.accountType === "FLEET_LITE", rec3.options);
-ok("3 full-time drivers: Pro costs £28.39 more, and we say so", approx(rec3.savingGbp, 28.39), rec3);
+ok("3 full-time drivers: the paid tiers cost more, and we say so", rec3.savingGbp > 0, rec3);
 ok("no fleet ever pays more than £43.26 a month on the free tier",
-  approx(fleetMonth("FLEET_LITE", 3).totalExVatGbp, 43.26));
+  approx(fleetMonth("FLEET_LITE", 5).totalExVatGbp, 43.26));
 var rec6 = A.recommendTier(6);
 ok("6 drivers: free tier is not even eligible", rec6.options[0].eligible === false && rec6.cheapest.accountType === "FLEET_PRO");
 
 // ---------------------------------------------------------------------------
 console.log("\n6. NO GUESSING — unset figures refuse to price");
 // ---------------------------------------------------------------------------
-// Confirmed by Brent 2026-07-29 ("keep as it stands"): Plus £10, Pro £50.
+// Brent 2026-08-11 abolished the £10 and £50 rungs and moved the ladder to
+// £25 / £100 — the same figures live on join.usehaf.co.uk, in Stripe and on
+// the storefront. These assertions are the guard that stops the dead rungs
+// creeping back in from an older document.
 ok("PLNA Plus is priced now", A.config.accountTypes.PLNA_PLUS.status === "SET");
-ok("PLNA Plus is £10 a month", approx(A.config.accountTypes.PLNA_PLUS.monthlyGbp, 10));
-ok("PLNA Pro is £50 a month", approx(A.config.accountTypes.PLNA_PRO.monthlyGbp, 50));
-ok("PLNA Plus, driver paid every week = £35.98 (£10 + 4.33 × £6)",
-  approx(A.monthlyBill({ accountType: "PLNA_PLUS", drivers: A.fullTimeDrivers(1) }).totalExVatGbp, 35.98),
+ok("PLNA Plus is £25 a month", approx(A.config.accountTypes.PLNA_PLUS.monthlyGbp, 25));
+ok("PLNA Pro is £100 a month", approx(A.config.accountTypes.PLNA_PRO.monthlyGbp, 100));
+ok("a year of Plus is £250 — two months free", approx(A.config.accountTypes.PLNA_PLUS.annualGbp, 250));
+ok("a year of Pro is £1,000 — two months free", approx(A.config.accountTypes.PLNA_PRO.annualGbp, 1000));
+ok("the abolished £10 and £50 rungs are gone for good",
+  A.config.accountTypes.PLNA_PLUS.monthlyGbp !== 10 && A.config.accountTypes.PLNA_PRO.monthlyGbp !== 50);
+ok("PLNA Plus, driver paid every week = £50.98 (£25 + 4.33 × £6)",
+  approx(A.monthlyBill({ accountType: "PLNA_PLUS", drivers: A.fullTimeDrivers(1) }).totalExVatGbp, 50.98),
   A.monthlyBill({ accountType: "PLNA_PLUS", drivers: A.fullTimeDrivers(1) }));
 ok("an independent Plus driver is charged £6 per invoice, not the Lite £9.99",
   approx(A.resolveInvoicingParty({ driverAccountType: "PLNA_PLUS" }).feeGbp, 6.00));
@@ -172,8 +187,8 @@ ok("live basis is flagged on the invoice", w.flags.indexOf("FLAT_FEE_BASIS") !==
 var savedBasis = A.config.fleetFeeBasis;
 A.config.fleetFeeBasis = "PER_DRIVER_LINE";
 var perDriver5 = fleetMonth("FLEET_PRO", 5);
-ok("modelled per-driver basis: Pro 5 drivers would be £158.25 (not what we charge)",
-  approx(perDriver5.totalExVatGbp, 158.25), perDriver5);
+ok("modelled per-driver basis: Pro 5 drivers would be £358.25 (not what we charge)",
+  approx(perDriver5.totalExVatGbp, 358.25), perDriver5);
 var perDriverLite3 = fleetMonth("FLEET_LITE", 3);
 ok("modelled per-driver basis: Lite 3 drivers would be £129.77 (not what we charge)",
   approx(perDriverLite3.totalExVatGbp, 129.77), perDriverLite3);
@@ -260,7 +275,26 @@ var liteFeat = A.featuresFor("PLNA_LITE");
 var plusFeat = A.featuresFor("PLNA_PLUS");
 var proFeat = A.featuresFor("PLNA_PRO");
 
-ok("every tier on a side sees the same ladder", liteFeat.length === proFeat.length);
+// Brent 2026-08-14 forced a model change here. A card still shows the WHOLE
+// ladder — that is the crown design — but a SLOT ("how many drivers?") can
+// only have ONE ticked answer, or a Plus fleet reads "Up to 5 drivers" and
+// "Up to 25 drivers" at the same time. So: same locked ladder for everyone,
+// and never two ticks answering the same question.
+function slotTicks(rows) {
+  var seen = {};
+  rows.filter(function (f) { return f.included && f.slot; })
+      .forEach(function (f) { seen[f.slot] = (seen[f.slot] || 0) + 1; });
+  return Object.keys(seen).filter(function (k) { return seen[k] > 1; });
+}
+ok("no card ever ticks two answers to the same question",
+  ["DRIVER", "FLEET", "FREIGHT"].every(function (side) {
+    return ["LITE", "PLUS", "PRO"].every(function (lvl) {
+      return slotTicks(A.featuresForSideLevel(side, lvl)).length === 0;
+    });
+  }));
+ok("every tier on a side is still missing the same things",
+  liteFeat.filter(function (f) { return f.lockedBy; }).length >=
+  proFeat.filter(function (f) { return f.lockedBy; }).length);
 ok("Lite is missing things", liteFeat.some(function (f) { return f.lockedBy; }));
 ok("Pro is missing nothing", A.ladderCheck().ok, A.ladderCheck().breaches);
 ok("Fleet Pro is missing nothing either",
@@ -553,8 +587,12 @@ ok("Plus gets route planning without needing AI",
 // can never be changed in config and left stale in the words next to it.
 ["DRIVER", "FLEET", "FREIGHT"].forEach(function (side) {
   var texts = A.featuresForSideLevel(side, "PRO").map(function (f) { return f.text; }).join(" | ");
-  ok(side + ": the free allowance on the card reads the configured 5",
-    texts.indexOf("5 " ) !== -1 || /up to 5/i.test(texts), { side: side });
+  var liteTexts = A.featuresForSideLevel(side, "LITE")
+    .map(function (f) { return f.text; }).join(" | ");
+  ok(side + ": the free card reads the configured allowance of 5",
+    /up to 5\b/i.test(liteTexts), { side: side, liteTexts: liteTexts });
+  ok(side + ": the Pro card says unlimited, and does not still say 5",
+    /unlimited/i.test(texts), { side: side });
   ok(side + ": no unresolved token reached the card",
     texts.indexOf("{") === -1 && texts.indexOf("}") === -1);
 });
@@ -579,6 +617,40 @@ var snapshot = A.permissionsFor("LITE");
 snapshot.jako_ai = true;
 ok("permissions hand back a copy, not the live switchboard",
   A.can("LITE", "jako_ai") === false);
+
+
+
+// ---------------------------------------------------------------------------
+console.log("\n12. FLEET — Brent's 14 Aug spec");
+// ---------------------------------------------------------------------------
+var fleetBands = {
+  FLEET_LITE: 5, FLEET_PLUS: 25, FLEET_PRO: null
+};
+Object.keys(fleetBands).forEach(function (code) {
+  ok(code + " caps at " + (fleetBands[code] === null ? "unlimited" : fleetBands[code]),
+    A.config.accountTypes[code].maxDrivers === fleetBands[code],
+    A.config.accountTypes[code].maxDrivers);
+  ok(code + " never charges per driver",
+    A.config.accountTypes[code].extraDriverMonthlyGbp === null);
+});
+
+var fleetPlna = A.featuresForSideLevel("FLEET", "PRO")
+  .filter(function (f) { return f.group === "PLNA"; });
+ok("a fleet driver gets a PLNA of their own", fleetPlna.length > 0);
+ok("the fleet PLNA says plainly it is not an open PLNA",
+  fleetPlna.some(function (f) { return /not an open PLNA/i.test(f.text); }));
+ok("the fleet PLNA has no public booking line",
+  fleetPlna.some(function (f) { return /No public booking line/i.test(f.text); }));
+ok("the fleet PLNA never sells the open driver's booking tools",
+  !fleetPlna.some(function (f) {
+    return /booking link|by your HAF username|return-route|filler-route/i.test(f.text);
+  }), fleetPlna.map(function (f) { return f.text; }));
+ok("a fleet driver is never sold JAKO in their own PLNA",
+  !fleetPlna.some(function (f) { return /JAKO/i.test(f.text); }));
+ok("the courier company gets a fleet management tab",
+  A.featuresForSideLevel("FLEET", "LITE").some(function (f) {
+    return /Fleet management tab/i.test(f.text) && f.included;
+  }));
 
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

@@ -6,7 +6,12 @@ import http from 'node:http';
 import fs from 'node:fs';
 import { chromium } from 'playwright-core';
 
-const ROOT = '/agent/workspace/knect-pricing';
+/* The repo this file lives in — it used to be hardcoded at a different
+   checkout, so this suite was testing someone else's copy of the app while
+   the one being changed went unchecked. */
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const KEY = process.env.SUPA_KEY;
 const SUPA = 'https://jsdwvogsxlnczzbefwgp.supabase.co/rest/v1/tier_config';
 
@@ -43,6 +48,10 @@ for (const [w, vp] of [['desktop', { width: 1440, height: 1000 }], ['phone', { w
     errs.push(w + ' console: ' + t);
   });
   await p.goto('http://localhost:8801/', { waitUntil: 'networkidle' });
+  /* "networkidle" is not "the app has booted" — the page pulls a map library
+     off the internet, and until that settles the tiles have not been drawn
+     yet. Waiting for the first tile turns a false failure into a real one. */
+  await p.waitForSelector('#wt-pills .lp-tile', { timeout: 20000 });
 
   /* ── 1. BOTH TILES ARE THERE, DRAWN, AND READABLE ── */
   const shape = await p.evaluate(() => {
@@ -207,6 +216,7 @@ for (const [w, vp] of [['desktop', { width: 1440, height: 1000 }], ['phone', { w
 {
   const p = await b.newPage();
   await p.goto('http://localhost:8801/', { waitUntil: 'networkidle' });
+  await p.waitForFunction(() => typeof recommendVan === 'function', null, { timeout: 20000 });
   const grid = await p.evaluate(() => {
     const rows = [];
     WT_BAND.forEach((w, wi) => SZ_BAND.forEach((z, zi) => {
