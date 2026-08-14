@@ -107,6 +107,23 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 
 /* MAIN */
 .land-main{display:flex;flex-direction:column;gap:1.8rem}
+/* Brent, 14 Aug: the last piece of "align correctly". Two grid columns always
+   share one row height, so whichever column is taller sets it and the other one
+   used to just stop early — which is exactly the ragged bottom edge on his
+   screenshot. Now BOTH sides spend the slack: the account column's three panels
+   already stretch, and this makes the consignment tile do the same. Whichever
+   one happens to be shorter grows into the gap, so the two columns finish on the
+   same line in every state — empty, once a price appears, and once the vehicle
+   ladder opens out. Trimming the account column above is what keeps the leftover
+   small enough that neither side looks padded out. */
+@media(min-width:861px){.land-main>.calc-box{flex:1 1 auto}}
+/* The last 27px of the ragged edge came from here, and it was invisible: the
+   wrapper holding the (hidden) email-quote panel is still a box in the column,
+   so the column kept spending a 1.8rem gap on something with nothing in it.
+   display:contents dissolves the wrapper itself while leaving its contents
+   exactly where they were — the hidden panel now costs the layout nothing, and
+   still appears in the right place the moment someone opens it. */
+#tiles-wrap{display:contents}
 .land-kicker{font-size:.75rem;font-weight:800;letter-spacing:.13em;color:var(--or);text-transform:uppercase}
 .land-h1{font-family:var(--dp);font-weight:900;font-size:clamp(2.2rem,4.5vw,3.4rem);line-height:1.05;letter-spacing:-.05em}
 .land-sub{font-size:1.05rem;color:var(--mu);margin-top:.3rem}
@@ -190,18 +207,18 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 /* SIDE PANEL */
 .land-side{display:flex;flex-direction:column;gap:1rem;padding-top:.1rem}
 .side-card{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:1.3rem;box-shadow:var(--sd)}
-.sc-title{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.03em;margin-bottom:.9rem}
-.sc-fi{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.5rem}
+.sc-title{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.03em;margin-bottom:.65rem}
+.sc-fi{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.4rem}
 .sc-lbl{font-size:.7rem;font-weight:700;letter-spacing:.06em;color:var(--mu);text-transform:uppercase}
 .sc-inp{width:100%;background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.58rem .85rem;font-size:.88rem;color:var(--tx);transition:border-color .14s}
 .sc-inp:focus{border-color:var(--or)}
 .sc-err{font-size:.7rem;color:var(--rd);margin:.3rem 0 .4rem;display:none}
-.sc-foot{font-size:.72rem;color:var(--mu);text-align:center;margin-top:.7rem;line-height:1.55}
+.sc-foot{font-size:.72rem;color:var(--mu);text-align:center;margin-top:.45rem;line-height:1.55}
 .sc-foot a{color:var(--or)}
 /* The demo strip at the foot of the login card. Styled here rather than inline
    so the phone rule below can actually override it — an inline style would win
    and leave a divider floating on its own once the card around it is hidden. */
-#sc-demo{border-top:1px solid var(--ln);padding-top:.7rem;margin-top:.7rem;text-align:center}
+#sc-demo{border-top:1px solid var(--ln);padding-top:.5rem;margin-top:.5rem;text-align:center}
 
 /* ══ OVERLAYS ═══════════════════════════════════════════════════ */
 .overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(10,12,14,.85);backdrop-filter:blur(12px);align-items:center;justify-content:center}
@@ -796,9 +813,22 @@ textarea.fi2{resize:vertical;min-height:70px}
    A ceiling stops a very long left column stretching them into three billboards
    — past that the column simply ends early rather than looking silly. */
 @media(min-width:861px){
-  #side-ways{flex:1 1 auto;display:flex;flex-direction:column;max-height:560px}
+  #side-ways{flex:1 1 auto;display:flex;flex-direction:column;max-height:720px}
   #side-ways .wtb{flex:1 1 auto;min-height:0}
 }
+/* Brent, 14 Aug (second pass): "align correctly" was still failing by 183px and
+   the reason was NOT the stretch rules above — those were already working. Two
+   grid columns share one row height, and that height is whatever the TALLER
+   column needs, so the account column could never end level with the tile while
+   its own content wanted 818px against the tile's 635px. No amount of stretching
+   fixes that; the content itself had to come down under the tile's height. So
+   the three sentences became one line each and this card carries less padding
+   than the login above it. Now the column's natural height sits UNDER the tile's,
+   the flex rule above spends the difference on the three panels, and the two
+   columns finish on the same line — in the empty state and once a price
+   appears and the left tile grows. */
+#side-ways{padding:1rem 1.1rem}
+#side-ways .sc-title{margin-bottom:.6rem}
 /* Centring the contents inside a stretched card looked tidy card-by-card and
    wrong as a set: "Repeat an order" has a one-line sentence, so its heading
    centred 7px lower than the other two, and the WhatsApp card's longer sentence
@@ -806,7 +836,7 @@ textarea.fi2{resize:vertical;min-height:70px}
    to the top and push the action line to the bottom, at every width — every
    heading starts on one line, every arrow finishes on one line, and the slack
    the row-stretch creates falls in the middle where nobody reads it. */
-.wtb-c{display:flex;gap:.65rem;align-items:stretch;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.7rem .8rem;text-align:left;width:100%;font:inherit;color:inherit;transition:background .15s,border-color .15s;position:relative}
+.wtb-c{display:flex;gap:.65rem;align-items:stretch;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.6rem .8rem;text-align:left;width:100%;font:inherit;color:inherit;transition:background .15s,border-color .15s;position:relative}
 .wtb-c.live{cursor:pointer}
 .wtb-c.live:hover{background:var(--p3);border-color:var(--or)}
 .wtb-c.soon{opacity:.7;cursor:default}
@@ -1866,7 +1896,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             </span>
             <span class="wtb-b">
               <span class="wtb-hr"><span class="wtb-h">Repeat an order</span></span>
-              <span class="wtb-p">Enter your reference number and rebook a previous delivery in seconds.</span>
+              <span class="wtb-p">Rebook a past delivery from its reference.</span>
               <span class="wtb-a">Rebook &#8594;</span>
             </span>
           </button>
@@ -1876,7 +1906,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             </span>
             <span class="wtb-b">
               <span class="wtb-hr"><span class="wtb-h">Order by email</span></span>
-              <span class="wtb-p">We write the email for you. Fill in the blanks, send it, and we come back with a price.</span>
+              <span class="wtb-p">We write it for you — send it and we price it.</span>
               <span class="wtb-a">Get my quote email &#8594;</span>
             </span>
           </button>
@@ -1886,7 +1916,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             </span>
             <span class="wtb-b">
               <span class="wtb-hr"><span class="wtb-h">Order on WhatsApp</span><span class="wtb-soon">Soon</span></span>
-              <span class="wtb-p">Message HAF and book the whole job in a chat. We're building this now — it isn't switched on yet.</span>
+              <span class="wtb-p">Book the whole job in a chat. Being built now.</span>
               <span class="wtb-a">Not available yet</span>
             </span>
           </div>
