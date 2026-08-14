@@ -319,10 +319,13 @@ ok("an entry-level feature is never marked on the entry tier",
   liteFeat.every(function (f) { return f.unlocksAt !== "LITE" || !f.lockedBy; }));
 
 // --- features are grouped into named sections, never one flat list ---------
-var KNOWN_GROUPS = ["DASHBOARD", "PLATFORM", "PLNA", "AI"];
-ok("the driver ladder is split into dashboard and PLNA sections",
-  liteFeat.some(function (f) { return f.group === "DASHBOARD"; }) &&
-  liteFeat.some(function (f) { return f.group === "PLNA"; }));
+// Brent 2026-08-14: the sections are his brief's own sections, in his order.
+var KNOWN_GROUPS = ["ACCOUNT", "DASHBOARD", "PLATFORM", "POSTING", "PLNA",
+  "ROUTES", "CALENDAR", "FLEET", "BOOKING", "PRICING", "BRANDING", "AI"];
+ok("the driver ladder is split into the brief's own sections",
+  ["PLNA", "POSTING", "CALENDAR", "BOOKING", "PRICING", "BRANDING"].every(function (g) {
+    return liteFeat.some(function (f) { return f.group === g; });
+  }));
 ok("every feature on every side carries a known group",
   ["DRIVER", "FLEET", "FREIGHT"].every(function (side) {
     return A.config.featureCatalogue[side].every(function (f) {
@@ -337,9 +340,16 @@ var driverPlusSecs = A.featureSections("DRIVER", "PLUS");
 ok("driver sections come back labelled and non-empty",
   driverPlusSecs.length >= 2 &&
   driverPlusSecs.every(function (s) { return !!s.label && s.features.length > 0; }));
-ok("dashboard is read before PLNA",
-  driverPlusSecs[0].label === "Dashboard features" &&
-  driverPlusSecs[1].label === "PLNA features");
+ok("the sections are read in the brief's order",
+  driverPlusSecs.map(function (s) { return s.label; }).join(" | ") ===
+    // Heading reworded 2026-08-14 on Brent's ruling that the PLNA is an add-on
+  // to the account rather than a section of a plan. The ORDER is what this
+  // check is for and it is unchanged.
+  ["Posting work onto the network", "Driver PLNA — an add-on to your account",
+     "Return and filler route planning", "Calendar and driver diary",
+     "Bookings and customers", "Pricing and utilisation",
+     "Branding and business tools", "JAKO AI"].join(" | "),
+  driverPlusSecs.map(function (s) { return s.label; }));
 ok("sectioning loses no feature",
   driverPlusSecs.reduce(function (n, s) { return n + s.features.length; }, 0) ===
     A.featuresForSideLevel("DRIVER", "PLUS").length);
@@ -634,8 +644,11 @@ Object.keys(fleetBands).forEach(function (code) {
     A.config.accountTypes[code].extraDriverMonthlyGbp === null);
 });
 
+// The fleet driver's own PLNA is filed under the brief's calendar/diary
+// section now, so read it from there rather than from a group that no longer
+// exists on the fleet side.
 var fleetPlna = A.featuresForSideLevel("FLEET", "PRO")
-  .filter(function (f) { return f.group === "PLNA"; });
+  .filter(function (f) { return f.group === "CALENDAR"; });
 ok("a fleet driver gets a PLNA of their own", fleetPlna.length > 0);
 ok("the fleet PLNA says plainly it is not an open PLNA",
   fleetPlna.some(function (f) { return /not an open PLNA/i.test(f.text); }));
@@ -651,6 +664,88 @@ ok("the courier company gets a fleet management tab",
   A.featuresForSideLevel("FLEET", "LITE").some(function (f) {
     return /Fleet management tab/i.test(f.text) && f.included;
   }));
+
+// ---------------------------------------------------------------------------
+console.log("\n13. THE BOOKING LINK LADDER — Brent 14 Aug");
+// ---------------------------------------------------------------------------
+// "free will just be a booking link", plus is "minimal but extra bits", and at
+// pro "the website [can] be customised". Three depths of ONE product.
+//
+// The checks below deliberately test the PROPERTY a customer would be misled
+// by, not the presence of a row. A row that exists but is ticked on a plan
+// where nothing is built is worse than a missing row.
+var SIDES = ["DRIVER", "FLEET", "FREIGHT"];
+var LEVELS = ["LITE", "PLUS", "PRO"];
+
+// Identified by SLOT, not by wording. The first version of this test matched on
+// the words "booking link", and my own Plus rung ("Make the link your own...")
+// does not contain them — so the check reported the Plus rung missing when it
+// was sitting right there. A test that can be defeated by a rewrite is testing
+// the copywriting, not the ladder.
+function isRung(f) { return f.group === "BOOKING" && f.slot === "booking_link"; }
+function bookingLadder(side) {
+  return A.featuresForSideLevel(side, "PRO").filter(isRung);
+}
+
+SIDES.forEach(function (side) {
+  var rungs = bookingLadder(side);
+  ok(side + ": the ladder has all three rungs", rungs.length === 3,
+    rungs.map(function (r) { return r.unlocksAt; }));
+  ok(side + ": free is JUST a link — nothing about customising it",
+    rungs.some(function (r) {
+      return r.unlocksAt === "LITE" && !/logo|colour|customise|sections/i.test(r.text);
+    }), rungs.filter(function (r) { return r.unlocksAt === "LITE"; }));
+  ok(side + ": Plus is the minimal touch — name, logo and colours",
+    rungs.some(function (r) {
+      return r.unlocksAt === "PLUS" && /logo/i.test(r.text) && /colour/i.test(r.text);
+    }));
+  ok(side + ": Pro customises the site itself",
+    rungs.some(function (r) {
+      return r.unlocksAt === "PRO" && /customise the site/i.test(r.text);
+    }));
+  // The one that matters most today. Nothing resolves behind a booking link on
+  // 14 Aug — /book, /b and /booking all return the app shell — so no plan may
+  // show any rung as something you have.
+  LEVELS.forEach(function (lvl) {
+    var shown = A.featuresForSideLevel(side, lvl).filter(isRung);
+    ok(side + "/" + lvl + ": no rung is sold as included while it is unbuilt",
+      shown.every(function (f) { return f.included === false && f.comingSoon === true; }),
+      shown.filter(function (f) { return f.included; }).map(function (f) { return f.text; }));
+  });
+  // The retired ruling must not leave a ghost behind: "Website Builder" was a
+  // separate paid product, and it no longer exists as a concept anywhere.
+  ok(side + ": the retired \"Website Builder\" wording is gone",
+    !A.featuresForSideLevel(side, "PRO").some(function (f) {
+      return /website builder/i.test(f.text);
+    }));
+});
+
+// A page that says "logo and colours" on Plus in one section and on Pro in
+// another is not two features, it is one contradiction. Catch it by property:
+// no two rows may claim the SAME capability at DIFFERENT levels.
+SIDES.forEach(function (side) {
+  var seen = {};
+  var clash = [];
+  A.featuresForSideLevel(side, "PRO").forEach(function (f) {
+    if (!/logo/i.test(f.text) || !/colour/i.test(f.text)) return;
+    // Qualified by WHERE it applies — booking page vs HAF profile — so the
+    // scope word is part of the identity, not noise.
+    var scope = /booking|land on|link/i.test(f.text) ? "booking-page" : "profile";
+    if (seen[scope] && seen[scope] !== f.unlocksAt) clash.push([scope, seen[scope], f.unlocksAt]);
+    seen[scope] = f.unlocksAt;
+  });
+  ok(side + ": logo-and-colours is never promised at two different levels",
+    clash.length === 0, clash);
+});
+
+// The section note must carry BOTH halves — the ladder AND that none of it is
+// switched on. A note with only the ladder reads as three live features.
+var note = A.groupNotes && A.groupNotes.BOOKING;
+ok("the booking section carries a note at all", !!note);
+ok("the note explains all three depths",
+  !!note && /free/i.test(note) && /Plus/i.test(note) && /Pro/i.test(note), note);
+ok("the note says plainly that none of it is switched on yet",
+  !!note && /not|nothing/i.test(note) && /yet/i.test(note), note);
 
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

@@ -38,7 +38,7 @@ const LADDERS = [
   {
     id: 'driver',
     tab: 'Owner driver &amp; business',
-    lead: 'Same account whether you drive your own van or book couriers for your business. The plan decides how much of the network you can use.',
+    lead: 'Same account whether you drive your own van or book couriers for your business. Your driver PLNA is an add-on to that account, and it opens once you are approved by Clever Checked &mdash; the plan decides the tools inside it, never whether you can have one.',
     side: 'DRIVER',
     codes: ['PLNA_LITE', 'PLNA_PLUS', 'PLNA_PRO']
   },
@@ -48,6 +48,19 @@ const LADDERS = [
     lead: 'One company account for the whole fleet. The plan decides how many drivers you can carry &mdash; you are never charged per driver.',
     side: 'FLEET',
     codes: ['FLEET_LITE', 'FLEET_PLUS', 'FLEET_PRO']
+  },
+  /* Freight forwarding is section 8 of the brief, so it gets its own tab and
+   * its own sections. It carries NO price: freight is free at launch and no
+   * paid freight plan has been set — the £500/1% and £1,000/3% tiers came off
+   * the terms page on 14 Aug. The cost section says exactly that rather than
+   * showing an invented figure or an empty cell. */
+  {
+    id: 'freight',
+    tab: 'Freight forwarding',
+    lead: 'Every HAF account can move freight, whichever plan it is on &mdash; to that plan&rsquo;s own allowance, features and the network rules. This ladder is for businesses whose whole trade is forwarding: it buys volume, client tools and reporting, never the right to post a load. Freight is free to join at launch.',
+    side: 'FREIGHT',
+    unpriced: true,
+    codes: ['FREIGHT_LITE', 'FREIGHT_PLUS', 'FREIGHT_PRO']
   }
 ];
 
@@ -56,6 +69,22 @@ const LEVEL_LABEL = { LITE: 'HAF KNECT Free', PLUS: 'HAF KNECT Plus', PRO: 'HAF 
 function costRows(ladder) {
   const t = ladder.codes.map((c) => A.config.accountTypes[c]);
   const rows = [];
+
+  /* An unpriced ladder gets the truth in place of a price: free to join today,
+   * and nothing quoted for a plan that has not been set. */
+  if (ladder.unpriced) {
+    rows.push({
+      label: 'Monthly price',
+      cells: ['Free', 'Not published yet', 'Not published yet'],
+      strong: true,
+      note: 'Freight is free at launch. If a paid freight plan is added, its price and terms are published before anyone is charged.'
+    });
+    rows.push({
+      label: 'Posting your own work onto the network',
+      cells: t.map((x) => A.postingLimitLabel(x.level))
+    });
+    return rows;
+  }
 
   rows.push({
     label: 'Monthly price',
@@ -105,14 +134,24 @@ function feeRows(ladder) {
   const t = ladder.codes.map((c) => A.config.accountTypes[c]);
   const lv = M.config.accountLevels;
   return [
+    /* Brent 2026-08-14: "instead of the words points use %". The figure is
+     * unchanged — feeReductionPts is still what the quote engine applies — but
+     * "points" is trade language a customer has to translate, and a % is the
+     * thing they can actually picture. Only the wording moved. */
     {
-      label: 'Points off the HAF network fee',
+      label: '% off the HAF network fee',
       cells: t.map((x) => {
         const pts = lv[x.level].feeReductionPts;
-        return pts === 0 ? 'Standard fee' : '&minus;' + pts + ' points';
+        return pts === 0 ? 'Standard fee' : '&minus;' + pts + '%';
       }),
       strong: true,
-      note: 'The network fee is HAF&rsquo;s share of the customer price. A paid plan takes points off it — it never comes out of what the driver is paid.'
+      /* The % is taken OFF THE FEE PERCENTAGE, not off the fee's value: a 20%
+       * network fee becomes 17.5%, not 19.5%. That is exactly why the engine
+       * calls it "points" internally — and exactly why the customer-facing
+       * line has to show the worked example, or "%" reads as the smaller,
+       * wrong number and we have understated what a paid plan gives. Brent's
+       * wording, with the ambiguity closed. */
+      note: 'The network fee is HAF&rsquo;s share of the customer price — a 20% fee becomes 17.5% on Plus and 15% on Pro. It never comes out of what the driver is paid.'
     }
   ];
 }
@@ -130,7 +169,10 @@ function featureSections(ladder) {
     if (!inGroup.length) return;
     const label = A.groupLabels[g];
     let bucket = groups.find((x) => x.label === label);
-    if (!bucket) groups.push(bucket = { label, rows: [] });
+    /* The note travels with the section from the shared list, so the one thing
+     * a customer must understand about it (a PLNA is an add-on; posting is on
+     * every account) cannot be left off by whoever renders it next. */
+    if (!bucket) groups.push(bucket = { label, note: A.groupNotes[g] || null, rows: [] });
 
     inGroup.forEach((f) => {
       const cells = levels.map((l, i) => {
@@ -186,7 +228,8 @@ function renderLadder(ladder, first) {
 
   // ---- the feature sections ------------------------------------------------
   featureSections(ladder).forEach((sec) => {
-    h += `<tbody><tr class="cmp-group"><th colspan="4" scope="colgroup">${esc(sec.label)}</th></tr>`;
+    h += `<tbody><tr class="cmp-group"><th colspan="4" scope="colgroup">${esc(sec.label)}` +
+      (sec.note ? `<span class="cmp-note">${esc(sec.note)}</span>` : '') + '</th></tr>';
     sec.rows.forEach((r) => {
       const same = r.cells.every((c) => c === r.cells[0]);
       h += `<tr class="cmp-row${same ? ' cmp-same' : ''}"><th scope="row">${esc(r.text)}` +
@@ -222,16 +265,30 @@ const CSS = `
 .cmp-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .cmp-table{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
 .cmp-table th,.cmp-table td{text-align:left;padding:11px 14px;border-bottom:1px solid rgba(0,0,0,.08);vertical-align:top}
-.cmp-table thead th{position:sticky;top:0;background:#fff;font-size:13px;font-weight:800;letter-spacing:.01em;border-bottom:2px solid rgba(0,0,0,.14);z-index:2}
+/* The plan names sit CENTRED over their own column: they used to inherit the
+   left alignment of the "What you get" column while every value beneath them
+   was centred, so each heading floated a third of a column left of the ticks
+   it labelled. Alignment is set per column here, not per cell, so a new row
+   cannot land out of line. */
+.cmp-table thead th{position:sticky;top:0;background:#fff;font-size:13px;font-weight:800;letter-spacing:.01em;border-bottom:2px solid rgba(0,0,0,.14);z-index:2;text-align:center}
+.cmp-table thead th.cmp-featcol{text-align:left}
 .cmp-table thead th.cmp-pro{color:var(--brand-orange,#f60)}
 .cmp-featcol{width:46%}
-.cmp-table td{text-align:center;width:18%}
+.cmp-table td{text-align:center;width:18%;vertical-align:middle}
 .cmp-table tbody th{font-weight:500;line-height:1.45}
 .cmp-group th{background:rgba(0,0,0,.035);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:10px 14px}
+.cmp-note{display:block;margin-top:5px;font-size:11.5px;font-weight:600;line-height:1.5;text-transform:none;letter-spacing:0;color:var(--muted);max-width:760px}
 .cmp-row td[data-strong]{font-weight:800;font-size:15px}
 .cmp-sub{display:block;font-size:11.5px;color:var(--muted);font-weight:500;line-height:1.4;margin-top:2px}
 .cmp-soon{display:inline-block;margin-left:7px;padding:1px 7px;border:1px solid var(--brand-orange,#f60);border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--brand-orange,#f60);white-space:nowrap}
-.cmp-y,.cmp-n{width:18px;height:18px;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+/* display:block + auto margins, NOT text-align. The storefront sets svg to
+   display:block for its own icons, and a block box ignores the cell's
+   text-align entirely — so every tick sat hard against the left edge of its
+   column, 72px adrift of the heading above it, while the CELLS measured
+   perfectly aligned. Centre the icon itself and the page's rule cannot move
+   it. Margins are reset in the phone layout below, where the cell is a flex
+   row and the tick belongs on the right, opposite its label. */
+.cmp-y,.cmp-n{width:18px;height:18px;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;display:block;margin:0 auto}
 .cmp-y{stroke:#1a9d4b}
 .cmp-n{stroke:rgba(0,0,0,.24)}
 .cmp-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -246,6 +303,7 @@ const CSS = `
   .cmp-table tbody th{font-weight:700;font-size:14.5px;padding:14px 0 6px;border-bottom:0}
   .cmp-table td{display:flex;align-items:center;justify-content:space-between;gap:14px;text-align:right;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.07)}
   .cmp-mob{display:block;font-size:12.5px;color:var(--muted);font-weight:600;text-align:left}
+  .cmp-y,.cmp-n{margin:0}
   .cmp-group th{padding:14px;margin-top:8px;border-radius:8px}
   .cmp-featcol{width:auto}
   /* the block-layout rule above out-specifies the plain .cmp-hide, so the
