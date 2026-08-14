@@ -654,8 +654,16 @@ textarea.fi2{resize:vertical;min-height:70px}
 .lk-note svg{width:18px;height:18px;flex:0 0 18px;margin-top:.1rem;stroke:var(--am);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .lk-note strong{display:block;font-weight:800;margin-bottom:.15rem}
 .lk-note[hidden]{display:none}
-#pane-f-post .fi2:disabled,#dir-book-ov .fi2:disabled{background:var(--p3);color:var(--mu);cursor:not-allowed;opacity:.75}
-#pane-f-post .btn:disabled,#dir-book-ov .btn:disabled{background:var(--p3);color:var(--mu);box-shadow:none;cursor:not-allowed}
+/* The two account-specific blocks on the posting screen. This is a CLASS-level
+   rule with !important, not the `hidden` attribute, and that is deliberate: the
+   cards and the radio rows carry their own display in a style attribute, and an
+   inline display beats [hidden] every time — so `el.hidden = true` left the
+   client-sell-rate boxes sitting there in plain sight on a business account.
+   Caught by the merge test before it ever shipped. Toggling an attribute also
+   leaves the element's own inline layout untouched, so putting it back is exact. */
+#pane-b-book [data-post-only][data-off]{display:none !important}
+#pane-b-book .fi2:disabled,#dir-book-ov .fi2:disabled{background:var(--p3);color:var(--mu);cursor:not-allowed;opacity:.75}
+#pane-b-book .btn:disabled,#dir-book-ov .btn:disabled{background:var(--p3);color:var(--mu);box-shadow:none;cursor:not-allowed}
 .lp-box{border-radius:var(--rx);padding:.9rem 1.1rem;margin-bottom:.85rem;display:flex;align-items:flex-start;gap:.65rem;min-height:52px;transition:background .2s,border-color .2s}
 .lp-box.hint{background:var(--p2);border:1.5px dashed var(--ln)}
 .lp-box.priced{background:var(--or-d);border:1.5px solid var(--or-g)}
@@ -2267,29 +2275,70 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
       </div>
 
       <!-- BUSINESS: Book (own goods only — free) -->
+      <!-- POST WORK — ONE SCREEN FOR EVERY ACCOUNT
+           ==========================================
+           Brent, 14 Aug 2026: "posting jobs and posting loads are the same
+           thing? — i need you to merge that page and tab together and anything
+           associated with it".
+
+           They are the same thing. Both put a collection, a delivery and a load
+           onto the same network, and both end up as one job in front of the same
+           drivers. There were two screens because two account types grew up
+           separately — not because the act differs — and the two forms had
+           already drifted apart in ways that cost real information:
+
+             · the freight form had no DATE on it at all
+             · the business form had nowhere to write instructions for the driver
+             · only the freight form asked what the work is worth
+
+           So this is now the single posting screen, and it carries the UNION of
+           both forms. Nothing either one asked for was dropped.
+
+           Three blocks are genuinely account-specific, and they are marked
+           data-post-only rather than duplicated into a second page. postingApplyRole()
+           shows them:
+             resale    — buy rate and client sell rate, which only mean something
+                         on an account posting for a paying client
+             ownfleet  — "my registered drivers first / only", which is a lie on
+                         an account that has no drivers of its own
+           Everything else, every account sees, because every account can post. -->
       <div class="tp" id="pane-b-book">
-        <h1 class="pt">Post a Job</h1><p class="ps">Move your own stock and goods via the HAF KNECT network. Your own registered drivers can also pick this up.</p>
+        <h1 class="pt" id="post-title">Post a Job</h1><p class="ps" id="post-sub">Put a collection and a delivery onto the HAF KNECT network.</p>
         <div class="card" style="max-width:580px;margin-bottom:.85rem">
           <div class="ct">Job details</div>
+          <!-- Reopened 14 Aug 2026. The one switch is LOAD_POSTING_LOCKED in the main script. -->
+          <div class="lk-note" id="post-lock-note">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="10" y1="9" x2="10" y2="15"/><line x1="14" y1="9" x2="14" y2="15"/></svg>
+            <div><strong>Posting paused</strong>Posting is paused while we rebuild the sign-up journey. Your account is unaffected — we&#8217;ll email you the moment it reopens.</div>
+          </div>
           <div class="fr"><div class="fg"><label class="fl">Collection address</label><input class="fi2" placeholder="Full address or postcode"></div><div class="fg"><label class="fl">Delivery address</label><input class="fi2" placeholder="Full address or postcode"></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Your reference</label><input class="fi2" placeholder="Internal order or PO ref"></div><div class="fg"><label class="fl">Goods description</label><input class="fi2" placeholder="e.g. Retail stock, tools"></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Your reference</label><input class="fi2" id="post-ref" placeholder="Internal order or PO ref"></div><div class="fg"><label class="fl">Goods description</label><input class="fi2" placeholder="e.g. Retail stock, pallets, tools"></div></div>
           <div class="fr"><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 200"></div><div class="fg"><label class="fl">Vehicle needed</label><select class="fi2"><option>Any</option><option>Small van</option><option>SWB</option><option>MWB</option><option>LWB</option><option>XLWB</option><option>Luton &#8212; box</option><option>Luton &#8212; curtain side</option><option>Luton &#8212; tail lift</option></select></div></div>
           <div class="fr"><div class="fg"><label class="fl">Date</label><input class="fi2" type="date"></div><div class="fg"><label class="fl">Urgency</label><select class="fi2"><option>Flexible</option><option>Same-day</option><option>Urgent</option><option>Timed window</option></select></div></div>
+          <!-- Came off the freight form. Every driver benefits from it, so every
+               account now gets to write it. -->
+          <div class="fg"><label class="fl">Special instructions</label><textarea class="fi2" placeholder="Tail lift, fragile, hazmat class, access..."></textarea></div>
+        </div>
+        <!-- RESALE — an account posting on behalf of a paying client -->
+        <div class="card" data-post-only="resale" style="max-width:580px;margin-bottom:.85rem">
+          <div class="ct">What this load is worth</div>
+          <div class="fr"><div class="fg"><label class="fl">Buy rate (max, &#163;)</label><input class="fi2" type="number" placeholder="Your carrier cost ceiling"></div><div class="fg"><label class="fl">Client sell rate (&#163;)</label><input class="fi2" type="number" placeholder="What your client pays"></div></div>
+          <p style="font-size:.7rem;color:var(--mu);margin:.5rem 0 0">Your margin stays yours — the driver never sees what your client pays.</p>
         </div>
         <!-- Acceptance rules -->
         <div class="card" style="max-width:580px;margin-bottom:.85rem">
           <div class="ct">Who can accept this job?</div>
           <div style="display:flex;flex-direction:column;gap:.55rem">
-            <label style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.55rem .7rem;background:var(--p2);border-radius:var(--rx);border:1.5px solid var(--or-g)">
+            <label data-post-only="ownfleet" style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.55rem .7rem;background:var(--p2);border-radius:var(--rx);border:1.5px solid var(--or-g)">
               <input type="radio" name="b-accept" value="mydriver" checked style="accent-color:var(--or)">
               <div><div style="font-weight:700;font-size:.82rem">My registered drivers first</div><div style="font-size:.7rem;color:var(--mu)">Offered to your team first — goes to the open network after 30 minutes if not accepted</div></div>
             </label>
-            <label style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.55rem .7rem;background:var(--p2);border-radius:var(--rx)">
+            <label data-post-only="ownfleet" style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.55rem .7rem;background:var(--p2);border-radius:var(--rx)">
               <input type="radio" name="b-accept" value="myonly" style="accent-color:var(--or)">
-              <div><div style="font-weight:700;font-size:.82rem">My drivers only</div><div style="font-size:.7rem;color:var(--mu)">Only drivers registered to your business account can accept — never goes to the open network</div></div>
+              <div><div style="font-weight:700;font-size:.82rem">My drivers only</div><div style="font-size:.7rem;color:var(--mu)">Only drivers registered to your fleet account can accept — never goes to the open network</div></div>
             </label>
             <label style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.55rem .7rem;background:var(--p2);border-radius:var(--rx)">
-              <input type="radio" name="b-accept" value="network" style="accent-color:var(--or)">
+              <input type="radio" name="b-accept" value="network" id="post-accept-network" style="accent-color:var(--or)">
               <div><div style="font-weight:700;font-size:.82rem">Open network</div><div style="font-size:.7rem;color:var(--mu)">Any Clever Checked driver on HAF KNECT can accept immediately</div></div>
             </label>
           </div>
@@ -2314,21 +2363,23 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
               <div style="font-size:.7rem;color:var(--mu)">Top-up cover for the gap between your goods value and standard carrier GIT — add per job when available</div>
             </div>
           </div>
+          <!-- data-always-disabled: this is not shut by the posting pause, it is
+               shut because the product does not exist yet. Reopening posting must
+               never switch it on. -->
           <label style="display:flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:600;color:var(--su);cursor:not-allowed;white-space:nowrap">
-            <input type="checkbox" disabled style="accent-color:var(--or)"> Add gap cover
+            <input type="checkbox" disabled data-always-disabled="1" style="accent-color:var(--or)"> Add gap cover
           </label>
         </div>
-        <div class="fr" style="max-width:580px;margin:0"><button class="btn btn-gh btn-sm">Save draft</button><button class="btn btn-or btn-sm">Post job →</button></div>
+        <div class="fr" style="max-width:580px;margin:0"><button class="btn btn-gh btn-sm" id="post-draft" data-lock="1">Save draft</button><button class="btn btn-or btn-sm" id="post-submit" data-label-open="Post to network &#8594;">Post to network &#8594;</button></div>
         <!-- Available drivers -->
         <div class="card" style="max-width:580px;margin-top:.85rem">
           <div class="ct">Network options right now</div>
           <div class="jl">
-            <div class="jc"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">YOUR DRIVER · Registered</div><div class="jroute">AB12 CDE — LWB · Sheffield S9 · James</div><div class="jdet">Available now · Clever Checked · Est. 30 min</div></div><button class="btn btn-or btn-xs">Assign</button></div>
+            <div class="jc" data-post-only="ownfleet"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">YOUR DRIVER · Registered</div><div class="jroute">AB12 CDE — LWB · Sheffield S9 · James</div><div class="jdet">Available now · Clever Checked · Est. 30 min</div></div><button class="btn btn-or btn-xs">Assign</button></div>
             <div class="jc"><div class="jdot" style="background:var(--am)"></div><div class="jm"><div class="jref">NETWORK DRIVER · Backload</div><div class="jroute">LWB courier heading your way — return route</div><div class="jdet">Est. collection: 2h · Clever Checked</div></div><button class="btn btn-gh btn-xs">Select</button></div>
           </div>
         </div>
       </div>
-
       <!-- BUSINESS: Deliveries -->
       <div class="tp" id="pane-b-del">
         <h1 class="pt">My Deliveries</h1><p class="ps">All shipments booked through your business account.</p>
@@ -2510,26 +2561,13 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
         <button class="btn btn-or btn-sm">Add new address</button>
       </div>
 
-      <!-- FREIGHT: Post a Load -->
-      <div class="tp" id="pane-f-post">
-        <h1 class="pt">Post a Load</h1><p class="ps">List freight for your clients on the HAF KNECT network.</p>
-        <div class="card" style="max-width:580px">
-          <div class="ct">Load details</div>
-          <!-- Reopened 14 Aug 2026. The switch is LOAD_POSTING_LOCKED in the main script. -->
-          <div class="lk-note" id="f-post-lock-note">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="10" y1="9" x2="10" y2="15"/><line x1="14" y1="9" x2="14" y2="15"/></svg>
-            <div><strong>Posting paused</strong>Posting loads is paused while we rebuild the sign-up journey. Your account is unaffected — we&#8217;ll email you the moment it reopens.</div>
-          </div>
-          <div class="fg"><label class="fl">Customer reference</label><input class="fi2" placeholder="Your client's job ref" disabled></div>
-          <div class="fr"><div class="fg"><label class="fl">Collection address</label><input class="fi2" placeholder="Address or postcode" disabled></div><div class="fg"><label class="fl">Delivery address</label><input class="fi2" placeholder="Address or postcode" disabled></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Goods type</label><input class="fi2" placeholder="e.g. Pallets, boxes, hazmat" disabled></div><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 850" disabled></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Vehicle required</label><select class="fi2" disabled><option>Small van</option><option>SWB</option><option>LWB</option><option>XLWB</option><option>Luton &#8212; box</option><option>Luton &#8212; curtain side</option><option>Luton &#8212; tail lift</option></select></div><div class="fg"><label class="fl">Urgency</label><select class="fi2" disabled><option>Flexible</option><option>Same-day</option><option>Urgent</option><option>Timed</option></select></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Buy rate (max, £)</label><input class="fi2" type="number" placeholder="Your carrier cost ceiling" disabled></div><div class="fg"><label class="fl">Client sell rate (£)</label><input class="fi2" type="number" placeholder="What your client pays" disabled></div></div>
-          <div class="fg"><label class="fl">Special instructions</label><textarea class="fi2" placeholder="Tail lift, fragile, hazmat class, access..." disabled></textarea></div>
-          <button class="btn btn-or btn-wide" style="margin-top:.3rem" id="f-post-submit" data-label-open="Post load to network &#8594;" disabled>Posting paused</button>
-        </div>
-      </div>
-
+      <!-- FREIGHT: "Post a Load" USED TO LIVE HERE.
+           Merged into the one posting screen above (pane-b-book, "Post a Job") on
+           14 Aug 2026 — Brent: posting jobs and posting loads are the same thing.
+           Every field this form had is on that screen; the two rate fields it had
+           and the others did not are shown there under data-post-only="resale".
+           switchTab() still answers to 'pane-f-post' and lands on the merged
+           screen, so no old link, quick action or typed tab id dead-ends. -->
       <!-- LIVE JOB (shared spine — reshapes per role) -->
       <!-- data-exact: this is a job you hold — the driver and the customer both need
            the real address to make the delivery happen, so it is shown in full here -->
@@ -3306,8 +3344,16 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
    journey is rebuilt.
 
    THIS IS THE ONLY SWITCH. Flip it to false and posting reopens everywhere:
-   the Post a Load form, the Book a driver directly modal, and the guard
+   the one posting screen, the Book a driver directly modal, and the guard
    inside submitDirBook(). Nothing else needs editing.
+
+   Two things it must NOT do, both learned the hard way when the two posting
+   forms became one:
+     · it must not switch on a field that is disabled for a different reason —
+       Gap Cover is disabled because the product does not exist yet, so it is
+       marked data-always-disabled and the lock leaves it alone;
+     · it must reach the buttons that commit a post, not only the inputs, so
+       Save draft carries data-lock="1".
 
    The HTML ships with the fields already disabled, so if this script fails
    to run the form stays shut rather than springing open (fail closed). */
@@ -3317,19 +3363,20 @@ const LOAD_POSTING_LOCKED = false;
 
 (function applyLoadPostingLock(){
   var open = !LOAD_POSTING_LOCKED;
-  [['pane-f-post','f-post-lock-note','f-post-submit'],
+  [['pane-b-book','post-lock-note','post-submit'],
    ['dir-book-ov','db-lock-note','db-submit']].forEach(function(ids){
     var scope = document.getElementById(ids[0]);
     if(!scope) return;                       /* pane removed for this role */
     var note = document.getElementById(ids[1]);
     var btn  = document.getElementById(ids[2]);
-    scope.querySelectorAll('input,select,textarea').forEach(function(el){
+    scope.querySelectorAll('input,select,textarea,[data-lock="1"]').forEach(function(el){
+      if(el.hasAttribute('data-always-disabled')) return;   /* shut for its own reason */
       el.disabled = !open;
     });
     if(note) note.hidden = open;
     if(btn){
       btn.disabled = !open;
-      btn.textContent = open ? (btn.dataset.labelOpen || 'Post load to network →')
+      btn.textContent = open ? (btn.dataset.labelOpen || 'Post to network →')
                              : 'Posting paused';
     }
   });
@@ -4200,7 +4247,7 @@ const DRIVER_NAV=[
      more: a driver who was posting work while waiting on their Clever checks
      must not LOSE those screens the day they are released. Being approved to
      drive adds to what somebody can reach; it never takes anything away. */
-  {id:'b-book',l:'Book a Courier',s:'Send Goods',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
+  {id:'b-book',l:'Post a Job',s:'Send Goods',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'b-del',l:'My Deliveries',s:'Send Goods',ico:'<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'},
   {id:'d-earn',l:'Earnings',s:'My Account',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
   {id:'d-comp',l:'Compliance',s:'My Account',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
@@ -4216,7 +4263,7 @@ const ADMIN_NAV=[
   {id:'fbadmin',l:'Feedback Control',s:'Overview',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {id:'pools',l:'Network Pools',s:'Overview',ico:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>'},
   {id:'pricing',l:'Pricing Engine',s:'Overview',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/><circle cx="12" cy="12" r="10"/>'},
-  {id:'f-post',l:'Post a Load',s:'Freight Tools',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
+  {id:'b-book',l:'Post a Job',s:'Freight Tools',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'f-loads',l:'Active Loads',s:'Freight Tools',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'f-cap',l:'Network Map',s:'Freight Tools',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:'f-cover',l:'Coverage Board',s:'Freight Tools',ico:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'},
@@ -4238,7 +4285,7 @@ const DEMO_NAV=[
 ];
 const BUSINESS_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
-  {id:'b-book',l:'Book a Courier',s:'Send Goods',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
+  {id:'b-book',l:'Post a Job',s:'Send Goods',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'livejob',l:'Live Job',s:'Send Goods',ico:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'},
   {id:'b-del',l:'My Deliveries',s:'Send Goods',ico:'<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'},
   {id:'f-cap',l:'Network Map',s:'Send Goods',ico:'<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>'},
@@ -4256,7 +4303,7 @@ const BUSINESS_NAV=[
 ];
 const FREIGHT_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
-  {id:'f-post',l:'Post a Load',s:'Freight',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
+  {id:'b-book',l:'Post a Job',s:'Freight',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'f-loads',l:'Active Loads',s:'Freight',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'livejob',l:'Live Job',s:'Freight',ico:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'},
   {id:'f-cap',l:'Network Map',s:'Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
@@ -4271,7 +4318,7 @@ const FREIGHT_NAV=[
 ];
 /* ── PERSONAL NAV (Brent as Pro freight forwarder) ── */
 const PERSONAL_NAV=[
-  {id:'f-post',l:'Post a Load',s:'My Freight',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
+  {id:'b-book',l:'Post a Job',s:'My Freight',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'f-loads',l:'My Active Loads',s:'My Freight',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'livejob',l:'Live Job',s:'My Freight',ico:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'},
   {id:'f-dir',l:'Driver Directory',s:'My Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
@@ -4631,7 +4678,7 @@ function enterMode(mode){
   }else if(mode==='personal'){
     roleEl.textContent='My Account';roleEl.className='role-chip chip cb';
     buildNav(PERSONAL_NAV);
-    switchTab('pane-f-post');
+    switchTab('pane-b-book');
     _setModePill('My Account','var(--bl)');
   }else{
     /* Anything unrecognised goes back to the door rather than guessing at a
@@ -5147,14 +5194,14 @@ const DEMO_EXPLORE={
     {l:'Earnings',t:'pane-d-earn'},
   ],
   'Freight Pro':[
-    {l:'Post a Load',t:'pane-f-post'},
+    {l:'Post a Job',t:'pane-b-book'},
     {l:'Driver Directory',t:'pane-f-dir'},
     {l:'Active Loads',t:'pane-f-loads'},
     {l:'Network Map',t:'pane-f-cap'},
     {l:'Lane Pricing',t:'pane-f-lanes'},
   ],
   'Business':[
-    {l:'Book a Courier',t:'pane-b-book'},
+    {l:'Post a Job',t:'pane-b-book'},
     {l:'My Drivers',t:'pane-b-drivers'},
     {l:'My Deliveries',t:'pane-b-del'},
     {l:'Network Map',t:'pane-f-cap'},
@@ -5406,6 +5453,47 @@ const HAF_AUD={
   admin   :{network:true , ownJobsOnly:false}
 };
 function hafAud(){return HAF_AUD[window.HAF_ROLE]||HAF_AUD.driver;}
+
+/* ── THE ONE POSTING SCREEN, SHAPED TO THE ACCOUNT ───────────────────────
+   Brent, 14 Aug 2026: posting a job and posting a load are the same thing, so
+   there is one screen. What differs between accounts is not the act — it is
+   two blocks that would be meaningless or untrue on the wrong account:
+
+     resale   — buy rate and client sell rate. Only an account posting on behalf
+                of a paying client has a sell rate; on anyone else these are two
+                empty boxes nobody can answer.
+     ownfleet — "my registered drivers first" and "my drivers only". Offering
+                these to an account with no drivers of its own is a promise the
+                product cannot keep, and it would silently hold the job back
+                from the network waiting for a team that does not exist.
+
+   Hidden, not removed: these are the poster's OWN commercial fields, not
+   somebody else's data, so there is nothing here for the audience rule to
+   protect — which is the reason that rule takes nodes out of the document.
+   Hiding is done by marking data-off, which a stylesheet rule turns into
+   display:none !important. The obvious `el.hidden = true` does NOT work here:
+   these blocks carry their own inline display, and an inline display wins.
+   When the ownfleet options go, Open network is selected, so a post can never
+   be left pointing at a routing rule the account cannot use. */
+function postingApplyRole(){
+  var role = window.HAF_ROLE || 'driver';
+  var show = {resale: role === 'freight' || role === 'admin',
+              ownfleet: role === 'fleet' || role === 'admin'};
+  document.querySelectorAll('#pane-b-book [data-post-only]').forEach(function(el){
+    if(show[el.getAttribute('data-post-only')]) el.removeAttribute('data-off');
+    else el.setAttribute('data-off','1');
+  });
+  if(!show.ownfleet){
+    var net = document.getElementById('post-accept-network');
+    if(net) net.checked = true;
+  }
+  /* One screen, but it should read in the account's own language. */
+  var sub = document.getElementById('post-sub'), ref = document.getElementById('post-ref');
+  if(sub) sub.textContent = show.resale
+    ? 'List a client\u2019s freight on the HAF KNECT network.'
+    : 'Put a collection and a delivery onto the HAF KNECT network.';
+  if(ref) ref.placeholder = show.resale ? 'Your client\u2019s job ref' : 'Internal order or PO ref';
+}
 /* nav entries that look outward at the network rather than at your own work */
 const AUD_NETWORK_TABS=['f-cap','f-dir','f-cover'];
 let _audOut=[],_audHero=null;
@@ -5441,6 +5529,7 @@ function applyAudience(){
     const pill=document.getElementById('dash-pill');if(pill)pill.style.display='';
   }
   try{rrRender();}catch(e){}
+  postingApplyRole();
 }
 
 /* ═══════════════ LOCATION MASKING ═══════════════
@@ -5563,8 +5652,10 @@ const HAF_NAV_V1=[
 
   {g:'WORK', id:'jobs', l:'Freight &amp; Jobs', ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
    tabs:[
+    /* ONE posting row for everybody (Brent, 14 Aug: they are the same thing).
+       It carries need:'post', which every account has — the tier decides the
+       daily allowance, never whether the row is there. */
     {id:'b-book',   l:'Post a Job',            need:'post'},
-    {id:'f-post',   l:'Post a Load',           need:'freight'},
     {id:'b-del',    l:'My Posted Jobs',        need:'post'},
     {id:'f-loads',  l:'Active Loads',          need:'freight'},
     {id:'d-invites',l:'Job Offers',            need:'drive'},
@@ -5966,6 +6057,11 @@ function setSave(){
 }
 
 function switchTab(id){
+  /* "Post a Load" was merged into "Post a Job" on 14 Aug 2026. Everything that
+     still points at the old screen — a bookmarked link, a quick action drawn
+     from a cached page, a typed tab id — lands on the merged one. A merge that
+     leaves dead links behind has not finished. */
+  if(id==='pane-f-post')id='pane-b-book';
   if(id==='pane-feedback'){fbPrefill();fbLoad();}
   /* the previous pane may have been taken out of the document by the audience rule */
   if(ct){const o=document.getElementById(ct);if(o)o.classList.remove('on');const n=document.getElementById('ni-'+ct.replace('pane-',''));if(n)n.classList.remove('on');}
@@ -5973,6 +6069,7 @@ function switchTab(id){
   const n=document.getElementById('ni-'+id.replace('pane-',''));if(n)n.classList.add('on');
   ct=id;
   if(id==='pane-d-home'){setTimeout(renderDashAreas,80);loadDashMode();}
+  if(id==='pane-b-book')postingApplyRole();
   if(id==='pane-f-cap')setTimeout(capBootPane,80);
   if(id==='pane-pricing')setTimeout(()=>{if(window.pxBoot)pxBoot();},60);
   if(id==='pane-admin')setTimeout(()=>{if(window.ovLoad)ovLoad();},60);
@@ -7030,13 +7127,13 @@ function _buildDashActions(role){
       {l:'Full network map',t:'pane-f-cap',style:'btn-gh'},
     ],
     'freight-pro':[
-      {l:'Post a load',t:'pane-f-post',style:'btn-or'},
+      {l:'Post a job',t:'pane-b-book',style:'btn-or'},
       {l:'Active loads',t:'pane-f-loads',style:'btn-gh'},
       {l:'Driver directory',t:'pane-f-dir',style:'btn-gh'},
       {l:'Full network map',t:'pane-f-cap',style:'btn-gh'},
     ],
     business:[
-      {l:'Book a courier',t:'pane-b-book',style:'btn-or'},
+      {l:'Post a job',t:'pane-b-book',style:'btn-or'},
       {l:'My deliveries',t:'pane-b-del',style:'btn-gh'},
       {l:'Saved addresses',t:'pane-b-saved',style:'btn-gh'},
       {l:'Full network map',t:'pane-f-cap',style:'btn-gh'},
@@ -7580,7 +7677,9 @@ function capSelect(id){
         <div class="kc"><div class="kc-l">Booking</div><div class="kc-v" style="font-size:1rem">Same-day</div></div>
       </div>
       <div style="font-size:.78rem;color:var(--mu);margin:.2rem 0 .3rem">Book a same-day courier across <strong style="color:var(--tx)">${z.cities}</strong> and the surrounding area. Live tracking from pickup to drop.</div>${bizRelay}`;
-    cta=`<button class="btn btn-or" onclick="capGo('book')">Book a courier in ${z.name} →</button>`;
+    /* One act, one name (Brent, 14 Aug). This button opens the same posting
+       screen the sidebar does, so it says the same thing the sidebar says. */
+    cta=`<button class="btn btn-or" onclick="capGo('book')">Post a job in ${z.name} →</button>`;
   }else{
     body=`<div class="kg" style="margin:.9rem 0 .4rem">
         <div class="kc"><div class="kc-l">Demand</div><div class="kc-v" style="font-size:1rem">${c.lbl}</div></div>
@@ -7618,7 +7717,7 @@ function capResetView(){
 /* route the region call-to-action to whichever booking/jobs page this account actually has */
 function capGo(kind){
   const first=ids=>ids.find(i=>document.getElementById('pane-'+i));
-  const target=kind==='book'?first(['b-book','f-post','d-jobs']):first(['d-jobs','d-invites','f-post']);
+  const target=kind==='book'?first(['b-book','d-jobs']):first(['d-jobs','d-invites','b-book']);
   if(target)switchTab('pane-'+target);
 }
 /* Region panels split west (left) / east (right) — each a brief overview of the area */
