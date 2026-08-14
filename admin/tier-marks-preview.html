@@ -146,10 +146,26 @@
 
   function cardHtml(opts){
     var feats = opts.features.map(function(f){ f._level = opts.level; return f; });
-    function group(g){
-      var rows = feats.filter(function(f){ return f.group === g; }).map(featureHtml).join("");
-      return '<div class="grp">'+(g === "AI" ? "AI &amp; automation" : "HAF platform")+
-             '</div><ul class="feats">'+rows+'</ul>';
+    // Headings come from the catalogue's own vocabulary, so this card cannot
+    // drift away from the section names every other screen shows.
+    var LABELS = (window.HAFAccountFees && window.HAFAccountFees.groupLabels) || {};
+    var ORDER  = (window.HAFAccountFees && window.HAFAccountFees.groupOrder)  || ["PLATFORM","AI"];
+    // Grouped by HEADING, not by group key: DASHBOARD and PLATFORM share the
+    // heading "Dashboard features", so keying on the group would either print
+    // it twice or drop whichever came second. Anything carrying a group this
+    // page has not been told about still gets rendered under its own name.
+    function allGroups(){
+      var order = [], byLabel = {};
+      function bucket(label){
+        if (!byLabel[label]) { byLabel[label] = []; order.push(label); }
+        return byLabel[label];
+      }
+      ORDER.forEach(function(g){ if (feats.some(function(f){ return f.group === g; })) bucket(LABELS[g] || g); });
+      feats.forEach(function(f){ bucket(LABELS[f.group] || f.group).push(f); });
+      return order.map(function(label){
+        return '<div class="grp">'+label+'</div>'+
+               '<ul class="feats">'+byLabel[label].map(featureHtml).join("")+'</ul>';
+      }).join("");
     }
     var missing = { PLUS:0, PRO:0 };
     feats.forEach(function(f){
@@ -166,7 +182,7 @@
       // account row, a chat header.
       '<h3>'+opts.name+' '+(opts.level === "PRO" ? C.badge({size:19, withLabel:false}) : "")+'</h3>'+
       '<div class="price">'+opts.price+'</div>'+
-      group("PLATFORM") + group("AI") +
+      allGroups() +
       (more.length ? '<div class="more">'+more.join('<span aria-hidden="true">·</span>')+'</div>' : "")+
       (opts.note ? '<p class="note">'+opts.note+'</p>' : "")+
       '<p class="note">'+A.config.footnotes.ALL+'</p>'+

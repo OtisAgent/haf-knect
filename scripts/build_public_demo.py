@@ -258,7 +258,7 @@ GATE = r"""
 <!-- ══ WHAT YOU SEE WHEN YOU SIGN IN ═══════════════════════════════════════
      Brent, 14 Aug: "i should be able to see an account HAF KNECT - Free
      version, Plus version & Pro version when i load up the demo.usehaf.co.uk
-     --> dashboard viewing to show what users would see if they signed up ...
+     to dashboard viewing to show what users would see if they signed up ...
      so people can use it".
 
      A visitor picking between Free, Plus and Pro is really asking one question:
@@ -270,8 +270,24 @@ GATE = r"""
 <style>
 .pd-menu{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.45rem;margin-top:.55rem}
 .pd-mi{display:flex;align-items:center;gap:.5rem;background:var(--bg);border:1px solid var(--ln);
-  border-radius:9px;padding:.5rem .6rem;font-size:.79rem;font-weight:600}
+  border-radius:9px;padding:.5rem .6rem;font-size:.79rem;font-weight:600;width:100%;text-align:left;
+  color:var(--tx);font-family:inherit;cursor:pointer;transition:border-color .12s,transform .12s}
+.pd-mi:hover{border-color:var(--or);transform:translateY(-1px)}
+.pd-mi .pd-go{margin-left:auto;color:var(--or);font-weight:800;opacity:0;transition:opacity .12s}
+.pd-mi:hover .pd-go{opacity:1}
 .pd-mi svg{flex:0 0 auto;opacity:.75}
+
+/* the strip that sits on top of every screen you walk into, so nobody is ever
+   one click from lost inside somebody else's dashboard */
+#pd-seatbar{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;background:var(--p2);
+  border:1px solid var(--ln);border-left:3px solid var(--or);border-radius:10px;
+  padding:.55rem .75rem;margin-bottom:.9rem}
+#pd-seatbar .pd-sb-t{font-size:.76rem;font-weight:800}
+#pd-seatbar .pd-sb-s{font-size:.7rem;color:var(--mu)}
+#pd-seatbar button{margin-left:auto}
+.pd-seat-back{display:flex;align-items:center;gap:.4rem;background:var(--or-d);border:1px solid var(--or-g);
+  color:var(--or);border-radius:9px;padding:.5rem .6rem;font-size:.76rem;font-weight:800;cursor:pointer;
+  margin:0 0 .5rem;width:100%;font-family:inherit;text-align:left}
 .pd-grp{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
   color:var(--mu);margin:.85rem 0 .1rem}
 
@@ -308,23 +324,114 @@ GATE = r"""
     var h='<div class="card"><div class="ct">What you see when you sign in &mdash; '
         + roleDef.l + ' on ' + T.label + '</div>';
     h+='<div class="dc-note" style="margin-top:.2rem">This is the real menu the app builds for a '
-      + roleDef.l.toLowerCase() + ' account, read straight from the live app. Membership decides '
-      + 'the features listed further down this page, not which menu you get.</div>';
+      + roleDef.l.toLowerCase() + ' account, read straight from the live app. '
+      + '<b style="color:var(--or)">Click any tab below to open that screen</b> and look around &mdash; '
+      + 'you can come back here from any of them. Membership decides the features listed further '
+      + 'down this page, not which menu you get.</div>';
 
     var seen={}, order=[];
     nav.forEach(function(t){ if(!seen[t.s]){seen[t.s]=[];order.push(t.s)} seen[t.s].push(t); });
     order.forEach(function(group){
       h+='<div class="pd-grp">'+group+'</div><div class="pd-menu">';
       seen[group].forEach(function(t){
-        h+='<div class="pd-mi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" '
+        h+='<button type="button" class="pd-mi" onclick="pdSeatOpen(\''+tier+'\',\''+t.id+'\')">'
+         + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" '
          + 'stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
-         + t.ico + '</svg><span>' + t.l + '</span></div>';
+         + t.ico + '</svg><span>' + t.l + '</span><span class="pd-go">&rarr;</span></button>';
       });
       h+='</div>';
     });
     if(got.note)h+='<div class="dc-note" style="margin-top:.7rem">'+got.note+'</div>';
     return h+'</div>';
   }
+
+  /* ── WALKING THE DASHBOARD ────────────────────────────────────────────────
+     Brent, 14 Aug: "the demo should allow me to walk through the dashboards
+     when click on the tabs".
+
+     Reading a menu tells you the tab exists. Opening it tells you whether you
+     want the account. So a click here does the same two things the app does
+     when a real member signs in: it builds THAT account's sidebar, and it
+     opens THAT screen. Not a picture of the screen — the screen, drawn by the
+     app's own code from the app's own data.
+
+     The one thing a visitor must never lose is the way back, because the
+     sidebar they are now looking at is somebody else's. So the way back is in
+     three places at once: the top of the sidebar, a strip across the top of
+     every screen they land on, and the pill in the corner. On a phone the
+     sidebar closes itself when a tab opens, which is exactly why the strip
+     exists. */
+  var PD_SEAT=null;
+
+  /* The strip lives in the shell, above the panes, NOT inside the pane it is
+     describing. It was inside the pane first, and the Network Map wiped it the
+     moment that screen drew itself: a pane that rebuilds its own innerHTML
+     takes the way back down with it. Anything that can be redrawn is the wrong
+     place to keep the exit. */
+  function pdSeatBar(){
+    if(!PD_SEAT)return;
+    var host=document.getElementById('main'); if(!host)return;
+    var bar=document.getElementById('pd-seatbar');
+    if(!bar){
+      bar=document.createElement('div'); bar.id='pd-seatbar';
+      bar.innerHTML='<div><div class="pd-sb-t" id="pd-sb-t"></div>'
+        +'<div class="pd-sb-s">A sandbox &mdash; nothing here creates a job, notifies a driver or takes a payment.</div></div>'
+        +'<button type="button" class="btn btn-or btn-sm" onclick="pdSeatClose()">&larr; Back to the demo</button>';
+    }
+    var t=bar.querySelector('.pd-sb-t');
+    if(t)t.textContent='You are looking at '+PD_SEAT.what;
+    if(host.firstChild!==bar)host.insertBefore(bar,host.firstChild);
+  }
+
+  window.pdSeatOpen=function(tier,tabId){
+    var view; try{view=DC_VIEW[tier]}catch(e){} if(!view)return;
+    var roleDef; try{roleDef=DC_ROLES.filter(function(r){return r.k===view.role})[0]}catch(e){}
+    var T; try{T=DC_TIERS[tier]}catch(e){} T=T||{label:tier};
+    var nav=(navFor(view.role).nav)||[]; if(!nav.length)return;
+
+    PD_SEAT={tier:tier, what:(roleDef?roleDef.l:view.role)+' on '+T.label};
+    try{ buildNav(nav); }catch(e){}
+    /* the way back, at the top of the sidebar this account would really have */
+    try{
+      var list=document.getElementById('nav-list');
+      if(list){
+        var b=document.createElement('button');
+        b.type='button'; b.className='pd-seat-back';
+        b.innerHTML='&larr; Back to the demo';
+        b.onclick=pdSeatClose;
+        list.insertBefore(b,list.firstChild);
+      }
+    }catch(e){}
+    var p=document.getElementById('mode-pill');
+    if(p){p.textContent='Sandbox · '+PD_SEAT.what; p.style.cursor='pointer';
+          p.onclick=pdSeatClose; p.title='Back to the demo';}
+    try{ switchTab('pane-'+(tabId||nav[0].id)); }catch(e){}
+  };
+
+  window.pdSeatClose=function(){
+    var tier=(PD_SEAT&&PD_SEAT.tier)||'free';
+    PD_SEAT=null;
+    var bar=document.getElementById('pd-seatbar');
+    if(bar&&bar.parentNode)bar.parentNode.removeChild(bar);
+    try{ buildNav(DEMO_NAV); }catch(e){}
+    var p=document.getElementById('mode-pill');
+    if(p){p.textContent='Demo Centre'; p.onclick=null; p.style.cursor='default'; p.title='Sandbox demo';}
+    try{ switchTab('pane-dc-'+tier); }catch(e){}
+  };
+
+  /* every screen the app opens while a seat is held gets the strip */
+  (function(){
+    function wrap(){
+      if(typeof window.switchTab!=='function'){setTimeout(wrap,120);return}
+      var inner=window.switchTab;
+      window.switchTab=function(id){
+        var out=inner.apply(this,arguments);
+        if(PD_SEAT)setTimeout(function(){try{pdSeatBar(id)}catch(e){}},60);
+        return out;
+      };
+    }
+    wrap();
+  })();
 
   /* dcOpen redraws the whole screen from scratch every time the role or the
      founder switch changes, so this has to run after it rather than once. */

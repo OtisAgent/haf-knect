@@ -197,6 +197,90 @@
     vatTreatment: "EX_VAT_PLUS_VAT",
 
     // =========================================================================
+    // TIER PERMISSIONS — the switchboard, section 14 of Brent's 14 Aug brief
+    //
+    // "Do not build this as completely separate hard-coded Free, Plus and Pro
+    // applications. Build modular feature permissions and configurable limits."
+    //
+    // So every gate in the product reads a NAMED PERMISSION from this block,
+    // and no page hard-codes a limit. If Plus becomes unlimited posting after
+    // real driver feedback, that is one number changed here — not a rebuild,
+    // and not a hunt through pages for the figure "10".
+    //
+    // The feature lists below quote these values through {PERM_LEVEL.name}
+    // tokens, so a limit can never be changed here and left lying on a page.
+    // =========================================================================
+    tierPermissions: {
+      LITE: {
+        network_posting: true,
+        posting_daily_limit: 5,
+        driver_plna: true,
+        fleet_management: true,
+        freight_forwarding: true,
+        direct_driver_booking: false,
+        flexible_pricing: false,
+        pricing_preferences: false,
+        return_route_planning: false,
+        filler_route_planning: false,
+        calendar_gap_detection: false,
+        advanced_calendar: false,
+        advanced_booking: false,
+        custom_branding: false,
+        jako_ai: false
+      },
+      PLUS: {
+        network_posting: true,
+        posting_daily_limit: 10,
+        driver_plna: true,
+        fleet_management: true,
+        freight_forwarding: true,
+        direct_driver_booking: true,
+        flexible_pricing: true,
+        pricing_preferences: true,
+        return_route_planning: true,
+        filler_route_planning: true,
+        calendar_gap_detection: true,
+        advanced_calendar: true,
+        advanced_booking: true,
+        custom_branding: false,
+        jako_ai: false
+      },
+      PRO: {
+        network_posting: true,
+        // null is UNLIMITED. Never 999 or 99999 — a sentinel number leaks onto
+        // a page as a real allowance the day someone forgets what it meant.
+        posting_daily_limit: null,
+        driver_plna: true,
+        fleet_management: true,
+        freight_forwarding: true,
+        direct_driver_booking: true,
+        flexible_pricing: true,
+        pricing_preferences: true,
+        return_route_planning: true,
+        filler_route_planning: true,
+        calendar_gap_detection: true,
+        advanced_calendar: true,
+        advanced_booking: true,
+        custom_branding: true,
+        jako_ai: true
+      }
+    },
+
+    // Counting rule for posting_daily_limit, brief section 3, stated so the
+    // engine that enforces it and the page that explains it cannot drift:
+    //   - a job counts ONCE, when it is successfully submitted to the network
+    //   - drafts do not count
+    //   - a cancelled job stays in audit history and is not refunded to the
+    //     allowance, so duplicate posting cannot be used to get round the limit
+    //   - the count resets daily
+    postingLimitRule: {
+      countsOn: "SUBMITTED_TO_NETWORK",
+      draftsCount: false,
+      cancelledReturnsAllowance: false,
+      resets: "DAILY"
+    },
+
+    // =========================================================================
     // WHAT EACH TIER ACTUALLY GIVES YOU
     //
     // Source: Brent's brief OTIS_HAF_PRICING_FREIGHT_FLEET_UPDATE.md (29 Jul
@@ -220,101 +304,205 @@
     // is what lets one catalogue serve Lite/Plus/Pro on any account type.
     // =========================================================================
     featureCatalogue: {
-      // ---- Driver side (PLNA) — brief section 7 ----------------------------
+      // ---- Driver side — HAF KNECT Free / Plus / Pro ------------------------
+      // SOURCE: Brent's "HAF KNECT Account Features — OTIS Build Brief",
+      // 14 Aug 2026. That document replaces the old section-7 list wholesale,
+      // and four of its rulings are load-bearing:
+      //
+      //   1. MATCHING IS BY SUITABILITY, NEVER BY MEMBERSHIP. The document bans
+      //      priority jobs, first access, better jobs and ranking boosts for
+      //      paid tiers outright. So the old "Priority and return-route
+      //      planning tools", "Improved terms on eligible jobs" and "Best
+      //      available terms on eligible jobs" lines are GONE — each of them
+      //      sold exactly the thing the product rule forbids. What Plus and Pro
+      //      actually buy is control over price and planning, not better work.
+      //   2. JAKO IS PRO ONLY, because it carries a real token cost. The old
+      //      AI-at-Lite and AI-at-Plus lines are gone with it; Plus gets the
+      //      non-AI PLNA route planner instead.
+      //   3. THE ASSISTANT IS NAMED. The JUDD/JAKO clash is settled — the
+      //      document says JAKO throughout, and JAKO is what is live.
+      //   4. The custom branded booking page is listed here as a Pro feature on
+      //      the strength of that document. It contradicts the 2026-07-29
+      //      ruling that the driver page is a separate paid Website Builder,
+      //      shown coming soon with no price and never a tier line. The newer
+      //      instruction wins, and the conflict is flagged to Brent — if he
+      //      keeps the older ruling, delete the one line marked BRANDED-PAGE.
+      //
+      // Groups are DASHBOARD (what you see and do in the account) and PLNA
+      // (the driver's diary, routes and booking link). Together with the fee
+      // treatment they give the three sections Brent asked to see per page.
       DRIVER: [
-        { unlocksAt: "LITE", group: "PLATFORM", text: "Driver profile and vehicle details" },
-        { unlocksAt: "LITE", group: "PLATFORM", text: "Your areas and availability" },
-        { unlocksAt: "LITE", group: "PLATFORM", text: "Job notifications" },
-        { unlocksAt: "LITE", group: "PLATFORM", text: "KNECT eligibility, subject to activation and compliance" },
-        { unlocksAt: "PLUS", group: "PLATFORM", text: "Priority and return-route planning tools" },
-        { unlocksAt: "PLUS", group: "PLATFORM", text: "Improved terms on eligible jobs" },
-        { unlocksAt: "PRO",  group: "PLATFORM", text: "Best available terms on eligible jobs" },
-        { unlocksAt: "PRO",  group: "PLATFORM", text: "Performance tools" },
-        // NOT LISTED, deliberately: the HAF-powered driver page. The brief
-        // (section 7) makes it a PLNA Pro feature, but that was superseded on
-        // 2026-07-29 — it is a separate paid Website Builder, shown coming soon
-        // with no price, and it must never appear as a tier feature line or
-        // carry a tick. Adding it back here would put that promise on a card.
+        // ---- FREE: access. Genuinely usable, not a locked demo. ----
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "Join the HAF KNECT network" },
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "Clever Checked compliance" },
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "Driver profile and vehicle details" },
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "Your areas and availability" },
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "Job notifications" },
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "See every job you are eligible for" },
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "Accept standard HAF KNECT jobs" },
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "Fair job matching — never decided by what you pay" },
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "Standard HAF network pricing" },
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "Complete deliveries and upload POD" },
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "Completed work and earnings history" },
+        // Posting is on EVERY account — brief section 3, "every HAF KNECT
+        // account must have the ability to post work onto the network". What
+        // the tier buys is the allowance and the tools around it, never access.
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "Post your own work onto the network — up to {PERM_LITE.posting_daily_limit} jobs a day" },
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "Guide price before you post, and edit the draft before it goes" },
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "Repeat a previous order from its reference number" },
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "Track what you posted, and cancel it with a full audit history" },
 
-        { unlocksAt: "LITE", group: "AI", text: "Guided setup and basic suggestions" },
-        { unlocksAt: "PLUS", group: "AI", text: "Planning-level AI help, within fair-use limits" },
-        { unlocksAt: "PRO",  group: "AI", text: "The full driver AI assistant" },
-        { unlocksAt: "PRO",  group: "AI", text: "Weekly reviews and approved growth tools" }
+        { unlocksAt: "LITE", group: "PLNA", text: "HAF username and PLNA identity" },
+        { unlocksAt: "LITE", group: "PLNA", text: "PLNA diary and route planner" },
+        { unlocksAt: "LITE", group: "PLNA", text: "Today, Day, Week and Month calendar views" },
+        { unlocksAt: "LITE", group: "PLNA", text: "Basic HAF booking link" },
+        { unlocksAt: "LITE", group: "PLNA", text: "Supported pre-bookings" },
+
+        // ---- PLUS: control. Price and planning, never priority. ----
+        { unlocksAt: "PLUS", group: "DASHBOARD", text: "Flexible pricing — choose to take a job below the standard rate when it suits your route" },
+        { unlocksAt: "PLUS", group: "DASHBOARD", text: "Backload pricing on return journeys and jobs near your route" },
+        { unlocksAt: "PLUS", group: "DASHBOARD", text: "Driver pricing preferences for normal, backload, towards-home and urgent work" },
+        { unlocksAt: "PLUS", group: "DASHBOARD", text: "HAF never reduces your payment — you choose every reduced rate yourself" },
+        { unlocksAt: "PLUS", group: "DASHBOARD", text: "Post up to {PERM_PLUS.posting_daily_limit} jobs a day onto the network" },
+        { unlocksAt: "PLUS", group: "DASHBOARD", text: "Advanced repeat-booking controls and higher-volume posting tools" },
+        { unlocksAt: "PLUS", group: "DASHBOARD", text: "Ask for a driver you know by their HAF username" },
+
+        { unlocksAt: "PLUS", group: "PLNA", text: "Return-route planning — find work that fits your journey home" },
+        { unlocksAt: "PLUS", group: "PLNA", text: "Filler-route planning — fill the gaps between confirmed bookings" },
+        { unlocksAt: "PLUS", group: "PLNA", text: "Calendar gap detection" },
+        { unlocksAt: "PLUS", group: "PLNA", text: "Direct booking by your HAF username" },
+        { unlocksAt: "PLUS", group: "PLNA", text: "Advanced booking link — scheduled, repeat and returning-customer bookings" },
+        { unlocksAt: "PLUS", group: "PLNA", text: "Diary, availability and customer history built into your booking link" },
+
+        // ---- PRO: your business. ----
+        // BRANDED-PAGE — see note 4 above before removing.
+        { unlocksAt: "PRO",  group: "DASHBOARD", text: "Unlimited job posting onto the network" },
+        { unlocksAt: "PRO",  group: "DASHBOARD", text: "Custom branded booking page — your logo, name, colours, services and contact details" },
+        { unlocksAt: "PRO",  group: "DASHBOARD", text: "Your own booking address, powered by HAF KNECT" },
+
+        { unlocksAt: "PRO",  group: "PLNA", text: "JAKO AI, the assistant inside PLNA" },
+        { unlocksAt: "PRO",  group: "PLNA", text: "Ask JAKO what work fits your return route" },
+        { unlocksAt: "PRO",  group: "PLNA", text: "Ask JAKO whether a reduced rate makes sense as a backload" },
+        { unlocksAt: "PRO",  group: "PLNA", text: "Ask JAKO about your diary gaps and your earnings" },
+        { unlocksAt: "PRO",  group: "PLNA", text: "Ask JAKO which customers book you, and who has stopped" }
       ],
 
-      // ---- Fleet side — brief section 6, numbers from the locked config -----
+      // ---- Fleet side — Brent's 14 Aug brief, section 7 ---------------------
+      // This list was rebuilt from that document. Three lines from the old
+      // 29 Jul version had to go, because the newer brief forbids exactly what
+      // they sold:
+      //   - "Priority fleet support" — the document bans paid-tier priority.
+      //     Support level is not matching, but the word "priority" on a tier
+      //     card is read as better work, so it goes.
+      //   - the three AI lines that sat on Fleet Lite — JAKO is Pro only now,
+      //     "because AI use creates an ongoing token / inference cost". A fleet
+      //     on the free tier being shown AI features it will not get is the
+      //     clearest kind of mis-sell.
+      //   - "add more at £5 each per month" — Brent deleted per-driver charging
+      //     when he locked the fleet bands. It should not have survived here.
+      // Compliance rule, stated in the brief and worth a line of its own: a
+      // fleet account does not bypass compliance.
       FLEET: [
         { unlocksAt: "LITE", group: "PLATFORM", text: "One fleet company account" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Every driver keeps their own PLNA profile" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Up to {FLEET_LITE.maxDrivers} drivers" },
-        { unlocksAt: "LITE", group: "PLATFORM", text: "{FLEET_LITE.bookingsPerDriverPerDay} jobs per driver per day" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Add and manage your approved drivers, and allocate vehicles" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Driver, vehicle, availability and compliance overview" },
-        { unlocksAt: "LITE", group: "PLATFORM", text: "Job allocation and fleet history" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Every driver Clever Checked — a fleet account never bypasses compliance" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Post work onto the network — up to {PERM_LITE.posting_daily_limit} jobs a day" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Allocate jobs to eligible fleet drivers" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "{FLEET_LITE.bookingsPerDriverPerDay} jobs per driver per day" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Live fleet jobs, basic fleet schedule and job history" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Fair job matching — never decided by what the fleet pays" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Standard support" },
-        { unlocksAt: "PRO",  group: "PLATFORM", text: "{FLEET_PRO.driversIncluded} drivers included, add more at £{FLEET_PRO.extraDriverMonthlyGbp} each per month" },
+
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Post up to {PERM_PLUS.posting_daily_limit} jobs a day onto the network" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Book a driver you know directly by their HAF username" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Return-route planning across the fleet" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Filler-route planning to fill the gaps in a driver's day" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Calendar gap detection across every driver's diary" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Advanced fleet scheduling" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Advanced pricing preferences, including backload rates your drivers choose" },
+
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Unlimited job posting onto the network" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "{FLEET_PRO.driversIncluded} drivers included" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Unlimited jobs per driver per day" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Central fleet dashboard with roles and permissions" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Advanced driver, vehicle, route and allocation tools" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Fleet reporting, exports and operational history" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Fleet-level compliance overview" },
-        { unlocksAt: "PRO",  group: "PLATFORM", text: "Priority fleet support" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Custom branded customer booking page in your company name" },
 
-        { unlocksAt: "LITE", group: "AI", text: "Guided fleet setup" },
-        { unlocksAt: "LITE", group: "AI", text: "Basic driver and vehicle matching suggestions" },
-        { unlocksAt: "LITE", group: "AI", text: "Missing compliance and availability prompts" },
-        { unlocksAt: "PRO",  group: "AI", text: "Fleet manager AI assistant" },
+        { unlocksAt: "PRO",  group: "AI", text: "JAKO AI for the fleet office" },
+        { unlocksAt: "PRO",  group: "AI", text: "AI route and utilisation analysis" },
         { unlocksAt: "PRO",  group: "AI", text: "Daily capacity and allocation planning" },
         { unlocksAt: "PRO",  group: "AI", text: "Best-driver suggestions from approved area, vehicle and compliance" },
         { unlocksAt: "PRO",  group: "AI", text: "Return-route and empty-mile prompts" },
         { unlocksAt: "PRO",  group: "AI", text: "Exception, lateness and missing-POD alerts" },
-        { unlocksAt: "PRO",  group: "AI", text: "Weekly fleet performance summary" }
+        { unlocksAt: "PRO",  group: "AI", text: "AI business insight and a weekly fleet performance summary" }
       ],
 
-      // ---- Freight forwarder — brief section 3 -----------------------------
-      // Listed so the marks work the day these tiers are switched on. Their
-      // PRICES are deliberately NOT in accountTypes: the brief says £0/£50/£100
-      // and that has not been confirmed since, so this file will not quote them.
+      // ---- Freight forwarder — Brent's 14 Aug brief, section 8 --------------
+      // Rebuilt from that document. Their PRICES are still deliberately NOT in
+      // accountTypes: the old brief said £0/£50/£100 and that has never been
+      // confirmed, so this file will not quote a freight price.
+      //
+      // Two lines from the old version are gone, and both for the same reason:
+      //   - "Priority matching review for eligible loads" sold the one thing
+      //     the document bans outright. Its rule is explicit — "open-network
+      //     jobs remain matched by driver suitability, not the freight
+      //     forwarder's subscription tier".
+      //   - the AI ladder that started at Free and grew through Plus. JAKO is
+      //     Pro only. The genuinely non-AI helpers (guided entry, address
+      //     checks, a summary before you submit) are real and stay, but they
+      //     sit under PLATFORM now, because calling a form check "AI" is what
+      //     let AI drift down the ladder in the first place.
+      //
+      // The reduced network fee stays: it is a commercial term Brent locked in
+      // the pricing framework, it costs the forwarder less rather than pushing
+      // them up a queue, and nothing in the new document touches it.
       FREIGHT: [
         { unlocksAt: "LITE", group: "PLATFORM", text: "One primary user" },
-        { unlocksAt: "LITE", group: "PLATFORM", text: "Post third-party client loads" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Post third-party client loads onto the network — up to {PERM_LITE.posting_daily_limit} a day" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Urgent, same-day and flexible or co-load requests" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Groupage", comingSoon: true },
-        { unlocksAt: "LITE", group: "PLATFORM", text: "The job price shown before you confirm" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Guide price shown before you confirm" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Repeat an order from its reference number" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Guided load entry, address checks and a job summary before you submit" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Card or CleverPay prepayment before release to the network" },
-        { unlocksAt: "LITE", group: "PLATFORM", text: "Job status, collection and delivery updates, POD history" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Job status, allocation, collection and delivery updates, POD history" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Client and load references" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Fair job matching — the best-placed driver wins the load, whatever you pay us" },
+
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Post up to {PERM_PLUS.posting_daily_limit} loads a day onto the network" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Request a driver you know by their HAF username" },
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Three users included, £5 per extra user per month" },
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Reduced network fee on eligible jobs" },
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Saved clients, addresses, contacts and load templates" },
-        { unlocksAt: "PLUS", group: "PLATFORM", text: "Repeat and duplicate jobs" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Advanced repeat-booking and booking controls" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Return and backload opportunity tools" },
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Client load-management dashboard" },
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Searchable history, reporting and exports" },
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Priority account support" },
+
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Unlimited load posting onto the network" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Ten users included, £5 per extra user per month" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Lowest freight network-fee band on eligible jobs" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Team roles and permissions" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Client sub-accounts and ownership controls" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Advanced SLA, load, lane and service reporting" },
-        { unlocksAt: "PRO",  group: "PLATFORM", text: "Priority matching review for eligible loads" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Custom branded booking experience for your own clients" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Bulk posting and import tools", comingSoon: true },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Dedicated account support" },
 
-        { unlocksAt: "LITE", group: "AI", text: "Guided load entry" },
-        { unlocksAt: "LITE", group: "AI", text: "Missing-information and address checks" },
-        { unlocksAt: "LITE", group: "AI", text: "An automatic job summary before you submit" },
-        { unlocksAt: "LITE", group: "AI", text: "Basic customer update templates" },
-        { unlocksAt: "PLUS", group: "AI", text: "Account-level freight AI assistant" },
-        { unlocksAt: "PLUS", group: "AI", text: "Turn a message, email or note into a draft load" },
-        { unlocksAt: "PLUS", group: "AI", text: "Route, timing and service suggestions" },
-        { unlocksAt: "PLUS", group: "AI", text: "Draft confirmations and customer updates" },
-        { unlocksAt: "PLUS", group: "AI", text: "POD and completed-job summaries" },
-        { unlocksAt: "PLUS", group: "AI", text: "Weekly account activity summary" },
-        { unlocksAt: "PRO",  group: "AI", text: "Full freight operations AI assistant" },
-        { unlocksAt: "PRO",  group: "AI", text: "Multi-load review and prioritisation" },
+        { unlocksAt: "PRO",  group: "AI", text: "JAKO AI for freight operations" },
+        { unlocksAt: "PRO",  group: "AI", text: "AI job and route recommendations" },
+        { unlocksAt: "PRO",  group: "AI", text: "Turn a message, email or note into a draft load" },
+        { unlocksAt: "PRO",  group: "AI", text: "Multi-load review, and which of your own loads to deal with first" },
         { unlocksAt: "PRO",  group: "AI", text: "Missing-detail, deadline and SLA-risk alerts" },
         { unlocksAt: "PRO",  group: "AI", text: "Consolidation, co-load and return-route opportunities" },
         { unlocksAt: "PRO",  group: "AI", text: "Draft client messages on approved channels" },
-        { unlocksAt: "PRO",  group: "AI", text: "Weekly performance and exception report" }
+        { unlocksAt: "PRO",  group: "AI", text: "AI customer and business insight, and a weekly exception report" }
       ]
     },
 
@@ -684,7 +872,18 @@
   // from the priced config above. An unknown token throws rather than printing
   // "{FLEET_PRO.driversIncluded}" onto a customer's screen.
   function resolveTokens(text) {
-    return String(text).replace(/\{([A-Z_]+)\.([A-Za-z]+)\}/g, function (_, code, field) {
+    return String(text).replace(/\{([A-Z_]+)\.([A-Za-z_]+)\}/g, function (_, code, field) {
+      // {PERM_PLUS.posting_daily_limit} reads the switchboard, so a feature
+      // line and the gate that enforces it can never quote different numbers.
+      if (code.indexOf("PERM_") === 0) {
+        var perms = config.tierPermissions[code.slice(5)];
+        if (!perms || perms[field] === undefined) {
+          throw new Error("Feature text references an unknown permission: " + code + "." + field);
+        }
+        var v = perms[field];
+        if (field === "posting_daily_limit") return v === null ? "Unlimited" : String(v);
+        return String(v);
+      }
       var t = config.accountTypes[code];
       if (!t || t[field] === undefined || t[field] === null) {
         throw new Error("Feature text references an unset figure: " + code + "." + field);
@@ -759,15 +958,109 @@
   }
 
   // ===========================================================================
+  // 6b. FEATURE GROUPS — one vocabulary, so no screen invents its own headings
+  // ===========================================================================
+  // Every screen that lists features reads these labels rather than hard-coding
+  // "HAF platform" / "AI & automation" the way the old preview card did. The
+  // ORDER is the order Brent asked to read a page in, after the fee treatment:
+  // what the account does, then what PLNA does.
+  var GROUP_ORDER = ["DASHBOARD", "PLATFORM", "PLNA", "AI"];
+  var GROUP_LABELS = {
+    DASHBOARD: "Dashboard features",
+    PLATFORM: "Dashboard features",
+    PLNA: "PLNA features",
+    AI: "AI features"
+  };
+
+  // Features for a side and level, already split into the labelled sections a
+  // page renders. Groups with nothing in them are dropped, so a page never
+  // shows an empty heading.
+  function featureSections(side, level) {
+    var rows = featuresForSideLevel(side, level);
+    var out = [];
+    GROUP_ORDER.forEach(function (g) {
+      var inGroup = rows.filter(function (f) { return f.group === g; });
+      if (!inGroup.length) return;
+      var existing = null;
+      out.forEach(function (s) { if (s.label === GROUP_LABELS[g]) existing = s; });
+      if (existing) { existing.features = existing.features.concat(inGroup); return; }
+      out.push({ group: g, label: GROUP_LABELS[g], features: inGroup });
+    });
+    // Anything carrying a group this file has not been told about still gets
+    // shown, under its own raw name, rather than silently vanishing off a page.
+    rows.forEach(function (f) {
+      if (GROUP_ORDER.indexOf(f.group) >= 0) return;
+      var bucket = null;
+      out.forEach(function (s) { if (s.group === f.group) bucket = s; });
+      if (!bucket) { bucket = { group: f.group, label: String(f.group), features: [] }; out.push(bucket); }
+      bucket.features.push(f);
+    });
+    return out;
+  }
+
+  // ===========================================================================
+  // 6d. PERMISSIONS — the one place any screen or gate asks "may they?"
+  //
+  // A page must never test the tier name. It asks for the permission by name,
+  // so the day a limit or an entitlement moves it moves once, in config.
+  // ===========================================================================
+  function permissionsFor(level) {
+    var perms = config.tierPermissions[String(level || "").toUpperCase()];
+    if (!perms) throw new Error("Unknown level: " + level);
+    var copy = {};
+    Object.keys(perms).forEach(function (k) { copy[k] = perms[k]; });
+    return copy;
+  }
+
+  function can(level, permission) {
+    var perms = permissionsFor(level);
+    if (perms[permission] === undefined) {
+      throw new Error("Unknown permission: " + permission);
+    }
+    return perms[permission] === true;
+  }
+
+  // null means unlimited, everywhere. Callers that need words use the label.
+  function postingLimit(level) {
+    return permissionsFor(level).posting_daily_limit;
+  }
+
+  function postingLimitLabel(level) {
+    var n = postingLimit(level);
+    return n === null ? "Unlimited" : n + " jobs a day";
+  }
+
+  // Would this submission be allowed? countToday is jobs already SUBMITTED to
+  // the network today — drafts are not counted by the caller, per the rule.
+  function mayPostAnother(level, countToday) {
+    var limit = postingLimit(level);
+    var used = Number(countToday) || 0;
+    if (limit === null) return { allowed: true, remaining: null, limit: null };
+    return {
+      allowed: used < limit,
+      remaining: Math.max(0, limit - used),
+      limit: limit
+    };
+  }
+
+  // ===========================================================================
   // 7. PUBLIC API
   // ===========================================================================
   return {
     config: config,
+    permissionsFor: permissionsFor,
+    can: can,
+    postingLimit: postingLimit,
+    postingLimitLabel: postingLimitLabel,
+    mayPostAnother: mayPostAnother,
     isProTier: isProTier,
     identity: identity,
     crownedTiers: crownedTiers,
     featuresFor: featuresFor,
     featuresForSideLevel: featuresForSideLevel,
+    featureSections: featureSections,
+    groupLabels: GROUP_LABELS,
+    groupOrder: GROUP_ORDER,
     missingSummary: missingSummary,
     ladderCheck: ladderCheck,
     resolveInvoicingParty: resolveInvoicingParty,

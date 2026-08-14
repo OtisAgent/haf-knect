@@ -284,15 +284,58 @@ ok("no included feature carries a mark",
 ok("an entry-level feature is never marked on the entry tier",
   liteFeat.every(function (f) { return f.unlocksAt !== "LITE" || !f.lockedBy; }));
 
-// --- platform and AI stay separate (brief section 1) -----------------------
-ok("features are split into platform and AI",
-  liteFeat.some(function (f) { return f.group === "PLATFORM"; }) &&
-  liteFeat.some(function (f) { return f.group === "AI"; }));
-ok("only PLATFORM and AI groups exist",
+// --- features are grouped into named sections, never one flat list ---------
+var KNOWN_GROUPS = ["DASHBOARD", "PLATFORM", "PLNA", "AI"];
+ok("the driver ladder is split into dashboard and PLNA sections",
+  liteFeat.some(function (f) { return f.group === "DASHBOARD"; }) &&
+  liteFeat.some(function (f) { return f.group === "PLNA"; }));
+ok("every feature on every side carries a known group",
   ["DRIVER", "FLEET", "FREIGHT"].every(function (side) {
     return A.config.featureCatalogue[side].every(function (f) {
-      return f.group === "PLATFORM" || f.group === "AI";
+      return KNOWN_GROUPS.indexOf(f.group) >= 0;
     });
+  }));
+ok("every group has a human label",
+  KNOWN_GROUPS.every(function (g) { return !!A.groupLabels[g]; }));
+
+// --- featureSections gives a page its headings, in reading order -----------
+var driverPlusSecs = A.featureSections("DRIVER", "PLUS");
+ok("driver sections come back labelled and non-empty",
+  driverPlusSecs.length >= 2 &&
+  driverPlusSecs.every(function (s) { return !!s.label && s.features.length > 0; }));
+ok("dashboard is read before PLNA",
+  driverPlusSecs[0].label === "Dashboard features" &&
+  driverPlusSecs[1].label === "PLNA features");
+ok("sectioning loses no feature",
+  driverPlusSecs.reduce(function (n, s) { return n + s.features.length; }, 0) ===
+    A.featuresForSideLevel("DRIVER", "PLUS").length);
+ok("every side can be sectioned without an empty heading",
+  ["DRIVER", "FLEET", "FREIGHT"].every(function (side) {
+    return ["LITE", "PLUS", "PRO"].every(function (lvl) {
+      return A.featureSections(side, lvl).every(function (s) { return s.features.length > 0; });
+    });
+  }));
+
+// --- Brent's core product rule: membership must not buy better work --------
+// "Do not build: priority jobs for paid accounts, first access to jobs for Pro,
+// better jobs for Plus/Pro, artificial ranking boosts." (14 Aug brief.) These
+// words are how that promise would leak back onto a customer-facing card.
+var BANNED_ON_DRIVER = ["priority", "first access", "better job", "ranking"];
+ok("no driver feature sells priority or better work for paying",
+  A.config.featureCatalogue.DRIVER.every(function (f) {
+    var t = f.text.toLowerCase();
+    return BANNED_ON_DRIVER.every(function (w) { return t.indexOf(w) < 0; });
+  }));
+
+// --- JAKO is a Pro feature, because it costs real tokens -------------------
+ok("no AI or JAKO line is included below Pro",
+  A.featuresForSideLevel("DRIVER", "PLUS").every(function (f) {
+    var t = f.text.toLowerCase();
+    return !(f.included && (t.indexOf("jako") >= 0 || t.indexOf(" ai") >= 0 || t.indexOf("ai ") === 0));
+  }));
+ok("JAKO does appear on Pro",
+  A.featuresForSideLevel("DRIVER", "PRO").some(function (f) {
+    return f.included && f.text.toLowerCase().indexOf("jako") >= 0;
   }));
 
 // --- coming soon is never sold as included ---------------------------------
@@ -321,10 +364,12 @@ ok("fleet driver cap is read from the config, not typed into the copy",
   A.featuresFor("FLEET_LITE").some(function (f) {
     return f.text === "Up to " + A.config.accountTypes.FLEET_LITE.maxDrivers + " drivers";
   }));
-ok("Fleet Pro seat price comes from the config",
-  A.featuresFor("FLEET_PRO").some(function (f) {
-    return f.text.indexOf("£" + A.config.accountTypes.FLEET_PRO.extraDriverMonthlyGbp +
-      " each per month") !== -1;
+// Brent deleted per-driver charging when he locked the fleet bands — a fleet
+// pays for its band, never per head. This test used to assert the opposite,
+// so it was guarding a line that should already have been gone.
+ok("no fleet card sells a per-driver seat price",
+  A.featuresFor("FLEET_PRO").every(function (f) {
+    return !/each per month|per driver per month|per extra driver/i.test(f.text);
   }));
 function withTempFeature(text, fn) {
   A.config.featureCatalogue.FLEET.push({ unlocksAt: "PRO", group: "PLATFORM", text: text });
@@ -426,6 +471,114 @@ ok("freight reads through the same door as driver and fleet",
   A.featuresFor("FREIGHT_LITE").length === A.config.featureCatalogue.FREIGHT.length &&
   A.missingSummary("FREIGHT_LITE").PRO > 0 &&
   A.missingSummary("FREIGHT_PRO").PRO === 0);
+
+
+// ---------------------------------------------------------------------------
+// BRENT'S 14 AUG FEATURES BRIEF — the rules that must never quietly regress
+// ---------------------------------------------------------------------------
+
+// Section 3: posting is on EVERY account. The tier buys the allowance, never
+// the ability. If this ever fails, someone has made posting a paid feature.
+ok("every level can post work onto the network",
+  ["LITE", "PLUS", "PRO"].every(function (l) { return A.can(l, "network_posting"); }));
+
+ok("the posting allowance is 5, 10 and unlimited",
+  A.postingLimit("LITE") === 5 &&
+  A.postingLimit("PLUS") === 10 &&
+  A.postingLimit("PRO") === null,
+  { lite: A.postingLimit("LITE"), plus: A.postingLimit("PLUS"), pro: A.postingLimit("PRO") });
+
+ok("unlimited reads as a word, never as a sentinel number",
+  A.postingLimitLabel("PRO") === "Unlimited");
+
+// The counting rule: a Free account is stopped at the fifth submitted job, and
+// a cancelled job does not hand the allowance back.
+ok("Free is allowed the fifth job and refused the sixth",
+  A.mayPostAnother("LITE", 4).allowed === true &&
+  A.mayPostAnother("LITE", 5).allowed === false &&
+  A.mayPostAnother("LITE", 5).remaining === 0);
+
+ok("Pro is never refused",
+  A.mayPostAnother("PRO", 9999).allowed === true &&
+  A.mayPostAnother("PRO", 9999).limit === null);
+
+ok("cancelled jobs do not return the allowance",
+  A.config.postingLimitRule.cancelledReturnsAllowance === false &&
+  A.config.postingLimitRule.draftsCount === false);
+
+// Section 1: MATCHING = suitability. Nothing on any card may sell priority,
+// first access, or better work for money. "Priority account support" is about
+// answering the phone, not about jobs, so it is the single allowed phrase.
+var PRIORITY_OK = /priority account support/i;
+var soldPriority = [];
+["DRIVER", "FLEET", "FREIGHT"].forEach(function (side) {
+  A.config.featureCatalogue[side].forEach(function (f) {
+    var t = String(f.text);
+    if (/\bpriorit/i.test(t) && !PRIORITY_OK.test(t)) soldPriority.push(side + ": " + t);
+    if (/first access|jump the queue|better jobs|ranking boost/i.test(t)) soldPriority.push(side + ": " + t);
+  });
+});
+ok("no account type is sold priority, first access or better jobs",
+  soldPriority.length === 0, { sold: soldPriority });
+
+// Section 12: JAKO carries a token cost, so it is Pro only — on every side.
+var aiBelowPro = [];
+["DRIVER", "FLEET", "FREIGHT"].forEach(function (side) {
+  A.config.featureCatalogue[side].forEach(function (f) {
+    if (/\bJAKO\b|\bAI\b/i.test(String(f.text)) && f.unlocksAt !== "PRO") {
+      aiBelowPro.push(side + " [" + f.unlocksAt + "]: " + f.text);
+    }
+  });
+});
+ok("JAKO and AI appear on Pro only, on every account type",
+  aiBelowPro.length === 0, { found: aiBelowPro });
+
+// Custom branding is Pro only, and the permission agrees with the feature list.
+ok("custom branding is Pro only in both the list and the switchboard",
+  A.can("PRO", "custom_branding") === true &&
+  A.can("PLUS", "custom_branding") === false &&
+  A.can("LITE", "custom_branding") === false);
+
+// Section 5: Plus must be genuinely useful WITHOUT AI — the route planner is
+// the whole reason Plus exists, so it cannot drift up to Pro.
+ok("Plus gets route planning without needing AI",
+  A.can("PLUS", "return_route_planning") &&
+  A.can("PLUS", "filler_route_planning") &&
+  A.can("PLUS", "calendar_gap_detection") &&
+  A.can("PLUS", "flexible_pricing") &&
+  A.can("PLUS", "direct_driver_booking") &&
+  !A.can("PLUS", "jako_ai"));
+
+// The allowance quoted on a card must come from the switchboard, so a limit
+// can never be changed in config and left stale in the words next to it.
+["DRIVER", "FLEET", "FREIGHT"].forEach(function (side) {
+  var texts = A.featuresForSideLevel(side, "PRO").map(function (f) { return f.text; }).join(" | ");
+  ok(side + ": the free allowance on the card reads the configured 5",
+    texts.indexOf("5 " ) !== -1 || /up to 5/i.test(texts), { side: side });
+  ok(side + ": no unresolved token reached the card",
+    texts.indexOf("{") === -1 && texts.indexOf("}") === -1);
+});
+
+// Every permission the brief names must exist — a screen asking for one that
+// was never defined would silently read undefined and open the gate.
+var REQUIRED = ["network_posting", "posting_daily_limit", "driver_plna",
+  "fleet_management", "freight_forwarding", "direct_driver_booking",
+  "flexible_pricing", "pricing_preferences", "return_route_planning",
+  "filler_route_planning", "calendar_gap_detection", "advanced_calendar",
+  "advanced_booking", "custom_branding", "jako_ai"];
+var missingPerms = [];
+["LITE", "PLUS", "PRO"].forEach(function (l) {
+  var p = A.permissionsFor(l);
+  REQUIRED.forEach(function (k) { if (p[k] === undefined) missingPerms.push(l + "." + k); });
+});
+ok("every permission named in the brief exists on all three levels",
+  missingPerms.length === 0, { missing: missingPerms });
+
+// A caller must not be able to mutate the live config by holding the result.
+var snapshot = A.permissionsFor("LITE");
+snapshot.jako_ai = true;
+ok("permissions hand back a copy, not the live switchboard",
+  A.can("LITE", "jako_ai") === false);
 
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

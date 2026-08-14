@@ -668,6 +668,13 @@ textarea.fi2{resize:vertical;min-height:70px}
 .dc-band .dc-band-sub{font-weight:500;color:var(--mu)}
 .dc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:.55rem}
 .dc-sub{font-size:.65rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mu);margin:.85rem 0 .45rem}
+/* Numbered section heading — the three parts every account page reads in */
+.dc-sec{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin:1.4rem 0 .6rem;padding-top:1.1rem;border-top:1px solid var(--lns)}
+.dc-sec:first-child{margin-top:.4rem;padding-top:0;border-top:none}
+.dc-sec-n{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--or-d);border:1px solid var(--or-g);color:var(--or);font-family:var(--dp);font-weight:900;font-size:.76rem;display:flex;align-items:center;justify-content:center}
+.dc-sec-t{font-family:var(--dp);font-weight:900;font-size:1.02rem;letter-spacing:-.03em;color:var(--tx)}
+.dc-sec-s{font-size:.7rem;color:var(--mu);flex:1 1 200px;line-height:1.45}
+@media(max-width:560px){.dc-sec-s{flex-basis:100%;margin-left:calc(22px + .55rem)}}
 .dc-note{font-size:.7rem;color:var(--mu);margin-top:.55rem;line-height:1.5}
 .dc-say{text-align:center;font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.03em;color:var(--tx);margin:1.1rem 0 .4rem}
 .dc-host .ct{margin-bottom:.5rem}
@@ -1533,8 +1540,8 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
     </div>
 
     <!-- ══ DOORS THREE AND FOUR ══════════════════════════════════════════
-         Brent, 14 Aug: "the master log in --> is my own HAF PLNA panel for me
-         to click --> the demo centre should take me directly to
+         Brent, 14 Aug: "the master log in → is my own HAF PLNA panel for me
+         to click → the demo centre should take me directly to
          demo.usehaf.co.uk".
 
          So the master screen is now four doors, and two of them leave this app
@@ -1583,8 +1590,8 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
   </div>
 </div>
 
-<!-- ══ DEMO FEEDBACK OVERLAY ═════════════════════════════════════ -->
-<!-- ══ CRM RECORD — one master record per network member ═════════════════════
+<!-- ══ DEMO FEEDBACK OVERLAY ═════════════════════════════════════ →
+<!— ══ CRM RECORD — one master record per network member ═════════════════════
      Brief section 6. Opened by clicking any row on Account Activity. Read-only
      on purpose: this is the place to understand an account, not to quietly edit
      one. No document, no PIN, no bank detail and no home address ever loads
@@ -2102,7 +2109,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
           <div class="card"><div class="ct">Recent jobs</div><table class="dt"><thead><tr><th>Ref</th><th>Route</th><th>Date</th><th>Pay</th><th>Status</th></tr></thead><tbody><tr><td>HAF-2848</td><td>M1 → LS1</td><td>Today</td><td style="color:var(--gn);font-weight:700">£87</td><td><span class="chip cg">Paid</span></td></tr><tr><td>HAF-2840</td><td>S1 → NG1</td><td>7 Jul</td><td style="color:var(--gn);font-weight:700">£54</td><td><span class="chip cg">Paid</span></td></tr><tr><td>HAF-2831</td><td>B1 → CV1</td><td>5 Jul</td><td style="color:var(--or);font-weight:700">£112</td><td><span class="chip ca">Pending</span></td></tr><tr><td>HAF-2820</td><td>WA1 → M1</td><td>4 Jul</td><td style="color:var(--or);font-weight:700">£38</td><td><span class="chip ca">Pending</span></td></tr></tbody></table></div>
           <div>
             <div class="card" style="margin-bottom:.75rem"><div class="ct">Next payment</div><div class="cr"><span class="ck">Amount</span><span class="cv" style="font-size:1.2rem;font-weight:900;color:var(--gn)">£284.00</span></div><div class="cr"><span class="ck">Payment date</span><span class="cv">Friday 13 Jul</span></div><div class="cr"><span class="ck">Via</span><span class="cv">CleverPay</span></div><div class="cr"><span class="ck">Jobs included</span><span class="cv">HAF-2820, HAF-2831</span></div></div>
-            <div class="card"><div class="ct">HAF KNECT plan</div><div class="cr"><span class="ck">Tier</span><span class="cv"><span class="chip co" data-haf-tier="PLUS">HAF KNECT Plus</span></span></div><div class="cr"><span class="ck">Priority matching</span><span class="cv"><span class="chip cg">Active</span></span></div><div class="cr"><span class="ck">Relay pool</span><span class="cv"><span class="chip cg">Eligible</span></span></div><div class="cr"><span class="ck">Zone rewards</span><span class="cv"><span class="chip cg">Earning</span></span></div></div>
+            <div class="card"><div class="ct">HAF KNECT plan</div><div class="cr"><span class="ck">Tier</span><span class="cv"><span class="chip co" data-haf-tier="PLUS">HAF KNECT Plus</span></span></div><div class="cr"><span class="ck">Job matching</span><span class="cv"><span class="chip cg">Fair &mdash; never by what you pay</span></span></div><div class="cr"><span class="ck">Relay pool</span><span class="cv"><span class="chip cg">Eligible</span></span></div><div class="cr"><span class="ck">Zone rewards</span><span class="cv"><span class="chip cg">Earning</span></span></div></div>
           </div>
         </div>
       </div>
@@ -2671,15 +2678,19 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <div class="pl-n">HAF KNECT Free</div>
             <div class="pl-p">£0<span style="font-size:.78rem;font-weight:500;color:var(--mu)">/mo</span></div>
             <div class="pl-fs">
-              <div class="pl-f">Post client loads on the network</div>
-              <div class="pl-f">12% network fee per job</div>
-              <div class="pl-f">Basic load tracking</div>
-              <div class="pl-f">Up to 10 active loads</div>
-              <div class="pl-f" style="opacity:.45">Account pooling credit</div>
-              <div class="pl-f" style="opacity:.45">Load history &amp; reporting</div>
-              <div class="pl-f" style="opacity:.45">Priority matching</div>
-              <div class="pl-f" style="opacity:.45">Team seats</div>
-              <div class="pl-f" style="opacity:.45">Dedicated account manager</div>
+              <div class="pl-f">One primary user</div>
+              <div class="pl-f">Post third-party client loads &mdash; up to 5 a day</div>
+              <div class="pl-f">Urgent, same-day and flexible or co-load requests</div>
+              <div class="pl-f">Guide price shown before you confirm</div>
+              <div class="pl-f">Repeat an order from its reference number</div>
+              <div class="pl-f">Card or CleverPay prepayment before release to the network</div>
+              <div class="pl-f">Job status, allocation, delivery updates and POD history</div>
+              <div class="pl-f">Fair job matching &mdash; the best-placed driver wins the load, whatever you pay us</div>
+              <div class="pl-f" style="opacity:.45">Groupage <span style="opacity:.55;font-size:.9em">coming soon</span></div>
+              <div class="pl-f" style="opacity:.45">Post up to 10 loads a day</div>
+              <div class="pl-f" style="opacity:.45">Saved clients, addresses and load templates</div>
+              <div class="pl-f" style="opacity:.45">Searchable history, reporting and exports</div>
+              <div class="pl-f" style="opacity:.45">Team roles, client sub-accounts and JAKO AI</div>
             </div>
             <button class="btn btn-gh btn-sm btn-wide">Current plan</button>
           </div>
@@ -2688,16 +2699,18 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <div class="pl-n" data-haf-tier="PLUS">HAF KNECT Plus</div>
             <div class="pl-p">£25<span>/mo</span></div>
             <div class="pl-fs">
-              <div class="pl-f">Post unlimited client loads</div>
-              <div class="pl-f">10% network fee per job</div>
-              <div class="pl-f"><strong style="color:var(--or)">1% pooling credited per job</strong> <span style="opacity:.55;font-size:.9em">coming soon</span></div>
-              <div class="pl-f">Credit offsets future invoices</div>
-              <div class="pl-f">Load history &amp; reporting</div>
-              <div class="pl-f">Client load management tools</div>
-              <div class="pl-f">Live driver tracking per load</div>
-              <div class="pl-f" style="opacity:.45">Priority matching</div>
-              <div class="pl-f" style="opacity:.45">Team seats</div>
-              <div class="pl-f" style="opacity:.45">Dedicated account manager</div>
+              <div class="pl-f">Everything in Free</div>
+              <div class="pl-f">Post up to 10 loads a day onto the network</div>
+              <div class="pl-f">Request a driver you know by their HAF username</div>
+              <div class="pl-f">Three users included, &pound;5 per extra user per month</div>
+              <div class="pl-f">Reduced network fee on eligible jobs</div>
+              <div class="pl-f">Saved clients, addresses, contacts and load templates</div>
+              <div class="pl-f">Advanced repeat-booking and booking controls</div>
+              <div class="pl-f">Return and backload opportunity tools</div>
+              <div class="pl-f">Client load-management dashboard</div>
+              <div class="pl-f">Searchable history, reporting and exports</div>
+              <div class="pl-f">Priority account support</div>
+              <div class="pl-f" style="opacity:.45">Team roles, client sub-accounts and JAKO AI</div>
             </div>
             <button class="btn btn-or btn-sm btn-wide">Upgrade to Plus</button>
           </div>
@@ -2705,16 +2718,17 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <div class="pl-n" data-haf-tier="PRO">HAF KNECT Pro</div>
             <div class="pl-p">£100<span>/mo</span></div>
             <div class="pl-fs">
-              <div class="pl-f">Post unlimited client loads</div>
-              <div class="pl-f">9% network fee per job</div>
-              <div class="pl-f"><strong style="color:var(--gn)">3% pooling credited per job</strong> <span style="opacity:.55;font-size:.9em">coming soon</span></div>
-              <div class="pl-f">Credit offsets future invoices</div>
-              <div class="pl-f">Full load history &amp; analytics</div>
-              <div class="pl-f">Client load management tools</div>
-              <div class="pl-f">Live driver tracking per load</div>
-              <div class="pl-f">Priority load matching</div>
-              <div class="pl-f"><strong>3 team seats included</strong> — post on company's behalf</div>
-              <div class="pl-f">Dedicated account manager</div>
+              <div class="pl-f">Everything in Plus</div>
+              <div class="pl-f">Unlimited load posting onto the network</div>
+              <div class="pl-f">Ten users included, &pound;5 per extra user per month</div>
+              <div class="pl-f">Lowest freight network-fee band on eligible jobs</div>
+              <div class="pl-f">Team roles and permissions</div>
+              <div class="pl-f">Client sub-accounts and ownership controls</div>
+              <div class="pl-f">Advanced SLA, load, lane and service reporting</div>
+              <div class="pl-f">Custom branded booking experience for your own clients</div>
+              <div class="pl-f">Dedicated account support</div>
+              <div class="pl-f">JAKO AI for freight operations, insight and a weekly exception report</div>
+              <div class="pl-f" style="opacity:.45">Bulk posting and import tools <span style="opacity:.55;font-size:.9em">coming soon</span></div>
             </div>
             <button class="btn btn-gh btn-sm btn-wide">Upgrade to Pro</button>
           </div>
@@ -3060,7 +3074,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
           <div class="card">
             <div class="ct">Driver reward rate <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">pence per mile — paused, held at zero</span></div>
             <div id="px-driver"></div>
-            <div class="cr"><span class="ck" style="color:var(--mu)">Paused for now: every driver is paid the same, whatever their tier. Tiers still earn priority matching, relay eligibility and their account benefits. When it is switched back on, HAF funds it out of its own share — the customer is always quoted the plain vehicle rate, so which driver takes a job can never change what they pay.</span></div>
+            <div class="cr"><span class="ck" style="color:var(--mu)">Paused for now: every driver is paid the same, whatever their tier. Job matching stays fair — it is never decided by what anyone pays; tiers earn relay eligibility and their account benefits. When it is switched back on, HAF funds it out of its own share — the customer is always quoted the plain vehicle rate, so which driver takes a job can never change what they pay.</span></div>
           </div>
           <div class="card">
             <div class="ct">Account fee reduction <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">percentage points off the network fee</span></div>
@@ -4009,7 +4023,12 @@ function hafErr(el,msg){el.textContent=msg;el.style.display='block'}
    for THIS member's own discount code. A username alone must never be enough —
    HAF usernames are guessable, and a code is worth six months of Pro. */
 let _hafCred=null;
-function hafGo(u,k,t){localStorage.setItem('knect-user',u);_hafCred={hash:t==='p'?null:k,relay:t==='p'?k:null};enterKnectApp(u);}
+/* The account record that actually opened this session. Every access decision on
+   the page reads THIS, and nothing else — never the username, never a guess from
+   which screen you came in on. Cleared on sign-out so the next person on a shared
+   machine inherits nothing. */
+let _hafAcct=null;
+function hafGo(u,k,t,acct){localStorage.setItem('knect-user',u);_hafCred={hash:t==='p'?null:k,relay:t==='p'?k:null};_hafAcct=acct||null;enterKnectApp(u,acct);}
 const DRIVER_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
   {id:'d-invites',l:'Exchange',s:'KNECT Jobs',badge:'2',ico:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>'},
@@ -4493,6 +4512,61 @@ function dcFounderRule(){
 const DC_FND_CHIP='<span class="dc-fnd">&#9733; FOUNDER</span>';
 
 /* ── SECTIONS 1-3: what Free, Plus and Pro actually receive ── */
+
+/* A numbered section heading. Brent asked for each account page to read in
+   three clear parts — the % uplift, the dashboard features, the PLNA features —
+   so the number is on the page, not just implied by the order of the cards. */
+function dcSecHead(n,title,sub){
+  return '<div class="dc-sec"><span class="dc-sec-n">'+n+'</span>'+
+         '<span class="dc-sec-t">'+_esc(title)+'</span>'+
+         (sub?'<span class="dc-sec-s">'+_esc(sub)+'</span>':'')+'</div>';
+}
+
+/* One feature row, ticked if this membership has it and marked with the level
+   that unlocks it if it does not. */
+function dcFeatRow(f){
+  const on=f.included;
+  return '<div class="dc-feat'+(on?'':' off')+'">'+
+    '<span class="dc-fi">'+(on?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gn)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'
+                           :'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>')+'</span>'+
+    '<span class="dc-ft">'+_esc(f.text)+'</span>'+
+    (f.comingSoon?'<span class="dc-unl" style="color:var(--mu)">Coming soon</span>'
+                 :(f.lockedBy?'<span class="dc-unl">'+DC_LEVEL_NAME[f.lockedBy]+'</span>':''))+
+    '</div>';
+}
+
+/* Sections 2 and 3. The catalogue decides both the feature lines AND which
+   section each one belongs in — this page only draws them. If the catalogue is
+   missing or empty the page says so rather than filling the gap with a guess. */
+function dcFeatureSections(tier,roleDef,lvl){
+  const A=window.HAFAccountFees;
+  const miss=(n,title,why)=>dcSecHead(n,title,'')+'<div class="card"><div class="dc-note">'+why+'</div></div>';
+
+  if(!roleDef.side)
+    return miss(2,'Dashboard features','The shared feature catalogue does not carry a Business list yet — it holds Driver, Fleet and Freight forwarder. Rather than invent one here, this is left blank until the real list is added to the catalogue every other screen reads.');
+  if(!A||!A.featureSections)
+    return miss(2,'Dashboard features','The shared feature catalogue did not load, so no feature list is shown. It is never guessed at from this page.');
+
+  let secs=[];
+  try{secs=A.featureSections(roleDef.side,lvl)||[];}catch(e){secs=[];}
+  if(!secs.length)
+    return miss(2,'Dashboard features','No features are listed for this role in the shared catalogue.');
+
+  /* Every section that follows the % uplift is numbered from 2, in the order
+     the catalogue hands them over — dashboard first, then PLNA. */
+  let h='',n=2;
+  secs.forEach(s=>{
+    const held=s.features.filter(f=>f.included).length;
+    h+=dcSecHead(n,s.label,held+' of '+s.features.length+' on '+DC_TIERS[tier].label);
+    h+='<div class="card"><div class="ct">'+_esc(s.label)+' &mdash; '+_esc(roleDef.l)+'</div>'+
+       '<div id="dc-feats-'+tier+'-'+s.group.toLowerCase()+'">'+
+       s.features.map(dcFeatRow).join('')+
+       '</div></div>';
+    n++;
+  });
+  return h;
+}
+
 function dcSetRole(tier,role){DC_VIEW[tier].role=role;dcRenderTier(tier);}
 function dcSetFounder(tier,on){DC_VIEW[tier].founder=!!on;dcRenderTier(tier);}
 
@@ -4515,7 +4589,12 @@ function dcRenderTier(tier){
   h+='<button class="dc-role'+(view.founder?' on':'')+'" onclick="dcSetFounder(\''+tier+'\','+(!view.founder)+')">'+(view.founder?'On':'Off')+'</button>';
   h+='<span class="dc-note" style="margin:0;flex:1 1 220px">'+_esc(fnd.text)+'</span></div></div>';
 
-  /* Pricing treatment — read from the matrix, never written down */
+  /* ── SECTION 1 of 3 — the % uplift ────────────────────────────────────────
+     Brent, 14 Aug: every account page reads in three sections — the % uplift,
+     then the dashboard features, then the PLNA features. Section one is the
+     only one that touches money, and every figure in it is read live from the
+     pricing matrix rather than written down here. */
+  h+=dcSecHead(1,'The % uplift','What this membership does to the money, and what it opens.');
   const al=ACC_LEVEL[T.acc]||ACC_LEVEL.lite, dl=DRV_LEVEL[T.drv]||DRV_LEVEL.free;
   h+='<div class="g2"><div class="card"><div class="ct">What this membership does to the money</div>';
   if(roleDef.posts){
@@ -4541,28 +4620,11 @@ function dcRenderTier(tier){
   acc.forEach(a=>{h+='<div class="cr"><span class="ck">'+a[0]+'</span><span class="cv">'+a[1]+'</span></div>';});
   h+='</div></div>';
 
-  /* Feature ladder — from the shared catalogue, not from this page */
-  h+='<div class="card"><div class="ct">Features on '+T.label+' &mdash; '+roleDef.l+'</div><div id="dc-feats-'+tier+'">';
-  if(!roleDef.side){
-    h+='<div class="dc-note">The shared feature catalogue does not carry a Business list yet — it holds Driver, Fleet and Freight forwarder. Rather than invent one here, this is left blank until the real list is added to the catalogue every other screen reads.</div>';
-  }else if(window.HAFAccountFees&&window.HAFAccountFees.featuresForSideLevel){
-    let rows=[];
-    try{rows=window.HAFAccountFees.featuresForSideLevel(roleDef.side,lvl);}catch(e){rows=[];}
-    if(!rows.length)h+='<div class="dc-note">No features listed for this role in the shared catalogue.</div>';
-    rows.forEach(f=>{
-      const on=f.included;
-      h+='<div class="dc-feat'+(on?'':' off')+'">'+
-        '<span class="dc-fi">'+(on?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gn)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'
-                               :'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>')+'</span>'+
-        '<span class="dc-ft">'+_esc(f.text)+'</span>'+
-        (f.comingSoon?'<span class="dc-unl" style="color:var(--mu)">Coming soon</span>'
-                     :(f.lockedBy?'<span class="dc-unl">'+DC_LEVEL_NAME[f.lockedBy]+'</span>':''))+
-        '</div>';
-    });
-  }else{
-    h+='<div class="dc-note">The shared feature catalogue did not load, so no feature list is shown. It is never guessed at from this page.</div>';
-  }
-  h+='</div></div>';
+  /* ── SECTIONS 2 AND 3 — dashboard features, then PLNA features ────────────
+     Both come from the shared catalogue every other screen reads, split by the
+     catalogue's own headings. Nothing on this page invents a feature line, and
+     nothing here decides which section a feature belongs in. */
+  h+=dcFeatureSections(tier,roleDef,lvl);
 
   /* Example job economics — the same job on every tier so they compare */
   const j={miles:45,mins:0,van:'lwb',job:'sday',from:'S35',to:'M1',vat:true};
@@ -4829,20 +4891,36 @@ async function hafAuth(u,s,err,btn){
        right — that is what lets somebody sign in here with the PIN they already
        set, instead of being sent away to invent a second one. */
     const cp=isPin?await hafSha('HAF-CP|'+u+'|'+s):null;
-    const r=await fetch(PLNA_URL+'/rest/v1/rpc/plna_auth',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify(isPin?{p_username:u,p_hash:null,p_relay:hash,p_cp:cp}:{p_username:u,p_hash:hash,p_relay:null,p_cp:null})});
+    /* ── WHICH DOOR THIS IS ──────────────────────────────────────────────────
+       This is KNECT — the posting side. Brent, 14 Aug: "every account can post
+       and every account has the option to add a PLNA which is a driver → only
+       should have access to the PLNA section when it's been clever checked and
+       approved". So this page opens the POSTING door (knect_auth), which lets a
+       correct credential in and REPORTS whether the driving side is unlocked.
+       The driving door (plna_auth) is a separate function and is unchanged: it
+       still refuses anyone who has not been released, and it is what
+       plna.usehaf.co.uk opens.
+
+       This used to call the driving door and then ignore its answer — a
+       not-yet-checked account came back saying "not cleared" and was signed in
+       anyway, straight onto the driver screens. That is the fault Brent hit. */
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/knect_auth',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify(isPin?{p_username:u,p_hash:null,p_relay:hash,p_cp:cp}:{p_username:u,p_hash:hash,p_relay:null,p_cp:null})});
     const d=await r.json();
-    if(!Array.isArray(d)||!d.length){
+    /* A row is not an answer. The field that decides is `cred` — the credential
+       form that actually opened the account. Anything without one is a refusal
+       wearing the shape of a profile, and it is treated as a refusal. */
+    if(!Array.isArray(d)||!d.length||!d[0]||!d[0].cred){
       hafErr(err,isPin?'That PIN didn\'t match. Use the PIN you chose on your application — or reset it below.':'Incorrect username or password. Try again.');
       btn.textContent=old;btn.disabled=false;return}
-    if(!isPin&&!d[0].has_pin){hafPend={u:u,hash:hash};btn.textContent=old;btn.disabled=false;closeLogin();document.getElementById('pin-ov').classList.add('open');document.getElementById('pin-a').focus();return}
+    if(!isPin&&!d[0].has_pin){hafPend={u:u,hash:hash,acct:d[0]};btn.textContent=old;btn.disabled=false;closeLogin();document.getElementById('pin-ov').classList.add('open');document.getElementById('pin-a').focus();return}
     /* keep whichever hash actually opened the account: later calls (bookings,
        usage, profile) prove who they are by sending it back */
-    hafGo(u,d[0].cred==='cleverpay'?cp:hash,isPin?'p':'w');
+    hafGo(u,d[0].cred==='cleverpay'?cp:hash,isPin?'p':'w',d[0]);
   }catch(e){hafErr(err,'Connection problem — please try again.');btn.textContent=old;btn.disabled=false}
 }
 function doLogin(){hafAuth(document.getElementById('l-user').value,document.getElementById('l-pass').value,document.getElementById('l-err'),document.querySelector('#login-ov .btn-wide'))}
 function scLogin(){hafAuth(document.getElementById('sc-user').value,document.getElementById('sc-pass').value,document.getElementById('sc-err'),document.querySelector('.side-card .btn-wide'))}
-function pinSkip(){document.getElementById('pin-ov').classList.remove('open');if(hafPend)hafGo(hafPend.u,hafPend.hash,'w')}
+function pinSkip(){document.getElementById('pin-ov').classList.remove('open');if(hafPend)hafGo(hafPend.u,hafPend.hash,'w',hafPend.acct)}
 async function pinSave(){
   const a=document.getElementById('pin-a').value.trim(),b=document.getElementById('pin-b').value.trim(),err=document.getElementById('pin-err'),btn=document.getElementById('pin-btn');
   err.style.display='none';
@@ -4859,11 +4937,11 @@ async function pinSave(){
     const r=await fetch(PLNA_URL+'/rest/v1/rpc/set_driver_pin',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:hafPend.u,p_password_hash:hafPend.hash,p_pin_hash:ph,p_cp:pc})});
     const ok=await r.json();
     if(ok!==true){hafErr(err,'Couldn\'t save your PIN — please try again.');btn.textContent='Save PIN and continue';btn.disabled=false;return}
-    hafGo(hafPend.u,hafPend.hash,'w');
+    hafGo(hafPend.u,hafPend.hash,'w',hafPend.acct);
   }catch(e){hafErr(err,'Connection problem — please try again.');btn.textContent='Save PIN and continue';btn.disabled=false}
 }
 function goLanding(){document.getElementById('app').classList.remove('open');document.getElementById('landing').style.display='flex'}
-function signOut(){localStorage.removeItem('knect-user');goLanding();}
+function signOut(){localStorage.removeItem('knect-user');_hafCred=null;_hafAcct=null;goLanding();}
 /* EXCHANGE */
 let _xchOnline=true;
 let _xchActiveJob=null;
@@ -6547,9 +6625,11 @@ function capBootPane(){
   }else{
     const dw=document.getElementById('cap-driverwork');if(dw)dw.style.display='none';
     const mz=document.getElementById('cap-mapzone');if(mz)mz.style.display='';
-    capMapOpen=true;initCapMap();
+    capMapOpen=true;
+    if(NETWORK_MAP_ADVANCED)initCapMap();  /* no map drawn while it is parked */
     capSetView(capView); /* land on the simple area tiles by default; map is one tap away */
   }
+  capApplySimpleMode();
 }
 function capRenderDriverWork(){
   const el=document.getElementById('cap-driverwork');if(!el)return;
@@ -6583,7 +6663,7 @@ function capToggleMapZone(open){
   capMapOpen=(open===undefined)?!capMapOpen:open;
   const mz=document.getElementById('cap-mapzone');if(mz)mz.style.display=capMapOpen?'':'none';
   const btn=document.getElementById('cap-mapviewbtn');if(btn)btn.innerHTML=capMapOpen?'▴ Hide map':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5z"/><path d="M9 4v13"/><path d="M15 6.5v13"/></svg> Full map view';
-  if(capMapOpen){initCapMap();capSetRole('driver');setTimeout(()=>{try{if(capMap)capMap.invalidateSize();}catch(e){}},60);}
+  if(capMapOpen){if(NETWORK_MAP_ADVANCED)initCapMap();capSetRole('driver');setTimeout(()=>{try{if(capMap)capMap.invalidateSize();}catch(e){}},60);}
   else{const lb=document.getElementById('cap-lb-card');if(lb)lb.style.display='none';}
 }
 /* Extra town/city labels so the map reads richer than the base tiles alone.
@@ -6826,7 +6906,45 @@ function capRenderSections(){
 }
 /* ── VIEW: the full-map page opens on the MAP (tiles live on the dashboard); List toggle brings the tiles back here too ── */
 let capView='map';
+/* ═══════════════ NETWORK MAP — SIMPLE ONLY, ADVANCED PARKED ═══════════════
+   Brent, 14 Aug: "to keep this simple can you remove the network map advanced
+   mode and keep it on a simple mode for the time being park it".
+
+   PARKED, not removed. Every advanced control is still in this file and still
+   works; this one switch decides whether they are reachable. Flip it to true
+   and the map, the West/East columns, the filter row and the customer/driver
+   switch all come back exactly as they were, with no other edit.
+
+   Simple mode is the area tiles — tap your area, see who covers it. It is the
+   view this pane was already built to default to; the map was the layer on top
+   of it, and the layer is what has been put away.
+
+   capSetView is the single choke point on purpose. Everything that asks for
+   the map — the dashboard's "Full network map", an area tile, the expand
+   button — comes through here, so parking it here parks it everywhere and
+   nothing is left half-open. */
+const NETWORK_MAP_ADVANCED=false;
+function capApplySimpleMode(){
+  if(NETWORK_MAP_ADVANCED)return;
+  ['crole-customer','crole-driver','cview-map','cview-list'].forEach(id=>{
+    const b=document.getElementById(id);
+    if(b&&b.parentNode)b.parentNode.style.display='none';
+  });
+  const f=document.querySelector('#pane-f-cap .cap-filters');if(f)f.style.display='none';
+  const x=document.querySelector('#cap-listview .btn-or');if(x)x.style.display='none';
+  const dv=document.getElementById('cap-mapviewbtn');if(dv)dv.style.display='none';
+  /* A driver normally gets their work cards and NO map area at all, because the
+     map was one tap away behind "Full map view" — and that button has just been
+     put away with the rest of it. Leaving it there would give them a tab called
+     Network Map with no network on it, so the area tiles come to them instead. */
+  const mz=document.getElementById('cap-mapzone');
+  if(mz&&mz.style.display==='none'){mz.style.display='';capMapOpen=true;}
+  capSetView('list');
+  const sub=document.getElementById('cap-sub');
+  if(sub&&!capIsDriver())sub.textContent='Tap your area to see who covers it and book a courier.';
+}
 function capSetView(v){
+  if(!NETWORK_MAP_ADVANCED)v='list';   /* the map is parked — always the tiles */
   capView=v;
   document.getElementById('cview-map').classList.toggle('on',v==='map');
   document.getElementById('cview-list').classList.toggle('on',v==='list');
