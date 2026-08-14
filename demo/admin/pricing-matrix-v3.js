@@ -1,0 +1,984 @@
+/* ============================================================================
+ * HAF KNECT — Pricing Matrix  (MATRIX-V5)
+ *
+ * The order-flow pricing brain. Sits alongside pricing-engine.js (lane maths)
+ * and margin-gate.js (loss gate). V5 completes the framework Brent locked on
+ * 2026-07-31 by adding the two levers he asked for on top of the V4 ladder:
+ *
+ *   DRIVER SIDE — driver reward rate, pence per mile
+ *     Free driver    +£0.00/mi     (PLNA Free / Fleet Lite)
+ *     Member driver  +£0.10/mi     (PLNA Plus / Fleet Middle / paid KNECT member)
+ *     Pro driver     +£0.25/mi     (PLNA Pro / Fleet Pro)
+ *
+ *   ACCOUNT SIDE — network fee reduction, percentage points (framework §5)
+ *     Free account    −0 pts       (Business Free / Freight Free)
+ *     Plus account    −2.5 pts     (Freight Plus, paid HAF KNECT member)
+ *     Pro account     −5 pts       (Freight Pro)
+ *   giving Brent's own matrix: urgent 30/27.5/25, same-day and scheduled
+ *   20/17.5/15. A FLEET tier never reduces the fee (§7) — a fleet is a supply
+ *   account, so its tier is expressed on the driver side instead.
+ *
+ * Three amounts, always kept apart and never blended into one rate:
+ *   1. Carrier Transport Value — what the road work is worth, paid to the driver
+ *   2. HAF Network Fee — a % of (1), added ON TOP, never skimmed out of it
+ *   3. Customer price — (1) + (2), ex VAT
+ *
+ * Principles (locked):
+ *  - FRAMEWORK-V7 (Brent 2026-08-02): WHICH DRIVER TAKES A JOB NEVER CHANGES
+ *    WHAT THE CUSTOMER PAYS. The driver reward rate is held at £0.00/mile for
+ *    now ("for now offering more for a driver isn't right"), and if it is ever
+ *    switched on again HAF funds it out of its own share ("i'm happy to take
+ *    less margin for HAF then make the customers pay more") down to a floor.
+ *    This replaces the V5/V6 rule that let the reward ride up the customer
+ *    price, and it makes §7 of the 31 July framework literally true.
+ *  - An account's level takes points off the fee, never off driver pay.
+ *  - Highest wins, never stacks — on both sides.
+ *  - HAF margin is always applied on network jobs; firm % by job type, with a
+ *    minimum floor that no benefit may breach.
+ *  - Direct bookings carry 0% HAF margin but are gated by KNECT tier quota.
+ *  - Hindrance (weight/handling/stops/waiting) pays the DRIVER, capped 1.40x
+ *    automated — anything above goes to manual review.
+ *  - Fuel marker: when the live fuel price runs above the market average,
+ *    base rates are uplifted automatically so drivers stay whole. Logged.
+ *  - Pool tracking: trial phase allocates a % of HAF margin to 4 pools
+ *    (affiliate / driver / freight / relay+storage); production phase locks a
+ *    5% network pool (2.5 driver / 2.5 relay). Both are computed on every job
+ *    so the split comparison is always auditable.
+ *  - EVERY calculation returns a full audit record. Nothing is hidden.
+ *
+ * Nothing commercial is hard-coded into logic: all numbers live in `config`
+ * (mirrored to tier_config seed v3 when promoted). Works in browser + Node.
+ * ========================================================================== */
+(function (root, factory) {
+  if (typeof module === "object" && module.exports) module.exports = factory();
+  else root.HAFPricingMatrix = factory();
+})(typeof self !== "undefined" ? self : this, function () {
+  "use strict";
+
+  // ===========================================================================
+  // 1. EDITABLE CONFIG — mirror of tier_config seed v3 (FRAMEWORK-V3)
+  // ===========================================================================
+  var config = {
+    version: "MATRIX-V7",
+    effectiveFrom: "2026-08-02",
+    vatPct: 20,
+
+    // The speed the rate card is built around. A lane that drives slower than
+    // this costs the driver more of their day per mile, so the road work is
+    // valued on the greater of distance and time. Matches the customer engine.
+    referenceMph: 40,
+
+    // --- Vehicle matrix — the ONLY eight vehicles on this network.
+    //     baseRate = £ per loaded mile paid to the driver/fleet
+    //     minTransportValue = the vehicle's minimum transport value, £ ex VAT
+    //     The top of the ladder is a Luton in its three approved bodies —
+    //     box, curtain side and tail lift (Brent 2026-08-02: "Lutons - tail
+    //     lift + box + curtain side").
+    //     Nothing above a Luton exists here: no artic, flatbed, rigid, tractor
+    //     unit, 7.5t, anything drawn on a trailer, or any other HGV class.
+    //     (Removal test, §17.)
+    //
+    //     Box and curtain side carry the same payload, so they price the same.
+    //     That mirrors the live rate card, which has always quoted the two
+    //     identically. Brent can split them on the Pricing Engine page if he
+    //     ever wants curtain side to earn more.
+    vehicles: [
+      { code: "SMALL_VAN",     name: "Small Van",           baseRate: 0.80, minTransportValue: 50 },
+      { code: "SWB_VAN",       name: "SWB",                 baseRate: 0.90, minTransportValue: 55 },
+      { code: "MWB_VAN",       name: "MWB",                 baseRate: 1.00, minTransportValue: 60 },
+      { code: "LWB_VAN",       name: "LWB",                 baseRate: 1.10, minTransportValue: 65 },
+      { code: "XLWB_VAN",      name: "XLWB",                baseRate: 1.20, minTransportValue: 70 },
+      { code: "LUTON",         name: "Luton — Box",         baseRate: 1.30, minTransportValue: 75 },
+      { code: "LUTON_CURTAIN", name: "Luton — Curtain Side", baseRate: 1.30, minTransportValue: 75 },
+      { code: "LUTON_TAIL",    name: "Luton — Tail Lift",   baseRate: 1.40, minTransportValue: 80 }
+    ],
+
+    // --- Prepared but INACTIVE: never priced, never shown, until approved (§13)
+    inactiveVehicles: [
+      { code: "MOTORCYCLE", name: "Motorcycle", baseRate: null, minTransportValue: null, active: false },
+      { code: "CAR",        name: "Car",        baseRate: null, minTransportValue: null, active: false }
+    ],
+
+    // --- DRIVER REWARD RATE (MATRIX-V5) --------------------------------------
+    //     Brent 2026-07-31 asked for a driver base-rate rise "per account or
+    //     HAF KNECT Paid members", then on 2026-08-02 asked for it to carry
+    //     different wording from "uplift" so it stops reading as a contradiction
+    //     of §7. Same money, one name everywhere: the DRIVER REWARD RATE.
+    //     It is PENCE PER LOADED MILE added to the
+    //     vehicle base rate — not a percentage skimmed off HAF's fee. It is the
+    //     model already approved in PRICING_ENGINE_CONSTANTS §5.1 (2026-07-18):
+    //     "Member and Pro derive automatically as Free + £0.10 and Free + £0.25".
+    //
+    //     ⚠️ SUPERSEDED IN PART BY FRAMEWORK-V7 (see `driverReward` below).
+    //     V5/V6 let the reward raise the transport value, so the network fee
+    //     rode up with it and the CUSTOMER paid for the better driver — Henry
+    //     measured £45 inc VAT on a 100-mile same-day small van. Brent ruled on
+    //     2026-08-02: "i wouldn't say charging more for a better driver ... for
+    //     now offering more for a driver isn't right - i'm happy to take less
+    //     margin for HAF then make the customers pay more."
+    //     So the rates below are the SHAPE of the reward, held at zero today,
+    //     and `driverReward` decides who funds it if it is ever switched on.
+    driverLevels: {
+      FREE:   { name: "Free driver",           rewardGbpPerMile: 0.00, rank: 0 },
+      MEMBER: { name: "Member driver",         rewardGbpPerMile: 0.10, rank: 1 },
+      PRO:    { name: "Pro driver",            rewardGbpPerMile: 0.25, rank: 2 }
+    },
+
+    // --- WHO FUNDS A DRIVER REWARD (FRAMEWORK-V7) ----------------------------
+    //     Brent 2026-08-02, in full, because both halves are rules:
+    //
+    //     1. "for now offering more for a driver isn't right"
+    //        → enabled:false. Member and Pro drivers are paid EXACTLY the same
+    //          as a Free driver today. Their tier still earns everything else
+    //          (priority matching, relay pool, fee reductions); the pay rung is
+    //          held at zero, not deleted, so it is one word to switch back on.
+    //          Pro's value comes from features he is adding later — gap
+    //          insurance and the rest — not from a mileage rate.
+    //
+    //     2. "i'm happy to take less margin for HAF then make the customers
+    //        pay more"
+    //        → fundedBy:"HAF_MARGIN". If the reward IS switched on, the
+    //          customer price is calculated as though a Free driver took the
+    //          job, and the extra comes out of HAF's own share. Two drivers,
+    //          two tiers, one price: which driver accepts a job can never move
+    //          what the customer is quoted. This is also §7 of his 31 July
+    //          framework, honoured literally at last.
+    //
+    //     minRetainedPctOfCustomer is the one limit on "happy to take less":
+    //     HAF funds the reward down to this share of the customer price and no
+    //     further. Beyond it the reward is TRIMMED to what HAF can afford and
+    //     the job is flagged — the customer price still does not move, and HAF
+    //     never runs a job at a loss to pay a bonus.
+    driverReward: {
+      enabled: false,
+      fundedBy: "HAF_MARGIN",          // "HAF_MARGIN" | "CUSTOMER" (the V5/V6 way)
+      minRetainedPctOfCustomer: 8
+    },
+
+    // Which driver level each thing earns. HIGHEST WINS, NEVER STACKS — the
+    // same rule as every other benefit on this network.
+    // ✅ CONFIRMED BY BRENT 2026-07-31 ("that's correct, add exactly that").
+    //    This SUPERSEDES §7 of the 31 Jul framework, which says "PLNA tier must
+    //    not change the customer-facing vehicle mileage rate". He was shown the
+    //    clash in writing and chose the reward rate: the customer rate follows the
+    //    driver who takes the job. §7's line is recorded as superseded here
+    //    rather than quietly dropped, so nobody re-applies it later.
+    driverLevelFrom: {
+      plnaTier:  { FREE: "FREE", PLUS: "MEMBER", PRO: "PRO" },
+      // Fleet bands per framework §7: Lite free to 5, Middle £100 to 25,
+      // Pro £250 to 50. A fleet's tier sets the level for its drivers — this is
+      // the reading of "Fleet account same again" that keeps fleet on the
+      // supply side, where §7 puts it. FLAGGED, not confirmed.
+      fleetTier: { FLEET_LITE: "FREE", FLEET_MIDDLE: "MEMBER", FLEET_PRO: "PRO" },
+      // A paid HAF KNECT membership on the DRIVER side earns the member rate.
+      knectPaidMember: "MEMBER"
+    },
+
+    // --- NETWORK FEE REDUCTION BY POSTING ACCOUNT (MATRIX-V5) ----------------
+    //     SOURCE: Brent's "HAF KNECT Pricing Matrix and Network Fee Framework",
+    //     31 Jul 2026, §5 — Freight Plus 2.5 percentage points, Freight Pro 5
+    //     percentage points, giving his own live matrix:
+    //       Urgent 30 / 27.5 / 25 · Same-day 20 / 17.5 / 15 · Scheduled 20 / 17.5 / 15
+    //     and his explicit instruction: "A percentage-POINT reduction must be
+    //     used. Do not calculate this as a 5% discount from the value of the
+    //     20% fee."
+    //
+    //     ✅ CONFIRMED BY BRENT 2026-07-31: "2.5 - 5 is correct".
+    //     SUPERSEDES the −4 / −7 pair in PRICING_ENGINE_CONSTANTS §5.5 (approved
+    //     2026-07-18) AND the legacy `freight_tier.feeAdjPts` row in tier_config
+    //     (+4 / 0 / −3, seed v1) which is a third, older model again. Both are
+    //     recorded as superseded, not deleted, so nobody re-applies them.
+    //
+    //     The reduction comes off HAF only — never the driver's transport value
+    //     (§5, §7) — and can never breach the job-type floor.
+    accountLevels: {
+      LITE: { name: "Free account", feeReductionPts: 0,   rank: 0 },
+      PLUS: { name: "Plus account", feeReductionPts: 2.5, rank: 1 },
+      PRO:  { name: "Pro account",  feeReductionPts: 5,   rank: 2 }
+    },
+    // Every older fee model, kept visible so none of them creeps back in.
+    supersededAccountLevels: {
+      supersededBy: "Pricing Matrix and Network Fee Framework §5, 2026-07-31 — confirmed by Brent in chat, same day",
+      priorModels: [
+        { source: "PRICING_ENGINE_CONSTANTS §5.5 (2026-07-18)", PLUS: 4,  PRO: 7 },
+        { source: "tier_config freight_tier.feeAdjPts seed v1",  FREE: 4, PLUS: 0, PRO: -3 },
+        { source: "tier_config knect_member.FEE_BENEFIT seed v2", MEMBER_PTS: 1 }
+      ]
+    },
+    // The percentage-multiplier driver model this pence-per-mile reward rate replaces.
+    supersededDriverModels: [
+      { source: "tier_config plna_payout seed v2 (multipliers)",
+        LITE: 1.00, PLUS: 1.04, PRO: 1.08, cap: 1.10 }
+    ],
+
+    accountLevelFrom: {
+      // ⚠️ FLEET IS DELIBERATELY ABSENT HERE. §7 of the framework: "Fleet
+      // subscription level must not automatically reduce the network fee
+      // charged to a freight forwarder or business customer." A fleet is a
+      // SUPPLY-side account — it takes work, it does not post it — so its tier
+      // is expressed on the DRIVER side instead (driverLevelFrom.fleetTier).
+      // Brent's chat line "Fleet account same again" sits in his network-fee
+      // paragraph and could be read the other way round; the document is
+      // explicit, so the document holds until he says otherwise. FLAGGED.
+      accountType: {
+        BUSINESS_FREE: "LITE",     // §7: business accounts get the standard fee
+        FREIGHT_FREE:  "LITE", FREIGHT_PLUS: "PLUS", FREIGHT_PRO: "PRO"
+      },
+      // ⚠️ NOT IN THE DOCUMENT AT ALL. Brent named KNECT members as earning a
+      // reduction in chat; the framework is silent on it. Set to the Plus rung
+      // as the entry paid tier. One word to move.
+      knectPaidMember: "PLUS"
+    },
+
+    // --- PLNA driver tiers (subscription identity; rate effect via driverLevels)
+    plnaTiers: {
+      FREE: { name: "PLNA Free" },
+      PLUS: { name: "PLNA Plus" },
+      PRO:  { name: "PLNA Pro" }
+    },
+
+    // --- KNECT tiers: paid membership + direct-booking allowance (anti-bypass)
+    knectTiers: {
+      FREE: { name: "KNECT Free",       paid: false, directBookingsPerMonth: 3 },
+      PAID: { name: "HAF KNECT Member", paid: true,  directBookingsPerMonth: null } // null = unlimited
+    },
+
+    // --- WHAT A PERCENTAGE MEANS (FRAMEWORK-V6, Brent 2026-08-02) -----------
+    //     Brent's bands are "minimum 10% - 15% per job paid accounts ... the
+    //     free accounts needs to be 20% - 30%". Henry built those as what HAF
+    //     KEEPS; V5 applied them as what HAF ADDS on top of the transport
+    //     value. Same words, two different businesses: on a 30-mile same-day
+    //     small van, adding 20% to a £50 transport value leaves HAF keeping
+    //     16.7% of the £60 — and only about 12.5% once the trial pools are
+    //     paid out. His stated band could not be met at any job type.
+    //
+    //     He then asked for the system to "allow for the figures above". The
+    //     only reading under which his own numbers are true is KEEP, so that
+    //     is what a percentage now means:
+    //
+    //         customer price (ex VAT) = transport value ÷ (1 − keep%)
+    //         HAF network fee         = customer price − transport value
+    //
+    //     Free accounts land on exactly 20 / 20 / 25 / 30 and paid accounts
+    //     never fall below 15 — his bands, hit without inventing a number.
+    //     The driver is unaffected: they are still paid the whole transport
+    //     value, and the fee still sits on top of it rather than inside the
+    //     mileage rate.
+    //
+    // --- RULING, 2026-08-02: this is now LOCKED, not a preference ------------
+    //     Brent's pricing document defines the fee the other way round (his
+    //     §6 worked examples add the percentage to driver pay: driver £115 at
+    //     20% = £138 to the customer). Asked which definition wins, he handed
+    //     the decision back — "find the right solution - and make a choice
+    //     OTIS - you can fix it" — so it is made here, on his numbers:
+    //
+    //       · ADDED cannot express his own bands. Adding 20% to the transport
+    //         value leaves HAF keeping 16.7% of what the customer pays, so
+    //         scheduled/flexible and same-day — the two job types that carry
+    //         the bulk of the network — land BELOW his stated 20–30% band at
+    //         every vehicle and every distance. Timed scrapes the 20% line
+    //         with under a tenth of a point to spare and urgent is the only
+    //         one with real room. Nothing in the engine can lift the other
+    //         two back: the definition itself is what fails. (Read the same
+    //         way, his paid band's 10% marker would be 9.1% kept — under his
+    //         own stated minimum.) A rule that cannot be satisfied is not a
+    //         rule. All of this is measured, not asserted:
+    //         node admin/fee-basis-lock.test.js
+    //       · KEEP meets every band exactly and needs no invented number.
+    //       · The driver is paid identically either way (proved in
+    //         fee-basis-lock.test.js), so the choice costs the network
+    //         nothing — it is purely what HAF retains.
+    //       · The cost of the ruling is honest and small: his three §6 worked
+    //         examples rise ~4% (£60→£62.50, £105.75→£109.09, £126.50→
+    //         £129.41). The document's arithmetic is what changes, not the
+    //         bands he wrote.
+    //
+    //     ADDED_TO_TRANSPORT_VALUE is deliberately left working so the
+    //     counterfactual can be TESTED rather than argued — the lock suite
+    //     runs it and shows the bands failing. It is not a supported setting:
+    //     changing this line breaks fee-basis-lock.test.js on purpose.
+    feeBasis: "SHARE_OF_CUSTOMER_PRICE",
+    // The bands the ruling has to satisfy, kept as data so the guard below and
+    // the lock suite check the SAME numbers Brent stated, not a copy of them.
+    feeBasisRuling: {
+      lockedOn: "2026-08-02",
+      lockedBy: "Brent — decision delegated to Otis",
+      freeAccountKeepBandPct: [20, 30],   // "the free accounts needs to be 20% - 30%"
+      paidAccountKeepFloorPct: 10         // "minimum 10% - 15% per job paid accounts"
+    },
+
+    // --- HAF margin by job type: firm %, hard floor. Never breached by benefits.
+    //     marginPct = the share of the customer price HAF keeps (see feeBasis).
+    //     floorPct   = the least HAF may retain after funding a driver reward.
+    //     Groupage is built but NOT customer-facing at launch (§12).
+    //     servicePremiumMult = the urgency premium, PAID TO THE DRIVER. It has
+    //     been live in the customer quote since FRAMEWORK-V3 but was missing
+    //     from this engine, so an urgent job was quoted 10% higher than the
+    //     order flow recorded — the driver would have been paid 10% short of
+    //     what the customer paid for. Found by the V6 lane suite on
+    //     2026-08-02 and fixed here; the customer price does not change.
+    jobTypes: [
+      { code: "GROUPAGE",     name: "Groupage",                     marginPct: 10, floorPct: 8,  servicePremiumMult: 1.00, active: false },
+      { code: "FLEX_SAMEDAY", name: "Scheduled / Flexible / Co-load", marginPct: 20, floorPct: 15, servicePremiumMult: 1.00, active: true },
+      { code: "STD_SAMEDAY",  name: "Same-Day",                     marginPct: 20, floorPct: 15, servicePremiumMult: 1.00, active: true },
+      { code: "TIMED",        name: "Timed Delivery",               marginPct: 25, floorPct: 18, servicePremiumMult: 1.00, active: true },
+      { code: "URGENT",       name: "Urgent / Time-Critical",       marginPct: 30, floorPct: 22, servicePremiumMult: 1.10, active: true }
+    ],
+
+    // --- Driver hindrance multipliers (pay the driver for genuine burden)
+    hindrance: {
+      weight:   { STANDARD: 1.00, MODERATE: 1.03, HEAVY: 1.07, NEAR_LIMIT: 1.12 },
+      handling: { KERBSIDE: 1.00, ASSISTED: 1.05, DIFFICULT: 1.08 },
+      maxAutoMultiplier: 1.40,          // above => manual review
+      stopFeeGbp: 5,                    // per additional stop
+      waitingPerHourGbp: 15             // after included allowance
+    },
+
+    // --- Fuel marker: protects driver economics when fuel surges
+    fuel: {
+      marketAvgPencePerLitre: 152,      // rolling market average (admin-updated)
+      currentPencePerLitre: 152,        // live price (admin/feed-updated)
+      surgeThresholdPct: 8,             // % above average before we act
+      baseRateUpliftPct: 4,             // % added to vehicle base rates on surge
+      maxUpliftPct: 10                  // hard ceiling on fuel compensation
+    },
+
+    // --- Market band guard: never price drivers out of their local market
+    market: {
+      bandPct: 15   // customer price may sit at most this % above local median
+    },
+
+    // --- Direct bookings: customer books their KNECTed driver directly
+    directBooking: {
+      hafMarginPct: 0                   // HAF takes nothing on direct jobs
+    },
+
+    // --- Minimums step up by VEHICLE, never by distance — one ladder only.
+    //     A genuinely short run in the area is handling work, not road work, so
+    //     that one minimum eases down for very low mileage and returns to full
+    //     by 25 miles. The taper is continuous: no mile where the price jumps.
+    //     The curve is smooth end to end, so no mile ever prices lower than a
+    //     shorter one. 0 mi = 30% below; 15 mi = 20% below; 25 mi = full.
+    localHandling: {
+      maxReductionPct: 30,                 // at zero miles
+      bandReductionPct: 20,                // by this many miles...
+      bandAtMiles: 15,
+      fullMinimumFromMiles: 25             // ...back to the full minimum here
+    },
+
+    // --- Pool allocation — % OF HAF MARGIN routed to network pools
+    pools: {
+      phase: "TRIAL",                   // TRIAL until builder criteria met
+      trial: {                          // Brent 2026-07-20: 20–25% back in
+        totalPctOfMargin: 25,
+        split: { affiliate: 7, driverPool: 7, freightPool: 6, relayStorage: 5 }
+      },
+      production: {                     // locks in after builder criteria
+        totalPctOfMargin: 5,
+        split: { driverPool: 2.5, relayStorage: 2.5 }
+      }
+    }
+  };
+
+  // --- The lane engine (FRAMEWORK-V6). Optional on purpose: if it is not
+  //     loaded the engine prices exactly as V5 did, with a flat lane of 1.00.
+  var LaneFactors = null;
+  try {
+    LaneFactors = (typeof require === "function")
+      ? require("./lane-factors-v1.js")
+      : (typeof self !== "undefined" ? self.HAFLaneFactors : null);
+  } catch (e) { LaneFactors = null; }
+
+  /* One lane adjustment for this job. `input.laneFactor` lets the back office
+     hold a lane still for a what-if without touching the learned record. */
+  function resolveLane(input) {
+    var flat = { key: null, factor: 1, basis: "NONE", parts: {}, sampleSize: 0, reasons: [] };
+    if (input.laneFactor != null) {
+      var f = parseFloat(input.laneFactor);
+      if (isFinite(f) && f > 0)
+        return { key: null, factor: f, basis: "WHAT_IF", parts: {}, sampleSize: 0,
+                 reasons: ["What-if lane adjustment " + Math.round(f * 100) + "% of standard."] };
+    }
+    if (!LaneFactors || !input.toPostcode) return flat;
+    try {
+      return LaneFactors.laneFactor(input.fromPostcode, input.toPostcode,
+        { miles: parseFloat(input.miles), minutes: parseFloat(input.minutes) });
+    } catch (e2) { return flat; }
+  }
+
+  var round2 = function (n) { return Math.round((n + Number.EPSILON) * 100) / 100; };
+  var num = function (v, d) { var n = parseFloat(v); return isFinite(n) ? n : (d || 0); };
+
+  function getVehicle(code) {
+    for (var i = 0; i < config.vehicles.length; i++)
+      if (config.vehicles[i].code === code) return config.vehicles[i];
+    return config.vehicles[0];
+  }
+  // The vehicle minimum, eased down for a genuinely short in-area run.
+  // Continuous by design: there is no mile at which the price jumps.
+  function minTransportValue(vehicle, miles) {
+    var lh = config.localHandling, m = Math.max(0, miles), f;
+    var maxOff = lh.maxReductionPct / 100, bandOff = lh.bandReductionPct / 100;
+    if (m >= lh.fullMinimumFromMiles) f = 1;
+    else if (m >= lh.bandAtMiles)
+      f = (1 - bandOff) + bandOff * (m - lh.bandAtMiles) / (lh.fullMinimumFromMiles - lh.bandAtMiles);
+    else
+      f = (1 - maxOff) + (maxOff - bandOff) * (m / lh.bandAtMiles);
+    return round2(vehicle.minTransportValue * f);
+  }
+  function getJobType(code) {
+    for (var i = 0; i < config.jobTypes.length; i++)
+      if (config.jobTypes[i].code === code) return config.jobTypes[i];
+    return config.jobTypes[2]; // Standard Same-Day default
+  }
+
+  // ---------------------------------------------------------------------------
+  // LEVEL RESOLVERS — "highest wins, never stacks", applied identically on both
+  // sides of the job. A driver who is PLNA Pro AND a paid KNECT member is a Pro
+  // driver, not a Pro-plus-Member driver. A freight forwarder on Pro who is also
+  // a KNECT member gets −7 points, not −11.
+  // ---------------------------------------------------------------------------
+  function bestOf(levels, candidates) {
+    var best = null;
+    for (var i = 0; i < candidates.length; i++) {
+      var key = candidates[i];
+      var lvl = key && levels[key];
+      if (lvl && (best === null || lvl.rank > levels[best].rank)) best = key;
+    }
+    return best;
+  }
+
+  // Which driver level applies, and every claim that was considered (audit).
+  function resolveDriverLevel(input) {
+    var map = config.driverLevelFrom, claims = [];
+    var candidates = [];
+    var fromPlna = map.plnaTier[input.plnaTier];
+    if (fromPlna) { candidates.push(fromPlna); claims.push({ source: "PLNA " + (input.plnaTier || "FREE"), level: fromPlna }); }
+    var fromFleet = input.driverFleetTier && map.fleetTier[input.driverFleetTier];
+    if (fromFleet) { candidates.push(fromFleet); claims.push({ source: "Fleet " + input.driverFleetTier, level: fromFleet }); }
+    if (input.driverIsKnectMember) {
+      candidates.push(map.knectPaidMember);
+      claims.push({ source: "HAF KNECT member (driver)", level: map.knectPaidMember });
+    }
+    var code = bestOf(config.driverLevels, candidates) || "FREE";
+    return { code: code, level: config.driverLevels[code], claims: claims };
+  }
+
+  // Which posting-account level applies, and every claim considered (audit).
+  function resolveAccountLevel(input) {
+    var map = config.accountLevelFrom, claims = [];
+    var candidates = [];
+    var fromType = input.accountType && map.accountType[input.accountType];
+    if (fromType) { candidates.push(fromType); claims.push({ source: input.accountType, level: fromType }); }
+    var knect = config.knectTiers[input.knectTier];
+    if (knect && knect.paid) {
+      candidates.push(map.knectPaidMember);
+      claims.push({ source: "HAF KNECT member (account)", level: map.knectPaidMember });
+    }
+    var code = bestOf(config.accountLevels, candidates) || "LITE";
+    return { code: code, level: config.accountLevels[code], claims: claims };
+  }
+
+  // ===========================================================================
+  // 2. FUEL MARKER — automatic driver protection, always reported
+  // ===========================================================================
+  function fuelAdjustment() {
+    var f = config.fuel;
+    var pctOver = f.marketAvgPencePerLitre > 0
+      ? ((f.currentPencePerLitre - f.marketAvgPencePerLitre) / f.marketAvgPencePerLitre) * 100
+      : 0;
+    if (pctOver >= f.surgeThresholdPct) {
+      var uplift = Math.min(f.baseRateUpliftPct, f.maxUpliftPct);
+      return { active: true, pctOverAverage: round2(pctOver), upliftPct: uplift,
+               reason: "FUEL_SURGE (" + round2(pctOver) + "% over market avg)" };
+    }
+    return { active: false, pctOverAverage: round2(pctOver), upliftPct: 0, reason: null };
+  }
+
+  // ===========================================================================
+  // 3. THE CALCULATION — one call per order, returns the full audit record
+  // ===========================================================================
+  /**
+   * price(input) -> full breakdown + audit record
+   * input: {
+   *   miles, vehicleCode, jobTypeCode,
+   *   plnaTier: 'FREE'|'PLUS'|'PRO',
+   *   knectTier: 'FREE'|'PAID',
+   *   weight: 'STANDARD'|'MODERATE'|'HEAVY'|'NEAR_LIMIT',
+   *   handling: 'KERBSIDE'|'ASSISTED'|'DIFFICULT',
+   *   extraStops, waitingHours,
+   *   isDirectBooking: bool,
+   *   directBookingsUsedThisMonth: number,   // for the quota gate
+   *   localMarketMedianExVat: number|null,   // market band guard (null = skip)
+   *   override: { marginPct, operator, reason } | null,   // admin only
+   *   operator: string                        // who ran the calc (audit)
+   * }
+   */
+  function price(input) {
+    var reasons = [], flags = [];
+    var vehicle = getVehicle(input.vehicleCode);
+    var jobType = getJobType(input.jobTypeCode);
+    var plna = config.plnaTiers[input.plnaTier] || config.plnaTiers.FREE;
+    var knect = config.knectTiers[input.knectTier] || config.knectTiers.FREE;
+    var miles = Math.max(0, num(input.miles));
+
+    // --- Direct booking gate (anti-bypass) ---
+    var direct = !!input.isDirectBooking;
+    var directAllowed = true;
+    if (direct) {
+      var quota = knect.directBookingsPerMonth;
+      if (quota !== null && num(input.directBookingsUsedThisMonth) >= quota) {
+        directAllowed = false;
+        flags.push("DIRECT_QUOTA_EXCEEDED");
+        reasons.push("Direct booking quota reached (" + quota + "/month on " + knect.name + ") — route through the network or upgrade.");
+      } else {
+        reasons.push("Direct booking (" + knect.name + ") — HAF margin 0%.");
+      }
+    }
+
+    // --- Driver reward rate: pence per mile ON the vehicle rate, decided
+    //     by the driver's own tier / fleet tier / KNECT membership. Highest
+    //     wins. This raises the transport value, so the fee rides up with it.
+    var driverLevel = resolveDriverLevel(input);
+    var rewardCfg = config.driverReward || { enabled: true, fundedBy: "CUSTOMER", minRetainedPctOfCustomer: 0 };
+    var rewardFundedByHaf = rewardCfg.fundedBy !== "CUSTOMER";
+    // FRAMEWORK-V7: held at zero today — "for now offering more for a driver
+    // isn't right" (Brent 2026-08-02). The level still resolves and is still
+    // recorded on the job, so nothing downstream has to change if it comes back.
+    var rewardPerMile = rewardCfg.enabled === false ? 0 : driverLevel.level.rewardGbpPerMile;
+    if (rewardPerMile > 0)
+      reasons.push("Driver reward +£" + rewardPerMile.toFixed(2) + "/mile (" +
+        driverLevel.level.name + ")" + (rewardFundedByHaf
+          ? " — funded by HAF, so the customer pays the same whichever driver takes the job."
+          : " — the customer rate follows the driver taking the job."));
+    else if (driverLevel.level.rewardGbpPerMile > 0)
+      reasons.push(driverLevel.level.name + " — tier benefits apply, but the driver reward rate " +
+        "is held at £0.00/mile for now, so every driver is paid the same on this job.");
+
+    // --- Fuel marker ---
+    var fuel = fuelAdjustment();
+    var baseRate = vehicle.baseRate + rewardPerMile;
+    if (fuel.active) {
+      baseRate = baseRate * (1 + fuel.upliftPct / 100);
+      reasons.push("Fuel protection: base rate +" + fuel.upliftPct + "% (" + fuel.reason + ").");
+    }
+    // --- Sandbox base-rate lever (what-if only; defaults off, live pricing unchanged) ---
+    if (input.baseRateMult != null) {
+      var brm = num(input.baseRateMult);
+      if (brm > 0 && brm !== 1) {
+        baseRate = baseRate * brm;
+        reasons.push("What-if base rate " + Math.round(brm * 100) + "% of standard.");
+      }
+    }
+
+    // --- Posting account level: how many points come off the network fee ---
+    var accountLevel = resolveAccountLevel(input);
+
+    // --- Hindrance multiplier (pays the driver) ---
+    var wF = config.hindrance.weight[input.weight] || 1.0;
+    var hF = config.hindrance.handling[input.handling] || 1.0;
+    var rawMult = wF * hF;
+    var mult = rawMult;
+    var manualReview = false;
+    if (rawMult > config.hindrance.maxAutoMultiplier) {
+      mult = config.hindrance.maxAutoMultiplier;
+      manualReview = true;
+      flags.push("MULTIPLIER_CAPPED");
+      reasons.push("Hindrance " + round2(rawMult) + "x capped at " + config.hindrance.maxAutoMultiplier + "x — manual review.");
+    }
+    var supplements = num(input.extraStops) * config.hindrance.stopFeeGbp
+                    + num(input.waitingHours) * config.hindrance.waitingPerHourGbp;
+
+    // --- LANE ADJUSTMENT (FRAMEWORK-V6) ------------------------------------
+    //     The route's own small adjustment: how the road really drives, how
+    //     likely a paid load back is, how busy the lane is, and what drivers
+    //     and customers say about it. It multiplies the mileage value, so it
+    //     pays the DRIVER and HAF's share rides on top exactly as every other
+    //     driver-side lever does. With no finished jobs behind a lane it falls
+    //     back to the destination-area grade that has always been live, so
+    //     nothing moves until there is real evidence. Details in
+    //     admin/lane-factors-v1.js.
+    var lane = resolveLane(input);
+    var laneF = lane.factor;
+    if (laneF !== 1) {
+      for (var lr = 0; lr < lane.reasons.length; lr++) reasons.push(lane.reasons[lr]);
+    }
+    // The urgency premium, paid to the driver — live in the customer quote
+    // since FRAMEWORK-V3 and now here too, so both engines value the same job
+    // at the same money.
+    var servicePremium = jobType.servicePremiumMult != null ? jobType.servicePremiumMult : 1;
+    if (servicePremium !== 1)
+      reasons.push(jobType.name + " premium " + Math.round((servicePremium - 1) * 100) +
+        "% on the road work — paid to the driver.");
+
+    // The framework's single combined ceiling: hindrance × lane × urgency may
+    // not exceed the automated cap. Above it we still price at the cap and send
+    // the job to a human rather than quietly charging more.
+    var roadMult = mult * laneF * servicePremium;
+    if (roadMult > config.hindrance.maxAutoMultiplier) {
+      roadMult = config.hindrance.maxAutoMultiplier;
+      manualReview = true;
+      flags.push("LANE_CAPPED");
+      reasons.push("Hindrance, lane and urgency together exceed " + config.hindrance.maxAutoMultiplier +
+        "x — held at the cap and sent for manual review.");
+    }
+    lane.appliedFactor = Math.round(laneF * 1000) / 1000;
+    lane.servicePremium = servicePremium;
+    lane.combinedRoadMultiplier = Math.round(roadMult * 1000) / 1000;
+
+    // --- Mileage value at this driver's rate, and at the plain Free rate, so
+    //     the audit can show exactly what the reward was worth on this job.
+    //     Where driving MINUTES are known, the road work is worth the greater
+    //     of the distance and the time — Brent 2026-08-02: "same driving time
+    //     different distance". A slow 40-mile run is not a cheap 40-mile run.
+    //     With no minutes supplied this is distance only, exactly as before.
+    var driverMinutes = num(input.minutes, 0);
+    var roadValue = function (rate) {
+      var byDistance = miles * rate;
+      var byTime = driverMinutes > 0 ? (driverMinutes / 60) * rate * config.referenceMph : 0;
+      return Math.max(byDistance, byTime);
+    };
+    var freeRate = vehicle.baseRate * (baseRate / (vehicle.baseRate + rewardPerMile));
+    if (driverMinutes > 0 && roadValue(baseRate) > miles * baseRate)
+      reasons.push("Priced on driving time (" + round2(driverMinutes) + " min for " + miles +
+        " miles) rather than distance — this lane drives slower than the rate card's " +
+        config.referenceMph + " mph.");
+    var driverBase = round2(roadValue(baseRate) * roadMult + supplements);
+    var driverBaseAtFreeRate = round2(roadValue(freeRate) * roadMult + supplements);
+
+    // --- Margin (firm; overridable by admin with reason, never below floor) ---
+    var marginPct = direct ? config.directBooking.hafMarginPct : jobType.marginPct;
+
+    // --- Account fee reduction: points off the job-type fee, floor-protected.
+    //     A direct booking already carries 0% — there is nothing to reduce.
+    var feeReduction = { requestedPts: 0, appliedPts: 0, floorHeld: false, level: accountLevel.code };
+    if (!direct && accountLevel.level.feeReductionPts > 0) {
+      var wantPts = accountLevel.level.feeReductionPts;
+      var afterPct = Math.max(marginPct - wantPts, jobType.floorPct);
+      feeReduction.requestedPts = wantPts;
+      feeReduction.appliedPts = round2(marginPct - afterPct);
+      feeReduction.floorHeld = feeReduction.appliedPts < wantPts;
+      reasons.push("Network fee −" + feeReduction.appliedPts + " points (" +
+        accountLevel.level.name + ") → " + afterPct + "%" +
+        (feeReduction.floorHeld ? " — held at the " + jobType.floorPct + "% floor" : "") + ".");
+      marginPct = afterPct;
+    }
+    // --- Sandbox margin lever (what-if only; defaults off, floor-protected) ---
+    if (!direct && input.marginDeltaPct != null) {
+      var md = num(input.marginDeltaPct);
+      if (md !== 0) {
+        marginPct = Math.min(90, Math.max(jobType.floorPct, marginPct + md));
+        reasons.push("What-if margin " + (md > 0 ? "+" : "") + md + " pts → " + marginPct + "%.");
+      }
+    }
+    var overrideApplied = null;
+    if (!direct && input.override && input.override.marginPct != null) {
+      var req = num(input.override.marginPct);
+      var eff = Math.max(req, jobType.floorPct);
+      overrideApplied = {
+        requestedPct: req, effectivePct: eff,
+        clamped: eff !== req,
+        operator: input.override.operator || "unknown",
+        reason: input.override.reason || "(no reason given)"
+      };
+      marginPct = eff;
+      flags.push("MARGIN_OVERRIDE");
+      reasons.push("Margin override to " + eff + "% by " + overrideApplied.operator +
+        (overrideApplied.clamped ? " (clamped to " + jobType.floorPct + "% floor)" : "") +
+        " — " + overrideApplied.reason);
+    }
+
+    // --- Carrier Transport Value: the greater of the mileage value and the
+    //     vehicle's minimum (eased down for genuinely short in-area work).
+    // The lane lifts the vehicle minimum too. Without this, a hard lane that
+    // happens to be short would price identically to an easy one, because the
+    // minimum would swallow the whole adjustment — which is exactly the case
+    // Brent raised (Sheffield→Manchester against Sheffield→Birmingham).
+    var minValue = round2(minTransportValue(vehicle, miles) * laneF);
+    var carrierValue = driverBase;
+    var minApplied = false;
+    if (!direct && carrierValue < minValue) {
+      carrierValue = minValue;
+      minApplied = true;
+      reasons.push("Vehicle minimum applied: " + vehicle.name + " £" + minValue +
+        (miles < config.localHandling.fullMinimumFromMiles
+          ? " (short local run priced as handling, eased down from £" + vehicle.minTransportValue + ")"
+          : ""));
+    }
+    carrierValue = round2(carrierValue);
+    // The same job priced at the plain Free rate — the reward's real worth.
+    var carrierValueAtFreeRate = round2(
+      (!direct && driverBaseAtFreeRate < minValue) ? minValue : driverBaseAtFreeRate);
+
+    // --- HAF Network Fee ---------------------------------------------------
+    //     FRAMEWORK-V6: the percentage is the share of the CUSTOMER PRICE HAF
+    //     keeps, so the customer price is the transport value grossed up:
+    //         customer = transport ÷ (1 − keep%)   ·   fee = customer − transport
+    //     The driver is still paid the whole transport value and the fee still
+    //     sits on top of it — only what the percentage MEANS has changed, and
+    //     it now means what Brent's own bands say. `feeBasis` switches the
+    //     engine back to the V5 add-on model in one word if he ever wants it.
+    var keepsBasis = config.feeBasis !== "ADDED_TO_TRANSPORT_VALUE";
+    // FRAMEWORK-V7: the customer price is built on the FREE-DRIVER transport
+    // value, so which driver accepts the job cannot move what the customer is
+    // quoted. Any reward is funded out of HAF's share below.
+    var priceBasis = rewardFundedByHaf ? carrierValueAtFreeRate : carrierValue;
+    var customerExVatRaw = keepsBasis
+      ? priceBasis / (1 - Math.min(marginPct, 95) / 100)
+      : priceBasis * (1 + marginPct / 100);
+    var customerExVat = round2(customerExVatRaw);
+
+    // --- The driver is paid the whole transport value, reward included, so no
+    //     reward can ever be "withheld" for margin reasons. What it costs is
+    //     taken from HAF's own share, never added to the customer's price.
+    var rewardGbp = round2(Math.max(0, carrierValue - carrierValueAtFreeRate));
+    var rewardTrimmedGbp = 0;
+    if (rewardFundedByHaf && rewardGbp > 0) {
+      // The one limit on "happy to take less margin": HAF funds the reward down
+      // to its floor share and no further. Past that the reward is trimmed and
+      // flagged — loudly, never silently — and the customer price still holds.
+      var minRetainedGbp = round2(customerExVat * num(rewardCfg.minRetainedPctOfCustomer) / 100);
+      var affordableGbp = round2(customerExVat - minRetainedGbp - carrierValueAtFreeRate);
+      if (affordableGbp < rewardGbp) {
+        rewardTrimmedGbp = round2(rewardGbp - Math.max(0, affordableGbp));
+        rewardGbp = round2(Math.max(0, affordableGbp));
+        carrierValue = round2(carrierValueAtFreeRate + rewardGbp);
+        manualReview = true;
+        flags.push("REWARD_TRIMMED");
+        reasons.push("Driver reward trimmed by £" + rewardTrimmedGbp + " — funding it in full would " +
+          "leave HAF under its " + rewardCfg.minRetainedPctOfCustomer + "% floor on this job. The " +
+          "customer price is unchanged; the shortfall is flagged for a human to look at.");
+      } else {
+        reasons.push("HAF funded £" + rewardGbp + " of driver reward out of its own share — the " +
+          "customer pays the same as they would with a free driver.");
+      }
+    }
+
+    var driverPay = carrierValue;
+    var networkFeeGbp = round2(customerExVat - carrierValue);
+
+    // --- Market band guard ---
+    if (input.localMarketMedianExVat != null && num(input.localMarketMedianExVat) > 0) {
+      var median = num(input.localMarketMedianExVat);
+      var maxOk = median * (1 + config.market.bandPct / 100);
+      if (customerExVat > maxOk) {
+        manualReview = true;
+        flags.push("ABOVE_MARKET_BAND");
+        reasons.push("Price £" + customerExVat + " is more than " + config.market.bandPct +
+          "% above local median £" + round2(median) + " — manual review.");
+      }
+    }
+
+    var vat = round2(customerExVat * config.vatPct / 100);
+    var hafMarginGbp = round2(customerExVat - driverPay);
+
+    // --- Pool allocation: computed BOTH ways on every job for the audit ---
+    function splitPools(spec) {
+      var out = { totalGbp: round2(hafMarginGbp * spec.totalPctOfMargin / 100), byPool: {} };
+      for (var k in spec.split)
+        out.byPool[k] = round2(hafMarginGbp * spec.split[k] / 100);
+      return out;
+    }
+    var poolsTrial = splitPools(config.pools.trial);
+    var poolsProduction = splitPools(config.pools.production);
+    var activePools = config.pools.phase === "TRIAL" ? poolsTrial : poolsProduction;
+    var hafNetGbp = round2(hafMarginGbp - activePools.totalGbp);
+
+    // --- The audit record (this IS the order's pricing record) ---
+    return {
+      version: config.version,
+      calculatedAt: input.calculatedAt || null,   // caller stamps (no Date here)
+      operator: input.operator || "system",
+      inputs: {
+        miles: miles, vehicle: vehicle.code, jobType: jobType.code,
+        plnaTier: input.plnaTier || "FREE", knectTier: input.knectTier || "FREE",
+        accountType: input.accountType || null,
+        driverFleetTier: input.driverFleetTier || null,
+        driverIsKnectMember: !!input.driverIsKnectMember,
+        weight: input.weight || "STANDARD", handling: input.handling || "KERBSIDE",
+        extraStops: num(input.extraStops), waitingHours: num(input.waitingHours),
+        isDirectBooking: direct
+      },
+      fuel: fuel,
+      rates: { vehicleBaseRate: vehicle.baseRate,
+               driverLevel: driverLevel.code,
+               driverLevelName: driverLevel.level.name,
+               driverRewardGbpPerMile: rewardPerMile,
+               rewardedBaseRate: round2(vehicle.baseRate + rewardPerMile),
+               fuelAdjustedRate: round2(baseRate),
+               levelClaims: driverLevel.claims },
+      account: { level: accountLevel.code,
+                 levelName: accountLevel.level.name,
+                 feeReductionRequestedPts: feeReduction.requestedPts,
+                 feeReductionAppliedPts: feeReduction.appliedPts,
+                 heldAtFloor: feeReduction.floorHeld,
+                 levelClaims: accountLevel.claims },
+      hindrance: { weightFactor: wF, handlingFactor: hF, rawMultiplier: round2(rawMult),
+                   appliedMultiplier: round2(mult), supplementsGbp: round2(supplements) },
+      lane: { key: lane.key, basis: lane.basis, factor: lane.factor,
+              appliedFactor: lane.appliedFactor != null ? lane.appliedFactor : lane.factor,
+              servicePremium: lane.servicePremium,
+              combinedRoadMultiplier: lane.combinedRoadMultiplier,
+              parts: lane.parts, sampleSize: lane.sampleSize,
+              from: input.fromPostcode || null, to: input.toPostcode || null },
+      money: {
+        feeBasis: config.feeBasis,
+        // The three amounts, kept apart (§1) — never blended into one rate.
+        carrierTransportValueGbp: carrierValue,   // 1. what the road work is worth
+        networkFeePct: marginPct,                 // 2. the HAF network fee...
+        networkFeeGbp: networkFeeGbp,             //    ...in pounds
+        customerExVatGbp: customerExVat,          // 3. what the customer pays, ex VAT
+        vatGbp: vat,
+        customerIncVatGbp: round2(customerExVat + vat),
+        driverBasePayGbp: driverBase,
+        driverRewardGbp: rewardGbp,               // what the reward rate was worth here
+        driverRewardFundedBy: rewardFundedByHaf ? "HAF_MARGIN" : "CUSTOMER",
+        driverRewardEnabled: rewardCfg.enabled !== false,
+        driverRewardTrimmedGbp: rewardTrimmedGbp,
+        // What the customer price was built on. Under FRAMEWORK-V7 this is the
+        // FREE-driver value, so two drivers on two tiers quote one price.
+        customerPriceBasisGbp: round2(priceBasis),
+        carrierValueAtFreeRateGbp: carrierValueAtFreeRate,
+        driverPayGbp: driverPay,                  // the whole transport value
+        hafMarginPct: marginPct,
+        hafMarginGbp: hafMarginGbp,               // the network fee, retained in full
+        // What HAF actually keeps as a share of the customer price — the number
+        // Brent's bands are written in. Under FRAMEWORK-V6 this equals
+        // networkFeePct; it is reported separately so the two can never drift
+        // apart unnoticed again.
+        hafKeepsPctOfCustomer: customerExVat > 0 ? round2(networkFeeGbp / customerExVat * 100) : 0,
+        hafNetPctOfCustomer: customerExVat > 0 ? round2(hafNetGbp / customerExVat * 100) : 0,
+        hafNetGbp: hafNetGbp,
+        vehicleMinimumGbp: vehicle.minTransportValue,
+        minimumAppliedGbp: minApplied ? minValue : null,
+        minChargeApplied: minApplied
+      },
+      pools: {
+        phase: config.pools.phase,
+        active: activePools,
+        comparison: { trial: poolsTrial, production: poolsProduction }
+      },
+      directBooking: direct ? { allowed: directAllowed,
+        quota: knect.directBookingsPerMonth,
+        used: num(input.directBookingsUsedThisMonth) } : null,
+      override: overrideApplied,
+      manualReviewRequired: manualReview || !directAllowed,
+      flags: flags,
+      reasons: reasons
+    };
+  }
+
+  // ===========================================================================
+  // 4. DEMO SCENARIOS — the framework working end-to-end in the back office
+  // ===========================================================================
+  var DEMO_SCENARIOS = [
+    { label: "Baseline — Free PLNA · Free KNECT",
+      input: { miles: 60, vehicleCode: "SWB_VAN", jobTypeCode: "STD_SAMEDAY",
+               plnaTier: "FREE", knectTier: "FREE", weight: "STANDARD", handling: "KERBSIDE" } },
+    { label: "Pro driver — base rate +£0.25/mi, fee rides up with it",
+      input: { miles: 60, vehicleCode: "SWB_VAN", jobTypeCode: "STD_SAMEDAY",
+               plnaTier: "PRO", knectTier: "FREE", weight: "STANDARD", handling: "KERBSIDE" } },
+    { label: "Freight Pro account — network fee −5 pts (20% → 15%)",
+      input: { miles: 100, vehicleCode: "LWB_VAN", jobTypeCode: "STD_SAMEDAY",
+               plnaTier: "FREE", knectTier: "FREE", accountType: "FREIGHT_PRO",
+               weight: "STANDARD", handling: "KERBSIDE" } },
+    { label: "Freight Plus on urgent — −2.5 pts (30% → 27.5%)",
+      input: { miles: 100, vehicleCode: "LWB_VAN", jobTypeCode: "URGENT",
+               plnaTier: "FREE", knectTier: "FREE", accountType: "FREIGHT_PLUS",
+               weight: "STANDARD", handling: "KERBSIDE" } },
+    { label: "Fleet Pro — drivers on the Pro rate, fee unchanged (framework §7)",
+      input: { miles: 100, vehicleCode: "XLWB_VAN", jobTypeCode: "URGENT",
+               plnaTier: "FREE", knectTier: "FREE", accountType: "FLEET_PRO",
+               driverFleetTier: "FLEET_PRO", weight: "STANDARD", handling: "KERBSIDE" } },
+    { label: "Double Pro — Pro driver on a Pro account",
+      input: { miles: 100, vehicleCode: "LWB_VAN", jobTypeCode: "STD_SAMEDAY",
+               plnaTier: "PRO", knectTier: "PAID", accountType: "FREIGHT_PRO",
+               weight: "STANDARD", handling: "KERBSIDE" } },
+    { label: "KNECT member — member driver rate + the Plus fee rung",
+      input: { miles: 100, vehicleCode: "LWB_VAN", jobTypeCode: "URGENT",
+               plnaTier: "FREE", knectTier: "PAID", driverIsKnectMember: true,
+               weight: "STANDARD", handling: "KERBSIDE" } },
+    { label: "Heavy handball Luton — hindrance pays the driver",
+      input: { miles: 45, vehicleCode: "LUTON", jobTypeCode: "TIMED",
+               plnaTier: "PLUS", knectTier: "FREE", weight: "HEAVY", handling: "DIFFICULT",
+               extraStops: 2, waitingHours: 1 } },
+    { label: "Fuel surge — base rates protect the driver",
+      input: { miles: 100, vehicleCode: "LWB_VAN", jobTypeCode: "STD_SAMEDAY",
+               plnaTier: "FREE", knectTier: "FREE", weight: "STANDARD", handling: "KERBSIDE",
+               _fuelDemo: true } },
+    { label: "Margin override — account retention (admin, logged)",
+      input: { miles: 80, vehicleCode: "MWB_VAN", jobTypeCode: "STD_SAMEDAY",
+               plnaTier: "FREE", knectTier: "PAID", weight: "STANDARD", handling: "KERBSIDE",
+               override: { marginPct: 16, operator: "Brent", reason: "Key account retention" } } },
+    { label: "Direct booking within quota — HAF margin 0%",
+      input: { miles: 30, vehicleCode: "SMALL_VAN", jobTypeCode: "STD_SAMEDAY",
+               plnaTier: "FREE", knectTier: "FREE", weight: "STANDARD", handling: "KERBSIDE",
+               isDirectBooking: true, directBookingsUsedThisMonth: 1 } },
+    { label: "Direct booking OVER quota — gated (upgrade path)",
+      input: { miles: 30, vehicleCode: "SMALL_VAN", jobTypeCode: "STD_SAMEDAY",
+               plnaTier: "FREE", knectTier: "FREE", weight: "STANDARD", handling: "KERBSIDE",
+               isDirectBooking: true, directBookingsUsedThisMonth: 3 } },
+    { label: "Urgent near-limit load — capped multiplier, manual review",
+      input: { miles: 70, vehicleCode: "LWB_VAN", jobTypeCode: "URGENT",
+               plnaTier: "PRO", knectTier: "PAID", weight: "NEAR_LIMIT", handling: "DIFFICULT" } }
+  ];
+
+  function runDemo(i) {
+    var s = DEMO_SCENARIOS[i];
+    if (!s) return null;
+    if (s.input._fuelDemo) {
+      // temporarily surge fuel for the demo, then restore
+      var saved = config.fuel.currentPencePerLitre;
+      config.fuel.currentPencePerLitre = config.fuel.marketAvgPencePerLitre * 1.12;
+      var out = price(s.input);
+      config.fuel.currentPencePerLitre = saved;
+      return { label: s.label, result: out };
+    }
+    return { label: s.label, result: price(s.input) };
+  }
+
+  // ===========================================================================
+  // 5. LOADING THE LIVE CONFIG FROM THE DATABASE
+  // ===========================================================================
+  /* The numbers above are the built-in defaults — the safety net. In normal
+     running the Pricing Engine page hands us the saved config from tier_config
+     so Brent can move a rate without anyone rebuilding this file.
+
+     applyConfig() merges a saved config over the defaults, one key at a time,
+     and returns the list of keys it actually replaced. Anything the database
+     does not carry keeps its built-in value, so a partial or half-saved record
+     can never leave the engine with a missing rate. */
+  var DEFAULTS = JSON.parse(JSON.stringify(config));
+  function applyConfig(saved) {
+    var applied = [];
+    if (!saved || typeof saved !== "object") return applied;
+    for (var k in saved) {
+      if (!Object.prototype.hasOwnProperty.call(saved, k)) continue;
+      if (saved[k] === undefined || saved[k] === null) continue;
+      config[k] = saved[k];
+      applied.push(k);
+    }
+    return applied;
+  }
+  function resetConfig() {
+    var fresh = JSON.parse(JSON.stringify(DEFAULTS));
+    for (var k in fresh) config[k] = fresh[k];
+    return config;
+  }
+
+  // ===========================================================================
+  // 6. PUBLIC API
+  // ===========================================================================
+  return {
+    config: config,
+    defaults: DEFAULTS,
+    applyConfig: applyConfig,
+    resetConfig: resetConfig,
+    price: price,
+    fuelAdjustment: fuelAdjustment,
+    DEMO_SCENARIOS: DEMO_SCENARIOS,
+    runDemo: runDemo,
+    round2: round2,
+    version: config.version
+  };
+});
