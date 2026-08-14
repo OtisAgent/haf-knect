@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e1113">
+<meta name="robots" content="noindex,nofollow">
+<title>Your HAF delivery</title>
+<!--
+  YOUR DELIVERY — the page a one-off customer watches.
+
+  It is reached by an unguessable token in the link and nothing else. No login,
+  no password, no account: somebody who has ordered one pallet should not have
+  to make an account to find out where it is. The token is the whole key, which
+  is why the database function behind it returns ONE job and hands back only
+  what the person who ordered it is entitled to see — never a driver's phone
+  number, never an address of anybody else, never a figure that is not theirs.
+
+  It answers one question at a time. A customer who has just paid a deposit
+  wants to know "has a driver got it yet"; a customer whose driver is on the
+  way wants to know who. So the page leads with the state in a full sentence,
+  and puts the paperwork underneath for the person who wants it.
+-->
+<style>
+  :root{--or:#f18e00;--bg:#0e1113;--card:#171b1e;--ln:#262c31;--mu:#8a9298;--gn:#2dab60;--rd:#cc3333;--ink:#eef2f4}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;min-height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:Montserrat,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex;flex-direction:column;min-height:100dvh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+  header{padding:1.2rem 1.2rem .4rem;display:flex;align-items:center;gap:.55rem;max-width:560px;width:100%;margin:0 auto}
+  .logo{font-weight:900;letter-spacing:.5px;font-size:1.05rem}
+  .logo b{color:var(--or)}
+  .wrap{flex:1;display:flex;flex-direction:column;gap:.85rem;padding:.4rem 1.1rem 2rem;max-width:560px;width:100%;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:1.15rem 1.2rem}
+  .lbl{font-size:.68rem;color:var(--mu);text-transform:uppercase;letter-spacing:1.2px;font-weight:700}
+  .ref{font-size:1.35rem;font-weight:900;margin-top:.3rem;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+  .route{font-size:1.08rem;font-weight:800;margin:.3rem 0 .2rem;line-height:1.3}
+  .sub{font-size:.85rem;color:var(--mu);line-height:1.55}
+  /* The state, told as a sentence rather than a status word. "on_network" is
+     not English, and a person reading it on a phone at 7am should not have to
+     work out what it means for their pallet. */
+  .state{display:flex;gap:.85rem;align-items:flex-start}
+  .pip{width:12px;height:12px;border-radius:50%;background:var(--mu);flex:0 0 12px;margin-top:.34rem;position:relative}
+  .pip.live{background:var(--gn)}
+  .pip.live::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--gn);animation:pulse 1.9s ease-out infinite}
+  .pip.wait{background:var(--or)}
+  .pip.stop{background:var(--rd)}
+  @keyframes pulse{0%{transform:scale(.4);opacity:.85}100%{transform:scale(1);opacity:0}}
+  .sttl{font-size:1.05rem;font-weight:800;line-height:1.35}
+  .stsub{font-size:.87rem;color:var(--mu);line-height:1.6;margin-top:.3rem}
+  .rows{display:flex;flex-direction:column;gap:.9rem}
+  .row .k{font-size:.68rem;color:var(--mu);text-transform:uppercase;letter-spacing:1.2px;font-weight:700}
+  .row .v{font-size:.97rem;font-weight:600;margin-top:.2rem;line-height:1.5}
+  .money{display:flex;justify-content:space-between;gap:1rem;padding:.55rem 0;border-bottom:1px solid var(--ln);font-size:.94rem}
+  .money:last-child{border-bottom:0}
+  .money .v{font-weight:800;font-variant-numeric:tabular-nums}
+  .money.tot .v{color:var(--or)}
+  .btn{display:block;text-align:center;text-decoration:none;border:0;border-radius:14px;padding:1.05rem;
+    font-size:1rem;font-weight:800;background:var(--or);color:#fff}
+  .foot{font-size:.75rem;color:var(--mu);text-align:center;line-height:1.65;padding:.4rem 0 0}
+  .foot a{color:var(--mu)}
+  .msg{text-align:center;padding:2.6rem 1.2rem;color:var(--mu);font-size:.95rem;line-height:1.65}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<header><span class="logo">HAF <b>KNECT</b></span></header>
+
+<div class="wrap">
+  <div id="loading" class="msg">Finding your delivery…</div>
+
+  <div id="gone" class="msg hide">
+    We could not find that delivery.<br>
+    Please open the link from your HAF email, or reply to that email and a person will pick it up.
+  </div>
+
+  <div id="job" class="hide">
+    <div class="card" style="margin-bottom:.85rem">
+      <div class="lbl">Your reference</div>
+      <div class="ref" id="j-ref">—</div>
+      <div class="route" id="j-route">—</div>
+      <div class="sub" id="j-when"></div>
+    </div>
+
+    <div class="card state" style="margin-bottom:.85rem">
+      <div class="pip" id="j-pip"></div>
+      <div>
+        <div class="sttl" id="j-sttl">—</div>
+        <div class="stsub" id="j-stsub"></div>
+      </div>
+    </div>
+
+    <a class="btn hide" id="j-pay" href="#">Pay the holding deposit</a>
+
+    <div class="card hide" id="j-driver" style="margin-top:.85rem">
+      <div class="lbl">Your driver</div>
+      <div class="row"><div class="v" id="j-dname">—</div></div>
+      <div class="sub" id="j-dveh"></div>
+    </div>
+
+    <div class="card rows" style="margin-top:.85rem">
+      <div class="row"><div class="k">What is being moved</div><div class="v" id="j-goods">—</div></div>
+      <div class="row"><div class="k">Van</div><div class="v" id="j-van">—</div></div>
+      <div class="row"><div class="k">Distance</div><div class="v" id="j-miles">—</div></div>
+    </div>
+
+    <div class="card" style="margin-top:.85rem">
+      <div class="lbl" style="margin-bottom:.5rem">Your price</div>
+      <div class="money"><span>Holding deposit</span><span class="v" id="j-dep">—</span></div>
+      <div class="money"><span>Balance, on completion</span><span class="v" id="j-bal">—</span></div>
+      <div class="money tot"><span>Total, including VAT</span><span class="v" id="j-tot">—</span></div>
+    </div>
+
+    <div class="foot">
+      Questions about this delivery? Reply to your HAF email and quote your reference.<br>
+      HAF Logistics Ltd &middot; United Kingdom
+    </div>
+  </div>
+</div>
+
+<script>
+/* The token comes from the server, injected into this page by functions/job/
+   [token].js, so it is never in a query string that a browser or an analytics
+   script would keep a copy of. */
+var TOKEN = window.__JOB_TOKEN || '';
+
+var gbp = function (p) {
+  return '£' + (Number(p || 0) / 100).toLocaleString('en-GB',
+    { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+var txt = function (id, v) { var e = document.getElementById(id); if (e) e.textContent = v; };
+var show = function (id, on) {
+  var e = document.getElementById(id); if (e) e.classList[on ? 'remove' : 'add']('hide');
+};
+
+/* Every state a job can be in, in the words a customer would use, with what it
+   means for them next. The database has one word for each of these; a person
+   needs the sentence. Anything not listed here still gets an honest answer
+   rather than a blank card — see the fallback below. */
+var STATE = {
+  new: ['pip wait', 'Waiting for your holding deposit',
+        'Your job is written down and priced. It goes out to HAF drivers as soon as the deposit is paid.'],
+  deposit_held: ['pip wait', 'Your deposit is in',
+        'We are putting your job in front of drivers now. This usually takes seconds.'],
+  on_network: ['pip live', 'Out to the HAF network',
+        'Your job is on drivers’ screens. We will email you the moment one accepts, with their name and vehicle.'],
+  claimed: ['pip live', 'A driver has your job',
+        'Your driver is below. They have your phone number and will be in touch about timings.'],
+  completed: ['pip live', 'Delivered',
+        'Your delivery is complete. Your receipt and the job breakdown are on their way by email.'],
+  declined: ['pip stop', 'Nobody was able to take this one',
+        'No driver was able to take your job, so your holding deposit is being refunded in full. A person will be in touch.'],
+  refunded: ['pip stop', 'Refunded',
+        'Your holding deposit has been refunded in full.']
+};
+
+fetch('/api/order/track?t=' + encodeURIComponent(TOKEN))
+  .then(function (r) { return r.json(); })
+  .then(function (d) {
+    if (!d || !d.ok || !d.order) throw new Error('not found');
+    var o = d.order;
+    show('loading', false); show('job', true);
+
+    txt('j-ref', o.job_ref);
+    txt('j-route', o.collect_postcode + ' → ' + o.deliver_postcode);
+    var when = [o.collect_on, o.collect_window].filter(Boolean).join(' · ');
+    txt('j-when', when || '');
+
+    var s = STATE[o.status] ||
+      /* An unknown status is a real state of the world, not a bug to hide. It
+         says plainly that we know where the job is and they should ask, rather
+         than showing an empty card that reads as "something has gone wrong". */
+      ['pip', 'We are on it',
+       'Your job is with our team. Reply to your HAF email quoting your reference and we will tell you exactly where it stands.'];
+    document.getElementById('j-pip').className = s[0];
+    txt('j-sttl', s[1]); txt('j-stsub', s[2]);
+
+    /* The deposit button only appears while the deposit is genuinely the next
+       thing. Offering "pay" on a job that is already paid for is how somebody
+       pays twice. */
+    if (o.status === 'new' && d.pay_url) {
+      var p = document.getElementById('j-pay'); p.href = d.pay_url; show('j-pay', true);
+    }
+
+    if (o.driver_name) {
+      show('j-driver', true);
+      txt('j-dname', o.driver_name);
+      txt('j-dveh', o.driver_vehicle || '');
+    }
+
+    txt('j-goods', o.goods || '—');
+    txt('j-van', o.vehicle_code || '—');
+    txt('j-miles', o.miles ? (Math.round(Number(o.miles)) + ' miles by road') : '—');
+    txt('j-dep', gbp(o.deposit_pence));
+    txt('j-bal', gbp(o.balance_pence));
+    txt('j-tot', gbp(o.total_pence));
+  })
+  .catch(function () { show('loading', false); show('gone', true); });
+</script>
+</body>
+</html>

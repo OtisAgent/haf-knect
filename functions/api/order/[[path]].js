@@ -158,7 +158,8 @@ async function place(request, env) {
     payment_reference: newPaymentReference(),
     purpose: 'deposit',
     plan_name: `Holding deposit — ${jobRef}`,
-    next_url: `${payBase(env)}/track/${token}`,
+    // Where HAF PAY sends them once the card has gone through.
+    next_url: jobPage(request, token),
     status: 'awaiting_payment'
   });
   await coreUpdate(env, 'job_order', `job_ref=eq.${jobRef}`, { deposit_reference: deposit.payment_reference });
@@ -178,7 +179,7 @@ async function place(request, env) {
     direct_username: directUser,
     first_refusal_minutes: FIRST_REFUSAL_MINUTES,
     pay_url: `${payBase(env)}/pay/${deposit.payment_reference}`,
-    track_url: `${payBase(env)}/track/${token}`
+    track_url: jobPage(request, token)
   });
 }
 
@@ -186,6 +187,18 @@ async function place(request, env) {
    payment screen — it only knows the address of the one that does. */
 function payBase(env) {
   return (env.PAY_BASE || 'https://join.usehaf.co.uk').replace(/\/+$/, '');
+}
+
+/* The job page is OURS, and it is deliberately built from the address the
+   customer is actually on rather than a constant. An order placed on a preview
+   hands back a preview link, and one placed on the live site hands back a live
+   one — so a test order can never send somebody to production, and a real order
+   can never send somebody to a preview that will be deleted next week.
+
+   It is not on HAF PAY because HAF PAY cannot take another page: its worker is
+   uploaded inline and cannot pass 20,000 characters, and it is at 19,287. */
+function jobPage(request, token) {
+  return `${new URL(request.url).origin}/job/${token}`;
 }
 
 /* The tracking page's only source. One job, no login, nothing about anybody
@@ -197,5 +210,14 @@ async function track(request, env) {
   const rows = await coreRpc(env, 'track_order', { p_token: token });
   const row = Array.isArray(rows) ? rows[0] : rows;
   if (!row) return bad('we cannot find that job', 404);
-  return json({ ok: true, order: row });
+
+  /* The deposit link is only handed over while the deposit is genuinely the
+     next thing that has to happen. Once the money is in, the link is not just
+     redundant — it is the way somebody pays for the same delivery twice. */
+  const payUrl = row.status === 'new' && row.deposit_reference
+    ? `${payBase(env)}/pay/${row.deposit_reference}`
+    : null;
+  // The reference was only needed to build that link; it does not go to the page.
+  delete row.deposit_reference;
+  return json({ ok: true, order: row, pay_url: payUrl });
 }
