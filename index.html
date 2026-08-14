@@ -646,6 +646,94 @@ textarea.fi2{resize:vertical;min-height:70px}
 .ld-note{font-size:.72rem;line-height:1.5;color:var(--mu);background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.5rem .7rem;margin:-.5rem 0 1rem}
 .ld-note strong{color:var(--tx);font-weight:700}
 .ld-note.warn{border-color:var(--or-g);background:var(--or-d)}
+/* ══ STEP 2 — WHAT ARE WE COLLECTING? ═══════════════════════════════════
+   Brent's addendum, 14 Aug: the weight/amount/vehicle section stays, but it
+   becomes one clear stage that also tells the DRIVER what they are turning up
+   to collect. Everything here is built from the existing tokens — no new
+   colours, no new fonts, the same tiles as the front calculator. */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem}
+@media(max-width:520px){.g3{grid-template-columns:1fr 1fr}}
+.sub-q{font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--mu);text-transform:uppercase;margin:.9rem 0 .4rem}
+.sub-q .opt-tag{font-weight:500;letter-spacing:0;text-transform:none;color:var(--su);margin-left:.3rem}
+/* the "exact if you know it" line — always secondary to the tiles above it */
+.xtra{display:flex;align-items:center;gap:.5rem;margin:.5rem 0 .2rem;flex-wrap:wrap}
+.xtra label{font-size:.72rem;font-weight:600;color:var(--mu);white-space:nowrap}
+.xtra .oi{max-width:150px}
+.oi,.osel{width:100%;background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.55rem .7rem;font:inherit;font-size:.85rem;color:var(--tx);transition:border-color .14s}
+.oi:focus,.osel:focus{outline:none;border-color:var(--or)}
+.osel{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%238b9299' stroke-width='1.6' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .6rem center;background-size:10px;padding-right:1.7rem}
+.ta{width:100%;background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.6rem .7rem;font:inherit;font-size:.85rem;color:var(--tx);line-height:1.5;resize:vertical;min-height:62px}
+.ta:focus{outline:none;border-color:var(--or)}
+/* Load requirement toggles — small, tappable, and either on or off. */
+.tgl-wrap{display:flex;flex-wrap:wrap;gap:.35rem}
+.tgl{background:var(--p2);border:1.5px solid var(--ln);border-radius:999px;padding:.36rem .7rem;font-size:.75rem;font-weight:600;color:var(--mu);cursor:pointer;transition:all .14s;display:inline-flex;align-items:center;gap:.35rem;line-height:1.3}
+.tgl:hover{border-color:var(--or)}
+.tgl svg{width:11px;height:11px;flex:none;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity .12s}
+.tgl.sel{background:var(--or-d);border-color:var(--or);color:var(--or)}
+.tgl.sel svg{opacity:1}
+/* "I don't know the dimensions" — a real answer, not a skipped field */
+.ckline{display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.75rem;font-weight:600;color:var(--mu);margin-top:.5rem}
+.ckline input{accent-color:var(--or);width:15px;height:15px;flex:none}
+.dims-off{opacity:.4;pointer-events:none}
+/* Photos of the goods — optional, and the driver sees them before accepting */
+.ph-drop{border:1.5px dashed var(--ln);border-radius:var(--rx);padding:.85rem;text-align:center;cursor:pointer;transition:all .14s;background:var(--p2)}
+.ph-drop:hover{border-color:var(--or);background:var(--or-d)}
+.ph-drop svg{width:20px;height:20px;stroke:var(--su);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block;margin:0 auto .3rem}
+.ph-drop-t{font-size:.78rem;font-weight:700;color:var(--mu)}
+.ph-drop-s{font-size:.66rem;color:var(--su);margin-top:.12rem}
+.ph-strip{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem}
+.ph-thumb{position:relative;width:54px;height:54px;border-radius:var(--rx);overflow:hidden;border:1px solid var(--ln)}
+.ph-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.ph-x{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:rgba(14,17,19,.72);color:#fff;font-size:.62rem;line-height:16px;text-align:center;cursor:pointer;border:none;padding:0}
+/* ══ RECOMMENDED VEHICLE — HAF Pick is the default, not a hidden setting ══ */
+.hpick{background:var(--or-d);border:1.5px solid var(--or);border-radius:var(--rx);padding:.85rem 1rem;display:flex;align-items:flex-start;gap:.7rem;margin-bottom:.55rem}
+.hpick-ico{width:30px;height:30px;border-radius:var(--rx);background:var(--p);display:flex;align-items:center;justify-content:center;flex:none}
+.hpick-ico svg{width:15px;height:15px;stroke:var(--or);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hpick-b{flex:1;min-width:0}
+.hpick-k{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--or);margin-bottom:.15rem}
+.hpick-v{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em;line-height:1.2}
+.hpick-w{font-size:.72rem;color:var(--mu);line-height:1.5;margin-top:.22rem}
+.veh-open{background:none;border:none;padding:0;font:inherit;font-size:.76rem;font-weight:700;color:var(--or);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.veh-list{display:none;margin-top:.7rem}
+.veh-list.open{display:block}
+/* The safety stop: a vehicle that cannot take the load is never silently accepted */
+.too-small{background:var(--am-d);border:1.5px solid var(--am);border-radius:var(--rx);padding:.85rem 1rem;margin-top:.6rem}
+.too-small-h{font-family:var(--dp);font-weight:900;font-size:.95rem;letter-spacing:-.03em;margin-bottom:.25rem}
+.too-small-p{font-size:.76rem;color:var(--mu);line-height:1.55;margin-bottom:.7rem}
+.too-small-b{display:flex;gap:.45rem;flex-wrap:wrap}
+/* ══ THE DRIVER'S JOB CARD — the same words the customer typed ══════════ */
+.jobc{background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.9rem 1rem}
+.jobc-h{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--or);margin-bottom:.55rem}
+.jobc-r{display:flex;gap:.7rem;padding:.32rem 0;border-bottom:1px solid var(--lns);font-size:.78rem;line-height:1.5}
+.jobc-r:last-child{border-bottom:none}
+.jobc-k{flex:0 0 108px;color:var(--su);font-weight:600;font-size:.72rem;padding-top:.05rem}
+.jobc-v{flex:1;min-width:0;color:var(--tx);font-weight:600}
+@media(max-width:460px){.jobc-r{flex-direction:column;gap:.05rem}.jobc-k{flex:none}}
+/* ══ KNOW THE DRIVER — send it straight to them ═════════════════════════ */
+.dd-box{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:1.1rem 1.15rem;box-shadow:var(--sd);margin-top:1rem}
+.dd-h{display:flex;align-items:center;gap:.55rem;margin-bottom:.3rem}
+.dd-h svg{width:15px;height:15px;stroke:var(--or);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.dd-t{font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.03em}
+.dd-p{font-size:.79rem;color:var(--mu);line-height:1.55;margin-bottom:.7rem}
+.dd-row{display:flex;gap:.5rem;align-items:stretch}
+.dd-row .oi{flex:1;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.dd-ok{background:var(--gn-d);border:1.5px solid var(--gn);border-radius:var(--rx);padding:.6rem .8rem;font-size:.76rem;line-height:1.55;color:var(--tx);margin-top:.55rem}
+.dd-ok strong{font-weight:800}
+.dd-err{color:var(--rd);font-size:.74rem;font-weight:600;margin-top:.45rem;display:none}
+/* ══ OTHER WAYS TO BOOK ═════════════════════════════════════════════════ */
+.owb{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-top:.7rem}
+@media(max-width:680px){.owb{grid-template-columns:1fr}}
+.owb-c{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:1.1rem 1.15rem 1rem;box-shadow:var(--sd);transition:all .17s;position:relative}
+.owb-c.live{cursor:pointer}
+.owb-c.live:hover{border-color:var(--or);transform:translateY(-2px);box-shadow:var(--sd-h)}
+.owb-c.soon{opacity:.72}
+.owb-ico{width:30px;height:30px;border-radius:var(--rx);background:var(--or-d);display:flex;align-items:center;justify-content:center;margin-bottom:.6rem}
+.owb-ico svg{width:14px;height:14px;stroke:var(--or);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.owb-h{font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.03em;margin-bottom:.25rem}
+.owb-p{font-size:.8rem;color:var(--mu);line-height:1.55;margin-bottom:.65rem}
+.owb-a{font-size:.82rem;color:var(--or);font-weight:800}
+.owb-soon{position:absolute;top:.9rem;right:.95rem;font-size:.58rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mu);background:var(--p3);border:1px solid var(--ln);border-radius:999px;padding:.2rem .5rem}
 /* ── LOAD POSTING PAUSED ───────────────────────────────────────────────
    Single switch: LOAD_POSTING_LOCKED in the main script (search that name).
    The markup ships LOCKED, so if the script never runs the form stays shut.
@@ -1161,12 +1249,39 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
         <div class="van-lbl">How much is there?</div>
         <div class="van-pills" id="sz-pills"></div>
         <div class="ld-note" id="ld-note" style="display:none"></div>
-        <div class="van-lbl">Van size <span class="van-hint">— we pick this for you, change it if you know better</span></div>
-        <!-- Vehicle cards: load space, pallets and max weight on every one, in
-             the same order on every one. Drawn from the vehicle table so a rate
-             or a capacity is only ever edited in one place. -->
-        <div class="van-pills" id="van-pills"></div>
-        <p class="van-guide">Load figures are a guide — we confirm the exact vehicle before your job is booked.</p>
+        <!-- ── RECOMMENDED VEHICLE ──
+             Brent, 14 Aug: "customers should not have to understand vans to make
+             a booking." So HAF's own pick leads, in words, and the vehicle list
+             is there for anyone who does know — one click away, never in the way. -->
+        <div class="van-lbl">Recommended vehicle</div>
+        <div class="hpick">
+          <div class="hpick-ico">
+            <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </div>
+          <div class="hpick-b">
+            <div class="hpick-k">HAF Pick</div>
+            <div class="hpick-v" id="hpick-v">We'll choose for you</div>
+            <div class="hpick-w" id="hpick-w">We'll select the safest suitable vehicle from the information you've provided.</div>
+          </div>
+        </div>
+        <button class="veh-open" type="button" id="veh-open" onclick="toggleVehList()">Choose vehicle myself</button>
+        <div class="veh-list" id="veh-list">
+          <!-- Vehicle cards: load space, pallets and max weight on every one, in
+               the same order on every one. Drawn from the vehicle table so a rate
+               or a capacity is only ever edited in one place. -->
+          <div class="van-pills" id="van-pills" style="margin-top:.55rem"></div>
+          <p class="van-guide">Load figures are a guide — we confirm the exact vehicle before your job is booked.</p>
+          <!-- The safety stop. A vehicle that cannot take the load is never
+               quietly accepted: HAF says so and offers its own pick back. -->
+          <div class="too-small" id="ts-front" style="display:none">
+            <div class="too-small-h">This vehicle may be too small</div>
+            <div class="too-small-p" id="ts-front-p"></div>
+            <div class="too-small-b">
+              <button class="btn btn-or btn-sm" type="button" onclick="useHafPick()">Use HAF recommendation</button>
+              <button class="btn btn-gh btn-sm" type="button" onclick="reviewLoad()">Review load details</button>
+            </div>
+          </div>
+        </div>
         <!-- LIVE PRICE DISPLAY -->
         <div class="lp-box hint" id="lp-box">
           <div id="lp-hint-txt" class="lp-hint-txt">Enter both postcodes to see your guide price</div>
@@ -1210,6 +1325,53 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <div class="ptile-arr">Let HAF decide &#8594;</div>
           </div>
         </div>
+
+        <!-- ── OTHER WAYS TO BOOK ──
+             Not everybody wants to fill in a form. Email is live now: we hand
+             the customer a ready-written quote request with everything we need
+             already listed, so nothing comes back half-answered. WhatsApp is
+             marked coming soon and does nothing until it genuinely works. -->
+        <div class="land-kicker" style="margin:1.4rem 0 .7rem">Other ways to book</div>
+        <div class="owb">
+          <div class="owb-c live" onclick="openEmailQuote()">
+            <div class="owb-ico">
+              <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2.5 6.5 12 13l9.5-6.5"/></svg>
+            </div>
+            <div class="owb-h">Book by email</div>
+            <p class="owb-p">We'll write the email for you. Fill in the blanks, send it, and we come back with a price.</p>
+            <div class="owb-a">Get my quote email &#8594;</div>
+          </div>
+          <div class="owb-c soon">
+            <span class="owb-soon">Coming soon</span>
+            <div class="owb-ico">
+              <svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.2-5.2A8.5 8.5 0 1 1 21 11.5z"/></svg>
+            </div>
+            <div class="owb-h">Book on WhatsApp</div>
+            <p class="owb-p">Message HAF and book the whole job in a chat. We're building this now &#8212; it isn't switched on yet.</p>
+            <div class="owb-a" style="color:var(--mu)">Not available yet</div>
+          </div>
+        </div>
+
+        <!-- The ready-written quote request. Pre-filled with whatever the
+             customer has already told the calculator above. -->
+        <div class="calc-box" id="email-quote" style="display:none;margin-top:.9rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem">
+            <div style="font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.04em">Your quote request</div>
+            <button class="btn btn-gh btn-sm" onclick="closeEmailQuote()" style="font-size:.74rem">&#8592; Back</button>
+          </div>
+          <p style="font-size:.79rem;color:var(--mu);line-height:1.6;margin-bottom:.7rem">
+            This goes to <strong>quote@usehaf.co.uk</strong>. Fill in the blanks, send it, and we'll come back with a price.
+            Anything you've already chosen above is filled in for you.
+          </p>
+          <textarea class="ta" id="eq-body" style="min-height:300px;font-size:.78rem;line-height:1.65"></textarea>
+          <div class="fnav" style="justify-content:flex-start;flex-wrap:wrap">
+            <button class="btn btn-or btn-sm" onclick="sendEmailQuote()">Open in my email app &#8594;</button>
+            <button class="btn btn-gh btn-sm" onclick="copyEmailQuote()" id="eq-copy">Copy it instead</button>
+          </div>
+          <p style="font-size:.68rem;color:var(--su);line-height:1.5;margin-top:.5rem">
+            If nothing opens, copy it and paste it into an email to quote@usehaf.co.uk.
+          </p>
+        </div>
       </div>
 
       <!-- INLINE FLOW PANEL — shown in place when a tile is clicked -->
@@ -1222,81 +1384,214 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
           </div>
 
           <!-- ── FAST QUOTE STEPS ── -->
+          <!-- ══ THE ORDER FLOW ══════════════════════════════════════════
+               Brent's addendum, 14 Aug 2026. Seven stages, in his order:
+                 1 where is it going · 2 what are we collecting · 3 what vehicle
+                 4 when · 5 full collection & delivery details · 6 price · 7 book
+               Stage 2 is the important one. It is not there to price the job —
+               it becomes the consignment record, so the driver turns up knowing
+               exactly what they are collecting. ═══════════════════════════ -->
           <div id="if-fast" style="display:none">
-            <!-- Questions anyone can answer come first; the van is worked out
-                 from them on the next step, already chosen. -->
+
+            <!-- ── 1 · WHERE IS IT GOING? ── -->
             <div class="fstep on" id="fq-1">
-              <div class="slbl">Step 1 of 8 &#8212; What are you sending?</div>
-              <div class="olbl">How heavy is it?</div>
-              <div class="ogrid" id="fq-wt"></div>
-              <div class="olbl" style="margin-top:.7rem">How much is there?</div>
-              <div class="ogrid" id="fq-sz"></div>
+              <div class="slbl">Step 1 of 7 &#8212; Where is it going?</div>
+              <div class="of" style="margin-bottom:.55rem"><label class="ol">Collection postcode</label><input class="oi" id="fq-from" placeholder="e.g. S9 1AA" maxlength="8" autocomplete="off"></div>
+              <div class="of"><label class="ol">Delivery postcode</label><input class="oi" id="fq-to" placeholder="e.g. M1 1AA" maxlength="8" autocomplete="off"></div>
               <div class="fstep-err" id="fq-err-1"></div>
               <div class="fnav"><button class="btn btn-or btn-sm" onclick="fqNext(2)">Next &#8594;</button></div>
             </div>
+
+            <!-- ── 2 · WHAT ARE WE COLLECTING? ──
+                 Everything on this step does four jobs at once: it helps the
+                 customer describe the load, it allocates the vehicle, it tells
+                 the accepting driver what they are picking up, and it keeps a
+                 job away from a van that cannot take it. -->
             <div class="fstep" id="fq-2">
-              <div class="slbl">Step 2 of 8 &#8212; Van size</div>
-              <div class="ld-note" id="fq-note" style="display:none;margin:0 0 .7rem"></div>
-              <div class="ogrid" id="fq-van"></div>
-              <p class="van-guide">Load figures are a guide — we confirm the exact vehicle before your job is booked.</p>
+              <div class="slbl">Step 2 of 7 &#8212; What are we collecting?</div>
+
+              <div class="olbl">How heavy is it?</div>
+              <div class="ogrid" id="fq-wt"></div>
+              <div class="xtra">
+                <label for="fq-exact">Exact weight if known</label>
+                <input class="oi" id="fq-exact" type="number" min="1" max="5000" step="1" placeholder="kg" oninput="fqLoadChanged()">
+                <span style="font-size:.72rem;color:var(--su)">kg</span>
+              </div>
+
+              <div class="sub-q">How much is there?</div>
+              <div class="ogrid" id="fq-sz"></div>
+              <div class="g2" style="margin-bottom:.2rem">
+                <div class="of"><label class="ol">Quantity</label><input class="oi" id="fq-qty" type="number" min="1" max="99" step="1" placeholder="e.g. 3" oninput="fqLoadChanged()"></div>
+                <div class="of"><label class="ol">Type</label>
+                  <select class="osel" id="fq-unit" onchange="fqLoadChanged()"></select>
+                </div>
+              </div>
+
+              <div class="sub-q">Describe the goods</div>
+              <textarea class="ta" id="fq-goods" placeholder="e.g. 3 pallets of boxed clothing / office furniture / engineering parts / 12 boxes of stock" oninput="fqLoadChanged()"></textarea>
+              <p style="font-size:.68rem;color:var(--su);line-height:1.5;margin-top:.3rem">This is what the driver sees before they accept your job.</p>
+
+              <div class="sub-q">Largest item or pallet<span class="opt-tag">optional for parcels</span></div>
+              <div id="fq-dims-wrap">
+                <div class="g3">
+                  <div class="of"><label class="ol">Length</label><input class="oi" id="fq-dl" type="number" min="1" step="1" placeholder="0" oninput="fqLoadChanged()"></div>
+                  <div class="of"><label class="ol">Width</label><input class="oi" id="fq-dw" type="number" min="1" step="1" placeholder="0" oninput="fqLoadChanged()"></div>
+                  <div class="of"><label class="ol">Height</label><input class="oi" id="fq-dh" type="number" min="1" step="1" placeholder="0" oninput="fqLoadChanged()"></div>
+                </div>
+                <div class="xtra">
+                  <label for="fq-dunit">Measured in</label>
+                  <select class="osel" id="fq-dunit" style="max-width:120px" onchange="fqLoadChanged()">
+                    <option value="cm">centimetres</option>
+                    <option value="m">metres</option>
+                    <option value="ft">feet</option>
+                  </select>
+                </div>
+              </div>
+              <label class="ckline"><input type="checkbox" id="fq-dnk" onchange="fqDimsUnknown()"> I don't know the dimensions</label>
+
+              <div class="sub-q">Loading and handling</div>
+              <div class="tgl-wrap" id="fq-reqs"></div>
+
+              <div class="sub-q">Anything else the driver needs to know?<span class="opt-tag">optional</span></div>
+              <textarea class="ta" id="fq-notes" placeholder="e.g. Pallets cannot be stacked. Collection is round the back, ring the buzzer." oninput="fqLoadChanged()"></textarea>
+
+              <div class="sub-q">Add photos of the goods<span class="opt-tag">optional</span></div>
+              <div class="ph-drop" onclick="document.getElementById('fq-photos').click()">
+                <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.2"/><path d="M8 5l1.5-2h5L16 5"/></svg>
+                <div class="ph-drop-t">Add photos</div>
+                <div class="ph-drop-s">Useful for furniture, machinery, pallets and awkward loads</div>
+              </div>
+              <input type="file" id="fq-photos" accept="image/*" multiple style="display:none" onchange="fqAddPhotos(this)">
+              <div class="ph-strip" id="fq-ph-strip"></div>
+
               <div class="fstep-err" id="fq-err-2"></div>
               <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(1)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqNext(3)">Next &#8594;</button></div>
             </div>
+
+            <!-- ── 3 · WHAT VEHICLE IS NEEDED? ──
+                 HAF Pick is the default. The list is there for anyone who knows
+                 vans, and a vehicle that cannot take the load is stopped. -->
             <div class="fstep" id="fq-3">
-              <div class="slbl">Step 3 of 8 &#8212; Loading and handling</div>
-              <div class="ogrid">
-                <button class="oopt" onclick="fqToggle(this,'handball')">Handball<span class="oopt-sub">manual carry or lift</span></button>
-                <button class="oopt" onclick="fqToggle(this,'forklift')">Forklift<span class="oopt-sub">palletised goods</span></button>
+              <div class="slbl">Step 3 of 7 &#8212; What vehicle is needed?</div>
+              <div class="hpick">
+                <div class="hpick-ico">
+                  <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                </div>
+                <div class="hpick-b">
+                  <div class="hpick-k">HAF Pick</div>
+                  <div class="hpick-v" id="fq-pick-v">&#8212;</div>
+                  <div class="hpick-w" id="fq-pick-w">We'll select the safest suitable vehicle from the information you've provided.</div>
+                </div>
               </div>
-              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(2)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqStep(4)">Next &#8594;</button></div>
+              <button class="veh-open" type="button" id="fq-veh-open" onclick="fqToggleVeh()">Choose vehicle myself</button>
+              <div class="veh-list" id="fq-veh-list">
+                <div class="ogrid" id="fq-van" style="margin-top:.55rem"></div>
+                <p class="van-guide">Load figures are a guide — we confirm the exact vehicle before your job is booked.</p>
+              </div>
+              <div class="too-small" id="fq-toosmall" style="display:none">
+                <div class="too-small-h">This vehicle may be too small</div>
+                <div class="too-small-p" id="fq-toosmall-p"></div>
+                <div class="too-small-b">
+                  <button class="btn btn-or btn-sm" type="button" onclick="fqUseHafPick()">Use HAF recommendation</button>
+                  <button class="btn btn-gh btn-sm" type="button" onclick="fqStep(2)">Review load details</button>
+                </div>
+              </div>
+              <div class="fstep-err" id="fq-err-3"></div>
+              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(2)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqNext(4)">Next &#8594;</button></div>
             </div>
+
+            <!-- ── 4 · WHEN DOES IT NEED MOVING? ── -->
             <div class="fstep" id="fq-4">
-              <div class="slbl">Step 4 of 8 &#8212; Collection and delivery</div>
-              <div class="of" style="margin-bottom:.55rem"><label class="ol">Collection postcode</label><input class="oi" id="fq-from" placeholder="e.g. S9 1AA" maxlength="8" autocomplete="off"></div>
-              <div class="of"><label class="ol">Delivery postcode</label><input class="oi" id="fq-to" placeholder="e.g. M1 1AA" maxlength="8" autocomplete="off"></div>
-              <div class="fstep-err" id="fq-err-4"></div>
-              <div class="fnav" style="margin-top:.6rem"><button class="btn btn-gh btn-sm" onclick="fqStep(3)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqNext(5)">Next &#8594;</button></div>
-            </div>
-            <div class="fstep" id="fq-5">
-              <div class="slbl">Step 5 of 8 &#8212; How soon?</div>
+              <div class="slbl">Step 4 of 7 &#8212; When does it need moving?</div>
               <div class="ogrid">
                 <button class="oopt" onclick="fqSel(this,'urg','urg')">Urgent<span class="oopt-sub">next available driver</span></button>
                 <button class="oopt" onclick="fqSel(this,'urg','sday')">Same-day<span class="oopt-sub">collected today</span></button>
                 <button class="oopt" onclick="fqSel(this,'urg','flex')">Flexible<span class="oopt-sub">best value</span></button>
                 <button class="oopt" onclick="fqSel(this,'urg','timed')">Pre-book<span class="oopt-sub">specific window</span></button>
               </div>
+              <div class="g2">
+                <div class="of"><label class="ol">Collection date<span class="opt-tag"></span></label><input class="oi" id="fq-cdate" type="date"></div>
+                <div class="of"><label class="ol">Collect from</label><input class="oi" id="fq-ctime" type="time"></div>
+              </div>
+              <div class="of" style="margin-top:.5rem"><label class="ol">Delivery requirement<span class="opt-tag"></span></label><input class="oi" id="fq-dreq" placeholder="e.g. must be on site before 4pm"></div>
+              <div class="fstep-err" id="fq-err-4"></div>
+              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(3)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqNext(5)">Next &#8594;</button></div>
+            </div>
+
+            <!-- ── 5 · FULL COLLECTION & DELIVERY DETAILS ── -->
+            <div class="fstep" id="fq-5">
+              <div class="slbl">Step 5 of 7 &#8212; Collection and delivery details</div>
+              <div class="olbl">Collection</div>
+              <div class="of" style="margin-bottom:.45rem"><label class="ol">Full address</label><input class="oi" id="fq-caddr" placeholder="Street, town, postcode" autocomplete="off"></div>
+              <div class="g2" style="margin-bottom:.45rem">
+                <div class="of"><label class="ol">Contact name</label><input class="oi" id="fq-cname" placeholder="Who the driver asks for"></div>
+                <div class="of"><label class="ol">Contact number</label><input class="oi" id="fq-cphone" type="tel" placeholder="07xxx xxxxxx"></div>
+              </div>
+              <div class="of" style="margin-bottom:.45rem"><label class="ol">Collection instructions<span class="opt-tag"></span></label><input class="oi" id="fq-cnote" placeholder="e.g. Goods-in at the rear, ring the buzzer"></div>
+              <div class="of"><label class="ol">what3words<span class="opt-tag"></span></label><input class="oi" id="fq-cw3w" placeholder="///lamp.tiger.road"></div>
+
+              <div class="olbl" style="margin-top:1rem">Delivery</div>
+              <div class="of" style="margin-bottom:.45rem"><label class="ol">Full address</label><input class="oi" id="fq-daddr" placeholder="Street, town, postcode" autocomplete="off"></div>
+              <div class="g2" style="margin-bottom:.45rem">
+                <div class="of"><label class="ol">Contact name</label><input class="oi" id="fq-dname" placeholder="Who receives it"></div>
+                <div class="of"><label class="ol">Contact number</label><input class="oi" id="fq-dphone" type="tel" placeholder="07xxx xxxxxx"></div>
+              </div>
+              <div class="of" style="margin-bottom:.45rem"><label class="ol">Delivery instructions<span class="opt-tag"></span></label><input class="oi" id="fq-dnote" placeholder="e.g. Book in on arrival, no forklift on site"></div>
+              <div class="of"><label class="ol">what3words<span class="opt-tag"></span></label><input class="oi" id="fq-dw3w" placeholder="///bench.grass.cloud"></div>
               <div class="fstep-err" id="fq-err-5"></div>
               <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(4)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqShowPriceV()">See price &#8594;</button></div>
             </div>
+
+            <!-- ── 6 · CONFIRM PRICE ──
+                 And the one thing no booking screen usually shows: exactly what
+                 the driver will read before they accept it. -->
             <div class="fstep" id="fq-6">
-              <div class="slbl">Step 6 of 8 &#8212; Your guide price</div>
+              <div class="slbl">Step 6 of 7 &#8212; Confirm your price</div>
               <div style="background:var(--or-d);border:1.5px solid var(--or-g);border-radius:var(--rx);padding:1rem 1.2rem;margin-bottom:.9rem">
                 <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;color:var(--or);text-transform:uppercase;margin-bottom:.28rem">Estimated price</div>
                 <div style="display:flex;align-items:baseline;gap:.35rem"><span style="font-family:var(--dp);font-weight:900;font-size:1.55rem;letter-spacing:-.05em" id="fq-pr-range">&#8212;</span><span style="font-size:.72rem;font-weight:600;color:var(--mu)">+ VAT</span></div>
                 <div style="font-size:.7rem;color:var(--mu);margin-top:.2rem" id="fq-pr-basis">&#8212;</div>
               </div>
-              <p style="font-size:.71rem;color:var(--su);line-height:1.6;margin-bottom:.85rem">Guide price only. Final confirmed after full details are reviewed. No payment taken now.</p>
+
+              <div class="olbl">What the driver will see</div>
+              <div id="fq-jobcard"></div>
+              <p style="font-size:.68rem;color:var(--su);line-height:1.5;margin:.4rem 0 .9rem">Only vehicles that can carry this load are offered the job.</p>
+
+              <!-- ── KNOW THE DRIVER? ──
+                   Brent, 14 Aug. Somebody who has used a HAF driver before can
+                   send the job straight to them instead of onto the open
+                   network. We never confirm who holds a username to a stranger —
+                   the job is simply offered to them first. -->
+              <div class="dd-box" style="margin-top:0">
+                <div class="dd-h">
+                  <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11l-3 3-2-2"/></svg>
+                  <div class="dd-t">Know the driver?</div>
+                </div>
+                <p class="dd-p">Send this job straight to a HAF driver you have used before. Enter their HAF username and they get first refusal &#8212; if they cannot take it, it goes to the network as normal.</p>
+                <div class="dd-row">
+                  <input class="oi" id="fq-dduser" placeholder="e.g. JW012390" maxlength="12" autocomplete="off" oninput="ddClear()">
+                  <button class="btn btn-or btn-sm" type="button" onclick="ddSetDirect()">Send direct</button>
+                </div>
+                <div class="dd-err" id="fq-dd-err"></div>
+                <div class="dd-ok" id="fq-dd-ok" style="display:none"></div>
+              </div>
+
+              <p style="font-size:.71rem;color:var(--su);line-height:1.6;margin:.9rem 0 0">Guide price only. Final confirmed after full details are reviewed. No payment taken now.</p>
               <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(5)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqStep(7)">Book this &#8594;</button></div>
             </div>
+
+            <!-- ── 7 · BOOK ── -->
             <div class="fstep" id="fq-7">
-              <div class="slbl">Step 7 of 8 &#8212; Your details</div>
+              <div class="slbl">Step 7 of 7 &#8212; Your details</div>
               <p style="font-size:.77rem;color:var(--mu);margin-bottom:.85rem;line-height:1.6">No account needed. We will send you delivery updates by text or WhatsApp.</p>
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Full name</label><input class="oi" id="fq-name" placeholder="Your name" autocomplete="name"></div>
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Email</label><input class="oi" id="fq-email" placeholder="your@email.co.uk" type="email" autocomplete="email"></div>
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Mobile</label><input class="oi" id="fq-mobile" placeholder="07xxx xxxxxx" type="tel" autocomplete="tel"></div>
               <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.73rem;font-weight:600;color:var(--mu)"><input type="checkbox" id="fq-wa" checked style="accent-color:var(--or)"> Send updates via WhatsApp</label>
               <div class="fstep-err" id="fq-err-7"></div>
-              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(6)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqNext(8)">Next &#8594;</button></div>
+              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(6)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqBookV()">Confirm and book &#8594;</button></div>
             </div>
-            <div class="fstep" id="fq-8">
-              <div class="slbl">Step 8 of 8 &#8212; Addresses</div>
-              <div class="of" style="margin-bottom:.48rem"><label class="ol">Full collection address</label><input class="oi" id="fq-caddr" placeholder="Street, town, postcode" autocomplete="off"></div>
-              <div class="of" style="margin-bottom:.48rem"><label class="ol">what3words (optional)</label><input class="oi" id="fq-cw3w" placeholder="///lamp.tiger.road"></div>
-              <div class="of" style="margin-bottom:.48rem"><label class="ol">Full delivery address</label><input class="oi" id="fq-daddr" placeholder="Street, town, postcode" autocomplete="off"></div>
-              <div class="of"><label class="ol">what3words (optional)</label><input class="oi" id="fq-dw3w" placeholder="///bench.grass.cloud"></div>
-              <div class="fstep-err" id="fq-err-8"></div>
-              <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(7)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqBookV()">Confirm and book &#8594;</button></div>
-            </div>
+
             <div class="fstep" id="fq-done">
               <div style="text-align:center;padding:.6rem 0 .9rem">
                 <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto .6rem"><circle cx="22" cy="22" r="22" fill="var(--gn-d)"/><polyline points="13,23 20,30 31,15" stroke="var(--gn)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -3473,6 +3768,192 @@ function openBandNote(wtKey,vanKey){
     ?'tell us and we will step up to the '+bigger.n+'.'
     :'tell us: that is this van at its limit and we will check it before confirming.');
 }
+/* ══════════════════════════════════════════════════════════════════════════
+   HAF VEHICLE ALLOCATION  (Brent's addendum, 14 Aug 2026)
+   ──────────────────────────────────────────────────────────────────────────
+   The old rule looked at two things: a weight band and a size band. This one
+   weighs up everything the customer has actually told us —
+
+     weight (band, or the exact figure if they know it)
+   + how much there is (band)
+   + how many, and of what
+   + the largest item's dimensions
+   + loading and unloading requirements
+   + special handling
+
+   — and returns the SMALLEST vehicle that can genuinely do the job, the plain
+   English reason why, and the full list of vehicles the job may be offered to
+   on the network. Nothing here is a preference: every test below is a hard
+   physical limit, so a customer can never be quoted, and a driver can never be
+   offered, a van that cannot take the load.
+   The same object then becomes the driver's job card — one record, from the
+   quote through to the POD. ══════════════════════════════════════════════ */
+
+/* What the goods are counted in. `pal` = this unit occupies a pallet space. */
+const UNIT=[
+  {k:'boxes'  ,n:'Boxes'          ,pal:0},
+  {k:'pallets',n:'Pallets'        ,pal:1},
+  {k:'crates' ,n:'Crates'         ,pal:1},
+  {k:'cages'  ,n:'Roll cages'     ,pal:1},
+  {k:'items'  ,n:'Items'          ,pal:0},
+  {k:'furn'   ,n:'Furniture items',pal:0},
+  {k:'bags'   ,n:'Bags or sacks'  ,pal:0}
+];
+/* Brent's eleven toggles, in his order. `x` names the toggle this one cancels —
+   a load cannot be both palletised and loose, or both stackable and not. */
+const LOAD_REQ=[
+  {k:'pallet' ,n:'Palletised'               ,x:'loose'},
+  {k:'loose'  ,n:'Loose loaded'             ,x:'pallet'},
+  {k:'fragile',n:'Fragile'},
+  {k:'stack'  ,n:'Stackable'                ,x:'nostack'},
+  {k:'nostack',n:'Non-stackable'            ,x:'stack'},
+  {k:'tail'   ,n:'Tail lift required'},
+  {k:'two'    ,n:'Two-person lift'},
+  {k:'forkc'  ,n:'Forklift at collection'},
+  {k:'forkd'  ,n:'Forklift at delivery'},
+  {k:'helpc'  ,n:'Loading help available'},
+  {k:'helpd'  ,n:'Unloading help available'}
+];
+const REQ_N=k=>(LOAD_REQ.find(r=>r.k===k)||{}).n||k;
+
+/* Dimensions come in as whatever the customer is comfortable with. Everything
+   downstream is metres, because that is what the vehicle table is written in. */
+function dimsToM(d){
+  if(!d)return null;
+  const f=d.unit==='cm'?0.01:d.unit==='ft'?0.3048:1;
+  const l=parseFloat(d.l),w=parseFloat(d.w),h=parseFloat(d.h);
+  if(!(l>0)||!(w>0)||!(h>0))return null;
+  return {l:l*f,w:w*f,h:h*f};
+}
+/* Will the biggest single item physically go in? The load can be turned on the
+   floor, so length and width may swap — but it can never be laid on its side,
+   because we do not know that the goods would survive it. */
+function itemFits(v,d){
+  if(!d)return true;
+  const H=d.h<=v.H+.02;
+  const flat=(d.l<=v.L+.02&&d.w<=v.W+.02)||(d.w<=v.L+.02&&d.l<=v.W+.02);
+  return H&&flat;
+}
+/* Pallet spaces the load will take up on the floor of the van. Stackable goods
+   double up; non-stackable and unstated ones do not. */
+function palletsNeeded(L){
+  const u=UNIT.find(x=>x.k===L.unit);
+  const q=parseInt(L.qty,10);
+  if(!u||!u.pal||!(q>0))return 0;
+  return (L.reqs&&L.reqs.stack&&!L.reqs.nostack)?Math.ceil(q/2):q;
+}
+/* The weight we allocate against: the exact figure if we have been given one,
+   otherwise the top of the band the customer chose. */
+function loadKg(L){
+  const ex=parseFloat(L.exactKg);
+  if(ex>0)return ex;
+  const w=WT_BAND.find(b=>b.k===L.weight);
+  return w?w.kg:0;
+}
+/* ── THE ALLOCATION ITSELF ──
+   Returns:
+     rec       the smallest vehicle that can do the job (null = bigger than a Luton)
+     eligible  every vehicle the job may be offered to on the network
+     why       one sentence of plain English naming what drove the decision
+     limits    the facts the decision was made on, for the driver's card */
+function allocateVehicle(L){
+  L=L||{};
+  const reqs=L.reqs||{};
+  const kg=loadKg(L);
+  const z=SZ_BAND.find(b=>b.k===L.size);
+  const lvl=z?z.lvl:0;
+  const pal=palletsNeeded(L);
+  const dim=L.dimsUnknown?null:dimsToM(L.dims);
+  const fits=k=>{
+    const v=VAN[k]; if(!v)return false;
+    if(kg&&v.kg<kg)return false;                 /* payload it is rated to carry */
+    if(lvl&&v.vol<lvl)return false;              /* how much space the load needs */
+    if(pal&&v.pal<pal)return false;              /* pallet spaces on the floor */
+    if(dim&&!itemFits(v,dim))return false;       /* the biggest item has to go in */
+    if(reqs.tail&&!v.tl)return false;            /* asked for a tail lift, needs one */
+    return true;
+  };
+  const eligible=VAN_ORDER.filter(fits);
+  const rec=eligible[0]||null;
+  /* Why we landed there — named in the customer's own terms, biggest driver
+     first, so the sentence reads like a person explaining it rather than a form
+     echoing itself back. */
+  const bits=[];
+  const u=UNIT.find(x=>x.k===L.unit);
+  const q=parseInt(L.qty,10);
+  if(u&&q>0)bits.push(q+' '+(q===1?u.n.replace(/s$/,'').toLowerCase():u.n.toLowerCase()));
+  else if(z)bits.push(z.n.toLowerCase());
+  if(kg)bits.push((parseFloat(L.exactKg)>0?'':'approximately ')+(kg>=1000?(kg/1000).toFixed(kg%1000?1:0)+' tonnes':kg+'kg'));
+  if(dim)bits.push('the dimensions entered');
+  if(reqs.tail)bits.push('a tail lift at delivery');
+  let why='';
+  if(rec){
+    const list=bits.length?bits.slice(0,-1).join(', ')+(bits.length>1?' and ':'')+bits[bits.length-1]:'what you have told us';
+    why='Based on '+list+', we recommend '+aOrAn(VAN[rec].n)+'.';
+  }else{
+    why='That is more than a Luton will take — carry on and we will price it as a '
+       +'multi-van or freight job. Nothing is turned away.';
+  }
+  return {rec,eligible,why,limits:{kg,lvl,pal,dim,reqs,exact:parseFloat(L.exactKg)>0}};
+}
+/* "an LWB", "a Luton" — the letters S, M, L and X are all spoken with a vowel
+   at the front, so the article follows the sound rather than the spelling. */
+function aOrAn(n){return ((/^(SWB|MWB|LWB|XLWB)/.test(n)||/^[aeiou]/i.test(n))?'an ':'a ')+n;}
+/* Everything at or above the recommendation, said the way a driver reads it. */
+function vehicleRequirement(rec){
+  if(!rec)return 'Multi-van or freight — HAF to confirm';
+  const v=VAN[rec];
+  return v.tl?v.n+' (tail lift)':v.n+' minimum';
+}
+/* ── THE CONSIGNMENT RECORD ──
+   One object. It answers the quote, it allocates the vehicle, it decides who on
+   the network may be offered the job, and it is what the driver reads before
+   pressing Accept. Built once, never re-typed. */
+function buildConsignment(L,extra){
+  const a=allocateVehicle(L);
+  const u=UNIT.find(x=>x.k===L.unit);
+  const q=parseInt(L.qty,10);
+  const w=WT_BAND.find(b=>b.k===L.weight);
+  const d=L.dimsUnknown?null:dimsToM(L.dims);
+  const on=Object.keys(L.reqs||{}).filter(k=>L.reqs[k]);
+  return Object.assign({
+    goods:(L.goods||'').trim(),
+    quantity:(u&&q>0)?q+' '+(q===1?u.n.replace(/s$/,'').toLowerCase():u.n.toLowerCase()):(SZ_BAND.find(b=>b.k===L.size)||{}).n||'',
+    weight:parseFloat(L.exactKg)>0?parseFloat(L.exactKg)+' kg':(w?'Approx. '+w.n.toLowerCase():''),
+    dims:d?m1(d.l)+'m × '+m1(d.w)+'m × '+m1(d.h)+'m':'Not given',
+    handling:on.map(REQ_N),
+    handlingKeys:on,
+    notes:(L.notes||'').trim(),
+    photos:(L.photos||[]).length,
+    vehicle:vehicleRequirement(a.rec),
+    vehicleKey:a.rec,
+    eligible:a.eligible,
+    why:a.why
+  },extra||{});
+}
+/* The LOAD block a driver sees on the job offer — the addendum's card, field for
+   field. A driver never gets "Sheffield → Manchester — LWB" and nothing else. */
+function jobCardHTML(c){
+  const row=(k,v)=>v?'<div class="jobc-r"><div class="jobc-k">'+k+'</div><div class="jobc-v">'+_esc2(v)+'</div></div>':'';
+  const on=c.handlingKeys||[];
+  /* The three things a driver has to know apart: what happens at the collection
+     end, what happens at the delivery end, and what the goods themselves need. */
+  const pick=ks=>ks.filter(k=>on.indexOf(k)>=0).map(REQ_N).join(', ');
+  return '<div class="jobc"><div class="jobc-h">Load</div>'
+    +row('Goods',c.goods||'Not described')
+    +row('Quantity',c.quantity)
+    +row('Weight',c.weight)
+    +row('Largest item',c.dims)
+    +row('Loading',pick(['forkc','helpc','pallet','loose'])||'Nothing stated — assume manual')
+    +row('Unloading',pick(['tail','forkd','helpd'])||'Nothing stated — assume manual')
+    +row('Handling',pick(['fragile','two','stack','nostack'])||'Nothing special')
+    +row('Vehicle required',c.vehicle)
+    +row('Photos',c.photos?c.photos+' attached':'')
+    +row('Additional notes',c.notes)
+    +'</div>';
+}
+function _esc2(s){return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));}
+
 /* fee = HAF network fee as a % of the carrier transport value · flr = the floor that fee may never drop below · svc = urgency premium paid to the driver */
 const URG={flex:{n:'Flexible',fee:.20,flr:.15,svc:1},sday:{n:'Same-day',fee:.20,flr:.15,svc:1},urg:{n:'Urgent',fee:.30,flr:.22,svc:1.10},timed:{n:'Timed delivery',fee:.25,flr:.18,svc:1}};
 /* ── DRIVER REWARD RATE ──
@@ -3784,11 +4265,16 @@ function applyLoadToVans(){
   const note=document.getElementById('ld-note');
   const pills=[...document.querySelectorAll('#van-pills .vp')];
   const w=WT_BAND.find(b=>b.k===selWtKey), z=SZ_BAND.find(b=>b.k===selSzKey);
-  const rec=recommendVan(selWtKey,selSzKey);
+  /* One engine for every surface. The front calculator only knows the two
+     bands, so that is all it hands over — the allocation reads the same either
+     way, it simply has less to go on here than inside a full booking. */
+  const both=!!(w&&z);
+  const A=both?allocateVehicle({weight:selWtKey,size:selSzKey,reqs:{}}):{rec:null,eligible:[],why:''};
+  const rec=A.rec;
 
   pills.forEach(p=>{
     const v=VAN[p.dataset.van]; if(!v)return;
-    const fits=!w||!z||(v.kg>=w.kg&&v.vol>=z.lvl);
+    const fits=!both||A.eligible.indexOf(p.dataset.van)>=0;
     p.classList.toggle('toosmall',!fits);
     p.classList.toggle('rec',!vanPickedByHand&&p.dataset.van===rec);
   });
@@ -3796,6 +4282,7 @@ function applyLoadToVans(){
     pills.forEach(p=>p.classList.toggle('sel',p.dataset.van===rec));
     selVanKey=rec;
   }
+  paintHafPick(both,A);
 
   if(!note)return;
   if(!w||!z){note.style.display='none';note.innerHTML='';return;}
@@ -3822,6 +4309,54 @@ function applyLoadToVans(){
   note.style.display='';
 }
 
+/* The HAF Pick card: what we chose, and the one sentence saying why. */
+function paintHafPick(both,A){
+  const v=document.getElementById('hpick-v'), why=document.getElementById('hpick-w');
+  if(!v||!why)return;
+  if(!both){
+    v.textContent="We'll choose for you";
+    why.textContent="We'll select the safest suitable vehicle from the information you've provided.";
+  }else if(A.rec){
+    v.textContent=VAN[A.rec].n+(vanPickedByHand&&selVanKey!==A.rec?' — you chose the '+VAN[selVanKey].n:'');
+    why.textContent=A.why;
+  }else{
+    v.textContent='Bigger than a Luton';
+    why.textContent=A.why;
+  }
+  paintTooSmall(both,A);
+}
+/* Brent's safety rule: a hand-picked vehicle that cannot take the load is
+   never simply accepted. We say so, and offer our own pick back. */
+function paintTooSmall(both,A){
+  const box=document.getElementById('ts-front'), p=document.getElementById('ts-front-p');
+  if(!box||!p)return;
+  const bad=both&&vanPickedByHand&&A.rec&&A.eligible.indexOf(selVanKey)<0;
+  if(!bad){box.style.display='none';return;}
+  p.textContent='Based on the goods information provided, HAF recommends '
+    +aOrAn(VAN[A.rec].n)+' rather than '+aOrAn(VAN[selVanKey].n)+'.';
+  box.style.display='';
+}
+function useHafPick(){
+  const A=allocateVehicle({weight:selWtKey,size:selSzKey,reqs:{}});
+  if(!A.rec)return;
+  vanPickedByHand=false;
+  selVanKey=A.rec;
+  applyLoadToVans();
+  calcLivePrice();
+}
+function reviewLoad(){
+  const box=document.getElementById('ts-front');
+  if(box)box.style.display='none';
+  const t=document.getElementById('wt-pills');
+  if(t)t.scrollIntoView({behavior:'smooth',block:'center'});
+}
+/* The vehicle list stays folded away until somebody says they know better. */
+function toggleVehList(){
+  const l=document.getElementById('veh-list'), b=document.getElementById('veh-open');
+  if(!l||!b)return;
+  const open=l.classList.toggle('open');
+  b.textContent=open?'Hide the vehicle list':'Choose vehicle myself';
+}
 function selVan(el,key){
   document.querySelectorAll('#van-pills .vp').forEach(b=>b.classList.remove('sel'));
   el.classList.add('sel');
@@ -3933,53 +4468,247 @@ function fqSel(el,key,val){
 }
 function fqToggle(el,key){el.classList.toggle('sel');fqData[key]=el.classList.contains('sel');}
 
-/* ── FAST QUOTE STEP 1 — the same two load questions as the front calculator,
-   drawn from the same bands so the two surfaces can never drift apart. ── */
+/* ── STEP 2 — WHAT ARE WE COLLECTING? ──
+   The two visual bands are the same ones as the front calculator, drawn from the
+   same table so the surfaces can never drift apart. Everything after them is the
+   detail that turns a price into a consignment: the exact figure if they have
+   it, how many and of what, the goods in their own words, the dimensions, the
+   loading requirements and the photos. */
 function fqBuildLoad(){
   const wp=document.getElementById('fq-wt'), sp=document.getElementById('fq-sz');
   if(!wp||!sp)return;
   wp.innerHTML=WT_BAND.map(b=>
-    '<button class="oopt gauge" type="button" onclick="fqSel(this,\'weight\',\''+b.k+'\')">'
+    '<button class="oopt gauge" type="button" onclick="fqSel(this,\'weight\',\''+b.k+'\');fqLoadChanged()">'
     +wtIcon(b.bars)+'<span>'+b.n+'<span class="oopt-sub">'+b.s+'</span></span></button>').join('');
   sp.innerHTML=SZ_BAND.map((b,i)=>
-    '<button class="oopt gauge" type="button" onclick="fqSel(this,\'size\',\''+b.k+'\')">'
+    '<button class="oopt gauge" type="button" onclick="fqSel(this,\'size\',\''+b.k+'\');fqLoadChanged()">'
     +szIcon(i)+'<span>'+b.n+'<span class="oopt-sub">'+b.s+'</span></span></button>').join('');
+  const us=document.getElementById('fq-unit');
+  if(us)us.innerHTML='<option value="">Choose&#8230;</option>'+UNIT.map(u=>'<option value="'+u.k+'">'+u.n+'</option>').join('');
+  const rq=document.getElementById('fq-reqs');
+  const tick='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+  if(rq)rq.innerHTML=LOAD_REQ.map(r=>
+    '<button class="tgl" type="button" data-req="'+r.k+'" aria-pressed="false" onclick="fqReq(this,\''+r.k+'\')">'
+    +tick+r.n+'</button>').join('');
   buildVanCards('fq-van','oopt','fqSelVan');
 }
 fqBuildLoad();
 
-/* Step 2 opens with the right van already chosen and anything too small marked,
-   so a customer only ever has to disagree — never work it out. */
-function fqApplyRec(){
-  const rec=recommendVan(fqData.weight,fqData.size);
-  const w=WT_BAND.find(b=>b.k===fqData.weight), z=SZ_BAND.find(b=>b.k===fqData.size);
-  const note=document.getElementById('fq-note');
-  document.querySelectorAll('#fq-van .oopt').forEach(p=>{
-    const v=VAN[p.dataset.van]; if(!v)return;
-    p.classList.toggle('toosmall',!!(w&&z)&&!(v.kg>=w.kg&&v.vol>=z.lvl));
-    if(!fqData.vanByHand)p.classList.toggle('sel',p.dataset.van===rec);
-  });
-  if(rec&&!fqData.vanByHand)fqData.van=rec;
-  if(!note)return;
-  if(!rec){
-    note.className='ld-note warn';
-    note.innerHTML='That is more than a Luton will take — carry on and we will price it as a multi-van or freight job.';
-    note.style.display=(w&&z)?'':'none';
-    return;
+/* Everything the customer has told us about the load, in one object. This is
+   what the allocation reads, and what becomes the driver's job card. */
+const fqPhotos=[];
+function fqLoad(){
+  const val=id=>{const e=document.getElementById(id);return e?e.value:'';};
+  return {
+    weight:fqData.weight, size:fqData.size,
+    exactKg:val('fq-exact'),
+    qty:val('fq-qty'), unit:val('fq-unit'),
+    goods:val('fq-goods'),
+    dims:{l:val('fq-dl'),w:val('fq-dw'),h:val('fq-dh'),unit:val('fq-dunit')},
+    dimsUnknown:!!(document.getElementById('fq-dnk')||{}).checked,
+    reqs:fqData.reqs||{},
+    notes:val('fq-notes'),
+    photos:fqPhotos
+  };
+}
+/* Anything that changes the load re-opens the question of which van it needs —
+   so the recommendation is never left showing the answer to an older load. */
+function fqLoadChanged(){
+  fqData.vanByHand=false;
+  fqApplyRec();
+}
+function fqReq(el,key){
+  fqData.reqs=fqData.reqs||{};
+  const on=!el.classList.contains('sel');
+  el.classList.toggle('sel',on);
+  el.setAttribute('aria-pressed',on?'true':'false');
+  fqData.reqs[key]=on;
+  /* A load cannot be both palletised and loose, or both stackable and not. */
+  const opp=(LOAD_REQ.find(r=>r.k===key)||{}).x;
+  if(on&&opp){
+    fqData.reqs[opp]=false;
+    const o=document.querySelector('#fq-reqs .tgl[data-req="'+opp+'"]');
+    if(o){o.classList.remove('sel');o.setAttribute('aria-pressed','false');}
   }
-  const chosen=VAN[fqData.van]||VAN[rec];
-  const bad=chosen.kg<w.kg||chosen.vol<z.lvl;
-  let msg=bad
-    ? 'A <strong>'+chosen.n+'</strong> will not take '+w.n.toLowerCase()+' of '+z.n.toLowerCase()
-      +'. The smallest that will is a <strong>'+VAN[rec].n+'</strong>.'
-    : '<strong>'+w.n+'</strong>, <strong>'+z.n.toLowerCase()+'</strong> — we have picked the <strong>'
-      +chosen.n+'</strong>. Change it if you know better.';
-  if(needsTailLiftHint(fqData.weight,fqData.size)&&!chosen.tl)
-    msg+=' No forklift or loading bay at either end? Pick the tail lift.';
-  if(!bad)msg+=openBandNote(fqData.weight,fqData.van);
-  note.innerHTML=msg;
-  note.className='ld-note'+(bad?' warn':'');
-  note.style.display='';
+  fqLoadChanged();
+}
+function fqDimsUnknown(){
+  const ck=document.getElementById('fq-dnk'), wrap=document.getElementById('fq-dims-wrap');
+  if(wrap)wrap.classList.toggle('dims-off',!!(ck&&ck.checked));
+  fqLoadChanged();
+}
+/* Photos stay in this browser on the preview — nothing is uploaded yet. The
+   count is what travels through to the driver's card. */
+function fqAddPhotos(inp){
+  [...inp.files].slice(0,6-fqPhotos.length).forEach(f=>{
+    const r=new FileReader();
+    r.onload=e=>{fqPhotos.push({name:f.name,src:e.target.result});fqPaintPhotos();};
+    r.readAsDataURL(f);
+  });
+  inp.value='';
+}
+function fqPaintPhotos(){
+  const s=document.getElementById('fq-ph-strip');
+  if(!s)return;
+  s.innerHTML=fqPhotos.map((p,i)=>
+    '<div class="ph-thumb"><img src="'+p.src+'" alt=""><button class="ph-x" type="button" onclick="fqDropPhoto('+i+')" aria-label="Remove photo">&#215;</button></div>').join('');
+}
+function fqDropPhoto(i){fqPhotos.splice(i,1);fqPaintPhotos();}
+
+/* ══ BOOK BY EMAIL ═══════════════════════════════════════════════════════
+   A blank "get in touch" address costs us a round of emails every time, because
+   the first message never has what we need in it. So we write the email for the
+   customer: every question the allocation asks, in order, with whatever they
+   have already told the calculator filled in. They complete the blanks and send
+   it to quote@usehaf.co.uk. ═══════════════════════════════════════════════ */
+const HAF_QUOTE_EMAIL='quote@usehaf.co.uk';
+function eqSubject(){
+  const fr=(_v('pc-from')||'').toUpperCase(), to=(_v('pc-to')||'').toUpperCase();
+  return 'Quote request'+(fr&&to?' — '+fr+' to '+to:'');
+}
+function eqTemplate(){
+  const fr=(_v('pc-from')||'').toUpperCase(), to=(_v('pc-to')||'').toUpperCase();
+  const w=WT_BAND.find(b=>b.k===selWtKey), z=SZ_BAND.find(b=>b.k===selSzKey);
+  const veh=(selWtKey&&selSzKey&&VAN[selVanKey])?VAN[selVanKey].n:'';
+  const L=l=>l+'\n';
+  return ''
+    +L('Hello HAF,')
+    +L('')
+    +L('Please could you quote for the delivery below.')
+    +L('')
+    +L('COLLECTION')
+    +L('Postcode: '+fr)
+    +L('Full address: ')
+    +L('Contact name: ')
+    +L('Contact number: ')
+    +L('Ready from (date and time): ')
+    +L('')
+    +L('DELIVERY')
+    +L('Postcode: '+to)
+    +L('Full address: ')
+    +L('Contact name: ')
+    +L('Contact number: ')
+    +L('Needed by (date and time): ')
+    +L('')
+    +L('WHAT WE ARE SENDING')
+    +L('Description of the goods: ')
+    +L('How many, and of what (e.g. 3 pallets): ')
+    +L('Approximate weight: '+(w?w.n:''))
+    +L('Exact weight if known (kg): ')
+    +L('How much is there: '+(z?z.n:''))
+    +L('Largest item — length x width x height: ')
+    +L('')
+    +L('LOADING AND HANDLING  (delete what does not apply)')
+    +L('Palletised / loose loaded')
+    +L('Fragile: yes / no')
+    +L('Stackable: yes / no')
+    +L('Tail lift required: yes / no')
+    +L('Two-person lift: yes / no')
+    +L('Forklift at collection: yes / no')
+    +L('Forklift at delivery: yes / no')
+    +L('Loading help available: yes / no')
+    +L('Unloading help available: yes / no')
+    +L('')
+    +L('ANYTHING ELSE THE DRIVER NEEDS TO KNOW')
+    +L('')
+    +L('')
+    +L('VEHICLE')
+    +L('Happy for HAF to choose: yes / no')
+    +L('If you know what you need: '+veh)
+    +L('')
+    +L('MY DETAILS')
+    +L('Name: ')
+    +L('Company: ')
+    +L('Email: ')
+    +L('Phone: ')
+    +L('')
+    +L('Thank you.');
+}
+function openEmailQuote(){
+  const box=document.getElementById('email-quote'), ta=document.getElementById('eq-body');
+  if(!box||!ta)return;
+  ta.value=eqTemplate();
+  box.style.display='';
+  box.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function closeEmailQuote(){
+  const box=document.getElementById('email-quote');
+  if(box)box.style.display='none';
+}
+function sendEmailQuote(){
+  const ta=document.getElementById('eq-body');
+  window.location.href='mailto:'+HAF_QUOTE_EMAIL
+    +'?subject='+encodeURIComponent(eqSubject())
+    +'&body='+encodeURIComponent(ta?ta.value:eqTemplate());
+}
+function copyEmailQuote(){
+  const ta=document.getElementById('eq-body'), btn=document.getElementById('eq-copy');
+  if(!ta)return;
+  const done=()=>{if(btn){btn.textContent='Copied — now email it to '+HAF_QUOTE_EMAIL;setTimeout(()=>{btn.textContent='Copy it instead';},4000);}};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(ta.value).then(done,()=>{ta.select();done();});
+  else{ta.select();document.execCommand('copy');done();}
+}
+
+/* ── STEP 3 — THE VEHICLE ──
+   HAF's own pick leads, in words, with the sentence saying what drove it. The
+   list is folded away for anyone who wants it, and a vehicle that cannot take
+   the load is stopped rather than quietly accepted. */
+function fqApplyRec(){
+  const L=fqLoad();
+  const ready=!!(L.weight&&L.size);
+  const A=ready?allocateVehicle(L):{rec:null,eligible:[],why:''};
+  fqData.alloc=A;
+  document.querySelectorAll('#fq-van .oopt').forEach(p=>{
+    if(!VAN[p.dataset.van])return;
+    p.classList.toggle('toosmall',ready&&A.eligible.indexOf(p.dataset.van)<0);
+    if(!fqData.vanByHand)p.classList.toggle('sel',p.dataset.van===A.rec);
+  });
+  if(A.rec&&!fqData.vanByHand)fqData.van=A.rec;
+  const v=document.getElementById('fq-pick-v'), why=document.getElementById('fq-pick-w');
+  if(v&&why){
+    if(!ready){
+      v.textContent='\u2014';
+      why.textContent="We'll select the safest suitable vehicle from the information you've provided.";
+    }else if(A.rec){
+      const hand=fqData.vanByHand&&fqData.van!==A.rec;
+      v.textContent=VAN[A.rec].n+(hand?' \u2014 you chose the '+VAN[fqData.van].n:'');
+      let line=A.why;
+      /* Weight bands are open-ended at the top and a pallet still has to come
+         off the van somehow — both said out loud rather than assumed. */
+      if(needsTailLiftHint(L.weight,L.size)&&!VAN[fqData.van||A.rec].tl&&!(L.reqs||{}).forkd)
+        line+=' No forklift or loading bay at the delivery end? Tick "tail lift required".';
+      if(!parseFloat(L.exactKg))line+=openBandNote(L.weight,fqData.van||A.rec);
+      why.textContent=line;
+    }else{
+      v.textContent='Bigger than a Luton';
+      why.textContent=A.why;
+    }
+  }
+  fqPaintTooSmall(ready,A);
+}
+/* Brent's safety rule: no simple override that knowingly creates an unsuitable
+   allocation. Two ways out, and neither of them is "carry on anyway". */
+function fqPaintTooSmall(ready,A){
+  const box=document.getElementById('fq-toosmall'), p=document.getElementById('fq-toosmall-p');
+  if(!box||!p)return;
+  const bad=ready&&fqData.vanByHand&&A.rec&&A.eligible.indexOf(fqData.van)<0;
+  if(!bad){box.style.display='none';return;}
+  p.textContent='Based on the goods information provided, HAF recommends '
+    +aOrAn(VAN[A.rec].n)+' rather than '+aOrAn(VAN[fqData.van].n)+'.';
+  box.style.display='';
+}
+function fqUseHafPick(){
+  const A=fqData.alloc||allocateVehicle(fqLoad());
+  if(!A.rec)return;
+  fqData.vanByHand=false;
+  fqData.van=A.rec;
+  fqApplyRec();
+}
+function fqToggleVeh(){
+  const l=document.getElementById('fq-veh-list'), b=document.getElementById('fq-veh-open');
+  if(!l||!b)return;
+  const open=l.classList.toggle('open');
+  b.textContent=open?'Hide the vehicle list':'Choose vehicle myself';
 }
 function fqSelVan(el,key){
   document.querySelectorAll('#fq-van .oopt').forEach(b=>b.classList.remove('sel'));
@@ -3988,37 +4717,87 @@ function fqSelVan(el,key){
   fqApplyRec();
 }
 
+/* ── KNOW THE DRIVER? ──
+   A username is not a lookup. HAF never confirms to a stranger who holds one —
+   the job is simply offered to that driver first, and falls back to the open
+   network if they do not take it. */
+function ddClear(){
+  const ok=document.getElementById('fq-dd-ok'), er=document.getElementById('fq-dd-err');
+  if(ok)ok.style.display='none';
+  if(er)er.style.display='none';
+  fqData.direct=null;
+}
+function ddSetDirect(){
+  const inp=document.getElementById('fq-dduser');
+  const ok=document.getElementById('fq-dd-ok'), er=document.getElementById('fq-dd-err');
+  const u=(inp?inp.value:'').trim().toUpperCase();
+  if(!u){er.textContent='Enter the driver\u2019s HAF username to send it to them.';er.style.display='block';return;}
+  if(!/^[A-Z]{2}[0-9]{4,8}$/.test(u)){
+    er.textContent='That does not look like a HAF username \u2014 they are two letters and then numbers, like JW012390.';
+    er.style.display='block';return;
+  }
+  er.style.display='none';
+  inp.value=u;
+  fqData.direct=u;
+  ok.innerHTML='This job will be offered to <strong>'+u+'</strong> first. '
+    +'If they have not accepted within 20 minutes it goes to the wider HAF network automatically, '
+    +'so your delivery is never left waiting on one driver.';
+  ok.style.display='';
+}
+
 /* ── FLOW VALIDATION ── */
 function fErr(id,msg){const el=document.getElementById(id);if(!el)return;el.textContent=msg||'';el.style.display=msg?'block':'none';}
 
+const _v=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
 function fqNext(toStep){
+  /* 1 → 2 : we need to know where before we can price anything */
   if(toStep===2){
-    if(!fqData.weight||!fqData.size){fErr('fq-err-1','Please choose how heavy it is and how much there is.');return;}
+    if(!_v('fq-from')||!_v('fq-to')){fErr('fq-err-1','Please enter both a collection and a delivery postcode.');return;}
     fErr('fq-err-1','');
-    fqApplyRec();                      /* arrive on the van step with it already chosen */
   }
-  if(toStep===3){if(!fqData.van){fErr('fq-err-2','Please select a van size to continue.');return;}fErr('fq-err-2','');}
+  /* 2 → 3 : the three answers the driver cannot do without */
+  if(toStep===3){
+    if(!fqData.weight||!fqData.size){fErr('fq-err-2','Please choose how heavy it is and how much there is.');return;}
+    if(!_v('fq-goods')){fErr('fq-err-2','Please describe the goods — this is what the driver sees before accepting.');return;}
+    const ex=parseFloat(_v('fq-exact'));
+    if(_v('fq-exact')&&!(ex>0)){fErr('fq-err-2','Exact weight should be a number of kilograms, or left blank.');return;}
+    const dnk=(document.getElementById('fq-dnk')||{}).checked;
+    const anyDim=_v('fq-dl')||_v('fq-dw')||_v('fq-dh');
+    if(!dnk&&anyDim&&!(_v('fq-dl')&&_v('fq-dw')&&_v('fq-dh'))){
+      fErr('fq-err-2','Please give all three dimensions, or tick "I don’t know the dimensions".');return;
+    }
+    fErr('fq-err-2','');
+    fqApplyRec();                      /* arrive on the vehicle step already decided */
+  }
+  /* 3 → 4 : a vehicle that cannot take the load never gets past here */
+  if(toStep===4){
+    const A=fqData.alloc||{};
+    if(!fqData.van&&A.rec)fqData.van=A.rec;
+    if(!fqData.van&&!A.rec){fErr('fq-err-3','');fqStep(4);return;}   /* freight job — HAF prices it by hand */
+    if(A.rec&&A.eligible&&A.eligible.indexOf(fqData.van)<0){
+      fErr('fq-err-3','That vehicle cannot take this load. Use the HAF recommendation, or go back and review the load details.');
+      fqPaintTooSmall(true,A);
+      return;
+    }
+    fErr('fq-err-3','');
+  }
+  /* 4 → 5 : how soon */
   if(toStep===5){
-    const fr=document.getElementById('fq-from').value.trim(),to=document.getElementById('fq-to').value.trim();
-    if(!fr||!to){fErr('fq-err-4','Please enter both a collection and delivery postcode.');return;}
+    if(!fqData.urg){fErr('fq-err-4','Please tell us when it needs moving.');return;}
     fErr('fq-err-4','');
-  }
-  if(toStep===8){
-    const n=document.getElementById('fq-name').value.trim(),e=document.getElementById('fq-email').value.trim(),m=document.getElementById('fq-mobile').value.trim();
-    if(!n||!e||!m){fErr('fq-err-7','Please fill in your name, email, and mobile number.');return;}
-    fErr('fq-err-7','');
   }
   fqStep(toStep);
 }
+/* 5 → 6 : full addresses, then the price and the driver's card */
 function fqShowPriceV(){
-  if(!fqData.urg){fErr('fq-err-5','Please select how soon you need this delivery.');return;}
+  if(!_v('fq-caddr')||!_v('fq-daddr')){fErr('fq-err-5','Please enter both the full collection and delivery addresses.');return;}
   fErr('fq-err-5','');
   fqShowPrice();
 }
 function fqBookV(){
-  const ca=document.getElementById('fq-caddr').value.trim(),da=document.getElementById('fq-daddr').value.trim();
-  if(!ca||!da){fErr('fq-err-8','Please enter both the full collection and delivery addresses.');return;}
-  fErr('fq-err-8','');
+  const n=_v('fq-name'),e=_v('fq-email'),m=_v('fq-mobile');
+  if(!n||!e||!m){fErr('fq-err-7','Please fill in your name, email, and mobile number.');return;}
+  fErr('fq-err-7','');
   fqBook();
 }
 
@@ -4068,6 +4847,16 @@ async function fqShowPrice(){
   const r=await fqCalcPrice();
   document.getElementById('fq-pr-range').textContent='£'+r.lo+'–£'+r.hi;
   document.getElementById('fq-pr-basis').textContent=r.v.n+' · '+r.fr+' → '+r.to+' · ~'+r.miles+' mi · '+r.u.n;
+  /* The consignment record — built once, from what the customer actually typed,
+     and shown back to them as the card the driver will read. */
+  fqData.consignment=buildConsignment(fqLoad(),{
+    from:r.fr,to:r.to,
+    collection:_v('fq-caddr'),delivery:_v('fq-daddr'),
+    when:(URG[fqData.urg]||{}).n||'',
+    date:_v('fq-cdate'),time:_v('fq-ctime'),deliveryReq:_v('fq-dreq')
+  });
+  const card=document.getElementById('fq-jobcard');
+  if(card)card.innerHTML=jobCardHTML(fqData.consignment);
   fqStep(6);
 }
 function fqBook(){openDemoGate();}
