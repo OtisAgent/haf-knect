@@ -1628,6 +1628,35 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
       </div>
     </div>
 
+    <!-- ══ DOOR FIVE — SEE WHAT A MEMBER SEES ════════════════════════════
+         Brent, 14 Aug: "i can't see it".
+
+         He was right, and this is why. His own login is the master login, and
+         the master login has never gone through a member's front door — it
+         lands on this screen. So the access split he asked for was live and
+         working, and the one person who needed to check it was the one person
+         the code never showed it to.
+
+         These six buttons run the member sign-in EXACTLY as a member's does:
+         the same hafAccess, the same hafPerms, the same sidebar. The only thing
+         standing in is the account record itself — the account type and whether
+         Clever has released them — because that is the thing being looked at.
+         Nothing here carries a price, a fee or a made-up figure: the old "view
+         as" cards did, every one of them had gone stale, and that is why they
+         were deleted. This is a window onto the real code, not a mock-up. -->
+    <div style="margin-top:1.1rem;border-top:1px solid var(--lns);padding-top:1rem">
+      <div style="font-weight:800;font-size:.82rem;margin-bottom:.15rem">See what a member sees</div>
+      <div style="font-size:.72rem;color:var(--mu);line-height:1.5;margin-bottom:.7rem">Your master login skips the member front door, so it never shows you a member's sidebar. Pick an account type and you get the real one — the same code a member's sign-in runs.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.45rem">
+        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('business',false)">Business — sends only</button>
+        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('freight_forwarder',false)">Freight forwarder — sends only</button>
+        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('driver',false)">Owner driver — checks not done</button>
+        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('driver',true)">Owner driver — released</button>
+        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('fleet',false)">Fleet — checks not done</button>
+        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('fleet',true)">Fleet — released</button>
+      </div>
+    </div>
+
     <div style="margin-top:1rem;text-align:center">
       <button class="btn btn-gh btn-sm" onclick="signOut()">Sign out</button>
     </div>
@@ -4612,6 +4641,54 @@ function enterMode(mode){
   }
 }
 
+/* ── SEE WHAT A MEMBER SEES ───────────────────────────────────────────────
+   The master login lands on the mode selector and never walks a member's
+   front door, so the one person who had to check the access split was the one
+   person who was never shown it. This walks it for him.
+
+   What is stood in: the account record — the type, and whether Clever has
+   released them. That is the input under examination, so it is the only thing
+   supplied. Everything downstream is the member's own code, untouched:
+   hafAccess decides what the account IS, hafPerms decides what that reaches,
+   buildNavV1 draws it. If the sidebar here is wrong, the member's is wrong
+   too — which is the entire point of looking.
+
+   It is deliberately marked on screen as a preview. Somebody has to be able to
+   tell at a glance whether they are looking at a real account or a look at
+   one, and a banner that says so is cheaper than an assumption that doesn't. */
+function viewAsMember(type,released){
+  const ov=document.getElementById('super-mode');
+  if(ov)ov.style.display='none';
+  document.getElementById('app').classList.add('open');
+  _hideDemoBar();
+  _setMyTier(null);                    // no membership level is being previewed
+  _setFounder(null);                   // and no founder's mark either
+
+  const acc=hafAccess({account_type:type,plna_released:released===true,
+                       full_name:'Preview account'});
+
+  const roleEl=document.getElementById('tb-role');
+  roleEl.textContent=HAF_TYPE_LABEL[acc.type]||'Account';
+  roleEl.className='role-chip chip '+(acc.type==='freight_forwarder'?'co':'cb');
+
+  const plnaBtn=document.getElementById('plna-link-btn');
+  if(plnaBtn)plnaBtn.style.display=acc.released?'flex':'none';
+
+  const vaBanner=document.getElementById('viewas-banner');
+  const vaLbl=document.getElementById('viewas-lbl');
+  if(vaLbl)vaLbl.textContent=(HAF_TYPE_LABEL[acc.type]||'Account')+
+    (acc.drives?(acc.released?', released by Clever':', checks not finished'):', sends only')+
+    ' — this is the sidebar they get';
+  if(vaBanner)vaBanner.style.display='flex';
+
+  buildNavV1(acc);
+  _buildDashActions(acc.type==='fleet'&&acc.released?'fleet':acc.released?'driver':
+                    acc.type==='freight_forwarder'?'freight-pro':'business');
+  switchTab('pane-d-home');
+  _setModePill('Preview · member view','var(--or)');
+}
+window.viewAsMember=viewAsMember;
+
 function _setModePill(label,col){
   const pill=document.getElementById('mode-pill');
   const lbl=document.getElementById('mode-pill-lbl');
@@ -5583,7 +5660,21 @@ function hafPerms(acc){
    to leave it out of the sidebar entirely. */
 function hafLockWhy(secId,acc){
   const m=HAF_LOCK_WHY[secId]; if(!m)return null;
-  return (acc.drives&&!acc.released)?(m.pending||null):(m[acc.type]||null);
+  /* "waiting on your Clever checks" is only an honest reason where finishing
+     those checks is what actually opens the section.
+
+     An owner driver waiting on their checks was being told "your fleet account
+     opens as soon as your Clever checks are complete" — and it does not. They
+     applied as an owner driver; no amount of paperwork turns that into a fleet.
+     A padlock that promises something the product will not deliver is worse
+     than no padlock at all, because the person waits for it. So the pending
+     line is used only when the pending state is genuinely what is in the way,
+     and otherwise the account is shown the reason that is true for it: to run
+     drivers and vans, register a fleet. */
+  const pendingApplies=acc.drives&&!acc.released&&
+                       (secId!=='fleet'||acc.type==='fleet');
+  if(pendingApplies&&m.pending)return m.pending;
+  return m[acc.type]||null;
 }
 
 let _navOpen=null;
