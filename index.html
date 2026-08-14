@@ -1273,8 +1273,14 @@ textarea.fi2{resize:vertical;min-height:70px}
   padding:.16rem .42rem;border-radius:4px;background:var(--gn-d);color:var(--gn);white-space:nowrap}
 
 /* privacy blur — the eye stays sharp and clickable, everything else goes soft */
+/* .hv-show is a card the person has explicitly asked to see again while "Blur
+   all" is on. Without it, pressing a card's own eye under Blur all did nothing
+   at all: the card stayed soft, and on a narrow screen — where the top-bar
+   switch steps aside, and the sidebar card sits outside any pane and so has no
+   view bar of its own — there was no other control to reach. A blur you cannot
+   lift is a broken screen, not a privacy feature. */
 .hv-tile.hv-blur > :not(.hv-eye),
-body.hv-blur-all .hv-tile > :not(.hv-eye){
+body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
   filter:blur(7px);opacity:.75;user-select:none;pointer-events:none}
 @media print{.hv-tile.hv-blur > :not(.hv-eye){filter:blur(9px)}}
 
@@ -7910,11 +7916,30 @@ function hafActiveJob(){return HAF_JOBS.find(j=>j.status!=='delivered'&&j.status
 function hafNow(){try{return new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}catch(e){return 'now';}}
 function hafEsc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
+/* Brent, 14 Aug: the sidebar card is the ONE thing on screen the whole time, so
+   it may only ever carry a real job. A seeded run sitting in that slot reads as
+   live work that does not exist — and once it is blurred for screen sharing
+   there is nothing left to read at all, just a smudge in the corner that will
+   not go away. So: no real job in play, no card. Blank beats plausible.
+
+   Real-vs-seeded is decided in ONE place — the run-visibility layer at the foot
+   of this file — never by a second copy of the list that can drift out of step.
+   If that layer has not booted yet we call the job seeded, because the failure
+   we can afford here is an empty card, not a fictional live one. */
+function hafIsRealRef(ref){
+  var v = window.HAF_VIEW;
+  return !!(ref && v && typeof v.isSample === 'function' && !v.isSample(ref));
+}
+function hafRealActiveJob(){
+  return HAF_JOBS.find(j => j.status!=='delivered' && j.status!=='closed'
+                            && hafIsRealRef(j.id)) || null;
+}
+
 /* sidebar tracker — always one glance from the live job */
 function hafRenderLiveWidget(){
  const el=document.getElementById('sb-livejob');if(!el)return;
- const j=hafActiveJob();
- if(!j||hafRole()==='admin'){el.style.display='none';return;}
+ const j=hafRealActiveJob();
+ if(!j||hafRole()==='admin'){el.style.display='none';el.innerHTML='';return;}
  const st=HAF_STATUS[j.status]||HAF_STATUS.transit;
  el.style.display='block';
  el.onclick=()=>hafOpenJob(j.id);
@@ -9922,7 +9947,19 @@ window.pxSave=async function(){
     function toggle(ev){
       ev.preventDefault();
       ev.stopPropagation();
-      var on = el.classList.toggle('hv-blur');
+      /* The eye flips WHAT YOU CAN SEE, which is not the same as flipping this
+         card's own switch. Under "Blur all" the card is already soft with its
+         own switch still off, so a plain toggle turned that switch ON and the
+         card stayed exactly as soft as before — the press that looked like it
+         should reveal the card did nothing at all. Read the state on screen
+         first, then flip that. Letting one card out under Blur all is an
+         exception for that card only, and blurring it again puts it straight
+         back under the rule, so the two controls can never disagree. */
+      var all = document.body.classList.contains('hv-blur-all');
+      var soft = el.classList.contains('hv-blur') || (all && !el.classList.contains('hv-show'));
+      var on = !soft;
+      el.classList.toggle('hv-blur', on);
+      el.classList.toggle('hv-show', !on && all);
       var k = el.getAttribute('data-hv-ref') || '';
       if (k) { if (on) blurred[k] = 1; else delete blurred[k]; saveBlurred(); }
       paintEye(el, eye);
@@ -9937,7 +9974,11 @@ window.pxSave=async function(){
     paintEye(el, eye);
   }
   function paintEye(el, eye){
-    var on = el.classList.contains('hv-blur');
+    /* the eye reports what is actually on screen, not just this card's own
+       switch — under "Blur all" a card is soft unless it has been let out */
+    var on = el.classList.contains('hv-blur')
+      || (document.body.classList.contains('hv-blur-all')
+          && !el.classList.contains('hv-show'));
     eye.innerHTML = on ? EYE_SHUT : EYE_OPEN;
     eye.title = on ? 'Show this again' : 'Blur this out for screen sharing';
     eye.setAttribute('aria-label', eye.title);
@@ -10011,6 +10052,12 @@ window.pxSave=async function(){
   /* ── blur everything ── */
   function setBlurAll(on){
     document.body.classList.toggle('hv-blur-all', on);
+    /* flipping the master switch starts a clean sheet: any single card that was
+       let out under the last Blur all goes back under the rule, so switching it
+       on always means everything, exactly as the label says */
+    document.querySelectorAll('.hv-tile.hv-show').forEach(function(t){
+      t.classList.remove('hv-show');
+    });
     try { localStorage.setItem(allKey(), on ? '1' : '0'); } catch(e){}
     document.querySelectorAll('.hv-b.hv-bl').forEach(function(b){
       b.classList.toggle('on', on);
@@ -10022,6 +10069,13 @@ window.pxSave=async function(){
       top.innerHTML = on ? EYE_SHUT : EYE_OPEN;
       top.title = on ? 'Show everything again' : 'Blur every run — for screen sharing';
     }
+    /* every card's own eye now reads the master switch, so repaint them all —
+       an eye still showing "open" over a blurred card is a control lying about
+       what it will do next */
+    document.querySelectorAll('.hv-tile').forEach(function(t){
+      var eye = t.querySelector(':scope > .hv-eye');
+      if (eye) paintEye(t, eye);
+    });
   }
 
   /* a permanent switch in the top bar, so it is reachable from any page */
