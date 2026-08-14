@@ -48,6 +48,19 @@ const LADDERS = [
     lead: 'One company account for the whole fleet. The plan decides how many drivers you can carry &mdash; you are never charged per driver.',
     side: 'FLEET',
     codes: ['FLEET_LITE', 'FLEET_PLUS', 'FLEET_PRO']
+  },
+  /* Freight forwarding is section 8 of the brief, so it gets its own tab and
+   * its own sections. It carries NO price: freight is free at launch and no
+   * paid freight plan has been set — the £500/1% and £1,000/3% tiers came off
+   * the terms page on 14 Aug. The cost section says exactly that rather than
+   * showing an invented figure or an empty cell. */
+  {
+    id: 'freight',
+    tab: 'Freight forwarding',
+    lead: 'For forwarders and load posters moving their clients&rsquo; freight. Freight is free to join at launch &mdash; the columns show the plan ladder the tools sit on.',
+    side: 'FREIGHT',
+    unpriced: true,
+    codes: ['FREIGHT_LITE', 'FREIGHT_PLUS', 'FREIGHT_PRO']
   }
 ];
 
@@ -56,6 +69,22 @@ const LEVEL_LABEL = { LITE: 'HAF KNECT Free', PLUS: 'HAF KNECT Plus', PRO: 'HAF 
 function costRows(ladder) {
   const t = ladder.codes.map((c) => A.config.accountTypes[c]);
   const rows = [];
+
+  /* An unpriced ladder gets the truth in place of a price: free to join today,
+   * and nothing quoted for a plan that has not been set. */
+  if (ladder.unpriced) {
+    rows.push({
+      label: 'Monthly price',
+      cells: ['Free', 'Not published yet', 'Not published yet'],
+      strong: true,
+      note: 'Freight is free at launch. If a paid freight plan is added, its price and terms are published before anyone is charged.'
+    });
+    rows.push({
+      label: 'Posting your own work onto the network',
+      cells: t.map((x) => A.postingLimitLabel(x.level))
+    });
+    return rows;
+  }
 
   rows.push({
     label: 'Monthly price',

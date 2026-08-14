@@ -93,7 +93,7 @@ ok('says plainly that matching is not bought', /never decided by what an account
 
 // --- 8. every feature row came from the shared list -----------------------
 const listTexts = new Set();
-['DRIVER', 'FLEET'].forEach((side) =>
+['DRIVER', 'FLEET', 'FREIGHT'].forEach((side) =>
   A.featuresForSideLevel(side, 'PRO').forEach((f) => listTexts.add(f.text)));
 const rowLabels = [...b.matchAll(/<th scope="row">([^<]+)/g)].map((m) => m[1].trim());
 const invented = rowLabels.filter((t) => !listTexts.has(

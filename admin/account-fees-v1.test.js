@@ -319,10 +319,13 @@ ok("an entry-level feature is never marked on the entry tier",
   liteFeat.every(function (f) { return f.unlocksAt !== "LITE" || !f.lockedBy; }));
 
 // --- features are grouped into named sections, never one flat list ---------
-var KNOWN_GROUPS = ["DASHBOARD", "PLATFORM", "PLNA", "AI"];
-ok("the driver ladder is split into dashboard and PLNA sections",
-  liteFeat.some(function (f) { return f.group === "DASHBOARD"; }) &&
-  liteFeat.some(function (f) { return f.group === "PLNA"; }));
+// Brent 2026-08-14: the sections are his brief's own sections, in his order.
+var KNOWN_GROUPS = ["ACCOUNT", "DASHBOARD", "PLATFORM", "POSTING", "PLNA",
+  "ROUTES", "CALENDAR", "FLEET", "BOOKING", "PRICING", "BRANDING", "AI"];
+ok("the driver ladder is split into the brief's own sections",
+  ["PLNA", "POSTING", "CALENDAR", "BOOKING", "PRICING", "BRANDING"].every(function (g) {
+    return liteFeat.some(function (f) { return f.group === g; });
+  }));
 ok("every feature on every side carries a known group",
   ["DRIVER", "FLEET", "FREIGHT"].every(function (side) {
     return A.config.featureCatalogue[side].every(function (f) {
@@ -337,9 +340,13 @@ var driverPlusSecs = A.featureSections("DRIVER", "PLUS");
 ok("driver sections come back labelled and non-empty",
   driverPlusSecs.length >= 2 &&
   driverPlusSecs.every(function (s) { return !!s.label && s.features.length > 0; }));
-ok("dashboard is read before PLNA",
-  driverPlusSecs[0].label === "Dashboard features" &&
-  driverPlusSecs[1].label === "PLNA features");
+ok("the sections are read in the brief's order",
+  driverPlusSecs.map(function (s) { return s.label; }).join(" | ") ===
+    ["Posting work onto the network", "Driver and PLNA",
+     "Return and filler route planning", "Calendar and driver diary",
+     "Bookings and customers", "Pricing and utilisation",
+     "Branding and business tools", "JAKO AI"].join(" | "),
+  driverPlusSecs.map(function (s) { return s.label; }));
 ok("sectioning loses no feature",
   driverPlusSecs.reduce(function (n, s) { return n + s.features.length; }, 0) ===
     A.featuresForSideLevel("DRIVER", "PLUS").length);
@@ -634,8 +641,11 @@ Object.keys(fleetBands).forEach(function (code) {
     A.config.accountTypes[code].extraDriverMonthlyGbp === null);
 });
 
+// The fleet driver's own PLNA is filed under the brief's calendar/diary
+// section now, so read it from there rather than from a group that no longer
+// exists on the fleet side.
 var fleetPlna = A.featuresForSideLevel("FLEET", "PRO")
-  .filter(function (f) { return f.group === "PLNA"; });
+  .filter(function (f) { return f.group === "CALENDAR"; });
 ok("a fleet driver gets a PLNA of their own", fleetPlna.length > 0);
 ok("the fleet PLNA says plainly it is not an open PLNA",
   fleetPlna.some(function (f) { return /not an open PLNA/i.test(f.text); }));

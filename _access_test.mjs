@@ -19,7 +19,11 @@
    ══════════════════════════════════════════════════════════════════════════ */
 import { chromium } from 'playwright';
 
-const BASE = process.env.BASE || 'http://127.0.0.1:8899';
+/* Point this at the MEMBER app (this folder), not the demo. A stray server left
+   running on the old port was serving demo/, and this test spent a full run
+   failing to find a login box that was never on the page it was looking at. It
+   now says which page it got, in one line, instead of sixty lines of retries. */
+const BASE = process.env.BASE || 'http://127.0.0.1:8911';
 let pass = 0, fail = 0;
 const ok = (c, m) => { c ? (pass++, console.log('  ok   ' + m)) : (fail++, console.log('  FAIL ' + m)); };
 
@@ -45,6 +49,13 @@ async function signIn(row) {
   }));
 
   await pg.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+  /* Am I even looking at the member app? The access model has to be on the page
+     or nothing below this line means anything. */
+  if (!await pg.evaluate(() => typeof window.hafAccess === 'function')) {
+    console.error('\nWRONG PAGE at ' + BASE + ' — no access model on it. ' +
+                  'Serve THIS folder (the member app), not demo/.');
+    process.exit(2);
+  }
   await pg.evaluate(() => { const o = document.getElementById('login-ov'); if (o) o.classList.add('open'); });
   await pg.fill('#l-user', 'TS449326');
   await pg.fill('#l-pass', '1234');
