@@ -77,9 +77,15 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 .land-nav{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.8rem;background:var(--p);border-bottom:1px solid var(--ln)}
 .llogo{display:flex;align-items:center;gap:.5rem;text-decoration:none}
 .llogo-m{width:30px;height:30px;background:var(--or);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:.9rem;color:#0e1113}
-.llogo-t{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em;color:var(--tx)}
+.llogo-t{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em;color:var(--tx);white-space:nowrap}
 .llogo-t span{color:var(--or)}
 .nav-r{display:flex;align-items:center;gap:.5rem}
+/* narrow phones: the wordmark stays on one line, so give the bar its width back */
+@media(max-width:430px){.land-nav{padding-left:.9rem;padding-right:.9rem}.nav-r{gap:.3rem}
+  .llogo{gap:.35rem}.llogo-t{font-size:.95rem}
+  .track-btn,.land-nav .btn-sm{font-size:.74rem;padding:.42rem .5rem;white-space:nowrap}}
+/* very small phones: the bar wraps to two rows rather than scrolling sideways */
+@media(max-width:345px){.land-nav{flex-wrap:wrap;justify-content:center;row-gap:.5rem}}
 .theme-btn{width:32px;height:32px;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;color:var(--mu);cursor:pointer;transition:all .14s;flex-shrink:0}
 .theme-btn:hover{background:var(--p3);color:var(--tx)}
 .track-btn{font-size:.82rem;font-weight:700;color:var(--mu);padding:.42rem .78rem;border-radius:var(--rx);border:1px solid var(--ln);background:var(--p2);cursor:pointer;transition:all .14s}
