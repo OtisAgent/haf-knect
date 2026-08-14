@@ -89,8 +89,14 @@
       },
       PLNA_PLUS: {
         name: "PLNA Plus", side: "DRIVER", status: "SET", level: "PLUS",
-        // Brent 2026-07-29: "keep as it stands" — £10 confirmed.
-        monthlyGbp: 10,
+        // Brent 2026-08-11: "NO one should be on the £10 and the £50 — remove
+        // everyone and move them to the free version, offer them an upgrade to
+        // the new layer." The £10 rung was ABOLISHED, not repriced downstream:
+        // join.usehaf.co.uk, Stripe (haf_plus_monthly) and the storefront all
+        // moved to £25 that day and this list was the last thing still holding
+        // the dead figure. Supersedes the 07-29 "keep as it stands".
+        monthlyGbp: 25,
+        annualGbp: 250,               // ten months charged — two months free
         // Amount from PRICING_ENGINE_CONSTANTS §5.8 (Brent-approved 2026-07-18),
         // which is the record Brent pointed to on 07-29 ("it's on the KNECT
         // process flow — they get charged when an invoice is generated").
@@ -99,8 +105,10 @@
       },
       PLNA_PRO: {
         name: "PLNA Pro", side: "DRIVER", status: "SET", level: "PRO",
-        // Brent 2026-07-29: "keep as it stands" — £50 confirmed.
-        monthlyGbp: 50,
+        // Brent 2026-08-11: the £50 rung went the same way as the £10 — see the
+        // note on PLNA_PLUS. Stripe lookup key haf_pro_monthly is £100.
+        monthlyGbp: 100,
+        annualGbp: 1000,              // ten months charged — two months free
         paymentRunFeeGbp: 0,
         // ⚠️ UNRESOLVED SOURCE CONFLICT — do not publish this figure without a
         // yes. PRICING_ENGINE_CONSTANTS §5.8 says PLNA Pro's payment run is £0,
@@ -120,33 +128,50 @@
       },
 
       // ---- Fleet side ------------------------------------------------------
+      // Brent 2026-08-14: the fleet ladder is decided by HEADCOUNT and nothing
+      // else — Free up to 5 drivers, Plus up to 25, Pro unlimited. A fleet is
+      // never charged per driver: you move up a band, you do not buy a seat.
       FLEET_LITE: {
         name: "Fleet Lite", side: "FLEET", status: "SET", level: "LITE",
         monthlyGbp: 0,
         paymentRunFeeGbp: 9.99,
-        driversIncluded: 3,
-        maxDrivers: 3,                    // hard cap — the upgrade trigger
+        driversIncluded: 5,
+        maxDrivers: 5,                    // hard cap — the upgrade trigger
         extraDriverMonthlyGbp: null,      // no seats sold above the cap
         bookingsPerDriverPerDay: 2,
         // Customer-facing pitch. Capability only — never a price comparison.
         sellsOn: [
-          "Up to 3 drivers",
+          "Up to 5 drivers",
           "2 jobs per driver per day",
           "No monthly fee"
         ]
       },
+      FLEET_PLUS: {
+        name: "Fleet Plus", side: "FLEET", status: "SET", level: "PLUS",
+        monthlyGbp: 50,
+        paymentRunFeeGbp: 5.00,
+        driversIncluded: 25,
+        maxDrivers: 25,                   // hard cap — the upgrade trigger
+        extraDriverMonthlyGbp: null,      // never per driver
+        bookingsPerDriverPerDay: null,    // unlimited
+        sellsOn: [
+          "Up to 25 drivers",
+          "Unlimited jobs per driver per day",
+          "One price for the company, however many are out"
+        ]
+      },
       FLEET_PRO: {
         name: "Fleet Pro", side: "FLEET", status: "SET", level: "PRO",
-        monthlyGbp: 50,
+        monthlyGbp: 250,
         paymentRunFeeGbp: 5.00,           // Brent 2026-07-29: charged, not waived
-        driversIncluded: 5,
+        driversIncluded: null,            // unlimited — no seat counting at all
         maxDrivers: null,                 // unlimited
-        extraDriverMonthlyGbp: 5,
+        extraDriverMonthlyGbp: null,      // Brent 2026-08-14: never per driver
         bookingsPerDriverPerDay: null,    // unlimited
         // Customer-facing pitch. Capability only — never a price comparison.
         // Brent 2026-07-29: "the pro is about the features not the price".
         sellsOn: [
-          "5 drivers included, add more any time",
+          "Unlimited drivers on one account",
           "Unlimited jobs per driver per day",
           "One weekly invoice for the whole fleet"
         ]
@@ -347,7 +372,7 @@
         // Posting is on EVERY account — brief section 3, "every HAF KNECT
         // account must have the ability to post work onto the network". What
         // the tier buys is the allowance and the tools around it, never access.
-        { unlocksAt: "LITE", group: "DASHBOARD", text: "Post your own work onto the network — up to {PERM_LITE.posting_daily_limit} jobs a day" },
+        { unlocksAt: "LITE", group: "DASHBOARD", text: "Post your own work onto the network — up to {PERM_LITE.posting_daily_limit} jobs a day" , slot: "posting" },
         { unlocksAt: "LITE", group: "DASHBOARD", text: "Guide price before you post, and edit the draft before it goes" },
         { unlocksAt: "LITE", group: "DASHBOARD", text: "Repeat a previous order from its reference number" },
         { unlocksAt: "LITE", group: "DASHBOARD", text: "Track what you posted, and cancel it with a full audit history" },
@@ -363,7 +388,7 @@
         { unlocksAt: "PLUS", group: "DASHBOARD", text: "Backload pricing on return journeys and jobs near your route" },
         { unlocksAt: "PLUS", group: "DASHBOARD", text: "Driver pricing preferences for normal, backload, towards-home and urgent work" },
         { unlocksAt: "PLUS", group: "DASHBOARD", text: "HAF never reduces your payment — you choose every reduced rate yourself" },
-        { unlocksAt: "PLUS", group: "DASHBOARD", text: "Post up to {PERM_PLUS.posting_daily_limit} jobs a day onto the network" },
+        { unlocksAt: "PLUS", group: "DASHBOARD", text: "Post up to {PERM_PLUS.posting_daily_limit} jobs a day onto the network" , slot: "posting" },
         { unlocksAt: "PLUS", group: "DASHBOARD", text: "Advanced repeat-booking controls and higher-volume posting tools" },
         { unlocksAt: "PLUS", group: "DASHBOARD", text: "Ask for a driver you know by their HAF username" },
 
@@ -376,7 +401,7 @@
 
         // ---- PRO: your business. ----
         // BRANDED-PAGE — see note 4 above before removing.
-        { unlocksAt: "PRO",  group: "DASHBOARD", text: "Unlimited job posting onto the network" },
+        { unlocksAt: "PRO",  group: "DASHBOARD", text: "Unlimited job posting onto the network" , slot: "posting" },
         { unlocksAt: "PRO",  group: "DASHBOARD", text: "Custom branded booking page — your logo, name, colours, services and contact details" },
         { unlocksAt: "PRO",  group: "DASHBOARD", text: "Your own booking address, powered by HAF KNECT" },
 
@@ -404,34 +429,49 @@
       // fleet account does not bypass compliance.
       FLEET: [
         { unlocksAt: "LITE", group: "PLATFORM", text: "One fleet company account" },
-        { unlocksAt: "LITE", group: "PLATFORM", text: "Every driver keeps their own PLNA profile" },
-        { unlocksAt: "LITE", group: "PLATFORM", text: "Up to {FLEET_LITE.maxDrivers} drivers" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Fleet management tab — drivers, vehicles, allocation and compliance in one place" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Up to {FLEET_LITE.maxDrivers} drivers" , slot: "fleet_headcount" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Add and manage your approved drivers, and allocate vehicles" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Driver, vehicle, availability and compliance overview" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Every driver Clever Checked — a fleet account never bypasses compliance" },
-        { unlocksAt: "LITE", group: "PLATFORM", text: "Post work onto the network — up to {PERM_LITE.posting_daily_limit} jobs a day" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Post work onto the network — up to {PERM_LITE.posting_daily_limit} jobs a day" , slot: "posting" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Allocate jobs to eligible fleet drivers" },
-        { unlocksAt: "LITE", group: "PLATFORM", text: "{FLEET_LITE.bookingsPerDriverPerDay} jobs per driver per day" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "{FLEET_LITE.bookingsPerDriverPerDay} jobs per driver per day" , slot: "fleet_jobs_per_driver" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Live fleet jobs, basic fleet schedule and job history" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Fair job matching — never decided by what the fleet pays" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Standard support" },
 
-        { unlocksAt: "PLUS", group: "PLATFORM", text: "Post up to {PERM_PLUS.posting_daily_limit} jobs a day onto the network" },
-        { unlocksAt: "PLUS", group: "PLATFORM", text: "Book a driver you know directly by their HAF username" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Post up to {PERM_PLUS.posting_daily_limit} jobs a day onto the network" , slot: "posting" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Up to {FLEET_PLUS.maxDrivers} drivers" , slot: "fleet_headcount" },
+        // The cap lifts at Plus in the config, so it lifts on the card too.
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Unlimited jobs per driver per day" , slot: "fleet_jobs_per_driver" },
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Return-route planning across the fleet" },
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Filler-route planning to fill the gaps in a driver's day" },
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Calendar gap detection across every driver's diary" },
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Advanced fleet scheduling" },
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Advanced pricing preferences, including backload rates your drivers choose" },
 
-        { unlocksAt: "PRO",  group: "PLATFORM", text: "Unlimited job posting onto the network" },
-        { unlocksAt: "PRO",  group: "PLATFORM", text: "{FLEET_PRO.driversIncluded} drivers included" },
-        { unlocksAt: "PRO",  group: "PLATFORM", text: "Unlimited jobs per driver per day" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Unlimited job posting onto the network" , slot: "posting" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Unlimited drivers on one account" , slot: "fleet_headcount" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Central fleet dashboard with roles and permissions" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Advanced driver, vehicle, route and allocation tools" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Fleet reporting, exports and operational history" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Fleet-level compliance overview" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Custom branded customer booking page in your company name" },
+
+        // Brent 2026-08-14: a fleet driver's PLNA is NOT the open PLNA. It is
+        // made by the company for the company's work — calendar, the jobs they
+        // have been given, and proof of delivery. It has no booking line, is
+        // not bookable by HAF username, and carries none of the independent
+        // driver's own-work tools, because a fleet driver does not sell their
+        // own diary. Every line below is deliberately basic.
+        { unlocksAt: "LITE", group: "PLNA", text: "A fleet PLNA for every driver — made by the company, not an open PLNA account" },
+        { unlocksAt: "LITE", group: "PLNA", text: "Simple driver calendar — today, day and week" },
+        { unlocksAt: "LITE", group: "PLNA", text: "The jobs their company has allocated to them" },
+        { unlocksAt: "LITE", group: "PLNA", text: "Complete a job and upload proof of delivery" },
+        { unlocksAt: "LITE", group: "PLNA", text: "Basic driver, vehicle and availability details" },
+        { unlocksAt: "LITE", group: "PLNA", text: "No public booking line — a fleet driver is booked through their company" },
+        { unlocksAt: "PLUS", group: "PLNA", text: "The fleet office sees every driver's calendar in one view" },
 
         { unlocksAt: "PRO",  group: "AI", text: "JAKO AI for the fleet office" },
         { unlocksAt: "PRO",  group: "AI", text: "AI route and utilisation analysis" },
@@ -463,7 +503,7 @@
       // them up a queue, and nothing in the new document touches it.
       FREIGHT: [
         { unlocksAt: "LITE", group: "PLATFORM", text: "One primary user" },
-        { unlocksAt: "LITE", group: "PLATFORM", text: "Post third-party client loads onto the network — up to {PERM_LITE.posting_daily_limit} a day" },
+        { unlocksAt: "LITE", group: "PLATFORM", text: "Post third-party client loads onto the network — up to {PERM_LITE.posting_daily_limit} a day" , slot: "posting" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Urgent, same-day and flexible or co-load requests" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Groupage", comingSoon: true },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Guide price shown before you confirm" },
@@ -474,7 +514,7 @@
         { unlocksAt: "LITE", group: "PLATFORM", text: "Client and load references" },
         { unlocksAt: "LITE", group: "PLATFORM", text: "Fair job matching — the best-placed driver wins the load, whatever you pay us" },
 
-        { unlocksAt: "PLUS", group: "PLATFORM", text: "Post up to {PERM_PLUS.posting_daily_limit} loads a day onto the network" },
+        { unlocksAt: "PLUS", group: "PLATFORM", text: "Post up to {PERM_PLUS.posting_daily_limit} loads a day onto the network" , slot: "posting" },
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Request a driver you know by their HAF username" },
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Three users included, £5 per extra user per month" },
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Reduced network fee on eligible jobs" },
@@ -485,7 +525,7 @@
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Searchable history, reporting and exports" },
         { unlocksAt: "PLUS", group: "PLATFORM", text: "Priority account support" },
 
-        { unlocksAt: "PRO",  group: "PLATFORM", text: "Unlimited load posting onto the network" },
+        { unlocksAt: "PRO",  group: "PLATFORM", text: "Unlimited load posting onto the network" , slot: "posting" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Ten users included, £5 per extra user per month" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Lowest freight network-fee band on eligible jobs" },
         { unlocksAt: "PRO",  group: "PLATFORM", text: "Team roles and permissions" },
@@ -897,6 +937,9 @@
     if (!list) throw new Error("No feature catalogue for side: " + side);
     return list.map(function (f) {
       var out = { text: resolveTokens(f.text), group: f.group, unlocksAt: f.unlocksAt };
+      // The slot has to survive this hop, or the "one answer per question"
+      // rule below never fires and a card contradicts itself.
+      if (f.slot) out.slot = f.slot;
       if (f.comingSoon) out.comingSoon = true;
       return out;
     });
@@ -915,18 +958,36 @@
   function featuresForSideLevel(side, level) {
     var have = LEVEL_ORDER.indexOf(String(level || "").toUpperCase());
     if (have < 0) throw new Error("Unknown level: " + level);
-    return catalogueFor(side).map(function (f) {
+    var rows = catalogueFor(side).map(function (f) {
       var need = LEVEL_ORDER.indexOf(f.unlocksAt);
       var included = have >= need && !f.comingSoon;
       return {
         text: f.text,
         group: f.group,
+        slot: f.slot || null,
         unlocksAt: f.unlocksAt,
         comingSoon: !!f.comingSoon,
         included: included,
         // null when included — the mark exists ONLY on a feature you lack.
         lockedBy: included || f.comingSoon ? null : f.unlocksAt
       };
+    });
+
+    // A SLOT answers one question — "how many drivers?", "how many jobs a
+    // day?" — and an account can only have ONE answer to it. Without this, a
+    // Plus fleet card read "Up to 5 drivers" AND "Up to 25 drivers", and a Pro
+    // driver was told both "up to 5 jobs a day" and "unlimited". Only the
+    // highest rung you actually have survives; the rungs above you stay, so
+    // the card still shows what upgrading would buy.
+    var best = {};
+    rows.forEach(function (r) {
+      if (!r.slot || !r.included) return;
+      var rank = LEVEL_ORDER.indexOf(r.unlocksAt);
+      if (best[r.slot] === undefined || rank > best[r.slot]) best[r.slot] = rank;
+    });
+    return rows.filter(function (r) {
+      if (!r.slot || !r.included) return true;
+      return LEVEL_ORDER.indexOf(r.unlocksAt) === best[r.slot];
     });
   }
 

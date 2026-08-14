@@ -263,10 +263,11 @@ GATE = r"""
 
      A visitor picking between Free, Plus and Pro is really asking one question:
      what will actually be on my screen. The entitlement cards answered it in
-     prose. This answers it by showing the menu itself — the SAME arrays the
-     app builds a real member's sidebar from, not a picture of one and not a
-     list retyped here. If a tab is added to the driver app tomorrow, it
-     appears on this demo tomorrow, because there is only one copy of it. -->
+     prose. This answers it by showing the menu itself — built by the app's own
+     hafAccess + hafNavModel, the same two functions that draw a real member's
+     sidebar the moment they sign in. Not a picture of one, and not a list
+     retyped here. If a tab is added to the driver app tomorrow it appears on
+     this demo tomorrow, because there is only one copy of the decision. -->
 <style>
 .pd-menu{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.45rem;margin-top:.55rem}
 .pd-mi{display:flex;align-items:center;gap:.5rem;background:var(--bg);border:1px solid var(--ln);
@@ -300,48 +301,127 @@ GATE = r"""
 </style>
 <script>
 (function(){
-  /* The app has no separate fleet menu yet — a fleet account is driven from the
-     driver app with the fleet tools switched on. Saying so is better than
-     inventing a menu that does not exist anywhere in the product. */
-  function navFor(role){
+  /* ── THE MENU COMES FROM THE APP, NOT FROM HERE ──────────────────────────
+     This used to keep three lists of its own — DRIVER_NAV for a driver,
+     BUSINESS_NAV for a business, and DRIVER_NAV again for a fleet with an
+     apology attached saying a fleet "does not have a menu of its own yet".
+
+     Both halves of that had gone stale. A fleet has had its own section for a
+     while. And none of the three knew about the Clever checks, so the demo
+     showed a brand new driver every driving screen in the product — the exact
+     opposite of what the app now does, and the exact thing the checks exist to
+     prevent. A demo that contradicts the product is not a small problem: it is
+     a promise the product then breaks.
+
+     So nothing is decided here any more. hafAccess says what the account IS
+     and hafNavModel says what that reaches — the same two functions the real
+     sidebar calls. This file only draws the answer. */
+  var DC_TYPE={driver:'driver',fleet:'fleet',business:'business',freight:'freight_forwarder'};
+
+  function navFor(role,rel){
     try{
-      if(role==='driver')  return {nav:DRIVER_NAV , note:null};
-      if(role==='business')return {nav:BUSINESS_NAV, note:null};
-      if(role==='freight') return {nav:FREIGHT_NAV , note:null};
-      if(role==='fleet')   return {nav:DRIVER_NAV , note:'A fleet account signs in to the driver app with the fleet tools switched on; it does not have a menu of its own yet.'};
-    }catch(e){}
-    return {nav:[],note:null};
+      var acc=hafAccess({account_type:(DC_TYPE[role]||role),
+                         plna_released:rel===true, full_name:'Demo account'});
+      return {acc:acc, model:(hafNavModel(acc)||[])};
+    }catch(e){ return {acc:null, model:[]}; }
   }
+
+  /* Only an account that drives has two states worth showing. A business or a
+     freight forwarder is never waiting on anything.
+
+     The demo opens on the RELEASED state, and that is a deliberate choice
+     rather than a convenient one. A visitor deciding whether to join wants to
+     see what the account becomes, and a brand new driver's menu is mostly
+     padlocks — an honest screen that sells nothing and explains less. So the
+     demo shows the account working, and puts the gate one click away where it
+     reads as the promise it is: this is yours once Clever has checked you. */
+  function relOf(view){ return !(view && view.rel===false); }
+  function drivesRole(role){ return role==='driver'||role==='fleet'; }
+
+  window.pdSetRel=function(tier,rel){
+    try{ DC_VIEW[tier].rel=(rel===true); dcRenderTier(tier); }catch(e){}
+  };
 
   function block(tier){
     var view; try{view=DC_VIEW[tier]}catch(e){} if(!view)return '';
     var roleDef; try{roleDef=DC_ROLES.filter(function(r){return r.k===view.role})[0]}catch(e){}
     if(!roleDef)return '';
-    var got=navFor(view.role), nav=got.nav||[];
-    if(!nav.length)return '';
+    var rel=relOf(view), drives=drivesRole(view.role);
+    var got=navFor(view.role,rel), model=got.model||[], acc=got.acc;
+    if(!model.length)return '';
 
     var T; try{T=DC_TIERS[tier]}catch(e){} T=T||{label:tier};
+    var state=drives?(rel?' &middot; checked and released':' &middot; checks not finished yet'):'';
     var h='<div class="card"><div class="ct">What you see when you sign in &mdash; '
-        + roleDef.l + ' on ' + T.label + '</div>';
+        + roleDef.l + ' on ' + T.label + state + '</div>';
     h+='<div class="dc-note" style="margin-top:.2rem">This is the real menu the app builds for a '
-      + roleDef.l.toLowerCase() + ' account, read straight from the live app. '
-      + '<b style="color:var(--or)">Click any tab below to open that screen</b> and look around &mdash; '
-      + 'you can come back here from any of them. Membership decides the features listed further '
-      + 'down this page, not which menu you get.</div>';
+      + roleDef.l.toLowerCase() + ' account &mdash; not a list kept here, but the app\'s own answer, '
+      + 'asked fresh every time you change the buttons above. '
+      + '<b style="color:var(--or)">Click any tab to open that screen</b> and look around; '
+      + 'you can come back here from any of them.</div>';
 
-    var seen={}, order=[];
-    nav.forEach(function(t){ if(!seen[t.s]){seen[t.s]=[];order.push(t.s)} seen[t.s].push(t); });
-    order.forEach(function(group){
-      h+='<div class="pd-grp">'+group+'</div><div class="pd-menu">';
-      seen[group].forEach(function(t){
+    /* The two states of a driving account, side by side, because the whole
+       point of the checks is that they change what you get. */
+    if(drives){
+      h+='<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.7rem">'
+       + '<button type="button" class="btn btn-'+(rel?'gh':'or')+' btn-xs" onclick="pdSetRel(\''+tier+'\',false)">Before the Clever checks</button>'
+       + '<button type="button" class="btn btn-'+(rel?'or':'gh')+' btn-xs" onclick="pdSetRel(\''+tier+'\',true)">Checked and released</button>'
+       + '</div>';
+      h+='<div class="dc-note" style="margin-top:.5rem">'
+       + (rel
+          ? 'Released by Clever: the driving side is open, and the planner opens with it.'
+          : 'Everyone can post work from the day they sign up. The driving screens stay shut until Clever has checked the documents &mdash; that is what keeps the network worth being in.')
+       + '</div>';
+    }
+
+    var cg='';
+    model.forEach(function(sec){
+      if(sec.g!==cg){ h+='<div class="pd-grp">'+sec.g+'</div>'; cg=sec.g; }
+      if(sec.locked){
+        /* A padlock is part of the answer, not a gap in it — leaving it out
+           would show a menu no member ever gets. */
+        h+='<div class="pd-menu"><div class="pd-mi" style="cursor:default;opacity:.72">'
+         + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mu)" '
+         + 'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+         + '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
+         + '<span>'+sec.l+'</span></div></div>'
+         + '<div class="dc-note" style="margin:.25rem 0 .1rem">'+sec.why+'</div>';
+        return;
+      }
+      h+='<div class="pd-menu">';
+      (sec.tabs||[]).forEach(function(t){
+        /* Some entries are not screens in this app at all — "Open my PLNA"
+           leaves for the driver's own planner. The demo cannot sign a visitor
+           in there, and pretending it is a tab here produced a click that
+           opened nothing. It is shown for what it is: a door out. */
+        if(t.ext){
+          h+='<div class="pd-mi pd-ext" style="cursor:default;opacity:.8">'
+           + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--or)" '
+           + 'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+           + '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>'
+           + '<polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'
+           + '<span>'+t.l+'</span></div>';
+          return;
+        }
         h+='<button type="button" class="pd-mi" onclick="pdSeatOpen(\''+tier+'\',\''+t.id+'\')">'
          + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" '
          + 'stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
-         + t.ico + '</svg><span>' + t.l + '</span><span class="pd-go">&rarr;</span></button>';
+         + sec.ico + '</svg><span>' + t.l + '</span><span class="pd-go">&rarr;</span></button>';
       });
       h+='</div>';
+      if((sec.tabs||[]).some(function(t){return t.ext}))
+        h+='<div class="dc-note" style="margin:.25rem 0 .1rem">The planner is its own app at plna.usehaf.co.uk &mdash; a released driver signs straight into it from here.</div>';
     });
-    if(got.note)h+='<div class="dc-note" style="margin-top:.7rem">'+got.note+'</div>';
+
+    /* The same invitation the sidebar puts at its own foot, said in words
+       here: an account that cannot drive today can choose to. */
+    if(acc&&!acc.released){
+      h+='<div class="dc-note" style="margin-top:.8rem">'
+       + (acc.drives
+          ? 'At the foot of this sidebar the account is asked for its documents, and the driving screens open the moment Clever releases them.'
+          : 'At the foot of this sidebar there is an <b>Add to your account</b> section &mdash; become an owner driver, or register a fleet, through the Clever checks. Nobody has to open a second account to do it.')
+       + '</div>';
+    }
     return h+'</div>';
   }
 
@@ -387,10 +467,22 @@ GATE = r"""
     var view; try{view=DC_VIEW[tier]}catch(e){} if(!view)return;
     var roleDef; try{roleDef=DC_ROLES.filter(function(r){return r.k===view.role})[0]}catch(e){}
     var T; try{T=DC_TIERS[tier]}catch(e){} T=T||{label:tier};
-    var nav=(navFor(view.role).nav)||[]; if(!nav.length)return;
+    var rel=relOf(view), drives=drivesRole(view.role);
+    var got=navFor(view.role,rel), model=got.model||[]; if(!model.length)return;
 
-    PD_SEAT={tier:tier, what:(roleDef?roleDef.l:view.role)+' on '+T.label};
-    try{ buildNav(nav); }catch(e){}
+    /* Say which account AND which state, because on a driving account those
+       are two different screens and a visitor who forgets which one they asked
+       for will read the wrong one as the product. */
+    PD_SEAT={tier:tier, what:(roleDef?roleDef.l:view.role)+' on '+T.label
+             +(drives?(rel?', released by Clever':', checks not finished'):'')};
+    /* the member's own sidebar, drawn by the app's own code */
+    try{ buildNavV1(got.acc); }catch(e){}
+    if(!tabId){
+      for(var i=0;i<model.length&&!tabId;i++){
+        if(model[i].locked)continue;
+        (model[i].tabs||[]).forEach(function(t){ if(!tabId&&!t.ext)tabId=t.id; });
+      }
+    }
     /* the way back, at the top of the sidebar this account would really have */
     try{
       var list=document.getElementById('nav-list');
@@ -405,7 +497,7 @@ GATE = r"""
     var p=document.getElementById('mode-pill');
     if(p){p.textContent='Sandbox · '+PD_SEAT.what; p.style.cursor='pointer';
           p.onclick=pdSeatClose; p.title='Back to the demo';}
-    try{ switchTab('pane-'+(tabId||nav[0].id)); }catch(e){}
+    if(tabId){ try{ switchTab('pane-'+tabId); }catch(e){} }
   };
 
   window.pdSeatClose=function(){
@@ -433,12 +525,18 @@ GATE = r"""
     wrap();
   })();
 
-  /* dcOpen redraws the whole screen from scratch every time the role or the
-     founder switch changes, so this has to run after it rather than once. */
+  /* The screen is redrawn from scratch every time anything about the view
+     changes, so this has to run after each redraw rather than once.
+
+     It used to hook dcOpen — the function that runs when you ARRIVE at a tier.
+     But switching the role, the founder mark or the Clever state goes straight
+     to dcRenderTier without passing through dcOpen, so the menu vanished the
+     moment a visitor changed anything about the account they were looking at.
+     The redraw is the thing to follow, not the arrival. */
   function hook(){
-    if(typeof window.dcOpen!=='function'){setTimeout(hook,120);return}
-    var inner=window.dcOpen;
-    window.dcOpen=function(tier){
+    if(typeof window.dcRenderTier!=='function'){setTimeout(hook,120);return}
+    var inner=window.dcRenderTier;
+    window.dcRenderTier=function(tier){
       var out=inner.apply(this,arguments);
       try{
         if(tier==='free'||tier==='plus'||tier==='pro'){

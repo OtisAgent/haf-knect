@@ -236,6 +236,43 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .nb{margin-left:auto;background:var(--or);color:#0e1113;font-size:.56rem;font-weight:800;padding:.06rem .36rem;border-radius:var(--pill)}
 .sdiv{border:none;border-top:1px solid var(--ln);margin:.4rem .85rem}
 .sb-bot{margin-top:auto;padding:.35rem}
+/* ── DASHBOARD V1 SHELL (Brent's override document, 14 Aug 2026) ──
+   One sidebar for every account. A section is a row; its screens are the rows
+   indented beneath it, revealed when the section is open. A section the
+   account cannot use yet is still a row — greyed, padlocked, and it explains
+   itself rather than silently vanishing. */
+.ni-sec{justify-content:flex-start}
+.ni-cv{margin-left:auto;width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;transition:transform .16s;opacity:.55}
+.ni-sec.open .ni-cv{transform:rotate(180deg)}
+.ni-sub{display:flex;align-items:center;gap:.55rem;padding:.36rem .85rem .36rem 2.05rem;margin:.02rem .4rem;border-radius:var(--rx);cursor:pointer;color:var(--mu);font-weight:500;font-size:.76rem;transition:all .14s}
+.ni-sub:hover{background:var(--ln);color:var(--tx)}
+.ni-sub.on{background:var(--or-d);color:var(--or);font-weight:700}
+.ni-sub .ni-ic{width:12px;height:12px;opacity:.8}
+.ni-lock{opacity:.55;cursor:pointer}
+.ni-lock:hover{opacity:.85;background:var(--ln)}
+.ni-lk{width:11px;height:11px;margin-left:auto;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.lk-why{padding:.05rem 1rem .5rem 2.05rem;font-size:.68rem;line-height:1.5;color:var(--su)}
+.lk-why a{color:var(--or);font-weight:700;cursor:pointer}
+/* the signed-in account, at the foot of the sidebar */
+.set-ck{display:flex;align-items:center;gap:.55rem;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--mu);padding:.35rem 0}
+.set-ck input{accent-color:var(--or)}
+.sb-acct{display:flex;align-items:center;gap:.55rem;padding:.5rem .85rem .55rem;border-radius:var(--rx)}
+.sb-acct .av{width:26px;height:26px;font-size:.62rem;flex:0 0 auto}
+.sb-acct-n{font-weight:800;font-size:.79rem;line-height:1.25;color:var(--tx)}
+.sb-acct-m{font-size:.66rem;color:var(--or);font-weight:700;line-height:1.3}
+.sb-acct-u{font-size:.63rem;color:var(--su);font-weight:600;letter-spacing:.04em}
+/* notification bell */
+.nbell{position:relative}
+.nbell-dot{position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:var(--or);display:none}
+.nbell-dot.on{display:block}
+.npanel{position:absolute;top:calc(100% + .45rem);right:0;width:min(310px,calc(100vw - 1.6rem));background:var(--p2);border:1.5px solid var(--lns);border-radius:var(--rs);box-shadow:0 10px 34px rgba(0,0,0,.34);padding:.55rem;z-index:70;display:none}
+.npanel.on{display:block}
+.npanel-h{font-size:.62rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--su);padding:.25rem .45rem .4rem}
+.nrow{display:flex;gap:.5rem;padding:.45rem;border-radius:var(--rx);font-size:.75rem;line-height:1.45;color:var(--tx);cursor:pointer}
+.nrow:hover{background:var(--ln)}
+.nrow .nrow-t{font-weight:700}
+.nrow .nrow-d{color:var(--mu);font-size:.7rem}
+.npanel-e{padding:.7rem .45rem;font-size:.75rem;color:var(--mu)}
 .so-btn{display:flex;align-items:center;gap:.5rem;padding:.5rem .85rem;border-radius:var(--rx);color:var(--mu);font-size:.78rem;font-weight:500;width:100%;transition:all .14s;cursor:pointer}
 .so-btn:hover{background:var(--rd-d);color:var(--rd)}
 .back-btn{display:flex;align-items:center;gap:.5rem;padding:.5rem .85rem;border-radius:var(--rx);color:var(--mu);font-size:.78rem;font-weight:500;width:100%;transition:all .14s;cursor:pointer;margin-bottom:.15rem}
@@ -415,6 +452,13 @@ textarea.fi2{resize:vertical;min-height:70px}
 /* sidebar HAF KNECT Promo */
 .sb-plna{display:block;margin:.9rem .8rem .4rem;padding:.8rem .9rem;background:var(--or-d);border:1.5px solid var(--or-g);border-radius:var(--rs);text-decoration:none;color:var(--tx);font-size:.74rem;line-height:1.5;transition:border-color .14s}
 .sb-plna:hover{border-color:var(--or)}
+/* "Add to your account" — its own section at the foot of the sidebar. Styled as
+   a nav row so it reads as part of the sidebar, with a leaving-the-app arrow so
+   nobody is surprised when Clever opens in a new tab. */
+.sb-addnote{padding:.1rem .85rem .5rem;font-size:.68rem;line-height:1.5;color:var(--mu)}
+.ni-add{color:var(--or)}
+.ni-add .ni-ic{stroke:var(--or)}
+.ni-out{width:11px;height:11px;margin-left:auto;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.7}
 .sb-plna b{display:block;color:var(--or);font-weight:800;margin-top:.15rem}
 @media(max-width:560px){.fr{grid-template-columns:1fr}}
 
@@ -1584,6 +1628,35 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
       </div>
     </div>
 
+    <!-- ══ DOOR FIVE — SEE WHAT A MEMBER SEES ════════════════════════════
+         Brent, 14 Aug: "i can't see it".
+
+         He was right, and this is why. His own login is the master login, and
+         the master login has never gone through a member's front door — it
+         lands on this screen. So the access split he asked for was live and
+         working, and the one person who needed to check it was the one person
+         the code never showed it to.
+
+         These six buttons run the member sign-in EXACTLY as a member's does:
+         the same hafAccess, the same hafPerms, the same sidebar. The only thing
+         standing in is the account record itself — the account type and whether
+         Clever has released them — because that is the thing being looked at.
+         Nothing here carries a price, a fee or a made-up figure: the old "view
+         as" cards did, every one of them had gone stale, and that is why they
+         were deleted. This is a window onto the real code, not a mock-up. -->
+    <div style="margin-top:1.1rem;border-top:1px solid var(--lns);padding-top:1rem">
+      <div style="font-weight:800;font-size:.82rem;margin-bottom:.15rem">See what a member sees</div>
+      <div style="font-size:.72rem;color:var(--mu);line-height:1.5;margin-bottom:.7rem">Your master login skips the member front door, so it never shows you a member's sidebar. Pick an account type and you get the real one — the same code a member's sign-in runs.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.45rem">
+        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('business',false)">Business — sends only</button>
+        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('freight_forwarder',false)">Freight forwarder — sends only</button>
+        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('driver',false)">Owner driver — checks not done</button>
+        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('driver',true)">Owner driver — released</button>
+        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('fleet',false)">Fleet — checks not done</button>
+        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('fleet',true)">Fleet — released</button>
+      </div>
+    </div>
+
     <div style="margin-top:1rem;text-align:center">
       <button class="btn btn-gh btn-sm" onclick="signOut()">Sign out</button>
     </div>
@@ -1652,6 +1725,13 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
         <span id="mode-pill-lbl">—</span>
         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
+      <div class="nbell" style="position:relative">
+        <button class="ib" id="nbell" title="Notifications" onclick="hafBellToggle()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="nbell-dot" id="nbell-dot"></span>
+        </button>
+        <div class="npanel" id="npanel"></div>
+      </div>
       <button class="ib" title="Toggle theme" onclick="toggleTheme()">
         <svg id="app-theme-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
       </button>
@@ -1666,6 +1746,11 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
       <a class="sb-plna" id="sb-plna" href="https://plna.usehaf.co.uk" target="_blank" rel="noopener">Looking to be a driver?<b>Sign up to the PLNA →</b></a>
       <div class="sb-bot">
         <hr class="sdiv">
+        <!-- Document §17: once signed in, the foot of the sidebar is the
+             member's own account — name, membership, username — then Sign Out.
+             Hidden until an account record has actually been read, because an
+             empty name card is worse than none. -->
+        <div class="sb-acct" id="sb-acct" style="display:none"></div>
         <button class="back-btn" id="plna-link-btn" style="display:none;color:var(--or);" onclick="window.open('https://plna.usehaf.co.uk','_blank')">
           <svg class="ni-ic" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           My PLNA Network →
@@ -2259,17 +2344,86 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
       <div class="tp" id="pane-b-usage">
         <h1 class="pt">Usage &amp; Activity</h1><p class="ps">Your monthly shipping activity — Business Account is free, no tiers.</p>
         <div class="kg"><div class="kc"><div class="kc-l">Deliveries this month</div><div class="kc-v or">38</div><div class="kc-d pos">+12% vs last month</div></div><div class="kc"><div class="kc-l">Spend this month</div><div class="kc-v">£4,820</div></div><div class="kc"><div class="kc-l">On-time rate</div><div class="kc-v gn">97%</div></div><div class="kc"><div class="kc-l">Account type</div><div class="kc-v" style="font-size:1rem">Free</div></div></div>
-        <div class="card"><div class="ct">Account summary</div><div class="cr"><span class="ck">Plan</span><span class="cv"><span class="chip cb">Business Account — Free</span></span></div><div class="cr"><span class="ck">Goods type</span><span class="cv">Your own stock and products only</span></div><div class="cr"><span class="ck">Registered drivers</span><span class="cv"><span class="chip cg">2 active · on PLNA</span></span></div><div class="cr"><span class="ck">Fleet on network</span><span class="cv"><span class="chip cg">Enabled</span></span></div><div class="cr"><span class="ck">Job acceptance rules</span><span class="cv"><span class="chip cg">My drivers first</span></span></div></div>
-        <div style="border:1.5px solid rgba(45,171,96,.25);border-radius:var(--rs);padding:1rem;background:var(--gn-d)">
-          <div style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Your drivers can earn on backloads</div>
-          <p style="font-size:.78rem;color:var(--mu);margin-bottom:.7rem">Any driver registered to your account gets their own HAF KNECT Profile. After completing your deliveries, they can accept return-route backloads from the network — earning extra on journeys they're already making.</p>
-          <button class="btn btn-or btn-sm" onclick="switchTab('pane-b-drivers')">Manage my drivers →</button>
+        <div class="card"><div class="ct">Account summary</div><div class="cr"><span class="ck">Plan</span><span class="cv"><span class="chip cb">Business Account — Free</span></span></div><div class="cr"><span class="ck">Goods type</span><span class="cv">Your own stock and products only</span></div><div class="cr"><span class="ck">Job matching</span><span class="cv"><span class="chip cg">Fair matching — never decided by what you pay</span></span></div></div>
+        <!-- The fleet rows and the backload panel that used to sit here were
+             removed on 14 Aug: running vans is a FLEET account, and a fleet
+             driver's PLNA is made by their company — it does not take open
+             network backloads. A plain business account has no drivers to
+             show. -->
+      </div>
+
+      <!-- ACCOUNT & MEMBERSHIP — document §13, a required section.
+           One page that answers: what have I got, what have I not got, and
+           what would unlock it. Every line is read from the one feature list
+           the pricing and join pages read from, so this page can never promise
+           something a customer page does not sell. -->
+      <div class="tp" id="pane-membership">
+        <h1 class="pt">Account &amp; Membership</h1>
+        <p class="ps">What your account includes today, and what unlocks the rest.</p>
+        <div class="card" id="mb-head"></div>
+        <div class="card" id="mb-perms"></div>
+        <div id="mb-feats"></div>
+      </div>
+
+      <!-- SETTINGS — document §16: account configuration, not operational
+           work, and deliberately NOT a second place to manage documents.
+           Compliance lives in Compliance &amp; Documents and only there. -->
+      <div class="tp" id="pane-settings">
+        <h1 class="pt">Settings</h1>
+        <p class="ps">Your details and how HAF contacts you. Documents are in Compliance &amp; Documents.</p>
+        <div class="card" style="max-width:560px">
+          <div class="ct">Your details</div>
+          <div class="fr"><div class="fg"><label class="fl">Name</label><input class="fi2" id="set-name" placeholder="Your name"></div><div class="fg"><label class="fl">Company</label><input class="fi2" id="set-co" placeholder="Company name, if any"></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Email</label><input class="fi2" id="set-email" type="email" placeholder="you@example.co.uk"></div><div class="fg"><label class="fl">Mobile</label><input class="fi2" id="set-tel" type="tel" placeholder="07xxx xxxxxx"></div></div>
+          <div class="fg"><label class="fl">VAT number, if registered</label><input class="fi2" id="set-vat" placeholder="GB000000000" style="max-width:220px"></div>
+        </div>
+        <div class="card" style="max-width:560px">
+          <div class="ct">How we reach you</div>
+          <label class="set-ck"><input type="checkbox" checked> Email me about jobs, documents and payouts</label>
+          <label class="set-ck"><input type="checkbox"> WhatsApp <span class="chip ca">Coming soon</span></label>
+          <label class="set-ck"><input type="checkbox"> Telegram <span class="chip ca">Coming soon</span></label>
+        </div>
+        <div class="card" style="max-width:560px">
+          <div class="ct">Sign in &amp; security</div>
+          <div class="cr"><span class="ck">Your HAF username</span><span class="cv" id="set-user">&#8212;</span></div>
+          <div class="cr"><span class="ck">PIN</span><span class="cv"><a class="btn btn-gh btn-xs" href="https://plna.usehaf.co.uk/reset" target="_blank" rel="noopener">Change PIN &#8594;</a></span></div>
+        </div>
+        <button class="btn btn-or btn-sm" onclick="setSave()">Save settings</button>
+        <div id="set-msg" style="font-size:.76rem;color:var(--mu);margin-top:.5rem"></div>
+      </div>
+
+      <!-- FLEET: Fleet Overview — the courier company's own front page.
+           Brent 2026-08-14: Fleet Management is its own section in a courier
+           company's sidebar. This is its head: the headcount band you are on,
+           who is out today, and the work you have handed to your own drivers.
+           The headcount line is drawn from the one feature list, so it can
+           never disagree with what the plans page sells. -->
+      <div class="tp" id="pane-fl-manage">
+        <h1 class="pt">Fleet Overview</h1>
+        <p class="ps">Your drivers, your vans, and the work you have allocated out today.</p>
+        <div class="kg" id="fl-kpis"></div>
+        <div class="card">
+          <div class="ct">Out today</div>
+          <div class="cr"><span class="ck">James Worthington &#183; LWB &#183; AB12 CDE</span><span class="cv"><span class="chip co">On a job</span></span></div>
+          <div class="cr"><span class="ck">Karen Price &#183; LWB &#183; XY64 FGH</span><span class="cv"><span class="chip cg">Available</span></span></div>
+          <div class="cr"><span class="ck">Mark Denton &#183; Small van &#183; not yet set up</span><span class="cv"><span class="chip ca">No fleet PLNA</span></span></div>
+        </div>
+        <div class="card">
+          <div class="ct">Work allocated to your drivers</div>
+          <div class="cr"><span class="ck">HAF-20260814-4K2P9X &#183; Sheffield &#8594; Leeds</span><span class="cv">James Worthington</span></div>
+          <div class="cr"><span class="ck">HAF-20260814-7QD1M4 &#183; Rotherham &#8594; Manchester</span><span class="cv">Karen Price</span></div>
+          <div class="cr"><span class="ck">HAF-20260814-9BZ3T8 &#183; Sheffield &#8594; Doncaster</span><span class="cv"><span class="chip ca">Not allocated</span></span></div>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <button class="btn btn-or btn-sm" onclick="switchTab('pane-b-drivers')">Manage drivers &#8594;</button>
+          <button class="btn btn-gh btn-sm" onclick="switchTab('pane-b-fleet')">Manage vehicles &#8594;</button>
+          <button class="btn btn-gh btn-sm" onclick="switchTab('pane-d-jobs')">Find work &#8594;</button>
         </div>
       </div>
 
       <!-- BUSINESS: My Fleet -->
       <div class="tp" id="pane-b-fleet">
-        <h1 class="pt">My Fleet</h1><p class="ps">Register your company vehicles on the KNECT network to take inbound deliveries.</p>
+        <h1 class="pt">Vehicles</h1><p class="ps">Your company vans. Put one on the network to take inbound work, or keep it on your own jobs only.</p>
         <div class="card" style="max-width:540px">
           <div class="ct">Add a vehicle</div>
           <div class="fr"><div class="fg"><label class="fl">Registration</label><input class="fi2" placeholder="e.g. AB12 CDE" style="text-transform:uppercase"></div><div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>SWB</option><option>MWB</option><option>LWB</option><option>XLWB</option><option>Luton &#8212; box</option><option>Luton &#8212; curtain side</option><option>Luton &#8212; tail lift</option></select></div></div>
@@ -2282,10 +2436,10 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
 
       <!-- BUSINESS: My Drivers -->
       <div class="tp" id="pane-b-drivers">
-        <h1 class="pt">My Drivers</h1>
-        <p class="ps">Register your drivers so they appear first when you post a job — and they can earn on backloads via their own PLNA account between your deliveries.</p>
+        <h1 class="pt">Drivers</h1>
+        <p class="ps">The drivers on your fleet account, and the work you allocate to them.</p>
         <div style="background:var(--gn-d);border:1.5px solid rgba(45,171,96,.25);border-radius:var(--rx);padding:.75rem 1rem;font-size:.76rem;margin-bottom:1rem;line-height:1.6">
-          <strong>How it works:</strong> each driver gets their own HAF username and a PLNA driver account. Your jobs are offered to them first. When they've delivered your goods, they can accept backloads from the open network on the return run — earning for themselves, costing you nothing.
+          <strong>How it works:</strong> you set each driver up with a fleet PLNA &#8212; a simple driver account made by your company. It shows them their calendar, the jobs you have allocated to them, and lets them complete a job with proof of delivery. It is not an open PLNA: a fleet driver has no public booking line and does not take work from the network themselves. Every driver is still Clever Checked &#8212; a fleet account never bypasses compliance.
         </div>
         <!-- Registered drivers -->
         <div class="card" style="margin-bottom:.85rem">
@@ -2297,7 +2451,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
               <div style="font-size:.71rem;color:var(--mu);margin-top:.1rem">JW012390 · LWB · Sheffield S9 · AB12 CDE</div>
             </div>
             <div style="display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;justify-content:flex-end">
-              <span class="chip cg">PLNA active</span>
+              <span class="chip cg">Fleet PLNA active</span>
               <span class="chip cb">On network</span>
               <a href="https://plna.usehaf.co.uk" target="_blank" class="btn btn-gh btn-xs">View PLNA →</a>
             </div>
@@ -2309,7 +2463,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
               <div style="font-size:.71rem;color:var(--mu);margin-top:.1rem">KP041872 · LWB · Sheffield S1 · XY64 FGH</div>
             </div>
             <div style="display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;justify-content:flex-end">
-              <span class="chip cg">PLNA active</span>
+              <span class="chip cg">Fleet PLNA active</span>
               <span class="chip co">On a job</span>
               <a href="https://plna.usehaf.co.uk" target="_blank" class="btn btn-gh btn-xs">View PLNA →</a>
             </div>
@@ -2321,8 +2475,8 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
               <div style="font-size:.71rem;color:var(--mu);margin-top:.1rem">No HAF username yet · Small van · Leeds LS9</div>
             </div>
             <div style="display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;justify-content:flex-end">
-              <span class="chip ca">No PLNA account</span>
-              <button class="btn btn-or btn-xs">Invite to PLNA →</button>
+              <span class="chip ca">No fleet PLNA</span>
+              <button class="btn btn-or btn-xs">Set up fleet PLNA →</button>
             </div>
           </div>
         </div>
@@ -2338,13 +2492,13 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <div class="fg"><label class="fl">Vehicle registration</label><input class="fi2" placeholder="e.g. AB12 CDE" style="text-transform:uppercase"></div>
           </div>
           <div class="fg" style="margin-bottom:.7rem"><label class="fl">Base postcode</label><input class="fi2" placeholder="e.g. S9 1AA" style="max-width:160px"></div>
-          <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.76rem;font-weight:600;color:var(--mu);margin:.1rem 0 .75rem"><input type="checkbox" checked style="accent-color:var(--or)"> Send PLNA invite by WhatsApp — driver creates their own account</label>
+          <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.76rem;font-weight:600;color:var(--mu);margin:.1rem 0 .75rem"><input type="checkbox" checked style="accent-color:var(--or)"> Send the fleet PLNA invite by WhatsApp — a simple driver account, made by you</label>
           <button class="btn btn-or btn-sm">Add driver →</button>
         </div>
         <!-- Insurance note -->
         <div style="border:1.5px solid var(--am-d);border-radius:var(--rx);padding:.8rem 1rem;background:var(--am-d);font-size:.76rem;display:flex;align-items:flex-start;gap:.6rem">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--am)" stroke-width="2" style="flex-shrink:0;margin-top:.1rem"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <div><strong style="color:var(--am)">Gap insurance — pending.</strong> HAF is working with an insurance provider to cover goods-in-transit gaps for business account deliveries made by registered drivers on backloads. Your goods are carried by Clever Checked, insured drivers — but check your own goods-in-transit cover in the meantime.</div>
+          <div><strong style="color:var(--am)">Gap insurance — pending.</strong> HAF is working with an insurance provider to cover goods-in-transit gaps on network jobs. Every driver on the network is Clever Checked and insured — but check your own goods-in-transit cover in the meantime.</div>
         </div>
       </div>
 
@@ -4023,7 +4177,16 @@ function hafErr(el,msg){el.textContent=msg;el.style.display='block'}
    for THIS member's own discount code. A username alone must never be enough —
    HAF usernames are guessable, and a code is worth six months of Pro. */
 let _hafCred=null;
-function hafGo(u,k,t){localStorage.setItem('knect-user',u);_hafCred={hash:t==='p'?null:k,relay:t==='p'?k:null};enterKnectApp(u);}
+/* The account record that actually opened this session. Every access decision on
+   the page reads THIS, and nothing else — never the username, never a guess from
+   which screen you came in on. Cleared on sign-out so the next person on a shared
+   machine inherits nothing. */
+let _hafAcct=null;
+/* Exposed on window as well as here: the browser walk-through signs in as each
+   account type through this exact door, so it tests the real path rather than a
+   test-only shortcut that could drift from it. */
+function hafGo(u,k,t,acct){localStorage.setItem('knect-user',u);_hafCred={hash:t==='p'?null:k,relay:t==='p'?k:null};_hafAcct=acct||null;enterKnectApp(u,acct);}
+window.hafGo=hafGo;window.buildNavV1=buildNavV1;window.switchTab=switchTab;window.hafAccess=hafAccess;window.hafPerms=hafPerms;
 const DRIVER_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
   {id:'d-invites',l:'Exchange',s:'KNECT Jobs',badge:'2',ico:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>'},
@@ -4032,6 +4195,13 @@ const DRIVER_NAV=[
   {id:'d-status',l:'My Status',s:'KNECT Jobs',ico:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
   {id:'d-empty',l:'Backload',s:'KNECT Jobs',ico:'<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.54"/>'},
   {id:'f-cap',l:'Network Map',s:'KNECT Jobs',ico:'<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>'},
+  /* Brent, 14 Aug: "every account can post". A driver is an account, so these
+     two sit here for the same reason they sit on every other nav — and for one
+     more: a driver who was posting work while waiting on their Clever checks
+     must not LOSE those screens the day they are released. Being approved to
+     drive adds to what somebody can reach; it never takes anything away. */
+  {id:'b-book',l:'Book a Courier',s:'Send Goods',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
+  {id:'b-del',l:'My Deliveries',s:'Send Goods',ico:'<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'},
   {id:'d-earn',l:'Earnings',s:'My Account',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
   {id:'d-comp',l:'Compliance',s:'My Account',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
   {id:'d-dir',l:'Driver Directory',s:'My Account',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
@@ -4072,8 +4242,12 @@ const BUSINESS_NAV=[
   {id:'livejob',l:'Live Job',s:'Send Goods',ico:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'},
   {id:'b-del',l:'My Deliveries',s:'Send Goods',ico:'<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'},
   {id:'f-cap',l:'Network Map',s:'Send Goods',ico:'<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>'},
-  {id:'b-fleet',l:'My Fleet',s:'Send Goods',ico:'<path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="1"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>'},
-  {id:'b-drivers',l:'My Drivers',s:'Send Goods',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
+  /* My Fleet and My Drivers used to sit here. They are fleet screens — running
+     vans and the people in them — and Brent, 14 Aug: a business account "just
+     wants access to send". A business that also runs vans registers a fleet
+     through the Clever checks, and gets these screens on that account. Leaving
+     them on a plain business login handed out the fleet side to somebody nobody
+     had checked. */
   {id:'b-saved',l:'Saved Addresses',s:'Send Goods',ico:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'},
   {id:'b-usage',l:'Usage &amp; Activity',s:'Account',ico:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'},
   {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
@@ -4122,7 +4296,100 @@ function _setMyTier(level){
   window.HAF_ACCOUNT_LEVEL = ACC_LEVEL[k] ? k : 'lite';
 }
 
-function enterKnectApp(u){
+/* ═══════════════ WHAT A SIGNED-IN ACCOUNT MAY REACH ═══════════════════════
+   Brent, 14 Aug 2026, in his own words:
+
+     "the features on posting are simple — every account can post and every
+      account has the option to add a PLNA which is a driver → only should have
+      access to the PLNA section when it's been clever checked and approved"
+
+     "if i sign up as a freight forwarder account or a business account i just
+      want access to send → they shouldn't have any access to PLNA on the log in
+      at all unless they want to and go through the clever.usehaf.co.uk system"
+
+   So there are exactly two questions, and this is the only place either is
+   answered:
+
+     CAN THEY POST?   Always. Posting is what an account is for. It was never
+                      the thing the Clever check protected.
+
+     CAN THEY DRIVE?  Only if their account type is one that drives (owner
+                      driver or fleet) AND a person has released them through
+                      clever.usehaf.co.uk. Both halves, every time.
+
+   A freight forwarder or a business account is not "a driver who hasn't been
+   checked yet" — driving is not part of that account at all, so the PLNA
+   section is not shown to them locked, it is not shown to them full stop. What
+   they get instead is the choice: add owner driver or fleet to this account,
+   which is a trip through Clever like everybody else's.
+
+   Both answers come off the record the database handed back at sign-in. This
+   page never works out access from the username, from which screen you came in
+   on, or from what it drew a moment ago. */
+const HAF_TYPES={driver:'driver',fleet:'fleet',business:'business',
+                 freight:'freight_forwarder',freight_forward:'freight_forwarder',
+                 freight_forwarder:'freight_forwarder',customer:'business'};
+function hafNormType(t){return HAF_TYPES[String(t||'').toLowerCase().trim()]||'driver';}
+
+function hafAccess(acct){
+  const type=hafNormType(acct&&acct.account_type);
+  const drives=(type==='driver'||type==='fleet');
+  /* Released is a fact from the release list, never inferred. If the record did
+     not carry the answer, the answer is no — a missing field must never read as
+     a yes on the door that protects the network. */
+  const released=!!(acct&&acct.plna_released===true)&&drives;
+  /* The name the member is shown at the foot of the sidebar. Taken off the
+     record, never assembled from a username — nobody is called BF638793. */
+  const nm=(acct&&(acct.full_name||acct.name||acct.contact_name||acct.company_name))||'';
+  return {type:type,drives:drives,released:released,posts:true,name:String(nm||'').trim()};
+}
+
+/* The label a person sees for their own account, in their words not ours. */
+const HAF_TYPE_LABEL={driver:'Owner Driver',fleet:'Fleet',
+                      business:'Business',freight_forwarder:'Freight Forwarder'};
+
+
+/* ── "ADD TO YOUR ACCOUNT" — its own section in the sidebar ────────────────
+   Brent, 14 Aug: "in the sidebar i should be able to sign up owner driver or
+   fleet which is a different section in the sidebar".
+
+   Its own section, under its own heading, below the work — never mixed into
+   the posting screens, because it is not a screen: it is a door out to the
+   Clever checks. It is shown to an account that does not drive today, and it
+   disappears the moment driving is unlocked, because by then it has nothing
+   left to offer.
+
+   Both entries carry the account's own username, so Clever recognises the
+   person instead of asking them to open a second HAF account they already
+   have — the duplicate that used to turn people away at their own front door. */
+const CLEVER_URL='https://clever.usehaf.co.uk';
+function hafCleverAdd(kind){
+  const u=encodeURIComponent((localStorage.getItem('knect-user')||'').toUpperCase());
+  window.open(CLEVER_URL+'/?add='+kind+(u?'&u='+u:''),'_blank','noopener');
+}
+function hafAddSection(acc){
+  /* Nothing to offer somebody who already drives. */
+  if(acc.released)return '';
+  const head=acc.drives?'Finish your checks':'Add to your account';
+  const line=acc.drives
+    ? 'Your '+(HAF_TYPE_LABEL[acc.type]||'driving')+' account is waiting on the Clever checks. Send your documents and the PLNA driving screens open up.'
+    : 'Want to drive as well as send? Owner driver and fleet accounts go through the Clever checks first.';
+  const row=(kind,label,ico)=>
+    '<div class="ni ni-add" onclick="hafCleverAdd(\''+kind+'\')">'+
+    '<svg class="ni-ic" viewBox="0 0 24 24">'+ico+'</svg>'+label+
+    '<svg class="ni-out" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>';
+  return '<hr class="sdiv"><div class="nav-sec">'+head+'</div>'+
+    '<div class="sb-addnote">'+_esc(line)+'</div>'+
+    (acc.drives
+      ? row(acc.type,acc.type==='fleet'?'Send fleet documents':'Send my documents',
+            '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>')
+      : row('driver','Become an owner driver',
+            '<path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="1"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>')+
+        row('fleet','Register a fleet',
+            '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'));
+}
+
+function enterKnectApp(u,acct){
   _superUser=u;
   /* a fresh sheet for whoever just signed in — no previous driver's run back left behind */
   try{_rrState={declined:[],accepted:null};}catch(e){}
@@ -4177,13 +4444,36 @@ function enterKnectApp(u){
     }
     _setModePill('Demo','var(--mu)');
   }else{
+    /* ── A REAL ACCOUNT ────────────────────────────────────────────────────
+       This branch used to sign EVERYBODY in as a driver, with the full driving
+       nav and the PLNA button, whatever they had actually signed up as and
+       whether or not anyone had checked them. That is exactly what Brent found:
+       he signed up, connected, and was standing inside the PLNA system without
+       ever having sent a document.
+
+       Now the account record decides, and it decides once, here. */
     _hideDemoBar();
-    roleEl.textContent='Driver';roleEl.className='role-chip chip cb';
+    const acc=hafAccess(acct||_hafAcct);
     _setMyTier(null);                           // real sign-in: tier comes from
                                                 // the account record, not a guess
-    if(plnaBtn)plnaBtn.style.display='flex';
-    buildNav(DRIVER_NAV);
-    _buildDashActions('driver');
+
+    /* The chip says what they signed up as, not what the app assumed. */
+    roleEl.textContent=HAF_TYPE_LABEL[acc.type]||'Account';
+    roleEl.className='role-chip chip '+(acc.type==='freight_forwarder'?'co':'cb');
+
+    /* The PLNA button leaves this app for the driving site. It appears only for
+       an account that both drives and has been released — so a freight or
+       business account never sees it at all, and a driver waiting on their
+       checks does not see a door that would only turn them away. */
+    if(plnaBtn)plnaBtn.style.display=acc.released?'flex':'none';
+
+    /* ONE sidebar, built from what this account may do. The six separate
+       navigations this replaced are kept only for the demo and master screens,
+       which are not member accounts at all. */
+    buildNavV1(acc);
+    _buildDashActions(acc.type==='fleet'&&acc.released?'fleet':acc.released?'driver':
+                      acc.type==='freight_forwarder'?'freight-pro':'business');
+    hafBellRender();
     switchTab('pane-d-home');
     _setModePill('','');
   }
@@ -4350,6 +4640,54 @@ function enterMode(mode){
     showModeSelector();
   }
 }
+
+/* ── SEE WHAT A MEMBER SEES ───────────────────────────────────────────────
+   The master login lands on the mode selector and never walks a member's
+   front door, so the one person who had to check the access split was the one
+   person who was never shown it. This walks it for him.
+
+   What is stood in: the account record — the type, and whether Clever has
+   released them. That is the input under examination, so it is the only thing
+   supplied. Everything downstream is the member's own code, untouched:
+   hafAccess decides what the account IS, hafPerms decides what that reaches,
+   buildNavV1 draws it. If the sidebar here is wrong, the member's is wrong
+   too — which is the entire point of looking.
+
+   It is deliberately marked on screen as a preview. Somebody has to be able to
+   tell at a glance whether they are looking at a real account or a look at
+   one, and a banner that says so is cheaper than an assumption that doesn't. */
+function viewAsMember(type,released){
+  const ov=document.getElementById('super-mode');
+  if(ov)ov.style.display='none';
+  document.getElementById('app').classList.add('open');
+  _hideDemoBar();
+  _setMyTier(null);                    // no membership level is being previewed
+  _setFounder(null);                   // and no founder's mark either
+
+  const acc=hafAccess({account_type:type,plna_released:released===true,
+                       full_name:'Preview account'});
+
+  const roleEl=document.getElementById('tb-role');
+  roleEl.textContent=HAF_TYPE_LABEL[acc.type]||'Account';
+  roleEl.className='role-chip chip '+(acc.type==='freight_forwarder'?'co':'cb');
+
+  const plnaBtn=document.getElementById('plna-link-btn');
+  if(plnaBtn)plnaBtn.style.display=acc.released?'flex':'none';
+
+  const vaBanner=document.getElementById('viewas-banner');
+  const vaLbl=document.getElementById('viewas-lbl');
+  if(vaLbl)vaLbl.textContent=(HAF_TYPE_LABEL[acc.type]||'Account')+
+    (acc.drives?(acc.released?', released by Clever':', checks not finished'):', sends only')+
+    ' — this is the sidebar they get';
+  if(vaBanner)vaBanner.style.display='flex';
+
+  buildNavV1(acc);
+  _buildDashActions(acc.type==='fleet'&&acc.released?'fleet':acc.released?'driver':
+                    acc.type==='freight_forwarder'?'freight-pro':'business');
+  switchTab('pane-d-home');
+  _setModePill('Preview · member view','var(--or)');
+}
+window.viewAsMember=viewAsMember;
 
 function _setModePill(label,col){
   const pill=document.getElementById('mode-pill');
@@ -4886,20 +5224,36 @@ async function hafAuth(u,s,err,btn){
        right — that is what lets somebody sign in here with the PIN they already
        set, instead of being sent away to invent a second one. */
     const cp=isPin?await hafSha('HAF-CP|'+u+'|'+s):null;
-    const r=await fetch(PLNA_URL+'/rest/v1/rpc/plna_auth',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify(isPin?{p_username:u,p_hash:null,p_relay:hash,p_cp:cp}:{p_username:u,p_hash:hash,p_relay:null,p_cp:null})});
+    /* ── WHICH DOOR THIS IS ──────────────────────────────────────────────────
+       This is KNECT — the posting side. Brent, 14 Aug: "every account can post
+       and every account has the option to add a PLNA which is a driver → only
+       should have access to the PLNA section when it's been clever checked and
+       approved". So this page opens the POSTING door (knect_auth), which lets a
+       correct credential in and REPORTS whether the driving side is unlocked.
+       The driving door (plna_auth) is a separate function and is unchanged: it
+       still refuses anyone who has not been released, and it is what
+       plna.usehaf.co.uk opens.
+
+       This used to call the driving door and then ignore its answer — a
+       not-yet-checked account came back saying "not cleared" and was signed in
+       anyway, straight onto the driver screens. That is the fault Brent hit. */
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/knect_auth',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify(isPin?{p_username:u,p_hash:null,p_relay:hash,p_cp:cp}:{p_username:u,p_hash:hash,p_relay:null,p_cp:null})});
     const d=await r.json();
-    if(!Array.isArray(d)||!d.length){
+    /* A row is not an answer. The field that decides is `cred` — the credential
+       form that actually opened the account. Anything without one is a refusal
+       wearing the shape of a profile, and it is treated as a refusal. */
+    if(!Array.isArray(d)||!d.length||!d[0]||!d[0].cred){
       hafErr(err,isPin?'That PIN didn\'t match. Use the PIN you chose on your application — or reset it below.':'Incorrect username or password. Try again.');
       btn.textContent=old;btn.disabled=false;return}
-    if(!isPin&&!d[0].has_pin){hafPend={u:u,hash:hash};btn.textContent=old;btn.disabled=false;closeLogin();document.getElementById('pin-ov').classList.add('open');document.getElementById('pin-a').focus();return}
+    if(!isPin&&!d[0].has_pin){hafPend={u:u,hash:hash,acct:d[0]};btn.textContent=old;btn.disabled=false;closeLogin();document.getElementById('pin-ov').classList.add('open');document.getElementById('pin-a').focus();return}
     /* keep whichever hash actually opened the account: later calls (bookings,
        usage, profile) prove who they are by sending it back */
-    hafGo(u,d[0].cred==='cleverpay'?cp:hash,isPin?'p':'w');
+    hafGo(u,d[0].cred==='cleverpay'?cp:hash,isPin?'p':'w',d[0]);
   }catch(e){hafErr(err,'Connection problem — please try again.');btn.textContent=old;btn.disabled=false}
 }
 function doLogin(){hafAuth(document.getElementById('l-user').value,document.getElementById('l-pass').value,document.getElementById('l-err'),document.querySelector('#login-ov .btn-wide'))}
 function scLogin(){hafAuth(document.getElementById('sc-user').value,document.getElementById('sc-pass').value,document.getElementById('sc-err'),document.querySelector('.side-card .btn-wide'))}
-function pinSkip(){document.getElementById('pin-ov').classList.remove('open');if(hafPend)hafGo(hafPend.u,hafPend.hash,'w')}
+function pinSkip(){document.getElementById('pin-ov').classList.remove('open');if(hafPend)hafGo(hafPend.u,hafPend.hash,'w',hafPend.acct)}
 async function pinSave(){
   const a=document.getElementById('pin-a').value.trim(),b=document.getElementById('pin-b').value.trim(),err=document.getElementById('pin-err'),btn=document.getElementById('pin-btn');
   err.style.display='none';
@@ -4916,11 +5270,11 @@ async function pinSave(){
     const r=await fetch(PLNA_URL+'/rest/v1/rpc/set_driver_pin',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_username:hafPend.u,p_password_hash:hafPend.hash,p_pin_hash:ph,p_cp:pc})});
     const ok=await r.json();
     if(ok!==true){hafErr(err,'Couldn\'t save your PIN — please try again.');btn.textContent='Save PIN and continue';btn.disabled=false;return}
-    hafGo(hafPend.u,hafPend.hash,'w');
+    hafGo(hafPend.u,hafPend.hash,'w',hafPend.acct);
   }catch(e){hafErr(err,'Connection problem — please try again.');btn.textContent='Save PIN and continue';btn.disabled=false}
 }
 function goLanding(){document.getElementById('app').classList.remove('open');document.getElementById('landing').style.display='flex'}
-function signOut(){localStorage.removeItem('knect-user');goLanding();}
+function signOut(){localStorage.removeItem('knect-user');_hafCred=null;_hafAcct=null;goLanding();}
 /* EXCHANGE */
 let _xchOnline=true;
 let _xchActiveJob=null;
@@ -5043,6 +5397,10 @@ function setComp(s,u){
    are the next build, and only they make it proof against a determined person. */
 const HAF_AUD={
   driver  :{network:true , ownJobsOnly:false},
+  /* A courier company wins work off the network the same way a driver does, so
+     it sees the network. Stated here rather than left to the fallback: a
+     silent default is not a decision anybody can check. */
+  fleet   :{network:true , ownJobsOnly:false},
   business:{network:false, ownJobsOnly:true , hdr:'Deliveries you have booked', noun:'delivery', nounPl:'deliveries'},
   freight :{network:false, ownJobsOnly:true , hdr:'Loads you have posted'     , noun:'load'    , nounPl:'loads'     },
   admin   :{network:true , ownJobsOnly:false}
@@ -5175,9 +5533,320 @@ function dashBuildOwnFeed(){
   }).join('');
 }
 
-function buildNav(tabs){
-  /* role first — the audience decides which entries are built at all */
-  window.HAF_ROLE=(tabs===DRIVER_NAV)?'driver':(tabs===BUSINESS_NAV)?'business':(tabs===FREIGHT_NAV||tabs===PERSONAL_NAV)?'freight':'admin';
+/* ═══════════════ HAF KNECT DASHBOARD V1 — THE ONE SIDEBAR ═════════════════
+   Brent's override document, 14 August 2026:
+
+     "One dashboard framework + account-based permissions + feature locks.
+      Do not create completely separate dashboard systems for every account
+      type."
+
+   Until today this file held SIX separate navigations — driver, business,
+   freight, fleet, pending and personal — and every new account type grew a
+   seventh. They drifted: the same screen appeared under three different
+   names, and a feature added to one was missing from the others.
+
+   There is now ONE structure, below, and permissions decide what a given
+   account sees of it. The four groups and nine sections are the document's,
+   in the document's order. What changes between two people signing in is
+   never the shape of the sidebar — only which sections are open to them.
+
+   A section has three possible states, exactly as the document sets out:
+     AVAILABLE    — shown normally, opens to its screens
+     LOCKED       — shown greyed with a padlock, and it SAYS what unlocks it
+     NOT RELEVANT — not shown at all, because it would only be clutter
+
+   Every screen listed here already exists. Nothing was rebuilt to make this
+   sidebar; the screens were moved into the section they belong to. */
+const HAF_NAV_V1=[
+  {g:'HOME', id:'home', l:'Home', ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
+   flat:true, tabs:[{id:'d-home',l:'Home'}]},
+
+  {g:'WORK', id:'jobs', l:'Freight &amp; Jobs', ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+   tabs:[
+    {id:'b-book',   l:'Post a Job',            need:'post'},
+    {id:'f-post',   l:'Post a Load',           need:'freight'},
+    {id:'b-del',    l:'My Posted Jobs',        need:'post'},
+    {id:'f-loads',  l:'Active Loads',          need:'freight'},
+    {id:'d-invites',l:'Job Offers',            need:'drive'},
+    {id:'d-jobs',   l:'Available Network Jobs',need:'drive'},
+    {id:'livejob',  l:'Active Job'},
+    {id:'d-empty',  l:'Backload',              need:'drive'},
+    {id:'d-status', l:'My Status',             need:'drive'},
+    {id:'f-cap',    l:'Network Map',           need:'network'},
+    {id:'f-cover',  l:'Coverage Board',        need:'freight'},
+    {id:'f-dir',    l:'Driver Directory',      need:'freight'},
+    {id:'f-lanes',  l:'Lane Pricing',          need:'freight'},
+    {id:'b-saved',  l:'Saved Addresses',       need:'post'},
+   ]},
+
+  {g:'WORK', id:'fleet', l:'Fleet Management', ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>',
+   need:'fleet',
+   tabs:[
+    {id:'fl-manage', l:'Fleet Overview'},
+    {id:'b-drivers', l:'Drivers'},
+    {id:'b-fleet',   l:'Vehicles'},
+   ]},
+
+  {g:'WORK', id:'plna', l:'PLNA', ico:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+   need:'plna',
+   /* The driver's planner lives on its own site and Brent's instruction is to
+      leave it exactly as it is. So this section does not copy it — it opens
+      it. A second job-management screen in here is the one thing the document
+      says PLNA must never become. */
+   tabs:[
+    {id:'d-comp', l:'Driver Compliance'},
+    {id:'__plna', l:'Open my PLNA', ext:'https://plna.usehaf.co.uk'},
+   ]},
+
+  {g:'MONEY', id:'payouts', l:'Payouts', ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+   tabs:[
+    {id:'d-earn', l:'Earnings',             need:'drive'},
+    {id:'billing',l:'Payments &amp; Invoices'},
+   ]},
+
+  {g:'ACCOUNT', id:'compliance', l:'Compliance &amp; Documents', ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+   need:'compliance',
+   tabs:[{id:'d-comp', l:'Clever Checked &amp; documents'}]},
+
+  {g:'ACCOUNT', id:'membership', l:'Account &amp; Membership', ico:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+   tabs:[
+    {id:'membership',l:'What my account includes'},
+    {id:'b-usage',   l:'Usage &amp; Activity', need:'post'},
+    {id:'f-account', l:'Account Controls',     need:'freight'},
+    {id:'f-plans',   l:'Upgrade',              need:'freight'},
+   ]},
+
+  {g:'ACCOUNT', id:'help', l:'Feedback &amp; Help', ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+   tabs:[
+    {id:'feedback',l:'Give feedback'},
+    {id:'support', l:'Help &amp; contact HAF'},
+   ]},
+
+  {g:'ACCOUNT', id:'settings', l:'Settings', ico:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+   flat:true, tabs:[{id:'settings',l:'Settings'}]},
+];
+
+/* Why a locked section is locked, in the words the member needs — never in
+   ours. Each line has to finish the sentence "you can have this once...". */
+const HAF_LOCK_WHY={
+  fleet:{driver:'Register a fleet on your account to manage drivers and vans.',
+         business:'Running your own vans? Register a fleet through the Clever checks.',
+         freight_forwarder:null,
+         pending:'Your fleet account opens as soon as your Clever checks are complete.'},
+  plna :{business:'Drivers only. Add owner driver to your account to get a PLNA.',
+         freight_forwarder:'Drivers only. Add owner driver to your account to get a PLNA.',
+         pending:'Complete your Clever checks and your PLNA driving screens open.'},
+  compliance:{}
+};
+
+/* ── THE PERMISSION ENGINE ────────────────────────────────────────────────
+   Every question the sidebar asks is answered here and nowhere else, from the
+   account record the database handed back at sign-in. One place to read, one
+   place to change, and no screen deciding its own access on the quiet. */
+function hafPerms(acc){
+  const t=acc.type, drives=acc.drives, rel=acc.released;
+  return {
+    post      :true,                       // every account can post work
+    drive     :rel,                        // accept network work: checked drivers only
+    plna      :rel,                        // the driver's own planner
+    fleet     :rel&&t==='fleet',           // run drivers and vans
+    freight   :t==='freight_forwarder',    // third-party client loads
+    network   :rel||t==='fleet',           // look outward at the network
+    compliance:drives                      // only accounts that drive have driver docs
+  };
+}
+/* A section the account has not got: is it worth showing locked, or is it
+   only clutter? The document's third state. Returns the reason line, or null
+   to leave it out of the sidebar entirely. */
+function hafLockWhy(secId,acc){
+  const m=HAF_LOCK_WHY[secId]; if(!m)return null;
+  /* "waiting on your Clever checks" is only an honest reason where finishing
+     those checks is what actually opens the section.
+
+     An owner driver waiting on their checks was being told "your fleet account
+     opens as soon as your Clever checks are complete" — and it does not. They
+     applied as an owner driver; no amount of paperwork turns that into a fleet.
+     A padlock that promises something the product will not deliver is worse
+     than no padlock at all, because the person waits for it. So the pending
+     line is used only when the pending state is genuinely what is in the way,
+     and otherwise the account is shown the reason that is true for it: to run
+     drivers and vans, register a fleet. */
+  const pendingApplies=acc.drives&&!acc.released&&
+                       (secId!=='fleet'||acc.type==='fleet');
+  if(pendingApplies&&m.pending)return m.pending;
+  return m[acc.type]||null;
+}
+
+let _navOpen=null;
+function hafSecToggle(id){
+  _navOpen=(_navOpen===id)?null:id;
+  buildNavV1(window._hafAccView,true);
+}
+function hafLockOpen(id){
+  /* A padlock is not a dead end. It opens the one page that explains, in one
+     place, everything this account has and everything it has not — which is
+     exactly what the document asks Account & Membership to be for. */
+  _navOpen='membership';
+  buildNavV1(window._hafAccView,true);
+  switchTab('pane-membership');
+}
+
+/* ── THE MENU THIS ACCOUNT GETS, AS DATA ──────────────────────────────────
+   One question — "what does this account actually see?" — with one answer,
+   held in one place.
+
+   It used to be answered twice. The sidebar worked it out here, and the Demo
+   Centre worked it out again from three hand-written lists of its own. Two
+   answers to one question is one answer waiting to go stale, and it did: the
+   Demo Centre was still telling people a fleet account "does not have a menu
+   of its own yet" weeks after it got one, and it knew nothing about Clever —
+   so it showed a driver every driving screen before anybody had checked them.
+
+   So the deciding lives here and returns plain data. The sidebar draws it.
+   The Demo Centre draws it. Neither can drift from the other, because neither
+   is deciding anything any more — and a demo that disagrees with the product
+   is worse than no demo, because people believe it. */
+function hafNavModel(acc){
+  if(!acc)return [];
+  const P=hafPerms(acc),aud=hafAud(),out=[];
+  HAF_NAV_V1.forEach(sec=>{
+    const locked=!!(sec.need&&!P[sec.need]);
+    let why=null;
+    /* A locked section with no honest reason to give is left out entirely —
+       the third state: not open, not padlocked, simply not this account's. */
+    if(locked){ why=hafLockWhy(sec.id,acc); if(!why)return; }
+    const kids=(sec.tabs||[]).filter(t=>{
+      if(t.need&&!P[t.need])return false;
+      if(!aud.network&&AUD_NETWORK_TABS.indexOf(t.id)>=0)return false;
+      return true;
+    });
+    if(!locked&&!kids.length)return;
+    out.push({id:sec.id,l:sec.l,ico:sec.ico,g:sec.g,flat:!!sec.flat,
+              locked:locked,why:why,tabs:kids});
+  });
+  return out;
+}
+window.hafNavModel=hafNavModel;
+
+function buildNavV1(acc,keepOpen){
+  if(!acc)return;
+  window._hafAccView=acc;
+  window.HAF_ROLE=acc.type==='fleet'?'fleet':acc.released?'driver':acc.type==='freight_forwarder'?'freight':'business';
+  /* the section holding the pane you are looking at opens itself, so the
+     sidebar never disagrees with the screen */
+  if(!keepOpen){
+    const cur=(ct||'').replace('pane-','');
+    const owner=HAF_NAV_V1.find(x=>(x.tabs||[]).some(t=>t.id===cur));
+    _navOpen=owner?owner.id:'home';
+  }
+  let h='',cg='';
+  hafNavModel(acc).forEach(sec=>{
+    const open=sec.locked,why=sec.why,kids=sec.tabs;
+    if(sec.g!==cg){ if(cg)h+='<hr class="sdiv">'; h+='<div class="nav-sec">'+sec.g+'</div>'; cg=sec.g; }
+    if(open){
+      h+='<div class="ni ni-lock" id="ni-sec-'+sec.id+'" onclick="hafLockOpen(\''+sec.id+'\')">'+
+         '<svg class="ni-ic" viewBox="0 0 24 24">'+sec.ico+'</svg>'+sec.l+
+         '<svg class="ni-lk" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>'+
+         '<div class="lk-why">'+why+' <a onclick="hafLockOpen(\''+sec.id+'\')">See what unlocks it &#8594;</a></div>';
+      return;
+    }
+    /* a one-screen section is a plain row — an arrow that opens a single item
+       is a click nobody should have to make */
+    if(sec.flat&&kids.length===1){
+      const t=kids[0];
+      h+='<div class="ni" id="ni-'+t.id+'" onclick="'+_navGo(t)+'">'+
+         '<svg class="ni-ic" viewBox="0 0 24 24">'+sec.ico+'</svg>'+sec.l+'</div>';
+      return;
+    }
+    const isOpen=(_navOpen===sec.id);
+    h+='<div class="ni ni-sec'+(isOpen?' open':'')+'" onclick="hafSecToggle(\''+sec.id+'\')">'+
+       '<svg class="ni-ic" viewBox="0 0 24 24">'+sec.ico+'</svg>'+sec.l+
+       '<svg class="ni-cv" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>';
+    if(isOpen)kids.forEach(t=>{
+      h+='<div class="ni-sub" id="ni-'+t.id+'" onclick="'+_navGo(t)+'">'+
+         '<svg class="ni-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg>'+t.l+'</div>';
+    });
+  });
+  document.getElementById('nav-list').innerHTML=h;
+  /* "Add owner driver or fleet" keeps its own place at the foot */
+  document.getElementById('nav-list').insertAdjacentHTML('beforeend',hafAddSection(acc));
+  const promo=document.getElementById('sb-plna'); if(promo)promo.style.display='none';
+  _fbRoleGuess=acc.released?'driver':'business';
+  hafAcctFooter(acc);
+  applyAudience();
+  hafRenderLiveWidget();
+  /* keep the highlight on whatever pane is showing */
+  const cur=document.getElementById('ni-'+(ct||'').replace('pane-',''));
+  if(cur)cur.classList.add('on');
+}
+function _navGo(t){
+  if(t.ext)return "window.open('"+t.ext+"','_blank','noopener')";
+  return t.id==='livejob'?'hafOpenJobs()':"switchTab('pane-"+t.id+"')";
+}
+
+/* ── THE SIGNED-IN ACCOUNT, AT THE FOOT OF THE SIDEBAR ────────────────────
+   Document §17: name, membership, username, then Sign Out. Nothing here is
+   guessed — the name and username come off the account record, and the
+   membership off the level the record set. */
+const HAF_LEVEL_LABEL={lite:'HAF KNECT Free',plus:'HAF KNECT Plus',pro:'HAF KNECT Pro'};
+function hafAcctFooter(acc){
+  const el=document.getElementById('sb-acct'); if(!el)return;
+  const u=(localStorage.getItem('knect-user')||'').toUpperCase();
+  const nm=(acc&&acc.name)||u||'My account';
+  const lvl=HAF_LEVEL_LABEL[(window.HAF_ACCOUNT_LEVEL||'lite')]||'HAF KNECT Free';
+  const ini=nm.replace(/[^A-Za-z ]/g,'').trim().split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase()||u.slice(0,2);
+  el.innerHTML='<div class="av">'+_esc(ini)+'</div><div style="min-width:0">'+
+    '<div class="sb-acct-n">'+_esc(nm)+'</div>'+
+    '<div class="sb-acct-m">'+lvl+'</div>'+
+    (u?'<div class="sb-acct-u">'+_esc(u)+'</div>':'')+'</div>';
+  el.style.display='flex';
+}
+
+/* ── NOTIFICATIONS ────────────────────────────────────────────────────────
+   Document §14: a bell in the top navigation, in-dashboard first, and "do not
+   build unnecessary complexity into V1 if the event system is not ready".
+
+   It is not ready. So this bell shows only things this page can see for
+   itself and know to be true right now — an outstanding Clever check, a
+   locked section worth knowing about. It invents nothing. When the event
+   system lands, real events join the same list and the bell does not change. */
+function hafNotes(){
+  const acc=window._hafAccView; if(!acc)return [];
+  const out=[];
+  if(acc.drives&&!acc.released)out.push({t:'Your Clever checks are outstanding',
+    d:'Send your documents and your driving screens open up.',go:"hafCleverAdd('"+acc.type+"')"});
+  if(!acc.drives)out.push({t:'You can add driving to this account',
+    d:'Owner driver or fleet, through the Clever checks.',go:"switchTab('pane-membership')"});
+  return out;
+}
+function hafBellRender(){
+  const p=document.getElementById('npanel'),d=document.getElementById('nbell-dot');
+  if(!p)return;
+  const n=hafNotes();
+  if(d)d.classList.toggle('on',n.length>0);
+  p.innerHTML='<div class="npanel-h">Notifications</div>'+(n.length
+    ? n.map(x=>'<div class="nrow" onclick="hafBellToggle(0);'+x.go+'"><div><div class="nrow-t">'+_esc(x.t)+'</div><div class="nrow-d">'+_esc(x.d)+'</div></div></div>').join('')
+    : '<div class="npanel-e">Nothing new. Job, document and payout alerts will appear here.</div>');
+}
+function hafBellToggle(open){
+  const p=document.getElementById('npanel'); if(!p)return;
+  const want=(open===undefined)?!p.classList.contains('on'):!!open;
+  if(want)hafBellRender();
+  p.classList.toggle('on',want);
+}
+document.addEventListener('click',function(e){
+  const p=document.getElementById('npanel'); if(!p||!p.classList.contains('on'))return;
+  if(!p.contains(e.target)&&!e.target.closest('#nbell'))p.classList.remove('on');
+});
+
+function buildNav(tabs,role,acc){
+  /* role first — the audience decides which entries are built at all.
+     It is passed in for a real account, because the nav array is no longer
+     enough to tell them apart: a pending owner driver and a business account
+     are handed the same posting screens and must be treated as the same
+     audience. The old identity check stays as the fallback for the demo and
+     master-mode screens, which still pass one of the fixed arrays. */
+  window.HAF_ROLE=role||((tabs===DRIVER_NAV)?'driver':(tabs===BUSINESS_NAV)?'business':(tabs===FREIGHT_NAV||tabs===PERSONAL_NAV)?'freight':'admin');
   const aud=hafAud();
   const shown=aud.network?tabs:tabs.filter(t=>AUD_NETWORK_TABS.indexOf(t.id)<0);
   let h='',cs='';
@@ -5186,15 +5855,116 @@ function buildNav(tabs){
     const click=t.id==='livejob'?'hafOpenJobs()':`switchTab('pane-${t.id}')`;
     h+=`<div class="ni" id="ni-${t.id}" onclick="${click}"><svg class="ni-ic" viewBox="0 0 24 24">${t.ico}</svg>${t.l}${t.badge?`<span class="nb">${t.badge}</span>`:''}</div>`;
   });
+  /* The "add owner driver or fleet" section, in its own place at the foot of
+     the sidebar. Only a real signed-in account gets it — a demo or master
+     screen has no Clever application to make. */
+  if(acc)h+=hafAddSection(acc);
   document.getElementById('nav-list').innerHTML=h;
+  /* The old orange "Looking to be a driver? Sign up to the PLNA" card sent a
+     business or freight account straight at the driving site, which is the
+     access Brent asked to close. Its job now belongs to the section above,
+     which goes to the Clever checks instead — so the card is only ever shown
+     on the demo and master screens, which have no account section of their own. */
   const promo=document.getElementById('sb-plna');
-  if(promo)promo.style.display=(tabs===DRIVER_NAV)?'none':'block';
+  if(promo)promo.style.display=(acc||tabs===DRIVER_NAV)?'none':'block';
   _fbRoleGuess=(tabs===DRIVER_NAV)?'driver':(tabs===BUSINESS_NAV)?'business':(tabs===FREIGHT_NAV)?'business':'team';
   /* the Live Job view was decided at the top of this function, with the audience */
   applyAudience();
   hafRenderLiveWidget();
 }
 let ct=null;
+/* ── FLEET OVERVIEW ────────────────────────────────────────────────────────
+   The headcount band is READ from the one feature list, never typed here, so
+   the sidebar can never promise a different number from the plans page. If the
+   list has not loaded, the tile says so rather than guessing a band. */
+function flRenderOverview(){
+  const el=document.getElementById('fl-kpis'); if(!el)return;
+  const A=window.HAFAccountFees;
+  let band='—';
+  try{
+    const lvl=(window.HAF_ACCOUNT_LEVEL||'lite').toUpperCase();
+    const acc=A&&A.config&&A.config.accountTypes&&A.config.accountTypes['FLEET_'+lvl];
+    if(acc)band=acc.maxDrivers?('Up to '+acc.maxDrivers+' on your plan'):'Unlimited on your plan';
+  }catch(e){band='—';}
+  el.innerHTML=
+    '<div class="kc"><div class="kc-l">Drivers on your account</div><div class="kc-v or">3</div><div class="kc-d">'+band+'</div></div>'+
+    '<div class="kc"><div class="kc-l">Out today</div><div class="kc-v">2</div></div>'+
+    '<div class="kc"><div class="kc-l">Jobs allocated today</div><div class="kc-v gn">2</div></div>'+
+    '<div class="kc"><div class="kc-l">Waiting to allocate</div><div class="kc-v">1</div></div>';
+}
+
+/* ── ACCOUNT & MEMBERSHIP (document §13) ───────────────────────────────────
+   Read from the one feature list. If that list has not loaded, this page says
+   so — it never falls back to a hand-typed set of features, because a page
+   that quietly disagrees with the pricing page is how a customer gets sold
+   something we do not do. */
+const HAF_SIDE_FOR={driver:'DRIVER',fleet:'FLEET',freight_forwarder:'FREIGHT',business:'FREIGHT'};
+function mbRender(){
+  const acc=window._hafAccView; const A=window.HAFAccountFees;
+  const head=document.getElementById('mb-head'),pm=document.getElementById('mb-perms'),ft=document.getElementById('mb-feats');
+  if(!head||!pm||!ft)return;
+  if(!acc){head.innerHTML='<div class="ct">Your account</div><div class="cr"><span class="ck">Sign in to see your account.</span></div>';pm.innerHTML='';ft.innerHTML='';return;}
+  const lvlKey=(window.HAF_ACCOUNT_LEVEL||'lite');
+  const lvl=lvlKey.toUpperCase();
+  head.innerHTML='<div class="ct">Your account</div>'+
+    '<div class="cr"><span class="ck">Account type</span><span class="cv">'+_esc(HAF_TYPE_LABEL[acc.type]||'Account')+'</span></div>'+
+    '<div class="cr"><span class="ck">HAF KNECT membership</span><span class="cv"><span class="chip cb">'+_esc(HAF_LEVEL_LABEL[lvlKey]||'HAF KNECT Free')+'</span></span></div>'+
+    '<div class="cr"><span class="ck">Clever Checked</span><span class="cv">'+(acc.released
+      ?'<span class="chip cg">Released &#8212; you can accept network work</span>'
+      :acc.drives?'<span class="chip ca">Checks outstanding</span>':'<span class="chip cb">Not needed for this account</span>')+'</span></div>';
+
+  /* What this account may do, in the same words the sidebar uses — so a
+     locked padlock and this page can never tell two different stories. */
+  const P=hafPerms(acc);
+  const row=(l,on,why)=>'<div class="cr"><span class="ck">'+l+'</span><span class="cv">'+
+    (on?'<span class="chip cg">Included</span>':'<span class="chip ca">Locked</span>'+(why?' <span style="color:var(--mu);font-size:.72rem">'+why+'</span>':''))+'</span></div>';
+  pm.innerHTML='<div class="ct">What this account can do</div>'+
+    row('Post work onto the network',P.post)+
+    row('Accept network jobs',P.drive,acc.drives?'Complete your Clever checks':'Add owner driver to your account')+
+    row('PLNA driver planner',P.plna,acc.drives?'Complete your Clever checks':'Drivers only')+
+    row('Fleet Management',P.fleet,acc.type==='fleet'?'Complete your Clever checks':'Register a fleet on your account')+
+    row('Post third-party client loads',P.freight,'Freight forwarder accounts');
+
+  if(!A||!A.featuresForSideLevel){
+    ft.innerHTML='<div class="card"><div class="ct">Features</div><div class="cr"><span class="ck">The feature list has not loaded, so this page is not showing one. Reload the page and it will come back.</span></div></div>';
+    return;
+  }
+  let rows;
+  try{rows=A.featuresForSideLevel(HAF_SIDE_FOR[acc.type]||'DRIVER',lvl);}catch(e){rows=null;}
+  if(!rows){ft.innerHTML='<div class="card"><div class="ct">Features</div><div class="cr"><span class="ck">Could not read the feature list for this account.</span></div></div>';return;}
+  const inc=rows.filter(r=>r.included),lock=rows.filter(r=>!r.included&&!r.comingSoon),soon=rows.filter(r=>r.comingSoon);
+  const li=(t,tail)=>'<div class="cr"><span class="ck">'+_esc(t)+'</span>'+(tail||'')+'</div>';
+  let h='<div class="card"><div class="ct">Included on your account &#8212; '+inc.length+'</div>'+
+        inc.map(r=>li(r.text,'<span class="cv"><span class="chip cg">Included</span></span>')).join('')+'</div>';
+  if(lock.length)h+='<div class="card"><div class="ct">Unlocked by upgrading &#8212; '+lock.length+'</div>'+
+        lock.map(r=>li(r.text,'<span class="cv"><span class="chip ca">'+(HAF_LEVEL_LABEL[String(r.lockedBy||'').toLowerCase()]||'Upgrade')+'</span></span>')).join('')+'</div>';
+  if(soon.length)h+='<div class="card"><div class="ct">Coming soon &#8212; '+soon.length+'</div>'+
+        soon.map(r=>li(r.text,'<span class="cv"><span class="chip cb">Coming soon</span></span>')).join('')+'</div>';
+  ft.innerHTML=h;
+}
+
+/* ── SETTINGS (document §16) ──────────────────────────────────────────────
+   Account configuration only. Saved on this device for now — when the account
+   record can take these fields, this writes there instead and nothing on the
+   page has to change. */
+function setRender(){
+  const u=(localStorage.getItem('knect-user')||'').toUpperCase();
+  const el=document.getElementById('set-user'); if(el)el.textContent=u||'—';
+  let v={}; try{v=JSON.parse(localStorage.getItem('knect-settings')||'{}');}catch(e){}
+  ['name','co','email','tel','vat'].forEach(k=>{
+    const f=document.getElementById('set-'+k); if(f&&v[k]!=null)f.value=v[k];
+  });
+}
+function setSave(){
+  const v={};
+  ['name','co','email','tel','vat'].forEach(k=>{
+    const f=document.getElementById('set-'+k); if(f)v[k]=f.value.trim();
+  });
+  try{localStorage.setItem('knect-settings',JSON.stringify(v));}catch(e){}
+  const m=document.getElementById('set-msg');
+  if(m){m.textContent='Saved on this device. These will move onto your HAF account as soon as it can hold them.';setTimeout(()=>{m.textContent='';},4000);}
+}
+
 function switchTab(id){
   if(id==='pane-feedback'){fbPrefill();fbLoad();}
   /* the previous pane may have been taken out of the document by the audience rule */
@@ -5217,6 +5987,9 @@ function switchTab(id){
   if(id==='pane-money')setTimeout(()=>{if(window.moLoad)moLoad();},60);
   if(id==='pane-fbadmin')setTimeout(()=>{if(window.faLoad)faLoad();},60);
   if(id==='pane-livejob')setTimeout(hafRenderLive,60);
+  if(id==='pane-fl-manage')setTimeout(flRenderOverview,40);
+  if(id==='pane-membership')setTimeout(mbRender,40);
+  if(id==='pane-settings')setTimeout(setRender,40);
   /* area rule applied to whatever this page just drew */
   setTimeout(()=>{try{hafMaskSweep(p);}catch(e){}},140);
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
@@ -6265,7 +7038,16 @@ function _buildDashActions(role){
     business:[
       {l:'Book a courier',t:'pane-b-book',style:'btn-or'},
       {l:'My deliveries',t:'pane-b-del',style:'btn-gh'},
-      {l:'My fleet',t:'pane-b-fleet',style:'btn-gh'},
+      {l:'Saved addresses',t:'pane-b-saved',style:'btn-gh'},
+      {l:'Full network map',t:'pane-f-cap',style:'btn-gh'},
+    ],
+    /* A courier company's first four moves: look at the fleet, hand work out,
+       go and win more. Never "my earnings" — that is one driver's number, and
+       a fleet is a company. */
+    fleet:[
+      {l:'Fleet overview',t:'pane-fl-manage',style:'btn-or'},
+      {l:'Drivers',t:'pane-b-drivers',style:'btn-gh'},
+      {l:'Find work',t:'pane-d-jobs',style:'btn-gh'},
       {l:'Full network map',t:'pane-f-cap',style:'btn-gh'},
     ],
   };
@@ -8150,10 +8932,11 @@ window.pxSave=async function(){
 
      A visitor picking between Free, Plus and Pro is really asking one question:
      what will actually be on my screen. The entitlement cards answered it in
-     prose. This answers it by showing the menu itself — the SAME arrays the
-     app builds a real member's sidebar from, not a picture of one and not a
-     list retyped here. If a tab is added to the driver app tomorrow, it
-     appears on this demo tomorrow, because there is only one copy of it. -->
+     prose. This answers it by showing the menu itself — built by the app's own
+     hafAccess + hafNavModel, the same two functions that draw a real member's
+     sidebar the moment they sign in. Not a picture of one, and not a list
+     retyped here. If a tab is added to the driver app tomorrow it appears on
+     this demo tomorrow, because there is only one copy of the decision. -->
 <style>
 .pd-menu{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.45rem;margin-top:.55rem}
 .pd-mi{display:flex;align-items:center;gap:.5rem;background:var(--bg);border:1px solid var(--ln);
@@ -8187,48 +8970,127 @@ window.pxSave=async function(){
 </style>
 <script>
 (function(){
-  /* The app has no separate fleet menu yet — a fleet account is driven from the
-     driver app with the fleet tools switched on. Saying so is better than
-     inventing a menu that does not exist anywhere in the product. */
-  function navFor(role){
+  /* ── THE MENU COMES FROM THE APP, NOT FROM HERE ──────────────────────────
+     This used to keep three lists of its own — DRIVER_NAV for a driver,
+     BUSINESS_NAV for a business, and DRIVER_NAV again for a fleet with an
+     apology attached saying a fleet "does not have a menu of its own yet".
+
+     Both halves of that had gone stale. A fleet has had its own section for a
+     while. And none of the three knew about the Clever checks, so the demo
+     showed a brand new driver every driving screen in the product — the exact
+     opposite of what the app now does, and the exact thing the checks exist to
+     prevent. A demo that contradicts the product is not a small problem: it is
+     a promise the product then breaks.
+
+     So nothing is decided here any more. hafAccess says what the account IS
+     and hafNavModel says what that reaches — the same two functions the real
+     sidebar calls. This file only draws the answer. */
+  var DC_TYPE={driver:'driver',fleet:'fleet',business:'business',freight:'freight_forwarder'};
+
+  function navFor(role,rel){
     try{
-      if(role==='driver')  return {nav:DRIVER_NAV , note:null};
-      if(role==='business')return {nav:BUSINESS_NAV, note:null};
-      if(role==='freight') return {nav:FREIGHT_NAV , note:null};
-      if(role==='fleet')   return {nav:DRIVER_NAV , note:'A fleet account signs in to the driver app with the fleet tools switched on; it does not have a menu of its own yet.'};
-    }catch(e){}
-    return {nav:[],note:null};
+      var acc=hafAccess({account_type:(DC_TYPE[role]||role),
+                         plna_released:rel===true, full_name:'Demo account'});
+      return {acc:acc, model:(hafNavModel(acc)||[])};
+    }catch(e){ return {acc:null, model:[]}; }
   }
+
+  /* Only an account that drives has two states worth showing. A business or a
+     freight forwarder is never waiting on anything.
+
+     The demo opens on the RELEASED state, and that is a deliberate choice
+     rather than a convenient one. A visitor deciding whether to join wants to
+     see what the account becomes, and a brand new driver's menu is mostly
+     padlocks — an honest screen that sells nothing and explains less. So the
+     demo shows the account working, and puts the gate one click away where it
+     reads as the promise it is: this is yours once Clever has checked you. */
+  function relOf(view){ return !(view && view.rel===false); }
+  function drivesRole(role){ return role==='driver'||role==='fleet'; }
+
+  window.pdSetRel=function(tier,rel){
+    try{ DC_VIEW[tier].rel=(rel===true); dcRenderTier(tier); }catch(e){}
+  };
 
   function block(tier){
     var view; try{view=DC_VIEW[tier]}catch(e){} if(!view)return '';
     var roleDef; try{roleDef=DC_ROLES.filter(function(r){return r.k===view.role})[0]}catch(e){}
     if(!roleDef)return '';
-    var got=navFor(view.role), nav=got.nav||[];
-    if(!nav.length)return '';
+    var rel=relOf(view), drives=drivesRole(view.role);
+    var got=navFor(view.role,rel), model=got.model||[], acc=got.acc;
+    if(!model.length)return '';
 
     var T; try{T=DC_TIERS[tier]}catch(e){} T=T||{label:tier};
+    var state=drives?(rel?' &middot; checked and released':' &middot; checks not finished yet'):'';
     var h='<div class="card"><div class="ct">What you see when you sign in &mdash; '
-        + roleDef.l + ' on ' + T.label + '</div>';
+        + roleDef.l + ' on ' + T.label + state + '</div>';
     h+='<div class="dc-note" style="margin-top:.2rem">This is the real menu the app builds for a '
-      + roleDef.l.toLowerCase() + ' account, read straight from the live app. '
-      + '<b style="color:var(--or)">Click any tab below to open that screen</b> and look around &mdash; '
-      + 'you can come back here from any of them. Membership decides the features listed further '
-      + 'down this page, not which menu you get.</div>';
+      + roleDef.l.toLowerCase() + ' account &mdash; not a list kept here, but the app\'s own answer, '
+      + 'asked fresh every time you change the buttons above. '
+      + '<b style="color:var(--or)">Click any tab to open that screen</b> and look around; '
+      + 'you can come back here from any of them.</div>';
 
-    var seen={}, order=[];
-    nav.forEach(function(t){ if(!seen[t.s]){seen[t.s]=[];order.push(t.s)} seen[t.s].push(t); });
-    order.forEach(function(group){
-      h+='<div class="pd-grp">'+group+'</div><div class="pd-menu">';
-      seen[group].forEach(function(t){
+    /* The two states of a driving account, side by side, because the whole
+       point of the checks is that they change what you get. */
+    if(drives){
+      h+='<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.7rem">'
+       + '<button type="button" class="btn btn-'+(rel?'gh':'or')+' btn-xs" onclick="pdSetRel(\''+tier+'\',false)">Before the Clever checks</button>'
+       + '<button type="button" class="btn btn-'+(rel?'or':'gh')+' btn-xs" onclick="pdSetRel(\''+tier+'\',true)">Checked and released</button>'
+       + '</div>';
+      h+='<div class="dc-note" style="margin-top:.5rem">'
+       + (rel
+          ? 'Released by Clever: the driving side is open, and the planner opens with it.'
+          : 'Everyone can post work from the day they sign up. The driving screens stay shut until Clever has checked the documents &mdash; that is what keeps the network worth being in.')
+       + '</div>';
+    }
+
+    var cg='';
+    model.forEach(function(sec){
+      if(sec.g!==cg){ h+='<div class="pd-grp">'+sec.g+'</div>'; cg=sec.g; }
+      if(sec.locked){
+        /* A padlock is part of the answer, not a gap in it — leaving it out
+           would show a menu no member ever gets. */
+        h+='<div class="pd-menu"><div class="pd-mi" style="cursor:default;opacity:.72">'
+         + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mu)" '
+         + 'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+         + '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
+         + '<span>'+sec.l+'</span></div></div>'
+         + '<div class="dc-note" style="margin:.25rem 0 .1rem">'+sec.why+'</div>';
+        return;
+      }
+      h+='<div class="pd-menu">';
+      (sec.tabs||[]).forEach(function(t){
+        /* Some entries are not screens in this app at all — "Open my PLNA"
+           leaves for the driver's own planner. The demo cannot sign a visitor
+           in there, and pretending it is a tab here produced a click that
+           opened nothing. It is shown for what it is: a door out. */
+        if(t.ext){
+          h+='<div class="pd-mi pd-ext" style="cursor:default;opacity:.8">'
+           + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--or)" '
+           + 'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+           + '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>'
+           + '<polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'
+           + '<span>'+t.l+'</span></div>';
+          return;
+        }
         h+='<button type="button" class="pd-mi" onclick="pdSeatOpen(\''+tier+'\',\''+t.id+'\')">'
          + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" '
          + 'stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
-         + t.ico + '</svg><span>' + t.l + '</span><span class="pd-go">&rarr;</span></button>';
+         + sec.ico + '</svg><span>' + t.l + '</span><span class="pd-go">&rarr;</span></button>';
       });
       h+='</div>';
+      if((sec.tabs||[]).some(function(t){return t.ext}))
+        h+='<div class="dc-note" style="margin:.25rem 0 .1rem">The planner is its own app at plna.usehaf.co.uk &mdash; a released driver signs straight into it from here.</div>';
     });
-    if(got.note)h+='<div class="dc-note" style="margin-top:.7rem">'+got.note+'</div>';
+
+    /* The same invitation the sidebar puts at its own foot, said in words
+       here: an account that cannot drive today can choose to. */
+    if(acc&&!acc.released){
+      h+='<div class="dc-note" style="margin-top:.8rem">'
+       + (acc.drives
+          ? 'At the foot of this sidebar the account is asked for its documents, and the driving screens open the moment Clever releases them.'
+          : 'At the foot of this sidebar there is an <b>Add to your account</b> section &mdash; become an owner driver, or register a fleet, through the Clever checks. Nobody has to open a second account to do it.')
+       + '</div>';
+    }
     return h+'</div>';
   }
 
@@ -8274,10 +9136,22 @@ window.pxSave=async function(){
     var view; try{view=DC_VIEW[tier]}catch(e){} if(!view)return;
     var roleDef; try{roleDef=DC_ROLES.filter(function(r){return r.k===view.role})[0]}catch(e){}
     var T; try{T=DC_TIERS[tier]}catch(e){} T=T||{label:tier};
-    var nav=(navFor(view.role).nav)||[]; if(!nav.length)return;
+    var rel=relOf(view), drives=drivesRole(view.role);
+    var got=navFor(view.role,rel), model=got.model||[]; if(!model.length)return;
 
-    PD_SEAT={tier:tier, what:(roleDef?roleDef.l:view.role)+' on '+T.label};
-    try{ buildNav(nav); }catch(e){}
+    /* Say which account AND which state, because on a driving account those
+       are two different screens and a visitor who forgets which one they asked
+       for will read the wrong one as the product. */
+    PD_SEAT={tier:tier, what:(roleDef?roleDef.l:view.role)+' on '+T.label
+             +(drives?(rel?', released by Clever':', checks not finished'):'')};
+    /* the member's own sidebar, drawn by the app's own code */
+    try{ buildNavV1(got.acc); }catch(e){}
+    if(!tabId){
+      for(var i=0;i<model.length&&!tabId;i++){
+        if(model[i].locked)continue;
+        (model[i].tabs||[]).forEach(function(t){ if(!tabId&&!t.ext)tabId=t.id; });
+      }
+    }
     /* the way back, at the top of the sidebar this account would really have */
     try{
       var list=document.getElementById('nav-list');
@@ -8292,7 +9166,7 @@ window.pxSave=async function(){
     var p=document.getElementById('mode-pill');
     if(p){p.textContent='Sandbox · '+PD_SEAT.what; p.style.cursor='pointer';
           p.onclick=pdSeatClose; p.title='Back to the demo';}
-    try{ switchTab('pane-'+(tabId||nav[0].id)); }catch(e){}
+    if(tabId){ try{ switchTab('pane-'+tabId); }catch(e){} }
   };
 
   window.pdSeatClose=function(){
@@ -8320,12 +9194,18 @@ window.pxSave=async function(){
     wrap();
   })();
 
-  /* dcOpen redraws the whole screen from scratch every time the role or the
-     founder switch changes, so this has to run after it rather than once. */
+  /* The screen is redrawn from scratch every time anything about the view
+     changes, so this has to run after each redraw rather than once.
+
+     It used to hook dcOpen — the function that runs when you ARRIVE at a tier.
+     But switching the role, the founder mark or the Clever state goes straight
+     to dcRenderTier without passing through dcOpen, so the menu vanished the
+     moment a visitor changed anything about the account they were looking at.
+     The redraw is the thing to follow, not the arrival. */
   function hook(){
-    if(typeof window.dcOpen!=='function'){setTimeout(hook,120);return}
-    var inner=window.dcOpen;
-    window.dcOpen=function(tier){
+    if(typeof window.dcRenderTier!=='function'){setTimeout(hook,120);return}
+    var inner=window.dcRenderTier;
+    window.dcRenderTier=function(tier){
       var out=inner.apply(this,arguments);
       try{
         if(tier==='free'||tier==='plus'||tier==='pro'){

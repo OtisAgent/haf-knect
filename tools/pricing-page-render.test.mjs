@@ -51,8 +51,18 @@ for (const [name, vp] of [['desktop', { width: 1440, height: 1000 }], ['phone', 
   p.on('response', r => { if (r.status() === 404) console.log('    404 -> ' + r.url()); });
   await p.goto('http://localhost:8799/', { waitUntil: 'networkidle' });
 
-  /* in as Brent's owner login, in Super Admin mode */
-  await p.evaluate(() => { try { enterKnectApp('BF638793'); enterMode('admin'); } catch (e) {} });
+  /* In as Brent's owner login, in Super Admin mode. This used to call
+     enterKnectApp(), which stopped existing when the master login went in —
+     and because the call sat inside a silent try/catch, the sign-in quietly
+     did nothing and every check below ran against a hidden page behind the
+     landing screen. So: call the real door, and shout if it does not open. */
+  await p.waitForFunction(() => typeof demoLogin === 'function', null, { timeout: 15000 });
+  await p.evaluate(() => { demoLogin('BF638793'); enterMode('admin'); });
+  await p.waitForTimeout(300);
+  const opened = await p.evaluate(() =>
+    document.getElementById('app').classList.contains('open') &&
+    getComputedStyle(document.getElementById('landing')).display === 'none');
+  ok('the owner login actually opens the app', opened);
   /* measure the shell's own overflow on an untouched tab first, as the baseline */
   await p.evaluate(() => { try { switchTab('pane-admin'); } catch (e) {} });
   await p.waitForTimeout(600);
