@@ -64,7 +64,8 @@ for (const [tag, vp] of [['desktop', { width: 1280, height: 1000 }], ['phone', {
   /* ── 2. one door, under the price ── */
   ok(await vis('#cf-go'), `[${tag}] one "Continue to book" button sits under the guide price`);
 
-  /* ── 3. the ways-to-book card, under the login, with Talk to HAF in it ── */
+  /* ── 3. the ways-to-book card, under the login, Talk to HAF and the demo
+         request both gone (Brent, 14 Aug) ── */
   const ways = await p.evaluate(() => {
     const c = document.getElementById('side-ways');
     if (!c) return null;
@@ -74,7 +75,7 @@ for (const [tag, vp] of [['desktop', { width: 1280, height: 1000 }], ['phone', {
       talk: !!c.querySelector('.wtb-sub'),
       phone: !!c.querySelector('a[href^="tel:"]'),
       wa: !!c.querySelector('a[href*="wa.me"], a[href*="whatsapp"]'),
-      demo: !!c.querySelector('.dr-btn'),
+      demoBtn: !!c.querySelector('.dr-btn'),
       belowLogin: !!(login && (login.compareDocumentPosition(c) & Node.DOCUMENT_POSITION_FOLLOWING)),
       talkPanelGone: !document.getElementById('side-talk')
     };
@@ -83,8 +84,61 @@ for (const [tag, vp] of [['desktop', { width: 1280, height: 1000 }], ['phone', {
   ok(ways && /repeat/i.test(ways.heads[0]) && /email/i.test(ways.heads[1]) && /whatsapp/i.test(ways.heads[2]),
     `[${tag}] in the order Brent asked for — repeat, email, WhatsApp`);
   ok(ways && ways.belowLogin, `[${tag}] the card sits under the login box`);
-  ok(ways && ways.talkPanelGone && ways.talk && ways.phone && ways.wa && ways.demo,
-    `[${tag}] Talk to HAF folded in — no separate panel, phone + WhatsApp + demo all kept`);
+  ok(ways && ways.talkPanelGone && !ways.talk && !ways.phone && !ways.wa && !ways.demoBtn,
+    `[${tag}] Talk to HAF and Request a demo are off the card — three panels and nothing else`);
+
+  /* ── 3a. the demo request is gone from the WHOLE page, not just that card,
+         and the one demo door left points at demo.usehaf.co.uk. Ask for the
+         resolved href, so a relative or mistyped link cannot pass. */
+  const demo = await p.evaluate(() => {
+    const label = e => (e.innerText || e.textContent || '').trim();
+    const clickable = [...document.querySelectorAll('a,button')].filter(e => {
+      const r = e.getBoundingClientRect(), st = getComputedStyle(e);
+      return st.display !== 'none' && st.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+    });
+    const asks = clickable.filter(e => /request a demo/i.test(label(e))).map(label);
+    const tries = clickable.filter(e => /try a live demo/i.test(label(e)))
+      .map(e => ({ href: e.href || '', blank: e.target === '_blank' }));
+    return {
+      asks,
+      tries,
+      formGone: !document.getElementById('dr-ov'),
+      fnGone: typeof window.openDemoReq === 'undefined' && typeof window.submitDemoReq === 'undefined',
+      mailchimp: /list-manage\.com\/subscribe/.test(document.documentElement.innerHTML)
+    };
+  });
+  ok(demo.asks.length === 0,
+    `[${tag}] nothing on the page still asks people to request a demo${demo.asks.length ? ' — STRAY: ' + demo.asks.join(' | ') : ''}`);
+  ok(demo.formGone && demo.fnGone, `[${tag}] the old demo request form and its code are gone, not just hidden`);
+  ok(!demo.mailchimp, `[${tag}] the page no longer signs anyone up to a mailing list of its own`);
+  ok(demo.tries.length > 0 && demo.tries.every(t => t.href === 'https://demo.usehaf.co.uk/' || t.href === 'https://demo.usehaf.co.uk'),
+    `[${tag}] every "Try a live demo" goes to demo.usehaf.co.uk: ${JSON.stringify(demo.tries.map(t => t.href))}`);
+  ok(demo.tries.every(t => t.blank), `[${tag}] and opens in its own tab, so a half-typed order is not thrown away`);
+
+  /* ── 3ii. the two columns finish on the same line (desktop only — on a
+         phone they are stacked, so there is no line to share). Measure the
+         real boxes: bottom of the left main column vs bottom of the last card
+         in the side column, and the three panels equal to each other. */
+  const align = await p.evaluate(() => {
+    const main = document.querySelector('.land-main');
+    const ways = document.getElementById('side-ways');
+    if (!main || !ways) return null;
+    const cards = [...document.querySelectorAll('#side-ways .wtb-c')].map(c => c.getBoundingClientRect().height);
+    return {
+      mainBottom: main.getBoundingClientRect().bottom,
+      sideBottom: ways.getBoundingClientRect().bottom,
+      stacked: getComputedStyle(document.querySelector('.land-body')).gridTemplateColumns.split(' ').length < 2,
+      spread: cards.length ? Math.max(...cards) - Math.min(...cards) : null,
+      cards
+    };
+  });
+  if (tag === 'desktop') {
+    ok(align && !align.stacked, `[${tag}] the page is still in two columns`);
+    ok(align && Math.abs(align.mainBottom - align.sideBottom) <= 24,
+      `[${tag}] the side column ends level with the tile on the left (${align ? Math.round(Math.abs(align.mainBottom - align.sideBottom)) : '?'}px apart)`);
+    ok(align && align.spread !== null && align.spread <= 2,
+      `[${tag}] the three panels are the same size as each other (${align ? Math.round(align.spread) : '?'}px apart)`);
+  }
 
   /* ── 3b. each card actually reads as a card, not one run-on line ──
      These live inside a <button>, so every part has to be made a block by

@@ -46,10 +46,8 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 /* ── VERSION ─── */
 .vbadge{position:fixed;bottom:14px;right:14px;z-index:9999;background:var(--or);color:#0e1113;font-family:var(--dp);font-weight:900;font-size:.6rem;letter-spacing:.08em;padding:.18rem .5rem;border-radius:var(--pill);pointer-events:none}
 
-/* ── DEMO REQUEST MODAL ── */
-.dr-btn{display:flex;align-items:center;justify-content:center;gap:.45rem;width:100%;padding:.65rem .9rem;border-radius:var(--rx);background:var(--or);color:#0e1113;font-size:.82rem;font-weight:800;cursor:pointer;border:none;transition:opacity .14s;margin-top:.75rem}
-.dr-btn:hover{opacity:.88}
-.dr-btn svg{width:14px;height:14px;fill:none;stroke:#0e1113;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+/* ── SHARED OVERLAY SHELL (the direct-book panel uses it; the demo-request
+      form that named it was removed 14 Aug) ── */
 .dr-ov{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:1.2rem}
 .dr-ov.open{display:flex}
 .dr-box{background:var(--p);border:1px solid var(--lns);border-radius:16px;width:100%;max-width:400px;padding:1.8rem 1.6rem;position:relative;box-shadow:0 12px 48px rgba(0,0,0,.18)}
@@ -96,7 +94,16 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 /* On a phone the side column stacks under the form. The login box drops out
    (the Driver / Account login links below the form already cover it) but the
    ways-to-book card must NOT — it is now the only route to repeat and email. */
-@media(max-width:860px){.land-body{grid-template-columns:1fr;padding:.4rem 1.2rem 1.5rem}.land-side{order:2}.land-body>.sec-acts{order:3;margin-top:.2rem;justify-content:center}#side-login{display:none}}
+@media(max-width:860px){.land-body{grid-template-columns:1fr;padding:.4rem 1.2rem 1.5rem}.land-side{order:2}.land-body>.sec-acts{order:3;margin-top:.2rem;justify-content:center}
+  /* A phone signs in from the nav, so the login card stays out of the way — but
+     the demo strip inside it is the page's only demo door, so keep that one
+     child and strip the card chrome off around it. */
+  #side-login{display:block;background:none;border:none;box-shadow:none;padding:0}
+  #side-login>*:not(#sc-demo){display:none}
+  /* Written as a descendant so it outranks the plain #sc-demo rule further down
+     the sheet — same weight would lose on source order and leave the divider. */
+  #side-login>#sc-demo{border-top:none;padding-top:0;margin-top:0}
+}
 
 /* MAIN */
 .land-main{display:flex;flex-direction:column;gap:1.8rem}
@@ -191,10 +198,10 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .sc-err{font-size:.7rem;color:var(--rd);margin:.3rem 0 .4rem;display:none}
 .sc-foot{font-size:.72rem;color:var(--mu);text-align:center;margin-top:.7rem;line-height:1.55}
 .sc-foot a{color:var(--or)}
-.sc-btns{display:flex;flex-direction:column;gap:.45rem}
-.sc-contact-btn{display:flex;align-items:center;gap:.5rem;padding:.65rem .9rem;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .14s}
-.sc-contact-btn:hover{background:var(--p3)}
-.sc-contact-btn svg{width:14px;height:14px;stroke:var(--or);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+/* The demo strip at the foot of the login card. Styled here rather than inline
+   so the phone rule below can actually override it — an inline style would win
+   and leave a divider floating on its own once the card around it is hidden. */
+#sc-demo{border-top:1px solid var(--ln);padding-top:.7rem;margin-top:.7rem;text-align:center}
 
 /* ══ OVERLAYS ═══════════════════════════════════════════════════ */
 .overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(10,12,14,.85);backdrop-filter:blur(12px);align-items:center;justify-content:center}
@@ -782,6 +789,17 @@ textarea.fi2{resize:vertical;min-height:70px}
    flow (see .wtb-soon) so all three headings and icons start on the same line
    instead of the WhatsApp one sitting a badge-height lower than its neighbours. */
 .wtb{display:grid;grid-auto-rows:1fr;gap:.55rem}
+/* Brent, 14 Aug: the two columns must finish on the same line. The side column
+   already fills the row; what was missing is the ways-to-book card growing into
+   the space the login card leaves, and the three panels sharing that growth.
+   grid-auto-rows:1fr keeps them identical to each other however tall they get.
+   A ceiling stops a very long left column stretching them into three billboards
+   — past that the column simply ends early rather than looking silly. */
+@media(min-width:861px){
+  #side-ways{flex:1 1 auto;display:flex;flex-direction:column;max-height:560px}
+  #side-ways .wtb{flex:1 1 auto;min-height:0}
+  #side-ways .wtb-c{align-items:center}
+}
 .wtb-c{display:flex;gap:.65rem;align-items:flex-start;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.7rem .8rem;text-align:left;width:100%;font:inherit;color:inherit;transition:background .15s,border-color .15s;position:relative}
 .wtb-c.live{cursor:pointer}
 .wtb-c.live:hover{background:var(--p3);border-color:var(--or)}
@@ -811,8 +829,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .wtb-soon{flex:none;font-size:.52rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mu);background:var(--p3);border:1px solid var(--ln);border-radius:999px;padding:.14rem .42rem;line-height:1.2;white-space:nowrap}
 /* The heading BOX ends before the badge starts — a margin, not padding, so the
    two genuinely never occupy the same space rather than merely looking like it. */
-.wtb-sep{height:1px;background:var(--ln);margin:1rem 0 .85rem}
-.wtb-sub{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--su);margin-bottom:.55rem}
+/* the Talk to HAF divider and label they styled were removed 14 Aug */
 /* The one button that starts a consignment. It replaces the three doors:
    the form above it already IS step one, so the flow just carries on. */
 .cf-go{margin-bottom:.5rem}
@@ -1808,17 +1825,27 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
         <button class="btn btn-or btn-wide" onclick="scLogin()" style="margin-top:.3rem">Log in →</button>
         <p class="sc-foot"><a href="https://clever.usehaf.co.uk/reset.html" target="_blank">Forgotten your PIN?</a></p>
         <p class="sc-foot">No account? <a href="https://clever.usehaf.co.uk" target="_blank">Create one via CleverPay</a></p>
-        <div style="border-top:1px solid var(--ln);padding-top:.7rem;margin-top:.7rem;text-align:center">
+        <!-- The one demo door on the page. It goes to demo.usehaf.co.uk, which
+             asks for the email itself — that is where demo leads are collected
+             now that the old request form has gone. It has its own id because
+             on a phone the login card is hidden and this strip must not go with
+             it, or the page would have no demo door at all. -->
+        <div id="sc-demo">
           <a href="https://demo.usehaf.co.uk" target="_blank" class="btn btn-or btn-wide" style="display:inline-flex;align-items:center;justify-content:center;gap:.4rem;font-size:.72rem;text-decoration:none">Try a live demo →</a>
           <p style="margin:.45rem 0 0;font-size:.58rem;color:var(--mu)">No login needed · Driver, Freight &amp; Business views</p>
         </div>
       </div>
       <!-- ══ OTHER WAYS TO BOOK ══════════════════════════════════════════
-           Brent, 14 Aug: the three ways to book sit under the login, and the
-           Talk to HAF panel merges into the same card. Repeat and email are
-           live now. WhatsApp is drawn but does nothing — it is marked coming
-           soon and stays that way until ManyChat is genuinely switched on, so
-           nobody sends a job into a channel that cannot answer them. -->
+           Brent, 14 Aug: the three ways to book sit under the login. Repeat and
+           email are live now. WhatsApp is drawn but does nothing — it is marked
+           coming soon and stays that way until ManyChat is genuinely switched
+           on, so nobody sends a job into a channel that cannot answer them.
+           Later the same evening: Talk to HAF and Request a demo both came off.
+           The demo door is the "Try a live demo" button in the login card above,
+           which goes to demo.usehaf.co.uk and collects the email there — one
+           demo route, one lead list, instead of two competing ones. With those
+           gone the three cards stretch to finish level with the tile on the
+           left, so the two columns end on the same line. -->
       <div class="side-card" id="side-ways">
         <div class="sc-title">Other ways to book</div>
         <div class="wtb">
@@ -1853,22 +1880,6 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             </span>
           </div>
         </div>
-        <div class="wtb-sep"></div>
-        <div class="wtb-sub">Talk to HAF</div>
-        <div class="sc-btns">
-          <a href="tel:+447354764642" class="sc-contact-btn">
-            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 5.51 5.51l.98-.88a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            Call HAF
-          </a>
-          <a href="https://wa.me/447354764642" target="_blank" class="sc-contact-btn">
-            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            WhatsApp HAF
-          </a>
-        </div>
-        <button class="dr-btn" onclick="openDemoReq()">
-          <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-          Request a demo
-        </button>
       </div>
     </div>
 
@@ -1886,39 +1897,11 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
   </div>
 </div>
 
-<!-- ══ DEMO REQUEST OVERLAY ═══════════════════════════════════════ -->
-<div class="dr-ov" id="dr-ov" onclick="if(event.target===this)closeDemoReq()">
-  <div class="dr-box">
-    <button class="dr-box-close" onclick="closeDemoReq()">×</button>
-    <h2>Request a demo</h2>
-    <p class="dr-box-sub">We'll walk you through the KNECT platform live — just fill in your details and we'll be in touch.</p>
-    <div id="dr-form-fields">
-      <div class="sc-fi" style="margin-bottom:.45rem"><span class="sc-lbl">Your name</span><input class="sc-inp" id="dr-name" placeholder="Jane Smith" autocomplete="name"></div>
-      <div class="sc-fi" style="margin-bottom:.45rem"><span class="sc-lbl">Email</span><input class="sc-inp" id="dr-email" type="email" placeholder="jane@company.com" autocomplete="email"></div>
-      <div class="sc-fi" style="margin-bottom:.45rem"><span class="sc-lbl">Business name</span><input class="sc-inp" id="dr-company" placeholder="Acme Logistics"></div>
-      <div class="sc-fi" style="margin-bottom:.8rem">
-        <span class="sc-lbl">Account type I'm interested in</span>
-        <select class="dr-select" id="dr-actype">
-          <option value="">Select an account type…</option>
-          <option value="Business Account">Business Account — send your own goods (free)</option>
-          <option value="HAF KNECT Free">HAF KNECT Free — post client loads (free to start)</option>
-          <option value="HAF KNECT Plus">HAF KNECT Plus — £25/mo · 1% profit pooling (coming soon)</option>
-          <option value="HAF KNECT Pro">HAF KNECT Pro — £100/mo · 3% profit pooling (coming soon) · 3 team seats</option>
-          <option value="KNECT Founders Member">KNECT Founders Member — network profit share (apply)</option>
-          <option value="PLNA Driver">PLNA Driver — join the courier network</option>
-          <option value="Not sure yet">Not sure yet</option>
-        </select>
-      </div>
-      <div class="sc-err" id="dr-err" style="display:none;margin-bottom:.5rem"></div>
-      <button class="btn btn-or btn-wide" onclick="submitDemoReq()">Request a demo →</button>
-    </div>
-    <div class="dr-success" id="dr-success">
-      <div class="dr-success-ic">✓</div>
-      <div class="dr-success-h">Request received</div>
-      <p class="dr-success-p">We'll be in touch shortly to arrange your walkthrough.</p>
-    </div>
-  </div>
-</div>
+<!-- The "Request a demo" overlay that used to live here is gone (Brent, 14 Aug).
+     It was a second demo form collecting the same names into Mailchimp behind
+     the platform's back. The one demo door is now the "Try a live demo" button
+     in the login card, which goes to demo.usehaf.co.uk — that page asks for the
+     email itself, so every demo lead lands in one place. -->
 
 <!-- ══ LOGIN OVERLAY ══════════════════════════════════════════════ -->
 <div class="overlay" id="login-ov">
@@ -6550,31 +6533,9 @@ function toggleXchAvail(){
 }
 function toggleSb(){document.getElementById('sidebar').classList.toggle('open')}
 
-/* ── DEMO REQUEST ── */
-function openDemoReq(){document.getElementById('dr-ov').classList.add('open');document.getElementById('dr-name').focus();}
-function closeDemoReq(){document.getElementById('dr-ov').classList.remove('open');}
-function submitDemoReq(){
-  const name=document.getElementById('dr-name').value.trim();
-  const email=document.getElementById('dr-email').value.trim();
-  const company=document.getElementById('dr-company').value.trim();
-  const actype=document.getElementById('dr-actype').value;
-  const err=document.getElementById('dr-err');
-  if(!name||!email){err.textContent='Please enter your name and email.';err.style.display='block';return;}
-  err.style.display='none';
-  window._mcDemoReq=function(data){
-    if(data.result==='success'){
-      document.getElementById('dr-form-fields').style.display='none';
-      document.getElementById('dr-success').style.display='block';
-    }else{
-      err.textContent=(data.msg||'Something went wrong — please try again.').replace(/<[^>]+>/g,'');
-      err.style.display='block';
-    }
-  };
-  const p=new URLSearchParams({u:'e74ba6ad9a8846214c9d6aad4',id:'79da7debac',EMAIL:email,FNAME:name,MMERGE6:company,MMERGE7:actype||'Demo Request',c:'_mcDemoReq'});
-  const s=document.createElement('script');
-  s.src='https://usehaf.us3.list-manage.com/subscribe/post-json?'+p;
-  document.head.appendChild(s);
-}
+/* The demo-request form and its three functions were removed on 14 Aug. Demo
+   interest is collected by demo.usehaf.co.uk now, so nothing on this page
+   writes to a mailing list of its own. */
 function setComp(s,u){
   const sp=document.getElementById('d-comp-sp');if(!sp)return;
   sp.className='sp '+s;
