@@ -639,6 +639,60 @@ textarea.fi2{resize:vertical;min-height:70px}
 .booked-sub{font-size:.8rem;color:var(--mu);line-height:1.65}
 /* ── SUPER MODE SELECTOR ── */
 #super-mode{display:none}
+
+/* ── DEMO CENTRE ───────────────────────────────────────────────────────────
+   The banner is deliberately loud and deliberately unmissable: the whole point
+   of a sandbox is that nobody can mistake it for the real network. It sits at
+   the top of every demo screen, not just the first one. */
+.dc-band{display:flex;align-items:center;gap:.5rem;background:repeating-linear-gradient(45deg,var(--or-d),var(--or-d) 10px,transparent 10px,transparent 20px);border:1px dashed var(--or);border-radius:10px;padding:.55rem .75rem;margin-bottom:.9rem;font-size:.72rem;font-weight:700;color:var(--or)}
+.dc-band .dc-dot{width:7px;height:7px;border-radius:50%;background:var(--or);flex-shrink:0}
+.dc-band .dc-band-sub{font-weight:500;color:var(--mu)}
+.dc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:.55rem}
+.dc-sub{font-size:.65rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mu);margin:.85rem 0 .45rem}
+.dc-note{font-size:.7rem;color:var(--mu);margin-top:.55rem;line-height:1.5}
+.dc-say{text-align:center;font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.03em;color:var(--tx);margin:1.1rem 0 .4rem}
+.dc-host .ct{margin-bottom:.5rem}
+
+/* Money-flow card: customer -> HAF -> driver, in that order, always. */
+.dc-flow{display:flex;align-items:stretch;gap:.4rem;flex-wrap:wrap;margin:.15rem 0 .3rem}
+.dc-fl{flex:1 1 130px;background:var(--pl);border:1px solid var(--lns);border-radius:10px;padding:.6rem .65rem}
+.dc-fl-l{font-size:.63rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mu);margin-bottom:.25rem}
+.dc-fl-v{font-family:var(--dp);font-weight:900;font-size:1.15rem;letter-spacing:-.03em}
+.dc-fl-d{font-size:.64rem;color:var(--mu);margin-top:.2rem;line-height:1.4}
+.dc-fl.pay .dc-fl-v{color:var(--tx)}
+.dc-fl.haf{border-color:var(--or-g);background:var(--or-d)}.dc-fl.haf .dc-fl-v{color:var(--or)}
+.dc-fl.drv{border-color:rgba(52,199,123,.32)}.dc-fl.drv .dc-fl-v{color:var(--gn)}
+.dc-fl.ffm{border-color:rgba(90,160,255,.32)}.dc-fl.ffm .dc-fl-v{color:var(--bl)}
+.dc-arw{display:flex;align-items:center;color:var(--mu);font-size:1rem;flex:0 0 auto}
+@media(max-width:640px){.dc-arw{display:none}}
+
+/* "Show calculation" — a price nobody can open is a price nobody can check. */
+.dc-calc{margin-top:.55rem;border-top:1px solid var(--lns);padding-top:.5rem}
+.dc-calc summary{cursor:pointer;font-size:.7rem;font-weight:700;color:var(--or);list-style:none;user-select:none}
+.dc-calc summary::-webkit-details-marker{display:none}
+.dc-calc summary:before{content:'▸ ';display:inline-block;transition:transform .15s}
+.dc-calc[open] summary:before{content:'▾ '}
+.dc-calc table{width:100%;border-collapse:collapse;margin-top:.5rem;font-size:.7rem}
+.dc-calc td{padding:.3rem .1rem;border-bottom:1px solid var(--lns);color:var(--mu);vertical-align:top}
+.dc-calc td:last-child{text-align:right;color:var(--tx);font-weight:700;white-space:nowrap}
+.dc-calc tr.dc-tot td{border-bottom:none;color:var(--tx);font-weight:800;padding-top:.45rem}
+.dc-calc tr.dc-hd td{color:var(--tx);font-weight:800;font-size:.64rem;letter-spacing:.06em;text-transform:uppercase;padding-top:.6rem;border-bottom-color:transparent}
+
+/* Feature ladder inside the Free / Plus / Pro demos */
+.dc-feat{display:flex;align-items:flex-start;gap:.5rem;padding:.4rem 0;border-bottom:1px solid var(--lns);font-size:.75rem;line-height:1.45}
+.dc-feat:last-child{border-bottom:none}
+.dc-feat .dc-fi{flex:0 0 15px;margin-top:.1rem}
+.dc-feat.off{color:var(--mu)}
+.dc-feat.off .dc-ft{text-decoration:none}
+.dc-unl{font-size:.63rem;font-weight:800;color:var(--or);white-space:nowrap;margin-left:auto;padding-left:.5rem}
+.dc-roles{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.15rem}
+.dc-role{padding:.35rem .6rem;border:1px solid var(--lns);border-radius:999px;font-size:.7rem;font-weight:700;cursor:pointer;color:var(--mu);background:transparent}
+.dc-role.on{border-color:var(--or);color:var(--or);background:var(--or-d)}
+.dc-cmp-row{display:grid;grid-template-columns:1.1fr 1fr 1fr .8fr auto;gap:.4rem;align-items:end;margin-bottom:.45rem}
+@media(max-width:760px){.dc-cmp-row{grid-template-columns:1fr 1fr}}
+.dc-x{background:transparent;border:1px solid var(--lns);color:var(--mu);border-radius:8px;width:30px;height:32px;cursor:pointer;font-size:.9rem}
+.dc-x:hover{border-color:var(--rd);color:var(--rd)}
+.dc-fnd{display:inline-flex;align-items:center;gap:.25rem;font-size:.6rem;font-weight:800;color:#e8b64c;border:1px solid rgba(232,182,76,.4);background:rgba(232,182,76,.09);border-radius:999px;padding:.1rem .4rem;margin-left:.3rem;vertical-align:middle}
 .cap-pill{padding:.28rem .7rem;border:1.5px solid var(--ln);border-radius:20px;background:var(--p2);font-size:.7rem;font-weight:700;color:var(--mu);cursor:pointer;transition:all .12s;white-space:nowrap}
 .cap-pill:hover{border-color:var(--or);color:var(--or)}
 .cap-pill.active{border-color:var(--or);background:var(--or-d);color:var(--or)}
@@ -1459,34 +1513,22 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
       </div>
     </div>
 
-    <!-- View As section -->
-    <div style="font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-bottom:.55rem">View as another account type</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem">
-      <div class="card sm-card sm-va" onclick="enterMode('view-driver')" style="cursor:pointer">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:.3rem"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-        <div style="font-weight:700;font-size:.8rem">Driver</div>
-        <div style="font-size:.68rem;color:var(--mu)">Job exchange view</div>
+    <!-- ══ DOOR THREE — DEMO CENTRE ══════════════════════════════════════
+         This replaces the old "view as FF Free / FF Plus / FF Pro / Business"
+         cards. Those cards sold a ROLE as if it were a product and each one
+         carried a fee percentage typed into the page by hand. There is one
+         membership ladder now — Free, Plus, Pro — and the role is chosen
+         inside the demo, so a card can no longer disagree with the matrix. -->
+    <div class="card sm-card" onclick="enterMode('demo')" style="cursor:pointer;border:1px dashed var(--lns)">
+      <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.5rem">
+        <div style="background:var(--lns);border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--tx)" stroke-width="2.2"><path d="M2 3h20v14H2z"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+        </div>
+        <div style="font-weight:800;font-size:.9rem">Demo Centre</div>
+        <span class="chip" style="background:var(--lns);color:var(--mu);font-size:.6rem">Sandbox · no live data</span>
       </div>
-      <div class="card sm-card sm-va" onclick="enterMode('view-ff-free')" style="cursor:pointer">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:.3rem"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <div style="font-weight:700;font-size:.8rem">FF Free</div>
-        <div style="font-size:.68rem;color:var(--mu)">Freight forwarder, free tier</div>
-      </div>
-      <div class="card sm-card sm-va" onclick="enterMode('view-ff-plus')" style="cursor:pointer">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:.3rem"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <div style="font-weight:700;font-size:.8rem">FF Plus</div>
-        <div style="font-size:.68rem;color:var(--mu)">Freight forwarder, £50/mo</div>
-      </div>
-      <div class="card sm-card sm-va" onclick="enterMode('view-ff-pro')" style="cursor:pointer">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:.3rem"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <div style="font-weight:700;font-size:.8rem">FF Pro</div>
-        <div style="font-size:.68rem;color:var(--mu)">Freight forwarder, £100/mo</div>
-      </div>
-      <div class="card sm-card sm-va" onclick="enterMode('view-business')" style="cursor:pointer">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:.3rem"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="1"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/></svg>
-        <div style="font-weight:700;font-size:.8rem">Business</div>
-        <div style="font-size:.68rem;color:var(--mu)">Own goods, free account</div>
-      </div>
+      <div style="font-size:.74rem;color:var(--mu);line-height:1.55">See exactly what Free, Plus and Pro receive, compare the same job across account combinations, and work out any job on the mileage &amp; margin simulator. Every figure comes from the live pricing matrix.</div>
+      <div style="margin-top:.6rem;font-size:.7rem;font-weight:700;color:var(--mu)">Nothing here touches real jobs, money or accounts</div>
     </div>
 
     <div style="margin-top:1rem;text-align:center">
@@ -2686,6 +2728,104 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
       </div>
 
       <!-- ADMIN -->
+      <!-- ══ DEMO CENTRE — five sections, one pricing engine ═══════════════
+           Sections 1-3 are the same layout three times over, rendered by one
+           function, so a difference you see between Free, Plus and Pro is a
+           real difference in entitlement and not a difference in how the page
+           was written. Sections 4 and 5 exist to answer the two questions the
+           old demo could not: where does the money go on this job, and what
+           would this exact job look like under a different pair of accounts.
+
+           NOT ONE figure on these five screens is typed into the page. Every
+           number is returned by v3Price() — the same call the live customer
+           quote uses — after it has been loaded with the saved matrix from
+           /api/pricing. Change a rate in the Pricing Engine and these screens
+           change with it. -->
+      <div class="tp" id="pane-dc-free"><div class="dc-host" id="dc-host-free"></div></div>
+      <div class="tp" id="pane-dc-plus"><div class="dc-host" id="dc-host-plus"></div></div>
+      <div class="tp" id="pane-dc-pro"><div class="dc-host" id="dc-host-pro"></div></div>
+
+      <!-- ── SECTION 4 — the same job, different accounts ── -->
+      <div class="tp" id="pane-dc-compare">
+        <h1 class="pt">Account Pricing Comparison</h1>
+        <p class="ps">One job. Up to five account combinations. Every figure calculated from the live pricing matrix.</p>
+        <div class="dc-band" id="dc-cmp-band"></div>
+
+        <div class="card">
+          <div class="ct">The job everybody is pricing</div>
+          <div class="dc-grid">
+            <div><label class="ol">Job type</label><select class="fi2" id="dc-cmp-job" onchange="dcCompare()"></select></div>
+            <div><label class="ol">Vehicle</label><select class="fi2" id="dc-cmp-van" onchange="dcCompare()"></select></div>
+            <div><label class="ol">Mileage</label><input class="fi2" id="dc-cmp-miles" type="number" min="1" value="45" oninput="dcCompare()"></div>
+            <div><label class="ol">From postcode</label><input class="fi2" id="dc-cmp-from" value="S35" oninput="dcCompare()"></div>
+            <div><label class="ol">To postcode</label><input class="fi2" id="dc-cmp-to" value="M1" oninput="dcCompare()"></div>
+          </div>
+          <div class="dc-note" id="dc-cmp-job-line"></div>
+        </div>
+
+        <div class="card">
+          <div class="ct">Account combinations</div>
+          <div id="dc-cmp-rows"></div>
+          <div style="display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.6rem">
+            <button class="btn btn-gh btn-sm" onclick="dcCmpAdd()" id="dc-cmp-add">Add a combination</button>
+            <button class="btn btn-gh btn-sm" onclick="dcCmpReset()">Reset to the three examples</button>
+          </div>
+        </div>
+
+        <div id="dc-cmp-out"></div>
+        <div class="dc-say">Same job. Different account combination. This is exactly how the money moves.</div>
+      </div>
+
+      <!-- ── SECTION 5 — build any job at all ── -->
+      <div class="tp" id="pane-dc-sim">
+        <h1 class="pt">Custom Mileage &amp; Margin Simulator</h1>
+        <p class="ps">Build any job and watch the money split three ways as you change it.</p>
+        <div class="dc-band" id="dc-sim-band"></div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="ct">The job</div>
+            <div class="dc-grid">
+              <div><label class="ol">Mileage</label><input class="fi2" id="dc-s-miles" type="number" min="1" value="45" oninput="dcSim()"></div>
+              <div><label class="ol">Vehicle</label><select class="fi2" id="dc-s-van" onchange="dcSim()"></select></div>
+              <div><label class="ol">Job type</label><select class="fi2" id="dc-s-job" onchange="dcSim()"></select></div>
+              <div><label class="ol">From postcode</label><input class="fi2" id="dc-s-from" value="S35" oninput="dcSim()"></div>
+              <div><label class="ol">To postcode</label><input class="fi2" id="dc-s-to" value="M1" oninput="dcSim()"></div>
+              <div><label class="ol">Driving time (minutes, optional)</label><input class="fi2" id="dc-s-mins" type="number" min="0" placeholder="worked out from mileage" oninput="dcSim()"></div>
+            </div>
+            <div class="dc-sub">Pickup &amp; delivery conditions</div>
+            <div class="dc-grid">
+              <div><label class="ol">Weight band</label><select class="fi2" id="dc-s-weight" onchange="dcSim()"></select></div>
+              <div><label class="ol">Handling</label><select class="fi2" id="dc-s-handling" onchange="dcSim()"></select></div>
+              <div><label class="ol">Extra stops</label><input class="fi2" id="dc-s-stops" type="number" min="0" value="0" oninput="dcSim()"></div>
+              <div><label class="ol">Waiting (hours)</label><input class="fi2" id="dc-s-wait" type="number" min="0" step="0.5" value="0" oninput="dcSim()"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="ct">The two accounts</div>
+            <div class="dc-sub">Driver taking the job</div>
+            <div class="dc-grid">
+              <div><label class="ol">Membership</label><select class="fi2" id="dc-s-dtier" onchange="dcSim()"><option value="free">HAF KNECT Free</option><option value="member">HAF KNECT Plus</option><option value="pro">HAF KNECT Pro</option></select></div>
+              <div><label class="ol">Founder status</label><select class="fi2" id="dc-s-dfnd" onchange="dcSim()"><option value="no">No</option><option value="yes">Yes</option></select></div>
+            </div>
+            <div class="dc-sub">Account posting the load</div>
+            <div class="dc-grid">
+              <div><label class="ol">Role</label><select class="fi2" id="dc-s-prole" onchange="dcSim()"><option value="freight">Freight forwarder</option><option value="business">Business</option><option value="fleet">Fleet / courier company</option><option value="driver">Driver</option></select></div>
+              <div><label class="ol">Membership</label><select class="fi2" id="dc-s-ptier" onchange="dcSim()"><option value="lite">HAF KNECT Free</option><option value="plus">HAF KNECT Plus</option><option value="pro">HAF KNECT Pro</option></select></div>
+              <div><label class="ol">Founder status</label><select class="fi2" id="dc-s-pfnd" onchange="dcSim()"><option value="no">No</option><option value="yes">Yes</option></select></div>
+              <div><label class="ol">VAT applies</label><select class="fi2" id="dc-s-vat" onchange="dcSim()"><option value="yes">Yes</option><option value="no">No</option></select></div>
+            </div>
+            <div class="dc-sub">Optional — what the forwarder charges their own customer</div>
+            <div class="dc-grid">
+              <div><label class="ol">Selling price to end customer (£, ex VAT)</label><input class="fi2" id="dc-s-sell" type="number" min="0" placeholder="leave blank to skip" oninput="dcSim()"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="dc-sim-out"></div>
+      </div>
+
       <div class="tp" id="pane-admin">
         <h1 class="pt">Network Overview</h1><p class="ps">Every account on HAF, read from the live systems. Admin only.</p>
 
@@ -2925,6 +3065,8 @@ const LOAD_POSTING_LOCKED = true;
    Luton in its three approved bodies (box, curtain side, tail lift). Nothing
    above a Luton exists on this network. */
 const REF_MPH=40, NET_POOL=.05;
+/* VAT is a matrix value like any other, so the demo never hard-codes 20%. */
+let HAF_VAT=.20;
 /* drv = £ per loaded mile paid to the driver · min = the vehicle's minimum transport value (£ ex VAT) */
 const VAN={
   small  :{n:'Small van'        ,drv:.80,min:50},
@@ -3179,6 +3321,10 @@ function hafApplyPricingConfig(cfg){
       if(a&&typeof a.feeReductionPts==='number')ACC_LEVEL[PX_ACC[c]].cut=a.feeReductionPts/100;});
     done.push('account reductions');
   }
+  if(typeof cfg.vatPct==='number'){HAF_VAT=cfg.vatPct/100;done.push('VAT rate');}
+  /* Kept whole so the Demo Centre can name the version and effective date it is
+     quoting from, rather than asking anyone to take the figures on trust. */
+  window.HAF_PRICING_CFG=cfg;
   const h=cfg.localHandling;
   if(h){
     if(typeof h.maxReductionPct==='number')LOCAL_MAX_OFF=h.maxReductionPct/100;
@@ -3776,6 +3922,17 @@ const ADMIN_NAV=[
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
   {id:'feedback',l:'Feedback',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
 ];
+/* ── DEMO CENTRE NAV ──
+   Five sections and nothing else. There is no live tab reachable from inside
+   the Demo Centre on purpose: the way out is the mode switcher, so you cannot
+   drift from a sandbox screen onto a real one without noticing. */
+const DEMO_NAV=[
+  {id:'dc-free',l:'HAF KNECT Free',s:'Membership demos',ico:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>'},
+  {id:'dc-plus',l:'HAF KNECT Plus',s:'Membership demos',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
+  {id:'dc-pro',l:'HAF KNECT Pro',s:'Membership demos',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
+  {id:'dc-compare',l:'Account Comparison',s:'Where the money goes',ico:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'},
+  {id:'dc-sim',l:'Mileage &amp; Margin Simulator',s:'Where the money goes',ico:'<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="18"/><line x1="8" y1="18" x2="12" y2="18"/>'},
+];
 const BUSINESS_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
   {id:'b-book',l:'Book a Courier',s:'Send Goods',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
@@ -4010,19 +4167,20 @@ function enterMode(mode){
   if(plnaBtn)plnaBtn.style.display='none';
   if(vaBanner)vaBanner.style.display='none';
 
-  const VA_LABELS={
-    'view-driver':'Driver view — PLNA driver on the HAF KNECT exchange',
-    'view-ff-free':'HAF KNECT Free — 12% fee, up to 10 loads, no pooling',
-    'view-ff-plus':'HAF KNECT Plus — 10% fee, 1% pooling, unlimited loads',
-    'view-ff-pro':'HAF KNECT Pro — 9% fee, 3% pooling, 3 team seats',
-    'view-business':'Business Account — own goods only, free, fleet on network',
-  };
+  /* The old "view as" modes are gone. Each of them carried a fee percentage
+     written into this file by hand — 12%, 10%, 9% — and every one of those
+     numbers had already stopped being true. Their replacement is the Demo
+     Centre, where the same question is answered by the pricing matrix. */
+  _setMyTier(null);
 
-  /* Which level the viewed account is on — the member symbol follows the view,
-     so "view as Freight Pro" shows you exactly what that customer sees. */
-  const VA_LEVELS={'view-ff-plus':'PLUS','view-ff-pro':'PRO','view-ff-free':null,
-                   'view-driver':'PLUS','view-business':null};
-  _setMyTier(VA_LEVELS[mode]||null);
+  if(mode==='demo'){
+    roleEl.textContent='Demo Centre';roleEl.className='role-chip chip';
+    roleEl.style.borderColor='var(--or)';
+    buildNav(DEMO_NAV);
+    switchTab('pane-dc-free');
+    _setModePill('Demo · sandbox','var(--or)');
+    return;
+  }
 
   if(mode==='admin'){
     roleEl.textContent='Super Admin';roleEl.className='role-chip chip co';
@@ -4035,27 +4193,10 @@ function enterMode(mode){
     switchTab('pane-f-post');
     _setModePill('My Account','var(--bl)');
   }else{
-    // View As modes
-    if(mode==='view-driver'){
-      roleEl.textContent='Viewing: Driver';roleEl.className='role-chip chip cb';
-      if(plnaBtn)plnaBtn.style.display='flex';
-      buildNav(DRIVER_NAV);
-      _buildDashActions('driver');
-      switchTab('pane-d-home');
-    }else if(mode==='view-business'){
-      roleEl.textContent='Viewing: Business';roleEl.className='role-chip chip cb';
-      buildNav(BUSINESS_NAV);
-      _buildDashActions('business');
-      switchTab('pane-d-home');
-    }else{
-      roleEl.textContent='Viewing: FF';roleEl.className='role-chip chip co';
-      buildNav(FREIGHT_NAV);
-      _buildDashActions('freight-pro');
-      switchTab('pane-d-home');
-    }
-    _setModePill('Preview','var(--mu)');
-    if(vaBanner){vaBanner.style.display='flex';}
-    if(vaLbl)vaLbl.textContent=VA_LABELS[mode]||mode;
+    /* Anything unrecognised goes back to the door rather than guessing at a
+       role — a master screen that quietly picks a mode for you is worse than
+       one that asks again. */
+    showModeSelector();
   }
 }
 
@@ -4068,6 +4209,384 @@ function _setModePill(label,col){
   if(lbl)lbl.textContent=label;
   pill.style.borderColor=col||'var(--lns)';
 }
+/* ══════════════════════════════════════════════════════════════════════════
+   DEMO CENTRE
+   ══════════════════════════════════════════════════════════════════════════
+   The rule this whole file section exists to obey: there is ONE pricing
+   engine. Every pound below comes back from v3Price(), the same call the live
+   customer quote makes, after hafApplyPricingConfig() has poured the saved
+   matrix into it. Nothing here re-implements a fee, a rate or a percentage,
+   and nothing here is allowed to write a figure into the page by hand.
+
+   If you are ever tempted to "just put the number in" — that is the exact
+   habit that left 9%, 10% and 12% on live cards months after the ladder that
+   produced them was deleted. Ask the engine.
+   ────────────────────────────────────────────────────────────────────────── */
+
+const DC_MONEY=n=>'£'+(Math.round((n+Number.EPSILON)*100)/100).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+const DC_PCT=n=>(Math.round(n*1000)/10).toFixed(1).replace(/\.0$/,'')+'%';
+
+/* Membership is one ladder. The role is chosen separately, and Founder is a
+   flag that rides alongside — never a fourth rung. */
+const DC_TIERS={
+  free:{key:'free',label:'HAF KNECT Free',acc:'lite',drv:'free'},
+  plus:{key:'plus',label:'HAF KNECT Plus',acc:'plus',drv:'member'},
+  pro :{key:'pro' ,label:'HAF KNECT Pro' ,acc:'pro' ,drv:'pro' },
+};
+const DC_ROLES=[
+  {k:'driver' ,l:'Driver'                ,side:'DRIVER' ,posts:false},
+  {k:'freight',l:'Freight forwarder'     ,side:'FREIGHT',posts:true },
+  {k:'business',l:'Business'             ,side:null     ,posts:true },
+  {k:'fleet'  ,l:'Fleet / courier company',side:'FLEET' ,posts:true },
+];
+const DC_LEVEL_NAME={LITE:'Free',PLUS:'Plus',PRO:'Pro'};
+
+/* Which section is looking at which role, and whether Founder is switched on.
+   Held per section so flipping to Plus does not silently reset your role. */
+const DC_VIEW={free:{role:'driver',founder:false},plus:{role:'driver',founder:false},pro:{role:'driver',founder:false}};
+
+/* Where the figures came from, said out loud on every screen. */
+function dcSource(){
+  const c=window.HAF_PRICING_CFG;
+  if(!c)return 'Built-in rates — the saved matrix could not be read just now, so these are the fallback figures shipped with the app.';
+  const d=c.effectiveFrom?new Date(c.effectiveFrom):null;
+  return 'Live HAF Pricing Matrix '+(c.version||'')+(d?' · in force since '+d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'');
+}
+function dcBand(el,what){
+  const n=document.getElementById(el);if(!n)return;
+  n.innerHTML='<span class="dc-dot"></span><span>'+(window.DC_SHOWCASE?'ADMIN SHOWCASE — SANDBOX DATA':'DEMO / SANDBOX')+
+    ' &middot; nothing here creates a job, notifies a driver, takes a payment or counts anywhere'+
+    '</span><span class="dc-band-sub" style="margin-left:auto;text-align:right">'+_esc(what||dcSource())+'</span>';
+}
+
+/* ── THE ONE CALL ──
+   Everything on every demo screen goes through here. j = the job, a = the two
+   accounts. Returns the engine's own answer plus the VAT line, which is the
+   only arithmetic this file does and which comes from the matrix too. */
+function dcQuote(j,a){
+  const q=v3Price(Number(j.miles)||1,Number(j.mins)||0,j.van,j.job,j.to,
+                  {driver:a.driverTier,account:a.posterTier,fromPc:j.from});
+  const stops=Math.max(0,Number(j.stops)||0), wait=Math.max(0,Number(j.wait)||0);
+  const cfg=window.HAF_PRICING_CFG||{}, h=cfg.hindrance||{};
+  const stopFee=(typeof h.stopFeeGbp==='number'?h.stopFeeGbp:5)*stops;
+  const waitFee=(typeof h.waitingPerHourGbp==='number'?h.waitingPerHourGbp:15)*wait;
+  const wMult=(h.weight&&h.weight[j.weight])||1;
+  const hMult=(h.handling&&h.handling[j.handling])||1;
+  const cap=(typeof h.maxAutoMultiplier==='number'?h.maxAutoMultiplier:1.4);
+  const hind=Math.min(wMult*hMult,cap);
+
+  /* Hindrance lifts the driver's transport value; the fee keeps the same share
+     of the finished price, so the split stays honest as the job gets harder. */
+  const driver=Math.round((q.carrier*hind+stopFee+waitFee+Number.EPSILON)*100)/100;
+  const sub=Math.round((driver/(1-Math.min(q.feePct,.95))+Number.EPSILON)*100)/100;
+  const fee=Math.round((sub-driver+Number.EPSILON)*100)/100;
+  const vat=j.vat===false?0:Math.round((sub*HAF_VAT+Number.EPSILON)*100)/100;
+  return{q,driver,sub,fee,vat,total:Math.round((sub+vat+Number.EPSILON)*100)/100,
+         hind,wMult,hMult,stopFee,waitFee,stops,wait,feePct:q.feePct};
+}
+
+/* The breakdown drawer. A price you cannot open is a price nobody can check. */
+function dcCalc(r,j,a){
+  const q=r.q,u=URG[j.job]||URG.sday,v=VAN[j.van]||VAN.lwb,al=ACC_LEVEL[a.posterTier]||ACC_LEVEL.lite;
+  const row=(k,val,strong)=>'<tr'+(strong?' class="dc-tot"':'')+'><td>'+k+'</td><td>'+val+'</td></tr>';
+  const hd=t=>'<tr class="dc-hd"><td colspan="2">'+t+'</td></tr>';
+  let h='<details class="dc-calc"><summary>Show calculation</summary><table>';
+  h+=hd('The job');
+  h+=row('Job type',_esc(u.n));
+  h+=row('Vehicle',_esc(v.n));
+  h+=row('Mileage',(Number(j.miles)||0)+' miles');
+  h+=row('Base driver rate',DC_MONEY(v.drv)+' per mile');
+  h+=row('Distance value',DC_MONEY((Number(j.miles)||0)*q.driverRate));
+  h+=row('Time value at '+REF_MPH+' mph reference',DC_MONEY(q.hours*q.driverRate*REF_MPH)+(q.timeWins?' — this one wins':''));
+  h+=row('Vehicle minimum for this distance',DC_MONEY(q.floor)+(q.onMinimum?' — the job is on the minimum':''));
+  if(q.lane&&q.lane.factor&&q.lane.factor!==1)h+=row('Route / return-load factor','× '+q.lane.factor.toFixed(3));
+  if(u.svc!==1)h+=row('Service premium for '+_esc(u.n),'× '+u.svc.toFixed(2));
+  if(r.wMult!==1||r.hMult!==1)h+=row('Pickup and delivery conditions','× '+r.hind.toFixed(3));
+  if(r.stops)h+=row(r.stops+' extra stop'+(r.stops===1?'':'s'),DC_MONEY(r.stopFee));
+  if(r.wait)h+=row(r.wait+' hour'+(r.wait===1?'':'s')+' waiting',DC_MONEY(r.waitFee));
+
+  h+=hd('Driver');
+  h+=row('Driver membership',_esc(DC_TIERS[a.driverKey]?DC_TIERS[a.driverKey].label:q.driverLevel)+(a.driverFounder?' + Founder':''));
+  h+=row('Membership uplift on the customer price',DRV_REWARD.on?DC_MONEY(q.rewardGbp):'None — the driver reward is switched off in the matrix today');
+  h+=row('Driver receives',DC_MONEY(r.driver),true);
+
+  h+=hd('HAF');
+  h+=row('Standard network fee for '+_esc(u.n),DC_PCT(u.fee));
+  h+=row('Posting account',_esc(DC_TIERS[a.posterKey]?DC_TIERS[a.posterKey].label:al.n)+(a.posterFounder?' + Founder':''));
+  h+=row('Account adjustment',al.cut?'−'+(al.cut*100).toFixed(1).replace(/\.0$/,'')+' points':'none on Free');
+  if(u.fee-al.cut<u.flr)h+=row('Floor for this job type held at',DC_PCT(u.flr));
+  h+=row('Effective network fee',DC_PCT(r.feePct));
+  h+=row('HAF network fee',DC_MONEY(r.fee),true);
+
+  h+=hd('Load poster');
+  h+=row('Price charged by HAF, ex VAT',DC_MONEY(r.sub));
+  h+=row('VAT'+(r.vat?' at '+DC_PCT(HAF_VAT):''),r.vat?DC_MONEY(r.vat):'not applied');
+  h+=row('Total network buy price',DC_MONEY(r.total),true);
+  h+='</table><div class="dc-note">'+_esc(dcSource())+'</div></details>';
+  return h;
+}
+
+/* Customer -> HAF -> Driver, in that order, always. */
+function dcFlow(r,sell){
+  const arw='<div class="dc-arw">&rarr;</div>';
+  let h='<div class="dc-flow">';
+  if(sell>0){
+    h+='<div class="dc-fl pay"><div class="dc-fl-l">End customer pays</div><div class="dc-fl-v">'+DC_MONEY(sell)+'</div><div class="dc-fl-d">what the forwarder charges, ex VAT</div></div>'+arw;
+    const m=Math.round((sell-r.sub+Number.EPSILON)*100)/100;
+    h+='<div class="dc-fl ffm"><div class="dc-fl-l">Forwarder keeps</div><div class="dc-fl-v">'+DC_MONEY(m)+'</div><div class="dc-fl-d">'+(sell>0?DC_PCT(m/sell)+' of their selling price':'')+'</div></div>'+arw;
+  }
+  h+='<div class="dc-fl pay"><div class="dc-fl-l">'+(sell>0?'Forwarder pays HAF':'Load poster pays')+'</div><div class="dc-fl-v">'+DC_MONEY(r.sub)+'</div><div class="dc-fl-d">ex VAT'+(r.vat?' · '+DC_MONEY(r.total)+' with VAT':'')+'</div></div>'+arw;
+  h+='<div class="dc-fl haf"><div class="dc-fl-l">HAF network margin</div><div class="dc-fl-v">'+DC_MONEY(r.fee)+'</div><div class="dc-fl-d">'+DC_PCT(r.feePct)+' of the price</div></div>'+arw;
+  h+='<div class="dc-fl drv"><div class="dc-fl-l">Driver receives</div><div class="dc-fl-v">'+DC_MONEY(r.driver)+'</div><div class="dc-fl-d">the whole transport value</div></div>';
+  return h+'</div>';
+}
+
+/* ── FOUNDER ──
+   Founder is a status, not a rung. It is shown wherever it is switched on, and
+   it changes a price only if the matrix says so. Today the saved matrix
+   carries no founder adjustment at all, so the honest thing to display is
+   that — not an invented discount. */
+function dcFounderRule(){
+  const c=window.HAF_PRICING_CFG||{};
+  const f=c.founder||c.founderBenefit||null;
+  if(f&&typeof f.feeReductionPts==='number')
+    return{active:true,pts:f.feeReductionPts,text:'Founder takes a further '+f.feeReductionPts+' points off the network fee, from the matrix.'};
+  return{active:false,pts:0,text:'Founder is recorded on the account and shown beside the membership, but the live pricing matrix carries no founder adjustment — so it changes no figure on this page. The moment a founder benefit is added to the matrix it will appear here on its own.'};
+}
+const DC_FND_CHIP='<span class="dc-fnd">&#9733; FOUNDER</span>';
+
+/* ── SECTIONS 1-3: what Free, Plus and Pro actually receive ── */
+function dcSetRole(tier,role){DC_VIEW[tier].role=role;dcRenderTier(tier);}
+function dcSetFounder(tier,on){DC_VIEW[tier].founder=!!on;dcRenderTier(tier);}
+
+function dcRenderTier(tier){
+  const host=document.getElementById('dc-host-'+tier);if(!host)return;
+  const T=DC_TIERS[tier],view=DC_VIEW[tier],roleDef=DC_ROLES.find(r=>r.k===view.role)||DC_ROLES[0];
+  const lvl=tier==='free'?'LITE':tier==='plus'?'PLUS':'PRO';
+  const fnd=dcFounderRule();
+
+  let h='<h1 class="pt">'+T.label+(view.founder?' '+DC_FND_CHIP:'')+'</h1>';
+  h+='<p class="ps">Exactly what a real '+T.label+' member sees. Switch the role to see the same membership from a different seat.</p>';
+  h+='<div class="dc-band" id="dc-band-'+tier+'"></div>';
+
+  /* Role + founder controls */
+  h+='<div class="card"><div class="ct">Who is holding this membership</div><div class="dc-roles">';
+  DC_ROLES.forEach(r=>{h+='<button class="dc-role'+(r.k===view.role?' on':'')+'" onclick="dcSetRole(\''+tier+'\',\''+r.k+'\')">'+r.l+'</button>';});
+  h+='</div><div class="dc-note">Membership and role are two different things. This account is on <strong>'+T.label+'</strong>; the role only decides which tools it opens.</div>';
+  h+='<div style="margin-top:.7rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">';
+  h+='<label class="ol" style="margin:0">Founder status</label>';
+  h+='<button class="dc-role'+(view.founder?' on':'')+'" onclick="dcSetFounder(\''+tier+'\','+(!view.founder)+')">'+(view.founder?'On':'Off')+'</button>';
+  h+='<span class="dc-note" style="margin:0;flex:1 1 220px">'+_esc(fnd.text)+'</span></div></div>';
+
+  /* Pricing treatment — read from the matrix, never written down */
+  const al=ACC_LEVEL[T.acc]||ACC_LEVEL.lite, dl=DRV_LEVEL[T.drv]||DRV_LEVEL.free;
+  h+='<div class="g2"><div class="card"><div class="ct">What this membership does to the money</div>';
+  if(roleDef.posts){
+    h+='<div class="cr"><span class="ck">Network fee reduction</span><span class="cv">'+(al.cut?(al.cut*100).toFixed(1).replace(/\.0$/,'')+' points off every job':'none — Free pays the standard fee')+'</span></div>';
+    h+='<div class="cr"><span class="ck">Standard fee before the reduction</span><span class="cv">'+DC_PCT(URG.sday.fee)+' to '+DC_PCT(URG.urg.fee)+', by job type</span></div>';
+    h+='<div class="cr"><span class="ck">Never falls below</span><span class="cv">'+DC_PCT(URG.sday.flr)+' to '+DC_PCT(URG.urg.flr)+', the floor per job type</span></div>';
+  }else{
+    h+='<div class="cr"><span class="ck">Driver reward rate</span><span class="cv">'+(DRV_REWARD.on?DC_MONEY(dl.up)+' per loaded mile':'switched off in the matrix today — every driver is paid the same transport value')+'</span></div>';
+    h+='<div class="cr"><span class="ck">Who funds it</span><span class="cv">'+(DRV_REWARD.fundedBy==='HAF'?'HAF, out of its own margin — the customer price never moves':'the customer')+'</span></div>';
+  }
+  h+='<div class="cr"><span class="ck">Founder</span><span class="cv">'+(fnd.active?fnd.pts+' further points':'no price effect today')+'</span></div>';
+  h+='<div class="dc-note">Read live from the matrix. Change it in the Pricing Engine and this line changes with it.</div></div>';
+
+  /* Access */
+  h+='<div class="card"><div class="ct">What it opens</div>';
+  const acc=[
+    ['PLNA access',roleDef.k==='driver'||roleDef.k==='fleet'?'Yes — the driver planner and personal bookings':'Not applicable to this role'],
+    ['Posting work to the network',roleDef.posts?'Yes':'No — a driver takes work rather than posting it'],
+    ['Accepting network work',roleDef.k==='driver'||roleDef.k==='fleet'?'Yes, once Clever Checked and released':'No'],
+    ['Fleet tools',roleDef.k==='fleet'?'Yes — drivers, vehicles and allocation':'Not applicable to this role'],
+    ['Direct booking allowance',tier==='free'?'Limited on Free':'Unlimited on '+DC_LEVEL_NAME[lvl]],
+  ];
+  acc.forEach(a=>{h+='<div class="cr"><span class="ck">'+a[0]+'</span><span class="cv">'+a[1]+'</span></div>';});
+  h+='</div></div>';
+
+  /* Feature ladder — from the shared catalogue, not from this page */
+  h+='<div class="card"><div class="ct">Features on '+T.label+' &mdash; '+roleDef.l+'</div><div id="dc-feats-'+tier+'">';
+  if(!roleDef.side){
+    h+='<div class="dc-note">The shared feature catalogue does not carry a Business list yet — it holds Driver, Fleet and Freight forwarder. Rather than invent one here, this is left blank until the real list is added to the catalogue every other screen reads.</div>';
+  }else if(window.HAFAccountFees&&window.HAFAccountFees.featuresForSideLevel){
+    let rows=[];
+    try{rows=window.HAFAccountFees.featuresForSideLevel(roleDef.side,lvl);}catch(e){rows=[];}
+    if(!rows.length)h+='<div class="dc-note">No features listed for this role in the shared catalogue.</div>';
+    rows.forEach(f=>{
+      const on=f.included;
+      h+='<div class="dc-feat'+(on?'':' off')+'">'+
+        '<span class="dc-fi">'+(on?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gn)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'
+                               :'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>')+'</span>'+
+        '<span class="dc-ft">'+_esc(f.text)+'</span>'+
+        (f.comingSoon?'<span class="dc-unl" style="color:var(--mu)">Coming soon</span>'
+                     :(f.lockedBy?'<span class="dc-unl">'+DC_LEVEL_NAME[f.lockedBy]+'</span>':''))+
+        '</div>';
+    });
+  }else{
+    h+='<div class="dc-note">The shared feature catalogue did not load, so no feature list is shown. It is never guessed at from this page.</div>';
+  }
+  h+='</div></div>';
+
+  /* Example job economics — the same job on every tier so they compare */
+  const j={miles:45,mins:0,van:'lwb',job:'sday',from:'S35',to:'M1',vat:true};
+  const a={driverTier:T.drv,posterTier:T.acc,driverKey:tier,posterKey:tier,
+           driverFounder:view.founder,posterFounder:view.founder};
+  let r=null;try{r=dcQuote(j,a);}catch(e){}
+  h+='<div class="card"><div class="ct">Example job economics</div>';
+  if(r){
+    h+='<div class="dc-note" style="margin:0 0 .55rem">A 45-mile same-day job in an LWB van, S35 to M1 — the identical job is used on Free, Plus and Pro so the difference you see is the membership and nothing else.</div>';
+    h+=dcFlow(r,0);
+    h+='<div class="cr"><span class="ck">'+(roleDef.posts?'What this account pays to post it':'What this account earns for taking it')+'</span><span class="cv"><strong>'+(roleDef.posts?DC_MONEY(r.total)+' inc VAT':DC_MONEY(r.driver))+'</strong></span></div>';
+    h+=dcCalc(r,j,a);
+  }else{
+    h+='<div class="dc-note">The pricing engine did not answer, so no example is shown rather than a made-up one.</div>';
+  }
+  h+='</div>';
+
+  /* Upgrade path */
+  if(tier!=='pro'){
+    h+='<div class="card"><div class="ct">Upgrade path</div><div class="dc-note">'+
+      (tier==='free'?'Plus takes '+(ACC_LEVEL.plus.cut*100).toFixed(1).replace(/\.0$/,'')+' points off the network fee on every job posted; Pro takes '+(ACC_LEVEL.pro.cut*100).toFixed(1).replace(/\.0$/,'')+'.'
+                    :'Pro takes '+(ACC_LEVEL.pro.cut*100).toFixed(1).replace(/\.0$/,'')+' points off the network fee, against '+(ACC_LEVEL.plus.cut*100).toFixed(1).replace(/\.0$/,'')+' on Plus.')+
+      ' Both figures are read from the live matrix.</div></div>';
+  }
+  host.innerHTML=h;
+  dcBand('dc-band-'+tier);
+}
+
+/* ── SECTION 4: the same job under different account combinations ── */
+const DC_CMP_DEFAULT=[
+  {d:'free',p:'free',df:false,pf:false},
+  {d:'plus',p:'pro' ,df:false,pf:false},
+  {d:'pro' ,p:'plus',df:false,pf:false},
+];
+let DC_CMP=JSON.parse(JSON.stringify(DC_CMP_DEFAULT));
+
+function dcCmpAdd(){if(DC_CMP.length>=5)return;DC_CMP.push({d:'free',p:'pro',df:false,pf:true});dcCmpRows();dcCompare();}
+function dcCmpDel(i){DC_CMP.splice(i,1);dcCmpRows();dcCompare();}
+function dcCmpSet(i,k,v){DC_CMP[i][k]=(k==='df'||k==='pf')?(v==='yes'):v;dcCompare();}
+function dcCmpReset(){DC_CMP=JSON.parse(JSON.stringify(DC_CMP_DEFAULT));dcCmpRows();dcCompare();}
+
+function dcCmpRows(){
+  const el=document.getElementById('dc-cmp-rows');if(!el)return;
+  const tierOpts=(sel)=>Object.keys(DC_TIERS).map(k=>'<option value="'+k+'"'+(k===sel?' selected':'')+'>'+DC_TIERS[k].label+'</option>').join('');
+  const yn=(v)=>'<option value="no"'+(!v?' selected':'')+'>No</option><option value="yes"'+(v?' selected':'')+'>Yes</option>';
+  el.innerHTML=DC_CMP.map((c,i)=>
+    '<div class="dc-cmp-row">'+
+    '<div><label class="ol">Driver membership</label><select class="fi2" onchange="dcCmpSet('+i+',\'d\',this.value)">'+tierOpts(c.d)+'</select></div>'+
+    '<div><label class="ol">Driver founder</label><select class="fi2" onchange="dcCmpSet('+i+',\'df\',this.value)">'+yn(c.df)+'</select></div>'+
+    '<div><label class="ol">Posting account</label><select class="fi2" onchange="dcCmpSet('+i+',\'p\',this.value)">'+tierOpts(c.p)+'</select></div>'+
+    '<div><label class="ol">Poster founder</label><select class="fi2" onchange="dcCmpSet('+i+',\'pf\',this.value)">'+yn(c.pf)+'</select></div>'+
+    '<div>'+(DC_CMP.length>1?'<button class="dc-x" onclick="dcCmpDel('+i+')" title="Remove">&times;</button>':'')+'</div>'+
+    '</div>').join('');
+  const add=document.getElementById('dc-cmp-add');
+  if(add){add.disabled=DC_CMP.length>=5;add.textContent=DC_CMP.length>=5?'Five is the maximum':'Add a combination';}
+}
+
+function dcCompare(){
+  dcBand('dc-cmp-band');
+  const g=id=>document.getElementById(id);
+  if(!g('dc-cmp-out'))return;
+  const j={miles:Number(g('dc-cmp-miles').value)||1,mins:0,van:g('dc-cmp-van').value,
+           job:g('dc-cmp-job').value,from:g('dc-cmp-from').value,to:g('dc-cmp-to').value,vat:true};
+  const u=URG[j.job]||URG.sday,v=VAN[j.van]||VAN.lwb;
+  g('dc-cmp-job-line').innerHTML='Every card below prices <strong>this one job</strong>: '+_esc(u.n)+', '+_esc(v.n)+
+    ', '+j.miles+' miles, '+_esc(j.from)+' to '+_esc(j.to)+'. Only the two accounts change.';
+
+  let out='';
+  DC_CMP.forEach((c,i)=>{
+    const a={driverTier:DC_TIERS[c.d].drv,posterTier:DC_TIERS[c.p].acc,driverKey:c.d,posterKey:c.p,
+             driverFounder:c.df,posterFounder:c.pf};
+    let r=null;try{r=dcQuote(j,a);}catch(e){}
+    out+='<div class="card"><div class="ct">Example '+(i+1)+' &mdash; '+DC_TIERS[c.d].label+(c.df?' + Founder':'')+
+         ' driver, job posted by '+DC_TIERS[c.p].label+(c.pf?' + Founder':'')+'</div>';
+    if(!r){out+='<div class="dc-note">The pricing engine did not answer for this combination.</div></div>';return;}
+    out+=dcFlow(r,0);
+    out+='<div class="cr"><span class="ck">Effective network fee</span><span class="cv">'+DC_PCT(r.feePct)+
+         ' &middot; standard '+DC_PCT(u.fee)+(ACC_LEVEL[a.posterTier].cut?', less '+(ACC_LEVEL[a.posterTier].cut*100).toFixed(1).replace(/\.0$/,'')+' points for '+DC_TIERS[c.p].label:'')+'</span></div>';
+    out+='<div class="cr"><span class="ck">Total network buy price</span><span class="cv"><strong>'+DC_MONEY(r.total)+'</strong> inc VAT</span></div>';
+    out+=dcCalc(r,j,a)+'</div>';
+  });
+  g('dc-cmp-out').innerHTML=out;
+}
+
+/* ── SECTION 5: build any job at all ── */
+function dcSim(){
+  dcBand('dc-sim-band');
+  const g=id=>document.getElementById(id);
+  if(!g('dc-sim-out'))return;
+  const dKey=g('dc-s-dtier').value==='member'?'plus':g('dc-s-dtier').value==='pro'?'pro':'free';
+  const pKey=g('dc-s-ptier').value==='plus'?'plus':g('dc-s-ptier').value==='pro'?'pro':'free';
+  const j={miles:Number(g('dc-s-miles').value)||1,mins:Number(g('dc-s-mins').value)||0,
+           van:g('dc-s-van').value,job:g('dc-s-job').value,from:g('dc-s-from').value,to:g('dc-s-to').value,
+           weight:g('dc-s-weight').value,handling:g('dc-s-handling').value,
+           stops:Number(g('dc-s-stops').value)||0,wait:Number(g('dc-s-wait').value)||0,
+           vat:g('dc-s-vat').value==='yes'};
+  const a={driverTier:g('dc-s-dtier').value,posterTier:g('dc-s-ptier').value,
+           driverKey:dKey,posterKey:pKey,
+           driverFounder:g('dc-s-dfnd').value==='yes',posterFounder:g('dc-s-pfnd').value==='yes'};
+  const sell=Number(g('dc-s-sell').value)||0;
+
+  let r=null;try{r=dcQuote(j,a);}catch(e){}
+  if(!r){g('dc-sim-out').innerHTML='<div class="card"><div class="dc-note">The pricing engine did not answer for that job — nothing is shown rather than a made-up figure.</div></div>';return;}
+
+  let h='<div class="card"><div class="ct">Where the money goes</div>'+dcFlow(r,sell)+dcCalc(r,j,a)+'</div>';
+  h+='<div class="g2">';
+  h+='<div class="card"><div class="ct">Driver</div>'+
+     '<div class="cr"><span class="ck">Base rate</span><span class="cv">'+DC_MONEY((VAN[j.van]||VAN.lwb).drv)+' per mile</span></div>'+
+     '<div class="cr"><span class="ck">Mileage value</span><span class="cv">'+DC_MONEY(j.miles*r.q.driverRate)+'</span></div>'+
+     '<div class="cr"><span class="ck">Job and route modifiers</span><span class="cv">&times; '+((r.q.lane&&r.q.lane.factor||1)*(URG[j.job]||URG.sday).svc*r.hind).toFixed(3)+'</span></div>'+
+     '<div class="cr"><span class="ck">Stops and waiting</span><span class="cv">'+DC_MONEY(r.stopFee+r.waitFee)+'</span></div>'+
+     '<div class="cr"><span class="ck">Membership uplift</span><span class="cv">'+(DRV_REWARD.on?DC_MONEY(r.q.rewardGbp):'none today')+(a.driverFounder?' · Founder on':'')+'</span></div>'+
+     '<div class="cr"><span class="ck"><strong>Driver receives</strong></span><span class="cv"><strong style="color:var(--gn)">'+DC_MONEY(r.driver)+'</strong></span></div></div>';
+  h+='<div class="card"><div class="ct">HAF</div>'+
+     '<div class="cr"><span class="ck">Standard network fee</span><span class="cv">'+DC_PCT((URG[j.job]||URG.sday).fee)+'</span></div>'+
+     '<div class="cr"><span class="ck">Account adjustment</span><span class="cv">'+(ACC_LEVEL[a.posterTier].cut?'−'+(ACC_LEVEL[a.posterTier].cut*100).toFixed(1).replace(/\.0$/,'')+' points':'none')+'</span></div>'+
+     '<div class="cr"><span class="ck">Effective network fee</span><span class="cv">'+DC_PCT(r.feePct)+'</span></div>'+
+     '<div class="cr"><span class="ck"><strong>HAF connection margin</strong></span><span class="cv"><strong style="color:var(--or)">'+DC_MONEY(r.fee)+'</strong></span></div></div>';
+  h+='</div>';
+  h+='<div class="card"><div class="ct">'+(g('dc-s-prole').value==='freight'?'Freight forwarder':'Load poster')+'</div>'+
+     '<div class="cr"><span class="ck">Amount paid to HAF KNECT</span><span class="cv">'+DC_MONEY(r.sub)+' ex VAT</span></div>'+
+     '<div class="cr"><span class="ck">VAT</span><span class="cv">'+(r.vat?DC_MONEY(r.vat)+' at '+DC_PCT(HAF_VAT):'not applied')+'</span></div>'+
+     '<div class="cr"><span class="ck"><strong>Total cost</strong></span><span class="cv"><strong>'+DC_MONEY(r.total)+'</strong></span></div>';
+  if(sell>0){
+    const m=Math.round((sell-r.sub+Number.EPSILON)*100)/100;
+    h+='<div class="dc-sub">Their own margin</div>'+
+       '<div class="cr"><span class="ck">Selling price to their customer</span><span class="cv">'+DC_MONEY(sell)+' ex VAT</span></div>'+
+       '<div class="cr"><span class="ck">Less the HAF KNECT buy price</span><span class="cv">−'+DC_MONEY(r.sub)+'</span></div>'+
+       '<div class="cr"><span class="ck"><strong>Gross margin</strong></span><span class="cv"><strong style="color:'+(m<0?'var(--rd)':'var(--bl)')+'">'+DC_MONEY(m)+' &middot; '+DC_PCT(m/sell)+'</strong></span></div>'+
+       '<div class="dc-note">'+(m<0?'This job sells for less than it costs to buy.':'HAF does not set what a forwarder charges their customer — this only shows the buy price and what it leaves them.')+'</div>';
+  }else{
+    h+='<div class="dc-note">Enter a selling price above to see the forwarder\'s own gross margin on this job.</div>';
+  }
+  h+='</div>';
+  g('dc-sim-out').innerHTML=h;
+}
+
+/* ── BOOT ──
+   The selects are filled from the matrix, so a vehicle or job type added to the
+   matrix appears in the demo without anyone editing this page. */
+let _dcBooted=false;
+function dcBoot(){
+  const fill=(id,obj,sel)=>{const e=document.getElementById(id);if(!e)return;
+    e.innerHTML=Object.keys(obj).map(k=>'<option value="'+k+'"'+(k===sel?' selected':'')+'>'+_esc(obj[k].n)+'</option>').join('');};
+  const cfg=window.HAF_PRICING_CFG||{},h=cfg.hindrance||{};
+  const opts=(o,def)=>Object.keys(o||{}).map(k=>'<option value="'+k+'"'+(k===def?' selected':'')+'>'+
+    _esc(k.charAt(0)+k.slice(1).toLowerCase().replace(/_/g,' '))+(o[k]!==1?' (× '+o[k]+')':'')+'</option>').join('');
+  ['dc-cmp-van','dc-s-van'].forEach(id=>fill(id,VAN,'lwb'));
+  ['dc-cmp-job','dc-s-job'].forEach(id=>fill(id,URG,'sday'));
+  const w=document.getElementById('dc-s-weight'),hd=document.getElementById('dc-s-handling');
+  if(w)w.innerHTML=opts(h.weight||{STANDARD:1},'STANDARD');
+  if(hd)hd.innerHTML=opts(h.handling||{KERBSIDE:1},'KERBSIDE');
+  if(!_dcBooted){dcCmpRows();_dcBooted=true;}
+}
+function dcOpen(which){
+  dcBoot();
+  if(which==='compare')dcCompare();
+  else if(which==='sim')dcSim();
+  else dcRenderTier(which);
+}
+
 /* ── DEMO ACCOUNTS ── */
 /* level = what the account is on the ladder (LITE/PLUS/PRO). It drives the
    member symbol beside the name and nothing else — no price, no permission.
@@ -4493,6 +5012,13 @@ function switchTab(id){
   if(id==='pane-f-cap')setTimeout(capBootPane,80);
   if(id==='pane-pricing')setTimeout(()=>{if(window.pxBoot)pxBoot();},60);
   if(id==='pane-admin')setTimeout(()=>{if(window.ovLoad)ovLoad();},60);
+  /* Demo Centre — each section redraws on entry so it always reflects the
+     matrix as it is now, not as it was when the tab was first opened. */
+  if(id==='pane-dc-free')setTimeout(()=>dcOpen('free'),40);
+  if(id==='pane-dc-plus')setTimeout(()=>dcOpen('plus'),40);
+  if(id==='pane-dc-pro')setTimeout(()=>dcOpen('pro'),40);
+  if(id==='pane-dc-compare')setTimeout(()=>dcOpen('compare'),40);
+  if(id==='pane-dc-sim')setTimeout(()=>dcOpen('sim'),40);
   if(id==='pane-accounts')setTimeout(()=>{if(window.aaBoot)aaBoot();},60);
   if(id==='pane-livejob')setTimeout(hafRenderLive,60);
   /* area rule applied to whatever this page just drew */
@@ -6196,7 +6722,11 @@ function xDirectAccept(btn,ref,route,rate){
   if(bk){bk.status='Accepted';_renderDirectBookings();}
 }
 </script>
-<script src="admin/pro-crown.js"></script>
+<!-- The shared feature catalogue. The Demo Centre reads its Free/Plus/Pro
+     feature ladder from this same file the rest of the system uses, so a
+     feature can never say one thing on the demo and another on the account. -->
+<script src="admin/account-fees-v1.js"></script>
+<script src="admin/pro-crown.js"</script>
 <script src="admin/tier-marks-v1.js"></script>
 <script src="admin/tier-identity-v1.js"></script>
 <script>

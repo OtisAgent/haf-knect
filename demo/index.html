@@ -547,39 +547,40 @@ textarea.fi2{resize:vertical;min-height:70px}
     </button>
   </div>
 
+  <!-- ══ ACCOUNT TYPES ═══════════════════════════════════════════════════
+       Rebuilt onto the one HAF KNECT membership ladder. The old bar mixed the
+       two ideas up — "Business Account", "HAF KNECT Pro" and "KNECT Founder"
+       sat side by side as if they were the same kind of thing, when the first
+       is a ROLE, the second is a MEMBERSHIP and the third is a STATUS.
+
+       Now: pick the role here, switch Free / Plus / Pro on the pills inside
+       the account, and Founder has its own switch because it can sit on any
+       of the three. -->
   <div class="demo-grp">
-    <span class="demo-grp-lbl">Business</span>
-    <button class="dp" onclick="demoLogin('biz-pro')">
-      <span class="dp-n">Business Account</span>
-      <span class="dp-s">Own goods · free</span>
+    <span class="demo-grp-lbl">Role</span>
+    <button class="dp" onclick="demoLogin('plna-plus')">
+      <span class="dp-n">Driver</span>
+      <span class="dp-s">Free · Plus · Pro</span>
     </button>
     <button class="dp" onclick="demoLogin('freight-pro')">
-      <span class="dp-n">HAF KNECT Pro</span>
-      <span class="dp-s">Load board · £100/mo</span>
+      <span class="dp-n">Freight forwarder</span>
+      <span class="dp-s">Free · Plus · Pro</span>
     </button>
-  </div>
-
-  <div class="demo-grp">
-    <span class="demo-grp-lbl">Drivers</span>
+    <button class="dp" onclick="demoLogin('biz-pro')">
+      <span class="dp-n">Business</span>
+      <span class="dp-s">Free · Plus · Pro</span>
+    </button>
     <button class="dp" onclick="demoLogin('plna-new')">
       <span class="dp-n">New Driver</span>
       <span class="dp-s">Compliance pending</span>
     </button>
-    <button class="dp" onclick="demoLogin('plna-plus')">
-      <span class="dp-n">PLNA Driver — Plus</span>
-      <span class="dp-s">Full driver dashboard</span>
-    </button>
   </div>
 
   <div class="demo-grp">
-    <span class="demo-grp-lbl">KNECT</span>
-    <button class="dp" onclick="demoLogin('knect-free')">
-      <span class="dp-n">KNECT Member</span>
-      <span class="dp-s">Free platform</span>
-    </button>
-    <button class="dp" onclick="demoLogin('knect-founder')">
-      <span class="dp-n">KNECT Founder</span>
-      <span class="dp-s">Exclusive access</span>
+    <span class="demo-grp-lbl">Status</span>
+    <button class="dp" id="dp-founder" onclick="toggleFounder()">
+      <span class="dp-n">&#9733; Founder</span>
+      <span class="dp-s">Off — tap to apply</span>
     </button>
   </div>
 
@@ -1734,7 +1735,7 @@ function goLanding(){
   document.getElementById('app').classList.remove('open');
   document.getElementById('landing').style.display='flex';
   const ctx=document.getElementById('demo-ctx');if(ctx)ctx.classList.remove('show');
-  document.querySelectorAll('.dp').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.dp').forEach(p=>{if(p.id!=='dp-founder')p.classList.remove('on')});
 }
 function signOut(){goLanding()}
 function toggleSb(){document.getElementById('sidebar').classList.toggle('open')}
@@ -1864,17 +1865,24 @@ const TIER_DEFS={
      unlock:['exchange','f-post','f-cap','f-lanes','f-loads','f-cover','f-account','billing','support','feedback']},
   ],
   plna:[
-    {key:'lite',    label:'Lite',    cls:'pb-lite',    plan:'HAF KNECT Free', next:'Plus',
+    {key:'free',    label:'Free',    cls:'pb-free',    plan:'HAF KNECT Free', next:'Plus',
      unlock:['exchange','f-cap','d-home','d-book','d-cust','d-comp','billing','support','feedback']},
     {key:'plus',    label:'Plus',    cls:'pb-plus',    plan:'HAF KNECT Plus', next:'Pro',
      unlock:['exchange','f-cap','d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support','feedback']},
     {key:'pro',     label:'Pro',     cls:'pb-pro',     plan:'HAF KNECT Pro',  next:null,
      unlock:['exchange','f-cap','d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','billing','support','feedback']},
   ],
-  knect:[
-    {key:'free',    label:'Free',    cls:'pb-free',    plan:'Free',      next:'Founder',
+  /* ── BUSINESS ──
+     This ladder used to read Free -> Founder, which quietly made Founder the
+     top rung of a membership ladder. Founder is a STATUS that sits alongside
+     whatever membership an account holds — it is not a rung, and an account
+     can be Free + Founder or Pro + Founder. It now has its own switch. */
+  business:[
+    {key:'free',    label:'Free',    cls:'pb-free',    plan:'HAF KNECT Free', next:'Plus',
      unlock:['exchange','f-cap','b-book','b-del','cust-track','billing','support','feedback']},
-    {key:'founder', label:'Founder', cls:'pb-founder', plan:'Founder',   next:null,
+    {key:'plus',    label:'Plus',    cls:'pb-plus',    plan:'HAF KNECT Plus', next:'Pro',
+     unlock:['exchange','f-cap','b-book','b-del','cust-track','cust-pod','b-saved','billing','support','feedback']},
+    {key:'pro',     label:'Pro',     cls:'pb-pro',     plan:'HAF KNECT Pro',  next:null,
      unlock:['exchange','f-cap','b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback']},
   ],
 };
@@ -1885,11 +1893,11 @@ const ACCS={
     tabIds:['cust-track','cust-pod','cust-orders','f-cap','support','feedback'],def:'cust-track',cp:'green',
     persona:'Individual Customer',ver:'HAF Demo',
     account_environment:'demo',is_demo_account:true,demo_role:'customer',demo_persona:'Individual Customer'},
-  'biz-pro':     {n:'Apex Logistics Ltd',u:'AL448793',i:'AL',r:'Business Account',rc:'co',tierGroup:null,initTier:null,
-    tabIds:['exchange','f-cap','b-book','b-del','b-spend','b-saved','billing','support','feedback'],def:'exchange',cp:'green',
-    persona:'Business Account',ver:'HAF Demo',
+  'biz-pro':     {n:'Apex Logistics Ltd',u:'AL448793',i:'AL',r:'Business',rc:'co',tierGroup:'business',initTier:'free',
+    tabIds:['exchange','f-cap','b-book','b-del','b-spend','b-saved','cust-track','cust-pod','billing','support','feedback'],def:'exchange',cp:'green',
+    persona:'Business — own goods',ver:'HAF Demo',
     account_environment:'demo',is_demo_account:true,demo_role:'business',demo_persona:'Business Account'},
-  'freight-pro': {n:'NorthFreight UK',  u:'NF992190',i:'NF',r:'HAF KNECT Pro',rc:'cb',tierGroup:'freight', initTier:'pro',
+  'freight-pro': {n:'NorthFreight UK',  u:'NF992190',i:'NF',r:'Freight forwarder',rc:'cb',tierGroup:'freight', initTier:'free',
     tabIds:['exchange','f-cap','f-post','f-lanes','f-loads','f-cover','f-account','billing','support','feedback'],def:'exchange',cp:'green',
     persona:'Freight Forward — Pro',ver:'HAF Demo',
     account_environment:'demo',is_demo_account:true,demo_role:'freight',demo_persona:'HAF KNECT Pro'},
@@ -1901,14 +1909,10 @@ const ACCS={
     tabIds:['exchange','f-cap','d-home','d-today','d-cal','d-book','d-cust','d-budget','d-comp','whats-new','billing','support','feedback'],def:'exchange',cp:'green',
     persona:'Clever Checked Driver — HAF KNECT Plus',ver:'DRV-1.4',
     account_environment:'demo',is_demo_account:true,demo_role:'driver',demo_persona:'HAF KNECT Plus Driver'},
-  'knect-free':  {n:'Sam Patel',        u:'SP881291',i:'SP',r:'KNECT Member',      rc:'cb',tierGroup:'knect',   initTier:'free',
-    tabIds:['exchange','f-cap','b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback'],def:'exchange',cp:'green',
-    persona:'KNECT Member — Free',ver:'HAF Demo',
-    account_environment:'demo',is_demo_account:true,demo_role:'knect',demo_persona:'KNECT Free Member'},
-  'knect-founder':{n:'Rachel Moore',    u:'RM449082',i:'RM',r:'KNECT Founder',     rc:'co',tierGroup:'knect',   initTier:'founder',
-    tabIds:['exchange','f-cap','b-book','b-del','cust-track','cust-pod','b-saved','b-spend','billing','support','feedback'],def:'exchange',cp:'green',
-    persona:'KNECT Founder',ver:'HAF Demo',
-    account_environment:'demo',is_demo_account:true,demo_role:'knect',demo_persona:'KNECT Founder'},
+  /* 'knect-free' and 'knect-founder' retired here. The first was a membership
+     wearing an account type's clothes and the second was a status doing the
+     same. Business now carries the Free/Plus/Pro ladder and Founder has its
+     own switch, so both are reachable without pretending to be roles. */
 };
 
 let currentAcc=null;
@@ -1918,9 +1922,9 @@ function demoLogin(key){
   // Safety check: only proceed for verified demo accounts
   if(a.account_environment!=='demo'||!a.is_demo_account)return;
   currentAcc=a;
-  document.querySelectorAll('.dp').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.dp').forEach(p=>{if(p.id!=='dp-founder')p.classList.remove('on')});
   const pills=document.querySelectorAll('.dp');
-  const map={customer:0,'biz-pro':1,'freight-pro':2,'plna-new':3,'plna-plus':4,'knect-free':5,'knect-founder':6};
+  const map={customer:0,'plna-plus':1,'freight-pro':2,'biz-pro':3,'plna-new':4};
   if(map[key]!==undefined)pills[map[key]].classList.add('on');
   document.getElementById('tb-user').textContent=a.u;
   document.getElementById('tb-av').textContent=a.i;
@@ -1969,8 +1973,20 @@ function switchTier(tierKey){
   const first=tabs.find(t=>!t.locked);
   if(first)switchTab('pane-'+first.id);
   window._nextTier=tier.next;
-  applyFounder(currentAcc.tierGroup==='knect'&&tierKey==='founder');
+  /* Founder rides alongside the membership rather than replacing it, so
+     switching Free -> Plus -> Pro must never switch Founder off. */
+  applyFounder(!!window._founderOn);
   if(currentAcc.tierGroup==='plna'){renderPlnaBook(tierKey);renderPlnaCust(tierKey);}
+}
+
+/* Founder is a status, not a rung on the ladder. It can sit on a Free account
+   or a Pro one, so it gets its own switch and survives a membership change. */
+function toggleFounder(){
+  window._founderOn=!window._founderOn;
+  const b=document.getElementById('dp-founder');
+  if(b){b.classList.toggle('on',!!window._founderOn);
+        const s=b.querySelector('.dp-s');if(s)s.textContent=window._founderOn?'On — status applied':'Off — tap to apply';}
+  applyFounder(!!window._founderOn);
 }
 
 function applyFounder(on){
