@@ -2327,7 +2327,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
         <h1 class="pt">Post a Load</h1><p class="ps">List freight for your clients on the HAF KNECT network.</p>
         <div class="card" style="max-width:580px">
           <div class="ct">Load details</div>
-          <!-- Ships LOCKED on purpose. Unlock = LOAD_POSTING_LOCKED in the main script. -->
+          <!-- Reopened 14 Aug 2026. The switch is LOAD_POSTING_LOCKED in the main script. -->
           <div class="lk-note" id="f-post-lock-note">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="10" y1="9" x2="10" y2="15"/><line x1="14" y1="9" x2="14" y2="15"/></svg>
             <div><strong>Posting paused</strong>Posting loads is paused while we rebuild the sign-up journey. Your account is unaffected — we&#8217;ll email you the moment it reopens.</div>
@@ -3083,7 +3083,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
     <button class="dr-box-close" onclick="closeDirBook()">✕</button>
     <h2>Book a driver directly</h2>
     <p class="dr-box-sub" id="db-driver-lbl">Booking driver: —</p>
-    <!-- Ships LOCKED on purpose. Unlock = LOAD_POSTING_LOCKED in the main script. -->
+    <!-- Reopened 14 Aug 2026. The switch is LOAD_POSTING_LOCKED in the main script. -->
     <div class="lk-note" id="db-lock-note">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="10" y1="9" x2="10" y2="15"/><line x1="14" y1="9" x2="14" y2="15"/></svg>
       <div><strong>Posting paused</strong>Posting loads is paused while we rebuild the sign-up journey. Your account is unaffected — we&#8217;ll email you the moment it reopens.</div>
@@ -3116,7 +3116,9 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
 
    The HTML ships with the fields already disabled, so if this script fails
    to run the form stays shut rather than springing open (fail closed). */
-const LOAD_POSTING_LOCKED = true;
+/* Reopened 14 Aug 2026 on Brent's instruction — the sign-up journey it was
+   waiting on is built, and he is running the first test through it today. */
+const LOAD_POSTING_LOCKED = false;
 
 (function applyLoadPostingLock(){
   var open = !LOAD_POSTING_LOCKED;
