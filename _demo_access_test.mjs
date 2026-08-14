@@ -31,6 +31,16 @@ pg.on('pageerror', e => errs.push(String(e)));
 await pg.goto(BASE + '/?code=HAFDEMO', { waitUntil: 'networkidle' });
 await pg.waitForTimeout(700);
 
+/* The Demo Centre is not ready the instant the page loads: it fetches the live
+   pricing matrix from the app first, and against the real site that is a real
+   round trip. Asking it what its menu is before it has one measures the network,
+   not the product — so wait for the first menu to exist before asking anything.
+   (A visitor never sees this: they arrive at the tier, which draws it.) */
+async function ready(tier) {
+  await pg.evaluate(t => { try { dcOpen(t); } catch (e) {} }, tier);
+  await pg.waitForSelector('#pane-dc-' + tier + ' .pd-mi', { timeout: 20000 });
+}
+
 /* the menu the Demo Centre is showing right now, as plain rows */
 async function menu(tier, role, rel) {
   await pg.evaluate(([t, r, x]) => {
@@ -48,6 +58,8 @@ async function menu(tier, role, rel) {
 const has = (rows, re) => rows.find(r => re.test(r.label));
 const opens = (rows, re) => { const r = has(rows, re); return !!r && r.open; };
 const locked = (rows, re) => { const r = has(rows, re); return !!r && !r.open && !r.ext; };
+
+await ready('free');
 
 console.log('\nA DRIVER WHOSE CHECKS ARE NOT DONE');
 {
