@@ -30,7 +30,7 @@
             GET  /api/order/track   one job, by its private token             */
 
 import {
-  json, bad, coreReady, coreInsert, coreUpdate, coreRpc, logEvent,
+  json, bad, coreReady, coreSelect, coreInsert, coreUpdate, coreRpc, logEvent,
   newJobReference, newTrackToken, newPaymentReference, milesBetween
 } from '../../../shared/order-core.js';
 import { quoteOneOff, VANS, URGENCIES, DEPOSIT_PCT } from '../../../shared/order-quote.js';
@@ -97,6 +97,40 @@ async function place(request, env) {
   if (!leg) return bad('we could not work out the distance between those two postcodes — please check them');
   const q = quoteOneOff({ miles: leg.miles, vehicleCode: b.vehicle_code, jobTypeCode: b.job_type_code });
   if (!q) return bad('please choose a van size and how quickly you need it');
+
+  /* ONE PRESS, ONE ORDER. The network already refuses to post the same job
+     twice; nothing until now stopped the same order being PLACED twice. A
+     second press, a back button, a flaky connection that retried — any of them
+     raised a second job and a second holding deposit for one delivery, and the
+     customer would be asked to pay both. So before anything is written we look
+     for the order this one would duplicate: same person, same route, same van,
+     still unpaid, placed in the last quarter of an hour. If it is there we hand
+     back the order that already exists — same reference, same deposit link — so
+     pressing twice is indistinguishable from pressing once. Deliberately NOT a
+     database constraint: two genuine deliveries on the same route later in the
+     day must still both go through, and only time separates them. */
+  const since = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+  const prior = await coreSelect(env, 'job_order',
+    'select=job_ref,track_token,deposit_reference,total_pence,deposit_pence,balance_pence,quote_detail'
+    + '&status=eq.new'
+    + '&customer_email=eq.' + encodeURIComponent(email)
+    + '&collect_postcode=eq.' + encodeURIComponent(collect)
+    + '&deliver_postcode=eq.' + encodeURIComponent(deliver)
+    + '&vehicle_code=eq.' + encodeURIComponent(q.vehicle_code)
+    + '&created_at=gte.' + encodeURIComponent(since)
+    + '&order=created_at.desc&limit=1').catch(() => []);
+  if (prior && prior.length) {
+    const p = prior[0];
+    return json({
+      ok: true, duplicate: true, job_ref: p.job_ref,
+      quote: q,
+      deposit_pence: p.deposit_pence, balance_pence: p.balance_pence,
+      direct_username: (p.quote_detail || {}).direct_username || null,
+      first_refusal_minutes: FIRST_REFUSAL_MINUTES,
+      pay_url: p.deposit_reference ? `${payBase(env)}/pay/${p.deposit_reference}` : null,
+      track_url: jobPage(request, p.track_token)
+    });
+  }
 
   /* The free HAF KNECT account, opened quietly. No compliance and no checks —
      they are not driving. It exists so this person is a record we can find and
