@@ -33,7 +33,7 @@ import {
   json, bad, coreReady, coreInsert, coreUpdate, coreRpc, logEvent,
   newJobReference, newTrackToken, newPaymentReference, milesBetween
 } from '../../../shared/order-core.js';
-import { quoteOneOff, VEHICLES, JOB_TYPES, DEPOSIT_PCT } from '../../../shared/order-quote.js';
+import { quoteOneOff, VANS, URGENCIES, DEPOSIT_PCT } from '../../../shared/order-quote.js';
 
 /* The first-refusal window, in minutes. Brent set this at ten on 14 Aug. It is
    written here once and passed to the network, and the order screen says the
@@ -46,7 +46,7 @@ export async function onRequest(context) {
   if (request.method === 'OPTIONS') return json({ ok: true });
   try {
     switch (`${request.method} /${route}`) {
-      case 'GET /options': return json({ ok: true, vehicles: VEHICLES, job_types: JOB_TYPES,
+      case 'GET /options': return json({ ok: true, vehicles: VANS, job_types: URGENCIES,
                                          deposit_pct: DEPOSIT_PCT,
                                          first_refusal_minutes: FIRST_REFUSAL_MINUTES });
       case 'POST /quote':  return await quote(request, env);
