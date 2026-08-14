@@ -6,7 +6,7 @@
    Run: node _layout_e2e.mjs */
 import { chromium } from '/agent/workspace/node_modules/playwright/index.mjs';
 
-const URL = 'file:///agent/workspace/knect-orderfix/index.html';
+const URL = process.env.TARGET_URL || 'file:///agent/workspace/knect-orderfix/index.html';
 const SHOT = '/agent/workspace/knect-orderfix/_shots';
 const fails = [], notes = [];
 const ok = (c, m) => { (c ? notes : fails).push((c ? 'PASS ' : 'FAIL ') + m); };
@@ -171,8 +171,30 @@ for (const [tag, vp] of [['desktop', { width: 1280, height: 1000 }], ['phone', {
   ok(pick.w.length > 30, `[${tag}] and still says why in plain words`);
   await shot('3-still-allocates');
 
-  /* ── 9. repeat-an-order still opens ── */
-  await p.evaluate(() => closeInlineFlow()); await p.waitForTimeout(300);
+  /* ── 9. leaving a half-filled consignment asks first, and means it ──
+     A part-typed order must not vanish on a mis-tap: the page asks. Say no and
+     the consignment is still there with the answers in it; say yes and it goes.
+     Both halves are proven here, because a guard nobody can pass is as bad as
+     no guard at all. */
+  let asked = '';
+  const answer = yes => {
+    const h = d => { asked = d.message(); yes ? d.accept() : d.dismiss(); };
+    p.once('dialog', h);
+  };
+
+  answer(false);                                    // the mis-tap: "no, stay"
+  await p.evaluate(() => closeInlineFlow()); await p.waitForTimeout(400);
+  ok(/not be kept/i.test(asked), `[${tag}] leaving a half-filled consignment asks first: "${asked}"`);
+  ok((await vis('#inline-flow')) === true, `[${tag}] saying no keeps the consignment open`);
+  const kept = await p.evaluate(() => (document.getElementById('fq-from') || {}).value);
+  ok(kept === 'S9 1AA', `[${tag}] and the answers already typed are still there (${kept})`);
+
+  answer(true);                                     // meant it: "yes, leave"
+  await p.evaluate(() => closeInlineFlow()); await p.waitForTimeout(400);
+  ok((await vis('#inline-flow')) === false, `[${tag}] saying yes closes the consignment`);
+  ok((await vis('#side-ways')) === true, `[${tag}] and the three ways to book come back`);
+
+  /* ── 10. repeat-an-order still opens ── */
   await p.click('#wtb-repeat'); await p.waitForTimeout(400);
   ok(await vis('#if-repeat'), `[${tag}] "Repeat an order" still opens its own flow`);
   await p.evaluate(() => closeInlineFlow()); await p.waitForTimeout(200);

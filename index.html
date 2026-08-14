@@ -700,6 +700,36 @@ textarea.fi2{resize:vertical;min-height:70px}
 .hpick-k{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--or);margin-bottom:.15rem}
 .hpick-v{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em;line-height:1.2}
 .hpick-w{font-size:.72rem;color:var(--mu);line-height:1.5;margin-top:.22rem}
+/* ══ VAN SIZE LADDER — Brent, 14 Aug ═══════════════════════════════════
+   "HAF give the exact van sizing suggestion" AND "give the user options of van
+   sizing". Both, in one control: four rungs the customer can read without
+   knowing anything about vans, with HAF's own answer badged on the rung it
+   falls in and the exact van named inside it. The full eight-vehicle list is
+   still one click away for anyone who wants a particular Luton body.
+   One grid, one row height, one baseline — every rung lines up whatever its
+   label length, because a ladder that jitters reads as a guess. */
+.vlad{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-bottom:.55rem}
+.vrung{position:relative;display:flex;flex-direction:column;align-items:stretch;text-align:left;gap:.12rem;
+  background:var(--p);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.95rem .6rem .6rem;
+  font:inherit;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s}
+.vrung:hover{border-color:var(--or-g)}
+.vrung.sel{border-color:var(--or);background:var(--or-d);box-shadow:var(--sd)}
+.vrung-n{font-family:var(--dp);font-weight:900;font-size:.86rem;letter-spacing:-.03em;line-height:1.2}
+.vrung-s{font-size:.66rem;color:var(--mu);line-height:1.4}
+.vrung-x{font-size:.66rem;font-weight:700;color:var(--su);line-height:1.4;margin-top:auto;padding-top:.3rem}
+.vrung.sel .vrung-x{color:var(--or)}
+/* The badge sits in the padding reserved for it at the top of EVERY rung, so a
+   rung with a badge is exactly as tall as one without and nothing shifts when
+   HAF's answer moves. */
+.vrung-b{position:absolute;top:.34rem;left:.6rem;right:.6rem;font-size:.56rem;font-weight:800;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--or);line-height:1;opacity:0}
+.vrung.haf .vrung-b{opacity:1}
+.vlad-x{font-size:.72rem;color:var(--mu);line-height:1.5;margin:-.15rem 0 .6rem}
+.vlad-x strong{color:var(--tx);font-weight:800}
+@media(max-width:560px){
+  .vlad{grid-template-columns:repeat(2,1fr)}
+  .vrung{padding:.9rem .65rem .6rem}
+}
 .veh-open{background:none;border:none;padding:0;font:inherit;font-size:.76rem;font-weight:700;color:var(--or);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .veh-list{display:none;margin-top:.7rem}
 .veh-list.open{display:block}
@@ -745,7 +775,13 @@ textarea.fi2{resize:vertical;min-height:70px}
    Talk to HAF panel folds in with them. The whole right column becomes
    "how else do I reach HAF"; the left column is the consignment itself.
    Same tokens as the tiles they replace — only the density changes. */
-.wtb{display:flex;flex-direction:column;gap:.55rem}
+/* ══ THE THREE WAYS TO BOOK — one set, one grid ════════════════════════
+   Brent, 14 Aug: line the account column up. These are three siblings that
+   should read as one set, so they share a row height rather than each sizing
+   to its own sentence — and the "coming soon" badge is lifted OUT of the text
+   flow (see .wtb-soon) so all three headings and icons start on the same line
+   instead of the WhatsApp one sitting a badge-height lower than its neighbours. */
+.wtb{display:grid;grid-auto-rows:1fr;gap:.55rem}
 .wtb-c{display:flex;gap:.65rem;align-items:flex-start;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.7rem .8rem;text-align:left;width:100%;font:inherit;color:inherit;transition:background .15s,border-color .15s;position:relative}
 .wtb-c.live{cursor:pointer}
 .wtb-c.live:hover{background:var(--p3);border-color:var(--or)}
@@ -766,12 +802,27 @@ textarea.fi2{resize:vertical;min-height:70px}
 /* The badge sits ON ITS OWN LINE above the heading rather than floating in the
    corner. Floated, it overlapped the title at narrow widths; stacked, it
    cannot collide with anything at any width. */
-.wtb-soon{display:inline-block;font-size:.52rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mu);background:var(--p3);border:1px solid var(--ln);border-radius:999px;padding:.14rem .42rem;margin-bottom:.25rem}
+/* Out of the flow entirely: in the flow it pushed its own card's heading down a
+   badge-height and broke the line the other two share. Pinned top-right it says
+   the same thing and costs the layout nothing. */
+/* The heading and its status pill share one line, so the pill never has to be
+   dodged with a guessed margin and every card's title starts on the same y. */
+.wtb-hr{display:flex;align-items:center;justify-content:space-between;gap:.45rem;min-height:1.1rem}
+.wtb-soon{flex:none;font-size:.52rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mu);background:var(--p3);border:1px solid var(--ln);border-radius:999px;padding:.14rem .42rem;line-height:1.2;white-space:nowrap}
+/* The heading BOX ends before the badge starts — a margin, not padding, so the
+   two genuinely never occupy the same space rather than merely looking like it. */
 .wtb-sep{height:1px;background:var(--ln);margin:1rem 0 .85rem}
 .wtb-sub{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--su);margin-bottom:.55rem}
 /* The one button that starts a consignment. It replaces the three doors:
    the form above it already IS step one, so the flow just carries on. */
 .cf-go{margin-bottom:.5rem}
+/* Once a price exists the button carries it, so the customer agrees to a number
+   they can see rather than stepping into an unknown. */
+.cf-go.live{box-shadow:var(--sd)}
+.cf-go strong{font-weight:900}
+.cf-offer{display:flex;align-items:flex-start;gap:.5rem;background:var(--gn-d);border:1.5px solid var(--gn);
+  border-radius:var(--rx);padding:.7rem .85rem;margin-bottom:.6rem;font-size:.76rem;line-height:1.55;color:var(--tx)}
+.cf-offer svg{width:15px;height:15px;flex:0 0 15px;margin-top:.18rem;stroke:var(--gn);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 /* ── LOAD POSTING PAUSED ───────────────────────────────────────────────
    Single switch: LOAD_POSTING_LOCKED in the main script (search that name).
    The markup ships LOCKED, so if the script never runs the form stays shut.
@@ -1300,17 +1351,20 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
              a booking." So HAF's own pick leads, in words, and the vehicle list
              is there for anyone who does know — one click away, never in the way. -->
         <div class="van-lbl">Recommended vehicle</div>
-        <div class="hpick">
-          <div class="hpick-ico">
-            <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-          </div>
-          <div class="hpick-b">
-            <div class="hpick-k">HAF Pick</div>
-            <div class="hpick-v" id="hpick-v">We'll choose for you</div>
-            <div class="hpick-w" id="hpick-w">We'll select the safest suitable vehicle from the information you've provided.</div>
-          </div>
-        </div>
-        <button class="veh-open" type="button" id="veh-open" onclick="toggleVehList()">Choose vehicle myself</button>
+        <!-- HAF Pick's own card is off the page (Brent, 14 Aug) but its engine
+             still runs: these two carry the answer and the reason for the
+             ladder caption, the driver card and the too-small stop to read. -->
+        <span id="hpick-v" hidden>We'll choose for you</span>
+        <span id="hpick-w" hidden>We'll select the safest suitable vehicle from the information you've provided.</span>
+        <!-- ── THE SIZE LADDER ──
+             Brent, 14 Aug: HAF gives the exact suggestion, the customer still
+             gets the choice. Four rungs in plain sizes; HAF's answer is badged
+             on one of them and named inside it. Picking another rung is allowed
+             and re-prices instantly — the too-small stop below still fires if
+             the load genuinely will not go in. -->
+        <div class="vlad" id="vlad"></div>
+        <div class="vlad-x" id="vlad-x"></div>
+        <button class="veh-open" type="button" id="veh-open" onclick="toggleVehList()">See every vehicle</button>
         <div class="veh-list" id="veh-list">
           <!-- Vehicle cards: load space, pallets and max weight on every one, in
                the same order on every one. Drawn from the vehicle table so a rate
@@ -1344,6 +1398,10 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
              did stays — the form above has already chosen the vehicle — so the
              customer just carries straight on into the seven stages instead of
              choosing between three doors that led to the same place. -->
+        <div class="cf-offer" id="cf-offer" style="display:none">
+          <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+          <span>That is your guide price. Carry straight on and we will hold the job while the network is asked &#8212; nothing is charged until you have seen the full details.</span>
+        </div>
         <button class="btn btn-or btn-wide cf-go" type="button" id="cf-go" onclick="startConsignment()">Continue to book &#8594;</button>
         <p class="pf-disc">Guide price only. Final confirmed after full delivery details are reviewed.</p>
       </div>
@@ -1374,10 +1432,14 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
       <!-- INLINE FLOW PANEL — shown in place when a tile is clicked -->
       <div id="inline-flow" style="display:none">
         <div class="calc-box" style="padding:1.4rem 1.5rem">
-          <!-- Header: title + back button -->
+          <!-- Header: title + the way out.
+               NOT another "Back": every stage already has its own Back, and two
+               buttons with the same word doing different things is how a
+               customer on stage five loses everything they have typed. This one
+               leaves the consignment, says so, and asks first. -->
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem">
             <div style="font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.04em" id="if-title">Fast Quote</div>
-            <button class="btn btn-gh btn-sm" onclick="closeInlineFlow()" style="font-size:.74rem">&#8592; Back</button>
+            <button class="btn btn-gh btn-sm" onclick="closeInlineFlow()" style="font-size:.74rem" id="if-close">&#10005; Close</button>
           </div>
 
           <!-- ── FAST QUOTE STEPS ── -->
@@ -1470,17 +1532,16 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
                  vans, and a vehicle that cannot take the load is stopped. -->
             <div class="fstep" id="fq-3">
               <div class="slbl">Step 3 of 7 &#8212; What vehicle is needed?</div>
-              <div class="hpick">
-                <div class="hpick-ico">
-                  <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                </div>
-                <div class="hpick-b">
-                  <div class="hpick-k">HAF Pick</div>
-                  <div class="hpick-v" id="fq-pick-v">&#8212;</div>
-                  <div class="hpick-w" id="fq-pick-w">We'll select the safest suitable vehicle from the information you've provided.</div>
-                </div>
-              </div>
-              <button class="veh-open" type="button" id="fq-veh-open" onclick="fqToggleVeh()">Choose vehicle myself</button>
+              <!-- HAF Pick's card is off this step too; the ladder below says
+                   what HAF chose and why. These two keep the engine's answer
+                   where the driver card and the too-small stop can read it. -->
+              <span id="fq-pick-v" hidden>&#8212;</span>
+              <span id="fq-pick-w" hidden>We'll select the safest suitable vehicle from the information you've provided.</span>
+              <!-- The same four rungs as the front form, so the size question
+                   is asked and answered the same way wherever you meet it. -->
+              <div class="vlad" id="fq-vlad"></div>
+              <div class="vlad-x" id="fq-vlad-x"></div>
+              <button class="veh-open" type="button" id="fq-veh-open" onclick="fqToggleVeh()">See every vehicle</button>
               <div class="veh-list" id="fq-veh-list">
                 <div class="ogrid" id="fq-van" style="margin-top:.55rem"></div>
                 <p class="van-guide">Load figures are a guide — we confirm the exact vehicle before your job is booked.</p>
@@ -1766,7 +1827,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
               <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.54"/></svg>
             </span>
             <span class="wtb-b">
-              <span class="wtb-h">Repeat an order</span>
+              <span class="wtb-hr"><span class="wtb-h">Repeat an order</span></span>
               <span class="wtb-p">Enter your reference number and rebook a previous delivery in seconds.</span>
               <span class="wtb-a">Rebook &#8594;</span>
             </span>
@@ -1776,7 +1837,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
               <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2.5 6.5 12 13l9.5-6.5"/></svg>
             </span>
             <span class="wtb-b">
-              <span class="wtb-h">Order by email</span>
+              <span class="wtb-hr"><span class="wtb-h">Order by email</span></span>
               <span class="wtb-p">We write the email for you. Fill in the blanks, send it, and we come back with a price.</span>
               <span class="wtb-a">Get my quote email &#8594;</span>
             </span>
@@ -1786,8 +1847,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
               <svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.2-5.2A8.5 8.5 0 1 1 21 11.5z"/></svg>
             </span>
             <span class="wtb-b">
-              <span class="wtb-soon">Coming soon</span>
-              <span class="wtb-h">Order on WhatsApp</span>
+              <span class="wtb-hr"><span class="wtb-h">Order on WhatsApp</span><span class="wtb-soon">Soon</span></span>
               <span class="wtb-p">Message HAF and book the whole job in a chat. We're building this now — it isn't switched on yet.</span>
               <span class="wtb-a">Not available yet</span>
             </span>
@@ -4006,15 +4066,17 @@ function allocateVehicle(L){
   if(kg)bits.push((parseFloat(L.exactKg)>0?'':'approximately ')+(kg>=1000?(kg/1000).toFixed(kg%1000?1:0)+' tonnes':kg+'kg'));
   if(dim)bits.push('the dimensions entered');
   if(reqs.tail)bits.push('a tail lift at delivery');
+  /* The bare facts the choice rests on, kept on their own so a caption can say
+     "based on one pallet and approximately 250kg" without repeating the van. */
+  const basis=bits.length?bits.slice(0,-1).join(', ')+(bits.length>1?' and ':'')+bits[bits.length-1]:'what you have told us';
   let why='';
   if(rec){
-    const list=bits.length?bits.slice(0,-1).join(', ')+(bits.length>1?' and ':'')+bits[bits.length-1]:'what you have told us';
-    why='Based on '+list+', we recommend '+aOrAn(VAN[rec].n)+'.';
+    why='Based on '+basis+', we recommend '+aOrAn(VAN[rec].n)+'.';
   }else{
     why='That is more than a Luton will take — carry on and we will price it as a '
        +'multi-van or freight job. Nothing is turned away.';
   }
-  return {rec,eligible,why,limits:{kg,lvl,pal,dim,reqs,exact:parseFloat(L.exactKg)>0}};
+  return {rec,eligible,why,basis,limits:{kg,lvl,pal,dim,reqs,exact:parseFloat(L.exactKg)>0}};
 }
 /* "an LWB", "a Luton" — the letters S, M, L and X are all spoken with a vowel
    at the front, so the article follows the sound rather than the spelling. */
@@ -4444,6 +4506,7 @@ function paintHafPick(both,A){
     why.textContent=A.why;
   }
   paintTooSmall(both,A);
+  paintLadder(both,A);
 }
 /* Brent's safety rule: a hand-picked vehicle that cannot take the load is
    never simply accepted. We say so, and offer our own pick back. */
@@ -4455,6 +4518,89 @@ function paintTooSmall(both,A){
   p.textContent='Based on the goods information provided, HAF recommends '
     +aOrAn(VAN[A.rec].n)+' rather than '+aOrAn(VAN[selVanKey].n)+'.';
   box.style.display='';
+}
+/* ══════════════════════════════════════════════════════════════════════════
+   THE VAN SIZE LADDER                                    (Brent, 14 Aug 2026)
+   ──────────────────────────────────────────────────────────────────────────
+   "HAF give the exact van sizing suggestion" and "give the user options of van
+   sizing" are not two features — they are one control. Eight vehicles is a
+   catalogue, and a customer who has never hired a van cannot choose from a
+   catalogue. Four rungs they can read at a glance, with HAF's own answer badged
+   on the rung it lands in and the exact vehicle named inside it, is a decision
+   anyone can make in a second — and still a real choice, because picking
+   another rung re-prices on the spot.
+
+   Each rung owns a GROUP of vehicles. Land on a rung that holds HAF's exact
+   pick and you get that exact van, not the rung's smallest — otherwise the
+   ladder would quietly downgrade the very recommendation it is showing.
+   ══════════════════════════════════════════════════════════════════════════ */
+const VAN_RUNGS=[
+  {k:'small',n:'Up to small van',s:'A few boxes or a car boot load',vans:['small','swb']},
+  {k:'mwb'  ,n:'MWB'            ,s:'A sofa, or a dozen boxes'      ,vans:['mwb']},
+  {k:'lwb'  ,n:'LWB'            ,s:'A room of furniture, 3–4 pallets',vans:['lwb','xlwb']},
+  {k:'luton',n:'Luton'          ,s:'A full van load, up to 5 pallets',vans:['luton','lutonc','lutontl']}
+];
+const rungFor=vanKey=>VAN_RUNGS.find(r=>r.vans.indexOf(vanKey)>=0)||null;
+/* The last distance we actually resolved, so a rung can be priced the moment it
+   is drawn without asking the postcode service again on every repaint. */
+let _lpLast=null;
+/* The vehicle a rung books. HAF's exact pick wins inside its own rung; any other
+   rung books its base vehicle. Never a Luton tail lift by accident — that is a
+   deliberate choice off the full list, not something a size rung hands out. */
+function rungVan(rung,rec){
+  return (rec&&rung.vans.indexOf(rec)>=0)?rec:rung.vans[0];
+}
+function paintLadder(both,A){
+  const el=document.getElementById('vlad'), x=document.getElementById('vlad-x');
+  if(!el)return;
+  const rec=(both&&A&&A.rec)?A.rec:null;
+  const recRung=rec?rungFor(rec):null;
+  const selRung=rungFor(selVanKey);
+  el.innerHTML=VAN_RUNGS.map(r=>{
+    const vk=rungVan(r,rec);
+    const isHaf=!!(recRung&&recRung.k===r.k);
+    const isSel=!!(selRung&&selRung.k===r.k);
+    /* Priced per rung when we know the distance — the whole point of offering
+       options is being able to see what the other option costs. */
+    let price='';
+    if(_lpLast){
+      const p=v3Price(_lpLast.miles,_lpLast.mins,vk,'sday',_lpLast.to,quoteOpts(_lpLast.from));
+      price='£'+Math.round(p.sub*.9)+'–£'+Math.round(p.sub*1.1);
+    }
+    return '<button class="vrung'+(isSel?' sel':'')+(isHaf?' haf':'')+'" type="button"'
+      +' data-rung="'+r.k+'" onclick="selRung(\''+r.k+'\')">'
+      +'<span class="vrung-b">HAF suggests</span>'
+      +'<span class="vrung-n">'+r.n+'</span>'
+      +'<span class="vrung-s">'+r.s+'</span>'
+      +(price?'<span class="vrung-x">'+price+'</span>':'')
+      +'</button>';
+  }).join('');
+  /* One line under the ladder that says what HAF chose and why it is allowed to
+     be overruled — so the suggestion never reads as a locked decision. */
+  if(x){
+    if(!both||!rec){
+      x.innerHTML='Answer the two questions above and HAF will name the exact van.';
+    }else if(vanPickedByHand&&selVanKey!==rec){
+      x.innerHTML='HAF suggests the <strong>'+VAN[rec].n+'</strong>. You have chosen the <strong>'
+        +VAN[selVanKey].n+'</strong> — we will confirm it before your job is booked.';
+    }else{
+      x.innerHTML='HAF has picked the <strong>'+VAN[rec].n+'</strong>'
+        +(A.basis?' — based on '+A.basis+'.':' for this load.')
+        +' Choose a different size above if you would rather.';
+    }
+  }
+}
+/* Choosing a rung is a hand pick like any other, so the too-small stop and the
+   "your choice" wording downstream both behave exactly as they already do. */
+function selRung(k){
+  const r=VAN_RUNGS.find(z=>z.k===k);
+  if(!r)return;
+  const A=allocateVehicle({weight:selWtKey,size:selSzKey,reqs:{}});
+  const vk=rungVan(r,A&&A.rec);
+  selVanKey=vk;
+  vanPickedByHand=!(A&&A.rec===vk);
+  applyLoadToVans();
+  calcLivePrice();
 }
 function useHafPick(){
   const A=allocateVehicle({weight:selWtKey,size:selSzKey,reqs:{}});
@@ -4486,6 +4632,11 @@ function selVan(el,key){
   calcLivePrice();
 }
 buildLoadPickers();
+/* Draw the ladder immediately, before a single question is answered. The whole
+   point of showing sizes is that a visitor can SEE the choice exists; a control
+   that only appears once you have already answered is not an option, it is a
+   confirmation. HAF's badge lands on it the moment there is something to badge. */
+paintLadder(false,null);
 
 let pcTimer=null;
 function onPcInput(){clearTimeout(pcTimer);pcTimer=setTimeout(calcLivePrice,600);}
@@ -4502,6 +4653,8 @@ async function calcLivePrice(){
     hint.textContent='Enter both postcodes to see your guide price';
     hint.style.display='';
     priced.style.display='none';
+    _lpLast=null;clearContinueOffer();
+    paintLadder(!!(selWtKey&&selSzKey),allocateVehicle({weight:selWtKey,size:selSzKey,reqs:{}}));
     return;
   }
   const v=VAN[selVanKey]||VAN.lwb;
@@ -4511,7 +4664,8 @@ async function calcLivePrice(){
   if(r.from===null||r.to===null){
     box.className='lp-box hint';
     hint.innerHTML='<span style="color:var(--rd);font-weight:600">“'+(r.from===null?fr:to)+'” isn\u2019t a recognised UK postcode — check and try again</span>';
-    hint.style.display='';priced.style.display='none';return;
+    hint.style.display='';priced.style.display='none';
+    _lpLast=null;clearContinueOffer();return;
   }
   const miles=r.miles;
   const p=v3Price(miles,r.mins,selVanKey,'sday',to,quoteOpts(fr));
@@ -4525,6 +4679,32 @@ async function calcLivePrice(){
   hint.style.display='none';
   priced.style.display='flex';
   priced.style.flexDirection='column';
+  /* Remember the leg. The ladder prices every rung off this without asking the
+     postcode service again, so switching van size is instant. */
+  _lpLast={miles:miles,mins:r.mins,from:fr,to:to};
+  paintLadder(!!(selWtKey&&selSzKey),allocateVehicle({weight:selWtKey,size:selSzKey,reqs:{}}));
+  offerToContinue(lo,hi);
+}
+
+/* ══ THE OFFER, AFTER THE PRICE ═══════════════════════════════════════════
+   Brent, 14 Aug: "offer to continue bookings after the guide price". Until
+   there is a price the button is a label nobody has a reason to press. The
+   moment one lands it becomes the obvious next move and carries the number
+   with it, so the customer is agreeing to something they can see rather than
+   stepping into an unknown. */
+function offerToContinue(lo,hi){
+  const b=document.getElementById('cf-go');
+  if(!b)return;
+  b.classList.add('live');
+  b.innerHTML='Continue to book &#8212; <strong>&pound;'+lo+'&#8211;&pound;'+hi+'</strong> &#8594;';
+  const o=document.getElementById('cf-offer');
+  if(o)o.style.display='';
+}
+function clearContinueOffer(){
+  const b=document.getElementById('cf-go');
+  if(b){b.classList.remove('live');b.innerHTML='Continue to book &#8594;';}
+  const o=document.getElementById('cf-offer');
+  if(o)o.style.display='none';
 }
 
 document.getElementById('pc-from').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('pc-to').focus();});
@@ -4583,7 +4763,17 @@ function openFlow(type){
   /* scroll so the flow panel is visible below the calculator */
   setTimeout(()=>flow.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
 }
+/* Closing throws the whole consignment away and puts the customer back on the
+   calculator. Past the first stage they have typed real work into it, so ask
+   before it goes — silently binning five stages of answers is the sort of thing
+   people never come back from. Once the job is booked there is nothing left to
+   lose, so it just closes. */
 function closeInlineFlow(){
+  const open=document.getElementById('inline-flow');
+  const started=open&&open.style.display!=='none'
+    &&!!document.querySelector('#if-fast .fstep.on:not(#fq-1)')
+    &&!document.querySelector('#fq-done.on');
+  if(started&&!window.confirm('Leave this consignment? The details you have entered will not be kept.'))return;
   document.body.classList.remove('tile-focus');
   document.getElementById('inline-flow').style.display='none';
   const gate=document.getElementById('demo-gate');if(gate)gate.style.display='none';
@@ -4827,6 +5017,48 @@ function fqApplyRec(){
     }
   }
   fqPaintTooSmall(ready,A);
+  fqPaintLadder(ready,A);
+}
+/* The consignment's own copy of the ladder. Same rungs, same badge, same rule
+   that HAF's exact pick wins inside its own rung — it reads from fqData rather
+   than the front form's selection, and that is the only difference. */
+function fqPaintLadder(ready,A){
+  const el=document.getElementById('fq-vlad'), x=document.getElementById('fq-vlad-x');
+  if(!el)return;
+  const rec=ready&&A?A.rec:null;
+  const recRung=rec?rungFor(rec):null;
+  const selRung=rungFor(fqData.van);
+  el.innerHTML=VAN_RUNGS.map(r=>{
+    const isHaf=!!(recRung&&recRung.k===r.k);
+    const isSel=!!(selRung&&selRung.k===r.k);
+    return '<button class="vrung'+(isSel?' sel':'')+(isHaf?' haf':'')+'" type="button"'
+      +' data-rung="'+r.k+'" onclick="fqSelRung(\''+r.k+'\')">'
+      +'<span class="vrung-b">HAF suggests</span>'
+      +'<span class="vrung-n">'+r.n+'</span>'
+      +'<span class="vrung-s">'+r.s+'</span>'
+      +'</button>';
+  }).join('');
+  if(x){
+    if(!ready||!rec){
+      x.innerHTML='Fill in the load details and HAF will name the exact van.';
+    }else if(fqData.vanByHand&&fqData.van!==rec){
+      x.innerHTML='HAF suggests the <strong>'+VAN[rec].n+'</strong>. You have chosen the <strong>'
+        +VAN[fqData.van].n+'</strong> — we will confirm it before your job is booked.';
+    }else{
+      x.innerHTML='HAF has picked the <strong>'+VAN[rec].n+'</strong>'
+        +(A.basis?' — based on '+A.basis+'.':' for this load.')
+        +' Choose a different size above if you would rather.';
+    }
+  }
+}
+function fqSelRung(k){
+  const r=VAN_RUNGS.find(z=>z.k===k);
+  if(!r)return;
+  const A=fqData.alloc||allocateVehicle(fqLoad());
+  const vk=rungVan(r,A&&A.rec);
+  fqData.van=vk;
+  fqData.vanByHand=!(A&&A.rec===vk);
+  fqApplyRec();
 }
 /* Brent's safety rule: no simple override that knowingly creates an unsuitable
    allocation. Two ways out, and neither of them is "carry on anyway". */

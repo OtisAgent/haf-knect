@@ -2,7 +2,7 @@
    ways in: send-direct-to-a-known-driver, and the email quote template. */
 import { chromium } from '/agent/workspace/node_modules/playwright/index.mjs';
 
-const URL = 'file:///agent/workspace/knect-orderfix/index.html';
+const URL = process.env.TARGET_URL || 'file:///agent/workspace/knect-orderfix/index.html';
 const SHOT = '/agent/workspace/knect-orderfix/_shots';
 const fails = [], notes = [];
 const ok = (c, m) => { (c ? notes : fails).push((c ? 'PASS ' : 'FAIL ') + m); };
