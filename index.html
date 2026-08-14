@@ -798,23 +798,29 @@ textarea.fi2{resize:vertical;min-height:70px}
 @media(min-width:861px){
   #side-ways{flex:1 1 auto;display:flex;flex-direction:column;max-height:560px}
   #side-ways .wtb{flex:1 1 auto;min-height:0}
-  #side-ways .wtb-c{align-items:center}
 }
-.wtb-c{display:flex;gap:.65rem;align-items:flex-start;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.7rem .8rem;text-align:left;width:100%;font:inherit;color:inherit;transition:background .15s,border-color .15s;position:relative}
+/* Centring the contents inside a stretched card looked tidy card-by-card and
+   wrong as a set: "Repeat an order" has a one-line sentence, so its heading
+   centred 7px lower than the other two, and the WhatsApp card's longer sentence
+   pushed its arrow 16px below the others on a phone. Pin the icon and heading
+   to the top and push the action line to the bottom, at every width — every
+   heading starts on one line, every arrow finishes on one line, and the slack
+   the row-stretch creates falls in the middle where nobody reads it. */
+.wtb-c{display:flex;gap:.65rem;align-items:stretch;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.7rem .8rem;text-align:left;width:100%;font:inherit;color:inherit;transition:background .15s,border-color .15s;position:relative}
 .wtb-c.live{cursor:pointer}
 .wtb-c.live:hover{background:var(--p3);border-color:var(--or)}
 .wtb-c.soon{opacity:.7;cursor:default}
-.wtb-ico{width:26px;height:26px;border-radius:var(--rx);background:var(--or-d);display:flex;align-items:center;justify-content:center;flex:none;margin-top:.05rem}
+.wtb-ico{align-self:flex-start;width:26px;height:26px;border-radius:var(--rx);background:var(--or-d);display:flex;align-items:center;justify-content:center;flex:none;margin-top:.05rem}
 .wtb-ico svg{width:13px;height:13px;stroke:var(--or);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .wtb-c.soon .wtb-ico{background:var(--p3)}
 .wtb-c.soon .wtb-ico svg{stroke:var(--mu)}
 /* These are spans inside a <button> — a button may not contain a <div> — so
    every one of them has to be told to be a block itself, or the heading, the
    sentence and the arrow all run together on one line. */
-.wtb-b{flex:1;min-width:0;display:block}
+.wtb-b{flex:1;min-width:0;display:flex;flex-direction:column}
 .wtb-h{display:block;font-family:var(--dp);font-weight:900;font-size:.88rem;letter-spacing:-.03em;line-height:1.25}
 .wtb-p{display:block;font-size:.72rem;color:var(--mu);line-height:1.45;margin-top:.15rem}
-.wtb-a{display:block;font-size:.74rem;color:var(--or);font-weight:800;margin-top:.32rem}
+.wtb-a{display:block;font-size:.74rem;color:var(--or);font-weight:800;margin-top:auto;padding-top:.32rem}
 
 .wtb-c.soon .wtb-a{color:var(--mu)}
 /* The badge sits ON ITS OWN LINE above the heading rather than floating in the
@@ -1824,7 +1830,12 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
         <div class="sc-err" id="sc-err"></div>
         <button class="btn btn-or btn-wide" onclick="scLogin()" style="margin-top:.3rem">Log in →</button>
         <p class="sc-foot"><a href="https://clever.usehaf.co.uk/reset.html" target="_blank">Forgotten your PIN?</a></p>
-        <p class="sc-foot">No account? <a href="https://clever.usehaf.co.uk" target="_blank">Create one via CleverPay</a></p>
+        <!-- Brent, 14 Aug: the sign-up link is no longer named after CleverPay.
+             It reads "Create an account" and goes to join.usehaf.co.uk — the one
+             front door, which decides for itself what the person is signing up
+             as. Sending people straight at the compliance portal made the first
+             thing they saw a document check. -->
+        <p class="sc-foot">New here? <a href="https://join.usehaf.co.uk" target="_blank">Create an account</a></p>
         <!-- The one demo door on the page. It goes to demo.usehaf.co.uk, which
              asks for the email itself — that is where demo leads are collected
              now that the old request form has gone. It has its own id because
@@ -1918,6 +1929,10 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
     <div class="oe" id="l-err"></div>
     <button class="btn btn-or btn-wide" onclick="doLogin()">Sign in →</button>
     <p style="margin:.7rem 0 0;font-size:.7rem;text-align:center"><a href="https://clever.usehaf.co.uk/reset.html" target="_blank" style="color:var(--mu)">Forgotten your PIN?</a></p>
+    <!-- The same sign-up line as the login card. This overlay is the door a
+         phone user actually gets (the card is hidden at that width), so without
+         it a phone had no way to create an account at all. -->
+    <p style="margin:.4rem 0 0;font-size:.7rem;text-align:center;color:var(--mu)">New here? <a href="https://join.usehaf.co.uk" target="_blank" style="color:var(--or);font-weight:700">Create an account</a></p>
     <div style="margin-top:1.1rem;border-top:1px solid var(--ln);padding-top:.9rem;text-align:center">
       <a href="https://demo.usehaf.co.uk" target="_blank" class="btn btn-or btn-wide" style="display:inline-flex;align-items:center;justify-content:center;gap:.4rem;text-decoration:none">Try a live demo →</a>
       <p style="margin:.5rem 0 0;font-size:.62rem;color:var(--mu)">No login needed · Driver, Freight &amp; Business views</p>
@@ -4538,7 +4553,12 @@ function paintLadder(both,A){
   if(!el)return;
   const rec=(both&&A&&A.rec)?A.rec:null;
   const recRung=rec?rungFor(rec):null;
-  const selRung=rungFor(selVanKey);
+  /* Nothing is highlighted until there is a reason to highlight it. The page's
+     default vehicle is LWB (it has to be something for the full list), and with
+     no answers in that outlined an LWB rung while the line underneath still
+     said "HAF will name the exact van" — a suggestion nobody had made. A rung
+     lights up only once HAF has actually chosen, or the customer has. */
+  const selRung=(rec||vanPickedByHand)?rungFor(selVanKey):null;
   el.innerHTML=VAN_RUNGS.map(r=>{
     const vk=rungVan(r,rec);
     const isHaf=!!(recRung&&recRung.k===r.k);

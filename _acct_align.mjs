@@ -34,6 +34,38 @@ for(const [tag,vp] of [['desktop',{width:1280,height:1100}],['phone',{width:390,
     return !(b.left>=h.right||b.right<=h.left||b.top>=h.bottom||b.bottom<=h.top);
   });
   ok(!clash,`[${tag}] the coming-soon badge never sits on top of its heading`);
+
+  // Brent, 14 Aug: the arrows must finish on one line too, not just start on one.
+  const actTops=await p.$$eval('.wtb .wtb-c',els=>els.map(e=>Math.round(
+    e.querySelector('.wtb-a').getBoundingClientRect().top-e.getBoundingClientRect().top)));
+  ok(new Set(actTops).size===1,`[${tag}] every action line finishes on the same line (${actTops.join('/')})`);
+
+  // The whole point of the stretch: the two columns end level with each other.
+  if(tag==='desktop'){
+    const ends=await p.evaluate(()=>{
+      const l=document.querySelector('.land-main')||document.querySelector('.calc-box');
+      const s=document.querySelector('.land-side');
+      return l&&s?{left:Math.round(l.getBoundingClientRect().bottom),right:Math.round(s.getBoundingClientRect().bottom)}:null;
+    });
+    ok(!!ends,'[desktop] both columns found');
+    if(ends)ok(Math.abs(ends.left-ends.right)<=24,
+      `[desktop] the account column ends level with the tile on the left (${ends.left} vs ${ends.right})`);
+  }
+
+  // The two doors Brent named this evening: the sign-up link and the demo button.
+  const signup=await p.$$eval('#side-login a, #login-ov a',els=>els
+    .filter(a=>/create an account/i.test(a.textContent))
+    .map(a=>a.getAttribute('href')));
+  ok(signup.length>0&&signup.every(h=>/^https:\/\/join\.usehaf\.co\.uk\/?$/.test(h)),
+    `[${tag}] every "Create an account" link goes to join.usehaf.co.uk (${JSON.stringify(signup)})`);
+  const cleverSignup=await p.$$eval('#side-login a, #login-ov a',els=>els
+    .filter(a=>/create one via cleverpay|create an account with cleverpay/i.test(a.textContent)).length);
+  ok(cleverSignup===0,`[${tag}] nothing still sends a new customer to CleverPay to sign up`);
+  const demos=await p.$$eval('#side-login a, #login-ov a',els=>els
+    .filter(a=>/live demo/i.test(a.textContent)).map(a=>a.getAttribute('href')));
+  ok(demos.length>0&&demos.every(h=>/^https:\/\/demo\.usehaf\.co\.uk\/?$/.test(h)),
+    `[${tag}] every "Try a live demo" button still goes to demo.usehaf.co.uk (${JSON.stringify(demos)})`);
+
   await p.close();
 }
 await b.close();

@@ -64,6 +64,20 @@ for (const [tag, vp] of [['desktop', { width: 1280, height: 1100 }], ['phone', {
   ok(Math.max(...r.map(x => x.h)) - Math.min(...r.map(x => x.h)) <= 1,
     `[${tag}] a badged rung is the same height as an unbadged one`);
 
+  /* ── 4b. nothing highlighted before HAF has actually suggested anything ── */
+  {
+    const fresh = await b.newPage({ viewport: vp });
+    await fresh.goto('file:///agent/workspace/knect-orderfix/index.html', { waitUntil: 'load' });
+    await fresh.waitForTimeout(700);
+    const g = await fresh.$('#ag-code');
+    if (g) { await fresh.fill('#ag-code', 'HAFLAUNCH'); await fresh.keyboard.press('Enter'); await fresh.waitForTimeout(500); }
+    const lit = await fresh.$$eval('#vlad .vrung', els => els.filter(e => e.classList.contains('sel')).length);
+    const line = (await fresh.textContent('#vlad-x')) || '';
+    ok(lit === 0, `[${tag}] on a fresh page no size is highlighted before HAF has picked one (${lit})`);
+    ok(/HAF will name the exact van/i.test(line), `[${tag}] and the line under it says HAF will name the van`);
+    await fresh.close();
+  }
+
   /* ── 5. no price yet, so no offer to continue ── */
   ok(!(await p.$('#cf-offer:visible')), `[${tag}] no continue offer before there is a price`);
   ok(!/£/.test(await p.textContent('#cf-go')), `[${tag}] and the button carries no number yet`);
