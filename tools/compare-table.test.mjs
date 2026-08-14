@@ -159,6 +159,25 @@ PAGES.forEach((file) => {
     !/posting (third-party )?client loads comes with/i.test(html));
   ok(`${name}: whose goods you move is still tied to the account role`,
     !/freight/i.test(html) || /role/i.test(html));
+
+  // The same fault, one section up: the generated table marked every booking
+  // rung "coming soon" while the hand-written plan cards ticked "Custom
+  // branded booking page" as something you get today. Nothing resolves behind
+  // a booking link on the live app — /book, /b and /booking all return the
+  // app shell — so any card line that promises one has to carry the badge.
+  // Checked by PROPERTY (a booking claim without a coming-soon marker), not by
+  // hunting the exact sentence, or the next rewrite walks straight past it.
+  const outsideTable = html.slice(0, html.indexOf('<!-- COMPARE:START')) +
+    html.slice(html.indexOf('<!-- COMPARE:END'));
+  const unbadged = [...outsideTable.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)]
+    .map((m) => m[1])
+    .filter((li) => /branded|booking address|booking link/i.test(li.replace(/<[^>]+>/g, '')))
+    .filter((li) => !/cmp-soon/.test(li))
+    .map((li) => li.replace(/<[^>]+>/g, '').trim());
+  ok(`${name}: no plan card promises a booking link that is not built yet`,
+    unbadged.length === 0, unbadged);
+  ok(`${name}: the retired "Website Builder" product is gone from the page`,
+    !/website builder/i.test(html));
 });
 
 console.log('\n' + '='.repeat(60));
