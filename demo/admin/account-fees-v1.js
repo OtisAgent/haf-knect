@@ -346,8 +346,13 @@
       //      useful without AI.
       //   3. Posting is on EVERY account. What a tier buys is the daily
       //      allowance and the tools around posting, never access.
-      //   4. The branded booking page is a Pro line (this supersedes the
-      //         2026-07-29 "separate Website Builder" ruling — flagged to Brent).
+      //   4. THE BOOKING LINK IS ONE PRODUCT AT THREE DEPTHS, not a separate
+      //      thing you buy. Brent settled this on 2026-08-14: "free will just
+      //      be a booking link", plus is "minimal but extra bits", and at pro
+      //      "the website [can] be customised". That RETIRES his 2026-07-29
+      //      ruling making it a standalone paid "Website Builder", shown coming
+      //      soon with no price and never a tier tick. The coming-soon half of
+      //      that ruling still stands, for a different reason: it is not built.
       DRIVER: [
         // ---- §4 Driver / PLNA -------------------------------------------
         // Brent 2026-08-14: "drivers PLNA is an add on to the account type",
@@ -422,17 +427,38 @@
         { unlocksAt: "PLUS", group: "CALENDAR", text: "Actions on empty time — find filler work, find a return route, mark yourself unavailable" },
 
         // ---- §9 Bookings and customers ----------------------------------
-        { unlocksAt: "LITE", group: "BOOKING", text: "Basic HAF booking link" },
+        // THE BOOKING LINK LADDER. Brent 2026-08-14, verbatim:
+        //   "we will be using a booking link format where the account types
+        //    will allow for the website to be customised at pro level, plus
+        //    will be minimal but extra bits and free will just be a booking
+        //    link"
+        //
+        // One product at three depths, NOT a separate thing you buy. This
+        // RETIRES the 2026-07-29 ruling that made it a standalone paid
+        // "Website Builder" with no price and no tier tick — see BOOKING_LADDER
+        // below for the note the customer reads.
+        //
+        // Every rung is comingSoon, and that is a MEASUREMENT, not a hedge:
+        // on 14 Aug 2026 there is no booking-link product at all. /book, /b and
+        // /booking on the live site each return the app shell, byte-identical
+        // to a nonsense URL — nothing resolves behind any of them. Ticking the
+        // free rung would sell a link that goes nowhere.
+        //
+        // No `slot` on these three on purpose. A slot collapses to the one rung
+        // you have, which is right for "how many drivers?" — but here nobody
+        // has ANY rung yet, so the whole ladder should stay visible as what is
+        // coming rather than three lines fighting to be the single answer.
+        { unlocksAt: "LITE", group: "BOOKING", text: "Your own HAF booking link — one link you send a customer so they can book you direct", slot: "booking_link", comingSoon: true },
+        { unlocksAt: "PLUS", group: "BOOKING", text: "Make the link your own — your name, logo and colours on the page your customer lands on", slot: "booking_link", comingSoon: true },
+        { unlocksAt: "PRO",  group: "BOOKING", text: "Customise the site itself — your own sections, wording and pictures, on your own booking address", slot: "booking_link", comingSoon: true },
         { unlocksAt: "LITE", group: "BOOKING", text: "Basic pre-booking" },
         { unlocksAt: "LITE", group: "BOOKING", text: "Repeat booking" },
         { unlocksAt: "LITE", group: "BOOKING", text: "Basic customer booking history" },
-        { unlocksAt: "LITE", group: "BOOKING", text: "Basic PLNA availability on your booking link" },
+        { unlocksAt: "LITE", group: "BOOKING", text: "Basic PLNA availability on your booking link", comingSoon: true },
         { unlocksAt: "PLUS", group: "BOOKING", text: "Direct booking by your HAF username" },
         { unlocksAt: "PLUS", group: "BOOKING", text: "Advanced scheduled bookings" },
         { unlocksAt: "PLUS", group: "BOOKING", text: "Advanced booking types" },
-        { unlocksAt: "PLUS", group: "BOOKING", text: "Full diary and availability integration on your booking link" },
-        { unlocksAt: "PRO",  group: "BOOKING", text: "Custom branded booking page" },
-        { unlocksAt: "PRO",  group: "BOOKING", text: "Your own customer-facing booking address" },
+        { unlocksAt: "PLUS", group: "BOOKING", text: "Full diary and availability integration on your booking link", comingSoon: true },
 
         // ---- §10 Pricing and utilisation --------------------------------
         { unlocksAt: "LITE", group: "PRICING", text: "Standard HAF pricing" },
@@ -448,9 +474,14 @@
         { unlocksAt: "LITE", group: "BRANDING", text: "Basic HAF booking presence" },
         { unlocksAt: "LITE", group: "BRANDING", text: "Powered by HAF KNECT infrastructure" },
         { unlocksAt: "PLUS", group: "BRANDING", text: "Advanced customer tools" },
-        { unlocksAt: "PRO",  group: "BRANDING", text: "Custom logo and colours" },
-        { unlocksAt: "PRO",  group: "BRANDING", text: "Company About section and services displayed" },
-        { unlocksAt: "PRO",  group: "BRANDING", text: "Branded booking landing page on your own booking address" },
+        // "Custom logo and colours" used to sit here unqualified, one section
+        // below a BOOKING line that puts logo and colours on PLUS. Same words,
+        // two levels, one page — a reader can only conclude the page is wrong.
+        // They are two different questions: this one is your HAF profile, the
+        // BOOKING rung is the page your customer lands on. Both now say which.
+        { unlocksAt: "PRO",  group: "BRANDING", text: "Custom logo and colours across your HAF profile" },
+        { unlocksAt: "PRO",  group: "BRANDING", text: "Company About section and services displayed", comingSoon: true },
+        { unlocksAt: "PRO",  group: "BRANDING", text: "Branded booking landing page on your own booking address", comingSoon: true },
 
         // ---- §12 JAKO AI (Pro only) -------------------------------------
         { unlocksAt: "PRO",  group: "AI", text: "JAKO AI, the assistant inside PLNA" },
@@ -525,9 +556,13 @@
         { unlocksAt: "PLUS", group: "CALENDAR", text: "Calendar gap tools across every driver's diary" },
 
         // ---- §9 Bookings and customers ----------------------------------
-        { unlocksAt: "LITE", group: "BOOKING", text: "Basic company booking link" },
+        // The same booking-link ladder the driver side carries (Brent
+        // 2026-08-14), in a fleet's words. Same three depths, same reason every
+        // rung is comingSoon: nothing resolves behind a booking link today.
+        { unlocksAt: "LITE", group: "BOOKING", text: "Your own HAF booking link — one link your customers use to book the company", slot: "booking_link", comingSoon: true },
+        { unlocksAt: "PLUS", group: "BOOKING", text: "Make the link your own — your company name, logo and colours on the page customers land on", slot: "booking_link", comingSoon: true },
+        { unlocksAt: "PRO",  group: "BOOKING", text: "Customise the site itself — your own sections, wording and pictures, on your own booking address", slot: "booking_link", comingSoon: true },
         { unlocksAt: "PLUS", group: "BOOKING", text: "Direct driver username booking" },
-        { unlocksAt: "PRO",  group: "BOOKING", text: "Custom branded customer booking page in your company name" },
 
         // ---- §10 Pricing and utilisation --------------------------------
         { unlocksAt: "LITE", group: "PRICING", text: "Standard HAF pricing on every fleet job" },
@@ -535,8 +570,8 @@
 
         // ---- §11 Branding and business tools ----------------------------
         { unlocksAt: "LITE", group: "BRANDING", text: "Company profile and HAF identity" },
-        { unlocksAt: "PRO",  group: "BRANDING", text: "Custom logo, colours and About section" },
-        { unlocksAt: "PRO",  group: "BRANDING", text: "Your own customer-facing booking address" },
+        { unlocksAt: "PRO",  group: "BRANDING", text: "Custom logo, colours and About section across your HAF company profile" },
+        { unlocksAt: "PRO",  group: "BRANDING", text: "Your own customer-facing booking address", comingSoon: true },
 
         // ---- §12 JAKO AI (Pro only) -------------------------------------
         { unlocksAt: "PRO",  group: "AI", text: "JAKO AI for the fleet office" },
@@ -599,7 +634,11 @@
         { unlocksAt: "PLUS", group: "BOOKING", text: "Advanced booking controls" },
         { unlocksAt: "PLUS", group: "BOOKING", text: "Saved clients, addresses, contacts and load templates" },
         { unlocksAt: "PLUS", group: "BOOKING", text: "Client load-management dashboard" },
-        { unlocksAt: "PRO",  group: "BOOKING", text: "Custom branded booking experience for your own clients" },
+        // Freight sits on the same ladder (Brent 2026-08-14), worded for an
+        // account whose customers are its own clients rather than the public.
+        { unlocksAt: "LITE", group: "BOOKING", text: "Your own HAF booking link — one link your clients use to send you work", slot: "booking_link", comingSoon: true },
+        { unlocksAt: "PLUS", group: "BOOKING", text: "Make the link your own — your name, logo and colours on the page your clients land on", slot: "booking_link", comingSoon: true },
+        { unlocksAt: "PRO",  group: "BOOKING", text: "Customise the site itself — your own sections, wording and pictures, on your own booking address", slot: "booking_link", comingSoon: true },
 
         // ---- §10 Pricing --------------------------------------------------
         { unlocksAt: "LITE", group: "PRICING", text: "Standard HAF pricing, with the guide price shown before you confirm" },
@@ -1127,6 +1166,15 @@
   // whoever builds the next surface. Only sections that genuinely need one
   // appear here — a note on every heading is noise, and noise gets skipped.
   var GROUP_NOTES = {
+    // The booking link is one product at three depths and every depth is still
+    // being built, so this note has to carry BOTH facts. Leaving the second
+    // sentence off would let three coming-soon ticks read as three things you
+    // can use today.
+    BOOKING: "Your booking link is one thing at three depths: on the free " +
+             "account it is simply your link, Plus puts your name, logo and " +
+             "colours on it, and Pro lets you customise the site itself on " +
+             "your own booking address. We are building it now — nothing on " +
+             "this ladder is switched on yet, on any plan.",
     PLNA: "The driver PLNA is an add-on to your HAF account, not a plan of " +
           "its own — add it to any account type. It opens once you are " +
           "approved by Clever Checked, and what your plan changes is the " +

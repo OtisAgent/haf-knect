@@ -346,10 +346,34 @@
       //      useful without AI.
       //   3. Posting is on EVERY account. What a tier buys is the daily
       //      allowance and the tools around posting, never access.
-      //   4. The branded booking page is a Pro line (this supersedes the
-      //         2026-07-29 "separate Website Builder" ruling — flagged to Brent).
+      //   4. THE BOOKING LINK IS ONE PRODUCT AT THREE DEPTHS, not a separate
+      //      thing you buy. Brent settled this on 2026-08-14: "free will just
+      //      be a booking link", plus is "minimal but extra bits", and at pro
+      //      "the website [can] be customised". That RETIRES his 2026-07-29
+      //      ruling making it a standalone paid "Website Builder", shown coming
+      //      soon with no price and never a tier tick. The coming-soon half of
+      //      that ruling still stands, for a different reason: it is not built.
       DRIVER: [
         // ---- §4 Driver / PLNA -------------------------------------------
+        // Brent 2026-08-14: "drivers PLNA is an add on to the account type",
+        // and (same day) "the driver PLNA is an add on that opens up once
+        // approved by clever checked."
+        //
+        // So PLNA is NOT a plan of its own and NOT a rung you buy — it is
+        // switched on alongside whatever account someone holds, on every
+        // level. What the plan changes is the tools inside it, which is why
+        // every row below still carries its own unlocksAt. The add-on line
+        // itself unlocks at LITE so no page can imply you must PAY to have a
+        // PLNA.
+        //
+        // The gate is COMPLIANCE, not price, and that distinction is the whole
+        // point: money never opens the PLNA and being approved is never for
+        // sale. It is the same door the network already runs on — no account
+        // reaches a job without a named CleverPay release — so the page says
+        // the true reason a PLNA is closed rather than leaving a reader to
+        // assume they need a bigger plan.
+        { unlocksAt: "LITE", group: "PLNA", text: "Your driver PLNA is an add-on to your HAF account — add it to any account type" },
+        { unlocksAt: "LITE", group: "PLNA", text: "Opens once you are approved by Clever Checked — compliance, never the plan you pay for" },
         { unlocksAt: "LITE", group: "PLNA", text: "Create your HAF and PLNA driver profile" },
         { unlocksAt: "LITE", group: "PLNA", text: "Clever Checked compliance" },
         { unlocksAt: "LITE", group: "PLNA", text: "Add your vehicle details" },
@@ -367,6 +391,13 @@
 
         // ---- §3 Posting work onto the network ---------------------------
         { unlocksAt: "LITE", group: "POSTING", text: "Post your own work onto HAF KNECT — up to {PERM_LITE.posting_daily_limit} jobs a day" , slot: "posting" },
+        // Brent 2026-08-14: "all accounts allow freight to be posted." Freight
+        // is a KIND OF WORK anyone may post, not a walled account type — the
+        // Freight Forward ladder is for businesses whose whole trade is
+        // forwarding, and it buys volume and client tools, never the right to
+        // post a load. tierPermissions.freight_forwarding is already true on
+        // every level; this is the customer-facing half of the same fact.
+        { unlocksAt: "LITE", group: "POSTING", text: "Move freight — freight posting is on every account type, within your plan's allowance and the network rules" },
         { unlocksAt: "LITE", group: "POSTING", text: "Standard full-order posting" },
         { unlocksAt: "LITE", group: "POSTING", text: "Guide price before you post" },
         { unlocksAt: "LITE", group: "POSTING", text: "Edit the draft before you submit it" },
@@ -396,17 +427,43 @@
         { unlocksAt: "PLUS", group: "CALENDAR", text: "Actions on empty time — find filler work, find a return route, mark yourself unavailable" },
 
         // ---- §9 Bookings and customers ----------------------------------
-        { unlocksAt: "LITE", group: "BOOKING", text: "Basic HAF booking link" },
+        // THE BOOKING LINK LADDER. Brent 2026-08-14, verbatim:
+        //   "we will be using a booking link format where the account types
+        //    will allow for the website to be customised at pro level, plus
+        //    will be minimal but extra bits and free will just be a booking
+        //    link"
+        //
+        // One product at three depths, NOT a separate thing you buy. This
+        // RETIRES the 2026-07-29 ruling that made it a standalone paid
+        // "Website Builder" with no price and no tier tick — see BOOKING_LADDER
+        // below for the note the customer reads.
+        //
+        // Every rung is comingSoon, and that is a MEASUREMENT, not a hedge:
+        // on 14 Aug 2026 there is no booking-link product at all. /book, /b and
+        // /booking on the live site each return the app shell, byte-identical
+        // to a nonsense URL — nothing resolves behind any of them. Ticking the
+        // free rung would sell a link that goes nowhere.
+        //
+        // They DO share a slot, and the slot is what makes them one product
+        // rather than three features: the day this is built, an account will
+        // show the one rung it actually holds, exactly like "how many drivers?".
+        // Until then all three stay on the page — the collapse only applies to
+        // rows you HAVE, and nobody has any rung while every one is comingSoon.
+        // So the customer reads the ladder today and their own depth later,
+        // from the same three lines. (An earlier note here claimed there was no
+        // slot; that was stale the moment the test started identifying a rung
+        // by slot instead of by its wording.)
+        { unlocksAt: "LITE", group: "BOOKING", text: "Your own HAF booking link — one link you send a customer so they can book you direct", slot: "booking_link", comingSoon: true },
+        { unlocksAt: "PLUS", group: "BOOKING", text: "Make the link your own — your name, logo and colours on the page your customer lands on", slot: "booking_link", comingSoon: true },
+        { unlocksAt: "PRO",  group: "BOOKING", text: "Customise the site itself — your own sections, wording and pictures, on your own booking address", slot: "booking_link", comingSoon: true },
         { unlocksAt: "LITE", group: "BOOKING", text: "Basic pre-booking" },
         { unlocksAt: "LITE", group: "BOOKING", text: "Repeat booking" },
         { unlocksAt: "LITE", group: "BOOKING", text: "Basic customer booking history" },
-        { unlocksAt: "LITE", group: "BOOKING", text: "Basic PLNA availability on your booking link" },
+        { unlocksAt: "LITE", group: "BOOKING", text: "Basic PLNA availability on your booking link", comingSoon: true },
         { unlocksAt: "PLUS", group: "BOOKING", text: "Direct booking by your HAF username" },
         { unlocksAt: "PLUS", group: "BOOKING", text: "Advanced scheduled bookings" },
         { unlocksAt: "PLUS", group: "BOOKING", text: "Advanced booking types" },
-        { unlocksAt: "PLUS", group: "BOOKING", text: "Full diary and availability integration on your booking link" },
-        { unlocksAt: "PRO",  group: "BOOKING", text: "Custom branded booking page" },
-        { unlocksAt: "PRO",  group: "BOOKING", text: "Your own customer-facing booking address" },
+        { unlocksAt: "PLUS", group: "BOOKING", text: "Full diary and availability integration on your booking link", comingSoon: true },
 
         // ---- §10 Pricing and utilisation --------------------------------
         { unlocksAt: "LITE", group: "PRICING", text: "Standard HAF pricing" },
@@ -422,9 +479,14 @@
         { unlocksAt: "LITE", group: "BRANDING", text: "Basic HAF booking presence" },
         { unlocksAt: "LITE", group: "BRANDING", text: "Powered by HAF KNECT infrastructure" },
         { unlocksAt: "PLUS", group: "BRANDING", text: "Advanced customer tools" },
-        { unlocksAt: "PRO",  group: "BRANDING", text: "Custom logo and colours" },
-        { unlocksAt: "PRO",  group: "BRANDING", text: "Company About section and services displayed" },
-        { unlocksAt: "PRO",  group: "BRANDING", text: "Branded booking landing page on your own booking address" },
+        // "Custom logo and colours" used to sit here unqualified, one section
+        // below a BOOKING line that puts logo and colours on PLUS. Same words,
+        // two levels, one page — a reader can only conclude the page is wrong.
+        // They are two different questions: this one is your HAF profile, the
+        // BOOKING rung is the page your customer lands on. Both now say which.
+        { unlocksAt: "PRO",  group: "BRANDING", text: "Custom logo and colours across your HAF profile" },
+        { unlocksAt: "PRO",  group: "BRANDING", text: "Company About section and services displayed", comingSoon: true },
+        { unlocksAt: "PRO",  group: "BRANDING", text: "Branded booking landing page on your own booking address", comingSoon: true },
 
         // ---- §12 JAKO AI (Pro only) -------------------------------------
         { unlocksAt: "PRO",  group: "AI", text: "JAKO AI, the assistant inside PLNA" },
@@ -456,6 +518,9 @@
 
         // ---- §3 Posting work onto the network ---------------------------
         { unlocksAt: "LITE", group: "POSTING", text: "Post jobs to HAF KNECT — up to {PERM_LITE.posting_daily_limit} a day" , slot: "posting" },
+        // Same ruling as the driver side (Brent 2026-08-14) — a courier company
+        // may post freight without a Freight Forward account.
+        { unlocksAt: "LITE", group: "POSTING", text: "Move freight — freight posting is on every account type, within your plan's allowance and the network rules" },
         { unlocksAt: "LITE", group: "POSTING", text: "Guide price, full-order posting and repeat by reference" },
         { unlocksAt: "LITE", group: "POSTING", text: "See active postings and job status" },
         { unlocksAt: "LITE", group: "POSTING", text: "Cancel a posting, with full audit history" },
@@ -496,9 +561,13 @@
         { unlocksAt: "PLUS", group: "CALENDAR", text: "Calendar gap tools across every driver's diary" },
 
         // ---- §9 Bookings and customers ----------------------------------
-        { unlocksAt: "LITE", group: "BOOKING", text: "Basic company booking link" },
+        // The same booking-link ladder the driver side carries (Brent
+        // 2026-08-14), in a fleet's words. Same three depths, same reason every
+        // rung is comingSoon: nothing resolves behind a booking link today.
+        { unlocksAt: "LITE", group: "BOOKING", text: "Your own HAF booking link — one link your customers use to book the company", slot: "booking_link", comingSoon: true },
+        { unlocksAt: "PLUS", group: "BOOKING", text: "Make the link your own — your company name, logo and colours on the page customers land on", slot: "booking_link", comingSoon: true },
+        { unlocksAt: "PRO",  group: "BOOKING", text: "Customise the site itself — your own sections, wording and pictures, on your own booking address", slot: "booking_link", comingSoon: true },
         { unlocksAt: "PLUS", group: "BOOKING", text: "Direct driver username booking" },
-        { unlocksAt: "PRO",  group: "BOOKING", text: "Custom branded customer booking page in your company name" },
 
         // ---- §10 Pricing and utilisation --------------------------------
         { unlocksAt: "LITE", group: "PRICING", text: "Standard HAF pricing on every fleet job" },
@@ -506,8 +575,8 @@
 
         // ---- §11 Branding and business tools ----------------------------
         { unlocksAt: "LITE", group: "BRANDING", text: "Company profile and HAF identity" },
-        { unlocksAt: "PRO",  group: "BRANDING", text: "Custom logo, colours and About section" },
-        { unlocksAt: "PRO",  group: "BRANDING", text: "Your own customer-facing booking address" },
+        { unlocksAt: "PRO",  group: "BRANDING", text: "Custom logo, colours and About section across your HAF company profile" },
+        { unlocksAt: "PRO",  group: "BRANDING", text: "Your own customer-facing booking address", comingSoon: true },
 
         // ---- §12 JAKO AI (Pro only) -------------------------------------
         { unlocksAt: "PRO",  group: "AI", text: "JAKO AI for the fleet office" },
@@ -528,6 +597,10 @@
       // never by the forwarder's subscription tier.
       FREIGHT: [
         // ---- Your account ------------------------------------------------
+        // Brent 2026-08-14: freight posting is open to everyone, so this ladder
+        // has to say what it is actually FOR, or a reader assumes they need it
+        // before they can post a load.
+        { unlocksAt: "LITE", group: "ACCOUNT", text: "For businesses whose trade is forwarding — any HAF account can post freight without one, to its own plan's allowance and rules" },
         { unlocksAt: "LITE", group: "ACCOUNT", text: "Create your freight-forwarding profile" },
         { unlocksAt: "LITE", group: "ACCOUNT", text: "One primary user" },
         { unlocksAt: "LITE", group: "ACCOUNT", text: "Client and load references" },
@@ -566,7 +639,11 @@
         { unlocksAt: "PLUS", group: "BOOKING", text: "Advanced booking controls" },
         { unlocksAt: "PLUS", group: "BOOKING", text: "Saved clients, addresses, contacts and load templates" },
         { unlocksAt: "PLUS", group: "BOOKING", text: "Client load-management dashboard" },
-        { unlocksAt: "PRO",  group: "BOOKING", text: "Custom branded booking experience for your own clients" },
+        // Freight sits on the same ladder (Brent 2026-08-14), worded for an
+        // account whose customers are its own clients rather than the public.
+        { unlocksAt: "LITE", group: "BOOKING", text: "Your own HAF booking link — one link your clients use to send you work", slot: "booking_link", comingSoon: true },
+        { unlocksAt: "PLUS", group: "BOOKING", text: "Make the link your own — your name, logo and colours on the page your clients land on", slot: "booking_link", comingSoon: true },
+        { unlocksAt: "PRO",  group: "BOOKING", text: "Customise the site itself — your own sections, wording and pictures, on your own booking address", slot: "booking_link", comingSoon: true },
 
         // ---- §10 Pricing --------------------------------------------------
         { unlocksAt: "LITE", group: "PRICING", text: "Standard HAF pricing, with the guide price shown before you confirm" },
@@ -1079,7 +1156,7 @@
     DASHBOARD: "Your account",
     PLATFORM: "Your account",
     POSTING: "Posting work onto the network",
-    PLNA: "Driver and PLNA",
+    PLNA: "Driver PLNA — an add-on to your account",
     ROUTES: "Return and filler route planning",
     CALENDAR: "Calendar and driver diary",
     FLEET: "Fleet and driver management",
@@ -1087,6 +1164,47 @@
     PRICING: "Pricing and utilisation",
     BRANDING: "Branding and business tools",
     AI: "JAKO AI"
+  };
+
+  // A sentence a SECTION carries wherever it is rendered, so the one thing a
+  // customer must understand about that section cannot be left off a page by
+  // whoever builds the next surface. Only sections that genuinely need one
+  // appear here — a note on every heading is noise, and noise gets skipped.
+  var GROUP_NOTES = {
+    // The booking link is one product at three depths and every depth is still
+    // being built, so this note has to carry BOTH facts. Leaving the second
+    // sentence off would let three coming-soon ticks read as three things you
+    // can use today.
+    BOOKING: "Your booking link is one thing at three depths: on the free " +
+             "account it is simply your link, Plus puts your name, logo and " +
+             "colours on it, and Pro lets you customise the site itself on " +
+             "your own booking address. We are building it now — nothing on " +
+             "this ladder is switched on yet, on any plan.",
+    PLNA: "The driver PLNA is an add-on to your HAF account, not a plan of " +
+          "its own — add it to any account type. It opens once you are " +
+          "approved by Clever Checked, and what your plan changes is the " +
+          "tools inside it.",
+    // The second sentence exists to stop this section contradicting the plan
+    // card beside it: a business account is sold as "send your own goods", so
+    // an unqualified "every account can post freight" would read as two
+    // opposite promises on one page.
+    //
+    // The boundary is the ACCOUNT TYPE, not the plan — and the first draft of
+    // this note got that wrong, saying third-party client posting "starts on
+    // Plus". Nothing supports that: there is no business Plus at all (the
+    // brief defines exactly one business tier), and no feature row on any
+    // ladder gates whose goods you may move. What Plus actually adds around
+    // clients is TOOLING — saved clients, addresses and load templates. So
+    // the note names the real line: a business account moves its own goods, a
+    // freight-forwarding account moves its clients'; the plan only ever moves
+    // the allowance and the tools.
+    POSTING: "Posting is on every account type, freight included. What a plan " +
+             "buys is your daily allowance and the tools around posting — " +
+             "never permission to post. Whose goods you may move is set by " +
+             "your account type, not your plan: a business account sends its " +
+             "own goods, a freight-forwarding account moves its clients’. " +
+             "Every load follows the network rules on vehicle, compliance and " +
+             "payment."
   };
 
   // Features for a side and level, already split into the labelled sections a
@@ -1177,6 +1295,7 @@
     featuresForSideLevel: featuresForSideLevel,
     featureSections: featureSections,
     groupLabels: GROUP_LABELS,
+    groupNotes: GROUP_NOTES,
     groupOrder: GROUP_ORDER,
     missingSummary: missingSummary,
     ladderCheck: ladderCheck,
