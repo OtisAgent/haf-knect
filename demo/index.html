@@ -2504,7 +2504,8 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <div style="display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;justify-content:flex-end">
               <span class="chip cg">Fleet PLNA active</span>
               <span class="chip cb">On network</span>
-              <a href="https://plna.usehaf.co.uk" target="_blank" class="btn btn-gh btn-xs">View PLNA →</a>
+              <!-- A fictional fleet driver, so this opens the demo planner too. -->
+              <a href="https://plna.usehaf.co.uk/sso.html#u=HAFDEMO01&amp;k=03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4&amp;t=w" target="_blank" rel="noopener" class="btn btn-gh btn-xs">View PLNA →</a>
             </div>
           </div>
           <!-- Driver 2 — has PLNA, currently on a job -->
@@ -2516,7 +2517,8 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <div style="display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;justify-content:flex-end">
               <span class="chip cg">Fleet PLNA active</span>
               <span class="chip co">On a job</span>
-              <a href="https://plna.usehaf.co.uk" target="_blank" class="btn btn-gh btn-xs">View PLNA →</a>
+              <!-- A fictional fleet driver, so this opens the demo planner too. -->
+              <a href="https://plna.usehaf.co.uk/sso.html#u=HAFDEMO01&amp;k=03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4&amp;t=w" target="_blank" rel="noopener" class="btn btn-gh btn-xs">View PLNA →</a>
             </div>
           </div>
           <!-- Driver 3 — no PLNA yet -->
@@ -4215,6 +4217,16 @@ function openDemoGate(){
 const PLNA_URL='https://ggkpqqrtxtlafdkxcaqg.supabase.co';
 const PLNA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdna3BxcXJ0eHRsYWZka3hjYXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTM2NjAsImV4cCI6MjA5Nzc2OTY2MH0.hB70KOYZu4dshwhsrxF_dFyBn0n72gStWTwxYGsLdgY';
 const PLNA_HOME='https://plna.usehaf.co.uk';
+/* THE DEMO PLANNER (Brent, 15 Aug 2026: "a demo test PLNA that's got fake data
+   in so people can see what the PLNA will be like").
+   Everyone who clicks this lands in the SAME account — a made-up owner driver
+   called Jamie Cole, with a made-up week's work in his diary. It is not a way
+   into anybody's real planner: the database knows this account as the public
+   demo, hands it a test-only job board so no real customer is ever on screen,
+   refuses every setting change on it so the next visitor sees what the last one
+   did, and refuses to pay its example earnings. The token in the link is that
+   account's own sign-in and unlocks nothing else. */
+const PLNA_DEMO='https://plna.usehaf.co.uk/sso.html#u=HAFDEMO01&k=03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4&t=w';
 function openLogin(){document.getElementById('login-ov').classList.add('open')}
 function closeLogin(){document.getElementById('login-ov').classList.remove('open')}
 async function hafSha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
@@ -5686,7 +5698,7 @@ const HAF_NAV_V1=[
       says PLNA must never become. */
    tabs:[
     {id:'d-comp', l:'Driver Compliance'},
-    {id:'__plna', l:'Open my PLNA', ext:'https://plna.usehaf.co.uk'},
+    {id:'__plna', l:'Open the demo PLNA', ext:PLNA_DEMO},
    ]},
 
   {g:'MONEY', id:'payouts', l:'Payouts', ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
@@ -9163,12 +9175,16 @@ window.pxSave=async function(){
            in there, and pretending it is a tab here produced a click that
            opened nothing. It is shown for what it is: a door out. */
         if(t.ext){
-          h+='<div class="pd-mi pd-ext" style="cursor:default;opacity:.8">'
+          /* This used to be a label you could not click, which made the one part
+             of the tour that is a real working app the one part nobody could
+             see. It opens the demo planner now — same account for everybody,
+             example data throughout. */
+          h+='<a class="pd-mi pd-ext" href="'+t.ext+'" target="_blank" rel="noopener" style="text-decoration:none">'
            + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--or)" '
            + 'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
            + '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>'
            + '<polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'
-           + '<span>'+t.l+'</span></div>';
+           + '<span>'+t.l+'</span></a>';
           return;
         }
         h+='<button type="button" class="pd-mi" onclick="pdSeatOpen(\''+tier+'\',\''+t.id+'\')">'
@@ -9178,7 +9194,7 @@ window.pxSave=async function(){
       });
       h+='</div>';
       if((sec.tabs||[]).some(function(t){return t.ext}))
-        h+='<div class="dc-note" style="margin:.25rem 0 .1rem">The planner is its own app at plna.usehaf.co.uk &mdash; a released driver signs straight into it from here.</div>';
+        h+='<div class="dc-note" style="margin:.25rem 0 .1rem">The planner is its own app at plna.usehaf.co.uk. Opening it here signs you into a demo driver&rsquo;s account so you can look round it &mdash; every job and figure on it is made up. A released driver signs into their own.</div>';
     });
 
     /* The same invitation the sidebar puts at its own foot, said in words
