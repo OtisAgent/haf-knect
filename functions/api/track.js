@@ -12,11 +12,35 @@ const j = (o, s) => new Response(JSON.stringify(o), { status: s || 200, headers:
 
 export function onRequestOptions() { return new Response(null, { headers: CORS }); }
 
+/* A position is released against a live tracking link, never against a job
+   reference on its own. Job references are short and guessable, so reading by
+   job let anyone walk the list and watch a driver move — the exact "has the URL,
+   therefore can see it" model Brent's directive rules out. One door now: a token
+   that is real, unrevoked and unexpired. */
+async function jobForToken(env, token) {
+  const r = await fetch(env.SUPA_URL + '/rest/v1/track_links?token=eq.' + encodeURIComponent(token) +
+    '&select=job,expires_at,revoked_at',
+    { headers: { apikey: env.SUPA_KEY, Authorization: 'Bearer ' + env.SUPA_KEY } });
+  const rows = await r.json();
+  const row = Array.isArray(rows) && rows[0];
+  if (!row) return { state: 'missing' };
+  const now = Date.now();
+  if (row.revoked_at && new Date(row.revoked_at).getTime() <= now) return { state: 'revoked' };
+  if (row.expires_at && new Date(row.expires_at).getTime() <= now) return { state: 'expired' };
+  return { state: 'ok', job: row.job };
+}
+
 export async function onRequestGet({ request, env }) {
   const u = new URL(request.url);
-  const job = (u.searchParams.get('job') || '').trim().toUpperCase();
-  if (!job) return j({ ok: false, error: 'no_job' }, 400);
+  const token = (u.searchParams.get('token') || '').trim();
+  if (!token) return j({ ok: false, error: 'no_token' }, 401);
   if (!env.SUPA_URL || !env.SUPA_KEY) return j({ ok: false, error: 'not_configured' }, 503);
+  let job;
+  try {
+    const t = await jobForToken(env, token);
+    if (t.state !== 'ok') return j({ ok: true, found: false, reason: t.state === 'missing' ? 'unknown' : t.state });
+    job = t.job;
+  } catch (e) { return j({ ok: false, error: 'upstream' }, 502); }
   let rows;
   try {
     const r = await fetch(env.SUPA_URL + '/rest/v1/live_pos?job=eq.' + encodeURIComponent(job) +
@@ -42,10 +66,11 @@ export async function onRequestPost({ request, env }) {
   if (!token) return j({ ok: false, error: 'no_token' }, 401);
   let job;
   try {
-    const lr = await fetch(env.SUPA_URL + '/rest/v1/track_links?token=eq.' + encodeURIComponent(token) + '&select=job',
-      { headers: { apikey: env.SUPA_KEY, Authorization: 'Bearer ' + env.SUPA_KEY } });
-    const lrows = await lr.json();
-    job = Array.isArray(lrows) && lrows[0] && lrows[0].job;
+    const t = await jobForToken(env, token);
+    /* an expired or revoked link stops publishing as well as stops showing —
+       otherwise a finished job would keep writing the driver's position */
+    if (t.state !== 'ok') return j({ ok: false, error: 'bad_token', reason: t.state }, 401);
+    job = t.job;
   } catch (e) { return j({ ok: false, error: 'upstream' }, 502); }
   if (!job) return j({ ok: false, error: 'bad_token' }, 401);
   const nowIso = new Date().toISOString();

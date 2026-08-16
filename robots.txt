@@ -1,0 +1,16 @@
+# HAF KNECT — search engine rules
+# Private by default (Brent's directive, 16 Aug 2026). This file is a courtesy
+# to well-behaved crawlers, NOT a security control: everything below is also
+# protected by authentication and by expiring, revocable links. A hidden URL is
+# not a secured URL.
+
+User-agent: *
+Disallow: /t/
+Disallow: /job/
+Disallow: /track/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /account/
+Disallow: /dashboard/
+
+Sitemap: https://knect.usehaf.co.uk/sitemap.xml

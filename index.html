@@ -8210,7 +8210,9 @@ function ljStopPoll(){if(ljPollTimer){clearInterval(ljPollTimer);ljPollTimer=nul
 function ljStartPoll(j){
  ljStopPoll();
  const tick=()=>{
-  fetch('/api/track?job='+encodeURIComponent(j.id)).then(r=>r.json()).then(d=>{
+  /* the live dot is read against this job's tracking link, not its reference —
+     a job reference is short and guessable, a link is issued, expiring and revocable */
+  hafIssue(j).then(tok=>fetch('/api/track?token='+encodeURIComponent(tok))).then(r=>r.json()).then(d=>{
     if(!d||!d.ok||!d.found)return;
     if(d.kind==='pin'){ljShowPin(j,d);return;}
     if(typeof d.ageSec==='number'&&d.ageSec<=180)ljApplyLive(j,d);
