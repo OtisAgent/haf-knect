@@ -48,12 +48,27 @@ async function signIn(row) {
     cred: 'relay', has_pin: true,
   }, row)]);
 
+  /* The board read must carry the credential that opened the session. Reading it
+     with a username alone is the bug this suite exists to stop coming back: the
+     raw board is service-role only and answered every such call with a refusal,
+     so the screen said "we couldn't read the job board" to everybody. Anything
+     asking for the raw board here is answered the way the live database answers
+     it — permission denied — so the test fails the same way a real driver would. */
+  let boardCred = null;
   await pg.route('**/rest/v1/**', r => {
     const u = r.request().url();
-    const body = u.includes('knect_auth') ? account
-      : u.includes('plna_exchange_board') ? BOARD
-      : '[]';
-    return r.fulfill({ status: 200, contentType: 'application/json', body });
+    if (u.includes('plna_exchange_board')) {
+      return r.fulfill({ status: 401, contentType: 'application/json',
+        body: '{"code":"42501","message":"permission denied for function plna_exchange_board"}' });
+    }
+    if (u.includes('plna_exchange_visible')) {
+      let sent = {};
+      try { sent = JSON.parse(r.request().postData() || '{}'); } catch {}
+      boardCred = !!(sent.p_hash || sent.p_relay || sent.p_cp);
+      return r.fulfill({ status: 200, contentType: 'application/json', body: BOARD });
+    }
+    return r.fulfill({ status: 200, contentType: 'application/json',
+      body: u.includes('knect_auth') ? account : '[]' });
   });
 
   await pg.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
@@ -105,7 +120,7 @@ async function signIn(row) {
     ['pane-f-cap', 'pane-f-dir', 'pane-f-cover'].filter(id => !!document.getElementById(id)));
 
   await pg.close();
-  return { ids, jobs, netPanes, errs };
+  return { ids, jobs, netPanes, errs, boardCred };
 }
 
 const CASES = [
@@ -136,6 +151,7 @@ for (const c of CASES) {
 
   if (c.seesJobs) {
     ok(r.jobs.cards === 1, 'the real board is drawn (' + r.jobs.cards + ' job)');
+    ok(r.boardCred === true, 'the board was read with this session\'s credential');
     ok(r.jobs.claim === (c.canClaim ? 1 : 0),
        c.canClaim ? 'a checked driver can take the job' : 'an unchecked driver gets no Take button');
     if (!c.canClaim) ok(r.jobs.waiting === 1, 'and is told the Clever checks open it');

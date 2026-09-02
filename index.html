@@ -7385,12 +7385,36 @@ async function hafJobsPaint(){
   if(!u){box.innerHTML='';return}
   box.innerHTML='<div class="aa-empty">Reading the network…</div>';
   let jobs;
+  /* The board is read with the credential that opened this session, never with
+     the username alone.
+
+     It used to call plna_exchange_board directly, and that call was refused
+     every single time: the raw board takes a username and no proof, so it is
+     service-role only — deliberately, because otherwise typing somebody else's
+     username would read their board. The screen said "we couldn't read the job
+     board" to everyone who signed in, which is not a state anybody could act on.
+
+     plna_exchange_visible proves who is asking and then returns the very same
+     plna_exchange_board — one place decides what is open work, so this screen
+     and the driving site can never disagree about the same job. It answers for
+     a driver whose Clever checks are still in the queue too; TAKING the work is
+     a separate question, asked below and answered by the database. */
+  const cred=_netCred();
+  if(!cred){
+    box.innerHTML='<div class="aa-empty">Sign in again to see the open work on '+
+      'the network.</div>';
+    return;
+  }
   try{
-    const r=await fetch(PLNA_URL+'/rest/v1/rpc/plna_exchange_board',{method:'POST',
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/plna_exchange_visible',{method:'POST',
       headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
-      body:JSON.stringify({p_username:u})});
+      body:JSON.stringify(cred)});
     if(!r.ok)throw new Error('board '+r.status);
     jobs=await r.json();
+    /* A refusal comes back as an object, not a list. Treated as the failure it
+       is rather than drawn as an empty board — "no work today" and "we could not
+       ask" are different sentences and a driver plans differently on each. */
+    if(jobs&&!Array.isArray(jobs)&&jobs.error)throw new Error('board '+jobs.error);
   }catch(e){
     /* A board that cannot be read says so. It never falls back to a sample —
        a plausible wrong job is worse than a blank screen. */
