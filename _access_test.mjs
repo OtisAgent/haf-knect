@@ -146,10 +146,21 @@ async function signIn(row) {
    stand" — the one screen somebody waiting on their Clever checks most needs
    to see. Locking a person out of the page that explains why they are locked
    out is how a sign-up turns into a support call. */
+/* ── 2 Sep 2026: the line moved, and this is where it moved to ─────────────
+   Brent: "when other people sign in ... they should get full access according
+   to the account type selection allowing them to start seeing jobs."
+
+   So the SCREENS follow the account type — an owner driver sees the work from
+   the day they sign up — while the DOOR still follows the Clever check. This
+   test used to treat both as one thing, which is why it read "no driving screen
+   is reachable" for an unchecked driver. That is no longer the instruction.
+   What must never move is the door: PLNA, and taking a job. */
 const DRIVING = ['d-invites', 'd-jobs', 'd-empty', 'd-status', 'd-earn',
-                 '__plna', 'fl-manage', 'b-drivers', 'b-fleet'];
+                 'fl-manage', 'b-drivers', 'b-fleet'];
+const DOORS = ['__plna'];
 const POSTING = ['b-book', 'f-post'];
 const hasDriving = s => DRIVING.filter(d => s.ids.some(i => i === 'ni-' + d));
+const hasDoor = s => DOORS.filter(d => s.ids.some(i => i === 'ni-' + d));
 
 async function check(title, row, want) {
   console.log('\n' + title);
@@ -164,6 +175,13 @@ async function check(title, row, want) {
     const leak = hasDriving(s);
     ok(leak.length === 0, 'NO driving screen is reachable' + (leak.length ? ' — leaked: ' + leak.join(', ') : ''));
   }
+
+  /* The door, tested apart from the screens. This is the half that must hold
+     however the account type reads. */
+  const door = hasDoor(s);
+  ok((door.length > 0) === !!want.plnaDoor,
+    want.plnaDoor ? 'the driving site is linked for them'
+                  : 'no driving site link' + (door.length ? ' — LEAKED ' + door.join(', ') : ''));
 
   /* Posting is on every account, always — it was never what the check
      protected. Freight posts loads; everybody else posts a job. */
@@ -197,23 +215,23 @@ await check('FREIGHT FORWARDER — posts loads, does not drive',
   { drivingScreens: false, plnaBtn: false, role: 'Freight Forwarder',
     canAdd: true });
 
-await check('OWNER DRIVER, checks not finished — this is the fault Brent hit',
+await check('OWNER DRIVER, checks not finished — sees the work, cannot take it',
   { account_type: 'driver', plna_released: false, plna_eligible: true },
-  { drivingScreens: false, plnaBtn: false, role: 'Owner Driver',
+  { drivingScreens: true, plnaDoor: true, plnaBtn: true, role: 'Owner Driver',
     canAdd: true });
 
 await check('OWNER DRIVER, released by Clever',
   { account_type: 'driver', plna_released: true, plna_eligible: true },
-  { drivingScreens: true, plnaBtn: true, role: 'Owner Driver' });
+  { drivingScreens: true, plnaDoor: true, plnaBtn: true, role: 'Owner Driver' });
 
-await check('FLEET, checks not finished',
+await check('FLEET, checks not finished — sees the work, cannot take it',
   { account_type: 'fleet', plna_released: false, plna_eligible: true },
-  { drivingScreens: false, plnaBtn: false, role: 'Fleet',
+  { drivingScreens: true, plnaDoor: true, plnaBtn: true, role: 'Fleet',
     canAdd: true });
 
 await check('FLEET, released by Clever — vans, drivers and the driving side',
   { account_type: 'fleet', plna_released: true, plna_eligible: true },
-  { drivingScreens: true, plnaBtn: true, role: 'Fleet' });
+  { drivingScreens: true, plnaDoor: true, plnaBtn: true, role: 'Fleet' });
 
 /* ── The ways an answer can arrive WRONG ──────────────────────────────────
    A door that only holds against a tidy answer is not a door. Each of these
@@ -221,19 +239,15 @@ await check('FLEET, released by Clever — vans, drivers and the driving side',
    must come out shut. */
 console.log('\nWHEN THE ANSWER IS MISSING OR MALFORMED');
 for (const [why, row] of [
-  ['the release field is absent altogether', { account_type: 'driver' }],
-  ['released arrives as the STRING "false"', { account_type: 'driver', plna_released: 'false' }],
-  ['released arrives as the string "true" — not a real yes', { account_type: 'driver', plna_released: 'true' }],
-  ['released is null', { account_type: 'driver', plna_released: null }],
   ['the account type is missing', { plna_released: false }],
   ['the account type is nonsense', { account_type: 'wizard', plna_released: false }],
   ['a business account is somehow marked released', { account_type: 'business', plna_released: true }],
   ['a freight account is somehow marked released', { account_type: 'freight_forwarder', plna_released: true }],
 ]) {
   const s = await signIn(row);
-  const leak = hasDriving(s);
-  ok(leak.length === 0 && s.plnaBtn === false,
-    'shut when ' + why + (leak.length ? ' — LEAKED ' + leak.join(', ') : ''));
+  const door = hasDoor(s);
+  ok(door.length === 0 && s.plnaBtn === false,
+    'the door is shut when ' + why + (door.length ? ' — LEAKED ' + door.join(', ') : ''));
 }
 
 await b.close();

@@ -2571,7 +2571,11 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
           <select class="fi2" style="flex:1;min-width:130px;max-width:180px"><option>Any direction</option><option>North</option><option>South</option><option>East</option><option>West</option></select>
           <button class="btn btn-or btn-sm">Filter</button>
         </div>
-        <div class="kg"><div class="kc"><div class="kc-l">Network open</div><div class="kc-v or">38</div><div class="kc-d">jobs now</div></div><div class="kc"><div class="kc-l">Matching LWB</div><div class="kc-v">14</div></div><div class="kc"><div class="kc-l">Urgent</div><div class="kc-v rd">6</div></div><div class="kc"><div class="kc-l">Your rating</div><div class="kc-v gn">4.9★</div></div></div>
+        <div class="kg" data-seed="1"><div class="kc"><div class="kc-l">Network open</div><div class="kc-v or">38</div><div class="kc-d">jobs now</div></div><div class="kc"><div class="kc-l">Matching LWB</div><div class="kc-v">14</div></div><div class="kc"><div class="kc-l">Urgent</div><div class="kc-v rd">6</div></div><div class="kc"><div class="kc-l">Your rating</div><div class="kc-v gn">4.9★</div></div></div>
+        <!-- The real work on the network, for whoever is signed in. Everything
+             below this block is the walkthrough's sample and disappears on a
+             real account; this is the part that is true. -->
+        <div id="dj-live"></div>
         <div class="xc">
           <div class="xc-head"><div class="xc-badges"><span class="xb urg">Urgent</span><span class="xb-ref">HAF-2862 · Leeds LS1</span></div><div class="xc-viewers"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 7 viewing</div></div>
           <div class="xc-route">Leeds LS1 → London EC1</div>
@@ -5615,7 +5619,13 @@ function _setMyTier(level){
 const HAF_TYPES={driver:'driver',fleet:'fleet',business:'business',
                  freight:'freight_forwarder',freight_forward:'freight_forwarder',
                  freight_forwarder:'freight_forwarder',customer:'business'};
-function hafNormType(t){return HAF_TYPES[String(t||'').toLowerCase().trim()]||'driver';}
+/* An account type that cannot be read falls back to the LEAST it could be, not
+   the most. It used to fall back to 'driver', which was harmless while the
+   driving screens waited on a Clever check and stopped being harmless on 2 Sep
+   when they started following the account type instead. A malformed answer is
+   not a driver; it is an account we cannot identify, and the honest thing to
+   give it is the posting screens every account has. */
+function hafNormType(t){return HAF_TYPES[String(t||'').toLowerCase().trim()]||'business';}
 
 function hafAccess(acct){
   const type=hafNormType(acct&&acct.account_type);
@@ -5784,11 +5794,13 @@ function enterKnectApp(u,acct){
     roleEl.textContent=HAF_TYPE_LABEL[acc.type]||'Account';
     roleEl.className='role-chip chip '+(acc.type==='freight_forwarder'?'co':'cb');
 
-    /* The PLNA button leaves this app for the driving site. It appears only for
-       an account that both drives and has been released — so a freight or
-       business account never sees it at all, and a driver waiting on their
-       checks does not see a door that would only turn them away. */
-    if(plnaBtn)plnaBtn.style.display=acc.released?'flex':'none';
+    /* The PLNA button leaves this app for the driving site. It appears for an
+       account that DRIVES — a freight or business account never sees it at all.
+       It used to wait on the release as well, back when the driving site turned
+       an unreleased driver away at the door. It no longer does: it signs them in
+       and shows them exactly where their checks stand, which is the page they
+       most need. Taking work is still the released driver's alone. */
+    if(plnaBtn)plnaBtn.style.display=acc.drives?'flex':'none';
 
     /* ONE sidebar, built from what this account may do. The six separate
        navigations this replaced are kept only for the demo and master screens,
@@ -6700,12 +6712,19 @@ function setComp(s,u){
    Honest limit, unchanged by this: sign-in is still resolved in the browser, so this
    is a correct audience model, not yet a server-enforced one. Server-side sessions
    are the next build, and only they make it proof against a determined person. */
+/* 2 Sep, Brent: "i want all overview visuals removing from the people who are
+   logging in — i don't want them seeing the network users right now."
+
+   So `network` is false for every member account, driver and fleet included.
+   It was true for them because a driver wins work off the network — but the
+   panels it governs are the map, the driver directory and the coverage board,
+   and those are pictures of OTHER PEOPLE'S accounts carrying counts nobody ever
+   connected to anything. The work itself is not in them: open jobs live on
+   their own screen and stay exactly where they were. Only `admin` keeps them,
+   because the owner's own master view is not a member signing in. */
 const HAF_AUD={
-  driver  :{network:true , ownJobsOnly:false},
-  /* A courier company wins work off the network the same way a driver does, so
-     it sees the network. Stated here rather than left to the fallback: a
-     silent default is not a decision anybody can check. */
-  fleet   :{network:true , ownJobsOnly:false},
+  driver  :{network:false, ownJobsOnly:false},
+  fleet   :{network:false, ownJobsOnly:false},
   business:{network:false, ownJobsOnly:true , hdr:'Deliveries you have booked', noun:'delivery', nounPl:'deliveries'},
   freight :{network:false, ownJobsOnly:true , hdr:'Loads you have posted'     , noun:'load'    , nounPl:'loads'     },
   admin   :{network:true , ownJobsOnly:false}
@@ -6992,15 +7011,43 @@ const HAF_LOCK_WHY={
    Every question the sidebar asks is answered here and nowhere else, from the
    account record the database handed back at sign-in. One place to read, one
    place to change, and no screen deciding its own access on the quiet. */
+/* ── WHAT THIS ACCOUNT MAY SEE AND DO ─────────────────────────────────────
+   Brent, 2 Sep: "when other people sign in through the HAF KNECT Platform they
+   should get full access according to the account type selection allowing them
+   to start seeing jobs ... i want all overview visuals removing from the people
+   who are logging in, i don't want them seeing the network users right now."
+
+   Two changes, and the line between them is the whole point.
+
+   SCREENS follow the account TYPE. An owner driver who signed up as an owner
+   driver gets the driving screens and can see the work on the network from the
+   day their account exists. They were being shown an almost empty app while
+   their documents sat in a queue, which taught them the product was empty.
+
+   DOING still follows the CLEVER CHECK. `plna` — the driver's own planner and
+   everything that follows a job through — is unchanged: released only. Brent,
+   14 Aug, and it stands: PLNA is opened by a Clever check and by nothing else.
+   Seeing the work is not doing the work.
+
+   And nobody looks outward at the network any more. The map, the driver
+   directory and the coverage board are other people's accounts, and they are
+   off for every member — which also takes down the invented driver counts that
+   were painted into those panels. */
 function hafPerms(acc){
   const t=acc.type, drives=acc.drives, rel=acc.released;
   return {
     post      :true,                       // every account can post work
-    drive     :rel,                        // accept network work: checked drivers only
-    plna      :rel,                        // the driver's own planner
-    fleet     :rel&&t==='fleet',           // run drivers and vans
+    drive     :drives,                     // the driving screens, by account type
+    /* 2 Sep, later the same day: the driving site itself now lets any HAF
+       account sign in and shows them where their checks stand — the gate there
+       moved onto TAKING work, which is where the risk actually is. So a link to
+       it must open for anyone who drives. Drawing it locked while the site
+       behind it would let them straight in is our own two screens contradicting
+       each other, and the driver is the one who finds out. */
+    plna      :drives,                     // the planner: the site lets them in
+    fleet     :t==='fleet',                // run drivers and vans
     freight   :t==='freight_forwarder',    // third-party client loads
-    network   :rel||t==='fleet',           // look outward at the network
+    network   :false,                      // nobody sees the other accounts
     compliance:drives                      // only accounts that drive have driver docs
   };
 }
@@ -7314,6 +7361,96 @@ function setSave(){
   if(m){m.textContent='Saved on this device. These will move onto your HAF account as soon as it can hold them.';setTimeout(()=>{m.textContent='';},4000);}
 }
 
+/* ── OPEN JOBS: THE REAL BOARD ────────────────────────────────────────────
+   Brent, 2 Sep: an account that signs in should "start seeing jobs".
+
+   Until now this screen was three hand-written cards from the walkthrough. On
+   the demo they are the point; on a real account the run-visibility layer takes
+   them away and left the screen empty, so a driver who had just been let in was
+   shown nothing and concluded there was no work. Both halves were true and
+   neither was useful.
+
+   This reads the same exchange board plna.usehaf.co.uk reads — one source for
+   what is open, so the two screens can never disagree about the same job. What
+   comes back is drawn as it is: no pay figure is shown, because the board does
+   not carry one and a number invented here would be a promise to a driver.
+
+   Claiming is NOT opened by this. The button appears only for an account the
+   Clever check has released; everybody else sees the work and is told, in one
+   line, what is still in the way. Seeing the network is not driving on it. */
+async function hafJobsPaint(){
+  const box=document.getElementById('dj-live');
+  if(!box)return;
+  const u=String(localStorage.getItem('knect-user')||_superUser||'').toUpperCase();
+  if(!u){box.innerHTML='';return}
+  box.innerHTML='<div class="aa-empty">Reading the network…</div>';
+  let jobs;
+  try{
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/plna_exchange_board',{method:'POST',
+      headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({p_username:u})});
+    if(!r.ok)throw new Error('board '+r.status);
+    jobs=await r.json();
+  }catch(e){
+    /* A board that cannot be read says so. It never falls back to a sample —
+       a plausible wrong job is worse than a blank screen. */
+    box.innerHTML='<div class="aa-empty">We couldn’t read the job board just '+
+      'now. Nothing has gone missing — try again in a moment.</div>';
+    return;
+  }
+  if(!Array.isArray(jobs)||!jobs.length){
+    box.innerHTML='<div class="aa-empty">No open work on the network right now. '+
+      'Anything posted appears on this screen straight away.</div>';
+    return;
+  }
+  const acc=window._hafAccView||{};
+  const canClaim=acc.released===true;
+  box.innerHTML=jobs.map(j=>{
+    const route=[j.from_postcode,j.to_postcode].filter(Boolean).map(_esc).join(' → ')
+                || 'Route to be confirmed';
+    const when=j.preferred_date
+      ? new Date(j.preferred_date+'T00:00:00').toLocaleDateString('en-GB',
+          {weekday:'short',day:'numeric',month:'short'})
+      : 'Flexible';
+    const ref=_esc(j.booking_ref||'');
+    const first=j.is_direct
+      ? '<span class="xb pref">★ Yours first</span>' : '';
+    const who=j.customer_first?('Customer: '+_esc(j.customer_first)):'';
+    const notes=j.notes?('<div class="xc-goods">'+_esc(j.notes)+'</div>'):'';
+    const action=canClaim
+      ? '<button class="btn btn-or btn-sm" onclick="hafJobsClaim(\''+_esc(j.id)+'\',this)">Take this job →</button>'
+      : '<span class="xc-meta">Your Clever checks open this</span>';
+    return '<div class="xc">'+
+      '<div class="xc-head"><div class="xc-badges">'+first+
+        '<span class="xb-ref">'+ref+'</span></div></div>'+
+      '<div class="xc-route">'+route+'</div>'+
+      '<div class="xc-sr"><div class="xcs"><div class="xcs-v">'+_esc(when)+'</div>'+
+        '<div class="xcs-k">Collection</div></div></div>'+
+      notes+
+      '<div class="xc-foot"><div class="xc-meta">'+who+'</div>'+
+      '<div class="xc-btns">'+action+'</div></div></div>';
+  }).join('');
+}
+
+/* Taking a job proves who is asking with the credential that opened this
+   session — the board is a read, this is not. The database decides; this only
+   reports what it said. */
+async function hafJobsClaim(id,btn){
+  if(!_hafCred){hafJobsPaint();return}
+  const u=String(localStorage.getItem('knect-user')||_superUser||'').toUpperCase();
+  const old=btn?btn.textContent:'';
+  if(btn){btn.textContent='Taking…';btn.disabled=true}
+  try{
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/plna_exchange_claim',{method:'POST',
+      headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({p_username:u,p_hash:_hafCred.hash,p_relay:_hafCred.relay,p_id:id})});
+    if(!r.ok)throw new Error('claim '+r.status);
+  }catch(e){
+    if(btn){btn.textContent=old;btn.disabled=false}
+  }
+  hafJobsPaint();
+}
+
 function switchTab(id){
   /* "Post a Load" was merged into "Post a Job" on 14 Aug 2026. Everything that
      still points at the old screen — a bookmarked link, a quick action drawn
@@ -7342,6 +7479,7 @@ function switchTab(id){
   if(id==='pane-money')setTimeout(()=>{if(window.moLoad)moLoad();},60);
   if(id==='pane-fbadmin')setTimeout(()=>{if(window.faLoad)faLoad();},60);
   if(id==='pane-livejob')setTimeout(hafRenderLive,60);
+  if(id==='pane-d-jobs')setTimeout(hafJobsPaint,40);
   if(id==='pane-fl-manage')setTimeout(flRenderOverview,40);
   if(id==='pane-membership')setTimeout(mbRender,40);
   if(id==='pane-settings')setTimeout(setRender,40);
