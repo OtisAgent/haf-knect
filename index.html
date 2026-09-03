@@ -7312,7 +7312,8 @@ function mbRender(){
   const acc=window._hafAccView; const A=window.HAFAccountFees;
   const head=document.getElementById('mb-head'),pm=document.getElementById('mb-perms'),ft=document.getElementById('mb-feats');
   if(!head||!pm||!ft)return;
-  if(!acc){head.innerHTML='<div class="ct">Your account</div><div class="cr"><span class="ck">Sign in to see your account.</span></div>';pm.innerHTML='';ft.innerHTML='';return;}
+  const _net0=document.getElementById('mb-net');
+  if(!acc){head.innerHTML='<div class="ct">Your account</div><div class="cr"><span class="ck">Sign in to see your account.</span></div>';pm.innerHTML='';ft.innerHTML='';if(_net0)_net0.innerHTML='';return;}
   const lvlKey=(window.HAF_ACCOUNT_LEVEL||'lite');
   const lvl=lvlKey.toUpperCase();
   head.innerHTML='<div class="ct">Your account</div>'+
@@ -7321,6 +7322,34 @@ function mbRender(){
     '<div class="cr"><span class="ck">Clever Checked</span><span class="cv">'+(acc.released
       ?'<span class="chip cg">Released &#8212; you can accept network work</span>'
       :acc.drives?'<span class="chip ca">Checks outstanding</span>':'<span class="chip cb">Not needed for this account</span>')+'</span></div>';
+
+  /* NETWORK MEMBERSHIP — Brent, 3 Sep: "HAF KNECT members is for the wider
+     network and HAF KNECT Plans is for features and users." Members are the
+     ones paying for the wider network, so the app has to say that out loud and
+     keep it apart from the plan above. The member wording here is the same
+     wording the join page already sells, so the two can never disagree. */
+  const nm=window._hafNetMember, nchk=window._hafNetChecked===true;
+  const net=document.getElementById('mb-net');
+  if(net){
+    let n='<div class="ct">HAF KNECT Network Membership <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">separate from your plan</span></div>';
+    if(nm){
+      n+='<div class="cr"><span class="ck">Your status</span><span class="cv"><span class="chip cg">Network Member</span></span></div>';
+      if(nm.member_no)n+='<div class="cr"><span class="ck">Member number</span><span class="cv">'+_esc(String(nm.member_no))+'</span></div>';
+      if(nm.since)n+='<div class="cr"><span class="ck">Member since</span><span class="cv">'+_esc(new Date(nm.since+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}))+'</span></div>';
+      n+='<div class="cr"><span class="ck">What your membership pays for</span><span class="cv">The wider HAF KNECT network</span></div>'+
+         '<div style="font-size:.74rem;color:var(--mu);line-height:1.6;padding:.55rem 0 0">Your member section, on top of your plan:'+
+         '<ul style="margin:.4rem 0 0;padding-left:1.1rem"><li>The wider network and relay areas</li>'+
+         '<li>Member benefits matched to your role</li>'+
+         '<li>Future member features as the network grows</li></ul></div>';
+    } else if(nchk){
+      n+='<div class="cr"><span class="ck">Your status</span><span class="cv"><span class="chip cb">Not a network member</span></span></div>'+
+         '<div style="font-size:.74rem;color:var(--mu);line-height:1.6;padding:.55rem 0 0">Network members are the ones who pay for the wider HAF KNECT network. It is a one-off purchase that sits on top of whichever plan you are on, and it opens the member section above. Your plan is unaffected either way, and nothing you have built up is lost.</div>'+
+         '<div style="padding:.7rem 0 0"><a class="btn btn-sm" style="background:var(--or);color:#fff;text-decoration:none" href="https://join.usehaf.co.uk/" target="_blank" rel="noopener">Become a Network Member &#8594;</a></div>';
+    } else {
+      n+='<div class="cr"><span class="ck">We could not read the network register just now, so this is not saying either way. Reload the page and it will come back.</span></div>';
+    }
+    net.innerHTML=n;
+  }
 
   /* What this account may do, in the same words the sidebar uses — so a
      locked padlock and this page can never tell two different stories. */
