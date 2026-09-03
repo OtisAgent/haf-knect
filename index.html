@@ -1730,6 +1730,23 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
                 <div style="font-family:var(--dp);font-weight:900;font-size:1.55rem;letter-spacing:-.04em;color:var(--or);margin:.4rem 0 .35rem" id="fq-ref">HAF-XXXX</div>
                 <p style="font-size:.79rem;color:var(--mu);line-height:1.65" id="fq-done-msg">Your order is placed. Save your reference above.</p>
               </div>
+              <!-- The price, broken out. The customer sees what the job costs, what
+                   the VAT on it is and what they owe in total, so the VAT is never
+                   something they meet for the first time on the card page. -->
+              <div id="fq-price" style="display:none;background:var(--p2);border:1px solid var(--ln);border-radius:12px;padding:.9rem 1rem;margin-bottom:.6rem">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;margin-bottom:.3rem">
+                  <span style="font-size:.73rem;color:var(--mu)">Price for the job</span>
+                  <span style="font-size:.82rem;font-weight:700;color:var(--tx)" id="fq-pr-sub">&#163;0.00</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;margin-bottom:.45rem">
+                  <span style="font-size:.73rem;color:var(--mu)" id="fq-pr-vatl">VAT</span>
+                  <span style="font-size:.82rem;font-weight:700;color:var(--tx)" id="fq-pr-vat">&#163;0.00</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;border-top:1px solid var(--ln);padding-top:.45rem">
+                  <span style="font-size:.7rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mu)">Total to pay</span>
+                  <span style="font-family:var(--dp);font-weight:900;font-size:1.2rem;color:var(--tx)" id="fq-pr-tot">&#163;0.00</span>
+                </div>
+              </div>
               <!-- The holding deposit. It is what sends the job to the network, so it
                    is the only button on this panel until it has been paid. -->
               <div id="fq-dep" style="display:none;background:var(--p2);border:1px solid var(--ln);border-radius:12px;padding:.9rem 1rem;margin-bottom:.9rem">
@@ -5380,6 +5397,18 @@ async function fqBook(){
 function fqPaintBooked(d){
   const gbp=p=>'£'+(p/100).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
   document.getElementById('fq-ref').textContent=d.job_ref;
+  /* Price, VAT, total — read from the server's own quote, never recomputed here.
+     If the server did not send a total we show nothing rather than a made-up
+     number: a wrong VAT line is worse than no VAT line. */
+  const q=d.quote||{};
+  const pr=document.getElementById('fq-price');
+  if(pr&&Number.isFinite(q.total_pence)&&Number.isFinite(q.quote_ex_vat_pence)){
+    pr.style.display='';
+    document.getElementById('fq-pr-sub').textContent=gbp(q.quote_ex_vat_pence);
+    document.getElementById('fq-pr-vatl').textContent='VAT at '+(q.vat_pct||20)+'%';
+    document.getElementById('fq-pr-vat').textContent=gbp(q.vat_pence||0);
+    document.getElementById('fq-pr-tot').textContent=gbp(q.total_pence);
+  }
   const dep=document.getElementById('fq-dep');
   if(dep){
     dep.style.display='';
