@@ -2409,7 +2409,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
            the pricing and join pages read from, so this page can never promise
            something a customer page does not sell. -->
       <div class="tp" id="pane-membership">
-        <h1 class="pt">Account &amp; Membership</h1>
+        <h1 class="pt">Account &amp; Plan</h1>
         <p class="ps">What your account includes today, and what unlocks the rest.</p>
         <div class="card" id="mb-head"></div>
         <div class="card" id="mb-perms"></div>
@@ -3072,13 +3072,13 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <div class="ct">The two accounts</div>
             <div class="dc-sub">Driver taking the job</div>
             <div class="dc-grid">
-              <div><label class="ol">Membership</label><select class="fi2" id="dc-s-dtier" onchange="dcSim()"><option value="free">HAF KNECT Free</option><option value="member">HAF KNECT Plus</option><option value="pro">HAF KNECT Pro</option></select></div>
+              <div><label class="ol">Plan</label><select class="fi2" id="dc-s-dtier" onchange="dcSim()"><option value="free">HAF KNECT Free</option><option value="member">HAF KNECT Plus</option><option value="pro">HAF KNECT Pro</option></select></div>
               <div><label class="ol">Founder status</label><select class="fi2" id="dc-s-dfnd" onchange="dcSim()"><option value="no">No</option><option value="yes">Yes</option></select></div>
             </div>
             <div class="dc-sub">Account posting the load</div>
             <div class="dc-grid">
               <div><label class="ol">Role</label><select class="fi2" id="dc-s-prole" onchange="dcSim()"><option value="freight">Freight forwarder</option><option value="business">Business</option><option value="fleet">Fleet / courier company</option><option value="driver">Driver</option></select></div>
-              <div><label class="ol">Membership</label><select class="fi2" id="dc-s-ptier" onchange="dcSim()"><option value="lite">HAF KNECT Free</option><option value="plus">HAF KNECT Plus</option><option value="pro">HAF KNECT Pro</option></select></div>
+              <div><label class="ol">Plan</label><select class="fi2" id="dc-s-ptier" onchange="dcSim()"><option value="lite">HAF KNECT Free</option><option value="plus">HAF KNECT Plus</option><option value="pro">HAF KNECT Pro</option></select></div>
               <div><label class="ol">Founder status</label><select class="fi2" id="dc-s-pfnd" onchange="dcSim()"><option value="no">No</option><option value="yes">Yes</option></select></div>
               <div><label class="ol">VAT applies</label><select class="fi2" id="dc-s-vat" onchange="dcSim()"><option value="yes">Yes</option><option value="no">No</option></select></div>
             </div>
@@ -3116,8 +3116,8 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
              in the same list as a membership is what made it look like a fourth
              tier in the first place. -->
         <div class="g2">
-          <div class="card"><div class="ct">Membership <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">one ladder</span></div><div id="ov-memb"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
-          <div class="card"><div class="ct">Founder status <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">held beside a membership</span></div><div id="ov-founder"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
+          <div class="card"><div class="ct">Plan <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">one ladder</span></div><div id="ov-memb"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
+          <div class="card"><div class="ct">Founder status <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">held beside a plan</span></div><div id="ov-founder"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
         </div>
 
         <div class="g2">
@@ -4289,9 +4289,9 @@ const ADMIN_NAV=[
    the Demo Centre on purpose: the way out is the mode switcher, so you cannot
    drift from a sandbox screen onto a real one without noticing. */
 const DEMO_NAV=[
-  {id:'dc-free',l:'HAF KNECT Free',s:'Membership demos',ico:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>'},
-  {id:'dc-plus',l:'HAF KNECT Plus',s:'Membership demos',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
-  {id:'dc-pro',l:'HAF KNECT Pro',s:'Membership demos',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
+  {id:'dc-free',l:'HAF KNECT Free',s:'Plan demos',ico:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>'},
+  {id:'dc-plus',l:'HAF KNECT Plus',s:'Plan demos',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
+  {id:'dc-pro',l:'HAF KNECT Pro',s:'Plan demos',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
   {id:'dc-compare',l:'Account Comparison',s:'Where the money goes',ico:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'},
   {id:'dc-sim',l:'Mileage &amp; Margin Simulator',s:'Where the money goes',ico:'<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="18"/><line x1="8" y1="18" x2="12" y2="18"/>'},
 ];
@@ -4854,8 +4854,8 @@ function dcCalc(r,j,a){
   if(r.wait)h+=row(r.wait+' hour'+(r.wait===1?'':'s')+' waiting',DC_MONEY(r.waitFee));
 
   h+=hd('Driver');
-  h+=row('Driver membership',_esc(DC_TIERS[a.driverKey]?DC_TIERS[a.driverKey].label:q.driverLevel)+(a.driverFounder?' + Founder':''));
-  h+=row('Membership uplift on the customer price',DRV_REWARD.on?DC_MONEY(q.rewardGbp):'None — the driver reward is switched off in the matrix today');
+  h+=row('Driver plan',_esc(DC_TIERS[a.driverKey]?DC_TIERS[a.driverKey].label:q.driverLevel)+(a.driverFounder?' + Founder':''));
+  h+=row('Plan uplift on the customer price',DRV_REWARD.on?DC_MONEY(q.rewardGbp):'None — the driver reward is switched off in the matrix today');
   h+=row('Driver receives',DC_MONEY(r.driver),true);
 
   h+=hd('HAF');
@@ -4899,7 +4899,7 @@ function dcFounderRule(){
   const f=c.founder||c.founderBenefit||null;
   if(f&&typeof f.feeReductionPts==='number')
     return{active:true,pts:f.feeReductionPts,text:'Founder takes a further '+f.feeReductionPts+' points off the network fee, from the matrix.'};
-  return{active:false,pts:0,text:'Founder is recorded on the account and shown beside the membership, but the live pricing matrix carries no founder adjustment — so it changes no figure on this page. The moment a founder benefit is added to the matrix it will appear here on its own.'};
+  return{active:false,pts:0,text:'Founder is recorded on the account and shown beside the plan, but the live pricing matrix carries no founder adjustment — so it changes no figure on this page. The moment a founder benefit is added to the matrix it will appear here on its own.'};
 }
 const DC_FND_CHIP='<span class="dc-fnd">&#9733; FOUNDER</span>';
 
@@ -4969,13 +4969,13 @@ function dcRenderTier(tier){
   const fnd=dcFounderRule();
 
   let h='<h1 class="pt">'+T.label+(view.founder?' '+DC_FND_CHIP:'')+'</h1>';
-  h+='<p class="ps">Exactly what a real '+T.label+' member sees. Switch the role to see the same membership from a different seat.</p>';
+  h+='<p class="ps">Exactly what a real '+T.label+' member sees. Switch the role to see the same plan from a different seat.</p>';
   h+='<div class="dc-band" id="dc-band-'+tier+'"></div>';
 
   /* Role + founder controls */
-  h+='<div class="card"><div class="ct">Who is holding this membership</div><div class="dc-roles">';
+  h+='<div class="card"><div class="ct">Who is holding this plan</div><div class="dc-roles">';
   DC_ROLES.forEach(r=>{h+='<button class="dc-role'+(r.k===view.role?' on':'')+'" onclick="dcSetRole(\''+tier+'\',\''+r.k+'\')">'+r.l+'</button>';});
-  h+='</div><div class="dc-note">Membership and role are two different things. This account is on <strong>'+T.label+'</strong>; the role only decides which tools it opens.</div>';
+  h+='</div><div class="dc-note">Plan and role are two different things. This account is on <strong>'+T.label+'</strong>; the role only decides which tools it opens.</div>';
   h+='<div style="margin-top:.7rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">';
   h+='<label class="ol" style="margin:0">Founder status</label>';
   h+='<button class="dc-role'+(view.founder?' on':'')+'" onclick="dcSetFounder(\''+tier+'\','+(!view.founder)+')">'+(view.founder?'On':'Off')+'</button>';
@@ -4986,9 +4986,9 @@ function dcRenderTier(tier){
      then the dashboard features, then the PLNA features. Section one is the
      only one that touches money, and every figure in it is read live from the
      pricing matrix rather than written down here. */
-  h+=dcSecHead(1,'The % uplift','What this membership does to the money, and what it opens.');
+  h+=dcSecHead(1,'The % uplift','What this plan does to the money, and what it opens.');
   const al=ACC_LEVEL[T.acc]||ACC_LEVEL.lite, dl=DRV_LEVEL[T.drv]||DRV_LEVEL.free;
-  h+='<div class="g2"><div class="card"><div class="ct">What this membership does to the money</div>';
+  h+='<div class="g2"><div class="card"><div class="ct">What this plan does to the money</div>';
   if(roleDef.posts){
     h+='<div class="cr"><span class="ck">Network fee reduction</span><span class="cv">'+(al.cut?(al.cut*100).toFixed(1).replace(/\.0$/,'')+' points off every job':'none — Free pays the standard fee')+'</span></div>';
     h+='<div class="cr"><span class="ck">Standard fee before the reduction</span><span class="cv">'+DC_PCT(URG.sday.fee)+' to '+DC_PCT(URG.urg.fee)+', by job type</span></div>';
@@ -5025,7 +5025,7 @@ function dcRenderTier(tier){
   let r=null;try{r=dcQuote(j,a);}catch(e){}
   h+='<div class="card"><div class="ct">Example job economics</div>';
   if(r){
-    h+='<div class="dc-note" style="margin:0 0 .55rem">A 45-mile same-day job in an LWB van, S35 to M1 — the identical job is used on Free, Plus and Pro so the difference you see is the membership and nothing else.</div>';
+    h+='<div class="dc-note" style="margin:0 0 .55rem">A 45-mile same-day job in an LWB van, S35 to M1 — the identical job is used on Free, Plus and Pro so the difference you see is the plan and nothing else.</div>';
     h+=dcFlow(r,0);
     h+='<div class="cr"><span class="ck">'+(roleDef.posts?'What this account pays to post it':'What this account earns for taking it')+'</span><span class="cv"><strong>'+(roleDef.posts?DC_MONEY(r.total)+' inc VAT':DC_MONEY(r.driver))+'</strong></span></div>';
     h+=dcCalc(r,j,a);
@@ -5064,7 +5064,7 @@ function dcCmpRows(){
   const yn=(v)=>'<option value="no"'+(!v?' selected':'')+'>No</option><option value="yes"'+(v?' selected':'')+'>Yes</option>';
   el.innerHTML=DC_CMP.map((c,i)=>
     '<div class="dc-cmp-row">'+
-    '<div><label class="ol">Driver membership</label><select class="fi2" onchange="dcCmpSet('+i+',\'d\',this.value)">'+tierOpts(c.d)+'</select></div>'+
+    '<div><label class="ol">Driver plan</label><select class="fi2" onchange="dcCmpSet('+i+',\'d\',this.value)">'+tierOpts(c.d)+'</select></div>'+
     '<div><label class="ol">Driver founder</label><select class="fi2" onchange="dcCmpSet('+i+',\'df\',this.value)">'+yn(c.df)+'</select></div>'+
     '<div><label class="ol">Posting account</label><select class="fi2" onchange="dcCmpSet('+i+',\'p\',this.value)">'+tierOpts(c.p)+'</select></div>'+
     '<div><label class="ol">Poster founder</label><select class="fi2" onchange="dcCmpSet('+i+',\'pf\',this.value)">'+yn(c.pf)+'</select></div>'+
@@ -5128,7 +5128,7 @@ function dcSim(){
      '<div class="cr"><span class="ck">Mileage value</span><span class="cv">'+DC_MONEY(j.miles*r.q.driverRate)+'</span></div>'+
      '<div class="cr"><span class="ck">Job and route modifiers</span><span class="cv">&times; '+((r.q.lane&&r.q.lane.factor||1)*(URG[j.job]||URG.sday).svc*r.hind).toFixed(3)+'</span></div>'+
      '<div class="cr"><span class="ck">Stops and waiting</span><span class="cv">'+DC_MONEY(r.stopFee+r.waitFee)+'</span></div>'+
-     '<div class="cr"><span class="ck">Membership uplift</span><span class="cv">'+(DRV_REWARD.on?DC_MONEY(r.q.rewardGbp):'none today')+(a.driverFounder?' · Founder on':'')+'</span></div>'+
+     '<div class="cr"><span class="ck">Plan uplift</span><span class="cv">'+(DRV_REWARD.on?DC_MONEY(r.q.rewardGbp):'none today')+(a.driverFounder?' · Founder on':'')+'</span></div>'+
      '<div class="cr"><span class="ck"><strong>Driver receives</strong></span><span class="cv"><strong style="color:var(--gn)">'+DC_MONEY(r.driver)+'</strong></span></div></div>';
   h+='<div class="card"><div class="ct">HAF</div>'+
      '<div class="cr"><span class="ck">Standard network fee</span><span class="cv">'+DC_PCT((URG[j.job]||URG.sday).fee)+'</span></div>'+
@@ -5711,7 +5711,7 @@ const HAF_NAV_V1=[
    need:'compliance',
    tabs:[{id:'d-comp', l:'Clever Checked &amp; documents'}]},
 
-  {g:'ACCOUNT', id:'membership', l:'Account &amp; Membership', ico:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  {g:'ACCOUNT', id:'membership', l:'Account &amp; Plan', ico:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
    tabs:[
     {id:'membership',l:'What my account includes'},
     {id:'b-usage',   l:'Usage &amp; Activity', need:'post'},
@@ -6011,7 +6011,7 @@ function mbRender(){
   const lvl=lvlKey.toUpperCase();
   head.innerHTML='<div class="ct">Your account</div>'+
     '<div class="cr"><span class="ck">Account type</span><span class="cv">'+_esc(HAF_TYPE_LABEL[acc.type]||'Account')+'</span></div>'+
-    '<div class="cr"><span class="ck">HAF KNECT membership</span><span class="cv"><span class="chip cb">'+_esc(HAF_LEVEL_LABEL[lvlKey]||'HAF KNECT Free')+'</span></span></div>'+
+    '<div class="cr"><span class="ck">HAF KNECT plan</span><span class="cv"><span class="chip cb">'+_esc(HAF_LEVEL_LABEL[lvlKey]||'HAF KNECT Free')+'</span></span></div>'+
     '<div class="cr"><span class="ck">Clever Checked</span><span class="cv">'+(acc.released
       ?'<span class="chip cg">Released &#8212; you can accept network work</span>'
       :acc.drives?'<span class="chip ca">Checks outstanding</span>':'<span class="chip cb">Not needed for this account</span>')+'</span></div>';
