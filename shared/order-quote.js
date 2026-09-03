@@ -62,12 +62,15 @@ export const LOCAL_BAND_AT = 15;
 export const LOCAL_FULL_AT = 25;
 
 /* The holding deposit.
-   Brent asked for "a holding deposit" and has not set the size, so this is my
-   default and it is the ONLY place it is written down: a quarter of the job,
-   never less than £25, never more than the job itself. Change these two numbers
-   and every quote, page and email follows. */
-export const DEPOSIT_PCT = 25;
-export const DEPOSIT_MIN_PENCE = 2500;
+   Brent set the size on 3 Sep 2026: the deposit is the FULL job amount. The
+   money is held when the job is booked and taken in full once a driver has
+   accepted it, so there is never a balance to chase afterwards and nothing is
+   taken for a job the network never picked up.
+   This is the ONLY place the size is written down. Change it here and every
+   quote, page and email follows. The floor is dead at 100% and is kept at zero
+   rather than removed, because the tests and the quote both still read it. */
+export const DEPOSIT_PCT = 100;
+export const DEPOSIT_MIN_PENCE = 0;
 
 const p2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
 const pence = (pounds) => Math.round(pounds * 100);

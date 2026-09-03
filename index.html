@@ -1751,12 +1751,12 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
                    is the only button on this panel until it has been paid. -->
               <div id="fq-dep" style="display:none;background:var(--p2);border:1px solid var(--ln);border-radius:12px;padding:.9rem 1rem;margin-bottom:.9rem">
                 <div style="display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;margin-bottom:.45rem">
-                  <span style="font-size:.7rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mu)">Holding deposit</span>
+                  <span style="font-size:.7rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mu)">Amount held</span>
                   <span style="font-family:var(--dp);font-weight:900;font-size:1.2rem;color:var(--tx)" id="fq-dep-amt">£0.00</span>
                 </div>
                 <p style="font-size:.73rem;color:var(--mu);line-height:1.6;margin:0" id="fq-dep-note"></p>
               </div>
-              <a class="btn btn-or btn-wide" id="fq-pay" style="display:none;margin-bottom:.5rem" target="_blank" rel="noopener">Pay the holding deposit &#8594;</a>
+              <a class="btn btn-or btn-wide" id="fq-pay" style="display:none;margin-bottom:.5rem" target="_blank" rel="noopener">Hold the payment and post the job &#8594;</a>
               <a class="btn btn-gh btn-wide" id="fq-track" style="display:none;margin-bottom:.5rem" target="_blank" rel="noopener">Track this delivery</a>
               <div class="fstep-err" id="fq-err-done"></div>
               <button class="btn btn-gh btn-wide" onclick="closeInlineFlow()">Done</button>
@@ -5414,8 +5414,9 @@ function fqPaintBooked(d){
     dep.style.display='';
     document.getElementById('fq-dep-amt').textContent=gbp(d.deposit_pence);
     document.getElementById('fq-dep-note').textContent=
-      'This holds the job while the network is asked. The balance of '+gbp(d.balance_pence)
-      +' is due once a driver has accepted, and the deposit comes back in full if nobody takes it.';
+      'This is the full price for the job. It is held now and taken only once a driver has '
+      +'accepted it. If nobody on the network takes the job, the hold is released and you are '
+      +'charged nothing. There is no balance to pay later.';
   }
   const pay=document.getElementById('fq-pay');
   if(pay&&d.pay_url){pay.href=d.pay_url;pay.style.display='';}
