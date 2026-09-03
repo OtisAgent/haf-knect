@@ -3645,6 +3645,18 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         <h1 class="pt">Account Activity</h1>
         <p class="ps">Every account on the network and everything that has happened to it. Admin only.</p>
 
+        <!-- ══ WHO IS ON NOW ═══════════════════════════════════════════════
+             The first question this page should answer. A green "On now" is a
+             live heartbeat inside the last 15 minutes; everyone else on the
+             list signed in within the last 24 hours and has gone. Nobody is
+             ever listed from a guess — if the network cannot be read, this
+             says so and shows nothing. -->
+        <div class="card">
+          <div class="ct">Who is on now <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem" id="who-when">checking…</span></div>
+          <div class="kg" id="who-kpis"></div>
+          <div class="aa-wrap"><div id="who-list"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
+        </div>
+
         <div class="card">
           <div class="ct">Find an account</div>
           <div class="aa-filters">
@@ -5516,6 +5528,41 @@ let _hafAcct=null;
    account type through this exact door, so it tests the real path rather than a
    test-only shortcut that could drift from it. */
 function hafGo(u,k,t,acct){localStorage.setItem('knect-user',u);_hafCred={hash:t==='p'?null:k,relay:t==='p'?k:null};_hafAcct=acct||null;enterKnectApp(u,acct);}
+/* ── WHO IS ACTUALLY ON THE SYSTEM ───────────────────────────────────────
+   Nothing on HAF recorded a sign-in until now. The log table and the note
+   function were built in August and never called, so the master overview
+   could show who had been let into the network but never who had turned up,
+   and "who is on right now" could not be answered at all.
+
+   Two calls fix it: one stamp when somebody arrives, then a quiet heartbeat
+   while their page is open, which is what separates "signed in this morning"
+   from "on the road right now". Both are fire-and-forget — a failure here
+   must never be able to stop somebody signing in or taking a job. Nothing
+   about the person's PIN, password or documents goes anywhere near it. */
+let _hafBeat=null,_hafBeatBound=false;
+function hafNoteIn(u,surface){
+  if(!u)return;
+  _hafPing(u,surface,'haf_note_login');
+  _hafPing(u,surface,'haf_note_activity');
+  clearInterval(_hafBeat);
+  _hafBeat=setInterval(function(){if(!document.hidden)_hafPing(u,surface,'haf_note_activity')},60000);
+  /* Coming back to a parked tab should show them as here again straight away,
+     not on the next minute boundary. Bound once, never stacked. */
+  if(!_hafBeatBound){
+    _hafBeatBound=true;
+    document.addEventListener('visibilitychange',function(){
+      const who=(localStorage.getItem('knect-user')||'').toUpperCase();
+      if(!document.hidden&&who)_hafPing(who,surface,'haf_note_activity');
+    });
+  }
+}
+function _hafPing(u,surface,fn){
+  try{
+    fetch(PLNA_URL+'/rest/v1/rpc/'+fn,{method:'POST',keepalive:true,
+      headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({p_username:u,p_surface:surface||'knect'})}).catch(function(){});
+  }catch(e){}
+}
 window.hafGo=hafGo;window.buildNavV1=buildNavV1;window.switchTab=switchTab;window.hafAccess=hafAccess;window.hafPerms=hafPerms;
 const DRIVER_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
@@ -5771,6 +5818,10 @@ function enterKnectApp(u,acct){
   _setFounder(null);
   const isAdmin=u==='BF638793';
   const demo=DEMO_ACCOUNTS[u];
+  /* Every route into the app passes through here, so this is where an arrival
+     is recorded. A demo account is not a real person turning up, so it is
+     never stamped and can never appear on Brent's "who is on now". */
+  if(!demo)hafNoteIn(u,'knect');
   const displayName=demo?demo.name:u;
   const initials=demo?demo.initials:u.slice(0,2);
   document.getElementById('tb-user').textContent=displayName;
@@ -8088,7 +8139,68 @@ async function faLoad(){
 }
 window.faLoad=faLoad;
 
-function aaBoot(){aaLoad();aaFeed();}
+/* ── WHO IS ON NOW ──────────────────────────────────────────────────────
+   Reads the owner-gated report and nothing else. "On now" means a heartbeat
+   inside the last 15 minutes — a real page open on a real account — not
+   "signed in at some point", which is what every other line on this screen
+   already told Brent and was the reason he could not tell who was actually
+   working. */
+const _SURFACE_LBL={knect:'KNECT',plna:'PLNA',cleverpay:'CleverPay',join:'Join HAF'};
+let _whoTimer=null;
+function _clock(iso){
+  if(!iso)return '—';
+  return new Date(iso).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+async function whoLoad(){
+  const list=document.getElementById('who-list'),kpis=document.getElementById('who-kpis'),
+        when=document.getElementById('who-when');
+  if(!list)return;
+  try{
+    const {denied,rows}=await _netRpc('haf_who_is_on',{p_minutes:15});
+    if(denied){
+      list.innerHTML='<div class="aa-empty">Sign in with your own HAF username and PIN to see who is on.</div>';
+      when.textContent='';kpis.innerHTML='';return}
+    const on=rows.filter(r=>r.online);
+    when.textContent='live · checked '+_clock(new Date().toISOString());
+    kpis.innerHTML=[
+      ['On right now',on.length,on.length?'gn':'','a page open in the last 15 minutes'],
+      ['Signed in today',rows.length,'','arrived in the last 24 hours'],
+      ['On KNECT',on.filter(r=>r.surface==='knect').length,'','the posting side'],
+      ['On PLNA',on.filter(r=>r.surface==='plna').length,'','the driving side']
+    ].map(k=>'<div class="kc"><div class="kc-l">'+k[0]+'</div><div class="kc-v'+(k[2]?' '+k[2]:'')+'">'+
+        k[1]+'</div><div class="kc-d" style="color:var(--mu)">'+k[3]+'</div></div>').join('');
+    if(!rows.length){
+      list.innerHTML='<div class="aa-empty">Nobody has signed in in the last 24 hours.</div>';return}
+    list.innerHTML=rows.map(r=>
+      '<div class="aa-row">'+
+        '<div class="aa-main">'+
+          '<div class="aa-name">'+_esc(r.name||r.username)+'</div>'+
+          '<div class="aa-sub">'+_esc(r.username||'—')+' &middot; '+_esc(_TYPE_LBL[r.type]||r.type||'—')+
+            (r.online&&r.here_since?' &middot; on since '+_esc(_clock(r.here_since)):'')+
+            (!r.online&&r.signed_in?' &middot; signed in '+_esc(_when(r.signed_in)):'')+'</div>'+
+        '</div>'+
+        '<div class="aa-right">'+
+          (r.online
+            ?'<span class="chip cg">On now</span><span class="chip">'+
+               _esc(_SURFACE_LBL[r.surface]||'—')+'</span>'
+            :'<span class="chip">Last seen '+_esc(r.last_seen?_ago(r.last_seen):'—')+'</span>')+
+        '</div>'+
+      '</div>').join('');
+  }catch(e){
+    when.textContent='';
+    list.innerHTML='<div class="aa-empty">Could not read who is on just now — nothing here is invented, so it is showing nothing rather than a guess.</div>';
+  }
+}
+function aaBoot(){
+  aaLoad();aaFeed();whoLoad();
+  /* Keeps itself current while Brent is looking at it, and stops the moment
+     he is not — a background tab does not need to keep asking. */
+  clearInterval(_whoTimer);
+  _whoTimer=setInterval(function(){
+    const pane=document.getElementById('pane-accounts');
+    if(!document.hidden&&pane&&pane.classList.contains('on'))whoLoad();
+  },30000);
+}
 function aaDebounce(){clearTimeout(_aaTimer);_aaTimer=setTimeout(aaLoad,300);}
 async function aaLoad(alsoFeed){
   const list=document.getElementById('aa-list'),cnt=document.getElementById('aa-count');
@@ -8149,7 +8261,7 @@ async function aaFeed(){
     feed.innerHTML='<div class="aa-empty">Could not read the activity just now.</div>';
   }
 }
-window.ovLoad=ovLoad;window.aaBoot=aaBoot;window.aaLoad=aaLoad;window.aaDebounce=aaDebounce;
+window.ovLoad=ovLoad;window.aaBoot=aaBoot;window.aaLoad=aaLoad;window.aaDebounce=aaDebounce;window.whoLoad=whoLoad;
 
 /* ═══════════════ HAF LIVE JOB SPINE ═══════════════
    One delivery record, stored once. Each role sees its own permitted slice.
