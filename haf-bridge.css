@@ -93,8 +93,21 @@ body { font-family: var(--haf-font); }
 /* ---- the logo ---------------------------------------------------------- */
 /* Both headers drew an orange square with a letter K in it. Neither was the
    logo. The badge goes there, with HAF KNECT beside it. */
-.tlogo .haf-logo { height: 26px; display: block; flex-shrink: 0; }
-.llogo .haf-logo { height: 30px; display: block; flex-shrink: 0; }
+/* The first pass dropped the badge INTO that orange square and left the square
+   standing, so the mark read as a logo on an orange plate. The plate is not in
+   the guidelines: the badge sits on the page itself, in either theme. */
+.haf-logo.tlogo-m,
+.haf-logo.llogo-m {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  width: auto;
+  padding: 0;
+  overflow: visible;
+}
+.tlogo .haf-logo { height: 28px; display: block; flex-shrink: 0; }
+.llogo .haf-logo { height: 32px; display: block; flex-shrink: 0; }
 .tlogo .haf-logo svg,
 .llogo .haf-logo svg { height: 100%; width: auto; display: block; }
 .tlogo-t, .llogo-t {
@@ -108,7 +121,7 @@ body { font-family: var(--haf-font); }
 /* ---- anything sitting on the orange ------------------------------------ */
 /* The page used its near-black on orange, which reads as a fourth colour and
    fails contrast. White, per the brand sheet. */
-.vbadge, .btn-primary, .btn.primary, .tlogo-m, .llogo-m { color: #ffffff; }
+.vbadge, .btn-primary, .btn.primary { color: #ffffff; }
 
 /* ---- the switch -------------------------------------------------------- */
 .theme-btn, [data-haf-theme-toggle] {
