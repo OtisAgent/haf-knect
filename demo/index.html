@@ -2,16 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script src="/brand/haf-theme.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache">
 <title>HAF KNECT — Send a delivery</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="admin/lane-factors-v1.js"></script>
 <script src="uk-regions.js"></script>
+<link rel="stylesheet" href="/brand/haf-brand.css">
 <style>
 /* ── TOKENS ─────────────────────────────────────────────────── */
 :root{
@@ -20,10 +19,10 @@
   --tx:#1a1e22;--mu:#6b7580;--su:#9aa3ad;
   --ln:rgba(26,30,34,.1);--lns:rgba(26,30,34,.18);
   --or:#f18e00;--or-d:rgba(241,142,0,.1);--or-g:rgba(241,142,0,.28);
-  --gn:#2dab60;--gn-d:rgba(45,171,96,.1);
-  --am:#d9920b;--am-d:rgba(217,146,11,.1);
-  --rd:#d04040;--rd-d:rgba(208,64,64,.1);
-  --bl:#3d7dca;--bl-d:rgba(61,125,202,.1);
+  --gn:var(--gn, #4f7f58);--gn-d:rgba(45,171,96,.1);
+  --am:var(--am, #b98530);--am-d:rgba(185,133,48,.1);
+  --rd:var(--haf-negative);--rd-d:rgba(180,72,63,.1);
+  --bl:var(--mu, #6f777d);--bl-d:rgba(111,119,125,.1);
   --r:16px;--rs:12px;--rx:8px;--pill:999px;
   --fn:"Inter",sans-serif;--dp:"Montserrat",sans-serif;
   --sb:252px;--tb:56px;
@@ -40,14 +39,14 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:15px;scroll-behavior:smooth}
 body{font-family:var(--fn);background:var(--bg);color:var(--tx);line-height:1.55;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .2s,color .2s}
-ul{list-style:none}a{color:var(--or);text-decoration:none}
+ul{list-style:none}a{color:var(--haf-orange-ink);text-decoration:none}
 button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none;background:none;cursor:pointer}
 
 /* ── VERSION ─── */
-.vbadge{position:fixed;bottom:14px;right:14px;z-index:9999;background:var(--or);color:#0e1113;font-family:var(--dp);font-weight:900;font-size:.6rem;letter-spacing:.08em;padding:.18rem .5rem;border-radius:var(--pill);pointer-events:none}
+.vbadge{position:fixed;bottom:14px;right:14px;z-index:9999;background:var(--or);color:#fff;font-family:var(--dp);font-weight:900;font-size:.6rem;letter-spacing:.08em;padding:.18rem .5rem;border-radius:var(--pill);pointer-events:none}
 
 /* ── DEMO REQUEST MODAL ── */
-.dr-btn{display:flex;align-items:center;justify-content:center;gap:.45rem;width:100%;padding:.65rem .9rem;border-radius:var(--rx);background:var(--or);color:#0e1113;font-size:.82rem;font-weight:800;cursor:pointer;border:none;transition:opacity .14s;margin-top:.75rem}
+.dr-btn{display:flex;align-items:center;justify-content:center;gap:.45rem;width:100%;padding:.65rem .9rem;border-radius:var(--rx);background:var(--or);color:#fff;font-size:.82rem;font-weight:800;cursor:pointer;border:none;transition:opacity .14s;margin-top:.75rem}
 .dr-btn:hover{opacity:.88}
 .dr-btn svg{width:14px;height:14px;fill:none;stroke:#0e1113;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .dr-ov{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:1.2rem}
@@ -58,13 +57,13 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 .dr-box-sub{font-size:.78rem;color:var(--mu);margin-bottom:1.2rem;line-height:1.55}
 .dr-select{width:100%;padding:.58rem .75rem;border-radius:var(--rx);border:1px solid var(--lns);background:var(--p2);color:var(--tx);font-size:.82rem;font-weight:500;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7580' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center;padding-right:2rem}
 .dr-success{display:none;text-align:center;padding:.8rem 0}
-.dr-success-ic{font-size:2rem;margin-bottom:.5rem;color:var(--or)}
+.dr-success-ic{font-size:2rem;margin-bottom:.5rem;color:var(--haf-orange-ink)}
 .dr-success-h{font-family:var(--dp);font-weight:900;font-size:1.05rem;margin-bottom:.3rem}
 .dr-success-p{font-size:.78rem;color:var(--mu);line-height:1.55}
 
 /* ── BUTTONS ── */
 .btn{display:inline-flex;align-items:center;gap:.35rem;font-weight:800;font-size:.88rem;letter-spacing:.01em;border-radius:var(--pill);padding:.55rem 1.35rem;transition:all .14s;cursor:pointer;line-height:1;white-space:nowrap}
-.btn-or{background:var(--or);color:#0e1113;box-shadow:0 4px 16px var(--or-g)}
+.btn-or{background:var(--or);color:#fff;box-shadow:0 4px 16px var(--or-g)}
 .btn-or:hover{filter:brightness(1.07);transform:translateY(-1px)}
 .btn-gh{background:transparent;color:var(--tx);border:1.5px solid var(--lns)}
 .btn-gh:hover{background:var(--ln)}
@@ -78,9 +77,9 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 /* NAV */
 .land-nav{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.8rem;background:var(--p);border-bottom:1px solid var(--ln)}
 .llogo{display:flex;align-items:center;gap:.5rem;text-decoration:none}
-.llogo-m{width:30px;height:30px;background:var(--or);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:.9rem;color:#0e1113}
+.llogo-m{width:30px;height:30px;background:var(--or);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:.9rem;color:#fff}
 .llogo-t{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em;color:var(--tx)}
-.llogo-t span{color:var(--or)}
+.llogo-t span{color:var(--haf-orange-ink)}
 .nav-r{display:flex;align-items:center;gap:.5rem}
 .theme-btn{width:32px;height:32px;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;color:var(--mu);cursor:pointer;transition:all .14s;flex-shrink:0}
 .theme-btn:hover{background:var(--p3);color:var(--tx)}
@@ -97,7 +96,7 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 
 /* MAIN */
 .land-main{display:flex;flex-direction:column;gap:1.8rem}
-.land-kicker{font-size:.75rem;font-weight:800;letter-spacing:.13em;color:var(--or);text-transform:uppercase}
+.land-kicker{font-size:.75rem;font-weight:800;letter-spacing:.13em;color:var(--haf-orange-ink);text-transform:uppercase}
 .land-h1{font-family:var(--dp);font-weight:900;font-size:clamp(2.2rem,4.5vw,3.4rem);line-height:1.05;letter-spacing:-.05em}
 .land-sub{font-size:1.05rem;color:var(--mu);margin-top:.3rem}
 
@@ -107,12 +106,12 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 
 /* TILE CARD */
 .tile{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:1.3rem 1.4rem;display:flex;align-items:center;justify-content:space-between;gap:.8rem;cursor:pointer;transition:all .17s;box-shadow:var(--sd)}
-.tile:hover{border-color:var(--or);box-shadow:var(--sd-h);transform:translateY(-2px)}
-.tile.active{border-color:var(--or);background:var(--or-d)}
+.tile:hover{border-color:var(--haf-orange-ink);box-shadow:var(--sd-h);transform:translateY(-2px)}
+.tile.active{border-color:var(--haf-orange-ink);background:var(--or-d)}
 .tile-body{}
 .tile-h{font-family:var(--dp);font-weight:800;font-size:.9rem;letter-spacing:-.02em;margin-bottom:.28rem}
 .tile-p{font-size:.76rem;color:var(--mu);line-height:1.55;max-width:200px}
-.tile-arr{font-size:1.15rem;color:var(--or);flex-shrink:0;font-weight:700;transition:transform .14s}
+.tile-arr{font-size:1.15rem;color:var(--haf-orange-ink);flex-shrink:0;font-weight:700;transition:transform .14s}
 .tile:hover .tile-arr{transform:translateX(3px)}
 .tile.feat{grid-column:1 / -1}
 
@@ -125,9 +124,9 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 .fi{display:flex;flex-direction:column;gap:.25rem}
 .fi-lbl{font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--mu);text-transform:uppercase}
 .fi-inp{background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.58rem .82rem;font-size:.88rem;color:var(--tx);transition:border-color .14s;width:100%}
-.fi-inp:focus{border-color:var(--or)}
+.fi-inp:focus{border-color:var(--haf-orange-ink)}
 .fi-sel{background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.58rem .82rem;font-size:.85rem;color:var(--tx);width:100%;cursor:pointer}
-.fi-sel:focus{border-color:var(--or)}
+.fi-sel:focus{border-color:var(--haf-orange-ink)}
 .pf-opts{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:.9rem}
 @media(max-width:500px){.pf-opts{grid-template-columns:1fr}}
 .pf-disc{font-size:.72rem;color:var(--su);text-align:center;margin-top:.6rem;line-height:1.55}
@@ -135,7 +134,7 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 /* PRICE RESULT */
 .price-result{background:var(--p);border:1.5px solid var(--or-g);border-radius:var(--r);padding:1.4rem;box-shadow:var(--sd);display:none}
 .price-result.show{display:block}
-.pr-lbl{font-size:.66rem;font-weight:700;letter-spacing:.11em;color:var(--or);text-transform:uppercase;margin-bottom:.4rem}
+.pr-lbl{font-size:.66rem;font-weight:700;letter-spacing:.11em;color:var(--haf-orange-ink);text-transform:uppercase;margin-bottom:.4rem}
 .pr-range{font-family:var(--dp);font-weight:900;font-size:2rem;letter-spacing:-.05em}
 .pr-vat{font-size:.76rem;color:var(--mu);font-weight:600;margin-left:.3rem}
 .pr-basis{font-size:.77rem;color:var(--mu);margin:.5rem 0 .25rem}
@@ -146,10 +145,10 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 .track-panel.open{display:block}
 .track-row{display:flex;gap:.5rem;margin-top:.6rem}
 .track-inp{flex:1;background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.58rem .82rem;font-size:.88rem;color:var(--tx);transition:border-color .14s}
-.track-inp:focus{border-color:var(--or)}
+.track-inp:focus{border-color:var(--haf-orange-ink)}
 .track-result{margin-top:.9rem;padding:.8rem 1rem;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln);display:none}
 .track-result.show{display:block}
-.tr-ref{font-size:.66rem;font-weight:700;letter-spacing:.1em;color:var(--or);text-transform:uppercase;margin-bottom:.3rem}
+.tr-ref{font-size:.66rem;font-weight:700;letter-spacing:.1em;color:var(--haf-orange-ink);text-transform:uppercase;margin-bottom:.3rem}
 .tr-status{font-family:var(--dp);font-weight:900;font-size:1rem;margin-bottom:.15rem}
 .tr-route{font-size:.77rem;color:var(--mu)}
 
@@ -171,7 +170,7 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 /* SECONDARY ACTIONS */
 .sec-acts{display:flex;align-items:center;gap:1.2rem;padding:.3rem 0}
 .sec-link{font-size:.8rem;font-weight:600;color:var(--mu);cursor:pointer;transition:color .14s}
-.sec-link:hover{color:var(--or)}
+.sec-link:hover{color:var(--haf-orange-ink)}
 .sec-sep{color:var(--su);font-size:.7rem}
 
 /* SIDE PANEL */
@@ -181,10 +180,10 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .sc-fi{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.5rem}
 .sc-lbl{font-size:.7rem;font-weight:700;letter-spacing:.06em;color:var(--mu);text-transform:uppercase}
 .sc-inp{width:100%;background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.58rem .85rem;font-size:.88rem;color:var(--tx);transition:border-color .14s}
-.sc-inp:focus{border-color:var(--or)}
+.sc-inp:focus{border-color:var(--haf-orange-ink)}
 .sc-err{font-size:.7rem;color:var(--rd);margin:.3rem 0 .4rem;display:none}
 .sc-foot{font-size:.72rem;color:var(--mu);text-align:center;margin-top:.7rem;line-height:1.55}
-.sc-foot a{color:var(--or)}
+.sc-foot a{color:var(--haf-orange-ink)}
 .sc-btns{display:flex;flex-direction:column;gap:.45rem}
 .sc-contact-btn{display:flex;align-items:center;gap:.5rem;padding:.65rem .9rem;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .14s}
 .sc-contact-btn:hover{background:var(--p3)}
@@ -200,7 +199,7 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .of{display:flex;flex-direction:column;gap:.28rem;margin-bottom:.55rem}
 .ol{display:block;font-size:.68rem;font-weight:700;color:var(--mu);letter-spacing:.05em;text-transform:uppercase}
 .oi{width:100%;background:var(--p2);border:1.5px solid var(--lns);border-radius:var(--rx);padding:.58rem .82rem;font-size:.85rem;color:var(--tx);transition:border-color .14s}
-.oi:focus{border-color:var(--or)}
+.oi:focus{border-color:var(--haf-orange-ink)}
 .oe{font-size:.73rem;color:var(--rd);margin:.2rem 0 .5rem;display:none}
 
 /* ══ APP SHELL ══════════════════════════════════════════════════ */
@@ -211,9 +210,9 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
    the right of a phone screen — which it did, on production, before this. */
 .tb-l{display:flex;align-items:center;gap:.8rem;min-width:0}
 .tlogo{display:flex;align-items:center;gap:.45rem;text-decoration:none}
-.tlogo-m{width:26px;height:26px;background:var(--or);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:.82rem;color:#0e1113}
+.tlogo-m{width:26px;height:26px;background:var(--or);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:.82rem;color:#fff}
 .tlogo-t{font-family:var(--dp);font-weight:900;font-size:.92rem;letter-spacing:-.04em;color:var(--tx)}
-.tlogo-t span{color:var(--or)}
+.tlogo-t span{color:var(--haf-orange-ink)}
 .menu-btn{display:none;width:30px;height:30px;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln);align-items:center;justify-content:center;color:var(--mu);cursor:pointer}
 .tb-r{display:flex;align-items:center;gap:.45rem;min-width:0}
 /* A long real name used to push the whole right-hand row off a phone screen.
@@ -222,7 +221,7 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .role-chip{font-size:.64rem;font-weight:700;letter-spacing:.06em;padding:.13rem .5rem;border-radius:var(--pill);text-transform:uppercase}
 .ib{width:28px;height:28px;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;color:var(--mu);transition:all .14s;cursor:pointer}
 .ib:hover{color:var(--tx);background:var(--p3)}
-.av{width:28px;height:28px;border-radius:50%;background:var(--or);color:#0e1113;font-size:.65rem;font-weight:800;font-family:var(--dp);display:flex;align-items:center;justify-content:center}
+.av{width:28px;height:28px;border-radius:50%;background:var(--or);color:#fff;font-size:.65rem;font-weight:800;font-family:var(--dp);display:flex;align-items:center;justify-content:center}
 
 /* SIDEBAR */
 .app-body{display:flex;flex:1;min-height:calc(100vh - var(--tb))}
@@ -231,9 +230,9 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .nav-sec{padding:.5rem .85rem .12rem;font-size:.6rem;font-weight:700;letter-spacing:.1em;color:var(--su);text-transform:uppercase}
 .ni{display:flex;align-items:center;gap:.6rem;padding:.5rem .85rem;margin:.06rem .4rem;border-radius:var(--rx);cursor:pointer;color:var(--mu);font-weight:600;font-size:.82rem;transition:all .14s}
 .ni:hover{background:var(--ln);color:var(--tx)}
-.ni.on{background:var(--or-d);color:var(--or);font-weight:700}
+.ni.on{background:var(--or-d);color:var(--haf-orange-ink);font-weight:700}
 .ni-ic{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.nb{margin-left:auto;background:var(--or);color:#0e1113;font-size:.56rem;font-weight:800;padding:.06rem .36rem;border-radius:var(--pill)}
+.nb{margin-left:auto;background:var(--or);color:#fff;font-size:.56rem;font-weight:800;padding:.06rem .36rem;border-radius:var(--pill)}
 .sdiv{border:none;border-top:1px solid var(--ln);margin:.4rem .85rem}
 .sb-bot{margin-top:auto;padding:.35rem}
 /* ── DASHBOARD V1 SHELL (Brent's override document, 14 Aug 2026) ──
@@ -246,20 +245,20 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .ni-sec.open .ni-cv{transform:rotate(180deg)}
 .ni-sub{display:flex;align-items:center;gap:.55rem;padding:.36rem .85rem .36rem 2.05rem;margin:.02rem .4rem;border-radius:var(--rx);cursor:pointer;color:var(--mu);font-weight:500;font-size:.76rem;transition:all .14s}
 .ni-sub:hover{background:var(--ln);color:var(--tx)}
-.ni-sub.on{background:var(--or-d);color:var(--or);font-weight:700}
+.ni-sub.on{background:var(--or-d);color:var(--haf-orange-ink);font-weight:700}
 .ni-sub .ni-ic{width:12px;height:12px;opacity:.8}
 .ni-lock{opacity:.55;cursor:pointer}
 .ni-lock:hover{opacity:.85;background:var(--ln)}
 .ni-lk{width:11px;height:11px;margin-left:auto;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .lk-why{padding:.05rem 1rem .5rem 2.05rem;font-size:.68rem;line-height:1.5;color:var(--su)}
-.lk-why a{color:var(--or);font-weight:700;cursor:pointer}
+.lk-why a{color:var(--haf-orange-ink);font-weight:700;cursor:pointer}
 /* the signed-in account, at the foot of the sidebar */
 .set-ck{display:flex;align-items:center;gap:.55rem;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--mu);padding:.35rem 0}
-.set-ck input{accent-color:var(--or)}
+.set-ck input{accent-color:var(--haf-orange-ink)}
 .sb-acct{display:flex;align-items:center;gap:.55rem;padding:.5rem .85rem .55rem;border-radius:var(--rx)}
 .sb-acct .av{width:26px;height:26px;font-size:.62rem;flex:0 0 auto}
 .sb-acct-n{font-weight:800;font-size:.79rem;line-height:1.25;color:var(--tx)}
-.sb-acct-m{font-size:.66rem;color:var(--or);font-weight:700;line-height:1.3}
+.sb-acct-m{font-size:.66rem;color:var(--haf-orange-ink);font-weight:700;line-height:1.3}
 .sb-acct-u{font-size:.63rem;color:var(--su);font-weight:600;letter-spacing:.04em}
 /* notification bell */
 .nbell{position:relative}
@@ -290,7 +289,7 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .kc{background:var(--p);border:1px solid var(--ln);border-radius:var(--rs);padding:1rem;box-shadow:var(--sd)}
 .kc-l{font-size:.66rem;font-weight:700;color:var(--mu);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.35rem}
 .kc-v{font-family:var(--dp);font-weight:900;font-size:1.6rem;letter-spacing:-.04em}
-.kc-v.or{color:var(--or)}.kc-v.gn{color:var(--gn)}.kc-v.rd{color:var(--rd)}.kc-v.am{color:var(--am)}
+.kc-v.or{color:var(--haf-orange-ink)}.kc-v.gn{color:var(--gn)}.kc-v.rd{color:var(--rd)}.kc-v.am{color:var(--am)}
 .kc-d{font-size:.68rem;font-weight:600;margin-top:.12rem}.kc-d.pos{color:var(--gn)}.kc-d.neg{color:var(--rd)}
 /* ── Network Overview + Account Activity ──────────────────────────────────
    The source line sits above the numbers, not in a footnote: on a page that
@@ -330,7 +329,7 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .crm-chips{display:flex;gap:.3rem;flex-wrap:wrap;margin:.55rem 0 .9rem}
 .crm-sec{font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;color:var(--mu);
          font-weight:800;margin:1.05rem 0 .4rem}
-.crm-warn{font-size:.75rem;background:var(--am-d,rgba(232,140,0,.12));border:1px solid rgba(232,140,0,.3);
+.crm-warn{font-size:.75rem;background:var(--am-d,rgba(241,142,0,.12));border:1px solid rgba(241,142,0,.3);
           border-radius:var(--rx);padding:.55rem .7rem;color:var(--tx);margin:.5rem 0}
 /* ── Money rows ── */
 .mo-row{display:flex;align-items:center;gap:.6rem;padding:.6rem 0;border-bottom:1px solid var(--ln)}
@@ -355,16 +354,16 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
    opened. Gold is theirs and nothing else on the dashboard uses it, so
    the mark reads as a status the moment it appears. Hidden by default:
    it is only ever switched on by a live founder check, never by a guess. */
-.fnd-badge{display:none;align-items:center;gap:.3rem;font-family:var(--dp);font-weight:900;font-size:.55rem;letter-spacing:.09em;text-transform:uppercase;color:#2e2200;background:linear-gradient(135deg,#f0c33c,#d9920b);border-radius:var(--pill);padding:.2rem .55rem;white-space:nowrap;flex:none}
+.fnd-badge{display:none;align-items:center;gap:.3rem;font-family:var(--dp);font-weight:900;font-size:.55rem;letter-spacing:.09em;text-transform:uppercase;color:#2e2200;background:linear-gradient(135deg,var(--haf-caution),var(--am, #b98530));border-radius:var(--pill);padding:.2rem .55rem;white-space:nowrap;flex:none}
 .fnd-badge.on{display:inline-flex}
 .fnd-badge svg{flex:none}
 
-.fnd-card{display:none;gap:1rem;align-items:flex-start;background:linear-gradient(105deg,rgba(217,146,11,.11),rgba(217,146,11,0) 62%),var(--p);border:1px solid var(--am);border-left:4px solid var(--am);border-radius:var(--rs);padding:1.1rem 1.2rem;margin-bottom:1rem;box-shadow:var(--sd)}
+.fnd-card{display:none;gap:1rem;align-items:flex-start;background:linear-gradient(105deg,rgba(185,133,48,.11),rgba(185,133,48,0) 62%),var(--p);border:1px solid var(--am);border-left:4px solid var(--am);border-radius:var(--rs);padding:1.1rem 1.2rem;margin-bottom:1rem;box-shadow:var(--sd)}
 .fnd-card.on{display:flex}
 .fnd-mark{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--am-d);color:var(--am);border:1px solid var(--am)}
 .fnd-body{min-width:0}
 .fnd-ttl{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;font-family:var(--dp);font-weight:900;font-size:.95rem;letter-spacing:-.02em;color:var(--tx)}
-.fnd-no{font-size:.58rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#2e2200;background:linear-gradient(135deg,#f0c33c,#d9920b);border-radius:var(--pill);padding:.12rem .45rem}
+.fnd-no{font-size:.58rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#2e2200;background:linear-gradient(135deg,var(--haf-caution),var(--am, #b98530));border-radius:var(--pill);padding:.12rem .45rem}
 .fnd-sub{font-size:.82rem;color:var(--mu);margin-top:.28rem;line-height:1.5}
 .fnd-meta{font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--am);margin-top:.5rem}
 /* The PLNA code block. It has to survive a long code on a 320px screen, so the
@@ -373,7 +372,7 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .fnd-code-lbl{font-size:.6rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--am)}
 .fnd-code-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-top:.35rem}
 .fnd-code-val{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92rem;font-weight:700;letter-spacing:.06em;color:var(--tx);word-break:break-all;min-width:0}
-.fnd-code-btn{flex:none;font-family:var(--dp);font-weight:900;font-size:.6rem;letter-spacing:.07em;text-transform:uppercase;color:#2e2200;background:linear-gradient(135deg,#f0c33c,#d9920b);border:0;border-radius:var(--pill);padding:.3rem .7rem;cursor:pointer}
+.fnd-code-btn{flex:none;font-family:var(--dp);font-weight:900;font-size:.6rem;letter-spacing:.07em;text-transform:uppercase;color:#2e2200;background:linear-gradient(135deg,var(--haf-caution),var(--am, #b98530));border:0;border-radius:var(--pill);padding:.3rem .7rem;cursor:pointer}
 .fnd-code-btn:disabled{opacity:.65;cursor:default}
 .fnd-code-hint{font-size:.7rem;color:var(--mu);margin-top:.4rem;line-height:1.5}
 @media(max-width:600px){
@@ -390,12 +389,12 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
 /* Network Pools what-if controls */
 .np-in{width:56px;background:var(--p2);border:1px solid var(--ln);border-radius:6px;color:var(--tx);font-size:.8rem;padding:.2rem .35rem;text-align:right;font-family:var(--fn)}
-.np-in:focus{outline:none;border-color:var(--or)}
+.np-in:focus{outline:none;border-color:var(--haf-orange-ink)}
 .np-bar{height:7px;border-radius:999px;background:var(--p2);border:1px solid var(--ln);overflow:hidden;margin:.25rem 0 .45rem}
 .np-bar i{display:block;height:100%;background:var(--or)}
 .np-btn{font-size:.72rem;font-weight:700;background:var(--p2);border:1px solid var(--ln);color:var(--mu);border-radius:7px;padding:.3rem .65rem;cursor:pointer}
-.np-btn:hover{color:var(--or);border-color:var(--or)}
-.np-rng{width:130px;accent-color:var(--or);vertical-align:middle;cursor:pointer}
+.np-btn:hover{color:var(--haf-orange-ink);border-color:var(--haf-orange-ink)}
+.np-rng{width:130px;accent-color:var(--haf-orange-ink);vertical-align:middle;cursor:pointer}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.85rem}
 @media(max-width:680px){.g2,.g3{grid-template-columns:1fr}}
 
@@ -403,18 +402,18 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .chip{display:inline-flex;align-items:center;gap:.25rem;padding:.15rem .55rem;border-radius:var(--pill);font-size:.66rem;font-weight:700;letter-spacing:.04em}
 .chip::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .cg{background:var(--gn-d);color:var(--gn);border:1px solid rgba(45,171,96,.22)}.cg::before{background:var(--gn)}
-.ca{background:var(--am-d);color:var(--am);border:1px solid rgba(217,146,11,.22)}.ca::before{background:var(--am)}
-.cr2{background:var(--rd-d);color:var(--rd);border:1px solid rgba(208,64,64,.22)}.cr2::before{background:var(--rd)}
-.co{background:var(--or-d);color:var(--or);border:1px solid var(--or-g)}.co::before{background:var(--or)}
-.cb{background:var(--bl-d);color:var(--bl);border:1px solid rgba(61,125,202,.22)}.cb::before{background:var(--bl)}
+.ca{background:var(--am-d);color:var(--am);border:1px solid rgba(185,133,48,.22)}.ca::before{background:var(--am)}
+.cr2{background:var(--rd-d);color:var(--rd);border:1px solid rgba(180,72,63,.22)}.cr2::before{background:var(--rd)}
+.co{background:var(--or-d);color:var(--haf-orange-ink);border:1px solid var(--or-g)}.co::before{background:var(--or)}
+.cb{background:var(--bl-d);color:var(--bl);border:1px solid rgba(111,119,125,.22)}.cb::before{background:var(--bl)}
 
 /* JOB CARDS */
 .jl{display:flex;flex-direction:column;gap:.55rem;margin-bottom:1rem}
 .jc{background:var(--p);border:1px solid var(--ln);border-radius:var(--rs);padding:.9rem 1.1rem;display:flex;align-items:center;gap:.85rem;box-shadow:var(--sd);transition:border-color .14s}
-.jc:hover{border-color:var(--or)}
+.jc:hover{border-color:var(--haf-orange-ink)}
 .jdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .jm{flex:1}
-.jref{font-size:.65rem;font-weight:700;letter-spacing:.06em;color:var(--or);margin-bottom:.1rem}
+.jref{font-size:.65rem;font-weight:700;letter-spacing:.06em;color:var(--haf-orange-ink);margin-bottom:.1rem}
 .jroute{font-size:.9rem;font-weight:700;margin-bottom:.1rem}
 .jdet{font-size:.7rem;color:var(--mu)}
 .jamt{font-family:var(--dp);font-weight:800;font-size:.92rem;flex-shrink:0}
@@ -431,17 +430,17 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .fg{margin-bottom:.9rem}
 .fl{display:block;font-size:.68rem;font-weight:700;color:var(--mu);margin-bottom:.28rem;letter-spacing:.04em;text-transform:uppercase}
 .fi2{width:100%;background:var(--p2);border:1.5px solid var(--lns);border-radius:var(--rx);padding:.58rem .82rem;font-size:.84rem;color:var(--tx);transition:border-color .14s}
-.fi2:focus{border-color:var(--or)}
+.fi2:focus{border-color:var(--haf-orange-ink)}
 textarea.fi2{resize:vertical;min-height:70px}
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
 /* feedback board */
 .fb-filters{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem}
 .fb-fbtn{padding:.3rem .8rem;border-radius:var(--pill);font-size:.72rem;font-weight:700;background:var(--p);border:1px solid var(--ln);color:var(--mu);transition:all .14s}
-.fb-fbtn.on{background:var(--or-d);border-color:var(--or-g);color:var(--or)}
+.fb-fbtn.on{background:var(--or-d);border-color:var(--or-g);color:var(--haf-orange-ink)}
 .fb-item{background:var(--p);border:1px solid var(--ln);border-radius:var(--rs);padding:.85rem 1rem;display:flex;gap:.85rem;align-items:flex-start;box-shadow:var(--sd);margin-bottom:.55rem}
 .fb-vote{display:flex;flex-direction:column;align-items:center;gap:.1rem;min-width:44px;padding:.45rem .3rem;border-radius:var(--rx);border:1px solid var(--ln);background:var(--p2);color:var(--mu);font-size:.82rem;font-weight:800;transition:all .14s;flex-shrink:0}
-.fb-vote:hover{border-color:var(--or);color:var(--or)}
-.fb-vote.voted{background:var(--or-d);border-color:var(--or-g);color:var(--or)}
+.fb-vote:hover{border-color:var(--haf-orange-ink);color:var(--haf-orange-ink)}
+.fb-vote.voted{background:var(--or-d);border-color:var(--or-g);color:var(--haf-orange-ink)}
 .fb-body{flex:1;min-width:0}
 .fb-title{font-weight:700;font-size:.92rem;overflow-wrap:anywhere}
 .fb-details{font-size:.78rem;color:var(--mu);line-height:1.55;margin-top:.15rem;white-space:pre-wrap;overflow-wrap:anywhere}
@@ -451,22 +450,22 @@ textarea.fi2{resize:vertical;min-height:70px}
 @media(max-width:900px){.fb-g2{grid-template-columns:1fr!important}}
 /* sidebar HAF KNECT Promo */
 .sb-plna{display:block;margin:.9rem .8rem .4rem;padding:.8rem .9rem;background:var(--or-d);border:1.5px solid var(--or-g);border-radius:var(--rs);text-decoration:none;color:var(--tx);font-size:.74rem;line-height:1.5;transition:border-color .14s}
-.sb-plna:hover{border-color:var(--or)}
+.sb-plna:hover{border-color:var(--haf-orange-ink)}
 /* "Add to your account" — its own section at the foot of the sidebar. Styled as
    a nav row so it reads as part of the sidebar, with a leaving-the-app arrow so
    nobody is surprised when Clever opens in a new tab. */
 .sb-addnote{padding:.1rem .85rem .5rem;font-size:.68rem;line-height:1.5;color:var(--mu)}
-.ni-add{color:var(--or)}
+.ni-add{color:var(--haf-orange-ink)}
 .ni-add .ni-ic{stroke:var(--or)}
 .ni-out{width:11px;height:11px;margin-left:auto;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.7}
-.sb-plna b{display:block;color:var(--or);font-weight:800;margin-top:.15rem}
+.sb-plna b{display:block;color:var(--haf-orange-ink);font-weight:800;margin-top:.15rem}
 @media(max-width:560px){.fr{grid-template-columns:1fr}}
 
 /* STATUS PANELS */
 .sp{border-radius:var(--rs);padding:1rem 1.2rem;margin-bottom:1rem;display:flex;align-items:center;gap:.85rem}
 .sp.gn{background:var(--gn-d);border:1px solid rgba(45,171,96,.22)}
-.sp.am{background:var(--am-d);border:1px solid rgba(217,146,11,.22)}
-.sp.rd{background:var(--rd-d);border:1px solid rgba(208,64,64,.22)}
+.sp.am{background:var(--am-d);border:1px solid rgba(185,133,48,.22)}
+.sp.rd{background:var(--rd-d);border:1px solid rgba(180,72,63,.22)}
 .sp-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
 .sp.gn .sp-dot{background:var(--gn)}.sp.am .sp-dot{background:var(--am)}.sp.rd .sp-dot{background:var(--rd)}
 .sp-tx h4{font-weight:700;font-size:.83rem;margin-bottom:.1rem}
@@ -485,7 +484,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 
 /* LOAD CARD */
 .ldc{background:var(--p);border:1px solid var(--ln);border-radius:var(--rs);padding:1rem;margin-bottom:.75rem;box-shadow:var(--sd);transition:border-color .14s}
-.ldc:hover{border-color:var(--or)}
+.ldc:hover{border-color:var(--haf-orange-ink)}
 .ldc-h{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.55rem}
 .ldc-route{font-weight:700;font-size:.88rem}
 .ldc-meta{display:flex;gap:1rem;flex-wrap:wrap}
@@ -503,8 +502,8 @@ textarea.fi2{resize:vertical;min-height:70px}
 .jtrack-step{display:flex;flex-direction:column;align-items:center;gap:.2rem;flex-shrink:0}
 .jts-dot{width:12px;height:12px;border-radius:50%;background:var(--ln);border:2px solid var(--lns)}
 .jts-lbl{font-size:.6rem;font-weight:700;color:var(--su);text-align:center;white-space:nowrap}
-.jtrack-step.on .jts-dot{background:var(--or);border-color:var(--or)}
-.jtrack-step.on .jts-lbl{color:var(--or)}
+.jtrack-step.on .jts-dot{background:var(--or);border-color:var(--haf-orange-ink)}
+.jtrack-step.on .jts-lbl{color:var(--haf-orange-ink)}
 .jtrack-line{flex:1;height:2px;background:var(--ln);min-width:20px}
 /* POOLING */
 .reb-bar-wrap{background:var(--p2);border-radius:var(--pill);height:7px;margin:.5rem 0;overflow:hidden}
@@ -519,7 +518,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .xch-lbl{font-weight:800;font-size:.84rem;letter-spacing:-.01em}
 .xch-sub{font-size:.68rem;color:var(--mu)}
 .xch-nums{display:flex;gap:1.1rem;align-items:center}
-.xch-num{text-align:center}.xch-nv{font-weight:900;font-size:1.05rem;color:var(--or)}.xch-nl{font-size:.6rem;color:var(--mu);text-transform:uppercase;letter-spacing:.05em}
+.xch-num{text-align:center}.xch-nv{font-weight:900;font-size:1.05rem;color:var(--haf-orange-ink)}.xch-nl{font-size:.6rem;color:var(--mu);text-transform:uppercase;letter-spacing:.05em}
 .xch-num.neu .xch-nv{color:var(--tx)}
 .avail-pill{display:flex;align-items:center;gap:.45rem;padding:.42rem .9rem;border-radius:20px;border:1.5px solid var(--gn);background:rgba(45,171,96,.08);cursor:pointer;user-select:none;transition:all .2s;white-space:nowrap}
 .avail-pill.off{border-color:var(--rd);background:rgba(204,51,51,.06)}
@@ -529,7 +528,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .avail-pill.off .ap-lbl{color:var(--rd)}
 /* Exchange job cards */
 .xc{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:.95rem 1.05rem;margin-bottom:.7rem;box-shadow:var(--sd);transition:border-color .18s,box-shadow .18s}
-.xc:hover{border-color:rgba(255,120,0,.35);box-shadow:0 2px 12px rgba(255,120,0,.08)}
+.xc:hover{border-color:rgba(241,142,0,.35);box-shadow:0 2px 12px rgba(241,142,0,.08)}
 .xc.xc-invite{border-color:var(--or-g)}
 /* a job this account posted — its own work, shown to nobody else */
 .xc.xc-own{border-color:var(--ln)}
@@ -537,9 +536,9 @@ textarea.fi2{resize:vertical;min-height:70px}
 .xc-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.5rem}
 .xc-badges{display:flex;gap:.28rem;align-items:center;flex-wrap:wrap}
 .xb{font-size:.57rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;padding:.18rem .5rem;border-radius:4px}
-.xb.inv{background:rgba(255,120,0,.15);color:var(--or);border:1px solid var(--or-g)}
-.xb.urg{background:rgba(208,64,64,.13);color:var(--rd)}
-.xb.sdy{background:rgba(232,140,0,.13);color:var(--am)}
+.xb.inv{background:rgba(241,142,0,.15);color:var(--haf-orange-ink);border:1px solid var(--or-g)}
+.xb.urg{background:rgba(180,72,63,.13);color:var(--rd)}
+.xb.sdy{background:rgba(241,142,0,.13);color:var(--am)}
 .xb.flx{background:var(--ln);color:var(--mu)}
 .xb.pref{background:rgba(45,171,96,.12);color:var(--gn)}
 .xb-ref{font-size:.65rem;color:var(--mu);font-weight:600}
@@ -559,14 +558,14 @@ textarea.fi2{resize:vertical;min-height:70px}
 .xfeed-hdr::after{content:'';flex:1;height:1px;background:var(--ln)}
 /* Active job banner */
 .ajob{border:2px solid var(--or);border-radius:var(--r);background:var(--or-d);padding:.95rem 1.05rem;margin-bottom:.9rem}
-.ajob-tag{font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--or);margin-bottom:.22rem}
+.ajob-tag{font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--haf-orange-ink);margin-bottom:.22rem}
 .ajob-route{font-family:var(--dp);font-weight:900;font-size:.97rem;margin-bottom:.75rem}
 .ajob-steps{display:flex;align-items:center;margin-bottom:.8rem}
 .ajs{display:flex;flex-direction:column;align-items:center;gap:.18rem;flex-shrink:0}
 .ajs-dot{width:13px;height:13px;border-radius:50%;background:var(--ln);border:2px solid #888}
 .ajs-lbl{font-size:.58rem;font-weight:700;color:#888;text-align:center;white-space:nowrap}
-.ajs.on .ajs-dot{background:var(--or);border-color:var(--or)}
-.ajs.on .ajs-lbl{color:var(--or)}
+.ajs.on .ajs-dot{background:var(--or);border-color:var(--haf-orange-ink)}
+.ajs.on .ajs-lbl{color:var(--haf-orange-ink)}
 .ajs.done .ajs-dot{background:var(--gn);border-color:var(--gn)}
 .ajs.done .ajs-lbl{color:var(--gn)}
 .ajob-line{flex:1;height:2px;background:var(--ln);min-width:16px}
@@ -575,7 +574,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 /* PLAN CARDS */
 .plg{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.85rem;margin-bottom:1.2rem}
 .plc{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:1.3rem;box-shadow:var(--sd)}
-.plc.feat{border-color:var(--or)}
+.plc.feat{border-color:var(--haf-orange-ink)}
 .pl-n{font-family:var(--dp);font-weight:900;font-size:.88rem;letter-spacing:-.02em;margin-bottom:.25rem}
 .pl-p{font-family:var(--dp);font-weight:900;font-size:1.7rem;letter-spacing:-.05em;margin-bottom:.2rem}
 .pl-p span{font-size:.78rem;font-weight:600;color:var(--mu)}
@@ -586,7 +585,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 /* INT CARDS */
 .ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:.85rem;margin-bottom:1.2rem}
 .ic{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--rs);padding:1rem;text-decoration:none;color:var(--tx);transition:all .17s;display:block;box-shadow:var(--sd)}
-.ic:hover{border-color:var(--or);transform:translateY(-2px)}
+.ic:hover{border-color:var(--haf-orange-ink);transform:translateY(-2px)}
 .ic-l{font-size:.6rem;font-weight:700;letter-spacing:.1em;color:var(--mu);text-transform:uppercase;margin-bottom:.2rem}
 .ic-n{font-family:var(--dp);font-weight:900;font-size:.88rem;letter-spacing:-.02em}
 .ic-s{font-size:.68rem;color:var(--gn);font-weight:600;margin-top:.2rem}
@@ -598,8 +597,8 @@ textarea.fi2{resize:vertical;min-height:70px}
 .van-lbl{font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--mu);text-transform:uppercase;margin-bottom:.45rem}
 .van-pills{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
 .vp{background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--pill);padding:.45rem .9rem;font-size:.8rem;font-weight:700;color:var(--mu);cursor:pointer;transition:all .14s;flex:1;min-width:80px;text-align:center;line-height:1.35}
-.vp:hover{border-color:var(--or);color:var(--tx)}
-.vp.sel{background:var(--or);border-color:var(--or);color:#0e1113}
+.vp:hover{border-color:var(--haf-orange-ink);color:var(--tx)}
+.vp.sel{background:var(--or);border-color:var(--haf-orange-ink);color:#fff}
 .vp-sub{font-size:.62rem;font-weight:400;color:var(--su);display:block}
 .vp.sel .vp-sub{color:rgba(14,17,19,.65)}
 /* A van that cannot take what the customer has told us — still choosable, but
@@ -607,7 +606,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .vp.toosmall{opacity:.42;border-style:dashed}
 .vp.toosmall:hover{opacity:.7}
 /* HAF's own suggestion, before the customer touches the van row */
-.vp.rec{border-color:var(--or);box-shadow:0 0 0 1px var(--or-g)}
+.vp.rec{border-color:var(--haf-orange-ink);box-shadow:0 0 0 1px var(--or-g)}
 .van-lbl .van-hint{font-weight:500;letter-spacing:0;text-transform:none;color:var(--su)}
 /* The van row is a fixed grid, not a wrapping flex line: every vehicle gets the
    same width whatever the fleet list is, so a long name can never squash the
@@ -633,10 +632,10 @@ textarea.fi2{resize:vertical;min-height:70px}
 .van-guide{font-size:.62rem;color:var(--su);line-height:1.45;margin:-.6rem 0 1rem}
 /* ── LOAD PICKER (how heavy / how big) ── */
 .lp-tile{background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.55rem .5rem .5rem;cursor:pointer;transition:all .14s;flex:1;min-width:96px;text-align:center;line-height:1.3;display:flex;flex-direction:column;align-items:center;gap:.3rem}
-.lp-tile:hover{border-color:var(--or)}
-.lp-tile.sel{background:var(--or-d);border-color:var(--or)}
+.lp-tile:hover{border-color:var(--haf-orange-ink)}
+.lp-tile.sel{background:var(--or-d);border-color:var(--haf-orange-ink)}
 .lp-tile svg{width:38px;height:23px;flex-shrink:0;color:var(--su);stroke:currentColor;fill:none;stroke-width:1.6}
-.lp-tile.sel svg{color:var(--or)}
+.lp-tile.sel svg{color:var(--haf-orange-ink)}
 .lp-tile svg .fill{fill:currentColor;stroke:none}
 .lp-tile-n{font-size:.74rem;font-weight:700;color:var(--mu)}
 .lp-tile.sel .lp-tile-n{color:var(--tx)}
@@ -678,35 +677,35 @@ textarea.fi2{resize:vertical;min-height:70px}
 .path-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem}
 @media(max-width:680px){.path-tiles{grid-template-columns:1fr}}
 .ptile{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:1.1rem 1.15rem 1rem;cursor:pointer;transition:all .17s;box-shadow:var(--sd)}
-.ptile:hover{border-color:var(--or);transform:translateY(-2px);box-shadow:var(--sd-h)}
+.ptile:hover{border-color:var(--haf-orange-ink);transform:translateY(-2px);box-shadow:var(--sd-h)}
 .ptile-icon{width:30px;height:30px;border-radius:var(--rx);background:var(--or-d);display:flex;align-items:center;justify-content:center;margin-bottom:.6rem}
 .ptile-icon svg{width:13px;height:13px;stroke:var(--or);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ptile-h{font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.03em;margin-bottom:.25rem}
 .ptile-p{font-size:.8rem;color:var(--mu);line-height:1.55;margin-bottom:.65rem}
-.ptile-arr{font-size:.82rem;color:var(--or);font-weight:800}
+.ptile-arr{font-size:.82rem;color:var(--haf-orange-ink);font-weight:800}
 
 /* ── FLOW OVERLAY ─────────────────────────────────────────── */
 .fbox{background:var(--p);border:1px solid var(--lns);border-radius:var(--r);padding:1.8rem;width:100%;max-width:430px;position:relative;max-height:88vh;overflow-y:auto}
 .fbox-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem}
 .fbox-title{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em}
 .fstep{display:none}.fstep.on{display:block}
-.slbl{font-size:.7rem;font-weight:800;letter-spacing:.1em;color:var(--or);text-transform:uppercase;margin-bottom:.7rem}
+.slbl{font-size:.7rem;font-weight:800;letter-spacing:.1em;color:var(--haf-orange-ink);text-transform:uppercase;margin-bottom:.7rem}
 .ogrid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:.9rem}
 .oopt{background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.7rem .85rem;font-size:.88rem;font-weight:700;text-align:left;cursor:pointer;transition:all .14s;line-height:1.4}
-.oopt:hover,.oopt.sel{border-color:var(--or);background:var(--or-d);color:var(--or)}
+.oopt:hover,.oopt.sel{border-color:var(--haf-orange-ink);background:var(--or-d);color:var(--haf-orange-ink)}
 .oopt-sub{font-size:.7rem;color:var(--mu);display:block;margin-top:.1rem}
 .oopt.sel .oopt-sub{color:inherit;opacity:.75}
 .olbl{font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--mu);text-transform:uppercase;margin-bottom:.4rem}
 /* option buttons that carry a drawn gauge alongside the words */
 .oopt.gauge{display:flex;align-items:center;gap:.6rem}
 .oopt.gauge svg{width:34px;height:21px;flex-shrink:0;color:var(--su);stroke:currentColor;fill:none;stroke-width:1.6}
-.oopt.gauge.sel svg{color:var(--or)}
+.oopt.gauge.sel svg{color:var(--haf-orange-ink)}
 .oopt.gauge svg .fill{fill:currentColor;stroke:none}
 .oopt.toosmall{opacity:.42;border-style:dashed}
 .oopt.toosmall:hover{opacity:.75}
 .fnav{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.85rem}
 .booked-hero{text-align:center;padding:.5rem 0 .8rem}
-.booked-ref{font-family:var(--dp);font-weight:900;font-size:1.65rem;letter-spacing:-.04em;color:var(--or);margin:.5rem 0 .4rem}
+.booked-ref{font-family:var(--dp);font-weight:900;font-size:1.65rem;letter-spacing:-.04em;color:var(--haf-orange-ink);margin:.5rem 0 .4rem}
 .booked-sub{font-size:.8rem;color:var(--mu);line-height:1.65}
 /* ── SUPER MODE SELECTOR ── */
 #super-mode{display:none}
@@ -715,7 +714,7 @@ textarea.fi2{resize:vertical;min-height:70px}
    The banner is deliberately loud and deliberately unmissable: the whole point
    of a sandbox is that nobody can mistake it for the real network. It sits at
    the top of every demo screen, not just the first one. */
-.dc-band{display:flex;align-items:center;gap:.5rem;background:repeating-linear-gradient(45deg,var(--or-d),var(--or-d) 10px,transparent 10px,transparent 20px);border:1px dashed var(--or);border-radius:10px;padding:.55rem .75rem;margin-bottom:.9rem;font-size:.72rem;font-weight:700;color:var(--or)}
+.dc-band{display:flex;align-items:center;gap:.5rem;background:repeating-linear-gradient(45deg,var(--or-d),var(--or-d) 10px,transparent 10px,transparent 20px);border:1px dashed var(--or);border-radius:10px;padding:.55rem .75rem;margin-bottom:.9rem;font-size:.72rem;font-weight:700;color:var(--haf-orange-ink)}
 .dc-band .dc-dot{width:7px;height:7px;border-radius:50%;background:var(--or);flex-shrink:0}
 .dc-band .dc-band-sub{font-weight:500;color:var(--mu)}
 .dc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:.55rem}
@@ -723,7 +722,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 /* Numbered section heading — the three parts every account page reads in */
 .dc-sec{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin:1.4rem 0 .6rem;padding-top:1.1rem;border-top:1px solid var(--lns)}
 .dc-sec:first-child{margin-top:.4rem;padding-top:0;border-top:none}
-.dc-sec-n{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--or-d);border:1px solid var(--or-g);color:var(--or);font-family:var(--dp);font-weight:900;font-size:.76rem;display:flex;align-items:center;justify-content:center}
+.dc-sec-n{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--or-d);border:1px solid var(--or-g);color:var(--haf-orange-ink);font-family:var(--dp);font-weight:900;font-size:.76rem;display:flex;align-items:center;justify-content:center}
 .dc-sec-t{font-family:var(--dp);font-weight:900;font-size:1.02rem;letter-spacing:-.03em;color:var(--tx)}
 .dc-sec-s{font-size:.7rem;color:var(--mu);flex:1 1 200px;line-height:1.45}
 @media(max-width:560px){.dc-sec-s{flex-basis:100%;margin-left:calc(22px + .55rem)}}
@@ -738,15 +737,15 @@ textarea.fi2{resize:vertical;min-height:70px}
 .dc-fl-v{font-family:var(--dp);font-weight:900;font-size:1.15rem;letter-spacing:-.03em}
 .dc-fl-d{font-size:.64rem;color:var(--mu);margin-top:.2rem;line-height:1.4}
 .dc-fl.pay .dc-fl-v{color:var(--tx)}
-.dc-fl.haf{border-color:var(--or-g);background:var(--or-d)}.dc-fl.haf .dc-fl-v{color:var(--or)}
+.dc-fl.haf{border-color:var(--or-g);background:var(--or-d)}.dc-fl.haf .dc-fl-v{color:var(--haf-orange-ink)}
 .dc-fl.drv{border-color:rgba(52,199,123,.32)}.dc-fl.drv .dc-fl-v{color:var(--gn)}
-.dc-fl.ffm{border-color:rgba(90,160,255,.32)}.dc-fl.ffm .dc-fl-v{color:var(--bl)}
+.dc-fl.ffm{border-color:rgba(111,119,125,.32)}.dc-fl.ffm .dc-fl-v{color:var(--bl)}
 .dc-arw{display:flex;align-items:center;color:var(--mu);font-size:1rem;flex:0 0 auto}
 @media(max-width:640px){.dc-arw{display:none}}
 
 /* "Show calculation" — a price nobody can open is a price nobody can check. */
 .dc-calc{margin-top:.55rem;border-top:1px solid var(--lns);padding-top:.5rem}
-.dc-calc summary{cursor:pointer;font-size:.7rem;font-weight:700;color:var(--or);list-style:none;user-select:none}
+.dc-calc summary{cursor:pointer;font-size:.7rem;font-weight:700;color:var(--haf-orange-ink);list-style:none;user-select:none}
 .dc-calc summary::-webkit-details-marker{display:none}
 .dc-calc summary:before{content:'▸ ';display:inline-block;transition:transform .15s}
 .dc-calc[open] summary:before{content:'▾ '}
@@ -762,26 +761,26 @@ textarea.fi2{resize:vertical;min-height:70px}
 .dc-feat .dc-fi{flex:0 0 15px;margin-top:.1rem}
 .dc-feat.off{color:var(--mu)}
 .dc-feat.off .dc-ft{text-decoration:none}
-.dc-unl{font-size:.63rem;font-weight:800;color:var(--or);white-space:nowrap;margin-left:auto;padding-left:.5rem}
+.dc-unl{font-size:.63rem;font-weight:800;color:var(--haf-orange-ink);white-space:nowrap;margin-left:auto;padding-left:.5rem}
 .dc-roles{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.15rem}
 .dc-role{padding:.35rem .6rem;border:1px solid var(--lns);border-radius:999px;font-size:.7rem;font-weight:700;cursor:pointer;color:var(--mu);background:transparent}
-.dc-role.on{border-color:var(--or);color:var(--or);background:var(--or-d)}
+.dc-role.on{border-color:var(--haf-orange-ink);color:var(--haf-orange-ink);background:var(--or-d)}
 .dc-cmp-row{display:grid;grid-template-columns:1.1fr 1fr 1fr .8fr auto;gap:.4rem;align-items:end;margin-bottom:.45rem}
 @media(max-width:760px){.dc-cmp-row{grid-template-columns:1fr 1fr}}
 .dc-x{background:transparent;border:1px solid var(--lns);color:var(--mu);border-radius:8px;width:30px;height:32px;cursor:pointer;font-size:.9rem}
 .dc-x:hover{border-color:var(--rd);color:var(--rd)}
-.dc-fnd{display:inline-flex;align-items:center;gap:.25rem;font-size:.6rem;font-weight:800;color:#e8b64c;border:1px solid rgba(232,182,76,.4);background:rgba(232,182,76,.09);border-radius:999px;padding:.1rem .4rem;margin-left:.3rem;vertical-align:middle}
+.dc-fnd{display:inline-flex;align-items:center;gap:.25rem;font-size:.6rem;font-weight:800;color:var(--haf-caution);border:1px solid rgba(185,133,48,.4);background:rgba(185,133,48,.09);border-radius:999px;padding:.1rem .4rem;margin-left:.3rem;vertical-align:middle}
 .cap-pill{padding:.28rem .7rem;border:1.5px solid var(--ln);border-radius:20px;background:var(--p2);font-size:.7rem;font-weight:700;color:var(--mu);cursor:pointer;transition:all .12s;white-space:nowrap}
-.cap-pill:hover{border-color:var(--or);color:var(--or)}
-.cap-pill.active{border-color:var(--or);background:var(--or-d);color:var(--or)}
+.cap-pill:hover{border-color:var(--haf-orange-ink);color:var(--haf-orange-ink)}
+.cap-pill.active{border-color:var(--haf-orange-ink);background:var(--or-d);color:var(--haf-orange-ink)}
 @media(max-width:820px){.cap-row{flex-direction:column}.cap-side{max-width:none!important;min-width:0!important}.cap-mapwrap #cap-map{height:340px!important}#cap-sections{max-height:none!important}}
-#cap-map{background:#aadaff}
-#cap-map .leaflet-container{background:#aadaff}
-#dash-map{background:#aadaff}
-#dash-map .leaflet-container{background:#aadaff}
+#cap-map{background:var(--p3, #e9e5dd)}
+#cap-map .leaflet-container{background:var(--p3, #e9e5dd)}
+#dash-map{background:var(--p3, #e9e5dd)}
+#dash-map .leaflet-container{background:var(--p3, #e9e5dd)}
 .leaflet-container{background:#0a1a2b}
 .cap-role{border:none;background:transparent;color:var(--mu);font-weight:800;font-size:.74rem;padding:.32rem .8rem;border-radius:18px;cursor:pointer;transition:all .14s;white-space:nowrap}
-.cap-role.on{background:var(--or);color:#0e1113}
+.cap-role.on{background:var(--or);color:#fff}
 .cap-back{position:absolute;top:10px;left:10px;z-index:1000;background:rgba(14,17,19,.86);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:18px;padding:.34rem .7rem;font-size:.7rem;font-weight:700;cursor:pointer;display:none;align-items:center;gap:.3rem;backdrop-filter:blur(4px)}
 /* Region overview card that floats over the map on hover — the map reads as an overview at a glance */
 .cap-tip{background:rgba(14,17,19,.92)!important;border:1px solid rgba(255,255,255,.16)!important;border-radius:12px!important;box-shadow:0 6px 22px rgba(0,0,0,.45)!important;padding:0!important;color:#fff!important;backdrop-filter:blur(6px)}
@@ -796,7 +795,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .cap-ov-row>div{text-align:center}
 .cap-ov-n{font-weight:800;font-size:.95rem;color:#fff;line-height:1}
 .cap-ov-l{font-size:.58rem;color:#9fb0bd;margin-top:.1rem}
-.cap-ov-cta{font-size:.62rem;color:#ffb454;font-weight:700;margin-top:.45rem;border-top:1px solid rgba(255,255,255,.12);padding-top:.35rem}
+.cap-ov-cta{font-size:.62rem;color:var(--haf-orange-ink);font-weight:700;margin-top:.45rem;border-top:1px solid rgba(255,255,255,.12);padding-top:.35rem}
 /* Three-column map layout: west panels | map | east panels */
 .cap-col{flex:0 0 205px;min-width:0;display:flex;flex-direction:column;border:1.5px solid var(--ln);border-radius:var(--r);background:var(--p);overflow:hidden}
 .cap-col-h{display:flex;align-items:center;justify-content:space-between;gap:.4rem;padding:.55rem .7rem;font-size:.74rem;font-weight:800;color:var(--tx);background:var(--p2);border-bottom:1px solid var(--ln)}
@@ -818,32 +817,32 @@ textarea.fi2{resize:vertical;min-height:70px}
 .cap-sec-mini i{width:14px;text-align:center;font-style:normal;opacity:.85}
 /* clean role-focused line under each section card — words, not judgy numbers */
 .cap-sec-line{display:flex;align-items:center;gap:.4rem;font-size:.68rem;font-weight:600;color:var(--mu)}
-.cap-sec-line .cap-sec-relay{display:inline-flex;align-items:center;gap:.28rem;color:#a688e6;font-weight:700}
-.cap-sec-cta{font-size:.66rem;font-weight:800;color:var(--or);margin-top:.15rem}
+.cap-sec-line .cap-sec-relay{display:inline-flex;align-items:center;gap:.28rem;color:var(--haf-ink-muted);font-weight:700}
+.cap-sec-cta{font-size:.66rem;font-weight:800;color:var(--haf-orange-ink);margin-top:.15rem}
 /* List view: same cards, no map, responsive grid */
 .cap-listgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.55rem}
 .cap-listgrid .cap-sec{height:100%}
 @media(max-width:560px){.cap-listgrid{grid-template-columns:1fr}}
 /* ── LIVE JOB SPINE (sidebar tracker + full page, shared across every role) ── */
 .sb-livejob{margin:.5rem .6rem .3rem;border:1.5px solid var(--or-g);border-radius:var(--r);background:linear-gradient(160deg,var(--or-d),var(--p2));padding:.6rem .65rem;cursor:pointer;transition:all .14s;display:none}
-.sb-livejob:hover{border-color:var(--or)}
+.sb-livejob:hover{border-color:var(--haf-orange-ink)}
 .sb-lj-top{display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin-bottom:.35rem}
-.sb-lj-tag{font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--or);display:flex;align-items:center;gap:.3rem}
+.sb-lj-tag{font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--haf-orange-ink);display:flex;align-items:center;gap:.3rem}
 .sb-lj-dot{width:7px;height:7px;border-radius:50%;background:var(--or);animation:pulse-dot 1.5s ease-in-out infinite}
 .sb-lj-ref{font-size:.56rem;color:var(--mu);font-weight:700}
 .sb-lj-route{font-size:.74rem;font-weight:800;color:var(--tx);line-height:1.25;margin-bottom:.3rem}
 .sb-lj-meta{display:flex;align-items:center;justify-content:space-between;gap:.4rem;font-size:.6rem;color:var(--mu);margin-bottom:.4rem}
 .sb-lj-bar{height:5px;border-radius:3px;background:var(--ln);overflow:hidden;margin-bottom:.45rem}
 .sb-lj-fill{height:100%;border-radius:3px;transition:width .5s}
-.sb-lj-btn{width:100%;text-align:center;font-size:.64rem;font-weight:800;color:var(--or);background:transparent;border:1px solid var(--or-g);border-radius:var(--pill);padding:.3rem;cursor:pointer}
+.sb-lj-btn{width:100%;text-align:center;font-size:.64rem;font-weight:800;color:var(--haf-orange-ink);background:transparent;border:1px solid var(--or-g);border-radius:var(--pill);padding:.3rem;cursor:pointer}
 .lj-wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:.9rem;align-items:start}
 .lj-mapwrap{position:relative;border:1.5px solid var(--ln);border-radius:var(--r);overflow:hidden}
-#lj-map{height:430px;width:100%;background:#aadaff}
+#lj-map{height:430px;width:100%;background:var(--p3, #e9e5dd)}
 /* Progress panel shown instead of a map to the account that posted the job —
    the journey as a bar and stages, never a followable position */
 .lj-prog{padding:1rem 1.1rem}
 .ljp-route{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;font-weight:800;font-size:.95rem;margin-bottom:.6rem}
-.ljp-arw{color:var(--or);font-weight:900}
+.ljp-arw{color:var(--haf-orange-ink);font-weight:900}
 .ljp-bar{height:10px;border-radius:20px;background:var(--p2);border:1px solid var(--ln);overflow:hidden}
 .ljp-fill{height:100%;border-radius:20px;transition:width .5s ease}
 .ljp-meta{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;font-size:.74rem;color:var(--mu);margin-top:.45rem}
@@ -859,7 +858,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .lj-tstep:before{content:'';position:absolute;left:-.84rem;top:.48rem;width:9px;height:9px;border-radius:50%;background:var(--ln);border:2px solid var(--p)}
 .lj-tstep.done{color:var(--tx);font-weight:600}
 .lj-tstep.done:before{background:var(--gn)}
-.lj-tstep.now{color:var(--or);font-weight:800}
+.lj-tstep.now{color:var(--haf-orange-ink);font-weight:800}
 .lj-tstep.now:before{background:var(--or);box-shadow:0 0 0 3px var(--or-g)}
 .lj-update{display:flex;gap:.5rem;font-size:.72rem;padding:.35rem 0;border-bottom:1px solid var(--ln)}
 .lj-update-t{color:var(--mu);white-space:nowrap;font-weight:700;font-size:.66rem;min-width:42px}
@@ -890,18 +889,18 @@ textarea.fi2{resize:vertical;min-height:70px}
 .pod-sig{width:100%;height:130px;display:block;touch-action:none;cursor:crosshair}
 .pod-sigclear{position:absolute;top:6px;right:6px;font-size:.6rem;font-weight:700;background:rgba(255,255,255,.9);border:1px solid #ddd;border-radius:12px;padding:.15rem .5rem;cursor:pointer;color:#333}
 .pod-thumb{max-width:120px;border-radius:var(--rx);border:1px solid var(--ln);margin-top:.4rem}
-.pod-err{color:#cc3333;font-size:.72rem;font-weight:600;margin-top:.5rem;min-height:1rem}
+.pod-err{color:var(--rd, #b4483f);font-size:.72rem;font-weight:600;margin-top:.5rem;min-height:1rem}
 .pod-foot{display:flex;justify-content:flex-end;gap:.5rem;padding:.75rem 1rem;border-top:1px solid var(--ln)}
 /* CRM-style live jobs board */
 .ljl-top{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem}
 .ljl-filters{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.85rem}
 .ljl-chip{font-size:.68rem;font-weight:700;padding:.34rem .7rem;border-radius:var(--pill);border:1.5px solid var(--ln);background:var(--p2);color:var(--mu);cursor:pointer;white-space:nowrap}
-.ljl-chip.on{border-color:var(--or);background:var(--or-d);color:var(--or)}
+.ljl-chip.on{border-color:var(--haf-orange-ink);background:var(--or-d);color:var(--haf-orange-ink)}
 .ljl-chip b{color:var(--tx);margin-left:.3rem}
-.ljl-chip.on b{color:var(--or)}
+.ljl-chip.on b{color:var(--haf-orange-ink)}
 .ljl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.6rem}
 .ljl-row{position:relative;text-align:left;width:100%;background:var(--p);border:1.5px solid var(--ln);border-left:5px solid var(--ln);border-radius:var(--r);padding:.7rem .8rem;cursor:pointer;transition:all .12s}
-.ljl-row:hover{border-color:var(--or);transform:translateY(-1px)}
+.ljl-row:hover{border-color:var(--haf-orange-ink);transform:translateY(-1px)}
 .ljl-r1{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.3rem}
 .ljl-ref{font-size:.62rem;font-weight:800;color:var(--mu);letter-spacing:.02em}
 .ljl-route{font-size:.92rem;font-weight:800;color:var(--tx);line-height:1.2;margin-bottom:.35rem}
@@ -910,7 +909,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .ljl-bar{height:5px;border-radius:3px;background:var(--ln);overflow:hidden;margin-bottom:.5rem}
 .ljl-fill{height:100%;border-radius:3px}
 .ljl-r2{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
-.ljl-open{font-size:.66rem;font-weight:800;color:var(--or);white-space:nowrap}
+.ljl-open{font-size:.66rem;font-weight:800;color:var(--haf-orange-ink);white-space:nowrap}
 .ljl-empty{padding:2rem;text-align:center;color:var(--mu);font-size:.8rem}
 @media(max-width:980px){
   .cap-row{flex-direction:column}
@@ -929,16 +928,16 @@ textarea.fi2{resize:vertical;min-height:70px}
 .cap-f-pc{display:flex;gap:.35rem}
 .cap-f-pc input{flex:1;min-width:0;padding:.42rem .55rem;border:1.5px solid var(--ln);border-radius:var(--rx);background:var(--bg);color:var(--tx);font-size:.78rem;font-weight:600}
 .cap-f-relay{display:flex;align-items:center;gap:.35rem;font-size:.72rem;font-weight:700;color:var(--tx);cursor:pointer;white-space:nowrap;padding:.42rem .6rem;border:1.5px solid var(--ln);border-radius:var(--rx);background:var(--p2);align-self:flex-end}
-.cap-f-relay input{cursor:pointer;accent-color:var(--or)}
+.cap-f-relay input{cursor:pointer;accent-color:var(--haf-orange-ink)}
 .cap-f-meta{display:flex;align-items:center;gap:.7rem;margin-left:auto;align-self:flex-end;font-size:.72rem;color:var(--mu);white-space:nowrap}
 .cap-f-meta #cap-fcount{font-weight:800;color:var(--tx)}
-.cap-f-rate strong{color:var(--or)}
+.cap-f-rate strong{color:var(--haf-orange-ink)}
 .cap-f-clear{background:none;border:1px solid var(--ln);border-radius:20px;padding:.25rem .6rem;font-size:.68rem;font-weight:700;color:var(--mu);cursor:pointer}
-.cap-f-clear:hover{border-color:var(--or);color:var(--or)}
+.cap-f-clear:hover{border-color:var(--haf-orange-ink);color:var(--haf-orange-ink)}
 @media(max-width:620px){.cap-f,.cap-f-pcwrap{flex:1 1 45%}.cap-f select{min-width:0;width:100%}.cap-f-meta{margin-left:0;flex-basis:100%;justify-content:space-between}}
 .demo-tile{flex:1;padding:.55rem .35rem;background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);cursor:pointer;text-align:center;transition:border-color .14s,background .14s;display:flex;flex-direction:column;align-items:center;gap:.18rem}
-.demo-tile:hover{border-color:var(--or);background:var(--or-d)}
-.demo-tile-ico{width:18px;height:18px;color:var(--or);stroke:var(--or);margin-bottom:.1rem}
+.demo-tile:hover{border-color:var(--haf-orange-ink);background:var(--or-d)}
+.demo-tile-ico{width:18px;height:18px;color:var(--haf-orange-ink);stroke:var(--or);margin-bottom:.1rem}
 .demo-tile-name{font-size:.73rem;font-weight:800;color:var(--tx)}
 .demo-tile-desc{font-size:.6rem;color:var(--mu);line-height:1.3}
 #demo-fb-bar{display:none;padding:.42rem 1rem;background:var(--p2);border-bottom:1.5px solid var(--or-g);align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
@@ -959,7 +958,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .dmsw-b:hover{color:var(--tx)}
 .dmsw-b.on{background:var(--or);color:#fff}
 #dash-basic-focus{display:none;background:var(--p);border:1.5px solid var(--or-g);border-radius:var(--r);padding:1rem 1.1rem;margin-bottom:.9rem}
-.dbf-k{font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--or);margin-bottom:.35rem}
+.dbf-k{font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--haf-orange-ink);margin-bottom:.35rem}
 .dbf-route{font-size:1.12rem;font-weight:800;color:var(--tx);line-height:1.25;margin-bottom:.15rem}
 .dbf-sub{font-size:.76rem;color:var(--mu);margin-bottom:.8rem}
 .dbf-row{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}
@@ -979,12 +978,12 @@ textarea.fi2{resize:vertical;min-height:70px}
    changes how this is DRAWN, never what the engine may find. */
 #dash-return{display:none;background:var(--p);border:1.5px solid var(--ln);border-left:3px solid var(--or);border-radius:var(--r);padding:.95rem 1.05rem;margin-bottom:.9rem}
 .rr-hd{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.25rem}
-.rr-k{font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--or)}
+.rr-k{font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--haf-orange-ink)}
 .rr-tier{font-size:.55rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.1rem .45rem;border-radius:var(--pill);border:1px solid var(--lns);color:var(--mu)}
-.rr-tier.pro{background:var(--or);border-color:var(--or);color:#fff}
+.rr-tier.pro{background:var(--or);border-color:var(--haf-orange-ink);color:#fff}
 .rr-demo{margin-left:auto;display:flex;align-items:center;gap:.3rem}
 .rr-demo .dmsw-b{font-size:.55rem;padding:.16rem .5rem;border:1px solid var(--lns);border-radius:var(--pill);background:var(--p2)}
-.rr-demo .dmsw-b.on{background:var(--or);border-color:var(--or);color:#fff}
+.rr-demo .dmsw-b.on{background:var(--or);border-color:var(--haf-orange-ink);color:#fff}
 .rr-sub{font-size:.75rem;color:var(--mu);margin-bottom:.75rem;line-height:1.5}
 .rr-item{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;padding:.6rem 0;border-top:1px solid var(--ln)}
 .rr-rt{font-weight:800;font-size:.9rem;color:var(--tx)}
@@ -1046,8 +1045,8 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
   align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;
   border:1px solid var(--ln);background:var(--p2);color:var(--mu);cursor:pointer;
   transition:all .14s;line-height:0}
-.hv-eye:hover{color:var(--or);border-color:var(--or-g);background:var(--or-d)}
-.hv-tile.hv-blur .hv-eye{color:var(--or);border-color:var(--or-g);background:var(--or-d)}
+.hv-eye:hover{color:var(--haf-orange-ink);border-color:var(--or-g);background:var(--or-d)}
+.hv-tile.hv-blur .hv-eye{color:var(--haf-orange-ink);border-color:var(--or-g);background:var(--or-d)}
 .hv-eye svg{width:12px;height:12px;pointer-events:none}
 
 /* the view-format bar injected at the top of each pane that holds runs */
@@ -1059,7 +1058,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
 .hv-b{font-size:.62rem;font-weight:700;padding:.24rem .55rem;border-radius:var(--pill);
   border:1px solid var(--ln);background:var(--p);color:var(--mu);cursor:pointer;transition:all .14s}
 .hv-b:hover{color:var(--tx);border-color:var(--lns)}
-.hv-b.on{background:var(--or);border-color:var(--or);color:#fff}
+.hv-b.on{background:var(--or);border-color:var(--haf-orange-ink);color:#fff}
 .hv-bar-sp{flex:1 1 auto}
 .hv-b.hv-bl.on{background:var(--tx);border-color:var(--tx);color:var(--p)}
 
@@ -1115,6 +1114,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
 }
 
 </style>
+<link rel="stylesheet" href="/haf-bridge.css">
 </head>
 <body>
 
@@ -1124,7 +1124,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
 <div id="landing">
   <nav class="land-nav">
     <a class="llogo" href="#">
-      <div class="llogo-m">K</div>
+      <span class="haf-logo llogo-m"><svg class="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 124.84 111.11" role="img" aria-label="HAF"><path fill="var(--haf-badge-fill, #2f373e)" fill-rule="evenodd" d="M34.48,105.09C33.94,104.85 33.19,104.31 32.81,103.88C32.44,103.45 29.84,99.13 27.05,94.28C24.25,89.43 18.28,79.07 13.76,71.25C6.28,58.31 5.56,56.92 5.56,55.55C5.56,54.18 6.23,52.87 13.01,41.16C17.11,34.07 23.09,23.71 26.30,18.14C29.51,12.57 32.44,7.66 32.82,7.23C34.32,5.51 33.59,5.56 62.42,5.56C91.04,5.56 90.52,5.53 91.96,7.14C92.30,7.52 98.59,18.24 105.93,30.96C118.13,52.09 119.28,54.21 119.28,55.56C119.28,56.92 118.14,59.01 105.94,80.15C98.60,92.86 92.31,103.58 91.97,103.96C90.52,105.59 91.07,105.56 62.35,105.54C40.67,105.53 35.27,105.45 34.48,105.09ZM102.47,79.08C111.07,64.19 115.44,56.34 115.15,56.27C114.56,56.13 114.58,54.98 115.16,54.84C115.48,54.77 113.56,51.18 109.09,43.46C105.50,37.26 100.86,29.25 98.78,25.65C96.70,22.06 93.72,16.91 92.15,14.22L89.30,9.31L62.41,9.31L35.52,9.31L31.54,16.18C29.35,19.95 25.27,27.01 22.47,31.86C19.68,36.72 15.54,43.88 13.28,47.79C10.64,52.37 9.35,54.90 9.65,54.90C9.92,54.90 10.13,55.20 10.13,55.56C10.13,55.92 9.92,56.21 9.65,56.21C9.35,56.21 10.85,59.12 13.84,64.30C16.41,68.75 22.15,78.71 26.61,86.44C31.06,94.17 34.92,100.82 35.17,101.23L35.64,101.96L62.49,101.88L89.35,101.80L102.47,79.08ZM36.41,100.73C36.21,100.60 35.46,99.46 34.74,98.20C32.39,94.12 19.96,72.60 15.15,64.29C12.57,59.83 10.46,55.91 10.46,55.58C10.46,54.94 35.81,10.79 36.41,10.38C36.60,10.25 48.40,10.14 62.61,10.14L88.46,10.13L96.25,23.61C100.53,31.03 104.80,38.42 105.74,40.03C106.68,41.65 109.01,45.65 110.92,48.92C112.82,52.20 114.38,55.17 114.38,55.52C114.38,56.07 106.62,69.70 91.25,96.16L88.46,100.98L62.61,100.98C48.40,100.97 36.61,100.86 36.41,100.73ZM52.94,69.93L52.94,60.46L62.42,60.46L71.90,60.46L71.90,69.93L71.90,79.41L77.29,79.41L82.68,79.41L82.60,67.08L82.52,54.74L82.43,66.91L82.34,79.08L77.28,79.08L72.22,79.08L72.22,69.61L72.22,60.13L62.42,60.13L52.61,60.13L52.61,69.61L52.61,79.08L47.55,79.08L42.49,79.08L42.40,57.60L42.32,36.11L42.24,57.76L42.16,79.41L47.55,79.41L52.94,79.41L52.94,69.93ZM81.70,52.83C81.70,52.78 81.29,52.37 80.80,51.94L79.90,51.14L80.69,52.04C81.43,52.88 81.70,53.09 81.70,52.83ZM53.01,41.18L52.92,31.70L49.75,31.77L46.57,31.83L49.59,31.94L52.61,32.05L52.61,41.35C52.61,46.47 52.72,50.65 52.86,50.65C52.99,50.65 53.06,46.39 53.01,41.18ZM78.69,47.27C80.93,45.62 84.01,40.90 84.62,38.19C85.23,35.42 83.84,31.99 81.46,30.43C77.25,27.67 71.45,29.76 70.06,34.55C69.47,36.60 69.62,37.93 70.75,40.43C72.39,44.06 75.78,47.99 77.31,48.03C77.50,48.03 78.12,47.70 78.69,47.27ZM76.22,38.05C74.87,37.11 75.68,34.97 77.38,34.97C78.08,34.97 79.08,36.07 79.08,36.84C79.08,37.38 77.90,38.56 77.36,38.56C77.13,38.56 76.62,38.33 76.22,38.05Z"/><path fill="var(--haf-badge-mark, #ffffff)" fill-rule="evenodd" d="M42.48,57.48C42.48,33.61 42.41,34.46 44.57,32.92C45.44,32.30 46.10,32.17 49.10,32.08L52.61,31.97L52.61,41.30L52.61,50.63L65.83,50.72C78.59,50.81 79.07,50.84 79.94,51.49C80.44,51.86 81.15,52.57 81.52,53.07C82.16,53.94 82.19,54.43 82.28,66.53L82.38,79.08L77.30,79.08L72.22,79.08L72.22,69.61L72.22,60.13L62.42,60.13L52.61,60.13L52.61,69.61L52.61,79.08L47.55,79.08L42.48,79.08L42.48,57.48ZM9.15,55.56C9.15,55.19 9.37,54.90 9.64,54.90C9.91,54.90 10.13,55.19 10.13,55.56C10.13,55.92 9.91,56.21 9.64,56.21C9.37,56.21 9.15,55.92 9.15,55.56ZM114.71,55.56C114.71,55.19 114.92,54.90 115.20,54.90C115.47,54.90 115.69,55.19 115.69,55.56C115.69,55.92 115.47,56.21 115.20,56.21C114.92,56.21 114.71,55.92 114.71,55.56Z"/><path fill="#f18e00" fill-rule="evenodd" d="M74.39,45.68C71.79,42.95 69.93,39.16 69.94,36.62C69.96,34.17 70.99,32.21 73.03,30.74C74.36,29.79 74.96,29.58 76.69,29.47C82.36,29.11 86.23,34.47 84.03,39.61C83.03,41.95 80.56,45.57 79.21,46.68C77.36,48.20 76.65,48.06 74.39,45.68ZM78.57,38.05C79.18,37.44 79.25,35.91 78.69,35.36C78.48,35.14 77.84,34.97 77.29,34.97C75.99,34.97 75.49,35.48 75.49,36.81C75.49,38.42 77.42,39.20 78.57,38.05Z"/></svg></span>
       <div class="llogo-t">HAF <span>KNECT</span></div>
     </a>
     <div class="nav-r">
@@ -1279,7 +1279,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <div class="fstep" id="fq-6">
               <div class="slbl">Step 6 of 8 &#8212; Your guide price</div>
               <div style="background:var(--or-d);border:1.5px solid var(--or-g);border-radius:var(--rx);padding:1rem 1.2rem;margin-bottom:.9rem">
-                <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;color:var(--or);text-transform:uppercase;margin-bottom:.28rem">Estimated price</div>
+                <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;color:var(--haf-orange-ink);text-transform:uppercase;margin-bottom:.28rem">Estimated price</div>
                 <div style="display:flex;align-items:baseline;gap:.35rem"><span style="font-family:var(--dp);font-weight:900;font-size:1.55rem;letter-spacing:-.05em" id="fq-pr-range">&#8212;</span><span style="font-size:.72rem;font-weight:600;color:var(--mu)">+ VAT</span></div>
                 <div style="font-size:.7rem;color:var(--mu);margin-top:.2rem" id="fq-pr-basis">&#8212;</div>
               </div>
@@ -1292,7 +1292,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Full name</label><input class="oi" id="fq-name" placeholder="Your name" autocomplete="name"></div>
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Email</label><input class="oi" id="fq-email" placeholder="your@email.co.uk" type="email" autocomplete="email"></div>
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Mobile</label><input class="oi" id="fq-mobile" placeholder="07xxx xxxxxx" type="tel" autocomplete="tel"></div>
-              <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.73rem;font-weight:600;color:var(--mu)"><input type="checkbox" id="fq-wa" checked style="accent-color:var(--or)"> Send updates via WhatsApp</label>
+              <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.73rem;font-weight:600;color:var(--mu)"><input type="checkbox" id="fq-wa" checked style="accent-color:var(--haf-orange-ink)"> Send updates via WhatsApp</label>
               <div class="fstep-err" id="fq-err-7"></div>
               <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(6)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqNext(8)">Next &#8594;</button></div>
             </div>
@@ -1308,7 +1308,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <div class="fstep" id="fq-done">
               <div style="text-align:center;padding:.6rem 0 .9rem">
                 <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto .6rem"><circle cx="22" cy="22" r="22" fill="var(--gn-d)"/><polyline points="13,23 20,30 31,15" stroke="var(--gn)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <div style="font-family:var(--dp);font-weight:900;font-size:1.55rem;letter-spacing:-.04em;color:var(--or);margin:.4rem 0 .35rem" id="fq-ref">HAF-XXXX</div>
+                <div style="font-family:var(--dp);font-weight:900;font-size:1.55rem;letter-spacing:-.04em;color:var(--haf-orange-ink);margin:.4rem 0 .35rem" id="fq-ref">HAF-XXXX</div>
                 <p style="font-size:.79rem;color:var(--mu);line-height:1.65">Your delivery is booked. HAF will assign a driver and confirm by text within 15 minutes. Save your reference above.</p>
               </div>
               <button class="btn btn-or btn-wide" onclick="closeInlineFlow()">Done</button>
@@ -1340,7 +1340,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <div class="fstep" id="ro-done">
               <div style="text-align:center;padding:.6rem 0 .9rem">
                 <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto .6rem"><circle cx="22" cy="22" r="22" fill="var(--gn-d)"/><polyline points="13,23 20,30 31,15" stroke="var(--gn)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <div style="font-family:var(--dp);font-weight:900;font-size:1.55rem;letter-spacing:-.04em;color:var(--or);margin:.4rem 0 .35rem" id="ro-newref">HAF-XXXX</div>
+                <div style="font-family:var(--dp);font-weight:900;font-size:1.55rem;letter-spacing:-.04em;color:var(--haf-orange-ink);margin:.4rem 0 .35rem" id="ro-newref">HAF-XXXX</div>
                 <p style="font-size:.79rem;color:var(--mu);line-height:1.65">Rebooked. A HAF driver will be confirmed shortly by text.</p>
               </div>
               <button class="btn btn-or btn-wide" onclick="closeInlineFlow()">Done</button>
@@ -1379,7 +1379,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <div class="fstep" id="hp-4">
               <div class="slbl">Step 4 of 5 &#8212; HAF recommendation</div>
               <div style="background:var(--or-d);border:1.5px solid var(--or-g);border-radius:var(--rx);padding:1rem 1.2rem;margin-bottom:.85rem">
-                <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;color:var(--or);text-transform:uppercase;margin-bottom:.28rem">Best option for you</div>
+                <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;color:var(--haf-orange-ink);text-transform:uppercase;margin-bottom:.28rem">Best option for you</div>
                 <div style="font-family:var(--dp);font-weight:900;font-size:.92rem;letter-spacing:-.03em;margin-bottom:.22rem" id="hp-van-rec">&#8212;</div>
                 <div style="display:flex;align-items:baseline;gap:.35rem"><span style="font-family:var(--dp);font-weight:900;font-size:1.45rem;letter-spacing:-.05em" id="hp-pr-range">&#8212;</span><span style="font-size:.72rem;font-weight:600;color:var(--mu)">+ VAT</span></div>
                 <div style="font-size:.7rem;color:var(--mu);margin-top:.18rem" id="hp-pr-basis">&#8212;</div>
@@ -1398,7 +1398,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <div class="fstep" id="hp-done">
               <div style="text-align:center;padding:.6rem 0 .9rem">
                 <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto .6rem"><circle cx="22" cy="22" r="22" fill="var(--gn-d)"/><polyline points="13,23 20,30 31,15" stroke="var(--gn)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <div style="font-family:var(--dp);font-weight:900;font-size:1.55rem;letter-spacing:-.04em;color:var(--or);margin:.4rem 0 .35rem" id="hp-ref">HAF-XXXX</div>
+                <div style="font-family:var(--dp);font-weight:900;font-size:1.55rem;letter-spacing:-.04em;color:var(--haf-orange-ink);margin:.4rem 0 .35rem" id="hp-ref">HAF-XXXX</div>
                 <p style="font-size:.79rem;color:var(--mu);line-height:1.65">HAF Pick booked. We will confirm your driver and van shortly by text.</p>
               </div>
               <button class="btn btn-or btn-wide" onclick="closeInlineFlow()">Done</button>
@@ -1526,8 +1526,8 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
   <div class="obox">
     <button class="obox-close" onclick="closeLogin()">×</button>
     <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.2rem">
-      <div style="width:32px;height:32px;background:var(--or);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:1rem;color:#0e1113">K</div>
-      <div style="font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.04em;color:var(--tx)">HAF <span style="color:var(--or)">KNECT</span></div>
+      <span class="haf-logo gate-k"><svg class="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 124.84 111.11" role="img" aria-label="HAF"><path fill="var(--haf-badge-fill, #2f373e)" fill-rule="evenodd" d="M34.48,105.09C33.94,104.85 33.19,104.31 32.81,103.88C32.44,103.45 29.84,99.13 27.05,94.28C24.25,89.43 18.28,79.07 13.76,71.25C6.28,58.31 5.56,56.92 5.56,55.55C5.56,54.18 6.23,52.87 13.01,41.16C17.11,34.07 23.09,23.71 26.30,18.14C29.51,12.57 32.44,7.66 32.82,7.23C34.32,5.51 33.59,5.56 62.42,5.56C91.04,5.56 90.52,5.53 91.96,7.14C92.30,7.52 98.59,18.24 105.93,30.96C118.13,52.09 119.28,54.21 119.28,55.56C119.28,56.92 118.14,59.01 105.94,80.15C98.60,92.86 92.31,103.58 91.97,103.96C90.52,105.59 91.07,105.56 62.35,105.54C40.67,105.53 35.27,105.45 34.48,105.09ZM102.47,79.08C111.07,64.19 115.44,56.34 115.15,56.27C114.56,56.13 114.58,54.98 115.16,54.84C115.48,54.77 113.56,51.18 109.09,43.46C105.50,37.26 100.86,29.25 98.78,25.65C96.70,22.06 93.72,16.91 92.15,14.22L89.30,9.31L62.41,9.31L35.52,9.31L31.54,16.18C29.35,19.95 25.27,27.01 22.47,31.86C19.68,36.72 15.54,43.88 13.28,47.79C10.64,52.37 9.35,54.90 9.65,54.90C9.92,54.90 10.13,55.20 10.13,55.56C10.13,55.92 9.92,56.21 9.65,56.21C9.35,56.21 10.85,59.12 13.84,64.30C16.41,68.75 22.15,78.71 26.61,86.44C31.06,94.17 34.92,100.82 35.17,101.23L35.64,101.96L62.49,101.88L89.35,101.80L102.47,79.08ZM36.41,100.73C36.21,100.60 35.46,99.46 34.74,98.20C32.39,94.12 19.96,72.60 15.15,64.29C12.57,59.83 10.46,55.91 10.46,55.58C10.46,54.94 35.81,10.79 36.41,10.38C36.60,10.25 48.40,10.14 62.61,10.14L88.46,10.13L96.25,23.61C100.53,31.03 104.80,38.42 105.74,40.03C106.68,41.65 109.01,45.65 110.92,48.92C112.82,52.20 114.38,55.17 114.38,55.52C114.38,56.07 106.62,69.70 91.25,96.16L88.46,100.98L62.61,100.98C48.40,100.97 36.61,100.86 36.41,100.73ZM52.94,69.93L52.94,60.46L62.42,60.46L71.90,60.46L71.90,69.93L71.90,79.41L77.29,79.41L82.68,79.41L82.60,67.08L82.52,54.74L82.43,66.91L82.34,79.08L77.28,79.08L72.22,79.08L72.22,69.61L72.22,60.13L62.42,60.13L52.61,60.13L52.61,69.61L52.61,79.08L47.55,79.08L42.49,79.08L42.40,57.60L42.32,36.11L42.24,57.76L42.16,79.41L47.55,79.41L52.94,79.41L52.94,69.93ZM81.70,52.83C81.70,52.78 81.29,52.37 80.80,51.94L79.90,51.14L80.69,52.04C81.43,52.88 81.70,53.09 81.70,52.83ZM53.01,41.18L52.92,31.70L49.75,31.77L46.57,31.83L49.59,31.94L52.61,32.05L52.61,41.35C52.61,46.47 52.72,50.65 52.86,50.65C52.99,50.65 53.06,46.39 53.01,41.18ZM78.69,47.27C80.93,45.62 84.01,40.90 84.62,38.19C85.23,35.42 83.84,31.99 81.46,30.43C77.25,27.67 71.45,29.76 70.06,34.55C69.47,36.60 69.62,37.93 70.75,40.43C72.39,44.06 75.78,47.99 77.31,48.03C77.50,48.03 78.12,47.70 78.69,47.27ZM76.22,38.05C74.87,37.11 75.68,34.97 77.38,34.97C78.08,34.97 79.08,36.07 79.08,36.84C79.08,37.38 77.90,38.56 77.36,38.56C77.13,38.56 76.62,38.33 76.22,38.05Z"/><path fill="var(--haf-badge-mark, #ffffff)" fill-rule="evenodd" d="M42.48,57.48C42.48,33.61 42.41,34.46 44.57,32.92C45.44,32.30 46.10,32.17 49.10,32.08L52.61,31.97L52.61,41.30L52.61,50.63L65.83,50.72C78.59,50.81 79.07,50.84 79.94,51.49C80.44,51.86 81.15,52.57 81.52,53.07C82.16,53.94 82.19,54.43 82.28,66.53L82.38,79.08L77.30,79.08L72.22,79.08L72.22,69.61L72.22,60.13L62.42,60.13L52.61,60.13L52.61,69.61L52.61,79.08L47.55,79.08L42.48,79.08L42.48,57.48ZM9.15,55.56C9.15,55.19 9.37,54.90 9.64,54.90C9.91,54.90 10.13,55.19 10.13,55.56C10.13,55.92 9.91,56.21 9.64,56.21C9.37,56.21 9.15,55.92 9.15,55.56ZM114.71,55.56C114.71,55.19 114.92,54.90 115.20,54.90C115.47,54.90 115.69,55.19 115.69,55.56C115.69,55.92 115.47,56.21 115.20,56.21C114.92,56.21 114.71,55.92 114.71,55.56Z"/><path fill="#f18e00" fill-rule="evenodd" d="M74.39,45.68C71.79,42.95 69.93,39.16 69.94,36.62C69.96,34.17 70.99,32.21 73.03,30.74C74.36,29.79 74.96,29.58 76.69,29.47C82.36,29.11 86.23,34.47 84.03,39.61C83.03,41.95 80.56,45.57 79.21,46.68C77.36,48.20 76.65,48.06 74.39,45.68ZM78.57,38.05C79.18,37.44 79.25,35.91 78.69,35.36C78.48,35.14 77.84,34.97 77.29,34.97C75.99,34.97 75.49,35.48 75.49,36.81C75.49,38.42 77.42,39.20 78.57,38.05Z"/></svg></span>
+      <div style="font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.04em;color:var(--tx)">HAF <span style="color:var(--haf-orange-ink)">KNECT</span></div>
     </div>
     <h2>Sign in</h2>
     <p>Enter your HAF username with your PIN (or password) to access your account.</p>
@@ -1561,8 +1561,8 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
 <div id="super-mode" style="position:fixed;inset:0;z-index:7000;background:var(--bg);align-items:center;justify-content:center;padding:1.5rem;flex-direction:column">
   <div style="width:100%;max-width:680px">
     <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.3rem">
-      <div style="background:var(--or);border-radius:10px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:.95rem;color:#0e1113">K</div>
-      <div style="font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.04em">HAF <span style="color:var(--or)">KNECT</span></div>
+      <span class="haf-logo gate-k"><svg class="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 124.84 111.11" role="img" aria-label="HAF"><path fill="var(--haf-badge-fill, #2f373e)" fill-rule="evenodd" d="M34.48,105.09C33.94,104.85 33.19,104.31 32.81,103.88C32.44,103.45 29.84,99.13 27.05,94.28C24.25,89.43 18.28,79.07 13.76,71.25C6.28,58.31 5.56,56.92 5.56,55.55C5.56,54.18 6.23,52.87 13.01,41.16C17.11,34.07 23.09,23.71 26.30,18.14C29.51,12.57 32.44,7.66 32.82,7.23C34.32,5.51 33.59,5.56 62.42,5.56C91.04,5.56 90.52,5.53 91.96,7.14C92.30,7.52 98.59,18.24 105.93,30.96C118.13,52.09 119.28,54.21 119.28,55.56C119.28,56.92 118.14,59.01 105.94,80.15C98.60,92.86 92.31,103.58 91.97,103.96C90.52,105.59 91.07,105.56 62.35,105.54C40.67,105.53 35.27,105.45 34.48,105.09ZM102.47,79.08C111.07,64.19 115.44,56.34 115.15,56.27C114.56,56.13 114.58,54.98 115.16,54.84C115.48,54.77 113.56,51.18 109.09,43.46C105.50,37.26 100.86,29.25 98.78,25.65C96.70,22.06 93.72,16.91 92.15,14.22L89.30,9.31L62.41,9.31L35.52,9.31L31.54,16.18C29.35,19.95 25.27,27.01 22.47,31.86C19.68,36.72 15.54,43.88 13.28,47.79C10.64,52.37 9.35,54.90 9.65,54.90C9.92,54.90 10.13,55.20 10.13,55.56C10.13,55.92 9.92,56.21 9.65,56.21C9.35,56.21 10.85,59.12 13.84,64.30C16.41,68.75 22.15,78.71 26.61,86.44C31.06,94.17 34.92,100.82 35.17,101.23L35.64,101.96L62.49,101.88L89.35,101.80L102.47,79.08ZM36.41,100.73C36.21,100.60 35.46,99.46 34.74,98.20C32.39,94.12 19.96,72.60 15.15,64.29C12.57,59.83 10.46,55.91 10.46,55.58C10.46,54.94 35.81,10.79 36.41,10.38C36.60,10.25 48.40,10.14 62.61,10.14L88.46,10.13L96.25,23.61C100.53,31.03 104.80,38.42 105.74,40.03C106.68,41.65 109.01,45.65 110.92,48.92C112.82,52.20 114.38,55.17 114.38,55.52C114.38,56.07 106.62,69.70 91.25,96.16L88.46,100.98L62.61,100.98C48.40,100.97 36.61,100.86 36.41,100.73ZM52.94,69.93L52.94,60.46L62.42,60.46L71.90,60.46L71.90,69.93L71.90,79.41L77.29,79.41L82.68,79.41L82.60,67.08L82.52,54.74L82.43,66.91L82.34,79.08L77.28,79.08L72.22,79.08L72.22,69.61L72.22,60.13L62.42,60.13L52.61,60.13L52.61,69.61L52.61,79.08L47.55,79.08L42.49,79.08L42.40,57.60L42.32,36.11L42.24,57.76L42.16,79.41L47.55,79.41L52.94,79.41L52.94,69.93ZM81.70,52.83C81.70,52.78 81.29,52.37 80.80,51.94L79.90,51.14L80.69,52.04C81.43,52.88 81.70,53.09 81.70,52.83ZM53.01,41.18L52.92,31.70L49.75,31.77L46.57,31.83L49.59,31.94L52.61,32.05L52.61,41.35C52.61,46.47 52.72,50.65 52.86,50.65C52.99,50.65 53.06,46.39 53.01,41.18ZM78.69,47.27C80.93,45.62 84.01,40.90 84.62,38.19C85.23,35.42 83.84,31.99 81.46,30.43C77.25,27.67 71.45,29.76 70.06,34.55C69.47,36.60 69.62,37.93 70.75,40.43C72.39,44.06 75.78,47.99 77.31,48.03C77.50,48.03 78.12,47.70 78.69,47.27ZM76.22,38.05C74.87,37.11 75.68,34.97 77.38,34.97C78.08,34.97 79.08,36.07 79.08,36.84C79.08,37.38 77.90,38.56 77.36,38.56C77.13,38.56 76.62,38.33 76.22,38.05Z"/><path fill="var(--haf-badge-mark, #ffffff)" fill-rule="evenodd" d="M42.48,57.48C42.48,33.61 42.41,34.46 44.57,32.92C45.44,32.30 46.10,32.17 49.10,32.08L52.61,31.97L52.61,41.30L52.61,50.63L65.83,50.72C78.59,50.81 79.07,50.84 79.94,51.49C80.44,51.86 81.15,52.57 81.52,53.07C82.16,53.94 82.19,54.43 82.28,66.53L82.38,79.08L77.30,79.08L72.22,79.08L72.22,69.61L72.22,60.13L62.42,60.13L52.61,60.13L52.61,69.61L52.61,79.08L47.55,79.08L42.48,79.08L42.48,57.48ZM9.15,55.56C9.15,55.19 9.37,54.90 9.64,54.90C9.91,54.90 10.13,55.19 10.13,55.56C10.13,55.92 9.91,56.21 9.64,56.21C9.37,56.21 9.15,55.92 9.15,55.56ZM114.71,55.56C114.71,55.19 114.92,54.90 115.20,54.90C115.47,54.90 115.69,55.19 115.69,55.56C115.69,55.92 115.47,56.21 115.20,56.21C114.92,56.21 114.71,55.92 114.71,55.56Z"/><path fill="#f18e00" fill-rule="evenodd" d="M74.39,45.68C71.79,42.95 69.93,39.16 69.94,36.62C69.96,34.17 70.99,32.21 73.03,30.74C74.36,29.79 74.96,29.58 76.69,29.47C82.36,29.11 86.23,34.47 84.03,39.61C83.03,41.95 80.56,45.57 79.21,46.68C77.36,48.20 76.65,48.06 74.39,45.68ZM78.57,38.05C79.18,37.44 79.25,35.91 78.69,35.36C78.48,35.14 77.84,34.97 77.29,34.97C75.99,34.97 75.49,35.48 75.49,36.81C75.49,38.42 77.42,39.20 78.57,38.05Z"/></svg></span>
+      <div style="font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.04em">HAF <span style="color:var(--haf-orange-ink)">KNECT</span></div>
     </div>
     <div style="font-family:var(--dp);font-weight:900;font-size:1.45rem;letter-spacing:-.04em;margin-bottom:.25rem">How do you want to enter today?</div>
     <div style="font-size:.82rem;color:var(--mu);margin-bottom:1.6rem">You're signed in as <strong style="color:var(--tx)" id="sm-username">BF638793</strong> — Super Admin</div>
@@ -1577,7 +1577,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
           <div style="font-weight:800;font-size:.9rem">Network Overview</div>
         </div>
         <div style="font-size:.74rem;color:var(--mu);line-height:1.55">See the full HAF KNECT network — all accounts, live jobs, zone map, coverage and admin controls.</div>
-        <div style="margin-top:.6rem;font-size:.7rem;font-weight:700;color:var(--or)">Admin · Full control</div>
+        <div style="margin-top:.6rem;font-size:.7rem;font-weight:700;color:var(--haf-orange-ink)">Admin · Full control</div>
       </div>
       <div class="card sm-card" onclick="enterMode('personal')" style="cursor:pointer">
         <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.5rem">
@@ -1694,7 +1694,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
       <div style="font-family:var(--dp);font-weight:900;font-size:.95rem;color:var(--tx)">Share your thoughts</div>
     </div>
     <p style="font-size:.8rem;color:var(--mu);margin-bottom:1rem">What's great? What's confusing? What's missing? Every reply helps us improve HAF KNECT — your feedback goes straight to the team.</p>
-    <div class="of"><label class="ol">Your feedback <span style="color:var(--or)">*</span></label><textarea class="oi" id="dfb-msg" rows="4" placeholder="Tell us what you think — be as blunt as you like" style="resize:vertical;min-height:80px;font-family:inherit;font-size:.82rem"></textarea></div>
+    <div class="of"><label class="ol">Your feedback <span style="color:var(--haf-orange-ink)">*</span></label><textarea class="oi" id="dfb-msg" rows="4" placeholder="Tell us what you think — be as blunt as you like" style="resize:vertical;min-height:80px;font-family:inherit;font-size:.82rem"></textarea></div>
     <div class="of" style="margin-top:.5rem"><label class="ol">Your name <span style="color:var(--mu);font-weight:400">(optional)</span></label><input class="oi" id="dfb-name" placeholder="Jane Smith" autocomplete="name"></div>
     <div class="of" style="margin-top:.5rem"><label class="ol">Email <span style="color:var(--mu);font-weight:400">(optional — if you want a reply)</span></label><input class="oi" id="dfb-email" type="email" placeholder="jane@company.com" autocomplete="email"></div>
     <div class="oe" id="dfb-err" style="display:none;margin-bottom:.5rem"></div>
@@ -1702,7 +1702,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
     <div id="dfb-success" style="display:none;text-align:center;padding:1.2rem 0">
       <div style="font-size:1.5rem;color:var(--gn);margin-bottom:.4rem">✓</div>
       <div style="font-weight:800;font-size:.9rem">Thank you — feedback sent</div>
-      <p style="font-size:.76rem;color:var(--mu);margin-top:.3rem">The HAF team will review this. Interested in a real account? <a href="https://clever.usehaf.co.uk" target="_blank" style="color:var(--or)">clever.usehaf.co.uk</a></p>
+      <p style="font-size:.76rem;color:var(--mu);margin-top:.3rem">The HAF team will review this. Interested in a real account? <a href="https://clever.usehaf.co.uk" target="_blank" style="color:var(--haf-orange-ink)">clever.usehaf.co.uk</a></p>
     </div>
   </div>
 </div>
@@ -1715,7 +1715,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <a class="tlogo" href="#">
-        <div class="tlogo-m">K</div>
+        <span class="haf-logo tlogo-m"><svg class="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 124.84 111.11" role="img" aria-label="HAF"><path fill="var(--haf-badge-fill, #2f373e)" fill-rule="evenodd" d="M34.48,105.09C33.94,104.85 33.19,104.31 32.81,103.88C32.44,103.45 29.84,99.13 27.05,94.28C24.25,89.43 18.28,79.07 13.76,71.25C6.28,58.31 5.56,56.92 5.56,55.55C5.56,54.18 6.23,52.87 13.01,41.16C17.11,34.07 23.09,23.71 26.30,18.14C29.51,12.57 32.44,7.66 32.82,7.23C34.32,5.51 33.59,5.56 62.42,5.56C91.04,5.56 90.52,5.53 91.96,7.14C92.30,7.52 98.59,18.24 105.93,30.96C118.13,52.09 119.28,54.21 119.28,55.56C119.28,56.92 118.14,59.01 105.94,80.15C98.60,92.86 92.31,103.58 91.97,103.96C90.52,105.59 91.07,105.56 62.35,105.54C40.67,105.53 35.27,105.45 34.48,105.09ZM102.47,79.08C111.07,64.19 115.44,56.34 115.15,56.27C114.56,56.13 114.58,54.98 115.16,54.84C115.48,54.77 113.56,51.18 109.09,43.46C105.50,37.26 100.86,29.25 98.78,25.65C96.70,22.06 93.72,16.91 92.15,14.22L89.30,9.31L62.41,9.31L35.52,9.31L31.54,16.18C29.35,19.95 25.27,27.01 22.47,31.86C19.68,36.72 15.54,43.88 13.28,47.79C10.64,52.37 9.35,54.90 9.65,54.90C9.92,54.90 10.13,55.20 10.13,55.56C10.13,55.92 9.92,56.21 9.65,56.21C9.35,56.21 10.85,59.12 13.84,64.30C16.41,68.75 22.15,78.71 26.61,86.44C31.06,94.17 34.92,100.82 35.17,101.23L35.64,101.96L62.49,101.88L89.35,101.80L102.47,79.08ZM36.41,100.73C36.21,100.60 35.46,99.46 34.74,98.20C32.39,94.12 19.96,72.60 15.15,64.29C12.57,59.83 10.46,55.91 10.46,55.58C10.46,54.94 35.81,10.79 36.41,10.38C36.60,10.25 48.40,10.14 62.61,10.14L88.46,10.13L96.25,23.61C100.53,31.03 104.80,38.42 105.74,40.03C106.68,41.65 109.01,45.65 110.92,48.92C112.82,52.20 114.38,55.17 114.38,55.52C114.38,56.07 106.62,69.70 91.25,96.16L88.46,100.98L62.61,100.98C48.40,100.97 36.61,100.86 36.41,100.73ZM52.94,69.93L52.94,60.46L62.42,60.46L71.90,60.46L71.90,69.93L71.90,79.41L77.29,79.41L82.68,79.41L82.60,67.08L82.52,54.74L82.43,66.91L82.34,79.08L77.28,79.08L72.22,79.08L72.22,69.61L72.22,60.13L62.42,60.13L52.61,60.13L52.61,69.61L52.61,79.08L47.55,79.08L42.49,79.08L42.40,57.60L42.32,36.11L42.24,57.76L42.16,79.41L47.55,79.41L52.94,79.41L52.94,69.93ZM81.70,52.83C81.70,52.78 81.29,52.37 80.80,51.94L79.90,51.14L80.69,52.04C81.43,52.88 81.70,53.09 81.70,52.83ZM53.01,41.18L52.92,31.70L49.75,31.77L46.57,31.83L49.59,31.94L52.61,32.05L52.61,41.35C52.61,46.47 52.72,50.65 52.86,50.65C52.99,50.65 53.06,46.39 53.01,41.18ZM78.69,47.27C80.93,45.62 84.01,40.90 84.62,38.19C85.23,35.42 83.84,31.99 81.46,30.43C77.25,27.67 71.45,29.76 70.06,34.55C69.47,36.60 69.62,37.93 70.75,40.43C72.39,44.06 75.78,47.99 77.31,48.03C77.50,48.03 78.12,47.70 78.69,47.27ZM76.22,38.05C74.87,37.11 75.68,34.97 77.38,34.97C78.08,34.97 79.08,36.07 79.08,36.84C79.08,37.38 77.90,38.56 77.36,38.56C77.13,38.56 76.62,38.33 76.22,38.05Z"/><path fill="var(--haf-badge-mark, #ffffff)" fill-rule="evenodd" d="M42.48,57.48C42.48,33.61 42.41,34.46 44.57,32.92C45.44,32.30 46.10,32.17 49.10,32.08L52.61,31.97L52.61,41.30L52.61,50.63L65.83,50.72C78.59,50.81 79.07,50.84 79.94,51.49C80.44,51.86 81.15,52.57 81.52,53.07C82.16,53.94 82.19,54.43 82.28,66.53L82.38,79.08L77.30,79.08L72.22,79.08L72.22,69.61L72.22,60.13L62.42,60.13L52.61,60.13L52.61,69.61L52.61,79.08L47.55,79.08L42.48,79.08L42.48,57.48ZM9.15,55.56C9.15,55.19 9.37,54.90 9.64,54.90C9.91,54.90 10.13,55.19 10.13,55.56C10.13,55.92 9.91,56.21 9.64,56.21C9.37,56.21 9.15,55.92 9.15,55.56ZM114.71,55.56C114.71,55.19 114.92,54.90 115.20,54.90C115.47,54.90 115.69,55.19 115.69,55.56C115.69,55.92 115.47,56.21 115.20,56.21C114.92,56.21 114.71,55.92 114.71,55.56Z"/><path fill="#f18e00" fill-rule="evenodd" d="M74.39,45.68C71.79,42.95 69.93,39.16 69.94,36.62C69.96,34.17 70.99,32.21 73.03,30.74C74.36,29.79 74.96,29.58 76.69,29.47C82.36,29.11 86.23,34.47 84.03,39.61C83.03,41.95 80.56,45.57 79.21,46.68C77.36,48.20 76.65,48.06 74.39,45.68ZM78.57,38.05C79.18,37.44 79.25,35.91 78.69,35.36C78.48,35.14 77.84,34.97 77.29,34.97C75.99,34.97 75.49,35.48 75.49,36.81C75.49,38.42 77.42,39.20 78.57,38.05Z"/></svg></span>
         <div>
           <div class="tlogo-t">HAF <span>KNECT</span></div>
           <div style="font-size:.56rem;color:var(--mu);font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-family:var(--fn);margin-top:-.05rem">Courier Connector</div>
@@ -1759,7 +1759,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
              Hidden until an account record has actually been read, because an
              empty name card is worse than none. -->
         <div class="sb-acct" id="sb-acct" style="display:none"></div>
-        <button class="back-btn" id="plna-link-btn" style="display:none;color:var(--or);" onclick="window.open('https://plna.usehaf.co.uk','_blank')">
+        <button class="back-btn" id="plna-link-btn" style="display:none;color:var(--haf-orange-ink);" onclick="window.open('https://plna.usehaf.co.uk','_blank')">
           <svg class="ni-ic" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           My PLNA Network →
         </button>
@@ -1781,8 +1781,8 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
         <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap">
           <div style="display:flex;align-items:center;gap:.5rem">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            <span style="font-size:.74rem;font-weight:700;color:var(--or)">Demo</span>
-            <span style="font-size:.74rem;color:var(--mu)">· <span id="demo-role-lbl">Driver</span> account · <a href="https://clever.usehaf.co.uk" target="_blank" style="color:var(--or);text-decoration:none">Get a real account →</a></span>
+            <span style="font-size:.74rem;font-weight:700;color:var(--haf-orange-ink)">Demo</span>
+            <span style="font-size:.74rem;color:var(--mu)">· <span id="demo-role-lbl">Driver</span> account · <a href="https://clever.usehaf.co.uk" target="_blank" style="color:var(--haf-orange-ink);text-decoration:none">Get a real account →</a></span>
           </div>
           <button class="btn btn-or btn-xs" onclick="openDemoFeedback()">Share feedback →</button>
         </div>
@@ -1796,7 +1796,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
       <div id="viewas-banner" style="background:var(--p2);border:1.5px solid var(--lns);border-radius:var(--rx);padding:.55rem 1rem;margin-bottom:1rem;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:.5rem">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          <span style="font-size:.76rem;font-weight:700;color:var(--or)">Super Admin preview — </span>
+          <span style="font-size:.76rem;font-weight:700;color:var(--haf-orange-ink)">Super Admin preview — </span>
           <span id="viewas-lbl" style="font-size:.76rem;color:var(--mu)">—</span>
         </div>
         <button class="btn btn-gh btn-xs" onclick="showModeSelector()">Exit preview →</button>
@@ -1875,15 +1875,15 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
 
         <!-- Network ticker -->
         <div data-mode-only="advanced" data-aud="network" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.45rem .75rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);margin-bottom:.75rem;font-size:.68rem;color:var(--mu)">
-          <span style="display:flex;align-items:center;gap:.3rem"><span style="width:7px;height:7px;border-radius:50%;background:#2dab60;display:inline-block;animation:pulse-dot 1.6s ease-in-out infinite"></span><strong style="color:var(--tx)">83</strong> drivers online</span>
+          <span style="display:flex;align-items:center;gap:.3rem"><span style="width:7px;height:7px;border-radius:50%;background:var(--gn, #4f7f58);display:inline-block;animation:pulse-dot 1.6s ease-in-out infinite"></span><strong style="color:var(--tx)">83</strong> drivers online</span>
           <span style="color:var(--ln)">·</span>
           <span><strong style="color:var(--tx)">12</strong> open jobs</span>
           <span style="color:var(--ln)">·</span>
           <span><strong style="color:var(--tx)">4</strong> en route</span>
           <span style="color:var(--ln)">·</span>
-          <span>Rate <strong style="color:var(--or)">£1.80–£2.40/mi</strong></span>
+          <span>Rate <strong style="color:var(--haf-orange-ink)">£1.80–£2.40/mi</strong></span>
           <span style="color:var(--ln)">·</span>
-          <span style="color:#2dab60;font-weight:700">Manchester ★ HIGH DEMAND</span>
+          <span style="color:var(--gn, #4f7f58);font-weight:700">Manchester ★ HIGH DEMAND</span>
           <span style="margin-left:auto;color:var(--mu)">9% network fee</span>
         </div>
 
@@ -2152,7 +2152,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
       <div class="tp" id="pane-d-status">
         <h1 class="pt">My Status</h1><p class="ps">Your availability, vehicle and today's summary.</p>
         <div id="st-active-banner" style="display:none;margin-bottom:.9rem">
-          <div class="ajob"><div class="ajob-tag">Active job</div><div class="ajob-route" id="st-aj-route">—</div><div style="font-size:.75rem;color:var(--or);font-weight:700" id="st-aj-rate"></div></div>
+          <div class="ajob"><div class="ajob-tag">Active job</div><div class="ajob-route" id="st-aj-route">—</div><div style="font-size:.75rem;color:var(--haf-orange-ink);font-weight:700" id="st-aj-rate"></div></div>
         </div>
         <div class="g2" style="margin-bottom:.85rem">
           <div class="card" style="display:flex;flex-direction:column;gap:.6rem">
@@ -2166,7 +2166,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <button class="btn btn-or btn-sm btn-wide" style="margin-top:.1rem">Update status</button>
           </div>
           <div>
-            <div class="card" style="margin-bottom:.75rem"><div class="ct">Today</div><div class="cr"><span class="ck">Jobs completed</span><span class="cv">3</span></div><div class="cr"><span class="ck">Earnings</span><span class="cv" style="color:var(--or);font-weight:700">£142</span></div><div class="cr"><span class="ck">Miles driven</span><span class="cv">84</span></div><div class="cr"><span class="ck">Rating</span><span class="cv" style="color:var(--gn);font-weight:700">4.9 ★</span></div></div>
+            <div class="card" style="margin-bottom:.75rem"><div class="ct">Today</div><div class="cr"><span class="ck">Jobs completed</span><span class="cv">3</span></div><div class="cr"><span class="ck">Earnings</span><span class="cv" style="color:var(--haf-orange-ink);font-weight:700">£142</span></div><div class="cr"><span class="ck">Miles driven</span><span class="cv">84</span></div><div class="cr"><span class="ck">Rating</span><span class="cv" style="color:var(--gn);font-weight:700">4.9 ★</span></div></div>
             <div class="card"><div class="ct">Vehicle on duty</div><div class="cr"><span class="ck">Type</span><span class="cv">Long wheelbase</span></div><div class="cr"><span class="ck">MOT</span><span class="cv"><span class="chip cg">Dec 2026</span></span></div><div class="cr"><span class="ck">Insurance</span><span class="cv"><span class="chip cg">Mar 2027</span></span></div><div class="cr"><span class="ck">GIT cover</span><span class="cv"><span class="chip ca">Pending upload</span></span></div></div>
           </div>
         </div>
@@ -2199,7 +2199,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
         <h1 class="pt">Earnings</h1><p class="ps">Your pay, payment schedule and HAF KNECT plan.</p>
         <div class="kg"><div class="kc"><div class="kc-l">This week</div><div class="kc-v or">£642</div><div class="kc-d pos">+18% vs last week</div></div><div class="kc"><div class="kc-l">Pending</div><div class="kc-v am">£284</div><div class="kc-d">due Friday</div></div><div class="kc"><div class="kc-l">This month</div><div class="kc-v">£2,180</div></div><div class="kc"><div class="kc-l">Jobs done</div><div class="kc-v gn">28</div></div></div>
         <div class="g2">
-          <div class="card"><div class="ct">Recent jobs</div><table class="dt"><thead><tr><th>Ref</th><th>Route</th><th>Date</th><th>Pay</th><th>Status</th></tr></thead><tbody><tr><td>HAF-2848</td><td>M1 → LS1</td><td>Today</td><td style="color:var(--gn);font-weight:700">£87</td><td><span class="chip cg">Paid</span></td></tr><tr><td>HAF-2840</td><td>S1 → NG1</td><td>7 Jul</td><td style="color:var(--gn);font-weight:700">£54</td><td><span class="chip cg">Paid</span></td></tr><tr><td>HAF-2831</td><td>B1 → CV1</td><td>5 Jul</td><td style="color:var(--or);font-weight:700">£112</td><td><span class="chip ca">Pending</span></td></tr><tr><td>HAF-2820</td><td>WA1 → M1</td><td>4 Jul</td><td style="color:var(--or);font-weight:700">£38</td><td><span class="chip ca">Pending</span></td></tr></tbody></table></div>
+          <div class="card"><div class="ct">Recent jobs</div><table class="dt"><thead><tr><th>Ref</th><th>Route</th><th>Date</th><th>Pay</th><th>Status</th></tr></thead><tbody><tr><td>HAF-2848</td><td>M1 → LS1</td><td>Today</td><td style="color:var(--gn);font-weight:700">£87</td><td><span class="chip cg">Paid</span></td></tr><tr><td>HAF-2840</td><td>S1 → NG1</td><td>7 Jul</td><td style="color:var(--gn);font-weight:700">£54</td><td><span class="chip cg">Paid</span></td></tr><tr><td>HAF-2831</td><td>B1 → CV1</td><td>5 Jul</td><td style="color:var(--haf-orange-ink);font-weight:700">£112</td><td><span class="chip ca">Pending</span></td></tr><tr><td>HAF-2820</td><td>WA1 → M1</td><td>4 Jul</td><td style="color:var(--haf-orange-ink);font-weight:700">£38</td><td><span class="chip ca">Pending</span></td></tr></tbody></table></div>
           <div>
             <div class="card" style="margin-bottom:.75rem"><div class="ct">Next payment</div><div class="cr"><span class="ck">Amount</span><span class="cv" style="font-size:1.2rem;font-weight:900;color:var(--gn)">£284.00</span></div><div class="cr"><span class="ck">Payment date</span><span class="cv">Friday 13 Jul</span></div><div class="cr"><span class="ck">Via</span><span class="cv">CleverPay</span></div><div class="cr"><span class="ck">Jobs included</span><span class="cv">HAF-2820, HAF-2831</span></div></div>
             <div class="card"><div class="ct">HAF KNECT plan</div><div class="cr"><span class="ck">Tier</span><span class="cv"><span class="chip co" data-haf-tier="PLUS">HAF KNECT Plus</span></span></div><div class="cr"><span class="ck">Job matching</span><span class="cv"><span class="chip cg">Fair &mdash; never by what you pay</span></span></div><div class="cr"><span class="ck">Relay pool</span><span class="cv"><span class="chip cg">Eligible</span></span></div><div class="cr"><span class="ck">Zone rewards</span><span class="cv"><span class="chip cg">Earning</span></span></div></div>
@@ -2219,7 +2219,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
       <div class="tp" id="pane-d-dir">
         <h1 class="pt">Driver Directory</h1>
         <p class="ps">List yourself so freight forwarders can find and contact you directly — or book you without posting to the open network.</p>
-        <div style="background:var(--bl-d);border:1.5px solid rgba(61,125,202,.22);border-radius:var(--rx);padding:.65rem 1rem;font-size:.75rem;color:var(--bl);margin-bottom:1rem;display:flex;align-items:center;gap:.55rem">
+        <div style="background:var(--bl-d);border:1.5px solid rgba(111,119,125,.22);border-radius:var(--rx);padding:.65rem 1rem;font-size:.75rem;color:var(--bl);margin-bottom:1rem;display:flex;align-items:center;gap:.55rem">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           <span>Available on <strong>HAF KNECT Plus and Pro</strong>. Free tier drivers are not listed.</span>
         </div>
@@ -2242,12 +2242,12 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
           </div>
           <div class="fg" style="margin-bottom:.7rem"><label class="fl">Run directions (tick all that apply)</label>
             <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.3rem">
-              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--or)"> North</label>
-              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--or)"> South</label>
-              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--or)"> East</label>
-              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--or)"> West</label>
-              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--or)"> National</label>
-              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--or)"> Backloads welcome</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--haf-orange-ink)"> North</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--haf-orange-ink)"> South</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--haf-orange-ink)"> East</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--haf-orange-ink)"> West</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--haf-orange-ink)"> National</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--haf-orange-ink)"> Backloads welcome</label>
             </div>
           </div>
           <div class="fg" style="margin-bottom:.7rem"><label class="fl">Short bio (optional)</label><textarea class="fi2" rows="2" placeholder="e.g. Based in Manchester, running M62 corridor daily, available for urgent and same-day jobs."></textarea></div>
@@ -2330,25 +2330,25 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
           <div class="ct">Who can accept this job?</div>
           <div style="display:flex;flex-direction:column;gap:.55rem">
             <label data-post-only="ownfleet" style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.55rem .7rem;background:var(--p2);border-radius:var(--rx);border:1.5px solid var(--or-g)">
-              <input type="radio" name="b-accept" value="mydriver" checked style="accent-color:var(--or)">
+              <input type="radio" name="b-accept" value="mydriver" checked style="accent-color:var(--haf-orange-ink)">
               <div><div style="font-weight:700;font-size:.82rem">My registered drivers first</div><div style="font-size:.7rem;color:var(--mu)">Offered to your team first — goes to the open network after 30 minutes if not accepted</div></div>
             </label>
             <label data-post-only="ownfleet" style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.55rem .7rem;background:var(--p2);border-radius:var(--rx)">
-              <input type="radio" name="b-accept" value="myonly" style="accent-color:var(--or)">
+              <input type="radio" name="b-accept" value="myonly" style="accent-color:var(--haf-orange-ink)">
               <div><div style="font-weight:700;font-size:.82rem">My drivers only</div><div style="font-size:.7rem;color:var(--mu)">Only drivers registered to your fleet account can accept — never goes to the open network</div></div>
             </label>
             <label style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.55rem .7rem;background:var(--p2);border-radius:var(--rx)">
-              <input type="radio" name="b-accept" value="network" id="post-accept-network" style="accent-color:var(--or)">
+              <input type="radio" name="b-accept" value="network" id="post-accept-network" style="accent-color:var(--haf-orange-ink)">
               <div><div style="font-weight:700;font-size:.82rem">Open network</div><div style="font-size:.7rem;color:var(--mu)">Any Clever Checked driver on HAF KNECT can accept immediately</div></div>
             </label>
           </div>
           <div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--ln)">
             <div style="font-size:.72rem;font-weight:700;color:var(--mu);margin-bottom:.45rem;text-transform:uppercase;letter-spacing:.06em">Additional requirements</div>
             <div style="display:flex;flex-wrap:wrap;gap:.45rem">
-              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--or)"> Clever Checked only</label>
-              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--or)"> GIT insurance required</label>
-              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--or)"> Local drivers only (50 mi)</label>
-              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--or)"> Tail-lift required</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--haf-orange-ink)"> Clever Checked only</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--haf-orange-ink)"> GIT insurance required</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--haf-orange-ink)"> Local drivers only (50 mi)</label>
+              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--haf-orange-ink)"> Tail-lift required</label>
             </div>
           </div>
         </div>
@@ -2359,7 +2359,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mu)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
             <div>
-              <div style="font-weight:700;font-size:.82rem">HAF Gap Cover <span style="font-size:.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--or);margin-left:.25rem">Coming soon</span></div>
+              <div style="font-weight:700;font-size:.82rem">HAF Gap Cover <span style="font-size:.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--haf-orange-ink);margin-left:.25rem">Coming soon</span></div>
               <div style="font-size:.7rem;color:var(--mu)">Top-up cover for the gap between your goods value and standard carrier GIT — add per job when available</div>
             </div>
           </div>
@@ -2367,7 +2367,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
                shut because the product does not exist yet. Reopening posting must
                never switch it on. -->
           <label style="display:flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:600;color:var(--su);cursor:not-allowed;white-space:nowrap">
-            <input type="checkbox" disabled data-always-disabled="1" style="accent-color:var(--or)"> Add gap cover
+            <input type="checkbox" disabled data-always-disabled="1" style="accent-color:var(--haf-orange-ink)"> Add gap cover
           </label>
         </div>
         <div class="fr" style="max-width:580px;margin:0"><button class="btn btn-gh btn-sm" id="post-draft" data-lock="1">Save draft</button><button class="btn btn-or btn-sm" id="post-submit" data-label-open="Post to network &#8594;">Post to network &#8594;</button></div>
@@ -2479,7 +2479,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
           <div class="ct">Add a vehicle</div>
           <div class="fr"><div class="fg"><label class="fl">Registration</label><input class="fi2" placeholder="e.g. AB12 CDE" style="text-transform:uppercase"></div><div class="fg"><label class="fl">Vehicle type</label><select class="fi2"><option>Small van</option><option>SWB</option><option>MWB</option><option>LWB</option><option>XLWB</option><option>Luton &#8212; box</option><option>Luton &#8212; curtain side</option><option>Luton &#8212; tail lift</option></select></div></div>
           <div class="fr"><div class="fg"><label class="fl">Driver name</label><input class="fi2" placeholder="Assigned driver"></div><div class="fg"><label class="fl">Base postcode</label><input class="fi2" placeholder="e.g. S9"></div></div>
-          <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.76rem;font-weight:600;color:var(--mu);margin:.3rem 0 .7rem"><input type="checkbox" style="accent-color:var(--or)"> Add to KNECT network — accept inbound jobs when available</label>
+          <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.76rem;font-weight:600;color:var(--mu);margin:.3rem 0 .7rem"><input type="checkbox" style="accent-color:var(--haf-orange-ink)"> Add to KNECT network — accept inbound jobs when available</label>
           <button class="btn btn-or btn-sm">Add vehicle</button>
         </div>
         <div class="card"><div class="ct">Registered fleet</div><div class="cr"><span class="ck">AB12 CDE — LWB · Sheffield S9</span><span class="cv"><span class="chip cg">On network</span></span></div><div class="cr"><span class="ck">XY64 FGH — Small van · Sheffield S9</span><span class="cv"><span class="chip ca">Off network</span></span></div></div>
@@ -2545,7 +2545,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <div class="fg"><label class="fl">Vehicle registration</label><input class="fi2" placeholder="e.g. AB12 CDE" style="text-transform:uppercase"></div>
           </div>
           <div class="fg" style="margin-bottom:.7rem"><label class="fl">Base postcode</label><input class="fi2" placeholder="e.g. S9 1AA" style="max-width:160px"></div>
-          <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.76rem;font-weight:600;color:var(--mu);margin:.1rem 0 .75rem"><input type="checkbox" checked style="accent-color:var(--or)"> Send the fleet PLNA invite by WhatsApp — a simple driver account, made by you</label>
+          <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.76rem;font-weight:600;color:var(--mu);margin:.1rem 0 .75rem"><input type="checkbox" checked style="accent-color:var(--haf-orange-ink)"> Send the fleet PLNA invite by WhatsApp — a simple driver account, made by you</label>
           <button class="btn btn-or btn-sm">Add driver →</button>
         </div>
         <!-- Insurance note -->
@@ -2607,16 +2607,16 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
         #cap-driverwork .cw-secttl{font-size:.8rem;font-weight:800;color:var(--tx);margin:.5rem 0 .4rem}
         #cap-driverwork .cw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.55rem}
         .cap-workcard{text-align:left;background:var(--p2);border:1.5px solid var(--ln);border-radius:14px;padding:.7rem .8rem;cursor:pointer;transition:all .13s;color:var(--tx);display:flex;flex-direction:column;gap:.28rem;font:inherit}
-        .cap-workcard:hover{border-color:var(--or);transform:translateY(-1px)}
-        .cap-workcard.taken{opacity:.6;border-color:#2dab60;pointer-events:none}
+        .cap-workcard:hover{border-color:var(--haf-orange-ink);transform:translateY(-1px)}
+        .cap-workcard.taken{opacity:.6;border-color:var(--gn, #4f7f58);pointer-events:none}
         .cap-workcard .cw-top{display:flex;align-items:center;justify-content:space-between}
-        .cap-workcard .cw-tag{font-size:.56rem;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--or);background:var(--or-d);border:1px solid var(--or-g);border-radius:20px;padding:.12rem .5rem}
+        .cap-workcard .cw-tag{font-size:.56rem;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--haf-orange-ink);background:var(--or-d);border:1px solid var(--or-g);border-radius:20px;padding:.12rem .5rem}
         .cap-workcard .cw-tag.home{color:#39d98a;background:rgba(45,171,96,.12);border-color:rgba(45,171,96,.4)}
         .cap-workcard .cw-pay{font-weight:900;font-size:1rem}
         .cap-workcard .cw-route{font-weight:800;font-size:.9rem}
-        .cap-workcard .cw-arw{color:var(--or)}
+        .cap-workcard .cw-arw{color:var(--haf-orange-ink)}
         .cap-workcard .cw-meta{font-size:.68rem;color:var(--mu)}
-        .cap-workcard .cw-accept{margin-top:.2rem;font-size:.72rem;font-weight:800;color:var(--or)}
+        .cap-workcard .cw-accept{margin-top:.2rem;font-size:.72rem;font-weight:800;color:var(--haf-orange-ink)}
         </style>
         <!-- DRIVER-FIRST: simple work panel (drivers only) -->
         <div id="cap-driverwork" style="display:none;margin-bottom:1rem"></div>
@@ -2698,7 +2698,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
               <button id="cap-back" class="cap-back" onclick="capResetView()">← Back to UK</button>
               <div style="position:absolute;top:10px;right:10px;z-index:1000;background:rgba(14,17,19,.82);border-radius:20px;padding:.3rem .8rem;font-size:.63rem;display:flex;align-items:center;gap:.6rem;box-shadow:0 1px 6px rgba(0,0,0,.3);backdrop-filter:blur(4px)">
                 <span style="color:#fff">Hover for overview · tap to open</span>
-                <span style="display:flex;align-items:center;gap:.28rem;color:#c9a7ff"><span style="width:8px;height:8px;background:#6a3fd0;display:inline-block;transform:rotate(45deg)"></span>Relay point</span>
+                <span style="display:flex;align-items:center;gap:.28rem;color:var(--am, #b98530)"><span style="width:8px;height:8px;background:var(--am, #b98530);display:inline-block;transform:rotate(45deg)"></span>Relay point</span>
               </div>
             </div>
           </div>
@@ -2753,7 +2753,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
           <div style="margin-top:.55rem;padding:.45rem .6rem;border-radius:var(--rx);background:var(--gn-d);border:1px solid rgba(45,171,96,.2);font-size:.72rem;color:var(--gn)">Driver: DH022641 · David Hughes · LWB · Confirmed en route 08:42</div>
         </div>
         <div class="ldc"><div class="ldc-h"><div><div class="ldc-route">Leeds LS1 → London E1</div><div style="font-size:.71rem;color:var(--mu);margin-top:.12rem">FF-0082 · Client: City Supplies · Posted 2 Jul</div></div><span class="chip cb">In transit</span></div><div class="ldc-meta"><span class="ldc-mi"><strong>900 kg</strong> · 6 pallets</span><span class="ldc-mi">ETA <strong>Today 17:00</strong></span><span class="ldc-mi">Agreed <strong>£310</strong></span></div>
-          <div style="margin-top:.55rem;padding:.45rem .6rem;border-radius:var(--rx);background:var(--bl-d);border:1px solid rgba(61,125,202,.2);font-size:.72rem;color:var(--bl)">Driver: JW012390 · James Wilson · En route · ETA London 17:00</div>
+          <div style="margin-top:.55rem;padding:.45rem .6rem;border-radius:var(--rx);background:var(--bl-d);border:1px solid rgba(111,119,125,.2);font-size:.72rem;color:var(--bl)">Driver: JW012390 · James Wilson · En route · ETA London 17:00</div>
         </div>
       </div>
 
@@ -2889,7 +2889,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
             <button class="btn btn-gh btn-sm btn-wide">Current plan</button>
           </div>
           <div class="plc feat">
-            <div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;color:var(--or);text-transform:uppercase;margin-bottom:.35rem">Most popular</div>
+            <div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;color:var(--haf-orange-ink);text-transform:uppercase;margin-bottom:.35rem">Most popular</div>
             <div class="pl-n" data-haf-tier="PLUS">HAF KNECT Plus</div>
             <div class="pl-p">£25<span>/mo</span></div>
             <div class="pl-fs">
@@ -2930,7 +2930,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
         <!-- Founders Member — separate programme -->
         <div style="margin-top:.5rem;border-radius:var(--r);border:1.5px solid #2a2a2a;background:linear-gradient(135deg,#111 0%,#1a1209 100%);padding:1.3rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
           <div>
-            <div style="font-size:.6rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--or);margin-bottom:.3rem">HAF KNECT Founders Members</div>
+            <div style="font-size:.6rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--haf-orange-ink);margin-bottom:.3rem">HAF KNECT Founders Members</div>
             <div style="font-family:var(--dp);font-weight:900;font-size:1rem;color:#fff;margin-bottom:.3rem">Network Profit Share</div>
             <div style="font-size:.73rem;color:#888;line-height:1.5;max-width:480px">A separate membership above the plans. Founders Members earn a share of the HAF KNECT network revenue — not just per-job pooling, a direct cut of the platform's growth. Apply-only. Limited seats.</div>
           </div>
@@ -2967,7 +2967,7 @@ body.hv-blur-all .hv-tile > :not(.hv-eye){
       <!-- SHARED: Community Feedback -->
       <div class="tp" id="pane-feedback">
         <h1 class="pt">Community Feedback</h1><p class="ps">Propose features and solutions to improve the HAF KNECT network — then vote for the ideas you'd actually use. Top-voted ideas get built first.</p>
-        <div style="background:var(--or-d);border:1px solid var(--or-g);border-radius:var(--rx);padding:.55rem .9rem;font-size:.73rem;color:var(--mu);margin-bottom:1rem"><strong style="color:var(--or)">House rules:</strong> strictly for suggesting alterations to the network — features, fixes and solutions. Anything rude, abusive or discriminatory is blocked and removed.</div>
+        <div style="background:var(--or-d);border:1px solid var(--or-g);border-radius:var(--rx);padding:.55rem .9rem;font-size:.73rem;color:var(--mu);margin-bottom:1rem"><strong style="color:var(--haf-orange-ink)">House rules:</strong> strictly for suggesting alterations to the network — features, fixes and solutions. Anything rude, abusive or discriminatory is blocked and removed.</div>
         <div class="g2 fb-g2" style="align-items:start">
           <div class="card">
             <div class="ct">Post to the board</div>
@@ -3820,8 +3820,10 @@ async function pcDistReal(a,b){
 /* ── THEME ── */
 function toggleTheme(){
   const h=document.documentElement;
-  const dark=h.getAttribute('data-theme')==='dark';
-  h.setAttribute('data-theme',dark?'':'dark');
+  const dark=h.getAttribute('data-theme')==='night'||h.getAttribute('data-theme')==='dark';
+  // one switch for the whole network: it remembers, and every HAF site reads it
+  if(window.hafTheme) window.hafTheme.set(dark?'day':'night');
+  else h.setAttribute('data-theme',dark?'':'night');
   const moon='<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>';
   const sun='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
   ['theme-ico','app-theme-ico'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=dark?moon:sun;});
@@ -5134,7 +5136,7 @@ function dcSim(){
      '<div class="cr"><span class="ck">Standard network fee</span><span class="cv">'+DC_PCT((URG[j.job]||URG.sday).fee)+'</span></div>'+
      '<div class="cr"><span class="ck">Account adjustment</span><span class="cv">'+(ACC_LEVEL[a.posterTier].cut?'−'+(ACC_LEVEL[a.posterTier].cut*100).toFixed(1).replace(/\.0$/,'')+' points':'none')+'</span></div>'+
      '<div class="cr"><span class="ck">Effective network fee</span><span class="cv">'+DC_PCT(r.feePct)+'</span></div>'+
-     '<div class="cr"><span class="ck"><strong>HAF connection margin</strong></span><span class="cv"><strong style="color:var(--or)">'+DC_MONEY(r.fee)+'</strong></span></div></div>';
+     '<div class="cr"><span class="ck"><strong>HAF connection margin</strong></span><span class="cv"><strong style="color:var(--haf-orange-ink)">'+DC_MONEY(r.fee)+'</strong></span></div></div>';
   h+='</div>';
   h+='<div class="card"><div class="ct">'+(g('dc-s-prole').value==='freight'?'Freight forwarder':'Load poster')+'</div>'+
      '<div class="cr"><span class="ck">Amount paid to HAF KNECT</span><span class="cv">'+DC_MONEY(r.sub)+' ex VAT</span></div>'+
@@ -6533,35 +6535,35 @@ window.ovLoad=ovLoad;window.aaBoot=aaBoot;window.aaLoad=aaLoad;window.aaDebounce
    The sidebar tracker + this page are the spine every account orbits.
    Adding a field, a role or a job = editing config below — never a redesign. */
 window.HAF_ROLE=window.HAF_ROLE||'driver';
-const HAF_STATUS={draft:['Scheduled','#8a97a0'],awaiting:['Awaiting driver','#e88c00'],assigned:['Driver assigned','#3d7dca'],collection:['En route to collection','#6a3fd0'],transit:['In transit','#0d9488'],delivered:['Delivered','#2dab60'],delayed:['Delayed','#cc3333'],closed:['Closed','#5b6b74']};
+const HAF_STATUS={draft:['Scheduled','#8a97a0'],awaiting:['Awaiting driver','var(--or, #f18e00)'],assigned:['Driver assigned','var(--mu, #6f777d)'],collection:['En route to collection','var(--am, #b98530)'],transit:['In transit','var(--or, #f18e00)'],delivered:['Delivered','var(--gn, #4f7f58)'],delayed:['Delayed','var(--rd, #b4483f)'],closed:['Closed','#5b6b74']};
 const HAF_STEPS=['Job posted','Driver assigned','En route to collection','Collected','In transit','Out for delivery','Delivered','Proof confirmed'];
 /* shared records — every field lives here once; role config decides what shows */
 const HAF_JOBS=[
- {id:'HAF-2858',colour:'#3d7dca',status:'transit',stepIdx:4,progress:62,
+ {id:'HAF-2858',colour:'var(--mu, #6f777d)',status:'transit',stepIdx:4,progress:62,
   from:{name:'Sheffield S1',lat:53.383,lng:-1.466},to:{name:'Leeds LS1',lat:53.796,lng:-1.547},driverPos:{lat:53.565,lng:-1.492},
   driverName:'James W.',driverId:'JW012390',vehicle:'LWB',reg:'MA71 ZKD',goods:'2 pallets · 420 kg · tail-lift',collect:'Today 13:30',deadline:'Today 15:00',eta:'14:35',distance:'38 mi',lastUpdate:'2 min ago',onTime:'On time',recipientHint:'Northern Pack — goods-in',
   payout:'£86',rate:'£2.26 / loaded mi',price:'£128',vat:'£25.60',buy:'£86',sell:'£128',margin:'£42',marginPct:'33%',client:'Northern Pack',account:'ABC Trade Ltd',
   updates:[{t:'13:32',s:'Collected from Sheffield S1 — proof of collection uploaded'},{t:'13:49',s:'In transit, northbound on the M1'},{t:'14:06',s:'On schedule — ETA holding at 14:35'}],
   messages:[{who:'driver',from:'James W. (Driver)',t:'13:33',text:'Collected, all secure. 2 pallets on, heading up the M1.'},{who:'portal',from:'HAF KNECT',t:'13:34',text:'Thanks James — customer tracking is live.'}]},
- {id:'HAF-2861',colour:'#ff7800',status:'assigned',stepIdx:1,progress:16,
+ {id:'HAF-2861',colour:'var(--or, #f18e00)',status:'assigned',stepIdx:1,progress:16,
   from:{name:'Salford M50',lat:53.474,lng:-2.29},to:{name:'Sheffield S9',lat:53.41,lng:-1.42},driverPos:{lat:53.474,lng:-2.29},
   driverName:'David H.',driverId:'DH022641',vehicle:'LWB',reg:'DH19 RGT',goods:'680 kg · no stacking · tail-lift',collect:'Tomorrow 09:00',deadline:'Tomorrow 12:30',eta:'11:40',distance:'41 mi',lastUpdate:'—',onTime:'Scheduled',recipientHint:'City Supplies — reception',
   payout:'£94',rate:'£2.29 / loaded mi',price:'£140',vat:'£28.00',buy:'£94',sell:'£140',margin:'£46',marginPct:'33%',client:'City Supplies',account:'ABC Trade Ltd',
   updates:[{t:'—',s:'Driver assigned — collection scheduled for 09:00 tomorrow'}],
   messages:[{who:'portal',from:'HAF KNECT',t:'12:10',text:'David is confirmed for the 09:00 collection tomorrow.'}]},
- {id:'HAF-2864',colour:'#2dab60',status:'collection',stepIdx:2,progress:22,
+ {id:'HAF-2864',colour:'var(--gn, #4f7f58)',status:'collection',stepIdx:2,progress:22,
   from:{name:'Manchester M60',lat:53.478,lng:-2.244},to:{name:'Liverpool L1',lat:53.405,lng:-2.99},driverPos:{lat:53.47,lng:-2.36},
   driverName:'Priya K.',driverId:'PK041872',vehicle:'SWB',reg:'PK20 HLM',goods:'1 pallet · 180 kg',collect:'Today 15:00',deadline:'Today 17:30',eta:'16:20',distance:'34 mi',lastUpdate:'5 min ago',onTime:'On time',recipientHint:'Mersey Retail — yard',
   payout:'£72',rate:'£2.12 / loaded mi',price:'£108',vat:'£21.60',buy:'£72',sell:'£108',margin:'£36',marginPct:'33%',client:'Mersey Retail',account:'ABC Trade Ltd',
   updates:[{t:'14:40',s:'Driver en route to collection'}],
   messages:[{who:'portal',from:'HAF KNECT',t:'14:41',text:'Priya is on her way to collect.'}]},
- {id:'HAF-2870',colour:'#6a3fd0',status:'awaiting',stepIdx:0,progress:0,
+ {id:'HAF-2870',colour:'var(--am, #b98530)',status:'awaiting',stepIdx:0,progress:0,
   from:{name:'Leeds LS1',lat:53.796,lng:-1.547},to:{name:'Hull HU1',lat:53.744,lng:-0.335},driverPos:{lat:53.796,lng:-1.547},
   driverName:'—',driverId:'—',vehicle:'Luton',reg:'—',goods:'4 pallets · 900 kg · tail-lift',collect:'Today 16:30',deadline:'Today 19:00',eta:'—',distance:'58 mi',lastUpdate:'—',onTime:'Awaiting driver',recipientHint:'Humber Depot',
   payout:'£128',rate:'£2.21 / loaded mi',price:'£190',vat:'£38.00',buy:'£128',sell:'£190',margin:'£62',marginPct:'33%',client:'Humber Depot',account:'ABC Trade Ltd',
   updates:[{t:'14:20',s:'Posted to the network — searching for a driver'}],
   messages:[{who:'portal',from:'HAF KNECT',t:'14:20',text:'We are matching a Luton driver for this load.'}]},
- {id:'HAF-2851',colour:'#0d9488',status:'delivered',stepIdx:7,progress:100,
+ {id:'HAF-2851',colour:'var(--or, #f18e00)',status:'delivered',stepIdx:7,progress:100,
   from:{name:'Birmingham B1',lat:52.48,lng:-1.9},to:{name:'Bristol BS1',lat:51.454,lng:-2.591},driverPos:{lat:51.454,lng:-2.591},
   driverName:'David H.',driverId:'DH022641',vehicle:'LWB',reg:'DH19 RGT',goods:'6 pallets · 1200 kg',collect:'Today 08:00',deadline:'Today 12:00',eta:'11:12',distance:'88 mi',lastUpdate:'earlier today',onTime:'Delivered',recipientHint:'Bristol DC',
   payout:'£176',rate:'£2.00 / loaded mi',price:'£262',vat:'£52.40',buy:'£176',sell:'£262',margin:'£86',marginPct:'33%',client:'City Supplies',account:'ABC Trade Ltd',
@@ -6622,7 +6624,7 @@ function hafRenderJobsList(){
  const rows=list.map(j=>{
    const st=HAF_STATUS[j.status]||HAF_STATUS.transit;
    const extra=role==='freight'?`Client <b>${hafEsc(j.client)}</b>`:role==='business'?`Ref <b>${j.id}</b>`:`Payout <b>${hafEsc(j.payout)}</b>`;
-   const drv=(j.driverName&&j.driverName!=='—')?`Driver <b>${hafEsc(j.driverName)}</b>`:`<b style="color:var(--or)">Finding driver…</b>`;
+   const drv=(j.driverName&&j.driverName!=='—')?`Driver <b>${hafEsc(j.driverName)}</b>`:`<b style="color:var(--haf-orange-ink)">Finding driver…</b>`;
    const eta=j.status==='delivered'?`Delivered <b>${hafEsc(j.pod?j.pod.time:'')}</b>`:((j.eta&&j.eta!=='—')?`ETA <b>${hafEsc(j.eta)}</b>`:`<b>—</b>`);
    return `<button class="ljl-row" style="border-left-color:${j.colour}" onclick="hafOpenJob('${j.id}')">
      <div class="ljl-r1"><span class="ljl-ref">${j.id}</span><span class="chip" style="background:${st[1]}22;color:${st[1]};font-weight:800;font-size:.56rem;border:1px solid ${st[1]}55">● ${st[0]}</span></div>
@@ -6654,7 +6656,7 @@ function hafRenderLiveJob(){
  const j=hafCurrentJob();const role=hafRole();const cfg=HAF_ROLECFG[role]||HAF_ROLECFG.driver;
  const st=HAF_STATUS[j.status]||HAF_STATUS.transit;
  const delivered=(j.status==='delivered');
- const otCol=/late|delay/i.test(j.onTime)?'#cc3333':(/schedul/i.test(j.onTime)?'var(--mu)':'#2dab60');
+ const otCol=/late|delay/i.test(j.onTime)?'var(--rd, #b4483f)':(/schedul/i.test(j.onTime)?'var(--mu)':'var(--gn, #4f7f58)');
  const fields=cfg.fields(j).map(f=>`<div class="lj-field"><div class="lj-field-l">${f[0]}</div><div class="lj-field-v" style="${f[2]?'color:'+f[2]:''}">${hafEsc(f[1])}</div></div>`).join('');
  const steps=HAF_STEPS.map((s,i)=>`<div class="lj-tstep ${i<j.stepIdx?'done':i===j.stepIdx?'now':''}">${s}</div>`).join('');
  const updates=j.updates.map(u=>`<div class="lj-update"><span class="lj-update-t">${hafEsc(u.t)}</span><span>${hafEsc(u.s)}</span></div>`).join('');
@@ -6722,7 +6724,7 @@ function hafRenderLiveJob(){
   <div class="lj-head">
     <div class="lj-head-i"><div class="lj-head-l">Status</div><div class="lj-head-v" style="color:${st[1]}">${st[0]}</div></div>
     <div class="lj-head-i"><div class="lj-head-l">ETA</div><div class="lj-head-v">${delivered?hafEsc(j.pod.time):hafEsc(j.eta)}</div></div>
-    <div class="lj-head-i"><div class="lj-head-l">${delivered?'Outcome':'On time'}</div><div class="lj-head-v" style="color:${delivered?'#2dab60':otCol};font-size:.86rem">${delivered?'Delivered':hafEsc(j.onTime)}</div></div>
+    <div class="lj-head-i"><div class="lj-head-l">${delivered?'Outcome':'On time'}</div><div class="lj-head-v" style="color:${delivered?'var(--gn, #4f7f58)':otCol};font-size:.86rem">${delivered?'Delivered':hafEsc(j.onTime)}</div></div>
     <div class="lj-head-i"><div class="lj-head-l">Last update</div><div class="lj-head-v" style="font-size:.82rem">${hafEsc(j.lastUpdate)}</div></div>
   </div>
   <div class="lj-wrap">
@@ -6800,7 +6802,7 @@ function hafInitLjMap(j){
  const line=L.polyline([[j.from.lat,j.from.lng],[j.driverPos.lat,j.driverPos.lng],[j.to.lat,j.to.lng]],{opacity:0}).addTo(ljMap);
  ljDotIcon=(fill,sz)=>L.divIcon({className:'',html:`<div style="width:${sz||14}px;height:${sz||14}px;border-radius:50%;background:${fill};border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.5)"></div>`,iconSize:[sz||14,sz||14],iconAnchor:[(sz||14)/2,(sz||14)/2]});
  L.marker([j.from.lat,j.from.lng],{icon:ljDotIcon(j.colour)}).addTo(ljMap).bindPopup('Collection · '+j.from.name);
- L.marker([j.to.lat,j.to.lng],{icon:ljDotIcon('#2dab60')}).addTo(ljMap).bindPopup('Delivery · '+j.to.name);
+ L.marker([j.to.lat,j.to.lng],{icon:ljDotIcon('var(--gn, #4f7f58)')}).addTo(ljMap).bindPopup('Delivery · '+j.to.name);
  ljDriverMarker=L.marker([j.driverPos.lat,j.driverPos.lng],{icon:ljDotIcon('#fff'),zIndexOffset:500}).addTo(ljMap).bindPopup('Driver · '+j.driverName+' ('+j.progress+'%)');
  try{ljMap.fitBounds(line.getBounds(),{padding:[40,40]});}catch(e){}
  setTimeout(()=>{try{ljMap.invalidateSize();}catch(e){}},80);
@@ -6832,7 +6834,7 @@ function ljApplyLive(j,d){
 }
 function ljShowPin(j,d){
  if(!ljMap)return;
- const ic=L.divIcon({className:'',html:'<div style="width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#ff7800;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.5)"></div>',iconSize:[16,16],iconAnchor:[8,16]});
+ const ic=L.divIcon({className:'',html:'<div style="width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--or, #f18e00);border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.5)"></div>',iconSize:[16,16],iconAnchor:[8,16]});
  if(ljPinMarker){ljPinMarker.setLatLng([d.lat,d.lng]);}
  else{ljPinMarker=L.marker([d.lat,d.lng],{icon:ic,zIndexOffset:400}).addTo(ljMap);}
  const ago=d.ageSec==null?'':(' · '+(d.ageSec<60?d.ageSec+'s':Math.round(d.ageSec/60)+'m')+' ago');
@@ -6895,11 +6897,11 @@ function hafOpenPod(){
      <label class="pod-l">Delivery outcome</label>
      <select id="pod-exc" class="pod-in" onchange="hafPodExc()">${HAF_POD_EXC.map(e=>`<option>${e}</option>`).join('')}</select>
      <div id="pod-sign-fields">
-       <label class="pod-l">Recipient name <span style="color:#cc3333">*</span></label>
+       <label class="pod-l">Recipient name <span style="color:var(--rd, #b4483f)">*</span></label>
        <input id="pod-name" class="pod-in" placeholder="Who took the delivery?">
        <label class="pod-l">Company / department</label>
        <input id="pod-co" class="pod-in" placeholder="${hafEsc(j.recipientHint||'e.g. Goods-in')}">
-       <label class="pod-l" id="pod-sig-l">Signature <span style="color:#cc3333">*</span></label>
+       <label class="pod-l" id="pod-sig-l">Signature <span style="color:var(--rd, #b4483f)">*</span></label>
        <div class="pod-sigwrap"><canvas id="pod-sig" class="pod-sig"></canvas><button type="button" class="pod-sigclear" onclick="hafSigClear()">Clear</button></div>
      </div>
      <label class="pod-l">Delivery photo (optional)</label>
@@ -6968,8 +6970,8 @@ function hafDownloadPod(id){
  const row=(k,v)=>`<tr><td class="k">${k}</td><td>${v}</td></tr>`;
  const doc=`<!doctype html><html><head><meta charset="utf-8"><title>POD ${j.id}</title>
    <style>body{font-family:Arial,Helvetica,sans-serif;color:#111;max-width:640px;margin:24px auto;padding:0 20px}
-   .h{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #ff7800;padding-bottom:10px}
-   .h b{font-size:20px}.t{color:#ff7800;font-weight:800;letter-spacing:.04em}
+   .h{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid var(--or, #f18e00);padding-bottom:10px}
+   .h b{font-size:20px}.t{color:var(--or, #f18e00);font-weight:800;letter-spacing:.04em}
    table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px}td{padding:7px 4px;border-bottom:1px solid #eee;vertical-align:top}
    td.k{color:#666;width:42%}img{max-width:220px;border:1px solid #ddd;margin-top:6px}
    .ok{color:#1a9d55;font-weight:700}.ref{color:#999;font-size:11px;margin-top:18px}</style></head><body>
@@ -7074,8 +7076,8 @@ async function fbSubmit(){
   btn.disabled=false;btn.textContent='Post to the board';
 }
 
-// Boot in day mode
-document.documentElement.removeAttribute('data-theme');
+// Day is the default, but a night choice made on any HAF site is remembered.
+// haf-theme.js has already applied it before first paint; don't undo it here.
 document.getElementById('landing').style.display='flex';
 
 /* ── EXCHANGE DASHBOARD MAP ── */
@@ -7085,7 +7087,7 @@ function renderDashAreas(){
   const el=document.getElementById('dash-areas');if(!el||typeof CAP_REGIONS==='undefined')return;
   const order={hot:0,warm:1,cool:2};
   const all=[...CAP_REGIONS].sort((a,b)=>order[a.tier]-order[b.tier]||b.drivers-a.drivers);
-  const dm={hot:['Hot demand','#9ec13c'],warm:['Warm','#f0b429'],cool:['Building','#4a90d9']};
+  const dm={hot:['Hot demand','var(--haf-positive)'],warm:['Warm','var(--haf-caution)'],cool:['Building','var(--haf-ink-muted)']};
   el.innerHTML=all.map(z=>{const d=dm[z.tier]||dm.cool;return `<button class="cap-sec" onclick="dashOpenArea('${z.id}')" style="border-left-color:${z.colour}" onmouseover="this.style.borderColor='${z.colour}'" onmouseout="this.style.borderColor='var(--ln)'">
       <div class="cap-sec-top"><span class="cap-sec-nm">${z.name}</span><span class="cap-sec-pill" style="background:${d[1]}22;color:${d[1]}">${d[0]}</span></div>
       <div class="cap-sec-towns">${z.towns||z.cities}</div>
@@ -7115,7 +7117,7 @@ function initDashMap(){
     {lat:54.98,lng:-1.62,city:'Newcastle',n:7,tier:'med'},
     {lat:55.86,lng:-4.25,city:'Glasgow',n:5,tier:'med'},
   ];
-  const TC={hi:{fill:'#2dab60',stroke:'#1e7a45'},med:{fill:'#e88c00',stroke:'#b36b00'},lo:{fill:'#cc3333',stroke:'#992222'}};
+  const TC={hi:{fill:'var(--gn, #4f7f58)',stroke:'#1e7a45'},med:{fill:'var(--or, #f18e00)',stroke:'var(--haf-orange-ink)'},lo:{fill:'var(--rd, #b4483f)',stroke:'#992222'}};
   ZONES.forEach(z=>{
     const c=TC[z.tier];
     L.circle([z.lat,z.lng],{radius:22000,fillColor:c.fill,color:c.stroke,weight:1,fillOpacity:.18}).addTo(dashMap);
@@ -7125,9 +7127,9 @@ function initDashMap(){
      district it is in and nothing sharper — no pin to zoom into, no address in the
      popup. The exact location is released with the job, to the driver who takes it. */
   [{lat:52.92,lng:-1.48,ref:'HAF-2858',route:'Manchester → Birmingham'},{lat:52.30,lng:-0.88,ref:'HAF-2201',route:'Leeds → London'},{lat:53.44,lng:-2.18,ref:'HAF-2196',route:'Liverpool → Sheffield'},{lat:51.72,lng:-1.08,ref:'HAF-2189',route:'Bristol → London'}].forEach(j=>{
-    L.circle([j.lat,j.lng],{radius:HAF_AREA_RADIUS,fillColor:'#ff7800',color:'#ff7800',weight:1.5,fillOpacity:.16,dashArray:'4 3'})
+    L.circle([j.lat,j.lng],{radius:HAF_AREA_RADIUS,fillColor:'var(--or, #f18e00)',color:'var(--or, #f18e00)',weight:1.5,fillOpacity:.16,dashArray:'4 3'})
       .addTo(dashMap)
-      .bindPopup(`<strong style="color:#ff7800">${j.ref}</strong><br>${hafArea(j.route)}<br><span style="color:#8a97a0;font-size:11px">Area shown — exact address on accept</span>`);
+      .bindPopup(`<strong style="color:var(--or, #f18e00)">${j.ref}</strong><br>${hafArea(j.route)}<br><span style="color:#8a97a0;font-size:11px">Area shown — exact address on accept</span>`);
   });
 }
 function _buildDashActions(role){
@@ -7419,24 +7421,24 @@ const CAP_TIER={hot:{lbl:'Hot demand'},warm:{lbl:'Warm'},cool:{lbl:'Cool / build
    colour = flat categorical fill (each section its own colour, like a regions infographic).
    lab = [lat,lng] for the on-map label. Numbers are network placeholders until live data fills them. */
 const CAP_REGIONS=[
-  {id:'sco',name:'Scotland',geo:'Scotland',pc:'Scotland',colour:'#e8823c',lab:[56.6,-4.2],tier:'warm',drivers:6,jobs:0,cities:'Glasgow · Edinburgh · Aberdeen',corridor:'M8 / M74',demand:'Gateway to/from England via Penrith',
+  {id:'sco',name:'Scotland',geo:'Scotland',pc:'Scotland',colour:'var(--haf-orange)',lab:[56.6,-4.2],tier:'warm',drivers:6,jobs:0,cities:'Glasgow · Edinburgh · Aberdeen',corridor:'M8 / M74',demand:'Gateway to/from England via Penrith',
     relays:[{name:'Abington (M74)',road:'M74 J13',swaps:9,ontime:87,dwell:31,live:false}]},
   {id:'ni',name:'Northern Ireland',geo:'Northern Ireland',pc:'Northern Ireland',colour:'#4fae73',lab:[54.7,-6.8],tier:'cool',drivers:2,jobs:0,cities:'Belfast · Derry · Lisburn',corridor:'M1 / M2',demand:'Early — sea-link backloads',relays:[]},
   {id:'ire',name:'Ireland',geo:'Ireland',pc:'Ireland',colour:'#3fa66a',lab:[53.4,-7.9],tier:'cool',drivers:0,jobs:0,cities:'Dublin · Cork · Galway · Limerick',corridor:'M50 / M7 / M8',demand:'Cross-border & sea-link — early',relays:[]},
-  {id:'ne',name:'North East',geo:'North East',pc:'North East',colour:'#b5543f',lab:[54.9,-1.9],tier:'warm',drivers:7,jobs:0,cities:'Newcastle · Sunderland · Durham',corridor:'A1(M)',demand:'Long-haul South backloads',
+  {id:'ne',name:'North East',geo:'North East',pc:'North East',colour:'var(--haf-negative)',lab:[54.9,-1.9],tier:'warm',drivers:7,jobs:0,cities:'Newcastle · Sunderland · Durham',corridor:'A1(M)',demand:'Long-haul South backloads',
     relays:[{name:'Scotch Corner (A1/A66)',road:'A1(M) J53',swaps:12,ontime:89,dwell:28,live:false}]},
-  {id:'nw',name:'North West',geo:'North West',pc:'North West',colour:'#9ec13c',lab:[54.0,-2.7],tier:'hot',drivers:14,jobs:2,cities:'Manchester · Liverpool · Preston',corridor:'M6 / M62',demand:'Manchester → Birmingham runs daily',
+  {id:'nw',name:'North West',geo:'North West',pc:'North West',colour:'var(--haf-positive)',lab:[54.0,-2.7],tier:'hot',drivers:14,jobs:2,cities:'Manchester · Liverpool · Preston',corridor:'M6 / M62',demand:'Manchester → Birmingham runs daily',
     relays:[{name:'Lymm Relay (M6/M56)',road:'M6 J20',swaps:38,ontime:96,dwell:14,live:true},{name:'Haydock Hub',road:'M6 J23',swaps:19,ontime:91,dwell:22,live:false}]},
   {id:'yo',name:'Yorkshire & Humber',geo:'Yorkshire and The Humber',pc:'Yorkshire and The Humber',colour:'#d94f9a',lab:[53.85,-1.2],tier:'hot',drivers:11,jobs:1,cities:'Leeds · Sheffield · Hull',corridor:'M1 / M62 / A1(M)',demand:'Strong backload pool both ways',
     relays:[{name:'Doncaster Gateway (M18/A1)',road:'M18 J3',swaps:41,ontime:97,dwell:12,live:true},{name:'Brighouse (M62)',road:'M62 J25',swaps:23,ontime:93,dwell:17,live:true}]},
-  {id:'wm',name:'West Midlands',geo:'West Midlands',pc:'West Midlands',colour:'#f0c020',lab:[52.5,-2.2],tier:'hot',drivers:12,jobs:1,cities:'Birmingham · Coventry · Wolverhampton',corridor:'M6 / M42 / M5',demand:'Golden-triangle overspill',
+  {id:'wm',name:'West Midlands',geo:'West Midlands',pc:'West Midlands',colour:'var(--haf-caution)',lab:[52.5,-2.2],tier:'hot',drivers:12,jobs:1,cities:'Birmingham · Coventry · Wolverhampton',corridor:'M6 / M42 / M5',demand:'Golden-triangle overspill',
     relays:[{name:'Coleshill Cross (M6/M42)',road:'M6 J4',swaps:34,ontime:95,dwell:15,live:true},{name:'Tamworth (M42/A5)',road:'M42 J10',swaps:27,ontime:92,dwell:19,live:false}]},
-  {id:'em',name:'East Midlands',geo:'East Midlands',pc:'East Midlands',colour:'#4a90d9',lab:[52.9,-0.9],tier:'warm',drivers:7,jobs:1,cities:'Nottingham · Leicester · Derby',corridor:'M1 / A50',demand:'DIRFT / Golden Triangle spine',
+  {id:'em',name:'East Midlands',geo:'East Midlands',pc:'East Midlands',colour:'var(--haf-ink-muted)',lab:[52.9,-0.9],tier:'warm',drivers:7,jobs:1,cities:'Nottingham · Leicester · Derby',corridor:'M1 / A50',demand:'DIRFT / Golden Triangle spine',
     relays:[{name:'Rugby / DIRFT',road:'M1 J18',swaps:29,ontime:94,dwell:16,live:true}]},
-  {id:'wal',name:'Wales',geo:'Wales',pc:'Wales',colour:'#e8823c',lab:[52.3,-3.7],tier:'cool',drivers:3,jobs:0,cities:'Cardiff · Swansea · Wrexham',corridor:'M4 / A55',demand:'Early — recruit drivers first',relays:[]},
+  {id:'wal',name:'Wales',geo:'Wales',pc:'Wales',colour:'var(--haf-orange)',lab:[52.3,-3.7],tier:'cool',drivers:3,jobs:0,cities:'Cardiff · Swansea · Wrexham',corridor:'M4 / A55',demand:'Early — recruit drivers first',relays:[]},
   {id:'ea',name:'East of England',geo:'Eastern',pc:'East of England',colour:'#5fb87a',lab:[52.3,0.6],tier:'cool',drivers:3,jobs:0,cities:'Cambridge · Norwich · Ipswich',corridor:'A14 / A11',demand:'Port backloads (Felixstowe)',
     relays:[{name:'A14 Cambridge',road:'A14 J31',swaps:6,ontime:90,dwell:23,live:false}]},
-  {id:'lon',name:'London',geo:'London',pc:'London',colour:'#f0b429',lab:[51.5,-0.1],tier:'warm',drivers:5,jobs:1,cities:'Greater London',corridor:'M25 / North & South Circular',demand:'High inbound, thin return capacity',
+  {id:'lon',name:'London',geo:'London',pc:'London',colour:'var(--haf-caution)',lab:[51.5,-0.1],tier:'warm',drivers:5,jobs:1,cities:'Greater London',corridor:'M25 / North & South Circular',demand:'High inbound, thin return capacity',
     relays:[{name:'Thurrock (M25 J30)',road:'M25 J30',swaps:15,ontime:88,dwell:26,live:false}]},
   {id:'se',name:'South East',geo:'South East',pc:'South East',colour:'#e56aa0',lab:[51.2,-0.6],tier:'warm',drivers:6,jobs:0,cities:'Reading · Milton Keynes · Kent',corridor:'M25 / M40 / M3',demand:'Home-counties distribution belt',
     relays:[{name:'Milton Keynes (M1 J13)',road:'M1 J13',swaps:22,ontime:90,dwell:24,live:false}]},
@@ -7515,7 +7517,7 @@ function capRenderDriverWork(){
   el.innerHTML=`
    <div class="card" style="padding:1rem 1.1rem">
      <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.35rem">
-       <div><div class="ct" style="margin:0">Your work</div><div style="font-size:.72rem;color:var(--mu)">Base: <b style="color:var(--tx)">${base.name}</b> · <a onclick="capChangeBase()" style="color:var(--or);cursor:pointer">change</a></div></div>
+       <div><div class="ct" style="margin:0">Your work</div><div style="font-size:.72rem;color:var(--mu)">Base: <b style="color:var(--tx)">${base.name}</b> · <a onclick="capChangeBase()" style="color:var(--haf-orange-ink);cursor:pointer">change</a></div></div>
        <button id="cap-mapviewbtn" class="btn btn-gh btn-sm" onclick="capToggleMapZone()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5z"/><path d="M9 4v13"/><path d="M15 6.5v13"/></svg> Full map view</button>
      </div>
      <div class="cw-secttl">Jobs from your base</div>
@@ -7529,7 +7531,7 @@ function capChangeBase(){alert('Set your base postcode — coming with the live 
 function capAcceptWork(id){
   const b=document.getElementById('cw-'+id);if(!b)return;
   b.classList.add('taken');
-  const a=b.querySelector('.cw-accept');if(a){a.textContent='✓ Accepted — added to your live jobs';a.style.color='#2dab60';}
+  const a=b.querySelector('.cw-accept');if(a){a.textContent='✓ Accepted — added to your live jobs';a.style.color='var(--gn, #4f7f58)';}
 }
 function capToggleMapZone(open){
   capMapOpen=(open===undefined)?!capMapOpen:open;
@@ -7610,10 +7612,10 @@ function initCapMap(){
   capMap.on('zoomend',capTownVis);setTimeout(capTownVis,0);
   /* Relay stations as diamonds on the region label points (toggle layer) */
   capMap._relayLayers=[];
-  const relayIcon=L.divIcon({className:'',html:`<div style="width:12px;height:12px;background:#6a3fd0;transform:rotate(45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>`,iconSize:[12,12],iconAnchor:[6,6]});
+  const relayIcon=L.divIcon({className:'',html:`<div style="width:12px;height:12px;background:var(--am, #b98530);transform:rotate(45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>`,iconSize:[12,12],iconAnchor:[6,6]});
   CAP_REGIONS.forEach(z=>{(z.relays||[]).forEach((rs,ri)=>{
     const m=L.marker([z.lab[0]-0.25-ri*0.28,z.lab[1]+0.35+ri*0.2],{icon:relayIcon})
-     .bindPopup(`<strong style="color:#6a3fd0">◆ ${rs.name}</strong><br>${rs.road}<br><span style="color:#666;font-size:11px">${z.name} · ${rs.live?rs.swaps+' swaps logged':'candidate hub'}</span>`);
+     .bindPopup(`<strong style="color:var(--am, #b98530)">◆ ${rs.name}</strong><br>${rs.road}<br><span style="color:#666;font-size:11px">${z.name} · ${rs.live?rs.swaps+' swaps logged':'candidate hub'}</span>`);
     capMap._relayLayers.push(m);
   });});
   capFilter();
@@ -7632,8 +7634,8 @@ function capCover(n){return n>=8?['Well covered','var(--gn)']:n>=3?['Cover avail
 function capOverviewHtml(z){
   const relays=(z.relays||[]).length;
   let pill,pc;
-  if(capRole==='customer'){const cov=capCover(z.drivers);pill=cov[0];pc=z.drivers>=8?'#4fae73':z.drivers>=3?'#e8823c':'#8ea3b0';}
-  else{const dm={hot:['Hot demand','#9ec13c'],warm:['Warm','#f0b429'],cool:['Building','#4a90d9']};const d=dm[z.tier]||dm.cool;pill=d[0];pc=d[1];}
+  if(capRole==='customer'){const cov=capCover(z.drivers);pill=cov[0];pc=z.drivers>=8?'#4fae73':z.drivers>=3?'var(--haf-orange)':'#8ea3b0';}
+  else{const dm={hot:['Hot demand','var(--haf-positive)'],warm:['Warm','var(--haf-caution)'],cool:['Building','var(--haf-ink-muted)']};const d=dm[z.tier]||dm.cool;pill=d[0];pc=d[1];}
   /* no raw counts on the map — a status word + towns, so nobody judges an area by placeholder numbers */
   const line=capRole==='customer'
     ? `<div class="cap-ov-towns" style="margin-top:.35rem;color:#cdd8e0">Same-day courier cover${relays?` · ◆ relay swap point`:''}</div>`
@@ -7680,7 +7682,7 @@ function capSelect(id){
   const cov=capCover(z.drivers);
   const relayRows=relays.length?relays.map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.5rem .1rem;border-bottom:1px solid var(--ln)">
         <div><div style="font-weight:700;font-size:.82rem">◆ ${r.name}</div><div style="font-size:.68rem;color:var(--mu)">${r.road} · ${r.live?'live':'candidate hub'}</div></div>
-        <div style="text-align:right;white-space:nowrap">${r.live?`<div style="font-weight:800;font-size:.85rem;color:var(--or)">${r.swaps}</div><div style="font-size:.64rem;color:var(--mu)">swaps · ${r.ontime}% on-time</div>`:`<span class="chip ca" style="font-size:.6rem">Recruiting partner</span>`}</div>
+        <div style="text-align:right;white-space:nowrap">${r.live?`<div style="font-weight:800;font-size:.85rem;color:var(--haf-orange-ink)">${r.swaps}</div><div style="font-size:.64rem;color:var(--mu)">swaps · ${r.ontime}% on-time</div>`:`<span class="chip ca" style="font-size:.6rem">Recruiting partner</span>`}</div>
       </div>`).join(''):`<div style="font-size:.78rem;color:var(--mu);padding:.5rem 0">No relay point here yet — a swap yard here would anchor the whole area.</div>`;
   const bizRelay=capBiz()?`<div class="ct" style="font-size:.85rem;margin:.8rem 0 .15rem">◆ Relay swap points serving ${z.name}</div><div style="font-size:.72rem;color:var(--mu);margin-bottom:.25rem">Where our drivers hand off long-distance loads — how HAF moves your goods faster and cheaper across regions.</div>${relayRows}`:'';
   let body,cta;
@@ -7739,8 +7741,8 @@ function _capSecCard(z){
   const rc=(z.relays||[]).length;
   /* role-aware status pill — the same overview language as the map */
   let pill,pc;
-  if(capRole==='customer'){const cov=capCover(z.drivers);pill=cov[0];pc=z.drivers>=8?'#4fae73':z.drivers>=3?'#e8823c':'#8ea3b0';}
-  else{const dm={hot:['Hot demand','#9ec13c'],warm:['Warm','#f0b429'],cool:['Building','#4a90d9']};const d=dm[z.tier]||dm.cool;pill=d[0];pc=d[1];}
+  if(capRole==='customer'){const cov=capCover(z.drivers);pill=cov[0];pc=z.drivers>=8?'#4fae73':z.drivers>=3?'var(--haf-orange)':'#8ea3b0';}
+  else{const dm={hot:['Hot demand','var(--haf-positive)'],warm:['Warm','var(--haf-caution)'],cool:['Building','var(--haf-ink-muted)']};const d=dm[z.tier]||dm.cool;pill=d[0];pc=d[1];}
   /* role-focused line — no raw counts, so nobody writes an area off before the network fills */
   const relayBit=rc?`<span class="cap-sec-relay">◆ Relay swap point</span>`:'';
   let line,cta;
@@ -7862,7 +7864,7 @@ function _capRegionAtLatLng(lat,lng){
 async function capPostcode(){
   const el=document.getElementById('cap-pc'),msg=document.getElementById('cap-pc-msg');
   const raw=(el.value||'').trim().toUpperCase().replace(/\s+/g,'');
-  const show=(t,ok)=>{msg.style.display='block';msg.style.color=ok?'var(--gn)':'#e5484d';msg.innerHTML=t;};
+  const show=(t,ok)=>{msg.style.display='block';msg.style.color=ok?'var(--gn)':'var(--haf-negative)';msg.innerHTML=t;};
   if(!raw){show('Type a postcode first.',false);return;}
   show('Checking…',true);msg.style.color='var(--mu)';
   try{
@@ -7876,7 +7878,7 @@ async function capPostcode(){
     }
     if(!label){show('That postcode wasn\'t recognised — check it and try again.',false);return;}
     if(!best){show('Couldn\'t match that to a region yet.',false);return;}
-    show('<strong>'+label+'</strong> sits in <strong style="color:var(--or)">'+best.name+'</strong> — opening it below.',true);
+    show('<strong>'+label+'</strong> sits in <strong style="color:var(--haf-orange-ink)">'+best.name+'</strong> — opening it below.',true);
     capSelect(best.id);
   }catch(e){show('Connection problem — please try again.',false);}
 }
@@ -7898,9 +7900,9 @@ function capRenderLeaderboard(){
   const medal=['<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f5c542" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2 6 7l3 1"/><path d="m16 2 2 5-3 1"/><circle cx="12" cy="15" r="6"/></svg>','<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9ccd1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2 6 7l3 1"/><path d="m16 2 2 5-3 1"/><circle cx="12" cy="15" r="6"/></svg>','<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#cd7f32" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2 6 7l3 1"/><path d="m16 2 2 5-3 1"/><circle cx="12" cy="15" r="6"/></svg>'];
   el.innerHTML=live.map((r,i)=>{
     const top=i===0;
-    return `<div style="display:flex;align-items:center;gap:.7rem;padding:.55rem .65rem;border-radius:var(--rx);margin-bottom:.4rem;${top?'background:linear-gradient(90deg,rgba(255,184,0,.14),transparent);border:1px solid rgba(255,184,0,.4)':'background:var(--p2);border:1px solid var(--ln)'}">
+    return `<div style="display:flex;align-items:center;gap:.7rem;padding:.55rem .65rem;border-radius:var(--rx);margin-bottom:.4rem;${top?'background:linear-gradient(90deg,rgba(241,142,0,.14),transparent);border:1px solid rgba(241,142,0,.4)':'background:var(--p2);border:1px solid var(--ln)'}">
       <div style="font-size:1.1rem;width:26px;text-align:center">${medal[i]||'<span style=\"font-size:.8rem;color:var(--mu);font-weight:800\">'+(i+1)+'</span>'}</div>
-      <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:.85rem;${top?'color:#ffb800':''}">${r.name}</div><div style="font-size:.67rem;color:var(--mu)">${r.region} · ${r.road}</div></div>
+      <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:.85rem;${top?'color:var(--haf-orange-ink)':''}">${r.name}</div><div style="font-size:.67rem;color:var(--mu)">${r.region} · ${r.road}</div></div>
       <div style="display:flex;gap:1rem;text-align:center;font-size:.7rem">
         <div><div style="font-weight:800;font-size:.9rem">${r.swaps}</div><div style="color:var(--mu);font-size:.6rem">swaps</div></div>
         <div><div style="font-weight:800;font-size:.9rem">${r.ontime}%</div><div style="color:var(--mu);font-size:.6rem">on-time</div></div>
@@ -8199,7 +8201,7 @@ function render(){
     lv.innerHTML=
       '<div class="cr"><span class="ck">Base driver rate</span><span class="cv"><input class="np-in" type="number" min="50" max="200" step="5" value="'+Math.round(RATE.baseMult*100)+'" onchange="npRate(\'base\',this)"> % of standard</span></div>'+
       '<div class="cr"><span class="ck">HAF margin shift</span><span class="cv"><input class="np-in" type="number" min="-15" max="15" step="1" value="'+RATE.marginDelta+'" onchange="npRate(\'margin\',this)"> % pts (floor-protected)</span></div>'+
-      (dirty?'<div class="cr"><span class="ck" style="color:var(--or)">Rates flexed — every figure on this page reflects the new numbers</span><button class="np-btn" onclick="npRateReset()">Reset rates</button></div>':'');
+      (dirty?'<div class="cr"><span class="ck" style="color:var(--haf-orange-ink)">Rates flexed — every figure on this page reflects the new numbers</span><button class="np-btn" onclick="npRateReset()">Reset rates</button></div>':'');
   }
   const tr=document.getElementById('pool-trial');
   if(tr)tr.innerHTML=
@@ -8838,20 +8840,19 @@ window.pxSave=async function(){
   text-transform:uppercase;color:var(--mu);margin-bottom:.35rem}
 #pd-gate input{width:100%;background:var(--bg);border:1px solid var(--lns);border-radius:9px;
   padding:.7rem .8rem;font:inherit;font-size:.88rem;color:var(--tx);outline:none}
-#pd-gate input:focus{border-color:var(--or)}
-#pd-gate .pd-err{color:#e0685f;font-size:.76rem;margin-top:.55rem;display:none}
+#pd-gate input:focus{border-color:var(--haf-orange-ink)}
+#pd-gate .pd-err{color:var(--haf-negative);font-size:.76rem;margin-top:.55rem;display:none}
 #pd-gate .pd-alt{margin-top:1rem;text-align:center;font-size:.74rem;color:var(--mu)}
-#pd-gate .pd-alt a{color:var(--or);cursor:pointer;font-weight:700}
+#pd-gate .pd-alt a{color:var(--haf-orange-ink);cursor:pointer;font-weight:700}
 #pd-code{font-family:var(--dp);font-weight:900;font-size:2rem;letter-spacing:.28em;
-  color:var(--or);text-align:center;margin:.5rem 0 .2rem}
+  color:var(--haf-orange-ink);text-align:center;margin:.5rem 0 .2rem}
 #pd-gate .pd-foot{margin-top:1.1rem;font-size:.66rem;color:var(--mu);text-align:center;line-height:1.6}
 </style>
 <div id="pd-gate">
   <div class="pd-box">
     <div style="display:flex;align-items:center;gap:.5rem">
-      <div style="width:34px;height:34px;background:var(--or);border-radius:9px;display:flex;
-        align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;color:#0e1113">K</div>
-      <div style="font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em">HAF <span style="color:var(--or)">KNECT</span></div>
+      <span class="haf-logo gate-k"><svg class="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 124.84 111.11" role="img" aria-label="HAF"><path fill="var(--haf-badge-fill, #2f373e)" fill-rule="evenodd" d="M34.48,105.09C33.94,104.85 33.19,104.31 32.81,103.88C32.44,103.45 29.84,99.13 27.05,94.28C24.25,89.43 18.28,79.07 13.76,71.25C6.28,58.31 5.56,56.92 5.56,55.55C5.56,54.18 6.23,52.87 13.01,41.16C17.11,34.07 23.09,23.71 26.30,18.14C29.51,12.57 32.44,7.66 32.82,7.23C34.32,5.51 33.59,5.56 62.42,5.56C91.04,5.56 90.52,5.53 91.96,7.14C92.30,7.52 98.59,18.24 105.93,30.96C118.13,52.09 119.28,54.21 119.28,55.56C119.28,56.92 118.14,59.01 105.94,80.15C98.60,92.86 92.31,103.58 91.97,103.96C90.52,105.59 91.07,105.56 62.35,105.54C40.67,105.53 35.27,105.45 34.48,105.09ZM102.47,79.08C111.07,64.19 115.44,56.34 115.15,56.27C114.56,56.13 114.58,54.98 115.16,54.84C115.48,54.77 113.56,51.18 109.09,43.46C105.50,37.26 100.86,29.25 98.78,25.65C96.70,22.06 93.72,16.91 92.15,14.22L89.30,9.31L62.41,9.31L35.52,9.31L31.54,16.18C29.35,19.95 25.27,27.01 22.47,31.86C19.68,36.72 15.54,43.88 13.28,47.79C10.64,52.37 9.35,54.90 9.65,54.90C9.92,54.90 10.13,55.20 10.13,55.56C10.13,55.92 9.92,56.21 9.65,56.21C9.35,56.21 10.85,59.12 13.84,64.30C16.41,68.75 22.15,78.71 26.61,86.44C31.06,94.17 34.92,100.82 35.17,101.23L35.64,101.96L62.49,101.88L89.35,101.80L102.47,79.08ZM36.41,100.73C36.21,100.60 35.46,99.46 34.74,98.20C32.39,94.12 19.96,72.60 15.15,64.29C12.57,59.83 10.46,55.91 10.46,55.58C10.46,54.94 35.81,10.79 36.41,10.38C36.60,10.25 48.40,10.14 62.61,10.14L88.46,10.13L96.25,23.61C100.53,31.03 104.80,38.42 105.74,40.03C106.68,41.65 109.01,45.65 110.92,48.92C112.82,52.20 114.38,55.17 114.38,55.52C114.38,56.07 106.62,69.70 91.25,96.16L88.46,100.98L62.61,100.98C48.40,100.97 36.61,100.86 36.41,100.73ZM52.94,69.93L52.94,60.46L62.42,60.46L71.90,60.46L71.90,69.93L71.90,79.41L77.29,79.41L82.68,79.41L82.60,67.08L82.52,54.74L82.43,66.91L82.34,79.08L77.28,79.08L72.22,79.08L72.22,69.61L72.22,60.13L62.42,60.13L52.61,60.13L52.61,69.61L52.61,79.08L47.55,79.08L42.49,79.08L42.40,57.60L42.32,36.11L42.24,57.76L42.16,79.41L47.55,79.41L52.94,79.41L52.94,69.93ZM81.70,52.83C81.70,52.78 81.29,52.37 80.80,51.94L79.90,51.14L80.69,52.04C81.43,52.88 81.70,53.09 81.70,52.83ZM53.01,41.18L52.92,31.70L49.75,31.77L46.57,31.83L49.59,31.94L52.61,32.05L52.61,41.35C52.61,46.47 52.72,50.65 52.86,50.65C52.99,50.65 53.06,46.39 53.01,41.18ZM78.69,47.27C80.93,45.62 84.01,40.90 84.62,38.19C85.23,35.42 83.84,31.99 81.46,30.43C77.25,27.67 71.45,29.76 70.06,34.55C69.47,36.60 69.62,37.93 70.75,40.43C72.39,44.06 75.78,47.99 77.31,48.03C77.50,48.03 78.12,47.70 78.69,47.27ZM76.22,38.05C74.87,37.11 75.68,34.97 77.38,34.97C78.08,34.97 79.08,36.07 79.08,36.84C79.08,37.38 77.90,38.56 77.36,38.56C77.13,38.56 76.62,38.33 76.22,38.05Z"/><path fill="var(--haf-badge-mark, #ffffff)" fill-rule="evenodd" d="M42.48,57.48C42.48,33.61 42.41,34.46 44.57,32.92C45.44,32.30 46.10,32.17 49.10,32.08L52.61,31.97L52.61,41.30L52.61,50.63L65.83,50.72C78.59,50.81 79.07,50.84 79.94,51.49C80.44,51.86 81.15,52.57 81.52,53.07C82.16,53.94 82.19,54.43 82.28,66.53L82.38,79.08L77.30,79.08L72.22,79.08L72.22,69.61L72.22,60.13L62.42,60.13L52.61,60.13L52.61,69.61L52.61,79.08L47.55,79.08L42.48,79.08L42.48,57.48ZM9.15,55.56C9.15,55.19 9.37,54.90 9.64,54.90C9.91,54.90 10.13,55.19 10.13,55.56C10.13,55.92 9.91,56.21 9.64,56.21C9.37,56.21 9.15,55.92 9.15,55.56ZM114.71,55.56C114.71,55.19 114.92,54.90 115.20,54.90C115.47,54.90 115.69,55.19 115.69,55.56C115.69,55.92 115.47,56.21 115.20,56.21C114.92,56.21 114.71,55.92 114.71,55.56Z"/><path fill="#f18e00" fill-rule="evenodd" d="M74.39,45.68C71.79,42.95 69.93,39.16 69.94,36.62C69.96,34.17 70.99,32.21 73.03,30.74C74.36,29.79 74.96,29.58 76.69,29.47C82.36,29.11 86.23,34.47 84.03,39.61C83.03,41.95 80.56,45.57 79.21,46.68C77.36,48.20 76.65,48.06 74.39,45.68ZM78.57,38.05C79.18,37.44 79.25,35.91 78.69,35.36C78.48,35.14 77.84,34.97 77.29,34.97C75.99,34.97 75.49,35.48 75.49,36.81C75.49,38.42 77.42,39.20 78.57,38.05Z"/></svg></span>
+      <div style="font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em">HAF <span style="color:var(--haf-orange-ink)">KNECT</span></div>
     </div>
 
     <div id="pd-step-email">
@@ -9055,8 +9056,8 @@ window.pxSave=async function(){
 .pd-mi{display:flex;align-items:center;gap:.5rem;background:var(--bg);border:1px solid var(--ln);
   border-radius:9px;padding:.5rem .6rem;font-size:.79rem;font-weight:600;width:100%;text-align:left;
   color:var(--tx);font-family:inherit;cursor:pointer;transition:border-color .12s,transform .12s}
-.pd-mi:hover{border-color:var(--or);transform:translateY(-1px)}
-.pd-mi .pd-go{margin-left:auto;color:var(--or);font-weight:800;opacity:0;transition:opacity .12s}
+.pd-mi:hover{border-color:var(--haf-orange-ink);transform:translateY(-1px)}
+.pd-mi .pd-go{margin-left:auto;color:var(--haf-orange-ink);font-weight:800;opacity:0;transition:opacity .12s}
 .pd-mi:hover .pd-go{opacity:1}
 .pd-mi svg{flex:0 0 auto;opacity:.75}
 
@@ -9069,7 +9070,7 @@ window.pxSave=async function(){
 #pd-seatbar .pd-sb-s{font-size:.7rem;color:var(--mu)}
 #pd-seatbar button{margin-left:auto}
 .pd-seat-back{display:flex;align-items:center;gap:.4rem;background:var(--or-d);border:1px solid var(--or-g);
-  color:var(--or);border-radius:9px;padding:.5rem .6rem;font-size:.76rem;font-weight:800;cursor:pointer;
+  color:var(--haf-orange-ink);border-radius:9px;padding:.5rem .6rem;font-size:.76rem;font-weight:800;cursor:pointer;
   margin:0 0 .5rem;width:100%;font-family:inherit;text-align:left}
 .pd-grp{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
   color:var(--mu);margin:.85rem 0 .1rem}
@@ -9139,7 +9140,7 @@ window.pxSave=async function(){
     h+='<div class="dc-note" style="margin-top:.2rem">This is the real menu the app builds for a '
       + roleDef.l.toLowerCase() + ' account &mdash; not a list kept here, but the app\'s own answer, '
       + 'asked fresh every time you change the buttons above. '
-      + '<b style="color:var(--or)">Click any tab to open that screen</b> and look around; '
+      + '<b style="color:var(--haf-orange-ink)">Click any tab to open that screen</b> and look around; '
       + 'you can come back here from any of them.</div>';
 
     /* The two states of a driving account, side by side, because the whole

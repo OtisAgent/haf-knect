@@ -146,7 +146,7 @@
     ".haf-id--plus{color:inherit;opacity:.9}",
     /* The crown is the only mark with a colour of its own. */
     ".haf-id--pro{color:var(--haf-crown,#f18e00);opacity:1}",
-    "@media (prefers-color-scheme:dark){.haf-id--pro{--haf-crown:#ffb347}}"
+    "@media (prefers-color-scheme:dark){.haf-id--pro{--haf-crown:var(--haf-orange)}}"
   ].join("");
 
   function inject(doc) {

@@ -97,7 +97,7 @@ console.log("\n7. THE CROWN STAYS SPECIAL");
 // ---------------------------------------------------------------------------
 ok("only the crown carries the brand colour", /haf-id--pro\{color:var\(--haf-crown/.test(ID.css));
 ok("the Plus mark takes the colour of the text beside it", /haf-id--plus\{color:inherit/.test(ID.css));
-ok("the crown lifts to gold on dark screens", /haf-crown:#ffb347/.test(ID.css));
+ok("the crown lifts to gold on dark screens", /haf-crown:var(--haf-orange)/.test(ID.css));
 
 // ---------------------------------------------------------------------------
 console.log("\n8. THE GATE ITSELF");

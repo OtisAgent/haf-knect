@@ -1,0 +1,150 @@
+/* KNECT and the demo — the bridge onto the HAF brand.
+ *
+ * KNECT was already day-by-default and already using the right orange, so most
+ * of this is not a rescue: it is joining the network's one palette, one type
+ * and one switch, and retiring the colours that were invented along the way.
+ *
+ * KNECT called its dark variant "dark"; the network calls it "night". Both
+ * spellings are honoured below so nothing that already links to ?theme=dark
+ * breaks, and the switch itself now writes "night" like every other HAF site.
+ *
+ * Loaded AFTER the page's own <style>, so these win.
+ */
+
+:root {
+  --bg:  var(--haf-bg);
+  --p:   var(--haf-surface-2);
+  --p2:  var(--haf-surface);
+  --p3:  var(--haf-surface-3);
+
+  --tx:  var(--haf-ink);
+  --mu:  var(--haf-ink-muted);
+  --su:  var(--haf-ink-faint);
+
+  --ln:  var(--haf-line);
+  --lns: var(--haf-line-strong);
+
+  --or:   var(--haf-orange);
+  --or-d: rgba(241, 142, 0, .10);
+  --or-g: rgba(241, 142, 0, .28);
+
+  --gn:   var(--haf-positive);
+  --gn-d: var(--haf-positive-wash);
+  --am:   var(--haf-caution);
+  --am-d: var(--haf-caution-wash);
+  --rd:   var(--haf-negative);
+  --rd-d: var(--haf-negative-wash);
+
+  /* There is no blue in the guidelines. "Information" becomes the grey. */
+  --bl:   var(--haf-grey);
+  --bl-d: rgba(47, 55, 62, .10);
+
+  --fn: var(--haf-font);
+  --dp: var(--haf-font-display);
+
+  --sd:   var(--haf-shadow-soft);
+  --sd-h: var(--haf-shadow);
+}
+
+:root[data-theme="night"],
+:root[data-theme="dark"] {
+  --bg:  var(--haf-bg);
+  --p:   var(--haf-surface);
+  --p2:  var(--haf-surface-2);
+  --p3:  var(--haf-surface-3);
+  --tx:  var(--haf-ink);
+  --mu:  var(--haf-ink-muted);
+  --su:  var(--haf-ink-faint);
+  --ln:  var(--haf-line);
+  --lns: var(--haf-line-strong);
+  --bl:  #c3cad0;
+  --bl-d: rgba(244, 241, 235, .10);
+}
+
+/* KNECT spells its dark variant "dark"; the tokens above only flip on "night",
+   so tell the brand kit that "dark" means the same thing. */
+:root[data-theme="dark"] {
+  --haf-bg:            #0e1113;
+  --haf-surface:       #171a1d;
+  --haf-surface-2:     #202428;
+  --haf-surface-3:     #262b30;
+  --haf-ink:           #f4f1eb;
+  --haf-ink-muted:     #a9b0b4;
+  --haf-ink-faint:     #6b747b;
+  --haf-line:          rgba(244, 241, 235, .14);
+  --haf-line-strong:   rgba(244, 241, 235, .24);
+  --haf-line-xstrong:  rgba(244, 241, 235, .32);
+  --haf-bar:           rgba(14, 17, 19, .92);
+  --haf-positive:      #6fa87a;
+  --haf-caution:       #d8a34d;
+  --haf-negative:      #d9695f;
+  --haf-positive-wash: rgba(111, 168, 122, .14);
+  --haf-caution-wash:  rgba(216, 163, 77, .14);
+  --haf-negative-wash: rgba(217, 105, 95, .14);
+  --haf-badge-fill:    #f4f1eb;
+  --haf-badge-mark:    #2f373e;
+  --haf-shadow:        0 28px 80px rgba(0, 0, 0, .45);
+  --haf-shadow-soft:   0 14px 36px rgba(0, 0, 0, .32);
+  color-scheme: dark;
+}
+
+body { font-family: var(--haf-font); }
+
+/* ---- the logo ---------------------------------------------------------- */
+/* Both headers drew an orange square with a letter K in it. Neither was the
+   logo. The badge goes there, with HAF KNECT beside it. */
+.tlogo .haf-logo { height: 26px; display: block; flex-shrink: 0; }
+.llogo .haf-logo { height: 30px; display: block; flex-shrink: 0; }
+.tlogo .haf-logo svg,
+.llogo .haf-logo svg { height: 100%; width: auto; display: block; }
+.tlogo-t, .llogo-t {
+  font-family: var(--haf-font-display);
+  font-weight: var(--haf-weight-display);
+  letter-spacing: 0;
+  color: var(--haf-ink);
+}
+.tlogo-t span, .llogo-t span { color: var(--haf-orange-ink); }
+
+/* ---- anything sitting on the orange ------------------------------------ */
+/* The page used its near-black on orange, which reads as a fourth colour and
+   fails contrast. White, per the brand sheet. */
+.vbadge, .btn-primary, .btn.primary, .tlogo-m, .llogo-m { color: #ffffff; }
+
+/* ---- the switch -------------------------------------------------------- */
+.theme-btn, [data-haf-theme-toggle] {
+  color: var(--haf-ink-muted);
+  cursor: pointer;
+}
+.theme-btn:hover, [data-haf-theme-toggle]:hover { color: var(--haf-ink); }
+
+/* ---- tokens the first pass missed --------------------------------------- */
+/* The owner overview and the public tracking page name a few colours the
+   other two do not. Left unmapped they stayed dark on a cream page. */
+:root {
+  /* tracking page: its card colour, and the body font it set by hand */
+  --card: var(--haf-surface);
+  /* owner overview: its body typeface token */
+  --bd:   var(--haf-font);
+  /* the grey-blue "highlight" invented for the network map. There is no blue
+     in the guidelines, so it becomes the HAF grey. */
+  --hv-s:    var(--haf-ink-muted);
+  --hv-s-bg: rgba(47, 55, 62, .07);
+  --hv-s-ln: rgba(47, 55, 62, .38);
+}
+:root[data-theme="night"],
+:root[data-theme="dark"] {
+  --hv-s-bg: rgba(244, 241, 235, .07);
+  --hv-s-ln: rgba(244, 241, 235, .38);
+}
+
+/* ---- the public tracking page ------------------------------------------ */
+/* Often the only HAF screen a customer ever opens. It set its ink to a
+   near-white by hand, which vanished the moment the page became a day page,
+   and it asked for the system font instead of ours. */
+body { color: var(--haf-ink); }
+.trk-body, .terms-body { color: var(--haf-ink-muted); }
+
+/* ---- the last five hand-drawn logos ------------------------------------ */
+/* The sign-in and demo gates each drew an orange square with a K in it. */
+.gate-k { height: 32px; width: auto; flex-shrink: 0; }
+.gate-k svg { height: 100%; width: auto; display: block; }

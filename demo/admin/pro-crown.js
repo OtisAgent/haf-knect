@@ -115,7 +115,7 @@
     "border:1px solid color-mix(in srgb,var(--haf-crown,#f18e00) 45%,transparent);",
     "background:color-mix(in srgb,var(--haf-crown,#f18e00) 12%,transparent)}",
     /* Dark surfaces lift it towards gold without a second asset. */
-    "@media (prefers-color-scheme:dark){.haf-crown{--haf-crown:#ffb347}}"
+    "@media (prefers-color-scheme:dark){.haf-crown{--haf-crown:var(--haf-orange)}}"
   ].join("");
 
   function inject(doc) {

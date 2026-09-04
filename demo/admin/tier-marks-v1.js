@@ -234,7 +234,7 @@
     /* No " — coming soon" suffix: the clock and its label already say it, and
        saying it twice on one row reads as a mistake. */
     "@media (prefers-color-scheme:dark){.haf-mark--plus{color:#cfd5da;opacity:1}",
-    ".haf-mark--pro{--haf-crown:#ffb347}.haf-feat--locked{--haf-locked:#98a1a8}}"
+    ".haf-mark--pro{--haf-crown:var(--haf-orange)}.haf-feat--locked{--haf-locked:#98a1a8}}"
   ].join("");
 
   function inject(doc) {
