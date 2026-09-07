@@ -7817,14 +7817,25 @@ function setSave(){
    prove otherwise. Both blocks this paints — the ticker and the stat cards —
    start hidden in the markup and are only ever revealed by this function.
 
-   THE THRESHOLD IS NOT SET, AND THAT IS DELIBERATE. "Worth showing" is a number
-   and Brent has not said which one. Henry is asking him. Until an answer comes
-   back SHOW_FROM stays null and nothing renders — which is correct under every
-   possible threshold, so none of this is thrown away by his answer. When it
-   arrives, one line changes and nothing else does.
+   🔒 THE THRESHOLD IS HIS TOO: THREE OR MORE REAL OPEN JOBS. Below three the
+   ticker is not in the document at all.
 
-   Guessing the number and shipping it would be worse than shipping nothing:
-   a clause he never said, enforced in his name, in a file nobody re-reads.
+   AND "REAL" IS PINNED AT THE DATABASE, NOT HERE — this is the part that
+   decides whether the rule works. The count comes from plna_exchange_visible,
+   which routes a demo account to the demo board and otherwise calls
+   plna_exchange_board(username, p_include_test => false). That function's own
+   WHERE clause carries
+
+       and (p_include_test or not coalesce(h.is_test, false))
+
+   so a test row cannot reach a real driver's board, and therefore cannot push
+   this count to three. Brent's own test bookings switching the ticker on and
+   announcing work that does not exist is the exact failure being fixed, and it
+   is prevented one layer below anything this file can get wrong.
+
+   DO NOT FILTER TEST ROWS IN JAVASCRIPT. A second definition of "real" written
+   up here would drift from the one in the database the first time either
+   changed, and the page would be confidently wrong while both looked right.
 
    THREE BEHAVIOURS, none of which may carry a literal:
      · hidden by default — only real activity above the threshold reveals it;
@@ -7842,7 +7853,7 @@ function setSave(){
    numbers when the board was read and BOTH null when it could not be. There is
    no default: a caller that forgets to say which it got gets the hidden state,
    never a confident-looking figure. */
-const SHOW_FROM=null;   /* awaiting Brent. null = never show. */
+const SHOW_FROM=3;   /* Brent, 7 Sep: three or more real open jobs. */
 
 function hafTicker(n,inv){
   const t=document.getElementById('dj-ticker');
