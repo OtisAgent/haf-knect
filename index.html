@@ -2406,7 +2406,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
              source for how many drivers are online, and an average rate is a
              commercial claim rather than an observation. Until the board
              answers, both show a dash — never a number. -->
-        <div class="kg" data-mode-only="advanced" data-aud="network" style="margin-bottom:.9rem">
+        <div class="kg" id="dj-netcards" data-mode-only="advanced" data-aud="network" style="display:none;margin-bottom:.9rem">
           <div class="kc"><div class="kc-l">Open jobs</div><div class="kc-v co" id="kc-open-jobs">&mdash;</div><div class="kc-d">ready to grab</div></div>
           <div class="kc"><div class="kc-l">Your invites</div><div class="kc-v gn" id="kc-invites">&mdash;</div><div class="kc-d">direct to you</div></div>
         </div>
@@ -7808,42 +7808,72 @@ function setSave(){
    Claiming is NOT opened by this. The button appears only for an account the
    Clever check has released; everybody else sees the work and is told, in one
    line, what is still in the way. Seeing the network is not driving on it. */
-/* Everything this screen says about the network, from the board's one answer.
+/* What this screen says about the network — and by default, it says nothing.
+
+   🔒 BRENT'S RULING, 7 Sep 2026: "hide until genuine activity is worth showing."
+
+   Not zeroed. HIDDEN. A row of noughts tells a driver the network is dead; an
+   absent row tells them nothing, and nothing is the honest state when we cannot
+   prove otherwise. Both blocks this paints — the ticker and the stat cards —
+   start hidden in the markup and are only ever revealed by this function.
+
+   THE THRESHOLD IS NOT SET, AND THAT IS DELIBERATE. "Worth showing" is a number
+   and Brent has not said which one. Henry is asking him. Until an answer comes
+   back SHOW_FROM stays null and nothing renders — which is correct under every
+   possible threshold, so none of this is thrown away by his answer. When it
+   arrives, one line changes and nothing else does.
+
+   Guessing the number and shipping it would be worse than shipping nothing:
+   a clause he never said, enforced in his name, in a file nobody re-reads.
+
+   THREE BEHAVIOURS, none of which may carry a literal:
+     · hidden by default — only real activity above the threshold reveals it;
+     · every value read live from the board, or not shown at all;
+     · unreadable network = hidden, no sample fallback, no stale figure left up.
+
+   ONE READING OF HIS RULING THAT IS MINE, SO IT CAN BE OVERRULED: a driver's
+   OWN invites are not a claim about network health. If work has been addressed
+   to this person they are shown it whatever the network looks like, because
+   hiding someone's own job from them to make a quiet network look tidier would
+   be a worse failure than the one we are fixing. Everything else waits for the
+   threshold.
 
    `n` is the open-work count and `inv` the ones addressed to this driver, both
    numbers when the board was read and BOTH null when it could not be. There is
-   deliberately no default: a caller that forgets to say which it got gets the
-   honest blank, never a confident-looking figure.
+   no default: a caller that forgets to say which it got gets the hidden state,
+   never a confident-looking figure. */
+const SHOW_FROM=null;   /* awaiting Brent. null = never show. */
 
-   One function paints the ticker AND the two stat cards on purpose. They used
-   to be independent blocks of typed-in numbers sitting one above the other, and
-   fixing only the one I had found changed nothing a driver could see. Fed from
-   a single fetch, they cannot drift apart or outlive each other. */
 function hafTicker(n,inv){
   const t=document.getElementById('dj-ticker');
-  const dash=(n===null||n===undefined);
-  const setCard=(id,v)=>{const e=document.getElementById(id);if(e)e.innerHTML=v;};
-  /* A dash, not a nought. "We could not ask" and "there are none" are different
-     sentences and a driver plans differently on each. */
-  setCard('kc-open-jobs',dash?'&mdash;':String(n));
-  setCard('kc-invites',dash?'&mdash;':String(inv||0));
-  if(!t)return;
-  if(dash){
-    /* Do not leave the last good number on screen: a stale figure looks exactly
-       like a fresh one. */
-    t.style.display='flex';
-    t.innerHTML='<span>We couldn’t read the network just now.</span>';
-    return;
+  const cards=document.getElementById('dj-netcards');
+  const readable=(n!==null&&n!==undefined);
+  const invites=readable?(inv||0):0;
+
+  /* Nothing is revealed unless the live network earns it. Written as an
+     explicit "may we show" rather than a chain of hides, so the default when
+     anything is unknown — unreadable board, threshold not yet set — is off. */
+  const showNetwork=readable&&SHOW_FROM!==null&&n>=SHOW_FROM;
+  const showInvites=readable&&invites>0;
+
+  if(t){
+    t.style.display=showNetwork?'flex':'none';
+    t.innerHTML=showNetwork
+      ? '<span style="display:flex;align-items:center;gap:.3rem">'+
+        '<span style="width:7px;height:7px;border-radius:50%;background:var(--gn, #4f7f58);'+
+        'display:inline-block;animation:pulse-dot 1.6s ease-in-out infinite"></span>'+
+        '<strong style="color:var(--tx)">'+n+'</strong> open '+(n===1?'job':'jobs')+
+        ' on the network</span>'
+      : '';   /* emptied, not just hidden: nothing stale can be revealed later */
   }
-  t.style.display='flex';
-  t.innerHTML=(n>0
-    ? '<span style="display:flex;align-items:center;gap:.3rem">'+
-      '<span style="width:7px;height:7px;border-radius:50%;background:var(--gn, #4f7f58);'+
-      'display:inline-block;animation:pulse-dot 1.6s ease-in-out infinite"></span>'+
-      '<strong style="color:var(--tx)">'+n+'</strong> open '+(n===1?'job':'jobs')+
-      ' on the network</span>'
-    : '<span>No open work on the network right now. Anything posted appears here straight away.</span>');
+  if(cards){
+    cards.style.display=(showNetwork||showInvites)?'':'none';
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerHTML=v;};
+    set('kc-open-jobs',showNetwork?String(n):'&mdash;');
+    set('kc-invites',showInvites?String(invites):'&mdash;');
+  }
 }
+
 
 async function hafJobsPaint(){
   const box=document.getElementById('dj-live');
