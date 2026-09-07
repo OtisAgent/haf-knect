@@ -111,9 +111,23 @@ ok('no plan is sold as unlocking work for third-party clients',
 ok('there is genuinely no business Plus or Pro to gate it behind',
   !Object.keys(A.config.accountTypes).some((c) => /^BUSINESS_(PLUS|PRO)$/.test(c)));
 
-// --- 6. the paused driver reward is not being sold ------------------------
-ok('the driver reward is paused in the framework', M.config.driverReward.enabled === false);
-ok('...so the table does not sell a reward rate',
+// --- 6. the driver plan uplift is real, and still not sold on this table ---
+/* Brent, 2026-09-07: "Free driver gets base rate, Plus driver gets 5% on top of
+   Base rate, Pro driver gets 10% on top of base rate". So it is ON — the old
+   check here asserted it was paused, which is the July position. It is a SHARE
+   of the base rate now, not pence per mile, HAF funds it, and the driver is
+   always paid their own rung whatever the customer is quoted. */
+ok('the driver plan uplift is switched on in the framework', M.config.driverReward.enabled === true);
+ok('it is a share of the base rate, not pence per mile',
+  M.config.driverReward.basis === 'PCT_OF_BASE_RATE');
+ok('the rungs are 0, 5 and 10 percent',
+  String(['FREE', 'MEMBER', 'PRO'].map((k) => M.config.driverLevels[k].rewardPctOfBaseRate)) === '0,5,10');
+ok('HAF funds it out of its own share', M.config.driverReward.fundedBy === 'HAF_MARGIN');
+/* Still not SOLD on the comparison table. The uplift is what a driver earns on
+   a job, not a plan feature to advertise a rate for, and quoting a "reward
+   rate" here would promise a number the blended customer price does not owe
+   anyone. */
+ok('...and the table still does not sell a reward rate',
   !/reward rate|better driver reward|per mile reward/i.test(text));
 
 // --- 7. nothing we promised never to say ----------------------------------

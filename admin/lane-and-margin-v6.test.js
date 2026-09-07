@@ -43,12 +43,17 @@ function slice(from, to) {
   if (i < 0 || j < 0) throw new Error("could not find customer engine block: " + from);
   return html.slice(i, j);
 }
+/* ONE ENGINE (Brent, 2026-09-07): v3Price on the page no longer does its own
+   arithmetic, it asks admin/pricing-matrix-v3.js. So the page needs the engine
+   on `window` as well as the lane factors, or it refuses to quote at all —
+   which is exactly what it did, crashing this whole suite, from the moment the
+   collapse landed. */
 var engineSrc =
-  "var window = { HAFLaneFactors: LANE };\n" +
+  "var window = { HAFLaneFactors: LANE, HAFPricingMatrix: PM };\n" +
   slice("const REF_MPH", "const PC={") +
   "\nreturn { VAN: VAN, URG: URG, v3Price: v3Price, laneAdjust: laneAdjust," +
   "\n         minTransportValue: minTransportValue, zoneFactorFor: zoneFactorFor };";
-var CUST = new Function("LANE", engineSrc)(L);
+var CUST = new Function("LANE", "PM", engineSrc)(L, M);
 
 function bo(extra) {
   var input = { miles: 100, vehicleCode: "LWB_VAN", jobTypeCode: "STD_SAMEDAY",
@@ -57,6 +62,11 @@ function bo(extra) {
   for (var k in (extra || {})) input[k] = extra[k];
   return M.price(input);
 }
+
+/* The band HAF must land inside on every job (Brent, 2026-09-07). Read from
+   the engine, never typed here, so the suite cannot drift from the rule. */
+var FLOOR = M.config.networkFeeFloor.pct;
+var CEILING = M.config.networkFeeFloor.ceilingPct;
 
 var VEHICLES = ["SMALL_VAN","SWB_VAN","MWB_VAN","LWB_VAN","XLWB_VAN","LUTON","LUTON_CURTAIN","LUTON_TAIL"];
 var ACTIVE_JOBS = ["FLEX_SAMEDAY","STD_SAMEDAY","TIMED","URGENT"];
@@ -72,16 +82,31 @@ var base = bo({});
 eq("the driver is paid the whole transport value", base.money.driverPayGbp, base.money.carrierTransportValueGbp);
 eq("transport value plus fee is the customer price",
    base.money.carrierTransportValueGbp + base.money.networkFeeGbp, base.money.customerExVatGbp);
-eq("what HAF keeps equals the quoted percentage",
-   base.money.hafKeepsPctOfCustomer, base.money.networkFeePct);
+/* FRAMEWORK-V8 (Brent, 2026-09-07): the quoted percentage is what HAF keeps
+   AT THE RUNG THE CUSTOMER IS QUOTED AT — the middle one. A free driver leaves
+   HAF more than the quote, a Pro driver less. That gap is the model, not a
+   fault: "we make more margin on the jobs from the free but we reclaim the
+   margin loss from the HAF KNECT plan monthly payments". */
+eq("what HAF keeps at the quoted rung equals the quoted percentage",
+   bo({ plnaTier: "PLUS" }).money.hafKeepsPctOfCustomer, base.money.networkFeePct);
+ok("a free driver leaves HAF more than the quoted percentage",
+   base.money.hafKeepsPctOfCustomer > base.money.networkFeePct,
+   base.money.hafKeepsPctOfCustomer + "% vs " + base.money.networkFeePct + "%");
+ok("a Pro driver leaves HAF less",
+   bo({ plnaTier: "PRO" }).money.hafKeepsPctOfCustomer < base.money.networkFeePct,
+   bo({ plnaTier: "PRO" }).money.hafKeepsPctOfCustomer + "%");
 
 /* The old V5 model is still reachable in one word, and it demonstrably fails
    his band — which is the whole reason for the change. */
 M.config.feeBasis = "ADDED_TO_TRANSPORT_VALUE";
 var v5 = bo({});
+/* Henry's finding: adding 20% on top of the transport value leaves HAF only
+   16.7% of the total. Measured at the quoted rung, where the comparison is
+   like for like, that is still exactly what it does. */
+var v5q = bo({ plnaTier: "PLUS" });
 ok("the old add-on model keeps less than the quoted 20% (16.7%) — Henry's finding",
-   Math.abs(v5.money.hafKeepsPctOfCustomer - 16.67) < 0.05,
-   "kept " + v5.money.hafKeepsPctOfCustomer + "%");
+   Math.abs(v5q.money.hafKeepsPctOfCustomer - 16.67) < 0.05,
+   "kept " + v5q.money.hafKeepsPctOfCustomer + "%");
 ok("the driver is paid the same under either model — this never touched driver pay",
    v5.money.driverPayGbp === base.money.driverPayGbp);
 M.config.feeBasis = "SHARE_OF_CUSTOMER_PRICE";
@@ -100,26 +125,40 @@ for (v = 0; v < VEHICLES.length; v++) {
       plus = bo({ miles: mi, vehicleCode: VEHICLES[v], jobTypeCode: ACTIVE_JOBS[j], accountType: "FREIGHT_PLUS" });
       pro  = bo({ miles: mi, vehicleCode: VEHICLES[v], jobTypeCode: ACTIVE_JOBS[j], accountType: "FREIGHT_PRO" });
       var k = free.money.hafKeepsPctOfCustomer;
-      if (k < 19.99 || k > 30.01) freeOutOfBand.push(VEHICLES[v] + " " + ACTIVE_JOBS[j] + " " + mi + "mi = " + k + "%");
-      if (plus.money.hafKeepsPctOfCustomer < 9.99) paidBelowMin.push("plus " + VEHICLES[v] + " " + mi);
-      if (pro.money.hafKeepsPctOfCustomer < 9.99) paidBelowMin.push("pro " + VEHICLES[v] + " " + mi);
+      /* Brent's 2026-08-02 band was "free accounts 20-30%". On 2026-09-07 he
+         replaced it with one band for everything: "i want HAF to make between
+         15% and 50% depends on the job, account type and the account type".
+         A free driver on an urgent free-account job now leaves HAF 33.3%,
+         which broke the old band and sits comfortably inside the new one. */
+      if (k < FLOOR - 0.01 || k > CEILING + 0.01)
+        freeOutOfBand.push(VEHICLES[v] + " " + ACTIVE_JOBS[j] + " " + mi + "mi = " + k + "%");
+      if (plus.money.hafKeepsPctOfCustomer < FLOOR - 0.01) paidBelowMin.push("plus " + VEHICLES[v] + " " + mi);
+      if (pro.money.hafKeepsPctOfCustomer < FLOOR - 0.01) paidBelowMin.push("pro " + VEHICLES[v] + " " + mi);
       if (pro.money.driverPayGbp !== free.money.driverPayGbp) driverLost.push(VEHICLES[v] + " " + mi);
     }
   }
 }
-ok("free accounts keep 20-30% on all 8 vehicles x 4 job types x 60 distances",
+ok("free accounts stay inside " + FLOOR + "-" + CEILING + "% on all 8 vehicles x 4 job types x 60 distances",
    freeOutOfBand.length === 0, freeOutOfBand.slice(0, 3).join("; "));
-ok("no paid account ever keeps less than his 10% minimum",
+ok("no paid account ever keeps less than the " + FLOOR + "% floor",
    paidBelowMin.length === 0, paidBelowMin.slice(0, 3).join("; "));
 ok("an account discount never comes off the driver — driver pay is identical",
    driverLost.length === 0, driverLost.slice(0, 3).join("; "));
 
-eq("free same-day keeps exactly 20%", bo({ jobTypeCode: "STD_SAMEDAY" }).money.hafKeepsPctOfCustomer, 20);
-eq("free timed keeps exactly 25%", bo({ jobTypeCode: "TIMED" }).money.hafKeepsPctOfCustomer, 25);
-eq("free urgent keeps exactly 30% — the top of his band",
-   bo({ jobTypeCode: "URGENT" }).money.hafKeepsPctOfCustomer, 30);
-eq("Pro account same-day keeps 15% — the bottom of his paid band",
-   bo({ jobTypeCode: "STD_SAMEDAY", accountType: "FREIGHT_PRO" }).money.hafKeepsPctOfCustomer, 15, 0.02);
+/* Brent's own matrix, measured where he set it — at the rung the customer is
+   quoted at. Urgent 30 / 27.5 / 25, same-day and scheduled 20 / 17.5 / 15,
+   timed 25 / 22.5 / 20. Every one of those is still literally true. */
+function keptAtQuoteRung(jobType, account) {
+  return bo({ jobTypeCode: jobType, accountType: account || null, plnaTier: "PLUS" })
+           .money.hafKeepsPctOfCustomer;
+}
+eq("free same-day keeps exactly 20%", keptAtQuoteRung("STD_SAMEDAY"), 20);
+eq("free timed keeps exactly 25%",    keptAtQuoteRung("TIMED"), 25);
+eq("free urgent keeps exactly 30%",   keptAtQuoteRung("URGENT"), 30);
+eq("Plus account same-day keeps 17.5%", keptAtQuoteRung("STD_SAMEDAY", "FREIGHT_PLUS"), 17.5, 0.02);
+eq("Pro account same-day keeps 15% — the bottom of his band, and its floor",
+   keptAtQuoteRung("STD_SAMEDAY", "FREIGHT_PRO"), 15, 0.02);
+eq("Pro account urgent keeps 25%", keptAtQuoteRung("URGENT", "FREIGHT_PRO"), 25, 0.02);
 
 /* The trial pools take a quarter of the margin — Brent's own 20 Jul setting.
    Nell flagged this as the rest of the gap; it is reported, not hidden. */

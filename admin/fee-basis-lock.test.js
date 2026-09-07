@@ -46,10 +46,19 @@ var ACTIVE_JOBS = M.config.jobTypes.filter(function (j) { return j.active; })
                    .map(function (j) { return j.code; });
 var MILES = [5, 12, 30, 55, 78, 120, 240];
 
+/* FRAMEWORK-V8 (Brent, 2026-09-07): the percentages in his framework are what
+   HAF keeps AT THE RUNG THE CUSTOMER IS QUOTED AT — the middle one. Measured
+   against a free driver they read high and against a Pro driver they read low,
+   because HAF deliberately earns more on free drivers and pays for the better
+   ones out of its own share. So this suite quotes at the engine's own
+   quoteAtLevel by default, which is the like-for-like comparison, and sweeps
+   all three rungs separately against the 15-50% band in section 2b. */
+var QUOTE_RUNG = { FREE: "FREE", MEMBER: "PLUS", PRO: "PRO" }[M.config.driverReward.quoteAtLevel] || "PLUS";
+
 function quote(o) {
   return M.price({
     miles: o.miles, vehicleCode: o.vehicle, jobTypeCode: o.job,
-    plnaTier: o.plnaTier || "FREE", knectTier: o.knectTier || "FREE",
+    plnaTier: o.plnaTier || QUOTE_RUNG, knectTier: o.knectTier || "FREE",
     accountType: o.accountType || null,
     weight: "STANDARD", handling: "KERBSIDE"
   });
@@ -82,7 +91,16 @@ ok("the ruling records who it came from",
 ok("Brent's free-account band is held as data, not a copy",
    String((M.config.feeBasisRuling || {}).freeAccountKeepBandPct) === "20,30");
 ok("Brent's paid-account floor is held as data",
-   (M.config.feeBasisRuling || {}).paidAccountKeepFloorPct === 10);
+   (M.config.feeBasisRuling || {}).paidAccountKeepFloorPct === 15);
+/* The 2026-09-07 replacement, also held as data rather than typed into logic. */
+ok("the one band that now governs every job is held as data",
+   M.config.networkFeeFloor.pct === 15 && M.config.networkFeeFloor.ceilingPct === 50,
+   JSON.stringify(M.config.networkFeeFloor));
+ok("the band is marked non-negotiable and attributed",
+   M.config.networkFeeFloor.nonNegotiable === true &&
+   /Brent/.test(M.config.networkFeeFloor.setBy || ""));
+ok("the older split bands are marked superseded, not silently left standing",
+   (M.config.feeBasisRuling || {}).supersededOn === "2026-09-07");
 
 var sample = quote({ vehicle: "SMALL_VAN", job: "STD_SAMEDAY", miles: 30 });
 ok("every quote states the basis it was priced on", sample.money.feeBasis === RULING);
@@ -97,9 +115,27 @@ var freeMisses = everyJob(function (o) {
   var k = quote(o).money.hafKeepsPctOfCustomer;
   return (k < band[0] - 0.01 || k > band[1] + 0.01) ? (o.vehicle + "/" + o.job + "/" + o.miles + "mi = " + k + "%") : null;
 }).filter(Boolean);
-ok("free accounts land inside " + band[0] + "–" + band[1] + "% kept on all " +
+ok("free accounts land inside " + band[0] + "–" + band[1] + "% kept at the quoted rung, on all " +
    (VEHICLES.length * ACTIVE_JOBS.length * MILES.length) + " jobs",
    freeMisses.length === 0, freeMisses.slice(0, 3).join("; "));
+
+/* 2b. And the band that governs EVERY job, whoever actually accepts it. */
+var FLOOR = M.config.networkFeeFloor.pct, CEILING = M.config.networkFeeFloor.ceilingPct;
+var bandMisses = [];
+["FREE", "PLUS", "PRO"].forEach(function (rung) {
+  ["FREIGHT_FREE", "FREIGHT_PLUS", "FREIGHT_PRO"].forEach(function (acct) {
+    everyJob(function (o) {
+      o.plnaTier = rung; o.accountType = acct;
+      var k = quote(o).money.hafKeepsPctOfCustomer;
+      if (k < FLOOR - 0.01 || k > CEILING + 0.01)
+        bandMisses.push(rung + "/" + acct + "/" + o.vehicle + "/" + o.job + "/" + o.miles + "mi = " + k + "%");
+    });
+  });
+});
+ok("HAF lands inside " + FLOOR + "-" + CEILING + "% on all " +
+   (VEHICLES.length * ACTIVE_JOBS.length * MILES.length * 9) +
+   " job / driver plan / account combinations",
+   bandMisses.length === 0, bandMisses.slice(0, 3).join("; "));
 
 eq("scheduled/flexible keeps exactly 20%",
    quote({ vehicle: "SMALL_VAN", job: "FLEX_SAMEDAY", miles: 30 }).money.hafKeepsPctOfCustomer, 20);
@@ -126,7 +162,7 @@ eq("the deepest paid reduction still keeps 15% on a same-day job",
 /* The number Brent's bands are written in and the number the engine charges
  * are two separate fields. They drifted apart once; they must never again. */
 var driftMisses = everyJob(function (o) {
-  var m = quote(o).money;
+  var m = quote({ vehicle: o.vehicle, job: o.job, miles: o.miles }).money;
   return Math.abs(m.hafKeepsPctOfCustomer - m.networkFeePct) > 0.02
     ? (o.vehicle + "/" + o.job + " " + m.hafKeepsPctOfCustomer + " vs " + m.networkFeePct) : null;
 }).filter(Boolean);
@@ -170,9 +206,20 @@ withBasis(COUNTERFACTUAL, function () {
   eq("a 30% urgent fee only keeps 23.08%",
      quote({ vehicle: "LUTON_BOX", job: "URGENT", miles: 78 }).money.hafKeepsPctOfCustomer,
      23.08, 0.02);
-  eq("the deepest paid reduction keeps 13.04%, under the floor the engine enforces",
-     quote({ vehicle: "SMALL_VAN", job: "STD_SAMEDAY", miles: 30, accountType: "FREIGHT_PRO" })
-       .money.hafKeepsPctOfCustomer, 13.04, 0.02);
+  /* Under ADDED the deepest paid reduction would have left HAF 13.04%, below
+     the floor. Since 2026-09-07 the floor catches it and lifts the customer
+     price instead — so the counterfactual is now proved twice over: it still
+     misses the band on its own arithmetic, AND the non-negotiable floor is
+     what stops that reaching a real customer. */
+  var deep = quote({ vehicle: "SMALL_VAN", job: "STD_SAMEDAY", miles: 30, accountType: "FREIGHT_PRO" });
+  eq("the deepest paid reduction would have kept 13.04%, under the floor",
+     deep.money.networkFeeFloorApplied.feePctBefore, 13.04, 0.02);
+  ok("...and the floor caught it rather than letting it through",
+     deep.money.hafKeepsPctOfCustomer >= M.config.networkFeeFloor.pct - 0.01,
+     deep.money.hafKeepsPctOfCustomer + "%");
+  ok("...by lifting the customer price, never by cutting the driver",
+     deep.money.networkFeeFloorApplied.upliftGbp > 0 &&
+     deep.money.driverRewardTrimmedGbp === 0);
 });
 
 ok("the counterfactual left no trace — the ruling is still configured",

@@ -64,7 +64,7 @@ async function quote(request, env) {
   const b = await request.json().catch(() => ({}));
   const leg = await milesBetween(b.collect_postcode, b.deliver_postcode);
   if (!leg) return bad('we could not work out the distance between those two postcodes — please check them');
-  const q = quoteOneOff({ miles: leg.miles, vehicleCode: b.vehicle_code, jobTypeCode: b.job_type_code });
+  const q = quoteOneOff({ miles: leg.miles, minutes: leg.minutes, vehicleCode: b.vehicle_code, jobTypeCode: b.job_type_code });
   if (!q) return bad('please choose a van size and how quickly you need it');
   return json({ ok: true, quote: { ...q, minutes: leg.minutes, from: leg.from, to: leg.to } });
 }
@@ -95,7 +95,7 @@ async function place(request, env) {
   // Priced here, from the postcodes, and never read from what the browser sent.
   const leg = await milesBetween(collect, deliver);
   if (!leg) return bad('we could not work out the distance between those two postcodes — please check them');
-  const q = quoteOneOff({ miles: leg.miles, vehicleCode: b.vehicle_code, jobTypeCode: b.job_type_code });
+  const q = quoteOneOff({ miles: leg.miles, minutes: leg.minutes, vehicleCode: b.vehicle_code, jobTypeCode: b.job_type_code });
   if (!q) return bad('please choose a van size and how quickly you need it');
 
   /* ONE PRESS, ONE ORDER. The network already refuses to post the same job

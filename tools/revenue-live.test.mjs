@@ -50,17 +50,39 @@ for (const [label, w, h] of [['desktop', 1440, 900], ['phone', 390, 844]]) {
 
   /* ---- the bands Brent stated, from the live engine ---- */
   const q = await page.evaluate(() => {
-    const p = (job, veh, miles, acct) => HAFPricingMatrix.price({
-      miles, vehicleCode: veh, jobTypeCode: job, plnaTier: 'FREE', knectTier: 'FREE',
+    /* FRAMEWORK-V8 (Brent, 2026-09-07): the framework percentages are what HAF
+       keeps AT THE RUNG THE CUSTOMER IS QUOTED AT — the middle one. Quoting
+       these against a free driver reads high, because HAF deliberately earns
+       more when a free driver takes the job. */
+    const rung = HAFPricingMatrix.config.driverReward.quoteAtLevel === 'MEMBER' ? 'PLUS' : 'FREE';
+    const p = (job, veh, miles, acct, tier) => HAFPricingMatrix.price({
+      miles, vehicleCode: veh, jobTypeCode: job, plnaTier: tier || rung, knectTier: 'FREE',
       accountType: acct || null, weight: 'STANDARD', handling: 'KERBSIDE' }).money;
     return {
       sameday: p('STD_SAMEDAY', 'SMALL_VAN', 30),
       urgent:  p('URGENT', 'LUTON_BOX', 78),
-      paid:    p('STD_SAMEDAY', 'SMALL_VAN', 30, 'FREIGHT_PRO')
+      paid:    p('STD_SAMEDAY', 'SMALL_VAN', 30, 'FREIGHT_PRO'),
+      /* 100 miles on an LWB, where mileage decides the price. A 30-mile small
+         van sits on the vehicle MINIMUM, and a minimum swallows the plan
+         uplift — all three rungs are paid the same on it, so it cannot show
+         the spread. */
+      midRung:    p('STD_SAMEDAY', 'LWB_VAN', 100),
+      freeDriver: p('STD_SAMEDAY', 'LWB_VAN', 100, null, 'FREE'),
+      proDriver:  p('STD_SAMEDAY', 'LWB_VAN', 100, null, 'PRO'),
+      band: HAFPricingMatrix.config.networkFeeFloor
     };
   });
   near('a free same-day job keeps 20% of the customer price', q.sameday.hafKeepsPctOfCustomer, 20);
   near('an urgent job keeps 30%', q.urgent.hafKeepsPctOfCustomer, 30);
+  ok('the live engine is on the 15-50% band', q.band.pct === 15 && q.band.ceilingPct === 50,
+     JSON.stringify(q.band));
+  ok('a free driver leaves HAF more, a Pro driver less — the reclaim model, live',
+     q.freeDriver.hafKeepsPctOfCustomer > q.midRung.hafKeepsPctOfCustomer &&
+     q.proDriver.hafKeepsPctOfCustomer < q.midRung.hafKeepsPctOfCustomer,
+     `${q.freeDriver.hafKeepsPctOfCustomer} / ${q.midRung.hafKeepsPctOfCustomer} / ${q.proDriver.hafKeepsPctOfCustomer}`);
+  ok('and all three sit inside the band',
+     [q.freeDriver, q.midRung, q.sameday, q.proDriver, q.urgent, q.paid]
+       .every(m => m.hafKeepsPctOfCustomer >= 14.99 && m.hafKeepsPctOfCustomer <= 50.01));
   near('the deepest paid account still keeps 15%', q.paid.hafKeepsPctOfCustomer, 15);
   ok('the fee charged and the share kept are the same number live',
      Math.abs(q.sameday.hafKeepsPctOfCustomer - q.sameday.networkFeePct) <= 0.02);

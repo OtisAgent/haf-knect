@@ -59,8 +59,13 @@
   // 1. EDITABLE CONFIG — mirror of tier_config seed v3 (FRAMEWORK-V3)
   // ===========================================================================
   var config = {
-    version: "MATRIX-V7",
-    effectiveFrom: "2026-08-02",
+    /* V8 (2026-09-07): the model changed materially — percentage plan uplifts,
+       the customer quoted at the middle rung, and the 15-50% band. The version
+       string HAS to move with it, or nobody can tell from outside which model a
+       page is actually running. It stayed on V7 through the first pass and the
+       live site looked correct while serving the August numbers. */
+    version: "MATRIX-V8",
+    effectiveFrom: "2026-09-07",
     vatPct: 20,
 
     // The speed the rate card is built around. A lane that drives slower than
@@ -351,11 +356,23 @@
     feeBasis: "SHARE_OF_CUSTOMER_PRICE",
     // The bands the ruling has to satisfy, kept as data so the guard below and
     // the lock suite check the SAME numbers Brent stated, not a copy of them.
+    //     ⚠️ THE BANDS BELOW ARE MEASURED AT THE RUNG THE CUSTOMER IS QUOTED
+    //     AT (FRAMEWORK-V8, 2026-09-07) — the middle one. A free driver leaves
+    //     HAF above them and a Pro driver below them, on purpose. The band that
+    //     applies to EVERY job whoever accepts is networkFeeFloor, and that is
+    //     the one enforced in code.
     feeBasisRuling: {
       lockedOn: "2026-08-02",
       lockedBy: "Brent — decision delegated to Otis",
       freeAccountKeepBandPct: [20, 30],   // "the free accounts needs to be 20% - 30%"
-      paidAccountKeepFloorPct: 15         // "minimum 10% - 15% per job paid accounts"
+      paidAccountKeepFloorPct: 15,        // "minimum 10% - 15% per job paid accounts"
+      // Brent, 2026-09-07: "i want HAF to make between 15% and 50% depends on
+      // the job, account type and the account type". One band for everything,
+      // replacing the split free/paid bands above as the enforced rule. The
+      // originals are kept because his §6 matrix is still quoted from them.
+      supersededOn: "2026-09-07",
+      supersededBy: "networkFeeFloor — one 15-50% band on every job",
+      measuredAtDriverRung: "MEMBER"
     },
 
     // --- HAF margin by job type: firm %, hard floor. Never breached by benefits.
@@ -369,7 +386,13 @@
     //     what the customer paid for. Found by the V6 lane suite on
     //     2026-08-02 and fixed here; the customer price does not change.
     jobTypes: [
-      { code: "GROUPAGE",     name: "Groupage",                     marginPct: 10, floorPct: 15,  servicePremiumMult: 1.00, active: false },
+      /* Groupage is built but switched off, and stays out of scope per Brent's
+         7 Sep document. Its fee moved 10 -> 15 with its floor: the 15% band is
+         non-negotiable, so a job type that could only ever be sold at 10 would
+         be unsellable the day it was switched on. Leaving the floor above the
+         fee also made the whole framework fail its own save guard, which meant
+         nobody could save ANY pricing change from the admin page. */
+      { code: "GROUPAGE",     name: "Groupage",                     marginPct: 15, floorPct: 15,  servicePremiumMult: 1.00, active: false },
       { code: "FLEX_SAMEDAY", name: "Scheduled / Flexible / Co-load", marginPct: 20, floorPct: 15, servicePremiumMult: 1.00, active: true },
       { code: "STD_SAMEDAY",  name: "Same-Day",                     marginPct: 20, floorPct: 15, servicePremiumMult: 1.00, active: true },
       { code: "TIMED",        name: "Timed Delivery",               marginPct: 25, floorPct: 18, servicePremiumMult: 1.00, active: true },
@@ -692,7 +715,13 @@
     //     of the distance and the time — Brent 2026-08-02: "same driving time
     //     different distance". A slow 40-mile run is not a cheap 40-mile run.
     //     With no minutes supplied this is distance only, exactly as before.
-    var driverMinutes = num(input.minutes, 0);
+    //     ⚠️ 2026-09-07: the customer screen has always sent this as
+    //     `driverMinutes` while this engine only read `minutes`, so from the
+    //     moment the screen started delegating here the time rule silently
+    //     stopped firing — a slow lane was priced as a fast one and the driver
+    //     was paid short of what the framework promises. Both names are read
+    //     now, so neither caller can turn the rule off by accident.
+    var driverMinutes = num(input.minutes, num(input.driverMinutes, 0));
     var roadValue = function (rate) {
       var byDistance = miles * rate;
       var byTime = driverMinutes > 0 ? (driverMinutes / 60) * rate * config.referenceMph : 0;

@@ -1,15 +1,16 @@
 /* Does the server price the job the way the screen does?
 
-   The order screen quotes from the engine inside index.html. The server fixes
-   the price again before it takes a penny. Those are two copies of one rate
-   card, and the day they disagree a customer is shown one price and charged a
-   deposit against another.
+   The order screen shows a price. The server fixes it again before it takes a
+   penny. The day those disagree, a customer is shown one price and charged a
+   deposit against another — which is exactly what happened on 7 Sep, by £213
+   on a long Luton job, because the server still held its own stale rate card.
 
-   So this reads index.html — the real file, not a fixture — pulls the numbers
-   straight out of it, and fails if any of them has drifted from the copy in
-   order-quote.js. It also re-implements the page's own price arithmetic from
-   those extracted numbers and checks the server agrees to the penny across a
-   spread of real jobs.
+   Both now go through the one engine. So this reads index.html — the real
+   file, not a fixture — and does two things with it. It checks every rate,
+   minimum, fee, floor, service factor and taper the page still SHOWS a
+   customer against what the engine actually charges. Then it runs the page's
+   own quoting code, lifted straight out of the file, against the server on a
+   spread of real jobs and demands the same penny.
 
    Run:  node shared/order-quote.test.mjs                                     */
 
@@ -18,12 +19,24 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import {
   VANS, URGENCIES, REF_MPH, VAT_PCT, LOCAL_MAX_OFF, LOCAL_BAND_OFF,
+  NETWORK_FEE_FLOOR_PCT, NETWORK_FEE_CEILING_PCT,
   LOCAL_BAND_AT, LOCAL_FULL_AT, MULT_CAP, DEPOSIT_PCT, DEPOSIT_MIN_PENCE,
   quoteOneOff, minTransportValue
 } from './order-quote.js';
 
+import { createRequire } from 'node:module';
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 const APP = readFileSync(join(HERE, '..', 'index.html'), 'utf8');
+
+/* The one engine, loaded the same way the server loads it. */
+const ENGINE = createRequire(import.meta.url)('../admin/pricing-matrix-v3.js');
+
+function slice(from, to) {
+  const i = APP.indexOf(from), j = APP.indexOf(to, i);
+  if (i < 0 || j < 0) throw new Error('could not find the customer engine block: ' + from);
+  return APP.slice(i, j);
+}
 
 let pass = 0;
 const fails = [];
@@ -96,26 +109,28 @@ if (taper) {
   ok('full minimum from', Number(taper[4]) === LOCAL_FULL_AT);
 }
 
-const capM = APP.match(/Math\.min\(u\.svc\*lane\.factor,([\d.]+)\)/);
-ok('multiplier cap', capM && near(Number(capM[1]), MULT_CAP),
-  capM ? `screen ${capM[1]} vs server ${MULT_CAP}` : 'cap not found');
+ok('multiplier cap', near(ENGINE.config.hindrance.maxAutoMultiplier, MULT_CAP),
+  `engine ${ENGINE.config.hindrance.maxAutoMultiplier} vs server ${MULT_CAP}`);
 
 /* ── 4. the same arithmetic, on real jobs ─────────────────────────────────── */
-/* The page's own maths, rebuilt here from the numbers extracted above — at the
-   neutral lane and the free account rung, which is exactly what an unsigned-in
-   one-off customer is quoted. If the server has ported it wrongly, this parts
-   company on the very first job. */
-const p2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
+/* This used to rebuild the page's arithmetic by hand from the numbers scraped
+   above. That was the right check while the screen and the server were two
+   separate copies of one rate card — but it also made this file a THIRD copy,
+   and on 7 Sep all three had drifted apart.
+   Since the collapse onto one engine, the honest check is the stronger one:
+   run the REAL adapter out of index.html, the one the customer's browser
+   executes, against the server, on the same job, and demand the same penny. */
+const engineSrc =
+  'var window = { HAFPricingMatrix: M };\n' +
+  slice('const REF_MPH', 'const PC={') +
+  '\nreturn { v3Price: v3Price };';
+const SCREEN = new Function('M', engineSrc)(ENGINE);
+
+/* No postcode, so the lane sits at its neutral band — exactly what the server
+   asks for, because a stranger's request has no view of a lane. No account and
+   no allocated driver, which is what a one-off customer is. */
 function pagePrice(miles, mins, vanKey, urgKey) {
-  const v = pageVans[vanKey], u = pageUrg[urgKey];
-  const rate = v.drv;
-  const hours = (mins && mins > 0 ? mins : (miles / 32) * 60) / 60;
-  const mult = Math.min(u.svc * 1.0, MULT_CAP);
-  const floor = minTransportValue({ min: v.min }, miles) * 1.0;
-  const rb = Math.max(miles * rate, hours * rate * REF_MPH);
-  const carrier = p2(Math.max(rb * mult, floor));
-  const feePct = Math.max(u.fee, u.flr);
-  return p2(carrier / (1 - Math.min(feePct, 0.95)));
+  return SCREEN.v3Price(miles, mins, vanKey, urgKey, null, {}).sub;
 }
 
 const JOBS = [
@@ -146,6 +161,37 @@ for (const j of JOBS) {
   ok(`${j.van}/${j.urg} deposit is a quarter, or the floor`,
     q.deposit_pence === Math.max(quarter, DEPOSIT_MIN_PENCE));
 }
+
+/* ── 4b. the band, on every job the server will ever quote ────────────────── */
+/* Brent, 2026-09-07: "15% on all jobs is the bare minimum HAF should be leaving
+   with on all jobs", then "i want HAF to make between 15% and 50%". A one-off
+   order is the one route into the network with no account and no driver behind
+   it, so it is the easiest place for a job to slip out of the band unnoticed. */
+let outside = [];
+for (const van of Object.keys(VANS)) {
+  for (const urg of Object.keys(URGENCIES)) {
+    for (const miles of [1, 3, 8, 14, 20, 26, 45, 90, 175, 320]) {
+      for (const mins of [0, Math.round(miles * 1.5), Math.round(miles * 3)]) {
+        const q = quoteOneOff({ miles, minutes: mins, vehicleCode: van, jobTypeCode: urg });
+        if (!q) { outside.push(`${van}/${urg} ${miles}mi did not price`); continue; }
+        if (q.network_fee_pct < NETWORK_FEE_FLOOR_PCT - 0.01 ||
+            q.network_fee_pct > NETWORK_FEE_CEILING_PCT + 0.01)
+          outside.push(`${van}/${urg} ${miles}mi/${mins}min = ${q.network_fee_pct}%`);
+      }
+    }
+  }
+}
+ok(`HAF lands inside ${NETWORK_FEE_FLOOR_PCT}–${NETWORK_FEE_CEILING_PCT}% on every one-off quote`,
+  outside.length === 0, outside.slice(0, 4).join('; '));
+
+/* The time rule, which was silently dead for a day because the screen sent
+   `driverMinutes` and the engine only read `minutes`. A slow lane must cost
+   more than a fast one over the same distance. */
+const fast = quoteOneOff({ miles: 40, minutes: 40, vehicleCode: 'lwb', jobTypeCode: 'sday' });
+const slow = quoteOneOff({ miles: 40, minutes: 120, vehicleCode: 'lwb', jobTypeCode: 'sday' });
+ok('a slow forty miles is not priced as a fast forty miles',
+  slow.quote_ex_vat_pence > fast.quote_ex_vat_pence,
+  `fast ${fast.quote_ex_vat_pence}p vs slow ${slow.quote_ex_vat_pence}p`);
 
 /* ── 5. what must never become a price ────────────────────────────────────── */
 ok('an unknown van is refused', quoteOneOff({ miles: 40, vehicleCode: 'artic', jobTypeCode: 'sday' }) === null);

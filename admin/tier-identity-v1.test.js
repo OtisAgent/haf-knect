@@ -97,7 +97,14 @@ console.log("\n7. THE CROWN STAYS SPECIAL");
 // ---------------------------------------------------------------------------
 ok("only the crown carries the brand colour", /haf-id--pro\{color:var\(--haf-crown/.test(ID.css));
 ok("the Plus mark takes the colour of the text beside it", /haf-id--plus\{color:inherit/.test(ID.css));
-ok("the crown lifts to gold on dark screens", /haf-crown:var(--haf-orange)/.test(ID.css));
+/* The brackets here were never escaped, so this pattern looked for the literal
+   text "haf-crown:var--haf-orange" and could not match anything the stylesheet
+   would ever contain. It reported the crown as broken on every run while the
+   CSS was correct all along — a check that can only fail is no safer than no
+   check at all. */
+ok("the crown lifts to gold on dark screens",
+  /prefers-color-scheme:dark[^}]*--haf-crown:var\(--haf-orange\)/.test(ID.css),
+  ID.css.match(/@media[^"]*/) || "no dark rule found");
 
 // ---------------------------------------------------------------------------
 console.log("\n8. THE GATE ITSELF");

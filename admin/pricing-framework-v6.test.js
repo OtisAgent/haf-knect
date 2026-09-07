@@ -2,8 +2,21 @@
  * HAF KNECT — Pricing FRAMEWORK V6 test suite
  *
  * Proves the engine against Brent's "HAF KNECT Pricing Matrix and Network Fee
- * Framework" (2026-07-31) as amended by his 2026-08-02 rulings, including its
- * own §16 required test cases and the §17 removal test.
+ * Framework" (2026-07-31) as amended by his 2026-08-02 rulings and rebuilt on
+ * 2026-09-07 as FRAMEWORK-V8, including its own §16 required test cases and
+ * the §17 removal test.
+ *
+ * FRAMEWORK-V8, in Brent's words on 2026-09-07:
+ *   - drivers are paid 0 / 5 / 10% over the base rate by plan,
+ *   - the customer is quoted at the MIDDLE rung, one price whoever accepts,
+ *   - "the drivers price always stays the same" — a driver's pay is never
+ *     trimmed to protect HAF's margin,
+ *   - "15% on all jobs is the bare minimum HAF should be leaving with",
+ *     later widened to "between 15% and 50%".
+ *
+ * The worked examples below were re-worked against his 7 Sep rate card. Where
+ * a figure moved, the OLD one is named in the comment beside it, so nobody has
+ * to guess whether a number changed on purpose.
  *
  * The lane layer and the margin bands have their own suite:
  *   node admin/lane-and-margin-v6.test.js
@@ -142,9 +155,10 @@ var a = customer(25, "small", "sday");
 eq("Small Van 25 mi — transport value is the £50 minimum, not £20", a.carrier, 50);
 ok("...and the engine says the minimum was applied", a.onMinimum === true);
 
-/* §2 worked example: LWB, 100 miles × £1.10 = £110, above the £65 minimum */
+/* §2 worked example: LWB, 100 miles × £1.50 = £150, above the £65 minimum.
+   (£1.10 on the old card; Brent's 7 Sep document moved LWB and XL to £1.50.) */
 var b = customer(100, "lwb", "sday");
-eq("LWB 100 mi — mileage takes over at £110", b.carrier, 110);
+eq("LWB 100 mi — mileage takes over at £150", b.carrier, 150);
 ok("...and the minimum is not in play", b.onMinimum === false);
 
 /* the minimum must rise with the vehicle, at the same distance */
@@ -223,13 +237,42 @@ ok("groupage is built but switched off for customers",
 
 var c = customer(100, "lwb", "sday");
 eq("transport value and fee add up to the customer price", c.carrier + c.fee, c.sub);
+
 /* FRAMEWORK-V6: the percentage is the share of the CUSTOMER PRICE HAF keeps,
    not a percentage added to the transport value. This is the one change that
-   makes Brent's own bands true — see §6. */
-eq("the fee is 20% of the customer price — what Brent's bands actually mean",
-   c.fee, c.sub * 0.20);
+   makes Brent's own bands true — see §6.
+
+   FRAMEWORK-V8 (Brent, 2026-09-07) says WHICH RUNG that percentage is measured
+   at. Drivers are now paid 0 / 5 / 10% over the base rate by plan, and "the
+   price given to the customer will be a dynamic pricing in the middle
+   somewhere as we don't know who will accept the job". So the customer is
+   quoted at the MIDDLE rung, and the quoted percentage is what HAF keeps when
+   a Plus driver takes the job. A Free driver leaves HAF MORE and a Pro driver
+   leaves it LESS — deliberately, in his words: "we make more margin on the
+   jobs from the free but we reclaim the margin loss from the HAF KNECT plan
+   monthly payments". */
+var cFree = customer(100, "lwb", "sday", { driver: "free" });
+var cPlus = customer(100, "lwb", "sday", { driver: "plus" });
+var cPro  = customer(100, "lwb", "sday", { driver: "pro" });
+
+/* LWB is £1.50/mile. 100 miles = £150 at the free rung, £157.50 at the middle
+   rung. The customer price is the middle rung grossed up at 20%: £196.88. */
+eq("the customer is quoted at the middle rung, not the free one", cFree.sub, 196.88);
+ok("one price, whoever accepts",
+   cFree.sub === cPlus.sub && cPlus.sub === cPro.sub,
+   cFree.sub + " / " + cPlus.sub + " / " + cPro.sub);
+eq("a Free driver is paid the base rate",       cFree.driverPay, 150);
+eq("a Plus driver is paid 5% over the base",    cPlus.driverPay, 157.50);
+eq("a Pro driver is paid 10% over the base",    cPro.driverPay,  165);
+eq("at the middle rung HAF keeps exactly the quoted 20%",
+   cPlus.fee / cPlus.sub * 100, 20);
+ok("a Free driver leaves HAF more than the quoted share",
+   cFree.fee / cFree.sub * 100 > 20.01, (cFree.fee / cFree.sub * 100).toFixed(2) + "%");
+ok("a Pro driver leaves HAF less — and that is the margin the plan fees reclaim",
+   cPro.fee / cPro.sub * 100 < 19.99, (cPro.fee / cPro.sub * 100).toFixed(2) + "%");
 ok("the fee is never buried in the mileage rate — the driver still gets it all",
-   Math.abs(c.carrier - 110) < 0.005 && Math.abs(c.fee - 27.50) < 0.005, JSON.stringify(c));
+   Math.abs(cFree.carrier - 150) < 0.005 && Math.abs(cFree.fee - 46.88) < 0.005,
+   JSON.stringify(cFree));
 
 /* ==========================================================================
  * 6. §6 worked examples — Brent's own jobs, re-worked under FRAMEWORK-V6
@@ -254,19 +297,27 @@ eq("Example A — network fee £12.50, which IS 20% of the price", exA.fee, 12.5
 eq("Example A — customer subtotal £62.50 ex VAT (his £60 kept only 16.7%)", exA.sub, 62.50);
 eq("Example A — HAF keeps exactly 20%", exA.fee / exA.sub * 100, 20);
 
-/* Example B — SWB, 100 mi, same-day, FREIGHT PLUS: 17.5% kept */
-var exB = customer(100, "swb", "sday", { account: "plus" });
-eq("Example B — SWB, 100 mi: transport £90, unchanged", exB.carrier, 90);
-eq("Example B — Freight Plus network fee £19.09", exB.fee, 19.09);
-eq("Example B — customer subtotal £109.09 ex VAT", exB.sub, 109.09);
-eq("Example B — HAF keeps 17.5%", Math.round(exB.fee / exB.sub * 1000) / 10, 17.5);
+/* Example B — SWB, 100 mi, same-day, FREIGHT PLUS: 17.5% kept at the middle
+   rung. SWB moved from £0.90 to £1.25/mile on Brent's 7 Sep rate card, so the
+   transport value is £125 at the free rung and £131.25 at the middle one. */
+var exB = customer(100, "swb", "sday", { account: "plus", driver: "plus" });
+eq("Example B — SWB, 100 mi: transport £131.25 at the rung quoted", exB.carrier, 131.25);
+eq("Example B — Freight Plus network fee £27.84", exB.fee, 27.84);
+eq("Example B — customer subtotal £159.09 ex VAT", exB.sub, 159.09);
+eq("Example B — HAF keeps 17.5% at the middle rung",
+   Math.round(exB.fee / exB.sub * 1000) / 10, 17.5);
+eq("Example B — a free driver on the same job leaves HAF 21.4%",
+   Math.round(customer(100, "swb", "sday", { account: "plus", driver: "free" }).fee /
+              exB.sub * 1000) / 10, 21.4);
 
-/* Example C — LWB, 100 mi, scheduled, FREIGHT PRO: 15% kept */
-var exC = customer(100, "lwb", "flex", { account: "pro" });
-eq("Example C — LWB, 100 mi, scheduled: transport £110, unchanged", exC.carrier, 110);
-eq("Example C — Freight Pro network fee £19.41", exC.fee, 19.41);
-eq("Example C — customer subtotal £129.41 ex VAT", exC.sub, 129.41);
-eq("Example C — HAF keeps 15% — the bottom of his paid band",
+/* Example C — LWB, 100 mi, scheduled, FREIGHT PRO: 15% kept at the middle
+   rung. LWB is £1.50/mile, so £150 free and £157.50 at the middle rung. */
+var exC = customer(100, "lwb", "flex", { account: "pro", driver: "plus" });
+eq("Example C — LWB, 100 mi, scheduled: transport £157.50 at the rung quoted",
+   exC.carrier, 157.50);
+eq("Example C — Freight Pro network fee £27.80", exC.fee, 27.80);
+eq("Example C — customer subtotal £185.30 ex VAT", exC.sub, 185.30);
+eq("Example C — HAF keeps 15% — the bottom of Brent's band, and its floor",
    Math.round(exC.fee / exC.sub * 1000) / 10, 15);
 
 /* Examples D and E — Luton tail lift, 100 mi, urgent, Freight Free then Pro.
@@ -277,13 +328,13 @@ eq("Example C — HAF keeps 15% — the bottom of his paid band",
  * document does allow "approved service adjustments" on top of the base rate,
  * so the two are reconcilable — but the worked example does not show one, so
  * the fee PERCENTAGES are what we assert here, not his subtotal. */
-var exD = customer(100, "lutontl", "urg");
-eq("Example D — urgent Freight Free network fee is 30% of the transport value",
+var exD = customer(100, "lutontl", "urg", { driver: "plus" });
+eq("Example D — urgent Freight Free keeps 30% at the middle rung",
    exD.feePct * 100, 30);
-eq("Example D — transport £154 (£140 base + the live 1.10 urgent service multiplier)",
-   exD.carrier, 154);
-var exE = customer(100, "lutontl", "urg", { account: "pro" });
-eq("Example E — urgent Freight Pro network fee is 25%, not 30%", exE.feePct * 100, 25);
+eq("Example D — transport £202.13 (£1.75/mi x 1.05 middle rung x the 1.10 urgent multiplier)",
+   exD.carrier, 202.13);
+var exE = customer(100, "lutontl", "urg", { account: "pro", driver: "plus" });
+eq("Example E — urgent Freight Pro keeps 25%, not 30%", exE.feePct * 100, 25);
 eq("Example E — the driver is paid exactly the same as in Example D",
    exE.carrier, exD.carrier);
 ok("Example E — the Pro discount comes only off HAF", exE.sub < exD.sub);
@@ -359,58 +410,70 @@ var bo = backoffice(60, "SWB_VAN", "STD_SAMEDAY", { plnaTier: "PRO" });
 var boFree = backoffice(60, "SWB_VAN", "STD_SAMEDAY");
 eq("a Pro driver costs the customer exactly the same as a Free driver",
    bo.money.customerIncVatGbp, boFree.money.customerIncVatGbp);
-eq("...and is paid the same today, because the reward is paused",
-   bo.money.driverPayGbp, boFree.money.driverPayGbp);
-eq("...so the reward is worth nothing on the job", bo.money.driverRewardGbp, 0);
+/* FRAMEWORK-V8 (Brent, 2026-09-07): the reward is back ON, as a share of the
+   base rate. So the driver IS paid more for their plan — that is what the plan
+   buys — and it comes out of HAF's share, never off the customer's price and
+   never off another driver's pay. */
+ok("...and is paid MORE, because his plan is what he is paying for",
+   bo.money.driverPayGbp > boFree.money.driverPayGbp,
+   bo.money.driverPayGbp + " vs " + boFree.money.driverPayGbp);
+eq("...the reward is 10% of the base rate on a Pro plan",
+   bo.money.driverRewardGbp, boFree.money.driverPayGbp * 0.10);
+ok("...and HAF, not the customer, funds it",
+   bo.money.driverRewardFundedBy === "HAF_MARGIN" &&
+   bo.money.hafMarginGbp < boFree.money.hafMarginGbp);
 ok("...HAF still holds its floor",
-   bo.money.hafMarginGbp >= bo.money.carrierTransportValueGbp * 0.15 - 0.01);
+   bo.money.hafKeepsPctOfCustomer >= M.config.networkFeeFloor.pct - 0.01,
+   bo.money.hafKeepsPctOfCustomer + "%");
 
 /* ==========================================================================
  * 8b. DRIVER BASE-RATE UPLIFT (V5) — pence per mile, highest wins
  * ======================================================================== */
 section("8b. Driver base-rate uplift");
 
-eq("Free driver adds nothing",   M.config.driverLevels.FREE.rewardGbpPerMile,   0.00);
-eq("Member driver adds £0.10",   M.config.driverLevels.MEMBER.rewardGbpPerMile, 0.10);
-eq("Pro driver adds £0.25",      M.config.driverLevels.PRO.rewardGbpPerMile,    0.25);
+/* FRAMEWORK-V8, Brent 2026-09-07, in his own words: "HAF KNECT Free driver
+   gets base rate, Plus driver gets 5% on top of Base rate, Pro driver gets 10%
+   on top of base rate". So the reward is a SHARE OF THE BASE RATE, not the
+   pence per mile V5 used, and it is switched ON. The old pence figures are
+   kept in the config as the superseded shape and are asserted here only so
+   nobody quietly reintroduces them as the live basis. */
+eq("Free driver adds nothing",        M.config.driverLevels.FREE.rewardPctOfBaseRate,   0);
+eq("Plus driver adds 5% of the base", M.config.driverLevels.MEMBER.rewardPctOfBaseRate, 5);
+eq("Pro driver adds 10% of the base", M.config.driverLevels.PRO.rewardPctOfBaseRate,   10);
 
-/* Held at zero on every live quote today. */
-eq("the reward is paused", M.config.driverReward.enabled, false);
-ok("and when it runs, HAF pays for it, not the customer",
+eq("the reward is live", M.config.driverReward.enabled, true);
+ok("...and it is a share of the base rate, not pence per mile",
+   M.config.driverReward.basis === "PCT_OF_BASE_RATE", M.config.driverReward.basis);
+ok("...and HAF pays for it, not the customer",
    M.config.driverReward.fundedBy === "HAF_MARGIN", M.config.driverReward.fundedBy);
-["PLUS", "PRO"].forEach(function (t) {
-  eq("a " + t + " driver's live quote carries a £0.00 reward",
-     backoffice(100, "LWB_VAN", "STD_SAMEDAY", { plnaTier: t }).rates.driverRewardGbpPerMile, 0);
-});
+ok("the customer is quoted at the middle rung",
+   M.config.driverReward.quoteAtLevel === "MEMBER", M.config.driverReward.quoteAtLevel);
 
-/* Everything from here to the end of 8b describes the reward SWITCHED ON, so
-   the shape survives intact for the day Brent turns it back on. */
-function rewardOn() {
-  M.applyConfig({ driverReward: { enabled: true, fundedBy: "HAF_MARGIN", minRetainedPctOfCustomer: 8 } });
-}
-rewardOn();
-
-/* The uplift lands on the rate, for every vehicle, at both member rungs. */
-[["MEMBER", 0.10], ["PRO", 0.25]].forEach(function (lv) {
-  var bad = 0;
+/* The uplift lands on the rate, for every vehicle, at both paid rungs. */
+[["MEMBER", "PLUS", 5], ["PRO", "PRO", 10]].forEach(function (lv) {
+  var bad = [];
   M.config.vehicles.forEach(function (v) {
     var r = M.price({ miles: 100, vehicleCode: v.code, jobTypeCode: "STD_SAMEDAY",
-                      plnaTier: lv[0] === "MEMBER" ? "PLUS" : "PRO" });
-    if (Math.abs(r.rates.rewardedBaseRate - (v.baseRate + lv[1])) > 0.001) bad++;
+                      plnaTier: lv[1] });
+    var want = v.baseRate * (1 + lv[2] / 100);
+    /* the engine records the rate to the penny, so compare to the penny */
+    if (Math.abs(r.rates.rewardedBaseRate - Math.round(want * 100) / 100) > 0.001)
+      bad.push(v.code + " " + r.rates.rewardedBaseRate + " vs " + want);
   });
-  ok(lv[0] + " rate = vehicle rate + £" + lv[1].toFixed(2) + " on all 7 vehicles", bad === 0);
+  ok(lv[0] + " rate = vehicle rate + " + lv[2] + "% on all 8 vehicles",
+     bad.length === 0, bad.join("; "));
 });
 
-/* A paid KNECT membership on the driver side earns the Member rate. */
+/* A paid KNECT membership on the driver side earns the Plus rate. */
 var dKnect = backoffice(100, "LWB_VAN", "STD_SAMEDAY", { driverIsKnectMember: true });
-eq("a paid HAF KNECT member driver earns the member rate",
-   dKnect.rates.driverRewardGbpPerMile, 0.10);
+eq("a paid HAF KNECT member driver earns the Plus rate",
+   dKnect.rates.driverRewardGbpPerMile, 1.50 * 0.05);
 
 /* Highest wins, never stacks — the rule that stops benefits compounding. */
 var stacked = backoffice(100, "LWB_VAN", "STD_SAMEDAY",
   { plnaTier: "PRO", driverIsKnectMember: true, driverFleetTier: "FLEET_PRO" });
-eq("PLNA Pro + KNECT member + Fleet Pro is still £0.25, never £0.45",
-   stacked.rates.driverRewardGbpPerMile, 0.25);
+eq("PLNA Pro + KNECT member + Fleet Pro is still 10%, never 25%",
+   stacked.rates.driverRewardGbpPerMile, 1.50 * 0.10);
 ok("...and all three claims are on the audit record",
    stacked.rates.levelClaims.length === 3, JSON.stringify(stacked.rates.levelClaims));
 
@@ -418,50 +481,61 @@ ok("...and all three claims are on the audit record",
 eq("Fleet Lite drivers sit on the free rate",
    backoffice(100, "LWB_VAN", "STD_SAMEDAY", { driverFleetTier: "FLEET_LITE" })
      .rates.driverRewardGbpPerMile, 0);
-eq("Fleet Middle drivers sit on the member rate",
+eq("Fleet Middle drivers sit on the Plus rate",
    backoffice(100, "LWB_VAN", "STD_SAMEDAY", { driverFleetTier: "FLEET_MIDDLE" })
-     .rates.driverRewardGbpPerMile, 0.10);
+     .rates.driverRewardGbpPerMile, 1.50 * 0.05);
 eq("Fleet Pro drivers sit on the Pro rate",
    backoffice(100, "LWB_VAN", "STD_SAMEDAY", { driverFleetTier: "FLEET_PRO" })
-     .rates.driverRewardGbpPerMile, 0.25);
+     .rates.driverRewardGbpPerMile, 1.50 * 0.10);
 
-/* V7: with the reward running, the CUSTOMER never pays a penny more for a
-   better driver, the driver is never paid less, and HAF never funds itself
-   below its floor share. That is the whole ruling, swept across the grid. */
-var priceMoved = 0, driverShort = 0, belowFloor = 0, funded = 0;
+/* THE WHOLE V8 RULING, swept across the grid on a free account: one price
+   whoever accepts, every driver paid their own rung, HAF inside its band, and
+   HAF — never the customer, never another driver — funding the difference. */
+var priceMoved = 0, driverShort = 0, outOfBand = 0, funded = 0, swept = 0;
 PAIRS.forEach(function (p) {
   for (var mm = 1; mm <= 300; mm += 11) {
     var f = backoffice(mm, p[1], "STD_SAMEDAY");
+    var pl = backoffice(mm, p[1], "STD_SAMEDAY", { plnaTier: "PLUS" });
     var pr = backoffice(mm, p[1], "STD_SAMEDAY", { plnaTier: "PRO" });
-    if (Math.abs(pr.money.customerIncVatGbp - f.money.customerIncVatGbp) > 0.01) priceMoved++;
-    if (pr.money.driverPayGbp < f.money.driverPayGbp - 0.01) driverShort++;
-    if (pr.money.hafKeepsPctOfCustomer < M.config.driverReward.minRetainedPctOfCustomer - 0.01) belowFloor++;
-    if (pr.money.driverRewardGbp > 0) funded++;
+    [pl, pr].forEach(function (q) {
+      if (Math.abs(q.money.customerIncVatGbp - f.money.customerIncVatGbp) > 0.01) priceMoved++;
+      if (q.money.driverPayGbp < f.money.driverPayGbp - 0.01) driverShort++;
+      if (q.money.hafKeepsPctOfCustomer < M.config.networkFeeFloor.pct - 0.01 ||
+          q.money.hafKeepsPctOfCustomer > M.config.networkFeeFloor.ceilingPct + 0.01) outOfBand++;
+      if (q.money.driverRewardGbp > 0) funded++;
+      swept++;
+    });
   }
 });
-ok("across 7 vehicles x 28 distances a Pro driver never changes the customer's price",
+ok("across " + swept + " quotes on a free account, the driver's plan never moves the price",
    priceMoved === 0, priceMoved + " failures");
-ok("...and the driver is never paid less than a free driver would be",
+ok("...and no driver is ever paid less than a free driver would be",
    driverShort === 0, driverShort + " failures");
-ok("...and HAF never funds a reward below its floor share",
-   belowFloor === 0, belowFloor + " failures");
+ok("...and HAF stays inside 15–50% on every one of them",
+   outOfBand === 0, outOfBand + " failures");
 ok("...and the reward really was being paid on those jobs", funded > 0, funded + " funded");
 
-/* The floor is real: on a long job a £0.25/mile reward outruns a 20% share, so
-   it is trimmed to what HAF can afford, flagged, and sent for a human to see —
-   and even then the customer's price does not move. */
-var longFree = backoffice(300, "SMALL_VAN", "STD_SAMEDAY");
-var longPro  = backoffice(300, "SMALL_VAN", "STD_SAMEDAY", { plnaTier: "PRO" });
-eq("an unaffordable reward still does not move the customer's price",
-   longPro.money.customerIncVatGbp, longFree.money.customerIncVatGbp);
-ok("...it is trimmed to what HAF can afford", longPro.money.driverRewardTrimmedGbp > 0);
-ok("...and flagged for a human rather than absorbed silently",
-   longPro.flags.indexOf("REWARD_TRIMMED") >= 0 && longPro.manualReviewRequired === true);
+/* The floor is real, and it bites the CUSTOMER PRICE, never the driver's pay.
+   Brent, 2026-09-07: "the drivers price always stays the same" and "add the
+   margin no matter what". On a deep-discount account a Pro driver's uplift
+   outruns what HAF can give away, so the price lifts to the 15% floor and the
+   driver still takes his full rung. */
+var deepFree = backoffice(100, "LWB_VAN", "STD_SAMEDAY", { accountType: "FREIGHT_PRO" });
+var deepPro  = backoffice(100, "LWB_VAN", "STD_SAMEDAY",
+                          { accountType: "FREIGHT_PRO", plnaTier: "PRO" });
+ok("where HAF cannot afford the uplift the customer price is lifted",
+   deepPro.money.customerExVatGbp > deepFree.money.customerExVatGbp,
+   deepFree.money.customerExVatGbp + " -> " + deepPro.money.customerExVatGbp);
+eq("...the driver is still paid his full rung, never trimmed",
+   deepPro.money.driverPayGbp, 165);
+eq("...and nothing is taken off the reward", deepPro.money.driverRewardTrimmedGbp, 0);
 eq("...leaving HAF exactly on its floor, never under it",
-   longPro.money.hafKeepsPctOfCustomer, M.config.driverReward.minRetainedPctOfCustomer);
+   deepPro.money.hafKeepsPctOfCustomer, M.config.networkFeeFloor.pct);
+ok("...and the Pro account still pays less than a free account would",
+   deepPro.money.customerExVatGbp <
+   backoffice(100, "LWB_VAN", "STD_SAMEDAY", { plnaTier: "PRO" }).money.customerExVatGbp);
 
-M.resetConfig();   /* back to the live setting: the reward is paused */
-eq("the suite leaves the engine on the live setting", M.config.driverReward.enabled, false);
+eq("the suite leaves the engine on the live setting", M.config.driverReward.enabled, true);
 
 /* ==========================================================================
  * 8c. ACCOUNT NETWORK-FEE REDUCTION (V5) — points off, floor always held
@@ -556,10 +630,28 @@ section("8d. Double Pro — Pro driver on a Pro account");
 var dp   = backoffice(100, "LWB_VAN", "STD_SAMEDAY", { plnaTier: "PRO", accountType: "FREIGHT_PRO" });
 var flat = backoffice(100, "LWB_VAN", "STD_SAMEDAY");
 var dpFreeDriver = backoffice(100, "LWB_VAN", "STD_SAMEDAY", { accountType: "FREIGHT_PRO" });
-eq("the Pro driver costs the customer nothing extra (V7)",
-   dp.money.customerIncVatGbp, dpFreeDriver.money.customerIncVatGbp);
-ok("...the Pro ACCOUNT still pays less than a free account, as it should",
-   dp.money.customerIncVatGbp < flat.money.customerIncVatGbp);
+/* ⚠️ THE ONE PLACE WHERE TWO OF BRENT'S RULES CANNOT BOTH HOLD, flagged to him
+   on 2026-09-07 rather than quietly reconciled. "One price whoever accepts"
+   and "HAF on every job needs 15%" collide exactly here: a Pro account has
+   already given away 5 points, so when a Pro driver takes the job there is
+   nothing left to fund his uplift from. Something has to give, and he was
+   clear which — "add the margin no matter what" — so the FLOOR wins and the
+   customer price lifts. The driver keeps his full rung either way.
+   On a FREE account, where there is room, the single price still holds; that
+   is swept in 8b above. */
+ok("on a discounted account, a Pro driver lifts the price to hold the floor",
+   dp.money.customerIncVatGbp > dpFreeDriver.money.customerIncVatGbp,
+   dpFreeDriver.money.customerIncVatGbp + " -> " + dp.money.customerIncVatGbp);
+eq("...and the lift stops exactly at the floor, never past it",
+   dp.money.hafKeepsPctOfCustomer, M.config.networkFeeFloor.pct);
+eq("...with the driver on his full 10% rung", dp.money.driverPayGbp, 165);
+ok("...the Pro ACCOUNT still pays less than a free account would, as it should",
+   dp.money.customerIncVatGbp <
+   backoffice(100, "LWB_VAN", "STD_SAMEDAY", { plnaTier: "PRO" }).money.customerIncVatGbp,
+   dp.money.customerIncVatGbp + " vs " +
+   backoffice(100, "LWB_VAN", "STD_SAMEDAY", { plnaTier: "PRO" }).money.customerIncVatGbp);
+ok("...and a free-driver Pro account is cheaper than a free-driver free account",
+   dpFreeDriver.money.customerIncVatGbp < flat.money.customerIncVatGbp);
 eq("the Pro account pays 15% — 20 less 5 points", dp.money.networkFeePct, 15);
 ok("HAF's fee never goes below the floor of the transport value",
    dp.money.hafMarginGbp >= dp.money.carrierTransportValueGbp * 0.15 - 0.01);
@@ -613,10 +705,16 @@ ok("the customer engine carries both ladders",
    /DRV_LEVEL\s*=/.test(html) && /ACC_LEVEL\s*=/.test(html));
 
 /* The two ladders must be identical on both sides — one source, not two. */
-eq("customer engine member uplift matches the back office",
-   CUST.DRV_LEVEL.member.up, M.config.driverLevels.MEMBER.rewardGbpPerMile);
-eq("customer engine pro uplift matches the back office",
-   CUST.DRV_LEVEL.pro.up, M.config.driverLevels.PRO.rewardGbpPerMile);
+eq("customer engine Plus uplift matches the back office",
+   CUST.DRV_LEVEL.member.pct, M.config.driverLevels.MEMBER.rewardPctOfBaseRate);
+eq("customer engine Pro uplift matches the back office",
+   CUST.DRV_LEVEL.pro.pct, M.config.driverLevels.PRO.rewardPctOfBaseRate);
+eq("customer engine floor matches the back office",
+   CUST.DRV_REWARD.floor * 100, M.config.networkFeeFloor.pct);
+eq("customer engine ceiling matches the back office",
+   CUST.DRV_REWARD.band[1] * 100, M.config.networkFeeFloor.ceilingPct);
+ok("customer engine agrees the reward is live and HAF-funded",
+   CUST.DRV_REWARD.on === true && CUST.DRV_REWARD.fundedBy === "HAF");
 eq("customer engine plus reduction matches the back office",
    CUST.ACC_LEVEL.plus.cut * 100, M.config.accountLevels.PLUS.feeReductionPts);
 eq("customer engine pro reduction matches the back office",
@@ -639,7 +737,7 @@ eq("VAT is 20% of the ex-VAT subtotal", vt.money.vatGbp, vt.money.customerExVatG
 eq("inc-VAT total adds up", vt.money.customerIncVatGbp,
    vt.money.customerExVatGbp + vt.money.vatGbp);
 ok("every quote carries a full audit record",
-   vt.version === "MATRIX-V7" && vt.money && vt.reasons && vt.inputs && vt.lane &&
+   vt.version === "MATRIX-V8" && vt.money && vt.reasons && vt.inputs && vt.lane &&
    vt.money.carrierTransportValueGbp != null && vt.money.networkFeeGbp != null &&
    vt.money.hafKeepsPctOfCustomer != null);
 
@@ -651,10 +749,10 @@ ok("every quote carries a full audit record",
  * ======================================================================== */
 section("10. V7 — the driver never moves the customer's price");
 
-ok("the customer engine has the reward paused too", CUST.DRV_REWARD.on === false);
-ok("...and funds it from HAF when it runs", CUST.DRV_REWARD.fundedBy === "HAF", CUST.DRV_REWARD.fundedBy);
+ok("...and funds it from HAF, not the customer", CUST.DRV_REWARD.fundedBy === "HAF",
+   CUST.DRV_REWARD.fundedBy);
 eq("...on the same floor share as the back office",
-   CUST.DRV_REWARD.floor * 100, M.config.driverReward.minRetainedPctOfCustomer);
+   CUST.DRV_REWARD.floor * 100, M.config.networkFeeFloor.pct);
 
 var drift = 0, custMoved = 0, boMoved = 0, checked = 0;
 ["sday", "timed", "urg", "flex"].forEach(function (urg) {
@@ -676,13 +774,12 @@ ok("...and neither does the back office", boMoved === 0, boMoved + " failures");
 ok("...and the two engines still agree on the price to the penny",
    drift === 0, drift + " failures");
 
-/* Switched on, in both engines at once: HAF pays, the customer does not. */
-M.applyConfig({ driverReward: { enabled: true, fundedBy: "HAF_MARGIN", minRetainedPctOfCustomer: 8 } });
-CUST.DRV_REWARD.on = true;
+/* Live, in both engines at once: HAF pays for the better driver, the customer
+   does not, and both engines fund the identical amount. */
 var cOnFree = customer(100, "lwb", "sday"), cOnPro = customer(100, "lwb", "sday", { driver: "pro" });
 var bOnFree = backoffice(100, "LWB_VAN", "STD_SAMEDAY"), bOnPro = backoffice(100, "LWB_VAN", "STD_SAMEDAY", { plnaTier: "PRO" });
-eq("switched on, the customer page still quotes one price", cOnPro.sub, cOnFree.sub);
-eq("switched on, the back office still quotes one price",
+eq("the customer page quotes one price whoever accepts", cOnPro.sub, cOnFree.sub);
+eq("the back office quotes the same one price",
    bOnPro.money.customerExVatGbp, bOnFree.money.customerExVatGbp);
 ok("...the Pro driver really is paid more", cOnPro.driverPay > cOnFree.driverPay &&
    bOnPro.money.driverPayGbp > bOnFree.money.driverPayGbp);
@@ -690,8 +787,15 @@ ok("...and HAF is the one paying for it",
    bOnPro.money.hafMarginGbp < bOnFree.money.hafMarginGbp &&
    cOnPro.fee < cOnFree.fee);
 eq("...both engines fund exactly the same amount", cOnPro.rewardGbp, bOnPro.money.driverRewardGbp);
-M.resetConfig(); CUST.DRV_REWARD.on = false;
-eq("the suite hands back a paused reward", M.config.driverReward.enabled, false);
+
+/* And the whole point of the exercise, in one line: the free driver is where
+   HAF makes its margin back. Brent, 2026-09-07: "we make more margin on the
+   jobs from the free but we reclaim the margin loss from the HAF KNECT plan
+   monthly payments". */
+ok("HAF earns more when a free driver takes the job than when a Pro does",
+   cOnFree.fee > cOnPro.fee,
+   "free £" + cOnFree.fee + " vs pro £" + cOnPro.fee);
+eq("the suite hands back a live reward", M.config.driverReward.enabled ? 1 : 0, 1);
 
 console.log("\n" + (fail === 0 ? "ALL PASS" : "FAILURES") + " — " + pass + " passed, " + fail + " failed\n");
 process.exit(fail === 0 ? 0 : 1);

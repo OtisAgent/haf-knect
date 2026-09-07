@@ -4257,16 +4257,19 @@ function _esc2(s){return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;',
 /* fee = HAF network fee as a % of the carrier transport value · flr = the floor that fee may never drop below · svc = urgency premium paid to the driver */
 const URG={flex:{n:'Flexible',fee:.20,flr:.15,svc:1},sday:{n:'Same-day',fee:.20,flr:.15,svc:1},urg:{n:'Urgent',fee:.30,flr:.22,svc:1.10},timed:{n:'Timed delivery',fee:.25,flr:.18,svc:1}};
 /* ── DRIVER REWARD RATE ──
-   Pence per loaded mile ON TOP of the vehicle rate, set by the driver taking
-   the job: PLNA tier, fleet tier, or a paid HAF KNECT membership. Highest wins,
-   never stacks.
-   FRAMEWORK-V7 (Brent 2026-08-02): held at £0.00/mile for now — "for now
-   offering more for a driver isn't right" — and if it is ever switched back on,
-   HAF funds it out of its own share rather than the customer's price:
-   "i'm happy to take less margin for HAF then make the customers pay more".
-   DRV_REWARD.on flips it; DRV_REWARD.floor is the least HAF may retain. */
-const DRV_REWARD={on:false,fundedBy:'HAF',floor:.08};
-const DRV_LEVEL={free:{n:'Free driver',up:0},member:{n:'Member driver',up:.10},pro:{n:'Pro driver',up:.25}};
+   A share of the vehicle base rate ON TOP of it, set by the plan of the driver
+   taking the job: PLNA tier, fleet tier, or a paid HAF KNECT membership.
+   Highest wins, never stacks.
+   FRAMEWORK-V8 (Brent 2026-09-07): "HAF KNECT Free driver gets base rate, Plus
+   driver gets 5% on top of Base rate, Pro driver gets 10% on top of base rate".
+   HAF funds it out of its own share, never the customer's price, and the
+   customer is quoted at the MIDDLE rung so one price covers whoever accepts.
+   DISPLAY ONLY — the price itself comes from the one engine. `up` is kept as
+   the pence-per-mile the plan is worth on a £1.50 LWB, purely so the old
+   read-outs keep working; `pct` is the real lever.
+   DRV_REWARD.floor is the least HAF may retain on any job. */
+const DRV_REWARD={on:true,fundedBy:'HAF',floor:.15,band:[.15,.50],quoteAt:'member'};
+const DRV_LEVEL={free:{n:'Free driver',up:0,pct:0},member:{n:'Plus driver',up:.075,pct:5},pro:{n:'Pro driver',up:.15,pct:10}};
 /* ── ACCOUNT NETWORK-FEE REDUCTION ──
    Percentage points off the job-type fee for the account posting the job —
    freight forwarder, business, fleet or paid HAF KNECT member. One ladder for
@@ -4344,14 +4347,28 @@ function hafApplyPricingConfig(cfg){
   }
   if(cfg.driverLevels){
     Object.keys(PX_DRV).forEach(c=>{const l=cfg.driverLevels[c];
-      if(l&&typeof l.rewardGbpPerMile==='number')DRV_LEVEL[PX_DRV[c]].up=l.rewardGbpPerMile;});
+      if(!l)return;
+      /* FRAMEWORK-V8: the plan uplift is a SHARE of the base rate. The old
+         pence-per-mile figure is still read so an older saved config does not
+         blank the read-out, but the share is what the engine actually uses. */
+      if(typeof l.rewardPctOfBaseRate==='number')DRV_LEVEL[PX_DRV[c]].pct=l.rewardPctOfBaseRate;
+      if(typeof l.rewardGbpPerMile==='number')DRV_LEVEL[PX_DRV[c]].up=l.rewardGbpPerMile;});
     done.push('driver reward');
   }
   if(cfg.driverReward){
     if(typeof cfg.driverReward.enabled==='boolean')DRV_REWARD.on=cfg.driverReward.enabled;
     if(cfg.driverReward.fundedBy)DRV_REWARD.fundedBy=cfg.driverReward.fundedBy==='CUSTOMER'?'CUSTOMER':'HAF';
-    if(typeof cfg.driverReward.minRetainedPctOfCustomer==='number')DRV_REWARD.floor=cfg.driverReward.minRetainedPctOfCustomer/100;
+    if(cfg.driverReward.quoteAtLevel)DRV_REWARD.quoteAt=({FREE:'free',MEMBER:'member',PRO:'pro'})[cfg.driverReward.quoteAtLevel]||'member';
     done.push('reward funding');
+  }
+  /* The band HAF must land inside on every job (Brent, 2026-09-07). Read from
+     the floor block, which is where the engine keeps it — NOT from the reward's
+     own retained-share setting, which the floor now outranks. */
+  if(cfg.networkFeeFloor){
+    if(typeof cfg.networkFeeFloor.pct==='number')DRV_REWARD.floor=cfg.networkFeeFloor.pct/100;
+    if(typeof cfg.networkFeeFloor.ceilingPct==='number')
+      DRV_REWARD.band=[DRV_REWARD.floor,cfg.networkFeeFloor.ceilingPct/100];
+    done.push('network fee band');
   }
   if(cfg.accountLevels){
     Object.keys(PX_ACC).forEach(c=>{const a=cfg.accountLevels[c];

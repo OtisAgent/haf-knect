@@ -83,8 +83,12 @@ for (const [label, w, h] of [['desktop', 1440, 900], ['phone', 390, 844]]) {
   ok('the slower cross-Pennine lane pays the driver more per mile',
      sheffield.smPerMile > sheffield.sbPerMile,
      `£${sheffield.smPerMile.toFixed(2)}/mi vs £${sheffield.sbPerMile.toFixed(2)}/mi`);
-  ok('HAF still keeps 20% on both — the lane pays the driver, not HAF',
-     Math.abs(sheffield.smKeeps - 20) < 0.05 && Math.abs(sheffield.sbKeeps - 20) < 0.05,
+  /* FRAMEWORK-V8: what HAF keeps depends on the rung of the driver who takes
+     the job, so the thing to prove about a LANE is that it does not move that
+     share at all — the lane pays the driver, not HAF. Same share on both lanes,
+     whatever that share is. */
+  ok('the lane pays the driver, not HAF — the same share on both lanes',
+     Math.abs(sheffield.smKeeps - sheffield.sbKeeps) < 0.05,
      `${sheffield.smKeeps.toFixed(2)}% / ${sheffield.sbKeeps.toFixed(2)}%`);
 
   /* FRAMEWORK-V7, read off the live page: which driver takes the job must not
@@ -110,14 +114,22 @@ for (const [label, w, h] of [['desktop', 1440, 900], ['phone', 390, 844]]) {
     });
     return out;
   });
-  ok('the live page has the driver reward paused', v7.on === false, String(v7.on));
+  ok('the live page has the driver reward running', v7.on === true, String(v7.on));
   ok('...and funds it from HAF, not the customer, when it runs',
      v7.fundedBy === 'HAF', String(v7.fundedBy));
   ok('a free, a member and a pro driver all quote the same price',
      v7.tiers.free.sub === v7.tiers.member.sub && v7.tiers.free.sub === v7.tiers.pro.sub,
      JSON.stringify(v7.tiers));
-  ok('...and all three are paid the same today',
-     v7.tiers.free.driverPay === v7.tiers.pro.driverPay, JSON.stringify(v7.tiers));
+  /* FRAMEWORK-V8, Brent 2026-09-07: 0 / 5 / 10% over the base rate by plan,
+     paid out of HAF's share. Read off the deployed page, because that is the
+     only copy a driver ever sees. */
+  ok('...and each is paid their own rung, 5% and 10% over the free rate',
+     Math.abs(v7.tiers.member.driverPay - v7.tiers.free.driverPay * 1.05) < 0.02 &&
+     Math.abs(v7.tiers.pro.driverPay - v7.tiers.free.driverPay * 1.10) < 0.02,
+     JSON.stringify(v7.tiers));
+  ok('...with HAF, not the customer, funding the difference',
+     v7.tiers.pro.reward > 0 && v7.tiers.free.sub === v7.tiers.pro.sub,
+     JSON.stringify(v7.tiers));
   ok(`across ${v7.checked} live quotes a Pro driver never costs the customer more`,
      v7.moved === 0, v7.moved + ' failures');
 
@@ -134,10 +146,14 @@ for (const [label, w, h] of [['desktop', 1440, 900], ['phone', 390, 844]]) {
   });
   const freeVals = Object.values(bands).map(x => x.free);
   const proVals = Object.values(bands).map(x => x.pro);
-  ok('every free account keeps 20-30% of the customer price',
-     freeVals.every(x => x >= 19.99 && x <= 30.01), JSON.stringify(freeVals.map(x => x.toFixed(1))));
-  ok('no paid account keeps less than his 10% minimum',
-     proVals.every(x => x >= 9.99), JSON.stringify(proVals.map(x => x.toFixed(1))));
+  /* Brent replaced the split free/paid bands on 2026-09-07 with one band for
+     everything: "i want HAF to make between 15% and 50%". Read off the live
+     page, on every job type, both account rungs. */
+  ok('every quote on the live page keeps between 15% and 50%',
+     freeVals.concat(proVals).every(x => x >= 14.99 && x <= 50.01),
+     JSON.stringify(freeVals.concat(proVals).map(x => x.toFixed(1))));
+  ok('no account ever drops HAF below the 15% floor',
+     proVals.every(x => x >= 14.99), JSON.stringify(proVals.map(x => x.toFixed(1))));
   ok('an account discount never comes off the driver',
      Object.values(bands).every(x => Math.abs(x.driverFree - x.driverPro) < 0.005));
 

@@ -196,9 +196,10 @@ console.log("  " + checked + " priced jobs run through the revenue model");
 section("§11 — gross profit deducts each cost ONCE, never twice");
 // ===========================================================================
 resetAll();
-Engine.applyConfig({
-  driverReward: { enabled: true, fundedBy: "HAF_MARGIN", minRetainedPctOfCustomer: 8 }
-});
+/* The reward is live in the shipped config since FRAMEWORK-V8 (2026-09-07), as
+   a share of the base rate quoted at the middle rung. This used to switch it on
+   by hand with the old pence-per-mile settings, which silently put the engine
+   back on the superseded V5 shape and priced a job nobody sells. */
 var qPro = Engine.price({ miles: 100, vehicleCode: "SMALL_VAN", jobTypeCode: "STD_SAMEDAY", plnaTier: "PRO" });
 var rPro = Rev.jobRevenue(qPro, { processingCostGbp: 2, approvedDiscountsGbp: 3 });
 var gp = rPro.grossProfit;
@@ -378,9 +379,19 @@ near("services stream = 60", summary.SERVICES.gbp, 60);
 near("total = every stream added up",
   ledger.total(), Rev.round2(deliveryExpected + 105 + 5 + 60));
 near("delivery margin is still ONLY delivery", ledger.deliveryMargin(), deliveryExpected);
-ok("the business earns more than the network does on these figures",
-  Rev.round2(105 + 5 + 60) > deliveryExpected,
-  "network £" + deliveryExpected + " vs business £170");
+/* The point of this ledger is that HAF is not a delivery-margin business with
+   some extras bolted on — the other streams are real money, counted separately.
+   It used to assert they were the LARGER half, which was only ever true of the
+   old rate card on these four sample jobs; Brent's 7 Sep card raised the
+   delivery side by about half. So assert what actually matters and stays true:
+   every non-delivery stream is material and is reported on its own. */
+ok("subscriptions, payroll and services are each counted, and none is delivery",
+  summary.SUBSCRIPTION.gbp > 0 && summary.PAYROLL.gbp > 0 && summary.SERVICES.gbp > 0 &&
+  Rev.round2(summary.SUBSCRIPTION.gbp + summary.PAYROLL.gbp + summary.SERVICES.gbp) === 170,
+  JSON.stringify(summary));
+ok("the non-delivery streams are a material share of the total, not a rounding error",
+  Rev.round2(170 / ledger.total() * 100) > 25,
+  Rev.round2(170 / ledger.total() * 100) + "% of £" + ledger.total());
 console.log("  → 4 jobs: network fees £" + deliveryExpected +
   " · subscriptions £105 · payroll £5 · services £60 · total £" + ledger.total());
 
