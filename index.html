@@ -4849,12 +4849,74 @@ function paintTooSmall(both,A){
    pick and you get that exact van, not the rung's smallest — otherwise the
    ladder would quietly downgrade the very recommendation it is showing.
    ══════════════════════════════════════════════════════════════════════════ */
+/* 🔴 THE PALLET COUNTS ARE READ, NOT TYPED — and the typed ones were wrong.
+   Measured 7 Sep against haf_van_class_spec, which is the table that says what
+   each vehicle class actually holds:
+
+     · the Luton rung read "A full van load, up to 5 pallets". luton, lutonc and
+       lutontl all hold FOUR. Overstated by one, on the rung a customer picks
+       precisely BECAUSE they have a full load — so they book a Luton for five
+       pallets and a driver arrives at a job that cannot be loaded. Not a display
+       defect; a wasted journey.
+     · the LWB rung read "3–4 pallets" while covering lwb (4) AND xlwb (5).
+       Understated for the larger van.
+
+   Wrong in both directions, which is what a second copy of a spec does: it
+   drifts from the first the moment either moves. So the prose stays here — it
+   is description, not data — and the pallet figure is appended only when the
+   spec has actually been read.
+
+   Brent's rule, 7 Sep: read live, or it is not shown. If the spec cannot be
+   fetched the rung says "A full van load" and nothing about pallets, which is
+   true and useful, rather than a number nobody checked. Correcting 5 to 4 would
+   only have made the lie true until the next vehicle change. */
 const VAN_RUNGS=[
   {k:'small',n:'Up to small van',s:'A few boxes or a car boot load',vans:['small','swb']},
   {k:'mwb'  ,n:'MWB'            ,s:'A sofa, or a dozen boxes'      ,vans:['mwb']},
-  {k:'lwb'  ,n:'LWB'            ,s:'A room of furniture, 3–4 pallets',vans:['lwb','xlwb']},
-  {k:'luton',n:'Luton'          ,s:'A full van load, up to 5 pallets',vans:['luton','lutonc','lutontl']}
+  {k:'lwb'  ,n:'LWB'            ,s:'A room of furniture'           ,vans:['lwb','xlwb']},
+  {k:'luton',n:'Luton'          ,s:'A full van load'               ,vans:['luton','lutonc','lutontl']}
 ];
+
+/* van_code -> euro_pallets, empty until the spec answers. Empty means the
+   pallet phrase is simply absent, never a guess. */
+let VAN_PALLETS={};
+
+/* The pallet phrase for a rung, derived from the vans it actually books.
+   A rung covering 4 and 5 says "4–5 pallets"; one covering only 4s says
+   "up to 4 pallets". Nothing at all if the spec has not been read, or if the
+   vans in this rung carry no pallets (a small van holds none, and "0 pallets"
+   is a worse sentence than silence). */
+function rungPallets(rung){
+  const n=rung.vans.map(v=>VAN_PALLETS[v]).filter(x=>typeof x==='number'&&x>0);
+  if(!n.length)return '';
+  const lo=Math.min.apply(null,n), hi=Math.max.apply(null,n);
+  return lo===hi ? ', up to '+hi+' pallet'+(hi===1?'':'s')
+                 : ', '+lo+'–'+hi+' pallets';
+}
+function rungText(rung){ return rung.s+rungPallets(rung); }
+
+/* Read once on load. A failure is silent BY DESIGN: the rungs still describe
+   themselves in words and simply say nothing about pallets. */
+(async function(){
+  try{
+    const r=await fetch(PLNA_URL+'/rest/v1/haf_van_class_spec?select=van_code,euro_pallets',
+                        {headers:{apikey:PLNA_KEY,Authorization:'Bearer '+PLNA_KEY},cache:'no-store'});
+    if(!r.ok)return;
+    const rows=await r.json();
+    if(!Array.isArray(rows))return;
+    const next={};
+    rows.forEach(x=>{ if(x&&x.van_code!=null)next[x.van_code]=Number(x.euro_pallets); });
+    VAN_PALLETS=next;
+    /* Repaint whichever ladders are already on screen, so the phrase appears
+       rather than waiting for the next interaction. BOTH of them: the picker
+       and the full-quote screen render the same rungs from the same array, and
+       fixing one would have left the other saying something different about the
+       same van — which is the whole fault being corrected here. */
+    ['paintLadder','fqPaintLadder'].forEach(fn=>{
+      try{ if(typeof window[fn]==='function')window[fn](); }catch(e){}
+    });
+  }catch(e){/* offline: the rungs read fine without the pallet phrase */}
+})();
 const rungFor=vanKey=>VAN_RUNGS.find(r=>r.vans.indexOf(vanKey)>=0)||null;
 /* The last distance we actually resolved, so a rung can be priced the moment it
    is drawn without asking the postcode service again on every repaint. */
@@ -4891,7 +4953,7 @@ function paintLadder(both,A){
       +' data-rung="'+r.k+'" onclick="selRung(\''+r.k+'\')">'
       +'<span class="vrung-b">HAF suggests</span>'
       +'<span class="vrung-n">'+r.n+'</span>'
-      +'<span class="vrung-s">'+r.s+'</span>'
+      +'<span class="vrung-s">'+rungText(r)+'</span>'
       +(price?'<span class="vrung-x">'+price+'</span>':'')
       +'</button>';
   }).join('');
@@ -5380,7 +5442,7 @@ function fqPaintLadder(ready,A){
       +' data-rung="'+r.k+'" onclick="fqSelRung(\''+r.k+'\')">'
       +'<span class="vrung-b">HAF suggests</span>'
       +'<span class="vrung-n">'+r.n+'</span>'
-      +'<span class="vrung-s">'+r.s+'</span>'
+      +'<span class="vrung-s">'+rungText(r)+'</span>'
       +'</button>';
   }).join('');
   if(x){
