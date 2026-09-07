@@ -1752,7 +1752,11 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <div id="fq-dep" style="display:none;background:var(--p2);border:1px solid var(--ln);border-radius:12px;padding:.9rem 1rem;margin-bottom:.9rem">
                 <div style="display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;margin-bottom:.45rem">
                   <span style="font-size:.7rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mu)">Amount held</span>
-                  <span style="font-family:var(--dp);font-weight:900;font-size:1.2rem;color:var(--tx)" id="fq-dep-amt">£0.00</span>
+                  <span style="font-family:var(--dp);font-weight:900;font-size:1.2rem;color:var(--tx)" id="fq-dep-amt">&mdash;</span><!-- a dash, never £0.00: this is written at
+                    runtime from deposit_pence, and if that write never runs the old
+                    placeholder told a customer their deposit was nothing. A figure
+                    behind a runtime id is a sample fallback, which Brent's rule
+                    forbids: read live, or not shown. -->
                 </div>
                 <p style="font-size:.73rem;color:var(--mu);line-height:1.6;margin:0" id="fq-dep-note"></p>
               </div>

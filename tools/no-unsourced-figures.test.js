@@ -26,7 +26,9 @@
  *
  *   · inside a [data-seed] block   -- declared sample content, hidden from any
  *                                     account that is not a demo account;
- *   · an element JavaScript writes -- populated at runtime from a real source;
+ *   · an element JavaScript writes -- and whose markup holds a DASH, not a
+ *                                     number: a literal behind a runtime id is
+ *                                     a sample fallback, which the rule forbids;
  *   · on the ALLOWED list below    -- a figure we have decided may be typed,
  *                                     each with a written reason.
  *
@@ -123,7 +125,21 @@ function text(chunk, at) {
   if (!t || !FIGURE.test(t)) return;
   const top = stack[stack.length - 1];
   if (stack.some(f => 'data-seed' in f.a)) return;         // declared sample content
-  if (top.a.id && written.has(top.a.id)) return;           // painted at runtime
+  /* 🔴 TIGHTENED 7 Sep, and it is Henry's catch against MY rule.
+     This used to exempt anything with an id that JavaScript writes to, on the
+     reasoning that the markup value is only a placeholder. That is exactly what
+     Brent's rule forbids: "it is read live, or it is not shown." A literal
+     sitting behind an id is a SAMPLE FALLBACK — if the live read ever fails,
+     the page quietly shows it and looks entirely normal doing so. The capacity
+     bar did precisely that with a rate band matching no entry in the table it
+     was painted from.
+     So an id still exempts the ELEMENT, but never a FIGURE inside it. A
+     placeholder must be a dash, an empty string, or nothing. */
+  if (top.a.id && written.has(top.a.id)) {
+    failures.push({ value: t, where: chain(), line: lineOf(at), id: top.a.id,
+                    why: 'literal fallback behind a runtime id' });
+    return;
+  }
   const where = chain();
   if (ALLOWED.some(r => r.value === t && r.at === where)) return;
   failures.push({ value: t, where, line: lineOf(at), id: top.a.id || null });
