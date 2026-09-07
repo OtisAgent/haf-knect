@@ -769,6 +769,36 @@ textarea.fi2{resize:vertical;min-height:70px}
 .too-small-b{display:flex;gap:.45rem;flex-wrap:wrap}
 /* ══ THE DRIVER'S JOB CARD — the same words the customer typed ══════════ */
 .jobc{background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.9rem 1rem}
+/* ── THE HAF WAY ── the four things that make posting here different, said at
+   the top of the screen where somebody is deciding whether to bother. */
+.hafw{border:1.5px solid var(--or-g);background:var(--or-d);border-radius:var(--rx);padding:.85rem 1rem;margin-bottom:.85rem;max-width:580px}
+.hafw-h{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--haf-orange-ink);margin-bottom:.55rem}
+.hafw-g{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .9rem}
+@media(max-width:620px){.hafw-g{grid-template-columns:1fr}}
+.hafw-i{display:flex;gap:.5rem;align-items:flex-start}
+.hafw-i svg{width:14px;height:14px;flex:0 0 14px;margin-top:.15rem;stroke:var(--haf-orange-ink);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.hafw-t{font-size:.76rem;font-weight:700;line-height:1.35}
+.hafw-p{font-size:.68rem;color:var(--mu);line-height:1.45;margin-top:.1rem}
+/* ── THE CONSIGNMENT TICKET ── the head that turns a load list into a job: the
+   route, the two windows, the distance and the money, above the load block. */
+.jobt{border:1.5px solid var(--ln);border-radius:var(--rx);overflow:hidden;background:var(--p)}
+.jobt-h{padding:.8rem 1rem .7rem;border-bottom:1px solid var(--ln)}
+.jobt-ref{font-size:.63rem;font-weight:800;letter-spacing:.09em;color:var(--haf-orange-ink);text-transform:uppercase}
+.jobt-rt{font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.03em;margin-top:.2rem;line-height:1.3}
+.jobt-leg{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;padding:.7rem 1rem;border-bottom:1px solid var(--ln)}
+@media(max-width:460px){.jobt-leg{grid-template-columns:1fr}}
+.jobt-l{background:var(--p2);border-radius:10px;padding:.55rem .7rem}
+.jobt-lk{font-size:.6rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--su)}
+.jobt-lv{font-size:.8rem;font-weight:700;margin-top:.15rem;line-height:1.4}
+.jobt-lw{font-size:.71rem;color:var(--mu);margin-top:.12rem;line-height:1.4}
+.jobt-sr{display:flex;flex-wrap:wrap;gap:.4rem;padding:.6rem 1rem;border-bottom:1px solid var(--ln)}
+.jobt-s{flex:1 1 78px;background:var(--p2);border-radius:9px;padding:.4rem .55rem;text-align:center}
+.jobt-s.pay{background:var(--or-d);border:1px solid var(--or-g)}
+.jobt-sv{font-family:var(--dp);font-weight:900;font-size:.9rem;letter-spacing:-.03em}
+.jobt-sk{font-size:.6rem;font-weight:700;color:var(--su);text-transform:uppercase;letter-spacing:.06em;margin-top:.05rem}
+.jobt-b{padding:.7rem 1rem}
+.jobt-b .jobc{background:transparent;border:none;padding:0}
+.jobt-f{padding:.6rem 1rem;border-top:1px solid var(--ln);font-size:.68rem;color:var(--su);line-height:1.5}
 .jobc-h{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--haf-orange-ink);margin-bottom:.55rem}
 .jobc-r{display:flex;gap:.7rem;padding:.32rem 0;border-bottom:1px solid var(--lns);font-size:.78rem;line-height:1.5}
 .jobc-r:last-child{border-bottom:none}
@@ -1688,6 +1718,50 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <div class="olbl">What the driver will see</div>
               <div id="fq-jobcard"></div>
               <p style="font-size:.68rem;color:var(--su);line-height:1.5;margin:.4rem 0 .9rem">Only vehicles that can carry this load are offered the job.</p>
+
+              <!-- ── WHO MAY ACCEPT IT ──
+                   Dashboard only, and only for the account types it can be true
+                   for. Ships hidden (data-off) so the public journey never sees
+                   it; postingApplyRole() reveals it once the flow is docked. -->
+              <div class="dd-box" data-post-only="account" data-off="1" style="margin:0 0 .7rem">
+                <div class="dd-h">
+                  <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <div class="dd-t">Who can accept this job?</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem">
+                  <label data-post-only="ownfleet" data-off="1" style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.5rem .65rem;background:var(--p2);border-radius:var(--rx);border:1.5px solid var(--or-g)">
+                    <input type="radio" name="b-accept" value="mydriver" checked style="accent-color:var(--haf-orange-ink)">
+                    <div><div style="font-weight:700;font-size:.8rem">My registered drivers first</div><div style="font-size:.69rem;color:var(--mu)">Offered to your team first &#8212; goes to the open network after 30 minutes if not accepted</div></div>
+                  </label>
+                  <label data-post-only="ownfleet" data-off="1" style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.5rem .65rem;background:var(--p2);border-radius:var(--rx)">
+                    <input type="radio" name="b-accept" value="myonly" style="accent-color:var(--haf-orange-ink)">
+                    <div><div style="font-weight:700;font-size:.8rem">My drivers only</div><div style="font-size:.69rem;color:var(--mu)">Only drivers registered to your fleet account can accept &#8212; never goes to the open network</div></div>
+                  </label>
+                  <label style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.5rem .65rem;background:var(--p2);border-radius:var(--rx)">
+                    <input type="radio" name="b-accept" value="network" id="post-accept-network" style="accent-color:var(--haf-orange-ink)">
+                    <div><div style="font-weight:700;font-size:.8rem">Open network</div><div style="font-size:.69rem;color:var(--mu)">Any Clever Checked driver on HAF KNECT can accept immediately</div></div>
+                  </label>
+                </div>
+                <div style="margin-top:.7rem;padding-top:.7rem;border-top:1px solid var(--ln)">
+                  <div style="font-size:.7rem;font-weight:700;color:var(--mu);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.06em">Additional requirements</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:.45rem">
+                    <label style="display:flex;align-items:center;gap:.35rem;font-size:.75rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--haf-orange-ink)"> Clever Checked only</label>
+                    <label style="display:flex;align-items:center;gap:.35rem;font-size:.75rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--haf-orange-ink)"> GIT insurance required</label>
+                    <label style="display:flex;align-items:center;gap:.35rem;font-size:.75rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--haf-orange-ink)"> Local drivers only (50 mi)</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── WHAT THIS LOAD IS WORTH ── freight forwarders only: nobody
+                   else has a client to sell it to. -->
+              <div class="dd-box" data-post-only="resale" data-off="1" style="margin:0 0 .7rem">
+                <div class="dd-h">
+                  <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  <div class="dd-t">What this load is worth</div>
+                </div>
+                <div class="fr" style="margin-top:.5rem"><div class="fg"><label class="fl">Buy rate (max, &#163;)</label><input class="fi2" id="post-buy" type="number" placeholder="Your carrier cost ceiling"></div><div class="fg"><label class="fl">Client sell rate (&#163;)</label><input class="fi2" id="post-sell" type="number" placeholder="What your client pays"></div></div>
+                <p style="font-size:.69rem;color:var(--mu);margin:.5rem 0 0">Your margin stays yours &#8212; the driver never sees what your client pays.</p>
+              </div>
 
               <!-- ── KNOW THE DRIVER? ──
                    Brent, 14 Aug. Somebody who has used a HAF driver before can
@@ -2780,81 +2854,56 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
              ownfleet  — "my registered drivers first / only", which is a lie on
                          an account that has no drivers of its own
            Everything else, every account sees, because every account can post. -->
+      <!-- ══ POST A JOB ══════════════════════════════════════════════════
+           ONE journey, not a second form. The consignment flow that the public
+           order screen uses is MOVED into #post-flow-host when this pane opens
+           and moved back when it is left (postingDock / postingUndock below).
+
+           It used to be eleven boxes wired to nothing: no time window, no
+           quantity, no dimensions, no price, and a "Post to network" button
+           that did not post anything. Everything this screen now asks, the
+           driver now reads — that is the whole point of the change.
+           ═══════════════════════════════════════════════════════════════ -->
       <div class="tp" id="pane-b-book">
         <h1 class="pt" id="post-title">Post a Job</h1><p class="ps" id="post-sub">Put a collection and a delivery onto the HAF KNECT network.</p>
-        <div class="card" style="max-width:580px;margin-bottom:.85rem">
-          <div class="ct">Job details</div>
-          <!-- Reopened 14 Aug 2026. The one switch is LOAD_POSTING_LOCKED in the main script. -->
-          <div class="lk-note" id="post-lock-note">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="10" y1="9" x2="10" y2="15"/><line x1="14" y1="9" x2="14" y2="15"/></svg>
-            <div><strong>Posting paused</strong>Posting is paused while we rebuild the sign-up journey. Your account is unaffected — we&#8217;ll email you the moment it reopens.</div>
-          </div>
-          <div class="fr"><div class="fg"><label class="fl">Collection address</label><input class="fi2" id="post-caddr" placeholder="Full address or postcode"></div><div class="fg"><label class="fl">Delivery address</label><input class="fi2" id="post-daddr" placeholder="Full address or postcode"></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Your reference</label><input class="fi2" id="post-ref" placeholder="Internal order or PO ref"></div><div class="fg"><label class="fl">Goods description</label><input class="fi2" placeholder="e.g. Retail stock, pallets, tools"></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 200"></div><div class="fg"><label class="fl">Vehicle needed</label><select class="fi2"><option>Any</option><option>Small van</option><option>SWB</option><option>MWB</option><option>LWB</option><option>XLWB</option><option>Luton &#8212; box</option><option>Luton &#8212; curtain side</option><option>Luton &#8212; tail lift</option></select></div></div>
-          <div class="fr"><div class="fg"><label class="fl">Date</label><input class="fi2" type="date"></div><div class="fg"><label class="fl">Urgency</label><select class="fi2"><option>Flexible</option><option>Same-day</option><option>Urgent</option><option>Timed window</option></select></div></div>
-          <!-- Came off the freight form. Every driver benefits from it, so every
-               account now gets to write it. -->
-          <div class="fg"><label class="fl">Special instructions</label><textarea class="fi2" placeholder="Tail lift, fragile, hazmat class, access..."></textarea></div>
-        </div>
-        <!-- RESALE — an account posting on behalf of a paying client -->
-        <div class="card" data-post-only="resale" style="max-width:580px;margin-bottom:.85rem">
-          <div class="ct">What this load is worth</div>
-          <div class="fr"><div class="fg"><label class="fl">Buy rate (max, &#163;)</label><input class="fi2" type="number" placeholder="Your carrier cost ceiling"></div><div class="fg"><label class="fl">Client sell rate (&#163;)</label><input class="fi2" type="number" placeholder="What your client pays"></div></div>
-          <p style="font-size:.7rem;color:var(--mu);margin:.5rem 0 0">Your margin stays yours — the driver never sees what your client pays.</p>
-        </div>
-        <!-- Acceptance rules -->
-        <div class="card" style="max-width:580px;margin-bottom:.85rem">
-          <div class="ct">Who can accept this job?</div>
-          <div style="display:flex;flex-direction:column;gap:.55rem">
-            <label data-post-only="ownfleet" style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.55rem .7rem;background:var(--p2);border-radius:var(--rx);border:1.5px solid var(--or-g)">
-              <input type="radio" name="b-accept" value="mydriver" checked style="accent-color:var(--haf-orange-ink)">
-              <div><div style="font-weight:700;font-size:.82rem">My registered drivers first</div><div style="font-size:.7rem;color:var(--mu)">Offered to your team first — goes to the open network after 30 minutes if not accepted</div></div>
-            </label>
-            <label data-post-only="ownfleet" style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.55rem .7rem;background:var(--p2);border-radius:var(--rx)">
-              <input type="radio" name="b-accept" value="myonly" style="accent-color:var(--haf-orange-ink)">
-              <div><div style="font-weight:700;font-size:.82rem">My drivers only</div><div style="font-size:.7rem;color:var(--mu)">Only drivers registered to your fleet account can accept — never goes to the open network</div></div>
-            </label>
-            <label style="display:flex;align-items:center;gap:.55rem;cursor:pointer;padding:.55rem .7rem;background:var(--p2);border-radius:var(--rx)">
-              <input type="radio" name="b-accept" value="network" id="post-accept-network" style="accent-color:var(--haf-orange-ink)">
-              <div><div style="font-weight:700;font-size:.82rem">Open network</div><div style="font-size:.7rem;color:var(--mu)">Any Clever Checked driver on HAF KNECT can accept immediately</div></div>
-            </label>
-          </div>
-          <div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--ln)">
-            <div style="font-size:.72rem;font-weight:700;color:var(--mu);margin-bottom:.45rem;text-transform:uppercase;letter-spacing:.06em">Additional requirements</div>
-            <div style="display:flex;flex-wrap:wrap;gap:.45rem">
-              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--haf-orange-ink)"> Clever Checked only</label>
-              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--haf-orange-ink)"> GIT insurance required</label>
-              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--haf-orange-ink)"> Local drivers only (50 mi)</label>
-              <label style="display:flex;align-items:center;gap:.35rem;font-size:.76rem;cursor:pointer"><input type="checkbox" style="accent-color:var(--haf-orange-ink)"> Tail-lift required</label>
-            </div>
+
+        <!-- The concept, said once, at the top of the act it describes. -->
+        <div class="hafw" id="post-hafway">
+          <div class="hafw-h">Posting on HAF</div>
+          <div class="hafw-g">
+            <div class="hafw-i"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><div><div class="hafw-t">Priced, never bid</div><div class="hafw-p">You see the price before you commit, and it is on the job before a driver sees it. Nobody haggles.</div></div></div>
+            <div class="hafw-i"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg><div><div class="hafw-t">A consignment, not an advert</div><div class="hafw-p">What you type is what the driver reads — goods, weight, sizes, handling, both time windows. No phone call to find out what it is.</div></div></div>
+            <div class="hafw-i"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11l-3 3-2-2"/></svg><div><div class="hafw-t">Straight to a driver you know</div><div class="hafw-p">Used someone before? Give them first refusal for 10 minutes. If they cannot take it, it opens to the network.</div></div></div>
+            <div class="hafw-i"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><div class="hafw-t">HAF holds the thread</div><div class="hafw-p">Your contact details go to the one driver who wins the job, and to nobody else on the network.</div></div></div>
           </div>
         </div>
-        <!-- Gap Cover add-on -->
-        <div style="max-width:580px;margin-bottom:.85rem;border:1.5px solid var(--lns);border-radius:var(--rx);padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:.6rem">
-            <div style="background:var(--p2);border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mu)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
-            <div>
-              <div style="font-weight:700;font-size:.82rem">HAF Gap Cover <span style="font-size:.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--haf-orange-ink);margin-left:.25rem">Coming soon</span></div>
-              <div style="font-size:.7rem;color:var(--mu)">Top-up cover for the gap between your goods value and standard carrier GIT — add per job when available</div>
-            </div>
-          </div>
-          <!-- data-always-disabled: this is not shut by the posting pause, it is
-               shut because the product does not exist yet. Reopening posting must
-               never switch it on. -->
-          <label style="display:flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:600;color:var(--su);cursor:not-allowed;white-space:nowrap">
-            <input type="checkbox" disabled data-always-disabled="1" style="accent-color:var(--haf-orange-ink)"> Add gap cover
-          </label>
+
+        <!-- Reopened 14 Aug 2026. The one switch is LOAD_POSTING_LOCKED in the main script. -->
+        <div class="lk-note" id="post-lock-note">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="10" y1="9" x2="10" y2="15"/><line x1="14" y1="9" x2="14" y2="15"/></svg>
+          <div><strong>Posting paused</strong>Posting is paused while we rebuild the sign-up journey. Your account is unaffected &#8212; we&#8217;ll email you the moment it reopens.</div>
         </div>
-        <div class="fr" style="max-width:580px;margin:0"><button class="btn btn-gh btn-sm" id="post-draft" data-lock="1">Save draft</button><button class="btn btn-or btn-sm" id="post-submit" data-label-open="Post to network &#8594;">Post to network &#8594;</button></div>
+
+        <!-- THE ONE DOOR. Everything past here is the docked journey. -->
+        <div id="post-start" class="card" style="max-width:580px;margin-bottom:.85rem">
+          <div class="ct">Start a job</div>
+          <p style="font-size:.77rem;color:var(--mu);line-height:1.6;margin:0 0 .8rem">
+            Seven short stages: where it goes, what we are collecting, which van, when,
+            the full addresses, your price, and confirm. We fill in what we already know
+            about your account, and the distance and drive time work themselves out.
+          </p>
+          <div class="fr" style="margin:0"><button class="btn btn-gh btn-sm" id="post-draft" data-lock="1" onclick="postingResume()">Continue last job</button><button class="btn btn-or btn-sm" id="post-submit" data-label-open="Start a consignment &#8594;" onclick="postingDock()">Start a consignment &#8594;</button></div>
+        </div>
+
+        <!-- Where the one journey docks. Empty until Post a Job is opened. -->
+        <div id="post-flow-host"></div>
+
         <!-- Available drivers -->
-        <div class="card" style="max-width:580px;margin-top:.85rem">
+        <div class="card" style="max-width:580px;margin-top:.85rem" id="post-netnow">
           <div class="ct">Network options right now</div>
           <div class="jl">
-            <div class="jc" data-post-only="ownfleet"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">YOUR DRIVER · Registered</div><div class="jroute">AB12 CDE — LWB · Sheffield S9 · James</div><div class="jdet">Available now · Clever Checked · Est. 30 min</div></div><button class="btn btn-or btn-xs">Assign</button></div>
-            <div class="jc"><div class="jdot" style="background:var(--am)"></div><div class="jm"><div class="jref">NETWORK DRIVER · Backload</div><div class="jroute">LWB courier heading your way — return route</div><div class="jdet">Est. collection: 2h · Clever Checked</div></div><button class="btn btn-gh btn-xs">Select</button></div>
+            <div class="jc" data-post-only="ownfleet"><div class="jdot" style="background:var(--gn)"></div><div class="jm"><div class="jref">YOUR DRIVER &#183; Registered</div><div class="jroute">AB12 CDE &#8212; LWB &#183; Sheffield S9 &#183; James</div><div class="jdet">Available now &#183; Clever Checked &#183; Est. 30 min</div></div><button class="btn btn-or btn-xs">Assign</button></div>
+            <div class="jc"><div class="jdot" style="background:var(--am)"></div><div class="jm"><div class="jref">NETWORK DRIVER &#183; Backload</div><div class="jroute">LWB courier heading your way &#8212; return route</div><div class="jdet">Est. collection: 2h &#183; Clever Checked</div></div><button class="btn btn-gh btn-xs">Select</button></div>
           </div>
         </div>
       </div>
@@ -3878,7 +3927,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
    waiting on is built, and he is running the first test through it today. */
 const LOAD_POSTING_LOCKED = false;
 
-(function applyLoadPostingLock(){
+function applyLoadPostingLock(){
   var open = !LOAD_POSTING_LOCKED;
   [['pane-b-book','post-lock-note','post-submit'],
    ['dir-book-ov','db-lock-note','db-submit']].forEach(function(ids){
@@ -3897,7 +3946,18 @@ const LOAD_POSTING_LOCKED = false;
                              : 'Posting paused';
     }
   });
-})();
+  /* Docked fields too: the journey lives outside this pane until Post a Job is
+     opened, so the lock has to reach it wherever it currently is. */
+  var flow = document.getElementById('inline-flow');
+  if(flow && document.getElementById('post-flow-host') &&
+     document.getElementById('post-flow-host').contains(flow)){
+    flow.querySelectorAll('input,select,textarea,[data-lock="1"]').forEach(function(el){
+      if(el.hasAttribute('data-always-disabled')) return;
+      el.disabled = LOAD_POSTING_LOCKED;
+    });
+  }
+}
+applyLoadPostingLock();
 
 /* ── PRICING — HAF-PRICE-V4.0 driver-first engine ──
    Source of truth: HAF KNECT Pricing Matrix and Network Fee Framework
@@ -4233,8 +4293,9 @@ function buildConsignment(L,extra){
 }
 /* The LOAD block a driver sees on the job offer — the addendum's card, field for
    field. A driver never gets "Sheffield → Manchester — LWB" and nothing else. */
-function jobCardHTML(c){
-  const row=(k,v)=>v?'<div class="jobc-r"><div class="jobc-k">'+k+'</div><div class="jobc-v">'+_esc2(v)+'</div></div>':'';
+function jobCardHTML(c,skip){
+  skip=skip||{};
+  const row=(k,v)=>(v&&!skip[k])?'<div class="jobc-r"><div class="jobc-k">'+k+'</div><div class="jobc-v">'+_esc2(v)+'</div></div>':'';
   const on=c.handlingKeys||[];
   /* The three things a driver has to know apart: what happens at the collection
      end, what happens at the delivery end, and what the goods themselves need. */
@@ -4253,6 +4314,63 @@ function jobCardHTML(c){
     +'</div>';
 }
 function _esc2(s){return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));}
+
+/* ══ THE HAF CONSIGNMENT TICKET ═══════════════════════════════════════════════
+   Brent, 7 Sep: the order has to be unique to the HAF concept, and the
+   information has to be SHOWN.
+
+   An exchange posts an advert: a route, a van and a price, and the driver rings
+   to find out what the job actually is. A HAF consignment is a ticket — the
+   whole job on one card, the same card at every end of it:
+
+     * the poster sees it at stage six, before they commit, so "what the driver
+       will see" is not a promise, it is the thing itself;
+     * the driver sees it on the board, before accepting, so nobody has to ring
+       to ask what a pallet weighs or whether there is a forklift;
+     * the phone shows the same card, so a driver who accepted at a desk and
+       drove off with a phone is reading one job, not two summaries of it.
+
+   Every row is written by row() and row() draws NOTHING for an empty value. A
+   ticket therefore shrinks to what is genuinely known and never invents a line —
+   an "Unloading: —" is a driver planning against a fact we never had.        */
+function consignmentTicket(c){
+  c=c||{};
+  const E=_esc2;
+  const has=v=>v!=null&&String(v).trim()!=='';
+  const stat=(v,k,cls)=>has(v)?'<div class="jobt-s'+(cls?' '+cls:'')+'"><div class="jobt-sv">'+E(v)+'</div><div class="jobt-sk">'+E(k)+'</div></div>':'';
+  /* A leg is an address, the window it has to happen in, and the door note. The
+     window is the field the old posting form never asked for at all, and the
+     single commonest reason a driver picks up the phone. */
+  const leg=(kind,addr,win,note)=>'<div class="jobt-l">'
+    +'<div class="jobt-lk">'+E(kind)+'</div>'
+    +'<div class="jobt-lv">'+E(addr||'Address to be confirmed')+'</div>'
+    +(has(win)?'<div class="jobt-lw">'+E(win)+'</div>':'')
+    +(has(note)?'<div class="jobt-lw">'+E(note)+'</div>':'')+'</div>';
+  const badges=[];
+  if(has(c.jobType))badges.push(E(c.jobType));
+  if(c.isDirect)badges.push('&#9733; Yours first');
+  return '<div class="jobt">'
+    +'<div class="jobt-h">'
+      +'<div class="jobt-ref">'+(badges.length?badges.join(' &#183; ')+' &#183; ':'')+E(c.ref||'Not yet referenced')+'</div>'
+      +'<div class="jobt-rt">'+E(c.route||'Route to be confirmed')+'</div>'
+    +'</div>'
+    +'<div class="jobt-leg">'
+      +leg('Collect from',c.collection,c.collectWindow,c.collectNote)
+      +leg('Deliver to',c.delivery,c.deliverWindow,c.deliverNote)
+    +'</div>'
+    +'<div class="jobt-sr">'
+      +stat(c.vehicle,'Vehicle')
+      +stat(c.miles,'Loaded')
+      +stat(c.drive,'Drive time')
+      +stat(c.weight,'Weight')
+      +stat(c.pay,'Driver pay','pay')
+    +'</div>'
+    /* Weight and vehicle are in the stat row above; the load block does not
+       repeat them. Anything the head could NOT show is still listed in full. */
+    +'<div class="jobt-b">'+jobCardHTML(c,{Weight:has(c.weight),'Vehicle required':has(c.vehicle)})+'</div>'
+    +(has(c.footer)?'<div class="jobt-f">'+E(c.footer)+'</div>':'')
+    +'</div>';
+}
 
 /* fee = HAF network fee as a % of the carrier transport value · flr = the floor that fee may never drop below · svc = urgency premium paid to the driver */
 const URG={flex:{n:'Flexible',fee:.20,flr:.15,svc:1},sday:{n:'Same-day',fee:.20,flr:.15,svc:1},urg:{n:'Urgent',fee:.30,flr:.22,svc:1.10},timed:{n:'Timed delivery',fee:.25,flr:.18,svc:1}};
@@ -5021,7 +5139,7 @@ document.getElementById('pc-to').addEventListener('keydown',e=>{if(e.key==='Ente
   addrAttach(G('pc-from'),()=>calcLivePrice());
   addrAttach(G('pc-to'),()=>calcLivePrice());
   /* the two quote journeys and the posting screen */
-  ['fq-from','fq-to','fq-caddr','fq-daddr','hp-from','hp-to','post-caddr','post-daddr','db-from','db-to']
+  ['fq-from','fq-to','fq-caddr','fq-daddr','hp-from','hp-to','db-from','db-to']
     .forEach(id=>addrAttach(G(id)));
 })();
 
@@ -5505,6 +5623,32 @@ function fqShowPriceV(){
   fErr('fq-err-5','');
   fqShowPrice();
 }
+/* "08:00 onwards, Mon 8 Sep" — one line, built from the date and the time the
+   customer gave on stage four. Either half may be missing and the sentence still
+   has to read properly, so it is assembled rather than templated. */
+function fqWindowText(){
+  const d=_v('fq-cdate'), t=_v('fq-ctime');
+  let day='';
+  if(d){
+    const dt=new Date(d+'T00:00:00');
+    if(!isNaN(dt))day=dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  }
+  if(t&&day)return t+' onwards, '+day;
+  if(t)return t+' onwards';
+  if(day)return day;
+  return '';
+}
+/* Drive time from the miles we just measured, at the speed the pricing engine
+   itself assumes. Shown as "2h 15m" because that is how a driver thinks about a
+   run — never as a decimal. */
+function fqDriveText(miles){
+  const m=Number(miles);
+  if(!(m>0))return '';
+  const mins=Math.round(m/40*60);
+  const h=Math.floor(mins/60), r=mins%60;
+  return h?(h+'h'+(r?' '+r+'m':'')):(r+'m');
+}
+
 function fqBookV(){
   const n=_v('fq-name'),e=_v('fq-email'),m=_v('fq-mobile');
   if(!n||!e||!m){fErr('fq-err-7','Please fill in your name, email, and mobile number.');return;}
@@ -5564,10 +5708,27 @@ async function fqShowPrice(){
     from:r.fr,to:r.to,
     collection:_v('fq-caddr'),delivery:_v('fq-daddr'),
     when:(URG[fqData.urg]||{}).n||'',
-    date:_v('fq-cdate'),time:_v('fq-ctime'),deliveryReq:_v('fq-dreq')
+    date:_v('fq-cdate'),time:_v('fq-ctime'),deliveryReq:_v('fq-dreq'),
+    /* The instructions for the two doors. They were being drawn on the card and
+       going no further — a note that reaches the customer's screen and not the
+       driver is the same as no note at all. */
+    collectNote:_v('fq-cnote'),deliverNote:_v('fq-dnote'),
+    collectWindow:fqWindowText(),
+    miles:r.miles,driveTime:fqDriveText(r.miles)
   });
   const card=document.getElementById('fq-jobcard');
-  if(card)card.innerHTML=jobCardHTML(fqData.consignment);
+  if(card)card.innerHTML=consignmentTicket(Object.assign({},fqData.consignment,{
+    ref:'Reference issued when you confirm',
+    jobType:(URG[fqData.urg]||{}).n||'',
+    route:r.fr+' \u2192 '+r.to,
+    collection:_v('fq-caddr')||r.fr,
+    delivery:_v('fq-daddr')||r.to,
+    deliverWindow:_v('fq-dreq')||((URG[fqData.urg]||{}).n||''),
+    miles:r.miles?(r.miles+' mi'):'',
+    drive:fqDriveText(r.miles),
+    footer:'This is the card, in full, that a driver reads before accepting. '
+      +'Your phone number is released to the one driver who takes the job and to nobody else on the network.'
+  }));
   fqStep(6);
 }
 /* ══ PLACE THE ORDER ══════════════════════════════════════════════════════
@@ -7071,7 +7232,14 @@ function hafAud(){return HAF_AUD[window.HAF_ROLE]||HAF_AUD.driver;}
    be left pointing at a routing rule the account cannot use. */
 function postingApplyRole(){
   var role = window.HAF_ROLE || 'driver';
-  var show = {resale: role === 'freight' || role === 'admin',
+  /* 'account' is every signed-in poster: the account-only decisions belong to
+     anyone posting from the dashboard, whatever type of account they hold. The
+     other two stay exactly as Brent set them — a client sell rate only means
+     something to a freight forwarder, and offering "my drivers first" to an
+     account with no drivers silently holds the job back waiting for a team that
+     does not exist. */
+  var show = {account: true,
+              resale: role === 'freight' || role === 'admin',
               ownfleet: role === 'fleet' || role === 'admin'};
   document.querySelectorAll('#pane-b-book [data-post-only]').forEach(function(el){
     if(show[el.getAttribute('data-post-only')]) el.removeAttribute('data-off');
@@ -7786,17 +7954,41 @@ async function hafJobsPaint(){
     const first=j.is_direct
       ? '<span class="xb pref">★ Yours first</span>' : '';
     const who=j.customer_first?('Customer: '+_esc(j.customer_first)):'';
-    const notes=j.notes?('<div class="xc-goods">'+_esc(j.notes)+'</div>'):'';
+    /* Everything the handover carries about the load, drawn through the one
+       ticket renderer. Fields the network does not yet send simply do not draw a
+       row — a driver planning against a blank is worse than a shorter card. */
+    const ticket=consignmentTicket({
+      ref:j.booking_ref||j.haf_job_ref||'',
+      jobType:j.job_type||'',
+      isDirect:!!j.is_direct,
+      route:route,
+      collection:j.collect_address||j.from_postcode||'',
+      delivery:j.deliver_address||j.to_postcode||'',
+      collectWindow:[when,j.collect_window].filter(Boolean).join(' \u00b7 '),
+      deliverWindow:j.deliver_by||'',
+      collectNote:j.collect_note||'',
+      deliverNote:j.deliver_note||'',
+      vehicle:j.vehicle_label||'',
+      miles:j.miles?(j.miles+' mi'):'',
+      drive:j.minutes?fqDriveText(Math.round(j.minutes/60*40)):'',
+      weight:j.weight||'',
+      pay:j.driver_pay||'',
+      goods:j.goods||j.notes||'',
+      quantity:j.quantity||'',
+      dims:j.dims||'',
+      handlingKeys:j.handling_keys||[],
+      notes:(j.goods&&j.notes)?j.notes:'',
+      footer:j.is_direct
+        ? 'You have first refusal on this one. If you cannot take it, it opens to the whole network.'
+        : ''
+    });
     const action=canClaim
       ? '<button class="btn btn-or btn-sm" onclick="hafJobsClaim(\''+_esc(j.id)+'\',this)">Take this job →</button>'
       : '<span class="xc-meta">Your Clever checks open this</span>';
     return '<div class="xc">'+
       '<div class="xc-head"><div class="xc-badges">'+first+
         '<span class="xb-ref">'+ref+'</span></div></div>'+
-      '<div class="xc-route">'+route+'</div>'+
-      '<div class="xc-sr"><div class="xcs"><div class="xcs-v">'+_esc(when)+'</div>'+
-        '<div class="xcs-k">Collection</div></div></div>'+
-      notes+
+      ticket+
       '<div class="xc-foot"><div class="xc-meta">'+who+'</div>'+
       '<div class="xc-btns">'+action+'</div></div></div>';
   }).join('');
@@ -7821,6 +8013,78 @@ async function hafJobsClaim(id,btn){
   hafJobsPaint();
 }
 
+/* ══ DOCKING THE ONE JOURNEY ══════════════════════════════════════════════════
+   Posting a job IS ordering a delivery. Rather than keep a second form in the
+   dashboard that asks less and does nothing — which is exactly what was there —
+   the consignment flow is MOVED into the Post a Job screen and moved back on the
+   way out. One markup, one engine, one price, one card. Nothing can drift
+   because there is only one of it.
+
+   Its original place in the document is remembered with a comment marker, not an
+   index: panes are added to and taken out of this page by the audience rules, so
+   an index would be a different place five minutes later.                     */
+let _postHome=null, _postDocked=false;
+function postingDock(){
+  const flow=document.getElementById('inline-flow');
+  const host=document.getElementById('post-flow-host');
+  if(!flow||!host)return;
+  if(!_postDocked){
+    if(!_postHome){_postHome=document.createComment('inline-flow home');flow.parentNode.insertBefore(_postHome,flow);}
+    host.appendChild(flow);
+    _postDocked=true;
+  }
+  /* The dashboard has its own page furniture; the landing-page focus mode would
+     fight it. openFlow() is called for the reset and the panel switching only. */
+  openFlow('fast');
+  document.body.classList.remove('tile-focus');
+  flow.style.display='block';
+  const t=document.getElementById('if-title');
+  if(t)t.textContent='Post a job \u2014 your consignment';
+  const start=document.getElementById('post-start');if(start)start.style.display='none';
+  const nn=document.getElementById('post-netnow');if(nn)nn.style.display='none';
+  const hw=document.getElementById('post-hafway');if(hw)hw.style.display='none';
+  postingApplyRole();      /* reveal the account-only decisions inside stage six */
+  postingPrefill();        /* we already know who they are — do not ask again   */
+  applyLoadPostingLock();  /* a docked field obeys the posting switch like any other */
+  setTimeout(()=>flow.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
+}
+/* Leaving Post a Job puts the journey back where the public page expects it.
+   Called from switchTab, so it happens however they leave — sidebar, quick
+   action or a typed tab id. */
+function postingUndock(){
+  if(!_postDocked)return;
+  const flow=document.getElementById('inline-flow');
+  if(flow&&_postHome&&_postHome.parentNode)_postHome.parentNode.insertBefore(flow,_postHome);
+  if(flow)flow.style.display='none';
+  /* Shut again on the way out. These are account decisions and the public
+     journey must never inherit them from a dashboard visit. */
+  document.querySelectorAll('#inline-flow [data-post-only]').forEach(el=>el.setAttribute('data-off','1'));
+  _postDocked=false;
+  const start=document.getElementById('post-start');if(start)start.style.display='';
+  const nn=document.getElementById('post-netnow');if(nn)nn.style.display='';
+  const hw=document.getElementById('post-hafway');if(hw)hw.style.display='';
+}
+function postingResume(){postingDock();}
+/* A signed-in account has already told us its name, email and mobile. Asking a
+   third time is how a seven-stage journey feels like a form. Anything we do not
+   hold is simply left for them to type. */
+function postingPrefill(){
+  const R=_hafAcct||{}, V=window._hafAccView||{};
+  /* The account record is the driver row the door returned, so the exact column
+     names belong to that table rather than to this screen. Each field is asked
+     for by the names it is actually kept under and the FIRST one that holds
+     something wins; a field the record does not carry is left empty for them to
+     type rather than filled with a guess. */
+  const pick=(...keys)=>{
+    for(const k of keys){const v=R[k];if(v!=null&&String(v).trim()!=='')return String(v).trim();}
+    return '';
+  };
+  const set=(id,v)=>{const e=document.getElementById(id);if(e&&!e.value&&v)e.value=v;};
+  set('fq-name',pick('full_name','contact_name','name','company_name')||V.name||'');
+  set('fq-email',pick('email','contact_email','email_address'));
+  set('fq-mobile',pick('phone','mobile','contact_phone','telephone'));
+}
+
 function switchTab(id){
   /* "Post a Load" was merged into "Post a Job" on 14 Aug 2026. Everything that
      still points at the old screen — a bookmarked link, a quick action drawn
@@ -7834,6 +8098,8 @@ function switchTab(id){
   const n=document.getElementById('ni-'+id.replace('pane-',''));if(n)n.classList.add('on');
   ct=id;
   if(id==='pane-d-home'){setTimeout(renderDashAreas,80);loadDashMode();}
+  /* However they LEAVE Post a Job, the journey goes home. */
+  if(id!=='pane-b-book')postingUndock();
   if(id==='pane-b-book')postingApplyRole();
   if(id==='pane-f-cap')setTimeout(capBootPane,80);
   if(id==='pane-pricing')setTimeout(()=>{if(window.pxBoot)pxBoot();},60);
