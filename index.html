@@ -3187,8 +3187,13 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
             <input type="checkbox" id="cap-relay" onchange="capFilter()"> Relay points
           </label>
           <div class="cap-f-meta">
-            <span id="cap-fcount">12 areas</span>
-            <span class="cap-f-rate">Rate <strong id="cap-rate-lbl">£1.80–£2.40/mi</strong></span>
+            <span id="cap-fcount">&mdash;</span>
+            <!-- Placeholders only: capApplyFilters() writes the area count and
+                 capRate() the guide band, both on first render. They used to read
+                 "12 areas" and "£1.80–£2.40/mi" — and that rate matches no entry in
+                 the RATES table it is overwritten from, so if the paint ever failed
+                 the page showed a band that exists nowhere. A dash cannot be wrong. -->
+            <span class="cap-f-rate">Rate <strong id="cap-rate-lbl">&mdash;</strong></span>
             <button class="cap-f-clear" onclick="capClearFilters()">Clear</button>
           </div>
         </div>
