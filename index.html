@@ -2385,12 +2385,30 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
           <div id="dash-areas" class="cap-listgrid"></div>
         </div>
 
-        <!-- Network stat cards -->
+        <!-- Network stat cards — the numbers, read from the board's own answer.
+
+             Henry caught these AFTER the ticker above was fixed, by reading the
+             rendered preview rather than the diff. They sat directly beneath it
+             carrying the same invented figures: Drivers live 83, Open jobs 12,
+             Your invites 2, Avg rate £1.80–£2.40 per mile. A driver on the
+             advanced view saw both, so removing one and leaving the other
+             changed nothing a person could see.
+
+             I missed them because I swept for FEE LITERALS — percentages near
+             the word fee — and these are counts and a rate range with neither.
+             Auditing the property instead of the category, again: the question
+             was never "where are the hardcoded percentages", it was "where does
+             this page state a fact about the network that it never read".
+
+             Two survive, both from the SAME plna_exchange_visible answer the
+             board below already fetches, so nothing on this screen can disagree
+             with anything else on it. Two are gone: there is no driver-readable
+             source for how many drivers are online, and an average rate is a
+             commercial claim rather than an observation. Until the board
+             answers, both show a dash — never a number. -->
         <div class="kg" data-mode-only="advanced" data-aud="network" style="margin-bottom:.9rem">
-          <div class="kc"><div class="kc-l">Drivers live</div><div class="kc-v or">83</div><div class="kc-d">on network now</div></div>
-          <div class="kc"><div class="kc-l">Open jobs</div><div class="kc-v co">12</div><div class="kc-d">ready to grab</div></div>
-          <div class="kc"><div class="kc-l">Your invites</div><div class="kc-v gn">2</div><div class="kc-d">direct to you</div></div>
-          <div class="kc"><div class="kc-l">Avg rate</div><div class="kc-v">£1.80–£2.40</div><div class="kc-d">per mile · van/LWB</div></div>
+          <div class="kc"><div class="kc-l">Open jobs</div><div class="kc-v co" id="kc-open-jobs">&mdash;</div><div class="kc-d">ready to grab</div></div>
+          <div class="kc"><div class="kc-l">Your invites</div><div class="kc-v gn" id="kc-invites">&mdash;</div><div class="kc-d">direct to you</div></div>
         </div>
 
         <!-- Role-specific quick actions -->
@@ -7785,24 +7803,35 @@ function setSave(){
    Claiming is NOT opened by this. The button appears only for an account the
    Clever check has released; everybody else sees the work and is told, in one
    line, what is still in the way. Seeing the network is not driving on it. */
-/* The network ticker, fed only from the board's own answer.
+/* Everything this screen says about the network, from the board's one answer.
 
-   `n` is a number when the board was read and null when it could not be. There
-   is deliberately no third state and no default: a caller that forgets to say
-   which it got produces a hidden ticker, never a confident-looking figure. */
-function hafTicker(n){
+   `n` is the open-work count and `inv` the ones addressed to this driver, both
+   numbers when the board was read and BOTH null when it could not be. There is
+   deliberately no default: a caller that forgets to say which it got gets the
+   honest blank, never a confident-looking figure.
+
+   One function paints the ticker AND the two stat cards on purpose. They used
+   to be independent blocks of typed-in numbers sitting one above the other, and
+   fixing only the one I had found changed nothing a driver could see. Fed from
+   a single fetch, they cannot drift apart or outlive each other. */
+function hafTicker(n,inv){
   const t=document.getElementById('dj-ticker');
+  const dash=(n===null||n===undefined);
+  const setCard=(id,v)=>{const e=document.getElementById(id);if(e)e.innerHTML=v;};
+  /* A dash, not a nought. "We could not ask" and "there are none" are different
+     sentences and a driver plans differently on each. */
+  setCard('kc-open-jobs',dash?'&mdash;':String(n));
+  setCard('kc-invites',dash?'&mdash;':String(inv||0));
   if(!t)return;
-  if(n===null||n===undefined){
-    /* Read failed or was refused. Say so; do not leave the last good number on
-       screen, because a stale figure looks exactly like a fresh one. */
+  if(dash){
+    /* Do not leave the last good number on screen: a stale figure looks exactly
+       like a fresh one. */
     t.style.display='flex';
     t.innerHTML='<span>We couldn’t read the network just now.</span>';
     return;
   }
-  const live=n>0;
   t.style.display='flex';
-  t.innerHTML=(live
+  t.innerHTML=(n>0
     ? '<span style="display:flex;align-items:center;gap:.3rem">'+
       '<span style="width:7px;height:7px;border-radius:50%;background:var(--gn, #4f7f58);'+
       'display:inline-block;animation:pulse-dot 1.6s ease-in-out infinite"></span>'+
@@ -7860,10 +7889,12 @@ async function hafJobsPaint(){
   if(!Array.isArray(jobs)||!jobs.length){
     box.innerHTML='<div class="aa-empty">No open work on the network right now. '+
       'Anything posted appears on this screen straight away.</div>';
-    hafTicker(0);
+    hafTicker(0,0);
     return;
   }
-  hafTicker(jobs.length);
+  /* Invites are the jobs the board itself badges '★ Yours first', so the
+     card and the badge can never count differently. */
+  hafTicker(jobs.length,jobs.filter(j=>j.is_direct).length);
   const acc=window._hafAccView||{};
   const canClaim=acc.released===true;
   box.innerHTML=jobs.map(j=>{
