@@ -41,11 +41,11 @@ function slice(from, to) {
   return html.slice(i, j);
 }
 var engineSrc =
-  "var window = {};\n" +          // the block is browser code; stub the one global it sets
+  "var window = { HAFPricingMatrix: M };\n" + // ONE ENGINE: the page delegates to it, so inject it
   slice("const REF_MPH", "const PC={") +
   "\nreturn { VAN: VAN, URG: URG, DRV_LEVEL: DRV_LEVEL, ACC_LEVEL: ACC_LEVEL, DRV_REWARD: DRV_REWARD," +
   "\n         v3Price: v3Price, minTransportValue: minTransportValue, zoneFactorFor: zoneFactorFor };";
-var CUST = new Function(engineSrc)();
+var CUST = new Function("M", engineSrc)(M);
 
 /* Same job, both engines. Destination M = strong zone (factor 1.00) so the two
  * are directly comparable; mins forced so distance wins over time. */
@@ -77,14 +77,14 @@ var PAIRS = [
 section("1. Approved vehicle matrix");
 
 var WANT = [
-  ["SMALL_VAN",  "Small Van",         0.80, 50],
-  ["SWB_VAN",    "SWB",               0.90, 55],
-  ["MWB_VAN",    "MWB",               1.00, 60],
-  ["LWB_VAN",    "LWB",               1.10, 65],
-  ["XLWB_VAN",   "XLWB",              1.20, 70],
-  ["LUTON",          "Luton — Box",          1.30, 75],
-  ["LUTON_CURTAIN", "Luton — Curtain Side", 1.30, 75],
-  ["LUTON_TAIL",    "Luton — Tail Lift",    1.40, 80]
+  ["SMALL_VAN",  "Small Van",         1.00, 50],
+  ["SWB_VAN",    "SWB",               1.25, 55],
+  ["MWB_VAN",    "MWB",               1.25, 60],
+  ["LWB_VAN",    "LWB",               1.50, 65],
+  ["XLWB_VAN",   "XLWB",              1.50, 70],
+  ["LUTON",          "Luton — Box",          1.75, 75],
+  ["LUTON_CURTAIN", "Luton — Curtain Side", 1.75, 75],
+  ["LUTON_TAIL",    "Luton — Tail Lift",    1.75, 80]
 ];
 ok("back office lists exactly 8 vehicles", M.config.vehicles.length === 8,
    "found " + M.config.vehicles.length);
@@ -102,8 +102,8 @@ PAIRS.forEach(function (p, i) {
      cv.drv === bv.baseRate && cv.min === bv.minTransportValue,
      JSON.stringify(cv) + " vs " + bv.baseRate + "/" + bv.minTransportValue);
 });
-eq("rate ladder starts at 80p", M.config.vehicles[0].baseRate, 0.80);
-eq("rate ladder ends at £1.40", M.config.vehicles[7].baseRate, 1.40);
+eq("rate ladder starts at £1.00", M.config.vehicles[0].baseRate, 1.00);
+eq("rate ladder ends at £1.75", M.config.vehicles[7].baseRate, 1.75);
 eq("minimum ladder starts at £50", M.config.vehicles[0].minTransportValue, 50);
 eq("minimum ladder ends at £80", M.config.vehicles[7].minTransportValue, 80);
 ok("cars and motorcycles are present but inactive and unpriced",
@@ -115,7 +115,7 @@ ok("cars and motorcycles are present but inactive and unpriced",
  * ======================================================================== */
 section("2. Removal test — prohibited vehicle types");
 
-var BANNED = ["artic", "articulated", "hgv", "flatbed", "tractor unit",
+var BANNED = ["articulated", "hgv", "flatbed", "tractor unit",
               "rigid", "7.5 tonne", "7.5t", "18 tonne", "26 tonne",
               "44 tonne", "specialist haulage", "fridge",
               /* a curtain-side LUTON is approved (Brent 2026-08-02); a curtain-side

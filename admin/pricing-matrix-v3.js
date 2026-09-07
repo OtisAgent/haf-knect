@@ -83,14 +83,14 @@
     //     identically. Brent can split them on the Pricing Engine page if he
     //     ever wants curtain side to earn more.
     vehicles: [
-      { code: "SMALL_VAN",     name: "Small Van",           baseRate: 0.80, minTransportValue: 50 },
-      { code: "SWB_VAN",       name: "SWB",                 baseRate: 0.90, minTransportValue: 55 },
-      { code: "MWB_VAN",       name: "MWB",                 baseRate: 1.00, minTransportValue: 60 },
-      { code: "LWB_VAN",       name: "LWB",                 baseRate: 1.10, minTransportValue: 65 },
-      { code: "XLWB_VAN",      name: "XLWB",                baseRate: 1.20, minTransportValue: 70 },
-      { code: "LUTON",         name: "Luton — Box",         baseRate: 1.30, minTransportValue: 75 },
-      { code: "LUTON_CURTAIN", name: "Luton — Curtain Side", baseRate: 1.30, minTransportValue: 75 },
-      { code: "LUTON_TAIL",    name: "Luton — Tail Lift",   baseRate: 1.40, minTransportValue: 80 }
+      { code: "SMALL_VAN",     name: "Small Van",           baseRate: 1.000, minTransportValue: 50 },
+      { code: "SWB_VAN",       name: "SWB",                 baseRate: 1.250, minTransportValue: 55 },
+      { code: "MWB_VAN",       name: "MWB",                 baseRate: 1.250, minTransportValue: 60 },
+      { code: "LWB_VAN",       name: "LWB",                 baseRate: 1.500, minTransportValue: 65 },
+      { code: "XLWB_VAN",      name: "XLWB",                baseRate: 1.500, minTransportValue: 70 },
+      { code: "LUTON",         name: "Luton — Box",         baseRate: 1.750, minTransportValue: 75 },
+      { code: "LUTON_CURTAIN", name: "Luton — Curtain Side", baseRate: 1.750, minTransportValue: 75 },
+      { code: "LUTON_TAIL",    name: "Luton — Tail Lift",   baseRate: 1.750, minTransportValue: 80 }
     ],
 
     // --- Prepared but INACTIVE: never priced, never shown, until approved (§13)
@@ -119,9 +119,9 @@
     //     So the rates below are the SHAPE of the reward, held at zero today,
     //     and `driverReward` decides who funds it if it is ever switched on.
     driverLevels: {
-      FREE:   { name: "Free driver",           rewardGbpPerMile: 0.00, rank: 0 },
-      MEMBER: { name: "Member driver",         rewardGbpPerMile: 0.10, rank: 1 },
-      PRO:    { name: "Pro driver",            rewardGbpPerMile: 0.25, rank: 2 }
+      FREE:   { name: "Free driver",           rewardPctOfBaseRate: 0,  rewardGbpPerMile: 0.00, rank: 0 },
+      MEMBER: { name: "Plus driver",           rewardPctOfBaseRate: 5,  rewardGbpPerMile: 0.10, rank: 1 },
+      PRO:    { name: "Pro driver",            rewardPctOfBaseRate: 10, rewardGbpPerMile: 0.25, rank: 2 }
     },
 
     // --- WHO FUNDS A DRIVER REWARD (FRAMEWORK-V7) ----------------------------
@@ -149,10 +149,61 @@
     //     further. Beyond it the reward is TRIMMED to what HAF can afford and
     //     the job is flagged — the customer price still does not move, and HAF
     //     never runs a job at a loss to pay a bonus.
+    //     ⚠️ SUPERSEDED 2026-09-07 BY BRENT, in his own words: "HAF KNECT Free
+    //     driver gets base rate, Plus driver gets 5% on top of Base rate, Pro
+    //     driver gets 10% on top of base rate ... the price given to the
+    //     customer will be a dynamic pricing in the middle somewhere as we
+    //     don't know who will accept the job, we make more margin on the jobs
+    //     from the free but we reclaim the margin loss from the HAF KNECT plan
+    //     monthly payments".
+    //     So: the reward is ON, it is a PERCENTAGE of the vehicle base rate
+    //     (not pence per mile), and the customer is quoted at `quoteAtLevel` —
+    //     the middle rung — whoever actually accepts. Brent chose the middle
+    //     rung on 2026-09-07 over quoting at the free rate, because quoting at
+    //     the free rate puts a Pro driver on a same-day job at 12% and under
+    //     the floor on every single one.
+    //     THE DRIVER IS ALWAYS PAID THEIR OWN RUNG. The blended customer price
+    //     never moves what a driver earns (Brent, 2026-09-07: "the drivers
+    //     price always stays the same").
     driverReward: {
-      enabled: false,
+      enabled: true,
+      basis: "PCT_OF_BASE_RATE",       // "PCT_OF_BASE_RATE" | "GBP_PER_MILE" (the V5 way)
       fundedBy: "HAF_MARGIN",          // "HAF_MARGIN" | "CUSTOMER" (the V5/V6 way)
-      minRetainedPctOfCustomer: 8
+      quoteAtLevel: "MEMBER",          // the middle rung the customer is quoted at
+      minRetainedPctOfCustomer: 15     // raised 8 -> 15 by the floor below
+    },
+
+    // --- THE 15% FLOOR — NON-NEGOTIABLE (Brent, 2026-09-07) ------------------
+    //     In his own words: "if it's two pro versions we soak up as much as
+    //     possible but add the margin no matter what to make sure HAF Ends up
+    //     with a network fee of 15% --> 15% on all jobs is the bare minimum HAF
+    //     should be leaving with on all jobs ... build that into a non
+    //     negotiable rule HAF on every job needs 15%".
+    //     BARE MINIMUM means exactly that: it is a FLOOR, not a target. It
+    //     raises everything below it and lowers NOTHING. Timed still keeps 18%
+    //     and Urgent still keeps 22% — a floor that pulled those down would be
+    //     a pay cut dressed as a protection.
+    //     It is applied LAST, after the driver reward, after the account fee
+    //     reduction and after any admin override, because it has to outrank all
+    //     three. HAF soaks up what it can afford; past that the customer price
+    //     is lifted until the fee is 15% again.
+    //     ⚠️ This is the GROSS network fee (customer price minus what the
+    //     driver is paid). Pool draws come out of it afterwards.
+    //     UPDATED 2026-09-07 (same day, later) by Brent: "i want HAF to make
+    //     between 15% and 50% depends on the job, account type and the account
+    //     type". So it is a BAND, not a single floor. 15 is the least HAF may
+    //     leave a job with and 50 is the most it may ever take. Where a job
+    //     lands inside the band is decided by the job type, the posting
+    //     account and the driver's plan, exactly as it is today.
+    //     "ignore the pools for the time being" (Brent, same message) — so
+    //     these percentages are the GROSS network fee, customer price minus
+    //     driver pay. Pool draws are not in scope.
+    networkFeeFloor: {
+      pct: 15,
+      ceilingPct: 50,
+      nonNegotiable: true,
+      setBy: "Brent Ford",
+      setOn: "2026-09-07"
     },
 
     // Which driver level each thing earns. HIGHEST WINS, NEVER STACKS — the
@@ -304,7 +355,7 @@
       lockedOn: "2026-08-02",
       lockedBy: "Brent — decision delegated to Otis",
       freeAccountKeepBandPct: [20, 30],   // "the free accounts needs to be 20% - 30%"
-      paidAccountKeepFloorPct: 10         // "minimum 10% - 15% per job paid accounts"
+      paidAccountKeepFloorPct: 15         // "minimum 10% - 15% per job paid accounts"
     },
 
     // --- HAF margin by job type: firm %, hard floor. Never breached by benefits.
@@ -318,7 +369,7 @@
     //     what the customer paid for. Found by the V6 lane suite on
     //     2026-08-02 and fixed here; the customer price does not change.
     jobTypes: [
-      { code: "GROUPAGE",     name: "Groupage",                     marginPct: 10, floorPct: 8,  servicePremiumMult: 1.00, active: false },
+      { code: "GROUPAGE",     name: "Groupage",                     marginPct: 10, floorPct: 15,  servicePremiumMult: 1.00, active: false },
       { code: "FLEX_SAMEDAY", name: "Scheduled / Flexible / Co-load", marginPct: 20, floorPct: 15, servicePremiumMult: 1.00, active: true },
       { code: "STD_SAMEDAY",  name: "Same-Day",                     marginPct: 20, floorPct: 15, servicePremiumMult: 1.00, active: true },
       { code: "TIMED",        name: "Timed Delivery",               marginPct: 25, floorPct: 18, servicePremiumMult: 1.00, active: true },
@@ -545,7 +596,16 @@
     // FRAMEWORK-V7: held at zero today — "for now offering more for a driver
     // isn't right" (Brent 2026-08-02). The level still resolves and is still
     // recorded on the job, so nothing downstream has to change if it comes back.
-    var rewardPerMile = rewardCfg.enabled === false ? 0 : driverLevel.level.rewardGbpPerMile;
+    var rewardPctBasis = rewardCfg.basis === "PCT_OF_BASE_RATE";
+    var rewardPerMile = rewardCfg.enabled === false ? 0
+      : rewardPctBasis
+        ? vehicle.baseRate * num(driverLevel.level.rewardPctOfBaseRate) / 100
+        : driverLevel.level.rewardGbpPerMile;
+    // The rung the CUSTOMER is quoted at — the middle of the ladder, so one
+    // price covers whoever accepts. Never the driver's own rung.
+    var quoteLevel = config.driverLevels[rewardCfg.quoteAtLevel || "FREE"] || config.driverLevels.FREE;
+    var quotePerMile = (rewardCfg.enabled === false || !rewardPctBasis) ? 0
+      : vehicle.baseRate * num(quoteLevel.rewardPctOfBaseRate) / 100;
     if (rewardPerMile > 0)
       reasons.push("Driver reward +£" + rewardPerMile.toFixed(2) + "/mile (" +
         driverLevel.level.name + ")" + (rewardFundedByHaf
@@ -645,6 +705,8 @@
         config.referenceMph + " mph.");
     var driverBase = round2(roadValue(baseRate) * roadMult + supplements);
     var driverBaseAtFreeRate = round2(roadValue(freeRate) * roadMult + supplements);
+    var quoteRate = freeRate * (1 + (vehicle.baseRate > 0 ? quotePerMile / vehicle.baseRate : 0));
+    var driverBaseAtQuoteRate = round2(roadValue(quoteRate) * roadMult + supplements);
 
     // --- Margin (firm; overridable by admin with reason, never below floor) ---
     var marginPct = direct ? config.directBooking.hafMarginPct : jobType.marginPct;
@@ -709,6 +771,9 @@
     // The same job priced at the plain Free rate — the reward's real worth.
     var carrierValueAtFreeRate = round2(
       (!direct && driverBaseAtFreeRate < minValue) ? minValue : driverBaseAtFreeRate);
+    // The same job priced at the middle rung — this is what the customer pays.
+    var carrierValueAtQuoteRate = round2(
+      (!direct && driverBaseAtQuoteRate < minValue) ? minValue : driverBaseAtQuoteRate);
 
     // --- HAF Network Fee ---------------------------------------------------
     //     FRAMEWORK-V6: the percentage is the share of the CUSTOMER PRICE HAF
@@ -722,7 +787,7 @@
     // FRAMEWORK-V7: the customer price is built on the FREE-DRIVER transport
     // value, so which driver accepts the job cannot move what the customer is
     // quoted. Any reward is funded out of HAF's share below.
-    var priceBasis = rewardFundedByHaf ? carrierValueAtFreeRate : carrierValue;
+    var priceBasis = rewardFundedByHaf ? carrierValueAtQuoteRate : carrierValue;
     var customerExVatRaw = keepsBasis
       ? priceBasis / (1 - Math.min(marginPct, 95) / 100)
       : priceBasis * (1 + marginPct / 100);
@@ -733,7 +798,13 @@
     //     taken from HAF's own share, never added to the customer's price.
     var rewardGbp = round2(Math.max(0, carrierValue - carrierValueAtFreeRate));
     var rewardTrimmedGbp = 0;
-    if (rewardFundedByHaf && rewardGbp > 0) {
+    // ⚠️ The old guard TRIMMED the driver's reward when HAF could not afford it.
+    //    That is now forbidden: Brent, 2026-09-07, "the drivers price always
+    //    stays the same" and "add the margin no matter what". Where a floor is
+    //    set, the CUSTOMER price is lifted instead and the driver keeps their
+    //    full rung. The trim only survives for a configuration with no floor.
+    var feeFloorActive = !!(config.networkFeeFloor && num(config.networkFeeFloor.pct) > 0);
+    if (rewardFundedByHaf && rewardGbp > 0 && !feeFloorActive) {
       // The one limit on "happy to take less margin": HAF funds the reward down
       // to its floor share and no further. Past that the reward is trimmed and
       // flagged — loudly, never silently — and the customer price still holds.
@@ -752,10 +823,64 @@
         reasons.push("HAF funded £" + rewardGbp + " of driver reward out of its own share — the " +
           "customer pays the same as they would with a free driver.");
       }
+    } else if (rewardFundedByHaf && rewardGbp > 0) {
+      reasons.push(driverLevel.level.name + " — paid the full " +
+        num(driverLevel.level.rewardPctOfBaseRate) + "% plan uplift (£" + rewardGbp +
+        "). Driver pay is never trimmed; if HAF cannot afford it the customer price is lifted " +
+        "to the " + num(config.networkFeeFloor.pct) + "% floor instead.");
     }
 
     var driverPay = carrierValue;
     var networkFeeGbp = round2(customerExVat - carrierValue);
+
+    // --- THE 15% FLOOR — NON-NEGOTIABLE (Brent, 2026-09-07) ----------------
+    //     Applied LAST so it outranks the driver reward, the account fee
+    //     reduction and any admin override. HAF soaks up what it can; past
+    //     that the CUSTOMER price is lifted until the fee is 15% again. The
+    //     driver's pay is never touched by this — they keep their own rung.
+    var feeFloor = config.networkFeeFloor || { pct: 0 };
+    var feeFloorPct = num(feeFloor.pct);
+    var feeCeilingPct = num(feeFloor.ceilingPct);
+    var feeFloorApplied = null;
+    var feeCeilingApplied = null;
+    if (feeFloorPct > 0 && customerExVat > 0 &&
+        (networkFeeGbp / customerExVat) * 100 < feeFloorPct - 1e-9) {
+      var beforeGbp = customerExVat;
+      var beforePct = round2((networkFeeGbp / customerExVat) * 100);
+      customerExVat = Math.ceil((driverPay / (1 - feeFloorPct / 100)) * 100) / 100;
+      networkFeeGbp = round2(customerExVat - driverPay);
+      feeFloorApplied = {
+        floorPct: feeFloorPct,
+        customerExVatBeforeGbp: beforeGbp,
+        upliftGbp: round2(customerExVat - beforeGbp),
+        feePctBefore: beforePct
+      };
+      flags.push("NETWORK_FEE_FLOOR_APPLIED");
+      reasons.push("HAF network fee floor: this job left HAF on " + beforePct + "%, under the " +
+        feeFloorPct + "% minimum, so the customer price was lifted £" + feeFloorApplied.upliftGbp +
+        " to £" + customerExVat + ". The driver is paid exactly the same either way.");
+    }
+    // The other end of the band. HAF never takes more than the ceiling, so a
+    // stacked set of multipliers cannot quietly turn into an overcharge. The
+    // customer price comes DOWN; the driver is paid the same either way.
+    if (feeCeilingPct > 0 && customerExVat > 0 &&
+        (networkFeeGbp / customerExVat) * 100 > feeCeilingPct + 1e-9) {
+      var ceilBeforeGbp = customerExVat;
+      var ceilBeforePct = round2((networkFeeGbp / customerExVat) * 100);
+      customerExVat = Math.floor((driverPay / (1 - feeCeilingPct / 100)) * 100) / 100;
+      networkFeeGbp = round2(customerExVat - driverPay);
+      feeCeilingApplied = {
+        ceilingPct: feeCeilingPct,
+        customerExVatBeforeGbp: ceilBeforeGbp,
+        reductionGbp: round2(ceilBeforeGbp - customerExVat),
+        feePctBefore: ceilBeforePct
+      };
+      flags.push("NETWORK_FEE_CEILING_APPLIED");
+      reasons.push("HAF network fee ceiling: this job would have left HAF on " + ceilBeforePct +
+        "%, over the " + feeCeilingPct + "% maximum, so the customer price was reduced £" +
+        feeCeilingApplied.reductionGbp + " to £" + customerExVat +
+        ". The driver is paid exactly the same either way.");
+    }
 
     // --- Market band guard ---
     if (input.localMarketMedianExVat != null && num(input.localMarketMedianExVat) > 0) {
@@ -823,6 +948,12 @@
               from: input.fromPostcode || null, to: input.toPostcode || null },
       money: {
         feeBasis: config.feeBasis,
+        networkFeeFloorPct: feeFloorPct,
+        networkFeeFloorApplied: feeFloorApplied,
+        networkFeeCeilingPct: feeCeilingPct,
+        networkFeeCeilingApplied: feeCeilingApplied,
+        carrierValueAtQuoteRateGbp: carrierValueAtQuoteRate,
+        customerQuotedAtLevel: rewardCfg.quoteAtLevel || "FREE",
         // The three amounts, kept apart (§1) — never blended into one rate.
         carrierTransportValueGbp: carrierValue,   // 1. what the road work is worth
         networkFeePct: marginPct,                 // 2. the HAF network fee...

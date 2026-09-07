@@ -3918,14 +3918,14 @@ const REF_MPH=40, NET_POOL=.05;
 let HAF_VAT=.20;
 /* drv = £ per loaded mile paid to the driver · min = the vehicle's minimum transport value (£ ex VAT) */
 const VAN={
-  small  :{n:'Small van'        ,drv:.80,min:50},
-  swb    :{n:'SWB'              ,drv:.90,min:55},
-  mwb    :{n:'MWB'              ,drv:1.00,min:60},
-  lwb    :{n:'LWB'              ,drv:1.10,min:65},
-  xlwb   :{n:'XLWB'             ,drv:1.20,min:70},
-  luton  :{n:'Luton — box'         ,drv:1.30,min:75},
-  lutonc :{n:'Luton — curtain side',drv:1.30,min:75},
-  lutontl:{n:'Luton — tail lift'   ,drv:1.40,min:80}
+  small  :{n:'Small van'        ,drv:1.00,min:50},
+  swb    :{n:'SWB'              ,drv:1.25,min:55},
+  mwb    :{n:'MWB'              ,drv:1.25,min:60},
+  lwb    :{n:'LWB'              ,drv:1.50,min:65},
+  xlwb   :{n:'XLWB'             ,drv:1.50,min:70},
+  luton  :{n:'Luton — box'         ,drv:1.75,min:75},
+  lutonc :{n:'Luton — curtain side',drv:1.75,min:75},
+  lutontl:{n:'Luton — tail lift'   ,drv:1.75,min:80}
 };
 /* ── WHAT EACH VAN CAN ACTUALLY CARRY ──
    Brent, 2 Aug, pointing at speedyfreight.com/vehicles: "use this as a
@@ -4411,52 +4411,55 @@ function minTransportValue(v,miles){
    opts.account = 'lite' | 'plus'   | 'pro'   — the level of the account posting it
    Both default to the free rung, so a quote with no account and no allocated
    driver prices exactly as it did before these levers existed. */
+/* ── ONE ENGINE ────────────────────────────────────────────────────────────
+   Brent, 2026-09-07: "collapse everything onto the one engine".
+   v3Price no longer does its own arithmetic. It is a thin adapter over
+   admin/pricing-matrix-v3.js — the SAME file the customer quote, the demo and
+   the tests use — so the back office and the customer can never disagree
+   again. They disagreed by about £4.60 on a lane-priced job before this.
+   The VAN / URG / DRV_LEVEL / ACC_LEVEL tables below are now DISPLAY ONLY.
+   Editing them will not change a single price. Change the shared engine. */
 function v3Price(miles,mins,vanKey,urgKey,toPc,opts){
-  const v=VAN[vanKey]||VAN.lwb,u=URG[urgKey]||URG.sday;
+  const PM=window.HAFPricingMatrix;
+  if(!PM||!PM.price) throw new Error('HAF pricing engine not loaded — refusing to guess a price.');
   const o=opts||{};
-  const dl=DRV_LEVEL[o.driver]||DRV_LEVEL.free;
-  const al=ACC_LEVEL[o.account]||ACC_LEVEL.lite;
-  /* FRAMEWORK-V7: the reward is what the DRIVER is paid; the customer is priced
-     on the plain vehicle rate, so which driver accepts a job never moves the
-     quote. Held at zero today (DRV_REWARD.on === false). */
-  const reward=DRV_REWARD.on?dl.up:0;
-  const rate=v.drv+reward;                          /* what the driver is paid per mile */
+  const VAN_CODE={small:'SMALL_VAN',swb:'SWB_VAN',mwb:'MWB_VAN',lwb:'LWB_VAN',xlwb:'XLWB_VAN',luton:'LUTON',lutonc:'LUTON_CURTAIN',lutontl:'LUTON_TAIL'};
+  const JOB_CODE={flex:'FLEX_SAMEDAY',sday:'STD_SAMEDAY',urg:'URGENT',timed:'TIMED'};
+  const ACC_TYPE={lite:null,plus:'FREIGHT_PLUS',pro:'FREIGHT_PRO'};
+  const DRV_TIER={free:'FREE',member:'PLUS',plus:'PLUS',pro:'PRO'};
+  const q=PM.price({
+    miles:Number(miles)||1,
+    driverMinutes:Number(mins)||0,
+    vehicleCode:VAN_CODE[vanKey]||'LWB_VAN',
+    jobTypeCode:JOB_CODE[urgKey]||'STD_SAMEDAY',
+    plnaTier:DRV_TIER[o.driver]||'FREE',
+    knectTier:'FREE',
+    accountType:ACC_TYPE[o.account]!==undefined?ACC_TYPE[o.account]:null,
+    weight:o.weight||'STANDARD',
+    handling:o.handling||'KERBSIDE',
+    extraStops:Number(o.extraStops)||0,
+    waitingHours:Number(o.waitingHours)||0,
+    fromPostcode:o.fromPc||null,
+    toPostcode:toPc||null
+  });
+  const M=q.money,p2=n=>Math.round((n+Number.EPSILON)*100)/100;
   const hours=(mins&&mins>0?mins:miles/32*60)/60;
-  const lane=laneAdjust(o.fromPc,toPc,miles,mins);
-  const mult=Math.min(u.svc*lane.factor,1.40);
-  /* The lane lifts the vehicle minimum too, or a hard lane that happens to be
-     short would price the same as an easy one — the minimum would swallow the
-     whole adjustment. */
-  const floor=minTransportValue(v,miles)*lane.factor;
-  const p2=n=>Math.round((n+Number.EPSILON)*100)/100;
-  const transportAt=r=>{const rb=Math.max(miles*r,hours*r*REF_MPH);return p2(Math.max(rb*mult,floor));};
-  let carrier=transportAt(rate);                    /* 1. Carrier Transport Value, driver's rate */
-  const carrierFree=transportAt(v.drv);             /*    the same job at the plain vehicle rate */
-  const distCost=miles*rate, timeCost=hours*rate*REF_MPH;
-  const feePct=Math.max(u.fee-al.cut,u.flr);        /*    fee after the account reduction, floor held */
-  /* ── WHAT THE PERCENTAGE MEANS (FRAMEWORK-V6) ──
-     It is the share of the customer price HAF KEEPS, so the customer price is
-     the transport value grossed up. That is the only reading under which
-     Brent's own bands — 20–30% free accounts, never below 15% paid — are true.
-     The driver is still paid the whole transport value and the fee still sits
-     on top of it; only the meaning of the number changed. */
-  /* V7: priced on the free-driver value when HAF funds the reward, so two
-     drivers on two tiers quote one price. */
-  const basis=DRV_REWARD.fundedBy==='HAF'?carrierFree:carrier;
-  const sub=p2(basis/(1-Math.min(feePct,.95)));     /* 3. Customer price, ex VAT  */
-  /* HAF funds the reward down to its floor share and no further — past that it
-     is trimmed and flagged, and the customer price still does not move. */
-  let rewardGbp=p2(Math.max(0,carrier-carrierFree)),rewardTrimmed=0;
-  if(DRV_REWARD.fundedBy==='HAF'&&rewardGbp>0){
-    const afford=p2(sub-sub*DRV_REWARD.floor-carrierFree);
-    if(afford<rewardGbp){rewardTrimmed=p2(rewardGbp-Math.max(0,afford));rewardGbp=p2(Math.max(0,afford));carrier=p2(carrierFree+rewardGbp);}
-  }
-  const fee=p2(sub-carrier);                        /* 2. HAF Network Fee         */
-  return{sub,carrier,fee,feePct,lane,driverPay:carrier,floor,onMinimum:carrier===p2(floor),
-         carrierFree,rewardGbp,rewardTrimmed,rewardFundedBy:DRV_REWARD.fundedBy,
-         driverRate:p2(rate),driverLevel:dl.n,driverRewardPerMile:reward,
-         accountLevel:al.n,feeCutPts:p2((u.fee-feePct)*100),
-         pool:p2(sub*NET_POOL),timeWins:timeCost>distCost,miles,hours};
+  return{
+    sub:M.customerExVatGbp, carrier:M.carrierTransportValueGbp, fee:M.networkFeeGbp,
+    feePct:M.customerExVatGbp>0?M.networkFeeGbp/M.customerExVatGbp:0,
+    lane:q.lane, driverPay:M.driverPayGbp,
+    floor:M.minimumAppliedGbp!=null?M.minimumAppliedGbp:M.vehicleMinimumGbp,
+    onMinimum:!!M.minChargeApplied, carrierFree:M.carrierValueAtFreeRateGbp,
+    rewardGbp:M.driverRewardGbp, rewardTrimmed:M.driverRewardTrimmedGbp,
+    rewardFundedBy:M.driverRewardFundedBy==='CUSTOMER'?'CUSTOMER':'HAF',
+    driverRate:q.rates.fuelAdjustedRate, driverLevel:q.rates.driverLevelName,
+    driverRewardPerMile:q.rates.driverRewardGbpPerMile,
+    accountLevel:q.account.levelName, feeCutPts:q.account.feeReductionAppliedPts,
+    /* the 15%-50% band, so the back office can show when it bit */
+    feeFloorApplied:M.networkFeeFloorApplied, feeCeilingApplied:M.networkFeeCeilingApplied,
+    pool:p2(M.customerExVatGbp*NET_POOL),
+    timeWins:hours*REF_MPH>Number(miles), miles:Number(miles)||1, hours:hours
+  };
 }
 const PC={M:[53.48,-2.24],LS:[53.80,-1.55],S:[53.38,-1.47],B:[52.48,-1.90],L:[53.41,-2.98],E:[51.52,-0.05],N:[51.55,-0.10],W:[51.51,-0.20],SE:[51.48,-0.05],SW:[51.46,-0.18],NW:[51.55,-0.16],WA:[53.39,-2.60],SK:[53.41,-2.16],NG:[52.95,-1.15],DE:[52.92,-1.48],CV:[52.41,-1.51],LE:[52.63,-1.13],G:[55.86,-4.25],EH:[55.95,-3.19],CF:[51.48,-3.18],BS:[51.45,-2.60],OX:[51.75,-1.26],CB:[52.21,.12],YO:[53.96,-1.08],HU:[53.74,-.34],DN:[53.52,-1.13],BD:[53.80,-1.75],WF:[53.68,-1.50],SR:[54.91,-1.39],NE:[54.97,-1.61],TS:[54.60,-1.23],LA:[54.05,-2.80],PE:[52.57,-.24],IP:[52.06,1.16]};
 function pcArea(s){return(s.trim().match(/^[A-Z]+/i)||['M'])[0].toUpperCase()}
@@ -10268,7 +10271,7 @@ function renderAll(){
 
   /* --- driver reward --- */
   el('px-driver').innerHTML=['FREE','MEMBER','PRO'].map(k=>
-    row(W.driverLevels[k].name, field('px-d-'+k,W.driverLevels[k].rewardGbpPerMile,'0.01','+£','/mile'))).join('');
+    row(W.driverLevels[k].name, field('px-d-'+k,W.driverLevels[k].rewardPctOfBaseRate,'1','+','% of base rate'))).join('');
 
   /* --- account fee reduction --- */
   el('px-account').innerHTML=['LITE','PLUS','PRO'].map(k=>
@@ -10338,7 +10341,7 @@ window.pxEdit=function(){
   if(!W)return;
   const n=(id,fb)=>{const e=el(id);if(!e)return fb;const v=parseFloat(e.value);return isFinite(v)?v:fb;};
   W.vehicles.forEach((v,i)=>{v.baseRate=n('px-v-rate-'+i,v.baseRate);v.minTransportValue=n('px-v-min-'+i,v.minTransportValue);});
-  ['FREE','MEMBER','PRO'].forEach(k=>{W.driverLevels[k].rewardGbpPerMile=n('px-d-'+k,W.driverLevels[k].rewardGbpPerMile);});
+  ['FREE','MEMBER','PRO'].forEach(k=>{W.driverLevels[k].rewardPctOfBaseRate=n('px-d-'+k,W.driverLevels[k].rewardPctOfBaseRate);});
   ['LITE','PLUS','PRO'].forEach(k=>{W.accountLevels[k].feeReductionPts=n('px-a-'+k,W.accountLevels[k].feeReductionPts);});
   W.jobTypes.forEach((t,i)=>{t.marginPct=n('px-j-fee-'+i,t.marginPct);t.floorPct=n('px-j-flr-'+i,t.floorPct);});
   const h=W.localHandling;
@@ -10359,14 +10362,25 @@ function problems(c){
     pr=v.baseRate;pm=v.minTransportValue;
   });
   const d=c.driverLevels;
-  if(!(d.FREE.rewardGbpPerMile<=d.MEMBER.rewardGbpPerMile&&d.MEMBER.rewardGbpPerMile<=d.PRO.rewardGbpPerMile))
-    p.push('The driver rewards must rise: free, then member, then pro.');
+  const rp=k=>typeof d[k].rewardPctOfBaseRate==='number'?d[k].rewardPctOfBaseRate:d[k].rewardGbpPerMile;
+  if(!(rp('FREE')<=rp('MEMBER')&&rp('MEMBER')<=rp('PRO')))
+    p.push('The driver plan uplifts must rise: free, then plus, then pro.');
   ['LITE','PLUS','PRO'].forEach(k=>{const a=c.accountLevels[k].feeReductionPts;
     if(!num(a)||a<0||a>20)p.push(c.accountLevels[k].name+' must be between 0 and 20 points.');});
+  /* THE BAND IS NOT EDITABLE HERE. Brent, 2026-09-07: HAF earns between 15%
+     and 50% on every job, non-negotiable. Nobody types their way under it. */
+  const BAND_LO=(c.networkFeeFloor&&c.networkFeeFloor.pct)||15,
+        BAND_HI=(c.networkFeeFloor&&c.networkFeeFloor.ceilingPct)||50;
   c.jobTypes.forEach(t=>{
-    if(!num(t.marginPct)||t.marginPct<0||t.marginPct>90)p.push(t.name+': the fee must be between 0% and 90%.');
+    if(t.active===false)return;
+    if(!num(t.marginPct)||t.marginPct<BAND_LO||t.marginPct>BAND_HI)
+      p.push(t.name+': the fee must be between '+BAND_LO+'% and '+BAND_HI+'%.');
+    if(!num(t.floorPct)||t.floorPct<BAND_LO||t.floorPct>BAND_HI)
+      p.push(t.name+': the floor must be between '+BAND_LO+'% and '+BAND_HI+'%.');
     if(num(t.floorPct)&&num(t.marginPct)&&t.floorPct>t.marginPct)p.push(t.name+': the floor cannot sit above the fee.');
   });
+  if(c.networkFeeFloor&&(c.networkFeeFloor.pct!==15||c.networkFeeFloor.ceilingPct!==50))
+    p.push('The 15% to 50% band is set by Brent and cannot be changed from this page.');
   const h=c.localHandling;
   if(h.bandReductionPct>h.maxReductionPct)p.push('The reduction at 15 miles cannot be bigger than the one at zero miles.');
   if(h.bandAtMiles>=h.fullMinimumFromMiles)p.push('The full minimum must return AFTER the mid-band mileage.');
