@@ -1403,11 +1403,11 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
       <div class="calc-box">
         <div class="pc-row">
           <div class="fi">
-            <span class="fi-lbl">From postcode</span>
+            <span class="fi-lbl">Collect from</span>
             <input class="fi-inp" id="pc-from" placeholder="e.g. S9 1AA" maxlength="8" autocomplete="off" oninput="onPcInput()">
           </div>
           <div class="fi">
-            <span class="fi-lbl">To postcode</span>
+            <span class="fi-lbl">Deliver to</span>
             <input class="fi-inp" id="pc-to" placeholder="e.g. M1 1AA" maxlength="8" autocomplete="off" oninput="onPcInput()">
           </div>
         </div>
@@ -1529,8 +1529,8 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
             <!-- ── 1 · WHERE IS IT GOING? ── -->
             <div class="fstep on" id="fq-1">
               <div class="slbl">Step 1 of 7 &#8212; Where is it going?</div>
-              <div class="of" style="margin-bottom:.55rem"><label class="ol">Collection postcode</label><input class="oi" id="fq-from" placeholder="e.g. S9 1AA" maxlength="8" autocomplete="off"></div>
-              <div class="of"><label class="ol">Delivery postcode</label><input class="oi" id="fq-to" placeholder="e.g. M1 1AA" maxlength="8" autocomplete="off"></div>
+              <div class="of" style="margin-bottom:.55rem"><label class="ol">Collecting from</label><input class="oi" id="fq-from" placeholder="e.g. S9 1AA" maxlength="8" autocomplete="off"></div>
+              <div class="of"><label class="ol">Delivering to</label><input class="oi" id="fq-to" placeholder="e.g. M1 1AA" maxlength="8" autocomplete="off"></div>
               <div class="fstep-err" id="fq-err-1"></div>
               <div class="fnav"><button class="btn btn-or btn-sm" onclick="fqNext(2)">Next &#8594;</button></div>
             </div>
@@ -1818,9 +1818,9 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <div class="fnav"><button class="btn btn-gh btn-sm" onclick="hpStep(1)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="hpNext(3)">Next &#8594;</button></div>
             </div>
             <div class="fstep" id="hp-3">
-              <div class="slbl">Step 3 of 5 &#8212; Postcodes</div>
-              <div class="of" style="margin-bottom:.55rem"><label class="ol">Collection postcode</label><input class="oi" id="hp-from" placeholder="e.g. S9 1AA" maxlength="8" autocomplete="off"></div>
-              <div class="of"><label class="ol">Delivery postcode</label><input class="oi" id="hp-to" placeholder="e.g. M1 1AA" maxlength="8" autocomplete="off"></div>
+              <div class="slbl">Step 3 of 5 &#8212; Where</div>
+              <div class="of" style="margin-bottom:.55rem"><label class="ol">Collecting from</label><input class="oi" id="hp-from" placeholder="e.g. S9 1AA" maxlength="8" autocomplete="off"></div>
+              <div class="of"><label class="ol">Delivering to</label><input class="oi" id="hp-to" placeholder="e.g. M1 1AA" maxlength="8" autocomplete="off"></div>
               <div class="fstep-err" id="hp-err-3"></div>
               <div class="fnav" style="margin-top:.6rem"><button class="btn btn-gh btn-sm" onclick="hpStep(2)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="hpEstimateV()">See estimate &#8594;</button></div>
             </div>
@@ -2789,7 +2789,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="10" y1="9" x2="10" y2="15"/><line x1="14" y1="9" x2="14" y2="15"/></svg>
             <div><strong>Posting paused</strong>Posting is paused while we rebuild the sign-up journey. Your account is unaffected — we&#8217;ll email you the moment it reopens.</div>
           </div>
-          <div class="fr"><div class="fg"><label class="fl">Collection address</label><input class="fi2" placeholder="Full address or postcode"></div><div class="fg"><label class="fl">Delivery address</label><input class="fi2" placeholder="Full address or postcode"></div></div>
+          <div class="fr"><div class="fg"><label class="fl">Collection address</label><input class="fi2" id="post-caddr" placeholder="Full address or postcode"></div><div class="fg"><label class="fl">Delivery address</label><input class="fi2" id="post-daddr" placeholder="Full address or postcode"></div></div>
           <div class="fr"><div class="fg"><label class="fl">Your reference</label><input class="fi2" id="post-ref" placeholder="Internal order or PO ref"></div><div class="fg"><label class="fl">Goods description</label><input class="fi2" placeholder="e.g. Retail stock, pallets, tools"></div></div>
           <div class="fr"><div class="fg"><label class="fl">Weight (kg)</label><input class="fi2" type="number" placeholder="e.g. 200"></div><div class="fg"><label class="fl">Vehicle needed</label><select class="fi2"><option>Any</option><option>Small van</option><option>SWB</option><option>MWB</option><option>LWB</option><option>XLWB</option><option>Luton &#8212; box</option><option>Luton &#8212; curtain side</option><option>Luton &#8212; tail lift</option></select></div></div>
           <div class="fr"><div class="fg"><label class="fl">Date</label><input class="fi2" type="date"></div><div class="fg"><label class="fl">Urgency</label><select class="fi2"><option>Flexible</option><option>Same-day</option><option>Urgent</option><option>Timed window</option></select></div></div>
@@ -4520,6 +4520,181 @@ async function pcDistReal(a,b){
 }
 
 
+/* ══ ADDRESS SEARCH — a street name works as well as a postcode ═══════════
+   Brent, 7 Sep 2026: "allow someone to type the name of the street if they
+   don't know the postcode".
+
+   Nothing below this line changes. The pricing engine, the distance gateway
+   and every quote still run on postcodes exactly as they did — this only
+   turns what a person types into one before it gets there. Someone who knows
+   their postcode types it and never sees any of this.
+
+   A street with no house number lands on the middle of the street, so we take
+   the nearest real postcode from the ONS database and price it. That is good
+   enough for a guide price and it is NOT good enough for a driver, so the
+   booking step asks for the number before anything is confirmed.           */
+const ADDR_GW='https://haf-distance.pages.dev/';
+const ADDR_FULL=/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;   /* S11 8PT */
+const ADDR_OUT=/^[A-Z]{1,2}\d[A-Z\d]?$/i;                 /* S11     */
+function addrIsPostcode(s){const t=(s||'').trim();return ADDR_FULL.test(t)||ADDR_OUT.test(t);}
+/* "12 Ecclesall Road" has a door on it, "Ecclesall Road" does not */
+function addrHasNumber(s){return /\d/.test(((s||'').split(',')[0])||'');}
+const _addrSugC={},_addrResC={};
+
+async function addrSuggest(q){
+  const k=(q||'').trim().toLowerCase();
+  if(k.length<3)return[];
+  if(_addrSugC[k])return _addrSugC[k];
+  try{
+    const r=await fetch(ADDR_GW+'autocomplete?q='+encodeURIComponent(q.trim()));
+    if(!r.ok)return[];
+    const d=await r.json();
+    const out=(d&&d.ok&&Array.isArray(d.suggestions))?d.suggestions:[];
+    _addrSugC[k]=out;
+    return out;
+  }catch(e){return[];}
+}
+
+/* what a person typed or picked -> a real UK postcode, or null if there is no
+   such place. Never invents one: no postcode back means no price. */
+async function addrResolve(text){
+  const t=(text||'').trim();
+  if(!t)return null;
+  if(addrIsPostcode(t))return{pc:t.toUpperCase(),label:t.toUpperCase(),precise:true};
+  const k=t.toLowerCase();
+  if(_addrResC[k]!==undefined)return _addrResC[k];
+  let out=null;
+  try{
+    const r=await fetch(ADDR_GW+'geocode?q='+encodeURIComponent(t));
+    if(r.ok){
+      const d=await r.json();
+      if(d&&d.ok){
+        let pc=(d.postcode||'').trim();
+        const precise=!!pc&&d.precision==='ROOFTOP'&&addrHasNumber(t);
+        if(!pc&&typeof d.lat==='number'&&typeof d.lng==='number'){
+          /* a street, not a door: nearest real postcode from ONS */
+          try{
+            const rv=await fetch('https://api.postcodes.io/postcodes?lon='+d.lng+'&lat='+d.lat+'&limit=1');
+            const dv=await rv.json();
+            if(dv&&dv.status===200&&dv.result&&dv.result[0])pc=dv.result[0].postcode;
+          }catch(e){}
+        }
+        if(pc)out={pc:pc.toUpperCase(),label:d.address||t,precise:precise};
+      }
+    }
+  }catch(e){return null;}   /* a wobble is not an answer — don't cache it */
+  _addrResC[k]=out;
+  return out;
+}
+
+function addrSet(el,r){
+  if(!el)return;
+  el.dataset.pc=r?r.pc:'';
+  el.dataset.pcFor=r?el.value.trim():'';
+  el.dataset.pcPrecise=(r&&r.precise)?'1':'';
+}
+function addrClear(el){if(el){el.dataset.pc='';el.dataset.pcFor='';el.dataset.pcPrecise='';}}
+/* the postcode this field stands for. Postcode typed = itself; anything else
+   resolved once and remembered against the exact text it came from. */
+async function addrEnsure(el){
+  if(!el)return '';
+  const v=(el.value||'').trim();
+  if(!v)return '';
+  if(addrIsPostcode(v))return v.toUpperCase();
+  if(el.dataset.pcFor===v&&el.dataset.pc)return el.dataset.pc;
+  const r=await addrResolve(v);
+  addrSet(el,r);
+  return r?r.pc:v;   /* no match: hand the raw text on and let the existing
+                        "we couldn't find that" message do its job */
+}
+
+/* ── the picker ── */
+let _addrBox=null,_addrFor=null,_addrTimer=null,_addrSeq=0,_addrIdx=-1;
+function addrCloseList(){if(_addrBox){_addrBox.remove();}_addrBox=null;_addrFor=null;_addrIdx=-1;}
+function addrOpenList(el,items){
+  addrCloseList();
+  if(!items||!items.length)return;
+  const r=el.getBoundingClientRect();
+  const b=document.createElement('div');
+  b.className='addr-list';
+  b.style.left=r.left+'px';b.style.top=(r.bottom+4)+'px';b.style.width=Math.max(r.width,210)+'px';
+  items.slice(0,5).forEach(s=>{
+    const d=document.createElement('div');
+    d.className='addr-item';
+    const m=document.createElement('span');m.className='addr-m';m.textContent=s.main||s.text||'';
+    const c=document.createElement('span');c.className='addr-s';c.textContent=(s.secondary||'').replace(/,\s*UK$/i,'');
+    d.appendChild(m);d.appendChild(c);
+    d.addEventListener('mousedown',ev=>{ev.preventDefault();addrPick(el,s);});
+    b.appendChild(d);
+  });
+  document.body.appendChild(b);
+  _addrBox=b;_addrFor=el;_addrIdx=-1;
+}
+async function addrPick(el,s){
+  /* "Ecclesall Road, Sheffield, UK" reads better without the country on it */
+  el.value=(s.text||s.main||'').replace(/,\s*UK$/i,'');
+  addrCloseList();
+  addrClear(el);
+  el.classList.add('addr-busy');
+  const r=await addrResolve(el.value.trim());
+  el.classList.remove('addr-busy');
+  addrSet(el,r);
+  if(typeof el._addrAfter==='function')el._addrAfter(r);
+}
+function addrAttach(el,after){
+  if(!el||el._addrOn)return;
+  el._addrOn=true;el._addrAfter=after;
+  el.removeAttribute('maxlength');            /* "S9 1AA" fits in 8, a street does not */
+  el.setAttribute('autocomplete','off');
+  /* only relabel the postcode-only boxes; fields that already ask for a full
+     address are saying the right thing already */
+  if(/^e\.g\./i.test(el.getAttribute('placeholder')||''))el.setAttribute('placeholder','Postcode or street, e.g. S9 1AA');
+  el.addEventListener('input',()=>{
+    addrClear(el);
+    const v=(el.value||'').trim();
+    clearTimeout(_addrTimer);
+    if(v.length<3||addrIsPostcode(v)){addrCloseList();return;}
+    const seq=++_addrSeq;
+    _addrTimer=setTimeout(async()=>{
+      const items=await addrSuggest(v);
+      if(seq!==_addrSeq||document.activeElement!==el)return;
+      addrOpenList(el,items);
+    },260);
+  });
+  el.addEventListener('blur',()=>{setTimeout(()=>{if(_addrFor===el)addrCloseList();},130);});
+}
+/* On the input itself the app's own Enter handlers were registered first, so
+   the list is driven from the document in the capture phase where it can get
+   in ahead of them. */
+document.addEventListener('keydown',e=>{
+  if(!_addrBox||!_addrFor||e.target!==_addrFor)return;
+  const items=[..._addrBox.querySelectorAll('.addr-item')];
+  if(!items.length)return;
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();
+    _addrIdx=(_addrIdx+(e.key==='ArrowDown'?1:-1)+items.length)%items.length;
+    items.forEach((n,i)=>n.classList.toggle('on',i===_addrIdx));
+  }else if(e.key==='Enter'&&_addrIdx>=0){
+    e.preventDefault();e.stopPropagation();
+    items[_addrIdx].dispatchEvent(new MouseEvent('mousedown'));
+  }else if(e.key==='Escape'){addrCloseList();}
+},true);
+window.addEventListener('scroll',()=>{if(_addrBox)addrCloseList();},true);
+window.addEventListener('resize',()=>{if(_addrBox)addrCloseList();});
+(function(){
+  const s=document.createElement('style');
+  s.textContent='.addr-list{position:fixed;z-index:9999;background:var(--p2,#fff);border:1px solid var(--ln,#ddd);'
+   +'border-radius:11px;box-shadow:0 12px 30px rgba(0,0,0,.18);overflow:hidden;max-height:264px;overflow-y:auto}'
+   +'.addr-item{padding:.55rem .7rem;cursor:pointer;border-bottom:1px solid var(--ln,#eee);line-height:1.3}'
+   +'.addr-item:last-child{border-bottom:none}'
+   +'.addr-item:hover,.addr-item.on{background:var(--p3,#f4f4f4)}'
+   +'.addr-m{display:block;font-size:.83rem;font-weight:700;color:var(--tx,#111)}'
+   +'.addr-s{display:block;font-size:.72rem;color:var(--mu,#777);margin-top:.08rem}'
+   +'.addr-busy{opacity:.65}';
+  document.head.appendChild(s);
+})();
+
+
 /* ── THEME ── */
 function toggleTheme(){
   const h=document.documentElement;
@@ -4768,14 +4943,14 @@ function onPcInput(){clearTimeout(pcTimer);pcTimer=setTimeout(calcLivePrice,600)
 
 window._lpSeq=0;
 async function calcLivePrice(){
-  const fr=document.getElementById('pc-from').value.trim().toUpperCase();
-  const to=document.getElementById('pc-to').value.trim().toUpperCase();
+  const elF=document.getElementById('pc-from'),elT=document.getElementById('pc-to');
+  const rawF=(elF.value||'').trim(),rawT=(elT.value||'').trim();
   const box=document.getElementById('lp-box');
   const hint=document.getElementById('lp-hint-txt');
   const priced=document.getElementById('lp-priced');
-  if(!fr||!to||fr.length<2||to.length<2){
+  if(!rawF||!rawT||rawF.length<2||rawT.length<2){
     box.className='lp-box hint';
-    hint.textContent='Enter both postcodes to see your guide price';
+    hint.textContent='Enter a postcode or a street at both ends to see your guide price';
     hint.style.display='';
     priced.style.display='none';
     _lpLast=null;clearContinueOffer();
@@ -4784,11 +4959,15 @@ async function calcLivePrice(){
   }
   const v=VAN[selVanKey]||VAN.lwb;
   const seq=++window._lpSeq;
+  /* whatever they typed becomes a postcode here; everything past this line is
+     the same code that has always priced a job */
+  const [fr,to]=await Promise.all([addrEnsure(elF),addrEnsure(elT)]);
+  if(seq!==window._lpSeq)return;
   const r=await pcDistReal(fr,to);
   if(seq!==window._lpSeq)return;
   if(r.from===null||r.to===null){
     box.className='lp-box hint';
-    hint.innerHTML='<span style="color:var(--rd);font-weight:600">“'+(r.from===null?fr:to)+'” isn\u2019t a recognised UK postcode — check and try again</span>';
+    hint.innerHTML='<span style="color:var(--rd);font-weight:600">We couldn\u2019t find “'+String(r.from===null?rawF:rawT).replace(/[<>]/g,'')+'” — try a postcode, or a street with its town</span>';
     hint.style.display='';priced.style.display='none';
     _lpLast=null;clearContinueOffer();return;
   }
@@ -4835,6 +5014,17 @@ function clearContinueOffer(){
 document.getElementById('pc-from').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('pc-to').focus();});
 document.getElementById('pc-to').addEventListener('keydown',e=>{if(e.key==='Enter')calcLivePrice();});
 
+/* ── every box that asks where, gets the street search ── */
+(function wireAddressSearch(){
+  const G=id=>document.getElementById(id);
+  /* guide price: picking a place reprices straight away */
+  addrAttach(G('pc-from'),()=>calcLivePrice());
+  addrAttach(G('pc-to'),()=>calcLivePrice());
+  /* the two quote journeys and the posting screen */
+  ['fq-from','fq-to','fq-caddr','fq-daddr','hp-from','hp-to','post-caddr','post-daddr','db-from','db-to']
+    .forEach(id=>addrAttach(G(id)));
+})();
+
 function toggleTrack(){
   const p=document.getElementById('track-panel');
   p.classList.toggle('open');
@@ -4862,9 +5052,19 @@ const FLOW_TITLES={fast:'Your consignment',repeat:'Repeat an order',pick:'HAF Pi
    works — it simply has no panel of its own any more. */
 function startConsignment(){
   openFlow('fast');
-  const set=(id,v)=>{const e=document.getElementById(id);if(e&&v)e.value=v;};
-  set('fq-from',(_v('pc-from')||'').toUpperCase());
-  set('fq-to',(_v('pc-to')||'').toUpperCase());
+  /* Carry the place across exactly as they left it, postcode or street, along
+     with the postcode it already resolved to so the quote does not go and ask
+     the same question again. */
+  const carry=(src,dst)=>{
+    const a=document.getElementById(src),b=document.getElementById(dst);
+    if(!a||!b||!a.value.trim())return;
+    b.value=addrIsPostcode(a.value.trim())?a.value.trim().toUpperCase():a.value.trim();
+    b.dataset.pc=a.dataset.pc||'';
+    b.dataset.pcFor=a.dataset.pc?b.value.trim():'';
+    b.dataset.pcPrecise=a.dataset.pcPrecise||'';
+  };
+  carry('pc-from','fq-from');
+  carry('pc-to','fq-to');
   /* Carry the bands over by pressing the matching buttons, so the allocation,
      the van card and the too-small stop all recalculate exactly as they would
      if the customer had chosen them on this step themselves. */
@@ -5251,7 +5451,7 @@ const _v=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
 function fqNext(toStep){
   /* 1 → 2 : we need to know where before we can price anything */
   if(toStep===2){
-    if(!_v('fq-from')||!_v('fq-to')){fErr('fq-err-1','Please enter both a collection and a delivery postcode.');return;}
+    if(!_v('fq-from')||!_v('fq-to')){fErr('fq-err-1','Please enter both a collection and a delivery location — a postcode, or a street and town.');return;}
     fErr('fq-err-1','');
   }
   /* 2 → 3 : the three answers the driver cannot do without */
@@ -5284,12 +5484,24 @@ function fqNext(toStep){
   if(toStep===5){
     if(!fqData.urg){fErr('fq-err-4','Please tell us when it needs moving.');return;}
     fErr('fq-err-4','');
+    /* They have already told us where twice over by now. Carry it forward so
+       the only thing left to add is the bit we genuinely still need: the
+       number on the door. */
+    const carry=(src,dst)=>{
+      const a=document.getElementById(src),b=document.getElementById(dst);
+      if(a&&b&&!b.value.trim()&&a.value.trim())b.value=a.value.trim();
+    };
+    carry('fq-from','fq-caddr');carry('fq-to','fq-daddr');
   }
   fqStep(toStep);
 }
 /* 5 → 6 : full addresses, then the price and the driver's card */
 function fqShowPriceV(){
   if(!_v('fq-caddr')||!_v('fq-daddr')){fErr('fq-err-5','Please enter both the full collection and delivery addresses.');return;}
+  /* A street was enough to price the job. It is not enough to drive to, so the
+     house or building number is asked for here and nowhere earlier. */
+  if(!addrHasNumber(_v('fq-caddr'))){fErr('fq-err-5','Add the house or building number to the collection address so the driver can find the door.');return;}
+  if(!addrHasNumber(_v('fq-daddr'))){fErr('fq-err-5','Add the house or building number to the delivery address so the driver can find the door.');return;}
   fErr('fq-err-5','');
   fqShowPrice();
 }
@@ -5320,7 +5532,7 @@ function hpNext(toStep){
 }
 function hpEstimateV(){
   const fr=document.getElementById('hp-from').value.trim(),to=document.getElementById('hp-to').value.trim();
-  if(!fr||!to){fErr('hp-err-3','Please enter both postcodes.');return;}
+  if(!fr||!to){fErr('hp-err-3','Please enter both locations — a postcode, or a street and town.');return;}
   fErr('hp-err-3','');
   hpEstimate();
 }
@@ -5332,8 +5544,8 @@ function hpBookV(){
 }
 
 async function fqCalcPrice(){
-  const fr=(document.getElementById('fq-from').value||'M1').trim().toUpperCase();
-  const to=(document.getElementById('fq-to').value||'LS1').trim().toUpperCase();
+  const fr=(await addrEnsure(document.getElementById('fq-from')))||'M1';
+  const to=(await addrEnsure(document.getElementById('fq-to')))||'LS1';
   const vk=fqData.van||'lwb';
   const uk=fqData.urg||'flex';
   const v=VAN[vk]||VAN.lwb;
@@ -5485,8 +5697,8 @@ function hpSel(el,key,val){
 }
 hpBuildLoad();
 async function hpEstimate(){
-  const fr=(document.getElementById('hp-from').value||'M1').trim().toUpperCase();
-  const to=(document.getElementById('hp-to').value||'LS1').trim().toUpperCase();
+  const fr=(await addrEnsure(document.getElementById('hp-from')))||'M1';
+  const to=(await addrEnsure(document.getElementById('hp-to')))||'LS1';
   const vk=recommendVan(hpData.weight,hpData.size)||'lwb';
   const v=VAN[vk];
   const r=await pcDistReal(fr,to);
@@ -9785,7 +9997,7 @@ function submitDirBook(){
   const weight=(document.getElementById('db-weight').value||'').trim();
   const ref=(document.getElementById('db-ref').value||'').trim();
   const err=document.getElementById('db-err');
-  if(!from||!to){err.textContent='Please enter collection and delivery postcodes.';err.style.display='block';return;}
+  if(!from||!to){err.textContent='Please enter a collection and a delivery location \u2014 a postcode, or a street and town.';err.style.display='block';return;}
   err.style.display='none';
   _dbCounter++;
   const jobRef='DB-'+_dbCounter;
