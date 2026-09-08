@@ -588,6 +588,19 @@ textarea.fi2{resize:vertical;min-height:70px}
 .xc-pref{font-size:.68rem;color:var(--gn);font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.28rem}
 .xc-foot{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
 .xc-meta{font-size:.63rem;color:var(--mu);line-height:1.5}
+/* The fuller load card, 8 Sep. The board already returned the windows, the doors, the
+   pallets and the pay; this screen printed a postcode pair and a date, so whoever posted
+   the load could not tell from it what a driver was being asked to do. */
+.xc-legs{display:grid;gap:.4rem;margin-bottom:.55rem}
+@media(min-width:720px){.xc-legs{grid-template-columns:1fr 1fr;gap:.6rem}}
+.xc-leg{border-left:2px solid var(--ln);padding-left:.5rem}
+.xc-leg .k{font-size:.56rem;text-transform:uppercase;letter-spacing:.04em;color:var(--mu)}
+.xc-leg .w{font-size:.72rem;line-height:1.45}
+.xc-leg .n{font-size:.66rem;color:var(--mu);line-height:1.45;margin-top:.1rem}
+.xc-chips{display:flex;flex-wrap:wrap;gap:.25rem;margin-bottom:.55rem}
+.xc-chips span{font-size:.63rem;padding:.13rem .45rem;border-radius:999px;background:var(--bg);border:1px solid var(--ln);color:var(--mu)}
+.xc-dist{font-size:.66rem;color:var(--mu);line-height:1.5;margin-bottom:.5rem}
+.xc-dist b{color:var(--tx,inherit);font-weight:700}
 .xc-cd{font-size:.65rem;font-weight:700;color:var(--rd);display:flex;align-items:center;gap:.2rem}
 .xc-btns{display:flex;gap:.35rem;flex-shrink:0}
 .xfeed-hdr{font-size:.63rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mu);margin:.85rem 0 .55rem;display:flex;align-items:center;gap:.5rem}
@@ -7810,16 +7823,110 @@ async function hafJobsPaint(){
     const action=canClaim
       ? '<button class="btn btn-or btn-sm" onclick="hafJobsClaim(\''+_esc(j.id)+'\',this)">Take this job →</button>'
       : '<span class="xc-meta">Your Clever checks open this</span>';
+    /* Four numbers across the top, in the order somebody decides in: when it has to be
+       collected, when it has to be there, how long the run is, what it pays. */
+    const cell=(v,k,cls)=>'<div class="xcs'+(cls?' '+cls:'')+'"><div class="xcs-v">'+_esc(v)+
+      '</div><div class="xcs-k">'+_esc(k)+'</div></div>';
+    const stats='<div class="xc-sr">'
+      +cell(j.collect_window||when,'Collection')
+      +cell(j.deliver_by||'To agree','Deliver by')
+      +cell(j.miles!=null?(Math.round(j.miles*10)/10)+' mi':'—','On the job')
+      +cell(j.driver_pay||'—','Driver pay',j.driver_pay?'rate':'')
+      +'</div>';
+    const leg=(k,w,n)=>'<div class="xc-leg"><div class="k">'+_esc(k)+'</div>'
+      +'<div class="w">'+_esc(w||'Address on acceptance')+'</div>'
+      +(n?'<div class="n">'+_esc(n)+'</div>':'')+'</div>';
+    const legs='<div class="xc-legs">'
+      +leg('Collection', j.collect_address||j.from_postcode, j.collect_note)
+      +leg('Delivery',   j.deliver_address||j.to_postcode,   j.deliver_note)
+      +'</div>';
+    const bits=_hafLoadBits(j.consignment);
+    if(j.job_type)      bits.unshift(String(j.job_type));
+    if(j.vehicle_label) bits.unshift(String(j.vehicle_label));
+    const chips=bits.length
+      ? '<div class="xc-chips">'+bits.map(b=>'<span>'+_esc(b)+'</span>').join('')+'</div>' : '';
     return '<div class="xc">'+
       '<div class="xc-head"><div class="xc-badges">'+first+
         '<span class="xb-ref">'+ref+'</span></div></div>'+
       '<div class="xc-route">'+route+'</div>'+
-      '<div class="xc-sr"><div class="xcs"><div class="xcs-v">'+_esc(when)+'</div>'+
-        '<div class="xcs-k">Collection</div></div></div>'+
-      notes+
+      stats+
+      '<div class="xc-dist" id="knd-'+_esc(j.id)+'">Working out how far this is from you…</div>'+
+      legs+chips+notes+
       '<div class="xc-foot"><div class="xc-meta">'+who+'</div>'+
       '<div class="xc-btns">'+action+'</div></div></div>';
   }).join('');
+  /* Road distances arrive after the board is readable. Nobody waits on a map to see work. */
+  _hafJobsDistances(jobs);
+}
+
+/* Only what the consignment actually records. A missing figure prints nothing rather
+   than a confident zero. */
+function _hafLoadBits(c){
+  if(!c||typeof c!=='object')return[];
+  const mm=v=>v>=1000?(Math.round(v/10)/100)+' m':Math.round(v/10)+' cm';
+  const out=[];
+  if(c.pallets)         out.push(c.pallets+(c.pallets==1?' pallet':' pallets'));
+  if(c.boxes)           out.push(c.boxes+(c.boxes==1?' box':' boxes'));
+  if(c.packages)        out.push(c.packages+(c.packages==1?' package':' packages'));
+  if(c.weight_kg)       out.push(c.weight_kg+' kg');
+  if(c.packaging)       out.push(String(c.packaging));
+  if(c.longest_item_mm) out.push('Longest '+mm(c.longest_item_mm));
+  if(c.height_mm)       out.push('Tallest '+mm(c.height_mm));
+  if(c.width_mm)        out.push('Widest '+mm(c.width_mm));
+  if(c.forklift_collect===true)  out.push('Forklift at collection');
+  if(c.forklift_deliver===true)  out.push('Forklift at delivery');
+  if(c.forklift_deliver===false) out.push('No forklift at delivery');
+  if(c.tail_lift===true)         out.push('Tail lift needed');
+  return out;
+}
+
+/* Brent, 8 Sep: three distances, not one. How far to get to it, how far the job is (the
+   stat row above), and where it leaves you — home, or at your next booked collection.
+   Every leg is a real road answer. If the gateway does not answer we say we could not
+   measure it; a straight-line guess would look right and send someone the wrong way. */
+const _HAF_ROUTES={};
+async function _hafRoute(from,to){
+  if(!from||!to)return null;
+  const k=from+'|'+to;
+  if(_HAF_ROUTES[k]!==undefined)return _HAF_ROUTES[k];
+  let v=null;
+  try{
+    const r=await fetch(DMX+'route?from='+encodeURIComponent(from)+'&to='+encodeURIComponent(to));
+    const d=r.ok?await r.json():null;
+    if(d&&d.ok&&d.miles!=null)v={miles:d.miles,mins:d.mins};
+  }catch(e){}
+  _HAF_ROUTES[k]=v;
+  return v;
+}
+function _hafMins(n){const v=Math.round(Number(n)||0);
+  if(v<60)return v+' min';const h=Math.floor(v/60),m=v%60;return h+'h'+(m?' '+m+'m':'');}
+async function _hafJobsDistances(jobs){
+  if(!Array.isArray(jobs)||!jobs.length)return;
+  const base=jobs[0].driver_base, radius=Number(jobs[0].driver_radius)||null, next=jobs[0].next_job;
+  if(!base){
+    jobs.forEach(j=>{const el=document.getElementById('knd-'+j.id);
+      if(el)el.textContent='Add the postcode you set off from on your driving app and every load here shows how far it is from you.';});
+    return;
+  }
+  for(const j of jobs){
+    const el=document.getElementById('knd-'+j.id); if(!el)continue;
+    const to=await _hafRoute(base, j.collect_address||j.from_postcode);
+    const end=j.deliver_address||j.to_postcode;
+    const nextRef=next&&next.ref;
+    const same=nextRef&&(nextRef===j.haf_job_ref||nextRef===j.booking_ref);
+    let onward=null, back=null;
+    if(nextRef&&!same) onward=await _hafRoute(end, next.collect_address||next.from_postcode);
+    if(!onward) back=await _hafRoute(end, base);
+    let out = to
+      ? '<b>'+(Math.round(to.miles*10)/10)+' mi</b> to collection'+(to.mins?', about '+_hafMins(to.mins):'')
+        +((radius&&to.miles>radius)?' — outside your '+radius+' mile patch':'')
+      : 'Could not measure the run to collection';
+    if(onward) out+=' · then <b>'+(Math.round(onward.miles*10)/10)+' mi</b> on to your next job'
+      +(nextRef?' ('+_esc(nextRef)+')':'');
+    else if(back) out+=' · then <b>'+(Math.round(back.miles*10)/10)+' mi</b> home';
+    else out+=' · could not measure the run back';
+    el.innerHTML=out;
+  }
 }
 
 /* Taking a job proves who is asking with the credential that opened this
