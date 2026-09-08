@@ -1096,6 +1096,35 @@ textarea.fi2{resize:vertical;min-height:70px}
 .sb-lj-bar{height:5px;border-radius:3px;background:var(--ln);overflow:hidden;margin-bottom:.45rem}
 .sb-lj-fill{height:100%;border-radius:3px;transition:width .5s}
 .sb-lj-btn{width:100%;text-align:center;font-size:.64rem;font-weight:800;color:var(--haf-orange-ink);background:transparent;border:1px solid var(--or-g);border-radius:var(--pill);padding:.3rem;cursor:pointer}
+/* ── PLNA AT A GLANCE (sidebar, driving accounts only) ──────────────────────
+   Brent, 8 Sep: a driver signed into KNECT should be able to see where their
+   PLNA stands without leaving the page — what is still needed, what work they
+   have on, and a way straight in. The full picture stays in PLNA; this is the
+   glance.
+
+   Every figure is read from that driver's own PLNA record on the live
+   database, counted by the SAME rules PLNA's own home screen uses, so the two
+   screens can never quote different numbers for the same day. Nothing here is
+   typed into the page, and a read that fails says so rather than showing a
+   zero — "nothing booked" and "we could not ask" are different sentences. */
+.sb-pl{margin:.5rem .6rem .3rem;border:1.5px solid var(--ln);border-radius:var(--r);background:var(--p2);padding:.6rem .65rem;display:none}
+.sb-pl-top{display:flex;align-items:center;justify-content:space-between;gap:.35rem;margin-bottom:.4rem}
+.sb-pl-tag{font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--haf-orange-ink)}
+.sb-pl-chip{font-size:.5rem;font-weight:800;border-radius:var(--pill);padding:.1rem .36rem;border:1px solid;white-space:nowrap}
+.sb-pl-ok{color:var(--gn, #4f7f58);border-color:var(--gn, #4f7f58)}
+.sb-pl-wait{color:var(--am, #b98530);border-color:var(--am, #b98530)}
+.sb-pl-nums{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.28rem;margin-bottom:.45rem}
+.sb-pl-n{background:var(--p);border:1px solid var(--ln);border-radius:var(--rx);padding:.3rem .15rem;text-align:center;min-width:0}
+.sb-pl-nv{font-size:.78rem;font-weight:800;color:var(--tx);line-height:1.15;overflow:hidden;text-overflow:ellipsis}
+.sb-pl-nl{font-size:.48rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;color:var(--mu);margin-top:.1rem;line-height:1.2}
+.sb-pl-need{font-size:.62rem;line-height:1.45;color:var(--mu);margin-bottom:.45rem}
+.sb-pl-need b{display:block;color:var(--tx);font-weight:800;margin-bottom:.15rem}
+/* Orange is reserved for a line the driver has to act on. A line that is only
+   telling them where they stand stays quiet, so the colour keeps its meaning. */
+.sb-pl-need span{display:block;color:var(--haf-orange-ink);font-weight:700}
+.sb-pl-need em{display:block;font-style:normal;color:var(--mu);font-weight:500}
+.sb-pl-btn{width:100%;text-align:center;font-size:.64rem;font-weight:800;color:var(--haf-orange-ink);background:transparent;border:1px solid var(--or-g);border-radius:var(--pill);padding:.3rem;cursor:pointer}
+.sb-pl-btn:hover{border-color:var(--haf-orange-ink)}
 .lj-wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:.9rem;align-items:start}
 .lj-mapwrap{position:relative;border:1.5px solid var(--ln);border-radius:var(--r);overflow:hidden}
 #lj-map{height:430px;width:100%;background:var(--p3, #e9e5dd)}
@@ -2258,6 +2287,11 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
   <div class="app-body">
     <nav class="sidebar" id="sidebar">
       <div class="sb-livejob" id="sb-livejob"></div>
+      <!-- PLNA at a glance. Sits outside nav-list on purpose: buildNavV1
+           rewrites nav-list on every redraw, and this card owns its own
+           lifecycle. Hidden until a driving account's own PLNA record has
+           actually answered. -->
+      <div class="sb-pl" id="sb-pl"></div>
       <div id="nav-list"></div>
       <a class="sb-plna" id="sb-plna" href="https://plna.usehaf.co.uk" target="_blank" rel="noopener">Looking to be a driver?<b>Sign up to the PLNA →</b></a>
       <div class="sb-bot">
@@ -2267,7 +2301,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
              Hidden until an account record has actually been read, because an
              empty name card is worse than none. -->
         <div class="sb-acct" id="sb-acct" style="display:none"></div>
-        <button class="back-btn" id="plna-link-btn" style="display:none;color:var(--haf-orange-ink);" onclick="window.open('https://plna.usehaf.co.uk','_blank')">
+        <button class="back-btn" id="plna-link-btn" style="display:none;color:var(--haf-orange-ink);" onclick="hafOpenPlna()">
           <svg class="ni-ic" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           My PLNA Network →
         </button>
@@ -6411,6 +6445,12 @@ function viewAsMember(type,released){
 
   const acc=hafAccess({account_type:type,plna_released:released===true,
                        full_name:'Preview account'});
+  /* The sidebar's PLNA card is the one thing on this screen that cannot be
+     previewed from a made-up account: it reads a real driving record, and the
+     only record this browser holds a credential for is the master's own. So it
+     is shown — a card nobody can see is a card nobody can check — and it says
+     on its face that it is the master's own record, not the previewed one. */
+  acc.preview=true;
 
   const roleEl=document.getElementById('tb-role');
   roleEl.textContent=HAF_TYPE_LABEL[acc.type]||'Account';
@@ -7019,7 +7059,10 @@ async function pinSave(){
   }catch(e){hafErr(err,'Connection problem — please try again.');btn.textContent='Save PIN and continue';btn.disabled=false}
 }
 function goLanding(){document.getElementById('app').classList.remove('open');document.getElementById('landing').style.display='flex'}
-function signOut(){localStorage.removeItem('knect-user');_hafCred=null;_hafAcct=null;hafSetSeed(false);goLanding();}
+/* Signing out has to take the previous person's PLNA card off the screen with
+   them. It carries their money and their work; leaving it up for whoever signs
+   in next on the same machine would be showing one driver another's day. */
+function signOut(){localStorage.removeItem('knect-user');_hafCred=null;_hafAcct=null;window._hafAccView=null;_plnaAt=0;try{hafPlnaPaint(true);}catch(e){}hafSetSeed(false);goLanding();}
 /* EXCHANGE */
 let _xchOnline=true;
 let _xchActiveJob=null;
@@ -7577,6 +7620,8 @@ function buildNavV1(acc,keepOpen){
   hafAcctFooter(acc);
   applyAudience();
   hafRenderLiveWidget();
+  /* the driver's own PLNA, read off their record — see hafPlnaPaint */
+  hafPlnaPaint(true);
   /* keep the highlight on whatever pane is showing */
   const cur=document.getElementById('ni-'+(ct||'').replace('pane-',''));
   if(cur)cur.classList.add('on');
@@ -7673,6 +7718,14 @@ function buildNav(tabs,role,acc){
   /* the Live Job view was decided at the top of this function, with the audience */
   applyAudience();
   hafRenderLiveWidget();
+  /* This is the demo and master path. Neither has a real driving record behind
+     it, so the PLNA card is taken off rather than left showing whatever the
+     previous screen put there. hafPlnaPaint refuses a demo account on its own,
+     but the account view it reads is not cleared when a master switches modes —
+     so the decision is made here too, where the situation is known. */
+  const plCard=document.getElementById('sb-pl');
+  if(plCard&&!acc){plCard.style.display='none';plCard.innerHTML='';}
+  else hafPlnaPaint(true);
 }
 let ct=null;
 /* ── FLEET OVERVIEW ────────────────────────────────────────────────────────
@@ -8751,6 +8804,186 @@ function hafRenderLiveWidget(){
    <div class="sb-lj-bar"><div class="sb-lj-fill" style="width:${j.progress}%;background:${j.colour}"></div></div>
    <button class="sb-lj-btn">Open live job →</button>`;
 }
+
+/* ── PLNA AT A GLANCE — the sidebar card a driving account gets ─────────────
+   Brent, 8 Sep: "on the sidebar of the HAF KNECT Dashboard when they are a
+   driver with access to the PLNA it should show the situation with the PLNA —
+   information needed and the deliveries etc, a simple breakdown. Then when
+   they log into the PLNA it shows in full."
+
+   So this is deliberately a GLANCE and not a second copy of PLNA. Four things,
+   in the order a driver actually needs them:
+     1. where they stand — cleared to take work, or still with Clever
+     2. what is still missing off their own record, in their words
+     3. their own work: booked in, completed, and what is due to them
+     4. one press through to PLNA, already signed in
+
+   THE NUMBERS ARE NOT REDEFINED HERE. Completed, booked in and due are counted
+   by exactly the rules PLNA's own home screen uses (loadMyDay), off exactly the
+   same two calls, so the sidebar and the driving app can never quote different
+   figures for the same day. If those rules ever change, they change in PLNA and
+   this follows — that is why the counting is written out plainly below rather
+   than hidden behind a cleverer expression.
+
+   A read that fails says so. It never falls back to zero: a driver told "£0
+   due" when we simply could not ask is worse than being told we could not
+   ask. */
+const HAF_PLNA_URL='https://plna.usehaf.co.uk';
+
+/* The three-argument credential. _netCred() sends a fourth (p_cp), which the
+   driver-side functions do not declare — and PostgREST answers 404 to a
+   signature it cannot match, which would have failed silently on every card.
+   A CleverPay-form PIN is still recognised: plna_cred_kind checks the relay
+   slot against cp_pin_hash as well as pin_hash. */
+function hafPlnaCred(){
+  const u=(localStorage.getItem('knect-user')||'').toUpperCase();
+  if(!u||!_hafCred)return null;
+  return {p_username:u,p_hash:_hafCred.hash,p_relay:_hafCred.relay};
+}
+
+/* One door into PLNA from KNECT, used by this card and by the foot of the
+   sidebar, so there is only ever one route to keep right.
+
+   The person has already proved who they are to open this page, so they are
+   handed through rather than asked for the same credential a second time —
+   being made to sign in twice to the same network is what the SSO page was
+   written for. The token travels in the URL fragment, which a browser never
+   sends to a server, and PLNA's sso page clears it out of history the moment
+   it has used it. No credential, no shortcut: the plain front door instead. */
+function hafOpenPlna(){
+  const c=hafPlnaCred();
+  if(!c||!(c.p_relay||c.p_hash)){window.open(HAF_PLNA_URL,'_blank','noopener');return}
+  const k=c.p_relay||c.p_hash, t=c.p_relay?'p':'w';
+  window.open(HAF_PLNA_URL+'/sso.html#u='+encodeURIComponent(c.p_username)+
+              '&k='+encodeURIComponent(k)+'&t='+t,'_blank','noopener');
+}
+
+/* What a driver reads when a field on their record is empty. The database
+   returns ids; a driver is never shown an id. */
+const HAF_PLNA_NEED={van:'Tell PLNA what you drive',
+                     base:'Set where your day starts',
+                     radius:'Set how far you will travel',
+                     contact:'Add a way we can reach you about a job'};
+
+let _plnaAt=0,_plnaBusy=false,_plnaSeq=0;
+async function hafPlnaPaint(force){
+  const el=document.getElementById('sb-pl'); if(!el)return;
+  const acc=window._hafAccView;
+  const u=(localStorage.getItem('knect-user')||'').toUpperCase();
+  /* Only an account that drives has a PLNA to report on. A business or freight
+     account is offered the door to become one further down the sidebar; it is
+     not shown an empty driver's card. A demo account never gets one either —
+     there is no real record behind it, and an invented one in this slot would
+     read as a real day's work. Both halves of that decision are made in one
+     place, using the same hafAccess every other screen uses. */
+  const hide=()=>{el.style.display='none';el.innerHTML='';};
+  if(!acc||!acc.drives||DEMO_ACCOUNTS[u]||!hafPlnaCred())return hide();
+  if(_plnaBusy)return;
+  if(!force&&el.innerHTML&&Date.now()-_plnaAt<30000)return;
+  _plnaBusy=true;
+  /* Who this paint is for. Three calls go out and the sidebar can change under
+     them — a master flicking from a driver preview to a business one, or a
+     sign-out. Without this, the driver's figures land in the business account's
+     sidebar a second later, which is the one thing this card must never do. */
+  const seq=++_plnaSeq, forUser=u, forType=acc.type;
+  el.style.display='block';
+  if(!el.innerHTML){
+    el.innerHTML='<div class="sb-pl-top"><span class="sb-pl-tag">Your PLNA</span></div>'+
+                 '<div class="sb-pl-need">Reading your driving record…</div>';
+  }
+  const cred=hafPlnaCred();
+  const call=async name=>{
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/'+name,{method:'POST',
+      headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify(cred)});
+    if(!r.ok)throw new Error(name+' '+r.status);
+    const d=await r.json();
+    /* A refusal comes back as an object carrying `error`, not as data. */
+    if(d&&!Array.isArray(d)&&d.error)throw new Error(name+' '+d.error);
+    return d;
+  };
+  /* Each read stands on its own: a payout call that fails must not blank the
+     setup list a driver needs to act on. */
+  const [setup,books,pay]=await Promise.all([
+    call('plna_driver_setup_state').catch(()=>null),
+    call('plna_my_bookings').catch(()=>null),
+    call('plna_my_payouts').catch(()=>null)
+  ]);
+  _plnaBusy=false;
+  /* The sidebar moved on while we were asking. Whatever came back belongs to a
+     screen that is no longer there, so it is dropped rather than drawn. */
+  const now=window._hafAccView;
+  if(seq!==_plnaSeq||!now||now.type!==forType||
+     (localStorage.getItem('knect-user')||'').toUpperCase()!==forUser)return;
+  _plnaAt=Date.now();
+
+  if(!setup&&!books&&!pay){
+    el.innerHTML='<div class="sb-pl-top"><span class="sb-pl-tag">Your PLNA</span></div>'+
+      '<div class="sb-pl-need">We couldn’t reach your driving record just now. '+
+      'Nothing has changed — try again in a moment.</div>'+
+      '<button class="sb-pl-btn" onclick="hafOpenPlna()">Open HAF PLNA →</button>';
+    return;
+  }
+
+  /* ── where they stand ── */
+  const cleared=!!(setup&&setup.cleared);
+  const chip=cleared
+    ? '<span class="sb-pl-chip sb-pl-ok">Cleared to work</span>'
+    : '<span class="sb-pl-chip sb-pl-wait">Checks in progress</span>';
+
+  /* ── their own work, counted PLNA's way ── */
+  const live=Array.isArray(books)?books.filter(b=>!b.removed_at):null;
+  const completed=live?live.filter(b=>b.status==='completed').length:null;
+  const booked=live?live.filter(b=>b.status==='accepted'||b.status==='pending').length:null;
+  const due=(pay&&!pay.error&&pay.due_next_run!=null)?Number(pay.due_next_run):null;
+  const num=(v,l)=>'<div class="sb-pl-n"><div class="sb-pl-nv">'+v+
+                   '</div><div class="sb-pl-nl">'+l+'</div></div>';
+  const nums='<div class="sb-pl-nums">'+
+    num(booked==null?'—':String(booked),'Booked in')+
+    num(completed==null?'—':String(completed),'Done')+
+    num(due==null?'—':'£'+due.toFixed(due%1?2:0),'Due')+'</div>';
+
+  /* ── what is still needed ──
+     Clever comes first when it is outstanding, because nothing a driver does
+     on their own record opens the door until that is through. Below it, only
+     the fields that are genuinely empty, and only the first two — a sidebar
+     card that lists four jobs is a wall, and the full list is one press away
+     in PLNA. */
+  let need='';
+  const gaps=(setup&&Array.isArray(setup.missing))?setup.missing:[];
+  if(!setup){
+    need='<div class="sb-pl-need">We couldn’t read your setup just now.</div>';
+  }else if(!cleared){
+    need='<div class="sb-pl-need"><b>HAF Clever is still checking you</b>'+
+         '<em>You can look round PLNA now; taking a job opens up when you are released.</em></div>';
+  }else if(gaps.length){
+    const rows=gaps.slice(0,2).map(g=>'<span>'+_esc(HAF_PLNA_NEED[g]||g)+'</span>').join('');
+    need='<div class="sb-pl-need"><b>'+gaps.length+' thing'+(gaps.length===1?'':'s')+
+         ' still needed</b>'+rows+
+         (gaps.length>2?'<em>and '+(gaps.length-2)+' more in PLNA</em>':'')+'</div>';
+  }else{
+    need='<div class="sb-pl-need"><b>Set up and ready for work</b>'+
+         '<em>Jobs that fit your van and your patch reach you.</em></div>';
+  }
+
+  /* On a master's preview of a member's sidebar the figures are the master's
+     own, because that is the only record this browser is allowed to read. Said
+     plainly, so nobody reads a preview as somebody else's day. */
+  const tag=acc.preview?'Your PLNA · preview':'Your PLNA';
+  const note=acc.preview
+    ? '<div class="sb-pl-need" style="margin-top:-.2rem">Preview — these figures are your own record, not the previewed account’s.</div>'
+    : '';
+  el.innerHTML='<div class="sb-pl-top"><span class="sb-pl-tag">'+tag+'</span>'+chip+'</div>'+
+               nums+need+note+
+               '<button class="sb-pl-btn" onclick="hafOpenPlna()">Open HAF PLNA →</button>';
+}
+
+/* A driver leaves this tab open all day. Coming back to it is the moment the
+   card is most likely to be stale, and the 30-second floor above stops that
+   turning into a call on every window switch. */
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden)hafPlnaPaint(false);
+});
 
 /* ── CRM-STYLE LIVE JOBS BOARD — the list of everything on the go ── */
 let _ljView='list',_ljFilter='all';
