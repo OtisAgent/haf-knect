@@ -174,7 +174,24 @@ async function place(request, env) {
       consignment: b.consignment || null,
       direct_username: directUser,
       first_refusal_minutes: FIRST_REFUSAL_MINUTES,
-      whatsapp_updates: Boolean(b.whatsapp_updates)
+      whatsapp_updates: Boolean(b.whatsapp_updates),
+      /* How each end is proved, and who is standing there. The screen has been
+         asking for these contacts since it was built and nothing was reading
+         them, so "someone will be available" had no answer anywhere. A mode of
+         'coded' without a mobile is downgraded on the network side, not here —
+         one place decides it, and it is the place that has to keep the promise. */
+      handover: {
+        collect: {
+          mode: b.collect_mode === 'coded' ? 'coded' : 'named',
+          contact: String(b.collect_contact || '').trim() || null,
+          phone: String(b.collect_contact_phone || '').trim() || null
+        },
+        deliver: {
+          mode: b.deliver_mode === 'coded' ? 'coded' : 'named',
+          contact: String(b.deliver_contact || '').trim() || null,
+          phone: String(b.deliver_contact_phone || '').trim() || null
+        }
+      }
     },
     status: 'new',
     track_token: token

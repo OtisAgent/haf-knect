@@ -234,6 +234,18 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .obox p{color:var(--mu);font-size:.8rem;margin-bottom:1.3rem;line-height:1.6}
 .of{display:flex;flex-direction:column;gap:.28rem;margin-bottom:.55rem}
 .ol{display:block;font-size:.68rem;font-weight:700;color:var(--mu);letter-spacing:.05em;text-transform:uppercase}
+/* How the handover is proved. Two cards rather than a dropdown, because the
+   difference between them is a sentence, not a word, and a poster picking the
+   wrong one here is the difference between a code nobody can produce at the
+   loading bay and a smooth collection. */
+.hoff{gap:.4rem}
+.hopt{display:flex;gap:.6rem;align-items:flex-start;cursor:pointer;padding:.6rem .7rem;
+      background:var(--p2);border:1.5px solid transparent;border-radius:var(--rx)}
+.hopt:has(input:checked){border-color:var(--or-g,#f18e00)}
+.hopt input{margin-top:.18rem;accent-color:var(--haf-orange-ink,#f18e00);flex:none}
+.hopt b{display:block;font-size:.82rem;font-weight:700}
+.hopt i{display:block;font-style:normal;font-size:.73rem;color:var(--mu);margin-top:.15rem;line-height:1.35}
+.hnote{font-size:.73rem;color:var(--or-g,#f18e00);font-weight:600;min-height:1px}
 .oi{width:100%;background:var(--p2);border:1.5px solid var(--lns);border-radius:var(--rx);padding:.58rem .82rem;font-size:.85rem;color:var(--tx);transition:border-color .14s}
 .oi:focus{border-color:var(--haf-orange-ink)}
 .oe{font-size:.73rem;color:var(--rd);margin:.2rem 0 .5rem;display:none}
@@ -1673,7 +1685,17 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
                 <div class="of"><label class="ol">Contact number</label><input class="oi" id="fq-cphone" type="tel" placeholder="07xxx xxxxxx"></div>
               </div>
               <div class="of" style="margin-bottom:.45rem"><label class="ol">Collection instructions<span class="opt-tag"></span></label><input class="oi" id="fq-cnote" placeholder="e.g. Goods-in at the rear, ring the buzzer"></div>
-              <div class="of"><label class="ol">what3words<span class="opt-tag"></span></label><input class="oi" id="fq-cw3w" placeholder="///lamp.tiger.road"></div>
+              <div class="of" style="margin-bottom:.45rem"><label class="ol">what3words<span class="opt-tag"></span></label><input class="oi" id="fq-cw3w" placeholder="///lamp.tiger.road"></div>
+              <!-- How this end is proved. The poster's choice, not ours: a trade
+                   counter and a building site are not the same problem. -->
+              <div class="of hoff" data-end="c">
+                <label class="ol">How the goods are released</label>
+                <label class="hopt"><input type="radio" name="fq-cmode" value="named" checked onchange="hoffPaint()">
+                  <span><b>Someone will be there</b><i>Your contact meets the driver and releases the goods.</i></span></label>
+                <label class="hopt"><input type="radio" name="fq-cmode" value="coded" onchange="hoffPaint()">
+                  <span><b>Coded release</b><i>We text your contact a six digit code the moment the driver arrives. They ask the driver for it, and only release the goods if it matches.</i></span></label>
+                <div class="hnote" id="fq-cmode-note"></div>
+              </div>
 
               <div class="olbl" style="margin-top:1rem">Delivery</div>
               <div class="of" style="margin-bottom:.45rem"><label class="ol">Full address</label><input class="oi" id="fq-daddr" placeholder="Street, town, postcode" autocomplete="off"></div>
@@ -1682,7 +1704,15 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
                 <div class="of"><label class="ol">Contact number</label><input class="oi" id="fq-dphone" type="tel" placeholder="07xxx xxxxxx"></div>
               </div>
               <div class="of" style="margin-bottom:.45rem"><label class="ol">Delivery instructions<span class="opt-tag"></span></label><input class="oi" id="fq-dnote" placeholder="e.g. Book in on arrival, no forklift on site"></div>
-              <div class="of"><label class="ol">what3words<span class="opt-tag"></span></label><input class="oi" id="fq-dw3w" placeholder="///bench.grass.cloud"></div>
+              <div class="of" style="margin-bottom:.45rem"><label class="ol">what3words<span class="opt-tag"></span></label><input class="oi" id="fq-dw3w" placeholder="///bench.grass.cloud"></div>
+              <div class="of hoff" data-end="d">
+                <label class="ol">How the goods are handed over</label>
+                <label class="hopt"><input type="radio" name="fq-dmode" value="named" checked onchange="hoffPaint()">
+                  <span><b>Someone will be there</b><i>Your contact meets the driver and signs for it.</i></span></label>
+                <label class="hopt"><input type="radio" name="fq-dmode" value="coded" onchange="hoffPaint()">
+                  <span><b>Coded handover</b><i>We text your contact a six digit code when the driver arrives. The driver asks them to read it out, and only hands over if it matches.</i></span></label>
+                <div class="hnote" id="fq-dmode-note"></div>
+              </div>
               <div class="fstep-err" id="fq-err-5"></div>
               <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(4)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqShowPriceV()">See price &#8594;</button></div>
             </div>
@@ -5535,6 +5565,12 @@ function fqShowPriceV(){
      house or building number is asked for here and nowhere earlier. */
   if(!addrHasNumber(_v('fq-caddr'))){fErr('fq-err-5','Add the house or building number to the collection address so the driver can find the door.');return;}
   if(!addrHasNumber(_v('fq-daddr'))){fErr('fq-err-5','Add the house or building number to the delivery address so the driver can find the door.');return;}
+  /* A coded end is a promise to text somebody. Without a mobile there is
+     nobody to text, and the driver arrives to a code nobody can produce. */
+  if(hoffMode('c')==='coded'&&!_v('fq-cphone')){fErr('fq-err-5','A coded release needs a mobile number for the collection contact — that is where the code is sent.');hoffPaint();return;}
+  if(hoffMode('d')==='coded'&&!_v('fq-dphone')){fErr('fq-err-5','A coded handover needs a mobile number for the delivery contact — that is where the code is sent.');hoffPaint();return;}
+  if(!_v('fq-cname')){fErr('fq-err-5','Please give a collection contact name, so the driver knows who to ask for.');return;}
+  if(!_v('fq-dname')){fErr('fq-err-5','Please give a delivery contact name, so we know who is receiving the goods.');return;}
   fErr('fq-err-5','');
   fqShowPrice();
 }
@@ -5617,9 +5653,29 @@ async function fqShowPrice(){
    held, which is why this panel offers the deposit and nothing else.
    ══════════════════════════════════════════════════════════════════════════ */
 const HAF_FIRST_REFUSAL_MINS=10;
+/* ── HOW EACH END IS PROVED ────────────────────────────────────────────────
+   Two ends, two independent choices. A coded end with no mobile on it is not
+   a coded end, so the note says so here rather than letting the driver find
+   out at a shutter door with the goods already on a pallet truck. */
+function hoffMode(end){
+  const r=document.querySelector('input[name="fq-'+end+'mode"]:checked');
+  return r?r.value:'named';
+}
+function hoffPaint(){
+  [['c','fq-cphone','collection contact'],['d','fq-dphone','delivery contact']]
+  .forEach(function(x){
+    const note=document.getElementById('fq-'+x[0]+'mode-note');
+    if(!note)return;
+    note.textContent=(hoffMode(x[0])==='coded'&&!_v(x[1]))
+      ? 'Add a mobile for the '+x[2]+' — that is where the code goes.' : '';
+  });
+}
 function fqOrderPayload(){
   const cons=fqData.consignment||null;
   return{
+    collect_mode:hoffMode('c'), deliver_mode:hoffMode('d'),
+    collect_contact:_v('fq-cname'), collect_contact_phone:_v('fq-cphone'),
+    deliver_contact:_v('fq-dname'), deliver_contact_phone:_v('fq-dphone'),
     customer_name:_v('fq-name'), customer_email:_v('fq-email'), customer_phone:_v('fq-mobile'),
     collect_postcode:_v('fq-from'), deliver_postcode:_v('fq-to'),
     collect_address:_v('fq-caddr'), deliver_address:_v('fq-daddr'),
