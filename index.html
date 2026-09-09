@@ -3566,11 +3566,26 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         <div class="card" style="margin-top:.5rem"><div class="ct">Pooling credit balance</div><div class="cr"><span class="ck">Status</span><span class="cv" style="font-weight:700;color:var(--mu)">Coming soon</span></div><div style="font-size:.74rem;color:var(--mu);line-height:1.55;margin-top:.4rem">Pooling is not switched on yet. When it is, credits you earn will show here.</div></div>
       </div>
 
-      <!-- SHARED: Payments -->
-      <div class="tp" id="pane-billing">
-        <h1 class="pt">Payments &amp; Billing</h1><p class="ps">Invoices, payment history and plan management.</p>
-        <div class="kg"><div class="kc"><div class="kc-l">Balance due</div><div class="kc-v">£0.00</div></div><div class="kc"><div class="kc-l">This month</div><div class="kc-v or">£273</div></div><div class="kc"><div class="kc-l">Last invoice</div><div class="kc-v">£241</div></div></div>
-        <div class="card"><div class="ct">Invoice history</div><table class="dt"><thead><tr><th>Invoice</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead><tbody><tr><td>INV-0048</td><td>1 Jul 2026</td><td>£241</td><td><span class="chip cg">Paid</span></td></tr><tr><td>INV-0041</td><td>1 Jun 2026</td><td>£318</td><td><span class="chip cg">Paid</span></td></tr></tbody></table></div>
+      <!-- SHARED: Payments - what this account owes, by type of payment.
+           This replaces a screen that showed every account that ever signed in
+           an invoice "INV-0048" for £241 and a month's spend of £273. None of it
+           was real and nobody was ever billed it. Every figure below comes from
+           a payment record that exists, or the screen says there is nothing. -->
+      <div class="tp" id="pane-pay-due">
+        <h1 class="pt">Payments</h1><p class="ps">Everything outstanding on your account. Pay by card through HAF PAY, or by bank transfer using the reference we give you.</p>
+        <div class="kg" id="pay-kpis"></div>
+        <div id="pay-sections"><div class="card"><div class="ct">Loading</div><div style="font-size:.78rem;color:var(--mu)">Fetching your payments...</div></div></div>
+      </div>
+
+      <div class="tp" id="pane-pay-hist">
+        <h1 class="pt">Payment history</h1><p class="ps">What you have already settled, and how it was paid.</p>
+        <div class="card"><div class="ct">Settled payments</div><div id="pay-history"><div style="font-size:.78rem;color:var(--mu)">Loading...</div></div></div>
+      </div>
+
+      <div class="tp" id="pane-pay-team">
+        <h1 class="pt">Transfers to confirm</h1><p class="ps">Money the network is still waiting on. Anything the customer has told us they have sent is shown first, so it can be matched off the bank and confirmed.</p>
+        <div class="kg" id="pay-team-kpis"></div>
+        <div class="card"><div class="ct">Awaiting payment</div><div id="pay-team-body"><div style="font-size:.78rem;color:var(--mu)">Loading...</div></div></div>
       </div>
 
       <!-- SHARED: Support -->
@@ -5824,6 +5839,13 @@ function fqOrderPayload(){
     goods:_v('fq-goods'), notes:_v('fq-notes'),
     vehicle_code:fqData.van, job_type_code:fqData.urg,
     direct_username:fqData.direct||null,
+    /* Who is placing it, when somebody is signed in. Until now an order was
+       only ever tied to the email typed on the form, so a member's own job did
+       not appear against their account anywhere — including on the payments
+       screen, where the whole point is seeing what YOU owe. The server treats
+       this as a claim and nothing more: it stamps it on the record, and it is
+       never what decides a price or an access. */
+    account_username:localStorage.getItem('knect-user')||null,
     consignment:cons,
     whatsapp_updates:!!(document.getElementById('fq-wa')||{}).checked
   };
@@ -6093,7 +6115,7 @@ const DRIVER_NAV=[
   {id:'d-earn',l:'Earnings',s:'My Account',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
   {id:'d-comp',l:'Compliance',s:'My Account',ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
   {id:'d-dir',l:'Driver Directory',s:'My Account',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
-  {id:'billing',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
+  {id:'pay-due',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'My Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
   {id:'feedback',l:'Feedback',s:'My Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
 ];
@@ -6109,7 +6131,7 @@ const ADMIN_NAV=[
   {id:'f-cap',l:'Network Map',s:'Freight Tools',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:'f-cover',l:'Coverage Board',s:'Freight Tools',ico:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'},
   {id:'f-lanes',l:'Lane Pricing',s:'Freight Tools',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
-  {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
+  {id:'pay-due',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
   {id:'feedback',l:'Feedback',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
 ];
@@ -6138,7 +6160,7 @@ const BUSINESS_NAV=[
      had checked. */
   {id:'b-saved',l:'Saved Addresses',s:'Send Goods',ico:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'},
   {id:'b-usage',l:'Usage &amp; Activity',s:'Account',ico:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'},
-  {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
+  {id:'pay-due',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
   {id:'feedback',l:'Feedback',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
 ];
@@ -6152,7 +6174,7 @@ const FREIGHT_NAV=[
   {id:'f-dir',l:'Driver Directory',s:'Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'f-lanes',l:'Lane Pricing',s:'Freight',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
   {id:'f-account',l:'Account Controls',s:'Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
-  {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
+  {id:'pay-due',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
   {id:'feedback',l:'Feedback',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {id:'f-plans',l:'Upgrade',s:'Upgrade',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
@@ -6165,7 +6187,7 @@ const PERSONAL_NAV=[
   {id:'f-dir',l:'Driver Directory',s:'My Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'f-cap',l:'Network Map',s:'My Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:'f-account',l:'Account &amp; Pooling',s:'My Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
-  {id:'billing',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
+  {id:'pay-due',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'My Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
   {id:'feedback',l:'Feedback',s:'My Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {id:'f-plans',l:'Upgrade',s:'Upgrade',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
@@ -6248,7 +6270,14 @@ function hafAccess(acct){
   /* The name the member is shown at the foot of the sidebar. Taken off the
      record, never assembled from a username — nobody is called BF638793. */
   const nm=(acct&&(acct.full_name||acct.name||acct.contact_name||acct.company_name))||'';
-  return {type:type,drives:drives,released:released,posts:true,name:String(nm||'').trim()};
+  /* The master's own flag, off the record and nowhere else. It opens ONE extra
+     screen - the transfers the network is still waiting on - and it is read the
+     way `released` is: a record that does not carry it is not a master. A
+     preview of a member's sidebar is built without it, so a master looking at a
+     member's view correctly loses the screen. */
+  const master=!!(acct&&acct.is_master===true);
+  return {type:type,drives:drives,released:released,posts:true,
+          master:master,name:String(nm||'').trim()};
 }
 
 /* The label a person sees for their own account, in their words not ours. */
@@ -7650,7 +7679,25 @@ const HAF_NAV_V1=[
   {g:'MONEY', id:'payouts', l:'Payouts', ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
    tabs:[
     {id:'d-earn', l:'Earnings',             need:'drive'},
-    {id:'billing',l:'Payments &amp; Invoices'},
+   ]},
+
+  /* MONEY OUT - Brent, 9 Sep: "on the HAF KNECT Dashboard on the side bar ...
+     a payments section and inside that section they can make payments to
+     outstanding Invoices and that goes directly to HAF PAY or they can
+     complete with a BACC transfer ... list that as a CRM with section of the
+     different types of payments needed."
+
+     Its own section rather than a row under Payouts, because Payouts is money
+     coming TO a driver and this is money going FROM an account. Every account
+     type can be charged for something, so every account gets it. */
+  {g:'MONEY', id:'payments', l:'Payments', ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
+   tabs:[
+    {id:'pay-due',  l:'Outstanding'},
+    {id:'pay-hist', l:'Payment history'},
+    /* HAF's own side of the same money. Only a master sees the row, and the
+       endpoint behind it checks that again on the server - a hidden row is not
+       a locked door. */
+    {id:'pay-team', l:'Transfers to confirm', need:'master'},
    ]},
 
   {g:'ACCOUNT', id:'compliance', l:'Compliance &amp; Documents', ico:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
@@ -7736,7 +7783,10 @@ function hafPerms(acc){
        owner driver is one person with a van and has no team to run. Whether the
        person looking at it may actually add or remove anybody is decided by the
        database, not here — this only decides whether the screen exists. */
-    team      :t==='fleet'||t==='business'||t==='freight_forwarder'
+    team      :t==='fleet'||t==='business'||t==='freight_forwarder',
+    /* Not a tier and not an account type: the one screen HAF's own side needs
+       inside the member app, for confirming bank transfers against the books. */
+    master    :!!acc.master
   };
 }
 /* A section the account has not got: is it worth showing locked, or is it
@@ -8580,6 +8630,206 @@ async function tmRemove(user,name){
 window.tmLoad=tmLoad;window.tmAdd=tmAdd;window.tmShape=tmShape;
 window.tmReinvite=tmReinvite;window.tmRemove=tmRemove;
 
+/* ── PAYMENTS ───────────────────────────────────────────────────────────────
+   Brent, 9 Sep: a payments section on the sidebar where an account settles what
+   it owes, straight through HAF PAY by card or by bank transfer against a
+   reference we give them.
+
+   Two rules this screen keeps:
+
+   1. NOTHING HERE IS DRAWN FROM NOTHING. Every row comes back from the server
+      as a payment record that exists. The screen this replaces had an invoice
+      and a monthly spend written into the HTML, so every account that ever
+      signed in was shown the same fictional £241 bill. An empty screen that
+      says "nothing outstanding" is worth more than a full one that is invented.
+
+   2. THE PAGE NEVER TOUCHES THE MONEY DATABASE. It asks /api/payments, which
+      proves who is asking with the same credential the sign-in used, and reads
+      with a key that never reaches a browser. */
+const PAY_API='/api/payments';
+let _payData=null,_payAt=0,_payBusy=false,_payOpenRef=null;
+
+function payCred(){
+  const u=localStorage.getItem('knect-user');
+  if(!u||!_hafCred)return null;
+  /* Same shape the rest of the app signs its calls with: a password hash, or a
+     PIN relayed two ways depending on which door the person came through. */
+  return {username:u,hash:_hafCred.hash,relay:_hafCred.relay,cp:_hafCred.relay};
+}
+function payMoney(p){return '£'+(Number(p||0)/100).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function payEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function payDate(d){if(!d)return '';var t=new Date(d);return isNaN(t)?'':t.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
+
+async function payPost(route,extra){
+  const c=payCred();if(!c)return null;
+  try{
+    const r=await fetch(PAY_API+route,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(Object.assign({},c,extra||{}))});
+    return await r.json();
+  }catch(e){return {ok:false,error:'we could not reach the payments service'};}
+}
+
+/* Read once a minute at most. Money does not change between two clicks, and a
+   screen that refetches on every tab press is a screen that feels slow. */
+async function payLoad(force){
+  if(_payBusy)return;
+  if(!force&&_payData&&Date.now()-_payAt<60000){payPaint();return;}
+  _payBusy=true;
+  const d=await payPost('/mine');
+  _payBusy=false;
+  if(d&&d.ok){_payData=d;_payAt=Date.now();}
+  else{_payData=null;_payAt=0;
+       const s=document.getElementById('pay-sections');
+       if(s)s.innerHTML='<div class="card"><div class="ct">We could not load your payments</div>'
+         +'<div style="font-size:.78rem;color:var(--mu);line-height:1.55">'+payEsc((d&&d.error)||'Please try again in a moment.')
+         +'</div><button class="btn btn-gh btn-sm" style="margin-top:.7rem" onclick="payLoad(true)">Try again</button></div>';
+       const h=document.getElementById('pay-history');
+       if(h)h.innerHTML='<div style="font-size:.78rem;color:var(--mu)">We could not load this just now.</div>';
+       return;}
+  payPaint();
+}
+
+function payPaint(){
+  const d=_payData;if(!d)return;
+  const k=document.getElementById('pay-kpis');
+  if(k)k.innerHTML=
+    '<div class="kc"><div class="kc-l">Outstanding</div><div class="kc-v'+(d.outstanding_total_pence>0?' or':'')+'">'+payMoney(d.outstanding_total_pence)+'</div></div>'
+   +'<div class="kc"><div class="kc-l">Payments due</div><div class="kc-v">'+d.outstanding_count+'</div></div>'
+   +'<div class="kc"><div class="kc-l">Settled</div><div class="kc-v">'+(d.history||[]).length+'</div></div>';
+
+  const box=document.getElementById('pay-sections');
+  if(box){
+    let h='';
+    if(!d.outstanding_count){
+      h+='<div class="card"><div class="ct">Nothing outstanding</div>'
+        +'<div style="font-size:.78rem;color:var(--mu);line-height:1.55">You have no payments due right now. Anything you are charged for — a job deposit, a balance, your plan or an invoice — appears here the moment it is raised.</div></div>';
+    }
+    /* Brent asked for the types as their own sections, so every type is drawn
+       whether or not it has anything in it. A type that quietly disappears is a
+       type nobody knows exists until they are billed for it. */
+    (d.sections||[]).forEach(function(s){
+      if(!s.lines.length&&!d.outstanding_count)return;
+      h+='<div class="card"><div class="ct">'+payEsc(s.l)
+        +(s.lines.length?' <span class="chip co">'+payMoney(s.total_pence)+'</span>':'')+'</div>'
+        +'<div style="font-size:.72rem;color:var(--mu);line-height:1.5;margin:-.5rem 0 .8rem">'+payEsc(s.why)+'</div>';
+      if(!s.lines.length){
+        h+='<div style="font-size:.78rem;color:var(--mu)">Nothing outstanding.</div>';
+      }else{
+        h+='<div class="jl">'+s.lines.map(payRow).join('')+'</div>';
+      }
+      h+='</div>';
+    });
+    box.innerHTML=h;
+    if(_payOpenRef)payBank(_payOpenRef,true);
+  }
+
+  const hist=document.getElementById('pay-history');
+  if(hist){
+    const rows=d.history||[];
+    hist.innerHTML=rows.length
+      ?'<table class="dt"><thead><tr><th>What</th><th>Reference</th><th>Date</th><th>Amount</th><th>How</th><th>Status</th></tr></thead><tbody>'
+        +rows.map(function(l){
+          return '<tr><td>'+payEsc(l.what)+'</td><td style="font-size:.7rem;color:var(--mu)">'+payEsc(l.reference||'')+'</td>'
+            +'<td>'+payEsc(payDate(l.paid_at||l.raised_at))+'</td><td>'+payMoney(l.amount_pence)+'</td>'
+            +'<td>'+payEsc(l.method==='bank_transfer'?'Bank transfer':l.method==='card'?'Card':'—')+'</td>'
+            +'<td><span class="chip '+(l.status==='paid'?'cg':l.status==='refunded'?'cb':'ca')+'">'+payEsc(payStatus(l.status))+'</span></td></tr>';
+        }).join('')+'</tbody></table>'
+      :'<div style="font-size:.78rem;color:var(--mu)">Nothing settled yet. Once you have paid something it is listed here with its reference, so you always have a record.</div>';
+  }
+}
+
+function payStatus(s){
+  return s==='paid'?'Paid':s==='refunded'?'Refunded':s==='cancelled'?'Cancelled':s==='awaiting_payment'?'Due':String(s||'');
+}
+
+function payRow(l){
+  const acts=l.needs_raising
+    ?'<button class="btn btn-or btn-xs" onclick="payRaise(\''+payEsc(l.job_ref)+'\')">Pay this balance</button>'
+    :(l.pay_url
+      ?'<a class="btn btn-or btn-xs" href="'+payEsc(l.pay_url)+'" target="_blank" rel="noopener">Pay by card</a>'
+       +'<button class="btn btn-gh btn-xs" onclick="payBank(\''+payEsc(l.reference)+'\')">Bank transfer</button>'
+      :'<span style="font-size:.68rem;color:var(--mu);max-width:11rem;display:block;text-align:right">Pay using the details on your invoice</span>');
+  return '<div class="jc" id="payrow-'+payEsc(l.reference||l.job_ref)+'">'
+    +'<span class="jdot" style="background:var(--or)"></span>'
+    +'<div class="jm">'
+      +(l.reference?'<div class="jref">'+payEsc(l.reference)+'</div>':'')
+      +'<div class="jroute">'+payEsc(l.what)+'</div>'
+      +'<div class="jdet">'+payEsc([l.route,l.due_on?'Due '+payDate(l.due_on):'','Raised '+payDate(l.raised_at)].filter(Boolean).join(' · '))+'</div>'
+      +'<div class="pay-bank" id="paybank-'+payEsc(l.reference||l.job_ref)+'"></div>'
+    +'</div>'
+    +'<div class="jamt">'+payMoney(l.amount_pence)+'</div>'
+    +'<div class="jacts">'+acts+'</div>'
+  +'</div>';
+}
+
+/* Bank transfer. The sort code and account number are HAF PAY's to hold, not
+   this page's — they are fetched for the one reference being paid, so there is
+   no second copy of HAF's bank details anywhere in this file to go stale. */
+async function payBank(ref,silent){
+  const el=document.getElementById('paybank-'+ref);if(!el)return;
+  if(!silent&&_payOpenRef===ref){el.innerHTML='';_payOpenRef=null;return;}
+  _payOpenRef=ref;
+  el.innerHTML='<div style="font-size:.72rem;color:var(--mu);margin-top:.5rem">Fetching the transfer details...</div>';
+  const d=await payPost('/bank',{payment_reference:ref});
+  if(!d||!d.ok){el.innerHTML='<div style="font-size:.72rem;color:var(--rd);margin-top:.5rem">'+payEsc((d&&d.error)||'We could not fetch the transfer details.')+'</div>';return;}
+  if(!d.bank){
+    el.innerHTML='<div style="font-size:.72rem;color:var(--mu);margin-top:.5rem;line-height:1.5">This one is a renewing plan, so it is paid by card rather than by transfer.</div>';
+    return;
+  }
+  el.innerHTML='<div style="margin-top:.6rem;padding:.7rem .85rem;border:1px solid var(--ln);border-radius:var(--rs);background:var(--bg)">'
+    +'<div class="cr"><span class="ck">Account name</span><span class="cv">'+payEsc(d.bank.name)+'</span></div>'
+    +'<div class="cr"><span class="ck">Sort code</span><span class="cv">'+payEsc(d.bank.sort_code)+'</span></div>'
+    +'<div class="cr"><span class="ck">Account number</span><span class="cv">'+payEsc(d.bank.number)+'</span></div>'
+    +'<div class="cr"><span class="ck">Amount</span><span class="cv">'+payMoney(d.amount_pence)+'</span></div>'
+    +'<div class="cr" style="border-bottom:none"><span class="ck">Reference to quote</span><span class="cv" style="color:var(--haf-orange-ink);letter-spacing:.04em">'+payEsc(d.reference)+'</span></div>'
+    +'<div style="font-size:.7rem;color:var(--mu);line-height:1.55;margin-top:.5rem">Use that exact reference. It is how we match your transfer to this payment when it reaches our account.</div>'
+    +'<button class="btn btn-gh btn-xs" style="margin-top:.6rem" onclick="payDeclare(\''+payEsc(d.reference)+'\')">I have sent this transfer</button>'
+    +'</div>';
+}
+
+/* Telling us the money has left is not the money arriving, and this says so.
+   It puts the payment at the top of HAF's own list to be matched off the bank;
+   it does not mark anything as paid. */
+async function payDeclare(ref){
+  const el=document.getElementById('paybank-'+ref);
+  const d=await payPost('/declare',{payment_reference:ref});
+  if(!el)return;
+  if(!d||!d.ok){el.innerHTML='<div style="font-size:.72rem;color:var(--rd);margin-top:.5rem">'+payEsc((d&&d.error)||'We could not record that.')+'</div>';return;}
+  el.innerHTML='<div style="margin-top:.6rem;padding:.7rem .85rem;border:1px solid var(--ln);border-radius:var(--rs);background:var(--bg);font-size:.74rem;line-height:1.55">'
+    +'<strong>Thank you.</strong> We will match your transfer against <span style="color:var(--haf-orange-ink)">'+payEsc(ref)+'</span> and confirm it here once it reaches our account. Transfers usually arrive the same working day.</div>';
+  _payOpenRef=null;
+}
+
+/* A finished job whose balance was never raised. The amount is the one priced
+   when the job was ordered; this only gives it a reference so it can be paid. */
+async function payRaise(jobRef){
+  const d=await payPost('/raise',{job_ref:jobRef});
+  if(!d||!d.ok){alert((d&&d.error)||'We could not raise that payment.');return;}
+  await payLoad(true);
+}
+
+/* HAF's own side: what the network is still waiting on. Master accounts only,
+   and the server checks that again — this is a screen, not a permission. */
+async function payTeamLoad(){
+  const body=document.getElementById('pay-team-body');if(!body)return;
+  const d=await payPost('/awaiting');
+  if(!d||!d.ok){body.innerHTML='<div style="font-size:.78rem;color:var(--mu)">'+payEsc((d&&d.error)||'We could not load this.')+'</div>';return;}
+  const k=document.getElementById('pay-team-kpis');
+  if(k)k.innerHTML='<div class="kc"><div class="kc-l">Awaiting payment</div><div class="kc-v">'+d.count+'</div></div>'
+    +'<div class="kc"><div class="kc-l">Said to be sent</div><div class="kc-v'+(d.declared_count?' or':'')+'">'+d.declared_count+'</div></div>'
+    +'<div class="kc"><div class="kc-l">Value</div><div class="kc-v">'+payMoney(d.total_pence)+'</div></div>';
+  body.innerHTML=d.rows.length
+    ?'<table class="dt"><thead><tr><th>Reference</th><th>Who</th><th>What</th><th>Raised</th><th>Amount</th><th>Customer says sent</th></tr></thead><tbody>'
+      +d.rows.map(function(r){
+        return '<tr><td style="font-size:.7rem;color:var(--haf-orange-ink)">'+payEsc(r.reference)+'</td>'
+          +'<td>'+payEsc(r.who||'')+'</td><td>'+payEsc(r.what||r.type)+'</td>'
+          +'<td>'+payEsc(payDate(r.raised_at))+'</td><td>'+payMoney(r.amount_pence)+'</td>'
+          +'<td>'+(r.declared_at?'<span class="chip ca">'+payEsc(payDate(r.declared_at))+'</span>':'<span style="color:var(--mu)">—</span>')+'</td></tr>';
+      }).join('')+'</tbody></table>'
+    :'<div style="font-size:.78rem;color:var(--mu)">Nothing is waiting on money right now.</div>';
+}
+window.payLoad=payLoad;window.payBank=payBank;window.payDeclare=payDeclare;window.payRaise=payRaise;window.payTeamLoad=payTeamLoad;
+
 function switchTab(id){
   /* "Post a Load" was merged into "Post a Job" on 14 Aug 2026. Everything that
      still points at the old screen — a bookmarked link, a quick action drawn
@@ -8613,6 +8863,11 @@ function switchTab(id){
   if(id==='pane-membership')setTimeout(mbRender,40);
   if(id==='pane-team')setTimeout(tmLoad,40);
   if(id==='pane-settings')setTimeout(setRender,40);
+  /* Both payment screens are drawn from one read, so opening either fills the
+     other — a customer flicking between "what I owe" and "what I have paid"
+     does not pay for a second round trip. */
+  if(id==='pane-pay-due'||id==='pane-pay-hist')setTimeout(function(){payLoad(false);},40);
+  if(id==='pane-pay-team')setTimeout(payTeamLoad,40);
   /* area rule applied to whatever this page just drew */
   setTimeout(()=>{try{hafMaskSweep(p);}catch(e){}},140);
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');

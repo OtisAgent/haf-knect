@@ -108,6 +108,16 @@ async function place(request, env) {
   const direct = String(b.direct_username || '').trim().toUpperCase();
   const directUser = /^[A-Z]{2}[0-9]{4,8}$/.test(direct) ? direct : null;
 
+  /* WHO IS PLACING IT. A signed-in member's order used to be tied to nothing
+     but the email typed on the form, so their own job never appeared against
+     their account — which is exactly what a payments screen has to show. The
+     username rides along and is STAMPED, never trusted: it decides no price,
+     opens no door, and a made-up one simply files the order under a username
+     that will never sign in. Ownership of money is still proved at read time
+     against the credential, not against this. */
+  const claimed = String(b.account_username || '').trim().toUpperCase();
+  const accountUser = /^[A-Z]{2}[0-9]{4,8}$/.test(claimed) ? claimed : null;
+
   // Priced here, from the postcodes, and never read from what the browser sent.
   const leg = await milesBetween(collect, deliver);
   if (!leg) return bad('we could not work out the distance between those two postcodes — please check them');
@@ -171,6 +181,7 @@ async function place(request, env) {
   await coreInsert(env, 'job_order', {
     job_ref: jobRef,
     account_ref: account.id,
+    haf_username: accountUser,
     customer_name: name, customer_email: email, customer_phone: phone,
     company: String(b.company || '').trim() || null,
     collect_postcode: collect, collect_address: String(b.collect_address || '').trim() || null,
@@ -218,6 +229,7 @@ async function place(request, env) {
   const deposit = await coreInsert(env, 'job_payment', {
     job_ref: jobRef,
     account_ref: account.id,
+    haf_username: accountUser,
     account_type: 'customer',
     customer_email: email,
     customer_name: name,
