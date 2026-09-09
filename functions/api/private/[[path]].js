@@ -164,7 +164,13 @@ async function post(request, env) {
     haf_username: acc.haf_username,
     customer_name: o.customer,
     customer_email: o.email,
-    customer_phone: o.customer_phone,
+    /* These four are NOT NULL on the table because the public order journey
+       always has them. A private order does not always: Brent may be invoicing
+       a company he already deals with, sending it to a driver whose van he
+       knows. So they are stored empty or as 'unspecified' rather than being
+       invented — an empty phone number is honest, a made-up one is a lie that
+       somebody will eventually ring. */
+    customer_phone: o.customer_phone || '',
     company: o.company,
     collect_postcode: o.collect, collect_address: o.collect_address,
     deliver_postcode: o.deliver, deliver_address: o.deliver_address,
@@ -172,7 +178,8 @@ async function post(request, env) {
     collect_window: o.collect_window,
     goods: o.goods,
     notes: o.notes,
-    vehicle_code: o.vehicle_code,
+    vehicle_code: o.vehicle_code || 'unspecified',
+    job_type_code: 'private',
     quote_ex_vat_pence: o.quote_ex_vat_pence,
     vat_pence: o.vat_pence,
     total_pence: o.total_pence,
@@ -200,7 +207,12 @@ async function post(request, env) {
      makes /pay/<reference> a real page: card or bank transfer, HAF PAY's own. */
   const payment = await coreInsert(env, 'job_payment', {
     job_ref: jobRef,
-    account_ref: null,
+    /* account_ref is NOT NULL and normally holds the join_signup id of the
+       account that ordered. A private order has no signup — Brent is invoicing
+       somebody who may never have a HAF login — so the payment belongs to the
+       job itself. Credit terms look up this handle and simply find none, which
+       is the correct answer for a customer with no account. */
+    account_ref: jobRef,
     account_type: 'customer',
     customer_email: o.email,
     customer_name: o.customer,
