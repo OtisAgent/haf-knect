@@ -10,6 +10,11 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="admin/lane-factors-v1.js"></script>
 <script src="uk-regions.js"></script>
+<!-- The ONE place an account is named: HAF KNECT, + PLNA when a driver login
+     is attached, · Business when the company number has been verified. Source
+     lives in haf-account-label/ and is copied here by its sync script — never
+     edit this copy, and never spell an account name out by hand again. -->
+<script src="haf-account-label.js"></script>
 <link rel="stylesheet" href="/brand/haf-brand.css">
 <style>
 /* ── TOKENS ─────────────────────────────────────────────────── */
@@ -2217,7 +2222,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
       <div style="font-size:.72rem;color:var(--mu);line-height:1.5;margin-bottom:.7rem">Your master login skips the member front door, so it never shows you a member's sidebar. Pick an account type and you get the real one — the same code a member's sign-in runs.</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.45rem">
         <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('business',false)">Business — sends only</button>
-        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('freight_forwarder',false)">Freight forwarder — sends only</button>
+        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('freight_forwarder',false)">Organise Freight — sends only</button>
         <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('driver',false)">Owner driver — checks not done</button>
         <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('driver',true)">Owner driver — released</button>
         <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('fleet',false)">Fleet — checks not done</button>
@@ -2805,7 +2810,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
       <!-- DRIVER: Directory -->
       <div class="tp" id="pane-d-dir">
         <h1 class="pt">Driver Directory</h1>
-        <p class="ps">List yourself so freight forwarders can find and contact you directly — or book you without posting to the open network.</p>
+        <p class="ps">List yourself so companies posting loads can find and contact you directly — or book you without posting to the open network.</p>
         <div style="background:var(--bl-d);border:1.5px solid rgba(111,119,125,.22);border-radius:var(--rx);padding:.65rem 1rem;font-size:.75rem;color:var(--bl);margin-bottom:1rem;display:flex;align-items:center;gap:.55rem">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           <span>Available on <strong>HAF KNECT Plus and Pro</strong>. Free tier drivers are not listed.</span>
@@ -2814,8 +2819,8 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
           <div class="ct">My listing</div>
           <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem .8rem;background:var(--p2);border-radius:var(--rx);margin-bottom:.8rem">
             <div>
-              <div style="font-weight:700;font-size:.84rem">Show me in the freight forwarder directory</div>
-              <div style="font-size:.72rem;color:var(--mu);margin-top:.12rem">Freight forwarders can contact and book you directly</div>
+              <div style="font-weight:700;font-size:.84rem">Show me in the load poster directory</div>
+              <div style="font-size:.72rem;color:var(--mu);margin-top:.12rem">Companies posting loads can contact and book you directly</div>
             </div>
             <button id="dir-tog" onclick="dirToggle()" style="padding:.32rem .75rem;border-radius:var(--pill);font-size:.72rem;font-weight:800;background:var(--gn);color:#fff;border:none;cursor:pointer;transition:background .15s;white-space:nowrap">● Listed</button>
           </div>
@@ -2841,7 +2846,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
           <button class="btn btn-or btn-sm">Save listing →</button>
         </div>
         <div class="card" style="max-width:560px">
-          <div class="ct">How your listing looks to freight forwarders</div>
+          <div class="ct">How your listing looks to load posters</div>
           <div style="padding:.8rem;background:var(--p2);border-radius:var(--rx);border:1px solid var(--ln)">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
               <div>
@@ -2857,7 +2862,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <button class="btn btn-gh btn-xs">Book this driver →</button>
             </div>
           </div>
-          <p style="font-size:.72rem;color:var(--mu);margin-top:.6rem">Direct bookings from freight forwarders land in your job invites with a <strong>Direct Booking</strong> badge.</p>
+          <p style="font-size:.72rem;color:var(--mu);margin-top:.6rem">Direct bookings from load posters land in your job invites with a <strong>Direct Booking</strong> badge.</p>
         </div>
       </div>
 
@@ -3484,7 +3489,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 
       <!-- FREIGHT: Upgrade (plans & tiers) -->
       <div class="tp" id="pane-f-plans">
-        <h1 class="pt">Upgrade</h1><p class="ps">All freight forwarding accounts can post loads for any client. Your tier sets your network fee, profit pooling, and tools — upgrade any time.</p>
+        <h1 class="pt">Upgrade</h1><p class="ps">All Organise Freight accounts can post loads for any client. Your tier sets your network fee, profit pooling, and tools — upgrade any time.</p>
         <div class="plg" style="grid-template-columns:repeat(auto-fit,minmax(195px,1fr))">
           <div class="plc">
             <div class="pl-n">HAF KNECT Free</div>
@@ -3695,7 +3700,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
             </div>
             <div class="dc-sub">Account posting the load</div>
             <div class="dc-grid">
-              <div><label class="ol">Role</label><select class="fi2" id="dc-s-prole" onchange="dcSim()"><option value="freight">Freight forwarder</option><option value="business">Business</option><option value="fleet">Fleet / courier company</option><option value="driver">Driver</option></select></div>
+              <div><label class="ol">Role</label><select class="fi2" id="dc-s-prole" onchange="dcSim()"><option value="freight">Organise Freight</option><option value="business">Business</option><option value="fleet">Fleet / courier company</option><option value="driver">Driver</option></select></div>
               <div><label class="ol">Plan</label><select class="fi2" id="dc-s-ptier" onchange="dcSim()"><option value="lite">HAF KNECT Free</option><option value="plus">HAF KNECT Plus</option><option value="pro">HAF KNECT Pro</option></select></div>
               <div><label class="ol">Founder status</label><select class="fi2" id="dc-s-pfnd" onchange="dcSim()"><option value="no">No</option><option value="yes">Yes</option></select></div>
               <div><label class="ol">VAT applies</label><select class="fi2" id="dc-s-vat" onchange="dcSim()"><option value="yes">Yes</option><option value="no">No</option></select></div>
@@ -3804,7 +3809,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
             <select class="fi2" id="aa-type" onchange="aaLoad()">
               <option value="">All account types</option>
               <option value="driver">Drivers (PLNA)</option>
-              <option value="freight">Freight forwarders</option>
+              <option value="freight">Organise Freight</option>
               <option value="business">Business accounts</option>
               <option value="fleet">Fleet accounts</option>
               <option value="fleet_driver">Drivers inside fleets</option>
@@ -6248,12 +6253,24 @@ function hafAccess(acct){
   /* The name the member is shown at the foot of the sidebar. Taken off the
      record, never assembled from a username — nobody is called BF638793. */
   const nm=(acct&&(acct.full_name||acct.name||acct.contact_name||acct.company_name))||'';
-  return {type:type,drives:drives,released:released,posts:true,name:String(nm||'').trim()};
+  /* The name of the account, worked out in one shared place rather than here.
+     Brent, 9 Sep 2026: everyone gets HAF KNECT, drivers get PLNA on top, and a
+     verified company number earns the Business tag. Passing `released` through
+     as plna_released keeps the rule honest — a driver who has not been cleared
+     cannot open PLNA, so their account must not claim to have one. */
+  const lbl=(self.HAFAccountLabel&&self.HAFAccountLabel.label)
+    ? self.HAFAccountLabel.label({account_type:type,plna_released:released,
+        company_verified:(acct&&acct.company_verified)})
+    : {product:'HAF KNECT',full:'HAF KNECT',does:'Account',tags:[]};
+  return {type:type,drives:drives,released:released,posts:true,name:String(nm||'').trim(),
+          label:lbl,account_name:lbl.full,product:lbl.product};
 }
 
-/* The label a person sees for their own account, in their words not ours. */
+/* What a person DOES, kept for the sentences that are about driving. The name
+   of their ACCOUNT is acc.account_name and comes from the shared file above:
+   "Freight Forwarder" is gone from every screen a customer reads. */
 const HAF_TYPE_LABEL={driver:'Owner Driver',fleet:'Fleet',
-                      business:'Business',freight_forwarder:'Freight Forwarder'};
+                      business:'Business',freight_forwarder:'Organise Freight'};
 
 
 /* ── "ADD TO YOUR ACCOUNT" — its own section in the sidebar ────────────────
@@ -6405,8 +6422,11 @@ function enterKnectApp(u,acct){
     _setMyTier(null);                           // real sign-in: tier comes from
                                                 // the account record, not a guess
 
-    /* The chip says what they signed up as, not what the app assumed. */
-    roleEl.textContent=HAF_TYPE_LABEL[acc.type]||'Account';
+    /* The chip says which HAF doors this account opens — HAF KNECT for
+       everyone, + PLNA once a driver login is attached, · Business once the
+       company number has been checked. Not what the app assumed, and no longer
+       trade jargon nobody outside the industry recognises. */
+    roleEl.textContent=acc.account_name||'HAF KNECT';
     roleEl.className='role-chip chip '+(acc.type==='freight_forwarder'?'co':'cb');
 
     /* The PLNA button leaves this app for the driving site. It appears for an
@@ -6683,7 +6703,7 @@ function viewAsMember(type,released){
   acc.preview=true;
 
   const roleEl=document.getElementById('tb-role');
-  roleEl.textContent=HAF_TYPE_LABEL[acc.type]||'Account';
+  roleEl.textContent=acc.account_name||'HAF KNECT';
   roleEl.className='role-chip chip '+(acc.type==='freight_forwarder'?'co':'cb');
 
   const plnaBtn=document.getElementById('plna-link-btn');
@@ -6741,7 +6761,7 @@ const DC_TIERS={
 };
 const DC_ROLES=[
   {k:'driver' ,l:'Driver'                ,side:'DRIVER' ,posts:false},
-  {k:'freight',l:'Freight forwarder'     ,side:'FREIGHT',posts:true },
+  {k:'freight',l:'Organise Freight'     ,side:'FREIGHT',posts:true },
   {k:'business',l:'Business'             ,side:null     ,posts:true },
   {k:'fleet'  ,l:'Fleet / courier company',side:'FLEET' ,posts:true },
 ];
@@ -6893,7 +6913,7 @@ function dcFeatureSections(tier,roleDef,lvl){
   const miss=(n,title,why)=>dcSecHead(n,title,'')+'<div class="card"><div class="dc-note">'+why+'</div></div>';
 
   if(!roleDef.side)
-    return miss(2,'Dashboard features','The shared feature catalogue does not carry a Business list yet — it holds Driver, Fleet and Freight forwarder. Rather than invent one here, this is left blank until the real list is added to the catalogue every other screen reads.');
+    return miss(2,'Dashboard features','The shared feature catalogue does not carry a Business list yet — it holds Driver, Fleet and Organise Freight. Rather than invent one here, this is left blank until the real list is added to the catalogue every other screen reads.');
   if(!A||!A.featureSections)
     return miss(2,'Dashboard features','The shared feature catalogue did not load, so no feature list is shown. It is never guessed at from this page.');
 
@@ -7094,7 +7114,7 @@ function dcSim(){
      '<div class="cr"><span class="ck">Effective network fee</span><span class="cv">'+DC_PCT(r.feePct)+'</span></div>'+
      '<div class="cr"><span class="ck"><strong>HAF connection margin</strong></span><span class="cv"><strong style="color:var(--haf-orange-ink)">'+DC_MONEY(r.fee)+'</strong></span></div></div>';
   h+='</div>';
-  h+='<div class="card"><div class="ct">'+(g('dc-s-prole').value==='freight'?'Freight forwarder':'Load poster')+'</div>'+
+  h+='<div class="card"><div class="ct">'+(g('dc-s-prole').value==='freight'?'Organise Freight':'Load poster')+'</div>'+
      '<div class="cr"><span class="ck">Amount paid to HAF KNECT</span><span class="cv">'+DC_MONEY(r.sub)+' ex VAT</span></div>'+
      '<div class="cr"><span class="ck">VAT</span><span class="cv">'+(r.vat?DC_MONEY(r.vat)+' at '+DC_PCT(HAF_VAT):'not applied')+'</span></div>'+
      '<div class="cr"><span class="ck"><strong>Total cost</strong></span><span class="cv"><strong>'+DC_MONEY(r.total)+'</strong></span></div>';
@@ -8009,7 +8029,7 @@ function mbRender(){
   const lvlKey=(window.HAF_ACCOUNT_LEVEL||'lite');
   const lvl=lvlKey.toUpperCase();
   head.innerHTML='<div class="ct">Your account</div>'+
-    '<div class="cr"><span class="ck">Account type</span><span class="cv">'+_esc(HAF_TYPE_LABEL[acc.type]||'Account')+'</span></div>'+
+    '<div class="cr"><span class="ck">Account</span><span class="cv">'+_esc(acc.account_name||'HAF KNECT')+'</span></div>'+
     '<div class="cr"><span class="ck">HAF KNECT plan</span><span class="cv"><span class="chip cb">'+_esc(HAF_LEVEL_LABEL[lvlKey]||'HAF KNECT Free')+'</span></span></div>'+
     '<div class="cr"><span class="ck">Clever Checked</span><span class="cv">'+(acc.released
       ?'<span class="chip cg">Released &#8212; you can accept network work</span>'
@@ -8053,7 +8073,7 @@ function mbRender(){
     row('Accept network jobs',P.drive,acc.drives?'Complete your Clever checks':'Add owner driver to your account')+
     row('PLNA driver planner',P.plna,acc.drives?'Complete your Clever checks':'Drivers only')+
     row('Fleet Management',P.fleet,acc.type==='fleet'?'Complete your Clever checks':'Register a fleet on your account')+
-    row('Post third-party client loads',P.freight,'Freight forwarder accounts');
+    row('Post third-party client loads',P.freight,'Organise Freight accounts');
 
   if(!A||!A.featuresForSideLevel){
     ft.innerHTML='<div class="card"><div class="ct">Features</div><div class="cr"><span class="ck">The feature list has not loaded, so this page is not showing one. Reload the page and it will come back.</span></div></div>';
@@ -8671,7 +8691,7 @@ function _when(iso){
 const _STATUS_CHIP={active:'cg',on_hold:'ca',missing_documents:'ca',rejected:'cr',blocked:'cr'};
 const _STATUS_LBL={active:'Active',on_hold:'On hold',missing_documents:'Missing documents',
                    rejected:'Rejected',blocked:'Blocked'};
-const _TYPE_LBL={driver:'Driver',freight:'Freight forwarder',business:'Business',
+const _TYPE_LBL={driver:'Driver',freight:'Organise Freight',business:'Business',
                  fleet:'Fleet',fleet_driver:'Fleet driver'};
 const _EVENT_LBL={signed_up:'applied',email_confirmed:'confirmed their email',
                   approved:'was approved',released:'was let into the network',
@@ -11146,7 +11166,7 @@ function _addDirectInvite(bk){
   card.innerHTML=`
     <div class="xc-head">
       <div class="xc-badges"><span class="xb inv">Direct Booking</span><span class="xb-ref">${bk.ref}</span></div>
-      <div style="font-size:.68rem;color:var(--mu)">from freight forwarder</div>
+      <div style="font-size:.68rem;color:var(--mu)">from a load poster</div>
     </div>
     <div class="xc-route">${bk.from} → ${bk.to}</div>
     <div class="xc-sr">
@@ -11156,7 +11176,7 @@ function _addDirectInvite(bk){
       ${bk.weight?`<div class="xcs"><div class="xcs-v">${bk.weight} kg</div><div class="xcs-k">Weight</div></div>`:''}
     </div>
     <div class="xc-foot">
-      <div class="xc-meta">Direct booking · Posted by freight forwarder via directory</div>
+      <div class="xc-meta">Direct booking · Posted by a load poster via directory</div>
       <div class="xc-btns">
         <button class="btn btn-gh btn-xs" onclick="this.closest('.xc').remove()">Decline</button>
         <button class="btn btn-or btn-sm" onclick="xDirectAccept(this,'${bk.ref}','${bk.from} → ${bk.to}','Direct booking')">Accept →</button>
