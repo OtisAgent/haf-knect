@@ -35,9 +35,15 @@ check('it is never given a price either', !r.priced, r);
 r = await type('S9 1XH','Manchester');
 check('a town is resolved to a real place and shown back to them',
       /Manchester/.test(r.priced) && /£/.test(r.priced), r);
-const resolved = await p.evaluate(()=>document.getElementById('pc-to').value);
-check('what the page carries forward is a postcode, never the word',
-      /^[A-Z]{1,2}[0-9][A-Z0-9]?\s?[0-9][A-Z]{2}$/.test(resolved.toUpperCase()), resolved);
+/* The box keeps their own words on purpose — it is their order, and reading
+   "Manchester" back is friendlier than a postcode they did not type. What has
+   to be a real postcode is the value the box STANDS FOR, which is what the
+   order sends. */
+const stood = await p.evaluate(()=>{const e=document.getElementById('pc-to');
+  return { typed: e.value, pc: e.dataset.pc || '' }});
+check('the box keeps the words they typed', /Manchester/i.test(stood.typed), stood);
+check('and it stands for a real postcode',
+      /^[A-Z]{1,2}[0-9][A-Z0-9]?\s?[0-9][A-Z]{2}$/.test(stood.pc.toUpperCase()), stood);
 
 r = await type('s91xh','m11ae');
 check('a carelessly typed pair still gets a price', /£/.test(r.priced), r);
