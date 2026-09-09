@@ -7724,9 +7724,21 @@ const HAF_NAV_V1=[
     {id:'__plna', l:'Open my PLNA', ext:'https://plna.usehaf.co.uk'},
    ]},
 
+  /* Money going OUT to a driver. Only an account that drives has any. */
   {g:'MONEY', id:'payouts', l:'Payouts', ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+   flat:true,
    tabs:[
     {id:'d-earn', l:'Earnings',             need:'drive'},
+   ]},
+
+  /* Money coming IN. It was a tab folded under Payouts, which meant what an
+     account OWES was filed under what it is PAID — two clicks deep, behind a
+     word for the opposite thing, and most accounts never drive so they never
+     opened it at all. Every account can owe HAF money, so this row has no
+     need: gate and sits on the sidebar on its own. */
+  {g:'MONEY', id:'payments', l:'Payments', ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
+   flat:true,
+   tabs:[
     {id:'billing',l:'Payments &amp; Invoices'},
    ]},
 
