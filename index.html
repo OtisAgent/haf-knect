@@ -3022,6 +3022,20 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
           <label class="set-ck"><input type="checkbox"> WhatsApp <span class="chip ca">Coming soon</span></label>
           <label class="set-ck"><input type="checkbox"> Telegram <span class="chip ca">Coming soon</span></label>
         </div>
+        <!-- Offer code. Brent, 9 Sep: the same field as the join page, here as
+             well, because an offer may reach somebody who joined months ago.
+             It is checked against the account's own role, so a driver offer
+             cannot be spent by a business. -->
+        <div class="card" style="max-width:560px">
+          <div class="ct">Offer code</div>
+          <p class="ps" style="margin:0 0 .6rem">If HAF has given you a code, enter it here. Nothing to do if you have not been given one.</p>
+          <div class="fr">
+            <div class="fg"><label class="fl">Code</label><input class="fi2" id="set-dc" placeholder="Enter your code" autocomplete="off" style="text-transform:uppercase;max-width:220px"></div>
+          </div>
+          <button class="btn btn-or btn-sm" onclick="dcApply()">Apply code</button>
+          <div id="set-dc-msg" style="font-size:.76rem;color:var(--mu);margin-top:.5rem"></div>
+          <div id="set-dc-have" style="font-size:.76rem;margin-top:.55rem"></div>
+        </div>
         <div class="card" style="max-width:560px">
           <div class="ct">Sign in &amp; security</div>
           <div class="cr"><span class="ck">Your HAF username</span><span class="cv" id="set-user">&#8212;</span></div>
@@ -3147,6 +3161,24 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         <h1 class="pt">Saved Addresses</h1><p class="ps">Your regular warehouses, shops and delivery points.</p>
         <div class="card"><div class="ct">Saved locations</div><div class="cr"><span class="ck">Main warehouse · Sheffield S9 1AA</span><button class="btn btn-gh btn-xs">Use</button></div><div class="cr"><span class="ck">Manchester depot · M60 1AA</span><button class="btn btn-gh btn-xs">Use</button></div><div class="cr"><span class="ck">Leeds store · LS1 2AB</span><button class="btn btn-gh btn-xs">Use</button></div></div>
         <button class="btn btn-or btn-sm">Add new address</button>
+      </div>
+
+      <!-- ═══════════ TEAM MEMBERS ═══════════
+           Brent, 9 Sep: "we can create business usernames if we wish but drivers
+           and PLNA's have 2 intials and last 4 digits of phone number and the
+           last 2 digits of the year of birth… add team members to generate a log
+           in if needed but have a master log in potentially… any one individual
+           then gets the log in, thats the rule above."
+
+           So this screen never types a username. It sends the person's details
+           and the DATABASE builds the name, which is the only way the rule can
+           hold on a screen nobody is watching. Nothing here can set a
+           colleague's PIN either — the invite link is the whole hand-over, and
+           the colleague chooses their own number at the other end of it. -->
+      <div class="tp" id="pane-team">
+        <h1 class="pt">Team Members</h1>
+        <p class="ps">Everyone who can sign in to this company's HAF account. Each person gets their own username and chooses their own PIN — you never see it.</p>
+        <div id="tm-body"><div class="card"><div class="cr"><span class="ck">Loading your team…</span></div></div></div>
       </div>
 
       <!-- FREIGHT: "Post a Load" USED TO LIVE HERE.
@@ -5934,6 +5966,61 @@ function openDemoGate(){
 const PLNA_URL='https://ggkpqqrtxtlafdkxcaqg.supabase.co';
 const PLNA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdna3BxcXJ0eHRsYWZka3hjYXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTM2NjAsImV4cCI6MjA5Nzc2OTY2MH0.hB70KOYZu4dshwhsrxF_dFyBn0n72gStWTwxYGsLdgY';
 const PLNA_HOME='https://plna.usehaf.co.uk';
+
+/* ── WHO SENT THEM, ON THIS SIDE OF THE NETWORK (Brent, 9 Sep 2026) ─────────
+   Until now only join.usehaf.co.uk knew what an affiliate code was. Anyone
+   who landed on KNECT carrying one lost it on arrival, so the introducer
+   earned nothing and had no way to find out. Two things fix that.
+
+   1. Catch ?a=CODE here too, exactly as the join page does.
+   2. Keep it in a COOKIE on .usehaf.co.uk, not only in this page's own
+      storage. join, knect and plna are separate origins, so browser storage
+      written on one of them is invisible to the other two — the code would
+      have died at the first hop. A cookie on the parent domain is the only
+      thing all three actually share.
+
+   Ninety days, because an introduction that turns into a job a month later
+   is still that person's introduction. */
+const HAF_AFF_COOKIE='haf_aff';
+function hafAffRemember(code){
+  try{localStorage.setItem('haf-affiliate-code',code);}catch(e){}
+  try{
+    document.cookie=HAF_AFF_COOKIE+'='+encodeURIComponent(code)+
+      ';path=/;max-age='+(90*24*60*60)+';domain=.usehaf.co.uk;samesite=lax'+
+      (location.protocol==='https:'?';secure':'');
+  }catch(e){}
+}
+function hafAffHeld(){
+  try{
+    const m=document.cookie.match(/(?:^|;\s*)haf_aff=([^;]*)/);
+    if(m&&m[1])return decodeURIComponent(m[1]);
+  }catch(e){}
+  try{return localStorage.getItem('haf-affiliate-code')||null;}catch(e){return null;}
+}
+(function hafCatchAffiliate(){
+  try{
+    const p=new URLSearchParams(location.search);
+    const raw=(p.get('a')||p.get('ref')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+    if(!raw)return;
+    hafAffRemember(raw);
+    let v=null;
+    try{
+      v=localStorage.getItem('af-visitor');
+      if(!v){v=Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);
+             localStorage.setItem('af-visitor',v);}
+    }catch(e){}
+    /* Fire and forget. A click we failed to count must never stop the page. */
+    fetch(PLNA_URL+'/rest/v1/rpc/haf_affiliate_track',{method:'POST',keepalive:true,
+      headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({p_code:raw,p_dest:'knect',p_visitor:v})}).catch(()=>{});
+    /* Tidy the address bar so nobody goes on to share this page still
+       carrying somebody else's code. */
+    p['delete']('a');p['delete']('ref');
+    const q=p.toString();
+    history.replaceState({},'',location.pathname+(q?'?'+q:'')+location.hash);
+  }catch(e){/* a link we cannot track must still open the page */}
+})();
+
 function openLogin(){document.getElementById('login-ov').classList.add('open')}
 function closeLogin(){document.getElementById('login-ov').classList.remove('open')}
 async function hafSha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
@@ -7515,6 +7602,7 @@ const HAF_NAV_V1=[
   {g:'ACCOUNT', id:'membership', l:'Account &amp; Plan', ico:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
    tabs:[
     {id:'membership',l:'What my account includes'},
+    {id:'team',      l:'Team Members',          need:'team'},
     {id:'b-usage',   l:'Usage &amp; Activity', need:'post'},
     {id:'f-account', l:'Account Controls',     need:'freight'},
     {id:'f-plans',   l:'Upgrade',              need:'freight'},
@@ -7584,7 +7672,13 @@ function hafPerms(acc){
     fleet     :t==='fleet',                // run drivers and vans
     freight   :t==='freight_forwarder',    // third-party client loads
     network   :false,                      // nobody sees the other accounts
-    compliance:drives                      // only accounts that drive have driver docs
+    compliance:drives,                     // only accounts that drive have driver docs
+    /* 9 Sep, Brent: a company opening an account "on behalf of" needs somewhere
+       to put its people. An account that IS a company gets the Team screen; an
+       owner driver is one person with a van and has no team to run. Whether the
+       person looking at it may actually add or remove anybody is decided by the
+       database, not here — this only decides whether the screen exists. */
+    team      :t==='fleet'||t==='business'||t==='freight_forwarder'
   };
 }
 /* A section the account has not got: is it worth showing locked, or is it
@@ -7929,6 +8023,77 @@ function setRender(){
   ['name','co','email','tel','vat'].forEach(k=>{
     const f=document.getElementById('set-'+k); if(f&&v[k]!=null)f.value=v[k];
   });
+  dcMine();
+}
+
+/* ── OFFER CODE, THE KNECT SIDE (Brent, 9 Sep 2026) ────────────────────────
+   The same field as join.usehaf.co.uk, for people already on the network.
+   Same rule too: the code is checked against WHO is asking, so an offer
+   written for drivers cannot be spent by a business.
+
+   Nothing here changes a price. What a code is worth is written on the code,
+   and until Brent says what a code should do this records the acceptance and
+   nothing more. */
+const DC_WHY={
+  empty:'Enter your code first.',
+  unknown:'We do not recognise that code. Check it and try again.',
+  inactive:'That code is not running at the moment.',
+  not_started:'That code has not opened yet.',
+  expired:'That code has finished.',
+  used_up:'That code has been fully taken up.',
+  wrong_audience:'That code is not for this kind of account.',
+  no_account:'Sign in first and we can put the code on your account.'
+};
+async function dcRpc(fn,args){
+  const r=await fetch(PLNA_URL+'/rest/v1/rpc/'+fn,{method:'POST',
+    headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify(args)});
+  if(!r.ok)throw new Error(fn+' '+r.status);
+  return r.json();
+}
+async function dcApply(){
+  const f=document.getElementById('set-dc');
+  const m=document.getElementById('set-dc-msg');
+  if(!f||!m)return;
+  const code=(f.value||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  const user=(localStorage.getItem('knect-user')||'').trim();
+  if(!code){m.textContent=DC_WHY.empty;return;}
+  m.textContent='Checking…';
+  try{
+    const d=await dcRpc('haf_discount_claim',
+      {p_code:code,p_username:user,p_audience:hafRole(),p_source:'knect'});
+    if(d&&d.ok){
+      /* "Already on your account" is not a failure and must not read as one. */
+      m.textContent=d.already
+        ? 'That code is already on your account.'
+        : 'Code applied — '+(d.label||code)+'.';
+      f.value='';
+      dcMine();
+    }else{
+      m.textContent=DC_WHY[d&&d.reason]||'We could not use that code.';
+    }
+  }catch(e){
+    /* A network wobble is not a bad code, and telling them it is sends them
+       hunting for a typo that is not there. */
+    m.textContent='We could not check that code just now. Nothing has changed — try again in a moment.';
+  }
+}
+async function dcMine(){
+  const box=document.getElementById('set-dc-have'); if(!box)return;
+  const user=(localStorage.getItem('knect-user')||'').trim();
+  if(!user){box.innerHTML='';return;}
+  try{
+    const d=await dcRpc('haf_discount_mine',{p_username:user});
+    const list=(d&&d.codes)||[];
+    box.innerHTML=list.length
+      ? '<b style="color:var(--tx)">On your account</b>'+list.map(c=>
+          '<div style="margin-top:.2rem">'+hafEsc(c.code)+' — '+hafEsc(c.label)+'</div>').join('')
+      : '';
+  }catch(e){
+    /* Silence, not a nought and not an error: "we could not ask" is a
+       different thing from "you have none", and only one of them is news. */
+    box.innerHTML='';
+  }
 }
 function setSave(){
   const v={};
@@ -8148,6 +8313,212 @@ async function hafJobsClaim(id,btn){
   hafJobsPaint();
 }
 
+
+/* ═══════════════════════ TEAM MEMBERS ═══════════════════════════════════════
+   A company's people, and the one place logins are handed out.
+
+   Brent, 9 Sep 2026: "add team members to generate a log in if needed but have
+   a master log in potentially… any one individual then gets the log in, thats
+   the rule above 2 intials, 4 digits, last 2 digits of year of birth."
+
+   Two things this screen deliberately cannot do.
+
+   It cannot type a username. The name comes back from the database, which
+   builds it from the rule — two initials, last four of the mobile, last two of
+   the birth year for anyone who drives; the company abbreviation and last four
+   for anyone who does not. A rule enforced by a form is a rule until somebody
+   writes a second form. The preview below asks the database for the same answer
+   rather than working it out here, so the screen can never show one name and
+   create another.
+
+   And it cannot set a colleague's PIN. The account is created with no way in at
+   all, and the person turns it into a login themselves on the invite link. If
+   an owner could set it, an owner could sign in as their own staff — and then
+   nothing anybody did on this account would provably be theirs.
+
+   The master login is the account that was opened at join.usehaf.co.uk. It is
+   listed here as the owner rather than being a separate thing to remember. */
+const TM_INVITE_BASE='https://join.usehaf.co.uk/team.html';
+let _tmCompany=null,_tmAdmin=false,_tmName='';
+
+function _tmRoleChip(m){
+  if(m.role==='owner')return '<span class="ck" style="font-weight:700">Master login</span>';
+  if(m.drives)return '<span class="ck">Driver</span>';
+  return '<span class="ck">Office</span>';
+}
+function _tmState(m){
+  if(m.state==='active')return m.drives
+    ?(m.plna_released?'Signed in · cleared to take work':'Signed in · waiting on Clever checks')
+    :'Signed in';
+  if(m.state==='expired')return 'Invite expired';
+  return 'Invited — waiting for them to set their PIN';
+}
+
+async function tmLoad(){
+  const box=document.getElementById('tm-body');
+  if(!box)return;
+  try{
+    /* The account holder appears on their own team the first time they open
+       this screen, so "who can get into this account" has one answer from the
+       very first look rather than an empty list plus a footnote. */
+    await _netRpc('haf_team_seed_owner',{});
+    const r=await _netRpc('haf_team_list',{});
+    const d=r.rows&&r.rows.length?r.rows[0]:r.rows;
+    const data=(d&&d.members)?d:(r.rows||{});
+    if(!data||!data.members){box.innerHTML=_tmErr('We could not read your team just then.');return;}
+    _tmCompany=data.company;_tmAdmin=data.am_admin===true;
+    const own=data.members.filter(m=>m.role==='owner')[0];
+    _tmName=own?own.name:'';
+    tmPaint(data.members);
+  }catch(e){box.innerHTML=_tmErr('We could not read your team just then.');}
+}
+function _tmErr(msg){
+  return '<div class="card"><div class="cr"><span class="ck">'+_esc(msg)+
+    ' Nothing has been changed. Try again in a moment, or tell HAF if it keeps happening.</span></div></div>';
+}
+
+function tmPaint(members){
+  let h='<div class="card"><div class="ct">Who can sign in to '+_esc(_tmName||'this account')+'</div>';
+  members.forEach(function(m){
+    h+='<div class="cr" style="align-items:flex-start;gap:.6rem;flex-wrap:wrap">'
+      +'<span class="ck" style="flex:1;min-width:190px"><b>'+_esc(m.name)+'</b><br>'
+      +'<span style="font-family:ui-monospace,monospace;letter-spacing:.04em">'+_esc(m.username)+'</span>'
+      +'<br><span style="opacity:.75">'+_esc(_tmState(m))+'</span></span>'
+      +_tmRoleChip(m);
+    /* Only an admin is offered the buttons, and only for somebody who is not
+       themselves. The database refuses the rest regardless — this just stops
+       offering a press that would come back refused. */
+    if(_tmAdmin&&m.role!=='owner'){
+      if(m.state!=='active'){
+        h+='<button class="btn btn-gh btn-xs" onclick="tmReinvite(\''+_esc(m.username)+'\')">New invite link</button>';
+      }
+      h+='<button class="btn btn-gh btn-xs" onclick="tmRemove(\''+_esc(m.username)+'\',\''+_esc(m.name)+'\')">Remove</button>';
+    }
+    h+='</div>';
+  });
+  h+='</div>';
+
+  if(_tmAdmin){
+    h+='<div class="card"><div class="ct">Add someone to this account</div>'
+      +'<div class="of" style="margin-bottom:.55rem"><label class="ol">First name</label><input class="oi" id="tm-fn" autocomplete="off"></div>'
+      +'<div class="of" style="margin-bottom:.55rem"><label class="ol">Last name</label><input class="oi" id="tm-ln" autocomplete="off"></div>'
+      +'<div class="of" style="margin-bottom:.55rem"><label class="ol">Email address</label><input class="oi" id="tm-em" type="email" autocomplete="off"></div>'
+      +'<div class="of" style="margin-bottom:.55rem"><label class="ol">Their own mobile number</label><input class="oi" id="tm-ph" type="tel" autocomplete="off"></div>'
+      +'<div class="cr"><label class="ck" style="cursor:pointer"><input type="checkbox" id="tm-dr" onchange="tmShape()" style="margin-right:.5rem">This person will drive</label></div>'
+      +'<div class="of hidden" id="tm-dbBox" style="margin-bottom:.55rem"><label class="ol">Date of birth</label><input class="oi" id="tm-db" type="date">'
+      +'<span class="ck" style="display:block;margin-top:.3rem;opacity:.75">Needed only for someone who drives — it is part of a driver\'s HAF username.</span></div>'
+      +'<div class="cr"><span class="ck" id="tm-preview">Their HAF username will appear here as you type.</span></div>'
+      +'<div class="cr" id="tm-msg" style="display:none"></div>'
+      +'<button class="btn btn-or btn-sm" id="tm-go" onclick="tmAdd()">Add and send them an invite</button>'
+      +'<div class="cr"><span class="ck" style="opacity:.75">They choose their own PIN on the invite link. You will never see it, and neither will we.</span></div>'
+      +'</div>';
+  }
+  document.getElementById('tm-body').innerHTML=h;
+  if(_tmAdmin){
+    ['tm-fn','tm-ln','tm-ph','tm-db'].forEach(function(id){
+      const el=document.getElementById(id);if(el)el.addEventListener('input',tmShape);
+    });
+  }
+}
+
+/* The username preview, asked of the database rather than worked out here.
+   Two copies of a naming rule is how the two copies start to disagree. */
+let _tmShapeTimer=null;
+function tmShape(){
+  const drives=document.getElementById('tm-dr').checked;
+  document.getElementById('tm-dbBox').classList.toggle('hidden',!drives);
+  clearTimeout(_tmShapeTimer);
+  _tmShapeTimer=setTimeout(async function(){
+    const out=document.getElementById('tm-preview');if(!out)return;
+    const fn=document.getElementById('tm-fn').value.trim();
+    const ln=document.getElementById('tm-ln').value.trim();
+    const ph=document.getElementById('tm-ph').value.trim();
+    const db=document.getElementById('tm-db').value;
+    try{
+      let fn_,args;
+      if(drives){fn_='haf_username_driver';args={p_first:fn,p_last:ln,p_phone:ph,p_dob:db||null};}
+      else{fn_='haf_username_staff';args={p_company:_tmName||'',p_phone:ph};}
+      const r=await fetch(PLNA_URL+'/rest/v1/rpc/'+fn_,{method:'POST',
+        headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+        body:JSON.stringify(args)});
+      const u=await r.json();
+      out.innerHTML=u
+        ?'Their HAF username will be <b style="font-family:ui-monospace,monospace">'+_esc(u)+'</b>'
+        :'Their HAF username will appear here once you have '+(drives
+            ?'their name, mobile number and date of birth.'
+            :'their name and mobile number.');
+    }catch(e){out.textContent='Their HAF username will appear here as you type.';}
+  },220);
+}
+
+const TM_SAYS={
+  not_allowed:'Only the account holder can add people to this account.',
+  name_required:'Please give their first and last name.',
+  phone_required:'Please give a mobile number we can reach them on.',
+  dob_required_for_driver:'A driver\'s HAF username is built from their date of birth, so we need it before we can add them.',
+  cannot_build_username:'We could not build a HAF username from those details — please check the mobile number.',
+  username_taken:'Somebody on HAF already has that username. That usually means this person has already been added.',
+  cannot_remove_yourself:'You cannot remove yourself — this account would be left with nobody running it.',
+  not_found:'We could not find that person on your team.'
+};
+/* Every refusal from the database arrives as a short code. It is turned into a
+   sentence HERE and nowhere else, so a company owner never reads
+   "dob_required_for_driver" on their own screen. An unrecognised code falls
+   back to plain words and an assurance that nothing changed — never the code
+   itself. */
+function _tmSay(el,text){
+  el.style.display='';
+  el.innerHTML='<span class="ck">'+_esc(text)+'</span>';
+}
+
+async function tmAdd(){
+  const msg=document.getElementById('tm-msg'),btn=document.getElementById('tm-go');
+  const drives=document.getElementById('tm-dr').checked;
+  btn.disabled=true;
+  try{
+    const r=await _netRpc('haf_team_add',{
+      p_first:document.getElementById('tm-fn').value.trim(),
+      p_last:document.getElementById('tm-ln').value.trim(),
+      p_email:document.getElementById('tm-em').value.trim()||null,
+      p_phone:document.getElementById('tm-ph').value.trim(),
+      p_dob:(drives?document.getElementById('tm-db').value:null)||null,
+      p_drives:drives});
+    const d=r.rows&&r.rows.length?r.rows[0]:r.rows;
+    if(!d||!d.ok){_tmSay(msg,TM_SAYS[d&&d.error]||'We could not add them just then. Nothing has changed.');btn.disabled=false;return;}
+    /* The link is shown once, here, and the owner passes it on. It is the only
+       thing that can turn that account into a login, so it is never emailed
+       from this screen without the owner seeing exactly what is going out. */
+    const link=TM_INVITE_BASE+'?t='+encodeURIComponent(d.invite_token);
+    msg.style.display='';
+    msg.innerHTML='<span class="ck"><b>'+_esc(d.username)+'</b> is ready. Send them this link so they can choose their own PIN — it lasts 14 days:<br>'
+      +'<input class="oi" style="margin-top:.4rem" readonly value="'+_esc(link)+'" onclick="this.select()"></span>';
+    tmLoad();
+  }catch(e){_tmSay(msg,'We could not add them just then. Nothing has changed.');}
+  btn.disabled=false;
+}
+
+async function tmReinvite(user){
+  try{
+    const r=await _netRpc('haf_team_reinvite',{p_member:user});
+    const d=r.rows&&r.rows.length?r.rows[0]:r.rows;
+    if(!d||!d.ok){alert(TM_SAYS[d&&d.error]||'We could not make a new invite link just then.');return;}
+    window.prompt('Send '+user+' this link. It lasts 14 days.',
+                  TM_INVITE_BASE+'?t='+encodeURIComponent(d.invite_token));
+  }catch(e){alert('We could not make a new invite link just then.');}
+}
+
+async function tmRemove(user,name){
+  if(!window.confirm('Remove '+name+' ('+user+') from this account? They will be signed out and will not be able to sign in again.'))return;
+  try{
+    const r=await _netRpc('haf_team_remove',{p_member:user});
+    const d=r.rows&&r.rows.length?r.rows[0]:r.rows;
+    if(!d||!d.ok){alert(TM_SAYS[d&&d.error]||'We could not remove them just then.');return;}
+    tmLoad();
+  }catch(e){alert('We could not remove them just then.');}
+}
+window.tmLoad=tmLoad;window.tmAdd=tmAdd;window.tmShape=tmShape;
+window.tmReinvite=tmReinvite;window.tmRemove=tmRemove;
+
 function switchTab(id){
   /* "Post a Load" was merged into "Post a Job" on 14 Aug 2026. Everything that
      still points at the old screen — a bookmarked link, a quick action drawn
@@ -8179,6 +8550,7 @@ function switchTab(id){
   if(id==='pane-d-jobs')setTimeout(hafJobsPaint,40);
   if(id==='pane-fl-manage')setTimeout(flRenderOverview,40);
   if(id==='pane-membership')setTimeout(mbRender,40);
+  if(id==='pane-team')setTimeout(tmLoad,40);
   if(id==='pane-settings')setTimeout(setRender,40);
   /* area rule applied to whatever this page just drew */
   setTimeout(()=>{try{hafMaskSweep(p);}catch(e){}},140);
@@ -9199,9 +9571,14 @@ async function hafAffPaint(force){
          (paid?'<em>'+money(paid)+' paid so far</em>':'')+'</div>';
   }
 
-  const row=(url,label,act)=>
-    '<button class="sb-af-l" onclick="hafAffCopy(this,'+JSON.stringify(url).replace(/"/g,'&quot;')+')">'+
-    '<b>'+label+'</b><span>'+act+'</span></button>';
+  /* ── ONE link, not three ──
+     Brent, 9 Sep: "cut down to one button". Three buttons read as three codes
+     when there has only ever been one, and two of the three were dead anyway:
+     nothing outside the join page captured a code, so a freight forwarder
+     sharing the KNECT or post-a-job link earned nothing and had no way to
+     know. One link goes to the join page, which does capture, and the code
+     then rides with the person across the network. */
+  const one=links.join;
 
   const tag=acc.preview?'Share &amp; earn · preview':'Share &amp; earn';
   const note=acc.preview
@@ -9212,9 +9589,9 @@ async function hafAffPaint(force){
     '<div class="sb-af-code">'+_esc(code)+'</div>'+
     nums+earn+
     '<div class="sb-af-lnks">'+
-      row(links.join,'Join HAF','Copy')+
-      row(links.knect,'Come into KNECT','Copy')+
-      row(links.job,'Post one job','Copy')+
+      '<button class="sb-af-l" onclick="hafAffCopy(this,'+
+      JSON.stringify(one).replace(/"/g,'&quot;')+')">'+
+      '<b>Copy my link</b><span>Copy</span></button>'+
     '</div>'+
     '<div class="sb-pl-need"><em>'+_esc(share)+'</em></div>'+note;
 }
