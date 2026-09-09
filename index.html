@@ -6603,9 +6603,43 @@ function enterMode(mode){
     switchTab('pane-admin');
     _setModePill('Network Overview','var(--or)');
   }else if(mode==='personal'){
+    /* ── THE MASTER'S OWN ACCOUNT ─────────────────────────────────────────
+       Brent, 9 Sep: "make sure my log in updates in real time with the HAF
+       KNECT Dashboard and PLNA alterations — my log in BF638793 Freight
+       forward account not changed."
+
+       It had not changed because this door built PERSONAL_NAV: a list of ten
+       items written by hand in August and frozen there. Every alteration since
+       has been made to the member sidebar, which is built from the account
+       record by hafAccess and buildNavV1 — so the master was the one account
+       in HAF that never saw its own product. He was still being shown Network
+       Map and Driver Directory, taken off every member months ago, and none of
+       the PLNA card, the documents section, Team Members, Backload, Saved
+       Addresses or share & earn.
+
+       So this door now builds exactly what any other account of his type gets,
+       from his own record: one sidebar, one permission engine, no second copy
+       to drift. The next alteration reaches him because it reaches everybody.
+       Only the pill still says which door he came through.
+
+       PERSONAL_NAV stays as the fallback for the one case that must not fail —
+       the record missing — because a master who cannot open his own account is
+       worse than a master looking at an old sidebar. */
     roleEl.textContent='My Account';roleEl.className='role-chip chip cb';
-    buildNav(PERSONAL_NAV);
-    switchTab('pane-b-book');
+    const macc=_hafAcct?hafAccess(_hafAcct):null;
+    if(macc){
+      buildNavV1(macc);
+      if(plnaBtn)plnaBtn.style.display=macc.drives?'flex':'none';
+      _buildDashActions(macc.type==='fleet'&&macc.released?'fleet':
+                        macc.type==='freight_forwarder'?'freight-pro':
+                        macc.type==='business'?'business':
+                        macc.released?'driver':'business');
+      hafBellRender();
+      switchTab('pane-d-home');
+    }else{
+      buildNav(PERSONAL_NAV);
+      switchTab('pane-b-book');
+    }
     _setModePill('My Account','var(--bl)');
   }else{
     /* Anything unrecognised goes back to the door rather than guessing at a
