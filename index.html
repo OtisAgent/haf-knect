@@ -3571,11 +3571,24 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         <div class="card" style="margin-top:.5rem"><div class="ct">Pooling credit balance</div><div class="cr"><span class="ck">Status</span><span class="cv" style="font-weight:700;color:var(--mu)">Coming soon</span></div><div style="font-size:.74rem;color:var(--mu);line-height:1.55;margin-top:.4rem">Pooling is not switched on yet. When it is, credits you earn will show here.</div></div>
       </div>
 
-      <!-- SHARED: Payments -->
+      <!-- SHARED: Payments
+           Every figure on this screen is read from the account's own rows in the
+           money database when the tab is opened. There is no sample and no
+           fallback: if it cannot be read, the screen says so and shows nothing.
+           (What was here until 9 Sep 2026 showed INV-0048 for £241 and "this
+           month £273" to every account that ever signed in. Nobody was ever
+           billed any of it.) -->
       <div class="tp" id="pane-billing">
-        <h1 class="pt">Payments &amp; Billing</h1><p class="ps">Invoices, payment history and plan management.</p>
-        <div class="kg"><div class="kc"><div class="kc-l">Balance due</div><div class="kc-v">£0.00</div></div><div class="kc"><div class="kc-l">This month</div><div class="kc-v or">£273</div></div><div class="kc"><div class="kc-l">Last invoice</div><div class="kc-v">£241</div></div></div>
-        <div class="card"><div class="ct">Invoice history</div><table class="dt"><thead><tr><th>Invoice</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead><tbody><tr><td>INV-0048</td><td>1 Jul 2026</td><td>£241</td><td><span class="chip cg">Paid</span></td></tr><tr><td>INV-0041</td><td>1 Jun 2026</td><td>£318</td><td><span class="chip cg">Paid</span></td></tr></tbody></table></div>
+        <h1 class="pt">Payments</h1><p class="ps">Everything HAF is waiting on from this account, grouped by what it is for.</p>
+        <div class="kg">
+          <div class="kc"><div class="kc-l">Outstanding</div><div class="kc-v or" id="py-total">&#8212;</div></div>
+          <div class="kc"><div class="kc-l">Items to pay</div><div class="kc-v" id="py-count">&#8212;</div></div>
+          <div class="kc"><div class="kc-l">Account</div><div class="kc-v" id="py-who" style="font-size:1rem">&#8212;</div></div>
+        </div>
+        <div id="py-sections"><div class="card"><div class="ct">Payments</div><div class="cr"><span class="ck">Reading your account</span><span class="cv">&#8212;</span></div></div></div>
+        <div class="card" style="margin-top:.5rem"><div class="ct">Paid and settled<button class="btn btn-gh btn-sm" style="float:right" onclick="pyLoad()">Refresh</button></div>
+          <div id="py-history"></div>
+        </div>
       </div>
 
       <!-- SHARED: Support -->
@@ -8675,6 +8688,7 @@ function switchTab(id){
   if(id==='pane-dc-sim')setTimeout(()=>dcOpen('sim'),40);
   if(id==='pane-accounts')setTimeout(()=>{if(window.aaBoot)aaBoot();},60);
   if(id==='pane-money')setTimeout(()=>{if(window.moLoad)moLoad();},60);
+  if(id==='pane-billing')setTimeout(()=>{if(window.pyLoad)pyLoad();},60);
   if(id==='pane-fbadmin')setTimeout(()=>{if(window.faLoad)faLoad();},60);
   if(id==='pane-livejob')setTimeout(hafRenderLive,60);
   if(id==='pane-d-jobs')setTimeout(hafJobsPaint,40);
@@ -8722,6 +8736,121 @@ async function _netRpc(name,extra){
   const d=await r.json();
   return {denied:false,rows:Array.isArray(d)?d:[]};
 }
+/* ── OUR OWN SERVER, asked with the credential this browser already holds ──
+   The network RPCs above go straight to the database with the anon key. These
+   go to our worker instead, which holds the service keys the browser must
+   never see. Same credential either way, so a person who can sign in can be
+   recognised by both without a second login. */
+function _apiCred(){
+  const u=(localStorage.getItem('knect-user')||'').toUpperCase();
+  if(!u||!_hafCred)return null;
+  return {username:u,hash:_hafCred.hash,relay:_hafCred.relay,cp:_hafCred.relay};
+}
+async function _api(path,extra){
+  const c=_apiCred();
+  if(!c)return {ok:false,error:'please sign in again'};
+  const r=await fetch('/api/'+path,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(Object.assign({},c,extra||{}))});
+  return await r.json().catch(()=>({ok:false,error:'the server did not answer properly'}));
+}
+
+/* ── PAYMENTS ─────────────────────────────────────────────────────────────
+   Brent, 9 Sep 2026: "on the HAF KNECT Dashboard on the side bar ... a payments
+   section and inside that section they can make payments to outstanding
+   Invoices and that goes directly to HAF PAY ... list that as a CRM with
+   section of the different types of payments needed."
+
+   The server decides what is owed and which section it belongs in; this code
+   only draws it. Two rules it keeps:
+   1. NOTHING IS INVENTED. Every line is a row that already exists — a deposit
+      raised by the order journey, a plan taken at sign-up, an invoice on the
+      books. There is no sample and no placeholder.
+   2. IF IT CANNOT BE READ, IT SAYS SO. A plausible wrong balance is worse than
+      a blank one, because somebody will pay it. */
+const _pyM=(p)=>'£'+(Number(p||0)/100).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+function _pyStatus(l){
+  const d=l.paid_at?new Date(l.paid_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):null;
+  if(l.status==='paid')return d?('Paid '+d):'Paid';
+  if(l.status==='cancelled')return 'Cancelled';
+  if(l.status==='refunded')return 'Refunded';
+  return String(l.status||'').replace(/_/g,' ');
+}
+
+/* One row shape for every kind of money, so an invoice and a deposit can never
+   be drawn differently by accident. */
+function _pyRow(l){
+  const bits=[];
+  if(l.job_ref)bits.push(_esc(l.job_ref));
+  if(l.route)bits.push(_esc(l.route));
+  if(l.reference)bits.push('ref '+_esc(l.reference));
+  if(l.due_on)bits.push('due '+_esc(l.due_on));
+  /* The press goes to HAF PAY's own page, which is where the card is taken and
+     where the bank details and this reference are shown. We never take money on
+     this screen. A line with no reference yet gets the press that raises one,
+     rather than a button to nowhere. */
+  const press=l.pay_url
+    ?'<a class="btn btn-or btn-sm" href="'+_esc(l.pay_url)+'" target="_blank" rel="noopener" style="margin-top:.35rem;display:inline-block">Pay this</a>'
+    :l.needs_raising
+      ?'<button class="btn btn-gh btn-sm" style="margin-top:.35rem" onclick="pyRaise(\''+_esc(l.job_ref)+'\',this)">Get a payment reference</button>'
+      :'<div style="font-size:.7rem;color:var(--mu);margin-top:.35rem">Pay using the details on the invoice</div>';
+  return '<div class="cr" style="align-items:flex-start"><span class="ck">'+_esc(l.what||'')+
+    (bits.length?'<br><span style="font-weight:500;color:var(--su);font-size:.72rem">'+bits.join(' &#183; ')+'</span>':'')+
+    '</span><span class="cv" style="text-align:right"><b>'+_pyM(l.amount_pence)+'</b><br>'+press+'</span></div>';
+}
+
+async function pyLoad(){
+  const secs=document.getElementById('py-sections');
+  if(!secs)return;
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  let r;
+  try{r=await _api('payments/mine',{});}catch(e){r={ok:false,error:'could not reach the server: '+e.message};}
+
+  if(!r||!r.ok){
+    set('py-total','—');set('py-count','—');set('py-who','—');
+    document.getElementById('py-history').innerHTML='';
+    secs.innerHTML='<div class="card"><div class="ct">We could not read your payments</div>'+
+      '<div class="cr"><span class="ck">What happened</span><span class="cv">'+_esc((r&&r.error)||'the server did not answer')+'</span></div>'+
+      '<div style="font-size:.74rem;color:var(--mu);line-height:1.55;margin-top:.4rem">Nothing is shown rather than a figure we are not sure of. Try Refresh, and tell HAF if it keeps happening.</div></div>';
+    return;
+  }
+
+  set('py-total',_pyM(r.outstanding_total_pence));
+  set('py-count',String(r.outstanding_count||0));
+  set('py-who',(r.account&&r.account.username)||'—');
+
+  const live=(r.sections||[]).filter(s=>s.lines&&s.lines.length);
+  secs.innerHTML=live.length
+    ?live.map(s=>
+      '<div class="card" style="margin-top:.5rem"><div class="ct">'+_esc(s.l)+
+        '<span style="float:right;color:var(--or);font-weight:700">'+_pyM(s.total_pence)+'</span></div>'+
+      '<div style="font-size:.72rem;color:var(--mu);line-height:1.5;margin:-.15rem 0 .5rem">'+_esc(s.why)+'</div>'+
+      s.lines.map(_pyRow).join('')+'</div>').join('')
+    :'<div class="card"><div class="ct">Nothing outstanding</div>'+
+      '<div style="font-size:.78rem;color:var(--mu);line-height:1.55">There is nothing for this account to pay right now. Holding deposits, job balances, membership, plans and invoices all appear here the moment they are raised.</div></div>';
+
+  const hist=r.history||[];
+  document.getElementById('py-history').innerHTML=hist.length
+    ?hist.map(l=>'<div class="cr" style="align-items:flex-start"><span class="ck">'+_esc(l.what||'')+
+        (l.reference?'<br><span style="font-weight:500;color:var(--su);font-size:.72rem">ref '+_esc(l.reference)+'</span>':'')+
+        '</span><span class="cv" style="text-align:right">'+_pyM(l.amount_pence)+
+        '<br><span style="font-size:.72rem;color:var(--mu)">'+_esc(_pyStatus(l))+'</span></span></div>').join('')
+    :'<div class="cr"><span class="ck">Nothing yet</span><span class="cv">Payments you have made will be listed here.</span></div>';
+}
+
+/* Money owed on a finished job that never got a reference. The amount comes
+   from the price the server set when the job was ordered — this press sends no
+   figure, it only asks for the reference so the money can be paid at all. */
+async function pyRaise(jobRef,btn){
+  const was=btn.textContent;
+  btn.disabled=true;btn.textContent='One moment…';
+  let r;
+  try{r=await _api('payments/raise',{job_ref:jobRef});}catch(e){r={ok:false,error:e.message};}
+  if(!r||!r.ok){btn.disabled=false;btn.textContent=was;alert((r&&r.error)||'that did not work');return;}
+  pyLoad();
+}
+window.pyLoad=pyLoad;window.pyRaise=pyRaise;
+
 function _esc(s){return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]))}
 function _ago(iso){
   if(!iso)return '';
