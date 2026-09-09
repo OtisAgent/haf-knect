@@ -2315,11 +2315,16 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
            lifecycle. Hidden until a driving account's own PLNA record has
            actually answered. -->
       <div class="sb-pl" id="sb-pl"></div>
-      <!-- Share & earn. The same lifecycle as the card above, and the mirror of
-           it: that one is shown to accounts that drive, this one to accounts
-           that do not, so the two can never both be on screen at once. -->
-      <div class="sb-af" id="sb-af"></div>
       <div id="nav-list"></div>
+      <!-- Share & earn. The same lifecycle as the PLNA card above, and the
+           mirror of it: that one is shown to accounts that drive, this one to
+           accounts that do not, so the two can never both be on screen at once.
+           Brent, 9 Sep: "put it in the side bar section not above the sidebar" —
+           it sits BELOW nav-list on purpose, part of the sidebar's own body
+           rather than a banner riding on top of the menu. Still outside
+           nav-list, because buildNavV1 rewrites that element on every redraw
+           and this card owns its own lifecycle. -->
+      <div class="sb-af" id="sb-af"></div>
       <a class="sb-plna" id="sb-plna" href="https://plna.usehaf.co.uk" target="_blank" rel="noopener">Looking to be a driver?<b>Sign up to the PLNA →</b></a>
       <div class="sb-bot">
         <hr class="sdiv">
@@ -5576,6 +5581,19 @@ function fqNext(toStep){
   /* 1 → 2 : we need to know where before we can price anything */
   if(toStep===2){
     if(!_v('fq-from')||!_v('fq-to')){fErr('fq-err-1','Please enter both a collection and a delivery location — a postcode, or a street and town.');return;}
+    /* Say it here, on the stage they typed it, rather than at the last press
+       six stages later. Both boxes are turned into real postcodes now; if one
+       of them is not a place we can find, that is the moment to tell them. */
+    Promise.all([addrEnsure(document.getElementById('fq-from')),
+                 addrEnsure(document.getElementById('fq-to'))]).then(()=>{
+      const badFrom=!addrIsPostcode(_pcOf('fq-from'));
+      const badTo=!addrIsPostcode(_pcOf('fq-to'));
+      if(badFrom||badTo){
+        fErr('fq-err-1','We could not find that '+(badFrom?'collection':'delivery')
+          +' place — try a postcode, or a street with its town.');
+        fqStep(1);
+      }
+    });
     fErr('fq-err-1','');
   }
   /* 2 → 3 : the three answers the driver cannot do without */
@@ -5731,15 +5749,45 @@ function hoffPaint(){
       ? 'Add a mobile for the '+x[2]+' — that is where the code goes.' : '';
   });
 }
+/* THE POSTCODE THE BOX STANDS FOR, never the words in it (9 Sep 2026).
+   Both location boxes deliberately accept a street or a town — "I don't know
+   the postcode" is a real customer, and addrEnsure has already turned what they
+   typed into a real postcode and remembered it against that exact text. Until
+   now the order sent the RAW TEXT, so a customer who typed "Manchester" placed
+   an order whose delivery postcode was the word Manchester. Nothing can draw an
+   arrival fence round a word, so that job reached a driver's board with no
+   fence and the handover code came out wherever they were standing.
+   The network refuses that outright now, which would have thrown this customer
+   out at the last press after six stages of typing — so the page sends what it
+   already knows instead: the resolved postcode. */
+function _pcTidy(pc){
+  const raw=String(pc||'').replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+  return /^[A-Z]{1,2}[0-9][A-Z0-9]?[0-9][A-Z]{2}$/.test(raw)
+    ? raw.replace(/^(.+)([0-9][A-Z]{2})$/,'$1 $2') : String(pc||'').trim();
+}
+function _pcOf(id){
+  const el=document.getElementById(id); if(!el)return '';
+  const v=(el.value||'').trim(); if(!v)return '';
+  if(addrIsPostcode(v))return _pcTidy(v);
+  return (el.dataset.pcFor===v && el.dataset.pc) ? _pcTidy(el.dataset.pc) : v;
+}
 function fqOrderPayload(){
   const cons=fqData.consignment||null;
+  /* If they typed a street or a town, that text is the best description of the
+     place we have — keep it as the address rather than losing it, unless they
+     have already written a fuller one themselves. */
+  const spelt=(id,addrId)=>{
+    const el=document.getElementById(id), typed=_v(id);
+    if(!el||!typed||addrIsPostcode(typed))return _v(addrId);
+    return _v(addrId)||typed;
+  };
   return{
     collect_mode:hoffMode('c'), deliver_mode:hoffMode('d'),
     collect_contact:_v('fq-cname'), collect_contact_phone:_v('fq-cphone'),
     deliver_contact:_v('fq-dname'), deliver_contact_phone:_v('fq-dphone'),
     customer_name:_v('fq-name'), customer_email:_v('fq-email'), customer_phone:_v('fq-mobile'),
-    collect_postcode:_v('fq-from'), deliver_postcode:_v('fq-to'),
-    collect_address:_v('fq-caddr'), deliver_address:_v('fq-daddr'),
+    collect_postcode:_pcOf('fq-from'), deliver_postcode:_pcOf('fq-to'),
+    collect_address:spelt('fq-from','fq-caddr'), deliver_address:spelt('fq-to','fq-daddr'),
     collect_on:_v('fq-cdate')||null, collect_window:[_v('fq-ctime'),_v('fq-dreq')].filter(Boolean).join(' · '),
     goods:_v('fq-goods'), notes:_v('fq-notes'),
     vehicle_code:fqData.van, job_type_code:fqData.urg,
@@ -5756,6 +5804,18 @@ async function fqBook(){
   const btns=document.querySelectorAll('#fq-7 .fnav .btn-or');
   btns.forEach(b=>{b.disabled=true;b.textContent='Placing your order…';});
   fErr('fq-err-7','');
+  /* Make sure both boxes have been turned into postcodes before the order is
+     built. Normally stage one did it; a customer who edited a box afterwards
+     would otherwise send the words. */
+  await Promise.all([addrEnsure(document.getElementById('fq-from')),
+                     addrEnsure(document.getElementById('fq-to'))]);
+  if(!_pcOf('fq-from')||!addrIsPostcode(_pcOf('fq-from'))||
+     !_pcOf('fq-to')||!addrIsPostcode(_pcOf('fq-to'))){
+    const bad=(!_pcOf('fq-from')||!addrIsPostcode(_pcOf('fq-from')))?'collection':'delivery';
+    btns.forEach(b=>{b.disabled=false;b.textContent='Confirm and book →';});
+    fErr('fq-err-7','We could not find that '+bad+' place. Please go back and give a postcode, or a street with its town.');
+    return;
+  }
   let d=null;
   try{
     const r=await fetch('/api/order/place',{method:'POST',headers:{'Content-Type':'application/json'},
