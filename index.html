@@ -6227,7 +6227,20 @@ function hafNormType(t){return HAF_TYPES[String(t||'').toLowerCase().trim()]||'b
 
 function hafAccess(acct){
   const type=hafNormType(acct&&acct.account_type);
-  const drives=(type==='driver'||type==='fleet');
+  /* Whether this account drives is the DATABASE's answer, not this page's.
+     `knect_auth` already works it out — the two account types that drive, plus
+     any named owner override sitting on the access list — and hands it back as
+     `plna_eligible`. Re-deriving it here from the account type alone is how the
+     master's own Freight Forwarder account ended up locked out of the driving
+     screens its own access row had already opened: the database said yes and
+     this line said no, and the sidebar believed this line.
+
+     So read the answer, never recompute it. The account type stays as the
+     fallback for a record that does not carry the field — a preview, or an
+     older payload — which keeps every other account behaving exactly as it did.
+     The gain is that a change to the access list now reaches the person on
+     their next sign-in, with no release of this file at all. */
+  const drives=(acct&&acct.plna_eligible===true)||type==='driver'||type==='fleet';
   /* Released is a fact from the release list, never inferred. If the record did
      not carry the answer, the answer is no — a missing field must never read as
      a yes on the door that protects the network. */
@@ -6408,8 +6421,17 @@ function enterKnectApp(u,acct){
        navigations this replaced are kept only for the demo and master screens,
        which are not member accounts at all. */
     buildNavV1(acc);
-    _buildDashActions(acc.type==='fleet'&&acc.released?'fleet':acc.released?'driver':
-                      acc.type==='freight_forwarder'?'freight-pro':'business');
+    /* The HOME screen follows what the account IS, not what it may also do.
+       An account that sends work and has been handed the driving screens on an
+       override is still a sending account when it opens the app — reading the
+       release first would swap its home page for a driver's and take its own
+       screens away. The driving screens are added to the sidebar; they do not
+       replace the account's front door. Nothing changes for anybody without an
+       override: a driver has no other type to fall back to. */
+    _buildDashActions(acc.type==='fleet'&&acc.released?'fleet':
+                      acc.type==='freight_forwarder'?'freight-pro':
+                      acc.type==='business'?'business':
+                      acc.released?'driver':'business');
     hafBellRender();
     switchTab('pane-d-home');
     _setModePill('','');
@@ -6641,8 +6663,10 @@ function viewAsMember(type,released){
   if(vaBanner)vaBanner.style.display='flex';
 
   buildNavV1(acc);
-  _buildDashActions(acc.type==='fleet'&&acc.released?'fleet':acc.released?'driver':
-                    acc.type==='freight_forwarder'?'freight-pro':'business');
+  _buildDashActions(acc.type==='fleet'&&acc.released?'fleet':
+                    acc.type==='freight_forwarder'?'freight-pro':
+                    acc.type==='business'?'business':
+                    acc.released?'driver':'business');
   switchTab('pane-d-home');
   _setModePill('Preview · member view','var(--or)');
 }
@@ -7757,7 +7781,10 @@ window.hafNavModel=hafNavModel;
 function buildNavV1(acc,keepOpen){
   if(!acc)return;
   window._hafAccView=acc;
-  window.HAF_ROLE=acc.type==='fleet'?'fleet':acc.released?'driver':acc.type==='freight_forwarder'?'freight':'business';
+  /* Same rule as the home screen, and for the same reason: the wording on a job
+     card is written for the account's own side of the job. An override adds the
+     driving screens; it does not turn a sending account into a driver. */
+  window.HAF_ROLE=acc.type==='fleet'?'fleet':acc.type==='freight_forwarder'?'freight':acc.type==='business'?'business':acc.released?'driver':'business';
   /* the section holding the pane you are looking at opens itself, so the
      sidebar never disagrees with the screen */
   if(!keepOpen){
@@ -9479,7 +9506,12 @@ async function hafAffPaint(force){
      code, because a code that mints against a made-up account is a real row on
      a real table. */
   const hide=()=>{el.style.display='none';el.innerHTML='';};
-  if(!acc||acc.drives||DEMO_ACCOUNTS[u]||!hafPlnaCred())return hide();
+  /* Read off the account TYPE, not off `drives`. A driver or a fleet has the
+     PLNA referral already and does not need this card. An account that sends
+     work still does, even where an override has opened the driving screens to
+     it — otherwise turning that override on would silently take the share-and-
+     earn card away from the one account most likely to use it. */
+  if(!acc||acc.type==='driver'||acc.type==='fleet'||DEMO_ACCOUNTS[u]||!hafPlnaCred())return hide();
   if(_affBusy)return;
   if(!force&&el.innerHTML&&Date.now()-_affAt<30000)return;
   _affBusy=true;
