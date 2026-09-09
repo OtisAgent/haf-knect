@@ -1,0 +1,24 @@
+import { postcodeShape, postcodeExists } from './shared/order-core.js';
+let n=0, pass=0;
+const t = async (name, fn, want) => {
+  n++; const got = await fn();
+  const ok = JSON.stringify(got) === JSON.stringify(want);
+  if (ok) pass++;
+  console.log(`${ok?'PASS':'FAIL'}  ${String(n).padStart(2)}  ${name}${ok?'':`   >>> got ${JSON.stringify(got)} want ${JSON.stringify(want)}`}`);
+};
+await t('a town is not a postcode',            () => postcodeShape('Sheffield'), null);
+await t('a city pair is not a postcode',       () => postcodeShape('Manchester'), null);
+await t('gibberish is not a postcode',         () => postcodeShape('JDBSBSJS'), null);
+await t('digits are not a postcode',           () => postcodeShape('56165156'), null);
+await t('a district alone is refused',         () => postcodeShape('S9'), null);
+await t('a street line is not a postcode',     () => postcodeShape('12 High Street'), null);
+await t('empty is not a postcode',             () => postcodeShape(''), null);
+await t('a real postcode comes back spaced',   () => postcodeShape('s91xh'), 'S9 1XH');
+await t('spacing and case are tidied',         () => postcodeShape('  m1   1ae '), 'M1 1AE');
+await t('a long postcode is spaced right',     () => postcodeShape('EC1A1BB'), 'EC1A 1BB');
+await t('a tidy postcode is unchanged',        () => postcodeShape('LS10 1AB'), 'LS10 1AB');
+await t('a real place exists',                 () => postcodeExists('S9 1XH'), true);
+await t('a well-shaped fake does not exist',   () => postcodeExists('ZZ9 9ZZ'), false);
+await t('another real place exists',           () => postcodeExists('M1 1AE'), true);
+console.log(`\n${pass} of ${n} checks passed`);
+process.exit(pass === n ? 0 : 1);

@@ -125,3 +125,39 @@ export async function milesBetween(from, to) {
   if (!d || !d.ok || !Number.isFinite(Number(d.miles)) || Number(d.miles) <= 0) return null;
   return { miles: Number(d.miles), minutes: Number(d.mins) || null, from: d.from, to: d.to };
 }
+
+/* ── A JOB CANNOT BE BORN WITHOUT A PLACE ──────────────────────────────────
+   The order screen resolves a street or a town to a postcode before it submits,
+   but a page is a request, not a rule: anything can post straight at this
+   address. Pricing alone does not protect us — HAF's distance service happily
+   answers from=Sheffield&to=Manchester with 37.9 miles, so a town in the
+   postcode box priced, saved, and reached a driver's board as a job with no
+   place. Nothing can draw an arrival fence round a word.
+
+   Two tests, on purpose, because they catch different things:
+
+     postcodeShape()   is it written like a UK postcode at all — refuses
+                       SHEFFIELD, and returns Royal Mail spacing so s91xh and
+                       S9 1XH stop being two warehouses. Same rule, character
+                       for character, as haf_postcode_norm on the network.
+     postcodeExists()  is it a real place — refuses ZZ9 9ZZ, which is shaped
+                       perfectly and does not exist. ONS data via postcodes.io:
+                       free, no key. Silent if unreachable, because an outage at
+                       a third party must never stop a real customer ordering;
+                       the shape test and the network's own guard still stand. */
+export function postcodeShape(text) {
+  const raw = String(text || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  if (!/^[A-Z]{1,2}[0-9][A-Z0-9]?[0-9][A-Z]{2}$/.test(raw)) return null;
+  return raw.replace(/^(.+)([0-9][A-Z]{2})$/, '$1 $2');
+}
+
+export async function postcodeExists(postcode) {
+  const r = await fetch(
+    'https://api.postcodes.io/postcodes/' + encodeURIComponent(postcode) + '/validate',
+    { cf: { cacheTtl: 86400 } }
+  ).catch(() => null);
+  if (!r || !r.ok) return true;               // unreachable: do not block a real order
+  const d = await r.json().catch(() => null);
+  if (!d || d.status !== 200) return true;
+  return d.result !== false;
+}

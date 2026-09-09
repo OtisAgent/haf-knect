@@ -31,7 +31,8 @@
 
 import {
   json, bad, coreReady, coreSelect, coreInsert, coreUpdate, coreRpc, logEvent,
-  newJobReference, newTrackToken, newPaymentReference, milesBetween
+  newJobReference, newTrackToken, newPaymentReference, milesBetween,
+  postcodeShape, postcodeExists
 } from '../../../shared/order-core.js';
 import { quoteOneOff, VANS, URGENCIES, DEPOSIT_PCT } from '../../../shared/order-quote.js';
 
@@ -77,13 +78,28 @@ async function place(request, env) {
   const name = String(b.customer_name || '').trim();
   const email = String(b.customer_email || '').trim().toLowerCase();
   const phone = String(b.customer_phone || '').replace(/[^\d+ ]/g, '').trim();
-  const collect = String(b.collect_postcode || '').trim().toUpperCase();
-  const deliver = String(b.deliver_postcode || '').trim().toUpperCase();
+  /* Both ends have to be a real UK postcode before anything is written. The
+     screen resolves a street or a town to one before it submits; this is the
+     rule behind that request, for anything posting straight at this address.
+     See postcodeShape/postcodeExists in order-core for why it is two tests. */
+  const rawCollect = String(b.collect_postcode || '').trim();
+  const rawDeliver = String(b.deliver_postcode || '').trim();
+  const collect = postcodeShape(rawCollect);
+  const deliver = postcodeShape(rawDeliver);
   const goods = String(b.goods || '').trim();
   if (name.length < 2) return bad('please give us your name');
   if (!/^[^@\s]+@[^@\s.]+\.[^@\s]{2,}$/.test(email)) return bad('that email address does not look right');
   if (phone.replace(/\D/g, '').length < 10) return bad('please give a phone number the driver can reach you on');
-  if (!collect || !deliver) return bad('please give both postcodes');
+  if (!rawCollect || !rawDeliver) return bad('please give both postcodes');
+  if (!collect || !deliver) {
+    const end = !collect ? 'collection' : 'delivery';
+    return bad(`that does not look like a UK postcode — please give the full postcode for the ${end}, like S9 1XH`);
+  }
+  for (const [pc, end] of [[collect, 'collection'], [deliver, 'delivery']]) {
+    if (!(await postcodeExists(pc))) {
+      return bad(`we could not find the postcode ${pc} — please check the ${end} postcode`);
+    }
+  }
   if (goods.length < 3) return bad('please tell us what is being moved');
 
   /* A username is never confirmed to a stranger. We take what was typed, keep
