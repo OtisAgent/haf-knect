@@ -3882,6 +3882,105 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         </div>
       </div>
 
+      <!-- ══ PRIVATE ORDER — Super Admin only ═══════════════════════════════
+           Brent, 9 Sep: "i need to add a section that is for me uploading a
+           job. then generating an invoice and payment link directly from the
+           HAF KNECT for me to send then i can send it to a driver directly
+           without it going on the network private order for example."
+
+           This is the one screen on KNECT where the price is TYPED rather than
+           priced. That is his ruling and it is why the pricing engine is not
+           on this page at all: a box that is sometimes an engine and sometimes
+           a text field is the kind of screen that quietly overwrites what you
+           meant. The engine's screen is Post a Job, one item down the sidebar.
+
+           Everything the server refuses, it refuses in words — the boxes here
+           check shape only, so no rule lives in two places. -->
+      <div class="tp" id="pane-private">
+        <h1 class="pt">Private Order</h1>
+        <p class="ps">Your own job, your own price, straight to one driver. Raises a numbered HAF invoice and a payment link you can send. It does not go on the open network unless you say so.</p>
+
+        <div class="g2">
+          <div class="card">
+            <div class="ct">The customer <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">goes on the invoice</span></div>
+            <div class="of"><label class="ol">Name</label><input class="oi" id="pv-name" placeholder="Who is being invoiced" autocomplete="off"></div>
+            <div class="of"><label class="ol">Company <span style="color:var(--su);font-weight:500">optional</span></label><input class="oi" id="pv-company" placeholder="Ltd name, if any" autocomplete="off"></div>
+            <div class="of"><label class="ol">Email</label><input class="oi" id="pv-email" type="email" placeholder="where the invoice and link go" autocomplete="off"></div>
+            <div class="of"><label class="ol">Mobile <span style="color:var(--su);font-weight:500">optional</span></label><input class="oi" id="pv-phone" type="tel" placeholder="07xxx xxxxxx" autocomplete="off"></div>
+          </div>
+
+          <div class="card">
+            <div class="ct">The job</div>
+            <div class="of"><label class="ol">Collection postcode</label><input class="oi" id="pv-from" placeholder="S9 1XH" maxlength="8" autocomplete="off"></div>
+            <div class="of"><label class="ol">Collection address <span style="color:var(--su);font-weight:500">optional</span></label><input class="oi" id="pv-from-addr" placeholder="Unit 4, Parkway" autocomplete="off"></div>
+            <div class="of"><label class="ol">Delivery postcode</label><input class="oi" id="pv-to" placeholder="M1 2AB" maxlength="8" autocomplete="off"></div>
+            <div class="of"><label class="ol">Delivery address <span style="color:var(--su);font-weight:500">optional</span></label><input class="oi" id="pv-to-addr" placeholder="Rear entrance" autocomplete="off"></div>
+            <div class="of"><label class="ol">Collection date</label><input class="oi" id="pv-on" type="date" autocomplete="off"></div>
+            <div class="of"><label class="ol">Time window <span style="color:var(--su);font-weight:500">optional</span></label><input class="oi" id="pv-window" placeholder="between 9am and 12" autocomplete="off"></div>
+            <div class="of"><label class="ol">What is being moved</label><input class="oi" id="pv-goods" placeholder="12 pallets of packaging" autocomplete="off"></div>
+            <div class="of"><label class="ol">Anything the driver needs to know <span style="color:var(--su);font-weight:500">optional</span></label><input class="oi" id="pv-notes" placeholder="Tail lift needed at the drop" autocomplete="off"></div>
+          </div>
+        </div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="ct">The money <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">you set both numbers</span></div>
+            <div class="of"><label class="ol">Customer price, excluding VAT</label><input class="oi" id="pv-price" inputmode="decimal" placeholder="450.00" autocomplete="off" oninput="pvSums()"></div>
+            <div class="of"><label class="ol">Driver pay</label><input class="oi" id="pv-drvpay" inputmode="decimal" placeholder="320.00" autocomplete="off" oninput="pvSums()"></div>
+            <div class="of"><label class="ol">Payment terms</label>
+              <select class="oi" id="pv-terms">
+                <option value="0">Due on receipt</option>
+                <option value="7">7 days</option>
+                <option value="14" selected>14 days</option>
+                <option value="30">30 days</option>
+              </select>
+            </div>
+            <div id="pv-sums">
+              <div class="cr"><span class="ck">VAT at 20%</span><span class="cv">&#8212;</span></div>
+              <div class="cr"><span class="ck">Customer pays</span><span class="cv">&#8212;</span></div>
+              <div class="cr"><span class="ck">HAF keeps</span><span class="cv">&#8212;</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="ct">The driver</div>
+            <div class="of"><label class="ol">Their HAF username</label><input class="oi" id="pv-driver" placeholder="JW012390" maxlength="12" autocomplete="off" style="text-transform:uppercase"></div>
+            <p style="font-size:.72rem;color:var(--su);line-height:1.55;margin:.1rem 0 .7rem">They must be cleared to take network work. If they are not, nothing is raised and you are told &#8212; the job is never quietly handed to everybody instead.</p>
+
+            <div class="olbl">Who else can see it</div>
+            <label style="display:flex;gap:.55rem;align-items:flex-start;cursor:pointer;padding:.55rem 0;font-size:.78rem;font-weight:600">
+              <input type="radio" name="pv-mode" value="private" checked style="accent-color:var(--haf-orange-ink);margin-top:.15rem" onchange="pvMode()">
+              <span>Nobody. Private to this driver<br><span style="font-weight:500;color:var(--mu);font-size:.72rem">If they decline it sits waiting for you to send it on. It never reaches the open board.</span></span>
+            </label>
+            <label style="display:flex;gap:.55rem;align-items:flex-start;cursor:pointer;padding:.55rem 0;font-size:.78rem;font-weight:600">
+              <input type="radio" name="pv-mode" value="network_after" style="accent-color:var(--haf-orange-ink);margin-top:.15rem" onchange="pvMode()">
+              <span>Them first, then the network<br><span style="font-weight:500;color:var(--mu);font-size:.72rem">They get first refusal for the time you set, then it opens to everybody.</span></span>
+            </label>
+            <div class="of" id="pv-window-wrap" style="display:none;margin-top:.4rem"><label class="ol">First refusal, in minutes</label><input class="oi" id="pv-mins" inputmode="numeric" value="120" autocomplete="off"></div>
+
+            <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.73rem;font-weight:600;color:var(--mu);margin-top:.7rem"><input type="checkbox" id="pv-test" style="accent-color:var(--haf-orange-ink)"> This is a test job &#8212; keep it off the real board and out of the figures</label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="dd-err" id="pv-err"></div>
+          <button class="btn btn-or" id="pv-go" onclick="pvPost()">Raise the invoice and send it to the driver</button>
+          <p style="font-size:.71rem;color:var(--su);line-height:1.55;margin:.6rem 0 0">Nothing is emailed to the customer. You get the invoice number and a payment link to send yourself.</p>
+        </div>
+
+        <div class="card" id="pv-done" style="display:none">
+          <div class="ct">Raised</div>
+          <div id="pv-done-body"></div>
+        </div>
+
+        <div class="card">
+          <div class="ct">Your private orders <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">newest first</span>
+            <button class="btn btn-gh btn-sm" style="float:right" onclick="pvLoad()">Refresh</button>
+          </div>
+          <div class="aa-wrap"><div id="pv-list"><div class="cr"><span class="ck">Loading</span><span class="cv">reading your orders&#8230;</span></div></div></div>
+        </div>
+      </div>
+
       <!-- Network Pools — Super Admin only (linked from ADMIN_NAV only; pooling never shows to any other role) -->
       <div class="tp" id="pane-pools">
         <h1 class="pt">Network Pools</h1><p class="ps">Trial-phase pooling — share of HAF margin routed back into the network. Admin only. Figures from the demo pricing queue.</p>
@@ -6109,6 +6208,7 @@ const ADMIN_NAV=[
   {id:'fbadmin',l:'Feedback Control',s:'Overview',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {id:'pools',l:'Network Pools',s:'Overview',ico:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>'},
   {id:'pricing',l:'Pricing Engine',s:'Overview',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/><circle cx="12" cy="12" r="10"/>'},
+  {id:'private',l:'Private Order',s:'Freight Tools',ico:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'},
   {id:'b-book',l:'Post a Job',s:'Freight Tools',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'f-loads',l:'Active Loads',s:'Freight Tools',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'f-cap',l:'Network Map',s:'Freight Tools',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
@@ -8675,6 +8775,7 @@ function switchTab(id){
   if(id==='pane-dc-sim')setTimeout(()=>dcOpen('sim'),40);
   if(id==='pane-accounts')setTimeout(()=>{if(window.aaBoot)aaBoot();},60);
   if(id==='pane-money')setTimeout(()=>{if(window.moLoad)moLoad();},60);
+  if(id==='pane-private')setTimeout(()=>{if(window.pvLoad)pvLoad();},60);
   if(id==='pane-fbadmin')setTimeout(()=>{if(window.faLoad)faLoad();},60);
   if(id==='pane-livejob')setTimeout(hafRenderLive,60);
   if(id==='pane-d-jobs')setTimeout(hafJobsPaint,40);
@@ -8721,6 +8822,128 @@ async function _netRpc(name,extra){
   if(!r.ok)throw new Error('rpc '+r.status);
   const d=await r.json();
   return {denied:false,rows:Array.isArray(d)?d:[]};
+}
+/* ── OUR OWN SERVER, asked with the credential this browser already holds ──
+   The network RPCs above go straight to the database with the anon key. These
+   go to our worker instead, which holds the service keys the browser must
+   never see. Same credential either way, so a person who can sign in can be
+   recognised by both without a second login. */
+function _apiCred(){
+  const u=(localStorage.getItem('knect-user')||'').toUpperCase();
+  if(!u||!_hafCred)return null;
+  return {username:u,hash:_hafCred.hash,relay:_hafCred.relay,cp:_hafCred.relay};
+}
+async function _api(path,extra){
+  const c=_apiCred();
+  if(!c)return {ok:false,error:'please sign in again'};
+  const r=await fetch('/api/'+path,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(Object.assign({},c,extra||{}))});
+  return await r.json().catch(()=>({ok:false,error:'the server did not answer properly'}));
+}
+
+/* ── PRIVATE ORDER ────────────────────────────────────────────────────────
+   The screen is deliberately thin. It shapes the form into a request, sends
+   it, and renders whatever comes back. Every rule that decides whether an
+   order is allowed lives on the server, so there is exactly one place to read
+   when the answer is surprising. */
+const _pvP=(v)=>{const s=String(v==null?'':v).trim().replace(/[£,\s]/g,'');
+  return /^\d+(\.\d{1,2})?$/.test(s)?Math.round(Number(s)*100):null;};
+const _pvM=(p)=>'£'+(Number(p||0)/100).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+function pvSums(){
+  const ex=_pvP(document.getElementById('pv-price').value);
+  const dr=_pvP(document.getElementById('pv-drvpay').value);
+  const box=document.getElementById('pv-sums');
+  if(ex===null){box.innerHTML='<div class="cr"><span class="ck">VAT at 20%</span><span class="cv">&#8212;</span></div>'+
+    '<div class="cr"><span class="ck">Customer pays</span><span class="cv">&#8212;</span></div>'+
+    '<div class="cr"><span class="ck">HAF keeps</span><span class="cv">&#8212;</span></div>';return;}
+  const vat=Math.round(ex*20/100);
+  /* The margin line stays blank until there is a driver figure to take off,
+     rather than showing the whole price as profit for the second before it is
+     typed. A number that is briefly wrong is still a number somebody read. */
+  const keeps=dr===null?null:ex-dr;
+  box.innerHTML=
+    '<div class="cr"><span class="ck">VAT at 20%</span><span class="cv">'+_pvM(vat)+'</span></div>'+
+    '<div class="cr"><span class="ck">Customer pays</span><span class="cv"><b>'+_pvM(ex+vat)+'</b></span></div>'+
+    '<div class="cr"><span class="ck">HAF keeps</span><span class="cv">'+
+      (keeps===null?'&#8212;':(keeps<0?'<span style="color:var(--rd)">'+_pvM(keeps)+' &#8212; check the numbers</span>':_pvM(keeps)))+
+    '</span></div>';
+}
+function pvMode(){
+  const on=document.querySelector('input[name="pv-mode"]:checked').value==='network_after';
+  document.getElementById('pv-window-wrap').style.display=on?'':'none';
+}
+async function pvPost(){
+  const err=document.getElementById('pv-err');const btn=document.getElementById('pv-go');
+  err.textContent='';
+  const v=(id)=>document.getElementById(id).value;
+  const mode=document.querySelector('input[name="pv-mode"]:checked').value;
+  btn.disabled=true;btn.textContent='Raising…';
+  let r;
+  try{
+    r=await _api('private/post',{
+      customer_name:v('pv-name'),company:v('pv-company'),customer_email:v('pv-email'),customer_phone:v('pv-phone'),
+      collect_postcode:v('pv-from'),collect_address:v('pv-from-addr'),
+      deliver_postcode:v('pv-to'),deliver_address:v('pv-to-addr'),
+      collect_on:v('pv-on'),collect_window:v('pv-window'),
+      goods:v('pv-goods'),notes:v('pv-notes'),
+      customer_price:v('pv-price'),driver_pay:v('pv-drvpay'),terms_days:v('pv-terms'),
+      driver_username:v('pv-driver'),mode:mode,window_minutes:v('pv-mins'),
+      is_test:document.getElementById('pv-test').checked
+    });
+  }catch(e){r={ok:false,error:'could not reach the server: '+e.message};}
+  btn.disabled=false;btn.textContent='Raise the invoice and send it to the driver';
+  if(!r||!r.ok){err.textContent=(r&&r.error)||'that did not work';return;}
+
+  const done=document.getElementById('pv-done');
+  document.getElementById('pv-done-body').innerHTML=
+    '<div class="cr"><span class="ck">Invoice</span><span class="cv"><b>'+_esc(r.invoice_number)+'</b></span></div>'+
+    '<div class="cr"><span class="ck">Job reference</span><span class="cv">'+_esc(r.job_ref)+'</span></div>'+
+    '<div class="cr"><span class="ck">Sent to</span><span class="cv">'+_esc(r.driver)+
+      (r.private?' &#8212; private, nobody else sees it':' &#8212; opens to the network in '+r.opens_to_network_in_minutes+' minutes')+'</span></div>'+
+    '<div class="cr"><span class="ck">Customer pays</span><span class="cv">'+_pvM(r.total_pence)+' by '+_esc(r.due_on)+'</span></div>'+
+    '<div class="cr"><span class="ck">Payment link</span><span class="cv"><a href="'+_esc(r.pay_url)+'" target="_blank" rel="noopener">'+_esc(r.pay_url)+'</a></span></div>'+
+    '<button class="btn btn-or btn-sm" style="margin-top:.6rem" onclick="pvCopy(\''+_esc(r.pay_url)+'\',this)">Copy the payment link</button>'+
+    (r.is_test?'<p style="font-size:.72rem;color:var(--su);margin:.6rem 0 0">Raised as a test job. It is flagged as test everywhere and stays out of the figures.</p>':'');
+  done.style.display='';
+  done.scrollIntoView({behavior:'smooth',block:'nearest'});
+  ['pv-name','pv-company','pv-email','pv-phone','pv-from','pv-from-addr','pv-to','pv-to-addr','pv-window','pv-goods','pv-notes','pv-price','pv-drvpay','pv-driver'].forEach(id=>{document.getElementById(id).value='';});
+  pvSums();pvLoad();
+}
+function pvCopy(url,btn){
+  navigator.clipboard.writeText(url).then(()=>{btn.textContent='Copied';setTimeout(()=>{btn.textContent='Copy the payment link';},1800);})
+    .catch(()=>{btn.textContent='Copy failed — select it above';});
+}
+async function pvLoad(){
+  const box=document.getElementById('pv-list');
+  if(!box)return;
+  let r;
+  try{r=await _api('private/mine',{});}catch(e){r={ok:false,error:e.message};}
+  if(!r||!r.ok){box.innerHTML='<div class="cr"><span class="ck">Could not read them</span><span class="cv">'+_esc((r&&r.error)||'')+'</span></div>';return;}
+  if(!r.jobs.length){box.innerHTML='<div class="cr"><span class="ck">Nothing yet</span><span class="cv">Private orders you raise will be listed here.</span></div>';return;}
+  box.innerHTML=r.jobs.map(j=>{
+    const paid=j.paid?'<span style="color:var(--gn);font-weight:700">Paid</span>':'<span style="color:var(--mu)">Unpaid, due '+_esc(j.due_on||'—')+'</span>';
+    const where=j.status==='cancelled'?'Cancelled'
+      :j.status==='private_failed'?'<span style="color:var(--rd)">Did not reach the driver</span>'
+      :j.status==='claimed'?'Taken by '+_esc(j.driver_name||j.driver||'a driver')
+      :j.status==='completed'?'Delivered'
+      :(j.private?'Private to '+_esc(j.driver||'—'):'Offered to '+_esc(j.driver||'—')+', then the network');
+    const canCancel=(j.status==='private');
+    return '<div class="cr" style="align-items:flex-start"><span class="ck">'+_esc(j.invoice_number||j.job_ref)+'<br>'+
+      '<span style="font-weight:500;color:var(--su);font-size:.72rem">'+_esc(j.route)+'</span></span>'+
+      '<span class="cv" style="text-align:right">'+_esc(j.customer||'')+'<br>'+
+      _pvM(j.total_pence)+' &#183; '+paid+'<br>'+
+      '<span style="font-size:.72rem;color:var(--mu)">'+where+(j.in_xero?' &#183; in Xero':' &#183; not yet in Xero')+'</span>'+
+      (j.pay_url?'<br><a href="'+_esc(j.pay_url)+'" target="_blank" rel="noopener" style="font-size:.72rem">payment link</a>':'')+
+      (canCancel?' <button class="btn btn-gh btn-sm" style="margin-left:.4rem" onclick="pvCancel(\''+_esc(j.job_ref)+'\')">Withdraw</button>':'')+
+      '</span></div>';
+  }).join('');
+}
+async function pvCancel(ref){
+  if(!confirm('Withdraw '+ref+'? It comes off the driver’s board and the invoice is voided.'))return;
+  const r=await _api('private/cancel',{job_ref:ref});
+  if(!r||!r.ok){alert((r&&r.error)||'could not withdraw it');return;}
+  pvLoad();
 }
 function _esc(s){return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]))}
 function _ago(iso){
