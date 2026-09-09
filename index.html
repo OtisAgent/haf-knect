@@ -1125,6 +1125,29 @@ textarea.fi2{resize:vertical;min-height:70px}
 .sb-pl-need em{display:block;font-style:normal;color:var(--mu);font-weight:500}
 .sb-pl-btn{width:100%;text-align:center;font-size:.64rem;font-weight:800;color:var(--haf-orange-ink);background:transparent;border:1px solid var(--or-g);border-radius:var(--pill);padding:.3rem;cursor:pointer}
 .sb-pl-btn:hover{border-color:var(--haf-orange-ink)}
+/* ── SHARE & EARN (sidebar, accounts that do NOT drive) ─────────────────────
+   Brent, 8 Sep: "an affiliate system for non drivers... a tracker for the
+   affiliate links they share out."
+
+   The mirror of the card above it. A driver already has the PLNA booking link;
+   this is the same idea pointed at everybody else — freight forwarders first,
+   then any business account. One code, three doors, and the tracker for what
+   those doors actually brought in.
+
+   It reuses the PLNA card's own classes wherever the shape is the same, so the
+   two sit together in the sidebar rather than looking like two different
+   products. Only the link rows are new.
+
+   The share is READ from the same setting the driver referral reads, never
+   typed here. Four places once had "10%" written into the page and were right
+   only because the number happened to be 10 that day. */
+.sb-af{margin:.5rem .6rem .3rem;border:1.5px solid var(--ln);border-radius:var(--r);background:var(--p2);padding:.6rem .65rem;display:none}
+.sb-af-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8rem;font-weight:800;letter-spacing:.06em;color:var(--tx);background:var(--p);border:1px solid var(--ln);border-radius:var(--rx);padding:.28rem .4rem;text-align:center;margin-bottom:.45rem;overflow:hidden;text-overflow:ellipsis}
+.sb-af-lnks{display:grid;gap:.22rem;margin-bottom:.45rem}
+.sb-af-l{display:flex;align-items:center;justify-content:space-between;gap:.3rem;width:100%;font-size:.6rem;font-weight:700;color:var(--tx);background:var(--p);border:1px solid var(--ln);border-radius:var(--rx);padding:.3rem .4rem;cursor:pointer;text-align:left}
+.sb-af-l:hover{border-color:var(--or-g)}
+.sb-af-l b{font-weight:800}
+.sb-af-l span{font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--haf-orange-ink);white-space:nowrap}
 .lj-wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:.9rem;align-items:start}
 .lj-mapwrap{position:relative;border:1.5px solid var(--ln);border-radius:var(--r);overflow:hidden}
 #lj-map{height:430px;width:100%;background:var(--p3, #e9e5dd)}
@@ -2292,6 +2315,10 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
            lifecycle. Hidden until a driving account's own PLNA record has
            actually answered. -->
       <div class="sb-pl" id="sb-pl"></div>
+      <!-- Share & earn. The same lifecycle as the card above, and the mirror of
+           it: that one is shown to accounts that drive, this one to accounts
+           that do not, so the two can never both be on screen at once. -->
+      <div class="sb-af" id="sb-af"></div>
       <div id="nav-list"></div>
       <a class="sb-plna" id="sb-plna" href="https://plna.usehaf.co.uk" target="_blank" rel="noopener">Looking to be a driver?<b>Sign up to the PLNA →</b></a>
       <div class="sb-bot">
@@ -7062,7 +7089,7 @@ function goLanding(){document.getElementById('app').classList.remove('open');doc
 /* Signing out has to take the previous person's PLNA card off the screen with
    them. It carries their money and their work; leaving it up for whoever signs
    in next on the same machine would be showing one driver another's day. */
-function signOut(){localStorage.removeItem('knect-user');_hafCred=null;_hafAcct=null;window._hafAccView=null;_plnaAt=0;try{hafPlnaPaint(true);}catch(e){}hafSetSeed(false);goLanding();}
+function signOut(){localStorage.removeItem('knect-user');_hafCred=null;_hafAcct=null;window._hafAccView=null;_plnaAt=0;_affAt=0;try{hafPlnaPaint(true);}catch(e){}try{hafAffPaint(true);}catch(e){}hafSetSeed(false);goLanding();}
 /* EXCHANGE */
 let _xchOnline=true;
 let _xchActiveJob=null;
@@ -7622,6 +7649,8 @@ function buildNavV1(acc,keepOpen){
   hafRenderLiveWidget();
   /* the driver's own PLNA, read off their record — see hafPlnaPaint */
   hafPlnaPaint(true);
+  /* and its mirror for everybody who does not drive — see hafAffPaint */
+  hafAffPaint(true);
   /* keep the highlight on whatever pane is showing */
   const cur=document.getElementById('ni-'+(ct||'').replace('pane-',''));
   if(cur)cur.classList.add('on');
@@ -7724,8 +7753,10 @@ function buildNav(tabs,role,acc){
      but the account view it reads is not cleared when a master switches modes —
      so the decision is made here too, where the situation is known. */
   const plCard=document.getElementById('sb-pl');
+  const afCard=document.getElementById('sb-af');
+  if(afCard&&!acc){afCard.style.display='none';afCard.innerHTML='';}
   if(plCard&&!acc){plCard.style.display='none';plCard.innerHTML='';}
-  else hafPlnaPaint(true);
+  else {hafPlnaPaint(true);hafAffPaint(true);}
 }
 let ct=null;
 /* ── FLEET OVERVIEW ────────────────────────────────────────────────────────
@@ -8978,11 +9009,161 @@ async function hafPlnaPaint(force){
                '<button class="sb-pl-btn" onclick="hafOpenPlna()">Open HAF PLNA →</button>';
 }
 
+/* ── SHARE & EARN ──────────────────────────────────────────────────────────
+   Brent, 8 Sep: non-drivers get an affiliate link too, and a tracker for what
+   it brings in. He set the reward the same day: "10% of HAF Earnings of the
+   delivery exactly same as the PLNA fee" — ten percent of what HAF keeps on
+   the job, never ten percent of what the customer pays. Those two readings are
+   nowhere near each other, so the wording on this card says which one it is
+   and the number itself is read from the database, never typed here.
+
+   Three doors from one code: join HAF, come into KNECT, or post a single job
+   without joining anything. All three are the same code, so a freight forwarder
+   has one link to remember rather than three to keep straight. */
+function hafAffCopy(btn,url){
+  const done=()=>{const s=btn.querySelector('span');if(!s)return;
+    const was=s.textContent;s.textContent='Copied';
+    setTimeout(()=>{s.textContent=was;},1400);};
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(done,()=>window.prompt('Copy your link',url));
+      return;
+    }
+  }catch(e){}
+  /* An older browser, or a page served without the permission the clipboard
+     needs. Showing them the link to copy by hand beats a button that silently
+     does nothing. */
+  window.prompt('Copy your link',url);
+}
+
+let _affAt=0,_affBusy=false,_affSeq=0;
+async function hafAffPaint(force){
+  const el=document.getElementById('sb-af'); if(!el)return;
+  const acc=window._hafAccView;
+  const u=(localStorage.getItem('knect-user')||'').toUpperCase();
+  /* The mirror of the PLNA card's rule. An account that drives already has the
+     PLNA booking link and its own referral; giving it a second, differently
+     worded one would be two schemes on one screen. A demo account never gets a
+     code, because a code that mints against a made-up account is a real row on
+     a real table. */
+  const hide=()=>{el.style.display='none';el.innerHTML='';};
+  if(!acc||acc.drives||DEMO_ACCOUNTS[u]||!hafPlnaCred())return hide();
+  if(_affBusy)return;
+  if(!force&&el.innerHTML&&Date.now()-_affAt<30000)return;
+  _affBusy=true;
+  /* Same race guard as the card above: a master flicking between previewed
+     account types must never end up with one account's earnings drawn into
+     another one's sidebar. */
+  const seq=++_affSeq, forUser=u, forType=acc.type;
+  el.style.display='block';
+  if(!el.innerHTML){
+    el.innerHTML='<div class="sb-pl-top"><span class="sb-pl-tag">Share &amp; earn</span></div>'+
+                 '<div class="sb-pl-need">Getting your link…</div>';
+  }
+  const cred=hafPlnaCred();
+  const call=async name=>{
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/'+name,{method:'POST',
+      headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify(cred)});
+    if(!r.ok)throw new Error(name+' '+r.status);
+    const d=await r.json();
+    if(d&&!Array.isArray(d)&&d.error)throw new Error(name+' '+d.error);
+    return d;
+  };
+  /* The first read mints the code if this account has never had one, so nobody
+     has to be issued one in advance. The second is the tracker. They stand on
+     their own: a tracker that fails must still leave them a link to share. */
+  const [mine,sum]=await Promise.all([
+    call('haf_affiliate_my_code').catch(()=>null),
+    call('haf_affiliate_summary').catch(()=>null)
+  ]);
+  _affBusy=false;
+  const now=window._hafAccView;
+  if(seq!==_affSeq||!now||now.type!==forType||
+     (localStorage.getItem('knect-user')||'').toUpperCase()!==forUser)return;
+  _affAt=Date.now();
+
+  const okMine=mine&&mine.ok===true;
+  if(!okMine&&!(sum&&sum.ok===true)){
+    el.innerHTML='<div class="sb-pl-top"><span class="sb-pl-tag">Share &amp; earn</span></div>'+
+      '<div class="sb-pl-need">We couldn’t reach your link just now. '+
+      'Nothing has changed — try again in a moment.</div>';
+    return;
+  }
+
+  const code=(okMine&&mine.code)||(sum&&sum.code)||null;
+  const links=(okMine&&mine.links)||(sum&&sum.links)||null;
+  if(!code||!links){
+    el.innerHTML='<div class="sb-pl-top"><span class="sb-pl-tag">Share &amp; earn</span></div>'+
+      '<div class="sb-pl-need">We couldn’t reach your link just now. '+
+      'Nothing has changed — try again in a moment.</div>';
+    return;
+  }
+
+  /* ── the reward, in the words that cannot be misread ──
+     `basis` is the driver referral's own setting. Anything other than the fee
+     basis would mean somebody changed what the share is drawn from, and this
+     card must not keep saying "of HAF's fee" after that. */
+  const pct=(okMine&&mine.pct!=null)?Number(mine.pct):null;
+  const basis=(okMine&&mine.basis)||'haf_fee';
+  const share=pct==null
+    ? 'You earn a share of what HAF makes on every delivery they book.'
+    : (basis==='haf_fee'
+        ? 'You earn '+pct+'% of what HAF makes on every delivery they book.'
+        : 'You earn '+pct+'% on every delivery they book.');
+
+  /* ── the tracker ──
+     A read that failed shows a dash, never a nought. "Nobody has clicked yet"
+     and "we could not ask" are different sentences, and a nought in this slot
+     would quietly tell a freight forwarder their link is not working. */
+  const okSum=!!(sum&&sum.ok===true);
+  const clicks=okSum&&Array.isArray(sum.clicks)
+    ? sum.clicks.reduce((n,c)=>n+Number(c.clicks||0),0) : null;
+  const signups=okSum&&sum.signups!=null?Number(sum.signups):null;
+  const jobs=okSum&&Array.isArray(sum.jobs)?sum.jobs.length:null;
+  const owed=okSum&&sum.pending!=null?Number(sum.pending):null;
+  const paid=okSum&&sum.paid!=null?Number(sum.paid):null;
+  const num=(v,l)=>'<div class="sb-pl-n"><div class="sb-pl-nv">'+v+
+                   '</div><div class="sb-pl-nl">'+l+'</div></div>';
+  const money=v=>'£'+v.toFixed(v%1?2:0);
+  const nums='<div class="sb-pl-nums">'+
+    num(clicks==null?'—':String(clicks),'Clicks')+
+    num(signups==null?'—':String(signups),'Joined')+
+    num(jobs==null?'—':String(jobs),'Jobs')+'</div>';
+
+  /* Money only once there is some. A row of noughts on a brand new account
+     reads as a scheme that does not pay. */
+  let earn='';
+  if(owed||paid){
+    earn='<div class="sb-pl-need"><b>'+money(owed||0)+' owed to you</b>'+
+         (paid?'<em>'+money(paid)+' paid so far</em>':'')+'</div>';
+  }
+
+  const row=(url,label,act)=>
+    '<button class="sb-af-l" onclick="hafAffCopy(this,'+JSON.stringify(url).replace(/"/g,'&quot;')+')">'+
+    '<b>'+label+'</b><span>'+act+'</span></button>';
+
+  const tag=acc.preview?'Share &amp; earn · preview':'Share &amp; earn';
+  const note=acc.preview
+    ? '<div class="sb-pl-need" style="margin-top:-.2rem">Preview — this is your own link and your own figures, not the previewed account’s.</div>'
+    : '';
+
+  el.innerHTML='<div class="sb-pl-top"><span class="sb-pl-tag">'+tag+'</span></div>'+
+    '<div class="sb-af-code">'+_esc(code)+'</div>'+
+    nums+earn+
+    '<div class="sb-af-lnks">'+
+      row(links.join,'Join HAF','Copy')+
+      row(links.knect,'Come into KNECT','Copy')+
+      row(links.job,'Post one job','Copy')+
+    '</div>'+
+    '<div class="sb-pl-need"><em>'+_esc(share)+'</em></div>'+note;
+}
+
 /* A driver leaves this tab open all day. Coming back to it is the moment the
    card is most likely to be stale, and the 30-second floor above stops that
    turning into a call on every window switch. */
 document.addEventListener('visibilitychange',function(){
-  if(!document.hidden)hafPlnaPaint(false);
+  if(!document.hidden){hafPlnaPaint(false);hafAffPaint(false);}
 });
 
 /* ── CRM-STYLE LIVE JOBS BOARD — the list of everything on the go ── */
