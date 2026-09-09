@@ -8781,8 +8781,13 @@ async function _api(path,extra){
       a blank one, because somebody will pay it. */
 const _pyM=(p)=>'£'+(Number(p||0)/100).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
 
+/* A date a customer reads, never the raw one the database keeps. */
+function _pyDay(iso){
+  const d=new Date(iso);
+  return isNaN(d)?String(iso):d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+}
 function _pyStatus(l){
-  const d=l.paid_at?new Date(l.paid_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):null;
+  const d=l.paid_at?_pyDay(l.paid_at):null;
   if(l.status==='paid')return d?('Paid '+d):'Paid';
   if(l.status==='cancelled')return 'Cancelled';
   if(l.status==='refunded')return 'Refunded';
@@ -8796,7 +8801,7 @@ function _pyRow(l){
   if(l.job_ref)bits.push(_esc(l.job_ref));
   if(l.route)bits.push(_esc(l.route));
   if(l.reference)bits.push('ref '+_esc(l.reference));
-  if(l.due_on)bits.push('due '+_esc(l.due_on));
+  if(l.due_on)bits.push('due '+_esc(_pyDay(l.due_on)));
   /* The press goes to HAF PAY's own page, which is where the card is taken and
      where the bank details and this reference are shown. We never take money on
      this screen. A line with no reference yet gets the press that raises one,

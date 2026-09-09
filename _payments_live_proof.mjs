@@ -198,11 +198,14 @@ for (const s of FIX.sections.filter(x => x.lines.length)) {
 }
 ok('a job line shows its job and its route',     /HAF-20260909-ABC123/.test(drawn.sections || '') && /S35 8RF to M1 4BT/.test(drawn.sections || ''));
 ok('every payable line shows its reference',     ['HAFPAY-AAA11111', 'HAFPAY-9GBW46YV', 'HAFPAY-QYM6JWJA'].every(r => (drawn.sections || '').includes(r)));
-ok('an invoice shows when it is due',            /due 2026-09-23/.test(drawn.sections || ''));
+ok('an invoice shows when it is due',            /due 23 Sept? 2026/.test(drawn.sections || ''), drawn.sections);
 ok('a balance with no reference offers to raise one', /Get a payment reference/.test(drawn.sections || ''));
 ok('and offers no button to nowhere',            drawn.payLinks.length === 3, JSON.stringify(drawn.payLinks));
 ok('every button leaves for HAF PAY',            drawn.payLinks.every(u => /join\.usehaf\.co\.uk\/pay\//.test(u)), JSON.stringify(drawn.payLinks));
-ok('a paid item reads as paid, with its date',   /Paid 1 Sep 2026/.test(drawn.history || ''), drawn.history);
+/* "Sept", not "Sep" — en-GB abbreviates September with four letters. Asserting
+   the string I expected rather than the one a browser writes is how a correct
+   screen gets reported as broken. */
+ok('a paid item reads as paid, with its date',   /Paid 1 Sept? 2026/.test(drawn.history || ''), drawn.history);
 ok('a cancelled item is not called paid',        /Cancelled/.test(drawn.history || ''));
 
 await page.screenshot({ path: '_payments_drawn_desktop.png' });
