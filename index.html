@@ -6269,8 +6269,25 @@ function hafAccess(acct){
 /* What a person DOES, kept for the sentences that are about driving. The name
    of their ACCOUNT is acc.account_name and comes from the shared file above:
    "Freight Forwarder" is gone from every screen a customer reads. */
-const HAF_TYPE_LABEL={driver:'Owner Driver',fleet:'Fleet',
+const HAF_TYPE_LABEL={driver:'Owner Driver',fleet:'Courier Company',
                       business:'Business',freight_forwarder:'Organise Freight'};
+
+/* ── And what each of those doors IS ──────────────────────────────────────────
+   Brent, 9 Sep, giving the two definitions himself and asking that the wording
+   be "open and understanding to people using the accounts":
+
+       HAF KNECT  — process work, oversee your account, your PLNA and your
+                    deliveries. Your transport management system.
+       HAF PLNA   — the full connector and organiser for drivers and fleet
+                    members.
+
+   A NAME with no explanation is the same failure as "Freight Forwarder" one
+   layer down: a person reads it, does not recognise it, and moves on. So the
+   sentence travels with the name. The words live in the shared file, never
+   here, so this screen and the public site cannot describe HAF differently. */
+function hafDoorLines(acc){
+  return ((acc&&acc.label&&acc.label.explains)||[]).map(p=>p.name+' — '+p.what);
+}
 
 
 /* ── "ADD TO YOUR ACCOUNT" — its own section in the sidebar ────────────────
@@ -6296,7 +6313,7 @@ function hafAddSection(acc){
   if(acc.released)return '';
   const head=acc.drives?'Finish your checks':'Add to your account';
   const line=acc.drives
-    ? 'Your '+(HAF_TYPE_LABEL[acc.type]||'driving')+' account is waiting on the Clever checks. Send your documents and the PLNA driving screens open up.'
+    ? 'Your account is waiting on the Clever checks. Send your documents and HAF PLNA opens up \u2014 the full connector and organiser for drivers and fleet members.'
     : 'Want to drive as well as send? Owner driver and fleet accounts go through the Clever checks first.';
   const row=(kind,label,ico)=>
     '<div class="ni ni-add" onclick="hafCleverAdd(\''+kind+'\')">'+
@@ -6427,7 +6444,9 @@ function enterKnectApp(u,acct){
        company number has been checked. Not what the app assumed, and no longer
        trade jargon nobody outside the industry recognises. */
     roleEl.textContent=acc.account_name||'HAF KNECT';
-    roleEl.className='role-chip chip '+(acc.type==='freight_forwarder'?'co':'cb');
+    /* Hovering the chip says what each door named in it is for. */
+    roleEl.title=hafDoorLines(acc).join('\n');
+    roleEl.className='role-chip chip '+((acc.label&&acc.label.plna)?'co':'cb');
 
     /* The PLNA button leaves this app for the driving site. It appears for an
        account that DRIVES — a freight or business account never sees it at all.
@@ -6704,7 +6723,8 @@ function viewAsMember(type,released){
 
   const roleEl=document.getElementById('tb-role');
   roleEl.textContent=acc.account_name||'HAF KNECT';
-  roleEl.className='role-chip chip '+(acc.type==='freight_forwarder'?'co':'cb');
+  roleEl.title=hafDoorLines(acc).join('\n');
+  roleEl.className='role-chip chip '+((acc.label&&acc.label.plna)?'co':'cb');
 
   const plnaBtn=document.getElementById('plna-link-btn');
   if(plnaBtn)plnaBtn.style.display=acc.released?'flex':'none';
@@ -8030,6 +8050,11 @@ function mbRender(){
   const lvl=lvlKey.toUpperCase();
   head.innerHTML='<div class="ct">Your account</div>'+
     '<div class="cr"><span class="ck">Account</span><span class="cv">'+_esc(acc.account_name||'HAF KNECT')+'</span></div>'+
+    /* Every door the name shows, followed by the sentence that says what it is
+       for. A name a person cannot decode is jargon, whatever the words are. */
+    ((acc.label&&acc.label.explains)||[]).map(p=>
+      '<div class="cr"><span class="ck">'+_esc(p.name)+'</span><span class="cv" style="font-weight:400;text-align:right;max-width:22rem">'+_esc(p.what)+'</span></div>').join('')+
+    '<div class="cr"><span class="ck">What you do</span><span class="cv">'+_esc(HAF_TYPE_LABEL[acc.type]||'Account')+'</span></div>'+
     '<div class="cr"><span class="ck">HAF KNECT plan</span><span class="cv"><span class="chip cb">'+_esc(HAF_LEVEL_LABEL[lvlKey]||'HAF KNECT Free')+'</span></span></div>'+
     '<div class="cr"><span class="ck">Clever Checked</span><span class="cv">'+(acc.released
       ?'<span class="chip cg">Released &#8212; you can accept network work</span>'
