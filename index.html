@@ -1989,7 +1989,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         <div class="sc-title">Log in to your account</div>
         <div class="sc-fi">
           <span class="sc-lbl">HAF username</span>
-          <input class="sc-inp" id="sc-user" placeholder="e.g. JW012390" autocomplete="username" autocapitalize="characters" maxlength="10" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')scLogin()">
+          <input class="sc-inp" id="sc-user" placeholder="Username or email" autocomplete="username" autocapitalize="off" maxlength="120" oninput="this.value=this.value.includes('@')?this.value:this.value.toUpperCase()" onkeydown="if(event.key==='Enter')scLogin()">
         </div>
         <div class="sc-fi">
           <span class="sc-lbl">PIN or password</span>
@@ -2092,7 +2092,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
     </div>
     <h2>Sign in</h2>
     <p>Enter your HAF username with your PIN (or password) to access your account.</p>
-    <div class="of"><label class="ol">HAF username</label><input class="oi" id="l-user" placeholder="e.g. JW012390" autocomplete="username" autocapitalize="characters" maxlength="10" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="of"><label class="ol">HAF username or email</label><input class="oi" id="l-user" placeholder="e.g. JW012390 or you@company.co.uk" autocomplete="username" autocapitalize="off" maxlength="120" oninput="this.value=this.value.includes('@')?this.value:this.value.toUpperCase()" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div class="of"><label class="ol">PIN or password</label><input class="oi" id="l-pass" placeholder="4–6 digit PIN or password" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div class="oe" id="l-err"></div>
     <button class="btn btn-or btn-wide" onclick="doLogin()">Sign in →</button>
@@ -7264,13 +7264,37 @@ function submitDemoFeedback(){
 
 async function hafAuth(u,s,err,btn){
   err.style.display='none';err.textContent='';
-  u=(u||'').trim().toUpperCase();s=(s||'');
-  if(!u||!s){hafErr(err,'Enter your HAF username and your PIN or password.');return}
-  if(DEMO_ACCOUNTS[u]){enterKnectApp(u);return;}
-  if(u.length<6){hafErr(err,'Username looks too short — format is like JW012390.');return}
+  /* A username is shouted back at the person in capitals; an email address is
+     not, because seeing YOUR@EMAIL.COM makes people doubt what they typed. */
+  u=(u||'').trim();s=(s||'');
+  const typedEmail=u.includes('@');
+  if(!typedEmail)u=u.toUpperCase();
+  if(!u||!s){hafErr(err,'Enter your HAF username or email address, and your PIN or password.');return}
+  if(!typedEmail&&DEMO_ACCOUNTS[u]){enterKnectApp(u);return;}
   const isPin=/^\d{4,6}$/.test(s);
   const old=btn.textContent;btn.textContent='Signing in…';btn.disabled=true;
   try{
+    /* ── EMAIL OR USERNAME ───────────────────────────────────────────────────
+       Brent, 9 Sep: "give the option of email or username".
+
+       The address has to become a username HERE, before a single hash is
+       computed, because the PIN is hashed with the username as its salt. Hash
+       an email and it cannot match what is stored, for anyone, ever.
+
+       The lookup answers only when the address belongs to exactly one account.
+       Two real drivers on this network share one company mailbox, so an
+       address that names two people names nobody — and picking one of them
+       would sign a person into a colleague's account. */
+    if(typedEmail){
+      const rr=await fetch(PLNA_URL+'/rest/v1/rpc/haf_resolve_login',{method:'POST',headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_id:u})});
+      const ru=await rr.json();
+      if(typeof ru!=='string'||!ru){
+        hafErr(err,'We could not match that email address to a single HAF account. If more than one account uses it, sign in with your username instead.');
+        btn.textContent=old;btn.disabled=false;return}
+      u=ru.toUpperCase();
+      if(DEMO_ACCOUNTS[u]){enterKnectApp(u);btn.textContent=old;btn.disabled=false;return;}
+    }
+    if(u.length<6){hafErr(err,'Username looks too short — format is like JW012390.');btn.textContent=old;btn.disabled=false;return}
     const hash=await hafSha(isPin?u+':'+s:s);
     /* The PIN form hashes username+PIN (the relay format), the password form hashes
        the password alone. plna_auth checks both and returns the profile only on a
