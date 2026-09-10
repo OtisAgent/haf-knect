@@ -22,10 +22,10 @@
   and puts the paperwork underneath for the person who wants it.
 -->
 <style>
-  :root{--or:#f18e00;--bg:#0e1113;--card:#171b1e;--ln:#262c31;--mu:#8a9298;--gn:#2dab60;--rd:#cc3333;--ink:#eef2f4}
+  :root{--or:#f18e00;--haf-orange-ink:#f9a63a;--haf-on-orange:#2f373e;--bg:#0e1113;--card:#171b1e;--ln:#262c31;--mu:#8a9298;--gn:#2dab60;--rd:#cc3333;--ink:#eef2f4}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;min-height:100%}
-  body{background:var(--bg);color:var(--ink);font-family:Montserrat,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+  body{background:var(--bg);color:var(--ink);font-family:"Gotham","Montserrat","Inter",Arial,sans-serif;
     display:flex;flex-direction:column;min-height:100dvh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
   header{padding:1.2rem 1.2rem .4rem;display:flex;align-items:center;gap:.55rem;max-width:560px;width:100%;margin:0 auto}
   .logo{font-weight:900;letter-spacing:.5px;font-size:1.05rem}
@@ -48,6 +48,27 @@
   @keyframes pulse{0%{transform:scale(.4);opacity:.85}100%{transform:scale(1);opacity:0}}
   .sttl{font-size:1.05rem;font-weight:800;line-height:1.35}
   .stsub{font-size:.87rem;color:var(--mu);line-height:1.6;margin-top:.3rem}
+  /* THE WHOLE JOURNEY, not just today's rung. The state sentence above answers
+     "what now"; this answers "how far along am I, and what is left" — which is
+     the question somebody asks when they have paid and heard nothing. Every
+     rung that is done carries the real time it happened, read from the record,
+     so this can never claim a step that has not been taken. */
+  .lad{display:flex;flex-direction:column;gap:0;margin-top:.35rem}
+  .rung{display:flex;gap:.85rem;align-items:flex-start;position:relative;padding:0 0 1.05rem}
+  .rung:last-child{padding-bottom:0}
+  .rung::before{content:"";position:absolute;left:10px;top:22px;bottom:0;width:2px;background:var(--ln)}
+  .rung:last-child::before{display:none}
+  .rung.done::before{background:var(--gn)}
+  .dot{width:22px;height:22px;border-radius:50%;flex:0 0 22px;border:2px solid var(--ln);
+    background:var(--card);display:flex;align-items:center;justify-content:center;
+    font-size:.72rem;font-weight:900;color:var(--mu);z-index:1}
+  .rung.done .dot{border-color:var(--gn);background:var(--gn);color:#0e1113}
+  .rung.now .dot{border-color:var(--or);background:var(--or);color:var(--haf-on-orange,#2f373e)}
+  .rung.stop .dot{border-color:var(--rd);background:var(--rd);color:#fff}
+  .rung .t{font-size:.95rem;font-weight:700;line-height:1.35;padding-top:.1rem}
+  .rung.todo .t{color:var(--mu);font-weight:600}
+  .rung .w{font-size:.78rem;color:var(--mu);margin-top:.18rem;line-height:1.5}
+  .rung.now .t{color:var(--haf-orange-ink)}
   .rows{display:flex;flex-direction:column;gap:.9rem}
   .row .k{font-size:.68rem;color:var(--mu);text-transform:uppercase;letter-spacing:1.2px;font-weight:700}
   .row .v{font-size:.97rem;font-weight:600;margin-top:.2rem;line-height:1.5}
@@ -56,7 +77,7 @@
   .money .v{font-weight:800;font-variant-numeric:tabular-nums}
   .money.tot .v{color:var(--haf-orange-ink)}
   .btn{display:block;text-align:center;text-decoration:none;border:0;border-radius:14px;padding:1.05rem;
-    font-size:1rem;font-weight:800;background:var(--or);color:#fff}
+    font-size:1rem;font-weight:800;background:var(--or);color:var(--haf-on-orange, #2f373e)}
   .foot{font-size:.75rem;color:var(--mu);text-align:center;line-height:1.65;padding:.4rem 0 0}
   .foot a{color:var(--mu)}
   .msg{text-align:center;padding:2.6rem 1.2rem;color:var(--mu);font-size:.95rem;line-height:1.65}
@@ -88,6 +109,11 @@
         <div class="sttl" id="j-sttl">—</div>
         <div class="stsub" id="j-stsub"></div>
       </div>
+    </div>
+
+    <div class="card" style="margin-bottom:.85rem">
+      <div class="lbl" style="margin-bottom:.7rem">Your delivery, step by step</div>
+      <div class="lad" id="j-lad"></div>
     </div>
 
     <a class="btn hide" id="j-pay" href="#">Pay the holding deposit</a>
@@ -154,6 +180,75 @@ var STATE = {
         'Your holding deposit has been refunded in full.']
 };
 
+/* The five things that happen to a one-off delivery, in order, each tied to the
+   one timestamp on the record that proves it happened. No step is ever drawn as
+   done on the strength of the status word alone. */
+/* Each rung: what it is called, the timestamp that proves it, what it means
+   while it is still to come, and what it means while it is the current step.
+   The two wordings are separate on purpose — "waiting for your deposit" and
+   "your job goes out once this clears" are the same rung read from either side,
+   and a customer who is stuck on it needs the first, not the second. */
+var LADDER = [
+  ['Order placed and priced',   'placed_at',
+   'We write your delivery down and price it.',            'Being written down now.'],
+  ['Holding deposit received',  'paid_at',
+   'Your job goes out to drivers the moment this clears.',  'Waiting for your holding deposit.'],
+  ['Out to HAF drivers',        'posted_at',
+   'On the screen of every cleared HAF driver.',            'Going out to drivers now.'],
+  ['A driver has your job',     'claimed_at',
+   'Their name and vehicle appear here, and we email you.', 'Waiting for a driver to accept it.'],
+  ['Delivered',                 'completed_at',
+   'Your receipt and the full breakdown follow by email.',  'Your driver has it and is on the job.']
+];
+
+/* A job that has stopped. Its ladder shows what really happened and then says
+   so plainly — it does not leave three grey rungs implying more is coming. */
+var STOPPED = {
+  declined: ['Nobody was able to take it', 'Your holding deposit is being refunded in full.'],
+  refunded: ['Refunded', 'Your holding deposit has been returned in full.'],
+  cancelled: ['Cancelled', 'This delivery was cancelled. Nothing further will happen on it.'],
+  private_failed: ['Held with our team', 'Reply to your HAF email quoting your reference and a person will pick it up.']
+};
+
+var stampText = function (iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' at ' +
+         d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+};
+
+function drawLadder(o) {
+  var lad = document.getElementById('j-lad');
+  if (!lad) return;
+  var stop = STOPPED[o.status];
+  /* A later step proves an earlier one, even when the earlier timestamp was
+     never written — a deposit that settled before we recorded the moment still
+     happened, and the job on a driver's board is the proof. So the rung is
+     drawn as done with no time, rather than claiming a time we do not have or
+     showing step three complete above an unfinished step two. */
+  var stamps = LADDER.map(function (r) { return o[r[1]] || null; });
+  var reached = -1;
+  for (var i = 0; i < stamps.length; i++) if (stamps[i]) reached = i;
+
+  var html = '';
+  for (var n = 0; n < LADDER.length; n++) {
+    var done = n <= reached;
+    var isNow = !done && n === reached + 1 && !stop;
+    if (!done && stop) {
+      html += '<div class="rung stop"><div class="dot">!</div><div>' +
+              '<div class="t">' + stop[0] + '</div><div class="w">' + stop[1] + '</div></div></div>';
+      break;
+    }
+    var cls = done ? 'done' : (isNow ? 'now' : 'todo');
+    var mark = done ? '&#10003;' : (n + 1);
+    var note = done ? (stampText(stamps[n]) || 'Done') : (isNow ? LADDER[n][3] : LADDER[n][2]);
+    html += '<div class="rung ' + cls + '"><div class="dot">' + mark + '</div><div>' +
+            '<div class="t">' + LADDER[n][0] + '</div><div class="w">' + note + '</div></div></div>';
+  }
+  lad.innerHTML = html;
+}
+
 fetch('/api/order/track?t=' + encodeURIComponent(TOKEN))
   .then(function (r) { return r.json(); })
   .then(function (d) {
@@ -174,6 +269,8 @@ fetch('/api/order/track?t=' + encodeURIComponent(TOKEN))
        'Your job is with our team. Reply to your HAF email quoting your reference and we will tell you exactly where it stands.'];
     document.getElementById('j-pip').className = s[0];
     txt('j-sttl', s[1]); txt('j-stsub', s[2]);
+
+    drawLadder(o);
 
     /* The deposit button only appears while the deposit is genuinely the next
        thing. Offering "pay" on a job that is already paid for is how somebody
