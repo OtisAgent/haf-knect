@@ -7373,6 +7373,21 @@ async function hafAuth(u,s,err,btn){
     if(!Array.isArray(d)||!d.length||!d[0]||!d[0].cred){
       hafErr(err,isPin?'That PIN didn\'t match. Use the PIN you chose on your application — or reset it below.':'Incorrect username or password. Try again.');
       btn.textContent=old;btn.disabled=false;return}
+    /* ── THE ADDRESS COMES BEFORE THE DASHBOARD ────────────────────────
+       Brent, 10 Sep: "the email must be confirmed yes, and for any account
+       opening ... once they've confirmed they get access to the HAF KNECT
+       Dashboard and thats it". Until then this is not a locked account, it is
+       an unfinished sign-up, and it says so: the credential was right, the way
+       in is one click in an email they already have. The driving side is a
+       separate, later door and is not mentioned here — that one waits on the
+       documents and a named release, which is a different sentence entirely.
+
+       knect_auth decides whether the rule reaches this person at all
+       (email_confirm_required), so nobody who signed up before the rule
+       existed is stopped by a page they have used for weeks. */
+    if(d[0].email_confirm_required&&!d[0].email_confirmed){
+      hafErr(err,'Almost there — please confirm your email address first. We sent you a link when you signed up: click it and you are straight in. Check your junk folder if you cannot see it.');
+      btn.textContent=old;btn.disabled=false;return}
     if(!isPin&&!d[0].has_pin){hafPend={u:u,hash:hash,acct:d[0]};btn.textContent=old;btn.disabled=false;closeLogin();document.getElementById('pin-ov').classList.add('open');document.getElementById('pin-a').focus();return}
     /* keep whichever hash actually opened the account: later calls (bookings,
        usage, profile) prove who they are by sending it back */
