@@ -1,0 +1,30 @@
+# Paths that must never be served.
+#
+# 🔴 10 Sep 2026, and this one is mine. I moved the pricing reasoning and the
+# seven test suites into folders beginning with a dot, on the belief that
+# Cloudflare Pages does not publish those. It does. I checked afterwards and
+# found /.decisions/pricing-source/pricing-matrix-v3.js answering 200 with all
+# 65,042 original bytes — I had taken the reasoning out of one public address and
+# published it at another. Deleting the old admin/*.test.js files did not help
+# either: Pages kept serving them from the previous deployment.
+#
+# So the rule is enforced here, at the door, where it does not depend on a naming
+# convention holding or on an asset really being gone. A 404 line refuses the path
+# before anything is served.
+#
+# The verification that matters is a fetch from outside with no credentials, never
+# "the file is not in the repo any more".
+
+/.decisions/*                       /_not-found   404
+/.tests/*                           /_not-found   404
+
+# The suites moved to .tests/. These are their old homes, still being served out
+# of an earlier deployment.
+/admin/account-fees-v1.test.js      /_not-found   404
+/admin/fee-basis-lock.test.js       /_not-found   404
+/admin/lane-and-margin-v6.test.js   /_not-found   404
+/admin/pricing-framework-v6.test.js /_not-found   404
+/admin/revenue-model-v1.test.js     /_not-found   404
+/admin/tier-identity-v1.test.js     /_not-found   404
+/admin/pricing-database.test.mjs    /_not-found   404
+/admin/pricing-matrix-v3.test.RETIRED.js /_not-found 404
