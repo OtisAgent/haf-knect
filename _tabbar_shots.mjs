@@ -2,7 +2,7 @@
    like something Brent would want on his phone. */
 import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
-const FILE = 'file://' + fileURLToPath(new URL('./index.html', import.meta.url));
+const FILE = process.env.NAV_URL || 'file://' + fileURLToPath(new URL('./index.html', import.meta.url));
 
 const CASES = [
   { key: 'driver',   acc: { type:'driver',            drives:true,  released:true,  name:'James Ward' } },

@@ -11,7 +11,9 @@
 import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
 
-const FILE = 'file://' + fileURLToPath(new URL('./index.html', import.meta.url));
+/* Point NAV_URL at a deployed address to run these same checks against the
+   surface a person actually opens, rather than the file on this machine. */
+const FILE = process.env.NAV_URL || 'file://' + fileURLToPath(new URL('./index.html', import.meta.url));
 
 const PHONES = [
   { name: 'small iPhone (SE)', w: 375, h: 667 },
