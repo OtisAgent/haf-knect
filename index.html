@@ -282,7 +282,28 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 /* SIDEBAR */
 .app-body{display:flex;flex:1;min-height:calc(100vh - var(--tb))}
 .sidebar{width:var(--sb);flex-shrink:0;background:var(--p);border-right:1px solid var(--ln);display:flex;flex-direction:column;padding:.7rem 0;position:sticky;top:var(--tb);height:calc(100vh - var(--tb));overflow-y:auto;transition:transform .22s}
-@media(max-width:768px){.sidebar{position:fixed;top:var(--tb);left:0;bottom:0;z-index:150;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.menu-btn{display:flex}}
+/* Brent, 10 Sep 2026: "turn the current nav bar into a drop down menu ... the
+   bottom nav needs to stay on constantly". So the side column stops being a
+   column at every width and becomes one panel that drops in over the screen,
+   opened from MORE on the bar. It keeps everything it ever had — the live job
+   tracker, the PLNA card, every nav row with its padlock sentence, the account
+   foot and Sign out — so nothing is lost and there is still only ONE menu. */
+.sidebar{position:fixed;top:var(--tb);left:0;bottom:0;height:auto;z-index:150;
+  width:min(320px,88vw);transform:translateX(-100%);
+  box-shadow:0 10px 40px rgba(0,0,0,.20)}
+.sidebar.open{transform:translateX(0)}
+/* the panel stops above the bar, so the bar is never covered by its own menu */
+body.haf-tabbar-on .sidebar{bottom:calc(var(--tabbar-h) + 22px + env(safe-area-inset-bottom,0px))}
+.menu-btn{display:flex}
+#sb-ov{position:fixed;inset:0;z-index:149;background:rgba(0,0,0,.42);
+  opacity:0;pointer-events:none;transition:opacity .18s}
+#sb-ov.on{opacity:1;pointer-events:auto}
+.sb-x{display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+  padding:.6rem .85rem .4rem;font-size:.6rem;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--su)}
+.sb-x button{width:28px;height:28px;flex:0 0 auto;border-radius:var(--rx);
+  background:var(--p2);border:1px solid var(--ln);color:var(--mu);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;line-height:1}
 .nav-sec{padding:.5rem .85rem .12rem;font-size:.6rem;font-weight:700;letter-spacing:.1em;color:var(--su);text-transform:uppercase}
 .ni{display:flex;align-items:center;gap:.6rem;padding:.5rem .85rem;margin:.06rem .4rem;border-radius:var(--rx);cursor:pointer;color:var(--mu);font-weight:600;font-size:.82rem;transition:all .14s}
 .ni:hover{background:var(--ln);color:var(--tx)}
@@ -1509,7 +1530,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 
 #haf-tabbar{display:none}
 
-@media(max-width:768px){
+@media(min-width:0px){
   /* The floating container Brent asked for: 16px of air each side, the screen
      showing through underneath it. */
   #haf-tabbar{
@@ -1545,7 +1566,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
     stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;transition:transform .16s}
   .tbi-l{font-size:.56rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
     max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    opacity:0;height:0;transition:opacity .16s}
+    opacity:1;height:auto;transition:opacity .16s}
   /* The active tab expands and shows its label. Everything else stays a symbol,
      which is what keeps the bar quiet. */
   .tbi.on{color:var(--haf-orange-ink)}
@@ -1650,7 +1671,13 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 .tbs-foot{padding:.5rem .4rem .2rem}
 .tbs-out{width:100%;padding:.7rem;border:1px solid var(--lns);border-radius:var(--rs);
   background:none;color:var(--mu);font-family:var(--fn);font-size:.8rem;font-weight:700;cursor:pointer}
-@media(min-width:769px){.tbs,.tbs-ov{display:none!important}}
+/* On a wide screen the bar does not stretch across a monitor: it sits centred,
+   about the width of a phone, so five thumb positions never become five
+   distant corners. */
+@media(min-width:769px){
+  #haf-tabbar{left:50%;right:auto;transform:translateX(-50%);
+    width:min(560px,calc(100% - 32px))}
+}
 
 </style>
 <link rel="stylesheet" href="/haf-bridge.css">
@@ -2553,6 +2580,11 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 
   <div class="app-body">
     <nav class="sidebar" id="sidebar">
+      <!-- The panel's own head. The hamburger is retired wherever the bar drew,
+           so the way out has to live inside the panel: this row, the shaded
+           backdrop, or Escape. -->
+      <div class="sb-x"><span>Menu</span>
+        <button type="button" aria-label="Close menu" onclick="hafSbClose()">&times;</button></div>
       <div class="sb-livejob" id="sb-livejob"></div>
       <!-- PLNA at a glance. Sits outside nav-list on purpose: buildNavV1
            rewrites nav-list on every redraw, and this card owns its own
@@ -8093,7 +8125,27 @@ function toggleXchAvail(){
   if(stLbl)stLbl.textContent=_xchOnline?'● Online — Taking jobs':'○ Offline — Not taking jobs';
   if(stLbl)stLbl.style.color=_xchOnline?'var(--gn)':'var(--mu)';
 }
-function toggleSb(){document.getElementById('sidebar').classList.toggle('open')}
+/* The drop-down menu. MORE on the bar opens it, the backdrop, the × and Escape
+   all close it, and choosing anything inside it closes it too — a menu you have
+   to dismiss by hand after you have already chosen is the commonest complaint
+   about a panel like this. */
+function hafSbOpen(){
+  const s=document.getElementById('sidebar'); if(!s)return;
+  let ov=document.getElementById('sb-ov');
+  if(!ov){ov=document.createElement('div');ov.id='sb-ov';ov.onclick=hafSbClose;
+    document.body.appendChild(ov)}
+  s.classList.add('open'); ov.classList.add('on');
+}
+function hafSbClose(){
+  const s=document.getElementById('sidebar'),ov=document.getElementById('sb-ov');
+  if(s)s.classList.remove('open'); if(ov)ov.classList.remove('on');
+}
+function toggleSb(){
+  const s=document.getElementById('sidebar');
+  if(s&&s.classList.contains('open'))hafSbClose(); else hafSbOpen();
+}
+window.hafSbOpen=hafSbOpen; window.hafSbClose=hafSbClose;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')hafSbClose()});
 
 /* The demo-request form and its three functions were removed on 14 Aug. Demo
    interest is collected by demo.usehaf.co.uk now, so nothing on this page
@@ -8906,35 +8958,9 @@ window.hafTabDo=hafTabDo;
    A locked section keeps its padlock and its reason. The phone is not allowed
    to quietly drop what the desktop takes the trouble to explain. */
 function hafTabMore(){
-  const acc=_tbAcc; if(!acc)return;
-  const model=hafNavModel(acc);
-  const cur=(ct||'').replace('pane-','');
-  let h='',cg='';
-  model.forEach(sec=>{
-    if(sec.g!==cg){h+='<div class="tbs-sec">'+sec.g+'</div>';cg=sec.g}
-    if(sec.locked){
-      h+='<button class="tbs-row lk" type="button" onclick="hafTabSheetClose();hafLockOpen(\''+sec.id+'\')">'+
-         '<svg class="ni-ic" viewBox="0 0 24 24">'+sec.ico+'</svg>'+sec.l+
-         '<svg class="ni-ic" style="margin-left:auto" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></button>'+
-         '<div class="tbs-why">'+sec.why+'</div>';
-      return;
-    }
-    /* The section's symbol is drawn once, on its first row. Repeating it down
-       every row of a section turned four screens into four identical lorries,
-       which is noise standing where a distinction should be. */
-    (sec.tabs||[]).forEach((t,i)=>{
-      const on=(!t.ext&&t.id===cur);
-      h+='<button class="tbs-row'+(on?' on':'')+'" type="button" onclick="hafTabRow(\''+sec.id+'\',\''+t.id+'\')">'+
-         (i===0?'<svg class="ni-ic" viewBox="0 0 24 24">'+sec.ico+'</svg>'
-               :'<span class="ni-ic tbs-tick"></span>')+t.l+
-         (t.ext?'<span class="tbs-ext">Opens PLNA</span>':'')+'</button>';
-    });
-  });
-  h+='<div class="tbs-sec">Session</div><div class="tbs-foot">'+
-     '<button class="tbs-out" type="button" onclick="hafTabSheetClose();signOut()">Sign out</button></div>';
-  const nm=(acc&&acc.name)||(localStorage.getItem('knect-user')||'').toUpperCase()||'';
-  _tbSheetOpen('Everything','',h);
-  const s=document.getElementById('tbs-s'); if(s&&nm)s.textContent=nm;
+  if(!_tbAcc)return;
+  hafTabSheetClose();
+  hafSbOpen();
 }
 window.hafTabMore=hafTabMore;
 
@@ -9720,7 +9746,7 @@ function switchTab(id){
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
   /* the bar follows the screen: a sheet that opened it closes, and the newly
      selected position takes the highlight */
-  try{hafTabSheetClose();hafTabBarPaint();}catch(e){}
+  try{hafTabSheetClose();hafSbClose();hafTabBarPaint();}catch(e){}
 }
 
 /* ═══════════════ NETWORK OVERVIEW + ACCOUNT ACTIVITY ═══════════════

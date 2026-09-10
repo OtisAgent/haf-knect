@@ -19,6 +19,7 @@ const PHONES = [
   { name: 'small iPhone (SE)', w: 375, h: 667 },
   { name: 'modern iPhone',     w: 390, h: 844 },
   { name: 'Android phone',     w: 412, h: 915 },
+  { name: 'phone sideways',    w: 844, h: 390 },
   { name: 'tablet portrait',   w: 768, h: 1024 },
 ];
 
@@ -117,36 +118,67 @@ for (const phone of PHONES) {
     const small = bar.items.filter(i => i.h < 44 || i.w < 40);
     ok(small.length === 0, C.key + ' every tap target is 44px or more', small.length + ' too small');
 
-    /* 5. THE COMPLETENESS PROPERTY — More holds every screen the model gives */
-    const comp = await page.evaluate(() => {
-      window.hafTabMore();
-      const rows = [...document.querySelectorAll('#tbs-b .tbs-row')];
-      const shown = rows.map(r => r.textContent.replace('Opens PLNA', '').trim());
-      const model = window.hafNavModel(window.hafTabModel ? null : null);
-      return { shown, hasSignOut: !!document.querySelector('#tbs-b .tbs-out') };
-    });
-    const expected = await page.evaluate((acc) => {
-      const out = [];
-      window.hafNavModel(acc).forEach(s => {
-        if (s.locked) { out.push(s.l.replace(/&amp;/g, '&')); return; }
-        (s.tabs || []).forEach(t => out.push(t.l.replace(/&amp;/g, '&')));
-      });
-      return out;
-    }, C.acc);
-    const shownNorm = comp.shown.map(s => s.replace(/&amp;/g, '&'));
-    const missing = expected.filter(e => !shownNorm.includes(e));
-    ok(expected.length > 0, C.key + ' the model actually offers screens to check', 'model was empty');
-    if (expected.length === 0) note(C.key + ' completeness');
-    ok(missing.length === 0, C.key + ' More panel holds every screen the sidebar has (' + expected.length + ')', 'missing: ' + missing.join(', '));
-    ok(comp.hasSignOut, C.key + ' More panel offers sign out');
+    /* 5. THE COMPLETENESS PROPERTY — MORE opens the ONE menu, and every screen
+       the model gives this account is reachable inside it AND lands somewhere
+       that exists.
 
-    /* 6. the sheet closes again, and closing does not leave the page blocked */
+       The menu groups its screens under headings that open one at a time, so
+       only the open heading's rows are in the page. Reachable therefore means
+       "open the heading and the row is there", which is what a person does, so
+       that is what this walks. Checked by row id rather than wording: a heading
+       holding a single screen is drawn under the HEADING's name here and under
+       the SCREEN's name on the bar, and a text match would call that a loss. */
+    await page.evaluate(() => window.hafTabMore());
+    /* wait for the panel to finish sliding rather than guessing at a delay —
+       a fixed pause passes on a fast machine and fails on a slow one */
+    await page.waitForFunction(() => {
+      const p = document.getElementById('sidebar');
+      return p && p.classList.contains('open') && p.getBoundingClientRect().left > -5;
+    }, null, { timeout: 4000 }).catch(() => {});
+    const comp = await page.evaluate((acc) => {
+      const panel = document.getElementById('sidebar');
+      const model = window.hafNavModel(acc);
+      const want = [], found = [], broken = [];
+      const target = (id) => {
+        const r = document.getElementById(id); if (!r) return;
+        const m = (r.getAttribute('onclick') || '').match(/switchTab\('pane-([^']+)'\)/);
+        if (m && !document.getElementById('pane-' + m[1])) broken.push(id + ' -> pane-' + m[1]);
+      };
+      model.forEach(sec => {
+        if (sec.locked) {
+          want.push('ni-sec-' + sec.id);
+          if (panel.querySelector('#ni-sec-' + sec.id)) found.push('ni-sec-' + sec.id);
+          return;
+        }
+        const need = (sec.tabs || []).map(t => 'ni-' + t.id);
+        need.forEach(id => want.push(id));
+        /* open this heading if its rows are not showing yet */
+        for (let i = 0; i < 2 && need.some(id => !document.getElementById(id)); i++) {
+          try { window.hafSecToggle(sec.id) } catch (e) {}
+        }
+        need.forEach(id => { if (document.getElementById(id)) { found.push(id); target(id) } });
+      });
+      return { want, found, broken,
+        open: panel.classList.contains('open'),
+        onScreen: panel.getBoundingClientRect().left > -5,
+        hasSignOut: !!panel.querySelector('.so-btn') };
+    }, C.acc);
+    const missing = comp.want.filter(w => !comp.found.includes(w));
+    ok(comp.want.length > 0, C.key + ' the model actually offers screens to check', 'model was empty');
+    if (comp.want.length === 0) note(C.key + ' completeness');
+    ok(comp.open && comp.onScreen, C.key + ' MORE opens the drop-down menu');
+    ok(missing.length === 0, C.key + ' every screen the model gives is reachable in the menu (' + comp.want.length + ')', 'missing: ' + missing.join(', '));
+    ok(comp.broken.length === 0, C.key + ' every menu row lands on a screen that exists', comp.broken.join(', '));
+    ok(comp.hasSignOut, C.key + ' the menu offers sign out');
+
+    /* 6. it closes again, and closing does not leave the page blocked */
     const closed = await page.evaluate(() => {
-      window.hafTabSheetClose();
-      const s = document.getElementById('tbs'), o = document.getElementById('tbs-ov');
-      return { sheet: s.classList.contains('on'), ov: getComputedStyle(o).pointerEvents };
+      window.hafSbClose();
+      const pn = document.getElementById('sidebar'), o = document.getElementById('sb-ov');
+      return { open: pn.classList.contains('open'),
+               ov: o ? getComputedStyle(o).pointerEvents : 'none' };
     });
-    ok(closed.sheet === false && closed.ov === 'none', C.key + ' the panel closes and stops blocking the screen');
+    ok(closed.open === false && closed.ov === 'none', C.key + ' the menu closes and stops blocking the screen');
 
     /* 7. the centre button offers only actions this account really has */
     const act = await page.evaluate((acc) => {
@@ -190,7 +222,7 @@ for (const phone of PHONES) {
   await ctx.close();
 }
 
-/* 10. desktop is untouched */
+/* 10. THE BAR IS PERMANENT — a desktop screen carries the same one */
 {
   console.log('\n=== desktop (1280x900) ===');
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
@@ -204,18 +236,29 @@ for (const phone of PHONES) {
     const b = document.getElementById('haf-tabbar');
     const sb = document.querySelector('.sidebar');
     const m = document.querySelector('.main');
+    const br = b ? b.getBoundingClientRect() : null;
+    const before = sb.getBoundingClientRect().left;
+    window.hafTabMore();
+    const after = sb.classList.contains('open');
+    const rows = document.querySelectorAll('#nav-list .ni, #nav-list .ni-sub').length;
+    window.hafSbClose();
     return {
-      barDisplay: b ? getComputedStyle(b).display : 'absent',
-      sidebar: getComputedStyle(sb).transform,
-      sidebarVisible: sb.getBoundingClientRect().width > 100,
+      barH: br ? Math.round(br.height) : 0,
+      barW: br ? Math.round(br.width) : 0,
+      pinned: b ? getComputedStyle(b).position : 'absent',
+      hiddenBefore: before < -50,
+      openedAfter: after,
       pad: parseFloat(getComputedStyle(m).paddingBottom),
-      navRows: document.querySelectorAll('#nav-list .ni').length,
+      rows,
     };
   });
-  ok(d.barDisplay === 'none', 'desktop shows no bottom bar', 'display=' + d.barDisplay);
-  ok(d.sidebarVisible, 'desktop sidebar still there');
-  ok(d.navRows > 3, 'desktop sidebar still full', d.navRows + ' rows');
-  ok(d.pad < 60, 'desktop keeps its normal spacing', 'padding ' + d.pad);
+  ok(d.barH > 40, 'desktop carries the same bottom bar', 'height=' + d.barH);
+  ok(d.pinned === 'fixed', 'the bar is pinned, not scrolled with the page', 'position=' + d.pinned);
+  ok(d.barW > 300 && d.barW <= 600, 'the desktop bar is centred, not stretched across the monitor', 'width=' + d.barW);
+  ok(d.hiddenBefore, 'the old side column is away until the menu is opened');
+  ok(d.openedAfter, 'MORE drops the menu down on desktop too');
+  ok(d.rows > 3, 'the menu still holds every row', d.rows + ' rows');
+  ok(d.pad > 60, 'desktop content clears the bar', 'padding ' + d.pad);
   await ctx.close();
 }
 
