@@ -365,6 +365,9 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .aa-name{font-weight:700;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .aa-sub{font-size:.7rem;color:var(--mu);margin-top:.12rem}
 .aa-right{display:flex;align-items:center;gap:.35rem;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+/* A live heartbeat, inside the last five minutes. Nothing else earns it. */
+.aa-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gn);
+        margin-right:.4rem;vertical-align:middle;flex-shrink:0}
 .aa-empty{font-size:.8rem;color:var(--mu);padding:.9rem 0;text-align:center}
 .aa-test{opacity:.62}
 .aa-ev{display:flex;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--ln);font-size:.78rem}
@@ -384,6 +387,38 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
          font-weight:800;margin:1.05rem 0 .4rem}
 .crm-warn{font-size:.75rem;background:var(--am-d,rgba(241,142,0,.12));border:1px solid rgba(241,142,0,.3);
           border-radius:var(--rx);padding:.55rem .7rem;color:var(--tx);margin:.5rem 0}
+/* ── How connected an account is, and how it is used ──
+   The bar is the only number on the profile that is a summary of other
+   numbers, so the checklist under it always shows the parts it is made of. */
+.cn-hd{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin:.2rem 0 .45rem}
+.cn-st{font-weight:800;font-size:.9rem}
+.cn-ct{color:var(--mu);font-size:.74rem;white-space:nowrap}
+.cn-bar{height:.5rem;border-radius:99px;background:var(--ln);overflow:hidden;margin-bottom:.65rem}
+.cn-fill{height:100%;border-radius:99px;background:var(--gn,#1f9d55);transition:width .4s ease}
+.cn-fill.am{background:var(--am,#f18e00)}.cn-fill.rd{background:var(--rd,#d8412f)}
+.cn-list{display:grid;grid-template-columns:1fr 1fr;gap:.2rem .9rem}
+@media(max-width:560px){.cn-list{grid-template-columns:1fr}}
+.cn-it{display:flex;gap:.45rem;align-items:flex-start;font-size:.78rem;padding:.24rem 0}
+.cn-tk{flex-shrink:0;font-weight:900;line-height:1.2}
+.cn-tk.y{color:var(--gn,#1f9d55)}.cn-tk.n{color:var(--mu)}
+.cn-it.miss span:last-child{color:var(--tx)}
+.cn-it.done span:last-child{color:var(--mu)}
+.us-says{font-size:.82rem;line-height:1.55;background:var(--bg2,rgba(127,127,127,.07));
+         border:1px solid var(--ln);border-radius:var(--rx);padding:.6rem .7rem;margin:.15rem 0 .6rem}
+.us-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(6.2rem,1fr));gap:.45rem}
+.us-c{border:1px solid var(--ln);border-radius:var(--rx);padding:.45rem .55rem}
+.us-c b{display:block;font-size:1.05rem;font-weight:900;line-height:1.15}
+.us-c span{font-size:.66rem;color:var(--mu);letter-spacing:.02em}
+/* ── Ledger lines: what changed, from what, to what, by whom ── */
+.lg{display:flex;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--ln);font-size:.78rem}
+.lg:last-child{border-bottom:none}
+.lg-t{color:var(--mu);font-size:.7rem;white-space:nowrap;flex-shrink:0;min-width:6.6rem}
+.lg-b{min-width:0;flex:1}
+.lg-f{font-weight:700}
+.lg-v{color:var(--mu)}
+.lg-v b{color:var(--tx);font-weight:700}
+.lg-w{font-size:.66rem;color:var(--mu);margin-top:.1rem}
+@media(max-width:560px){.lg{flex-direction:column;gap:.15rem}.lg-t{min-width:0}}
 /* ── Money rows ── */
 .mo-row{display:flex;align-items:center;gap:.6rem;padding:.6rem 0;border-bottom:1px solid var(--ln)}
 .mo-row:last-child{border-bottom:none}
@@ -3752,6 +3787,21 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
       <div class="tp" id="pane-admin">
         <h1 class="pt">Network Overview</h1><p class="ps">Every account on HAF, read from the live systems. Admin only.</p>
 
+        <!-- ══ NETWORK LIVE ═══════════════════════════════════════════════════
+             Brent's 10 Sep directive: open this and know what the network is
+             doing right now, without one blurry "active user" number standing
+             in for five different questions. Every figure here is counted off
+             the one account state record, so two of these can never disagree.
+             Online is a heartbeat inside five minutes. Active today means a
+             real operational action, not a page left open. -->
+        <div class="card" id="ops-card">
+          <div class="ct">Network live
+            <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem" id="ops-when">reading the network…</span>
+          </div>
+          <div class="kg" id="ops-kpis"></div>
+          <div id="ops-note" class="ov-src" style="margin:12px 0 0;display:none"></div>
+        </div>
+
         <!-- Where these numbers come from and when they were last true. The old
              version of this page carried figures typed in by hand months ago;
              naming the source out loud is what stops that happening again. -->
@@ -3803,6 +3853,15 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
           <div class="card"><div class="ct">Founder status <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">held beside a plan</span></div><div id="ov-founder"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
         </div>
 
+        <!-- How much of the network is actually finished setting up, and what
+             is stopping the rest. Every figure here is counted from the same
+             per-account checklist the profile shows, so a number can always be
+             opened and read step by step. -->
+        <div class="g2">
+          <div class="card"><div class="ct">Set-up across the network <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">are they fully connected</span></div><div id="ov-conn"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
+          <div class="card"><div class="ct">What is holding accounts up <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">most common first</span></div><div id="ov-block"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
+        </div>
+
         <div class="g2">
           <div class="card"><div class="ct">Jobs across the network</div><div id="ov-jobs"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
           <div class="card"><div class="ct">Money</div><div id="ov-money"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
@@ -3810,7 +3869,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 
         <div class="g2">
           <div class="card"><div class="ct">Accounts by tier</div><div id="ov-tiers"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
-          <div class="card"><div class="ct">System connections</div><div class="cr"><span class="ck">HAF PLNA</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">CleverPay</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">HAF Launch</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">Account ledger</span><span class="cv" id="ov-ledger"><span class="chip ca">checking…</span></span></div></div>
+          <div class="card"><div class="ct">System connections</div><div class="cr"><span class="ck">HAF PLNA</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">CleverPay</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">HAF Launch</span><span class="cv"><span class="chip cg">Live</span></span></div><div class="cr"><span class="ck">Account records</span><span class="cv" id="ov-ledger"><span class="chip ca">checking…</span></span></div></div>
         </div>
         <div class="card"><div class="ct">Quick links</div><div style="display:flex;gap:.45rem;flex-wrap:wrap"><a href="https://plna.usehaf.co.uk/dashboard.html" target="_blank" class="btn btn-gh btn-sm">PLNA</a><a href="https://clever.usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">CleverPay</a><a href="https://launch.usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">Launch site</a><a href="https://usehaf.co.uk" target="_blank" class="btn btn-gh btn-sm">usehaf.co.uk</a></div></div>
         <div class="ig"><a class="ic" href="https://plna.usehaf.co.uk" target="_blank"><div class="ic-l">Driver network</div><div class="ic-n">HAF PLNA</div><div class="ic-s">Live</div></a><a class="ic" href="https://clever.usehaf.co.uk" target="_blank"><div class="ic-l">Compliance</div><div class="ic-n">CleverPay</div><div class="ic-s">Live</div></a><a class="ic" href="https://launch.usehaf.co.uk" target="_blank"><div class="ic-l">Marketing</div><div class="ic-n">HAF Launch</div><div class="ic-s">Live</div></a></div>
@@ -3822,8 +3881,8 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
            has moved. Every row here is a real record; nothing is illustrative.
            No document, no PIN and no home address ever reaches this page. -->
       <div class="tp" id="pane-accounts">
-        <h1 class="pt">Account Activity</h1>
-        <p class="ps">Every account on the network and everything that has happened to it. Admin only.</p>
+        <h1 class="pt">Network Directory</h1>
+        <p class="ps">One row per HAF account, what it is and what it is doing, and everything that has happened to it. Admin only.</p>
 
         <!-- ══ WHO IS ON NOW ═══════════════════════════════════════════════
              The first question this page should answer. A green "On now" is a
@@ -3856,6 +3915,19 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <option value="rejected">Rejected</option>
               <option value="blocked">Blocked</option>
             </select>
+            <!-- What the account is doing, as opposed to what it is. Filtered
+                 on the rows already fetched, so it costs no second read. -->
+            <select class="fi2" id="aa-live" onchange="aaLoad()">
+              <option value="">Doing anything</option>
+              <option value="online">Online now</option>
+              <option value="today">Active today</option>
+              <option value="available">Available drivers</option>
+              <option value="onjob">On a job</option>
+              <option value="blocked">Blocked by Clever</option>
+              <option value="attention">Needs attention</option>
+              <option value="halfset">Not fully connected</option>
+              <option value="neverused">Let in, never used it</option>
+            </select>
             <input class="fi2" id="aa-q" placeholder="Name, username or reference" oninput="aaDebounce()">
             <button class="btn btn-gh btn-sm" onclick="aaLoad(true)">Refresh</button>
           </div>
@@ -3863,7 +3935,9 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         </div>
 
         <div class="card">
-          <div class="ct">Accounts</div>
+          <div class="ct">Network Directory
+            <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">one row per HAF account &middot; click a row to open its record</span>
+          </div>
           <div class="aa-wrap"><div id="aa-list"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
         </div>
 
@@ -6138,7 +6212,7 @@ const DRIVER_NAV=[
 ];
 const ADMIN_NAV=[
   {id:'admin',l:'Network Overview',s:'Overview',ico:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
-  {id:'accounts',l:'Account Activity',s:'Overview',ico:'<path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M4 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
+  {id:'accounts',l:'Network Directory',s:'Overview',ico:'<path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M4 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'money',l:'Payments &amp; Payouts',s:'Overview',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'fbadmin',l:'Feedback Control',s:'Overview',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {id:'pools',l:'Network Pools',s:'Overview',ico:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>'},
@@ -8947,7 +9021,13 @@ function _when(iso){
   return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+
          d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 }
-const _STATUS_CHIP={active:'cg',on_hold:'ca',missing_documents:'ca',rejected:'cr',blocked:'cr'};
+/* The red chip is `cr2`. `cr` is the card-row layout class, so `chip cr` drew a
+   full-width bordered flex row instead of a red pill. No account currently
+   carries `rejected` or `blocked` in this column, which is the only reason it
+   was never seen; the compliance chips below use red for real. */
+const _STATUS_CHIP={active:'cg',on_hold:'ca',missing_documents:'ca',rejected:'cr2',blocked:'cr2'};
+/* Clever's answer to "can this driver operate on the HAF network right now". */
+const _CMP_CHIP={Approved:'cg',Review:'ca',Expired:'ca',Blocked:'cr2'};
 const _STATUS_LBL={active:'Active',on_hold:'On hold',missing_documents:'Missing documents',
                    rejected:'Rejected',blocked:'Blocked'};
 const _TYPE_LBL={driver:'Driver',freight:'Find a Courier',business:'Business',
@@ -8966,14 +9046,81 @@ function _noCred(msg){
   if(s){s.className='ov-src bad';s.innerHTML='<span class="dot"></span>'+_esc(msg);}
   /* A card left saying "loading…" reads as a page still working. It is not —
      it is a page that was refused. Every panel says so plainly instead. */
-  ['ov-memb','ov-founder','ov-jobs','ov-money','ov-types','ov-status','ov-tiers'].forEach(id=>{
+  ['ov-memb','ov-founder','ov-jobs','ov-money','ov-types','ov-status','ov-tiers',
+   'ov-conn','ov-block'].forEach(id=>{
     const e=document.getElementById(id);
     if(e)e.innerHTML='<div class="cr"><span class="ck" style="color:var(--mu)">Not readable from this login</span></div>';
   });
 }
 
+/* ══ NETWORK LIVE ═════════════════════════════════════════════════════════
+   The twelve questions Brent listed, each answered separately. They all come
+   from one read of one record per account, so "available drivers" can never
+   contradict "drivers online" the way two independent counts would.
+
+   A zero here is a real zero and says why underneath it. That matters more
+   than it sounds: the network has no job traffic yet, so several of these read
+   0 today and will keep reading 0 until real work flows. A blank number with
+   no explanation is how a screen starts lying quietly. */
+let _opsCache=null;
+
+async function opsLoad(){
+  const when=document.getElementById('ops-when');
+  const note=document.getElementById('ops-note');
+  try{
+    const {denied,rows}=await _netRpc('haf_network_ops');
+    const d=(!denied&&rows.length)?rows[0]:null;
+    if(!d){
+      when.textContent='not readable from this login';
+      document.getElementById('ops-kpis').innerHTML=
+        '<div class="kc"><div class="kc-l">Live network</div><div class="kc-v">—</div>'+
+        '<div class="kc-d">Sign in with your own HAF username and PIN.</div></div>';
+      return;
+    }
+    _opsCache=d;
+    when.textContent='as at '+new Date(d.read_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+
+    /* label, value, colour, the plain sentence under it */
+    const K=[
+      ['Online now',          d.online_now,          d.online_now?'gn':'',        'a page open in the last 5 minutes'],
+      ['Active today',        d.active_today,        d.active_today?'gn':'',      'did something operational today'],
+      ['Drivers active today',d.drivers_active,      d.drivers_active?'gn':'',    'drivers among them'],
+      ['Drivers available',   d.drivers_available,   d.drivers_available?'gn':'', 'approved, online and free to take work'],
+      ['Drivers on a job',    d.drivers_on_job,      d.drivers_on_job?'or':'',    'collecting, driving or delivering'],
+      ['Live jobs',           d.live_jobs,           d.live_jobs?'or':'',         'claimed and not finished'],
+      ['Awaiting allocation', d.awaiting_allocation, d.awaiting_allocation?'am':'','posted, nobody has claimed them'],
+      ['Fleet accounts active',   d.fleet_active,    '',                          'fleets that did something today'],
+      ['Business accounts active',d.business_active, '',                          'freight and business, today'],
+      ['Compliance problems', d.compliance_review,   d.compliance_review?'am':'', 'in review or expired'],
+      ['Blocked drivers',     d.blocked_drivers,     d.blocked_drivers?'rd':'',   'cannot be given work'],
+      ['Accounts on the network', d.total_accounts,  '',                          'every type, test accounts excluded']
+    ];
+    document.getElementById('ops-kpis').innerHTML=K.map(k=>
+      '<div class="kc"><div class="kc-l">'+k[0]+'</div><div class="kc-v'+(k[2]?' '+k[2]:'')+'">'+
+      k[1]+'</div><div class="kc-d" style="color:var(--mu)">'+k[3]+'</div></div>').join('');
+
+    /* Say out loud when a zero is a zero because nothing has happened yet,
+       rather than letting a clean row of noughts read as a healthy network. */
+    const say=[];
+    if(!d.live_jobs&&!d.awaiting_allocation)
+      say.push('No job is running on the network right now, so the job figures are true zeros rather than a fault.');
+    if(!d.drivers_available)
+      say.push('No driver has set themselves available: PLNA has no availability control on the driver screens yet, so that figure cannot rise until it is built.');
+    if(d.pod_outstanding)
+      say.push(d.pod_outstanding+' delivered job'+(d.pod_outstanding===1?' is':'s are')+' still waiting on proof of delivery.');
+    note.style.display=say.length?'':'none';
+    note.innerHTML='<span class="dot"></span><span>'+say.map(_esc).join(' ')+'</span>';
+  }catch(e){
+    when.textContent='could not be read';
+    note.style.display='';
+    note.className='ov-src bad';
+    note.innerHTML='<span class="dot"></span>Could not read the live network just now. Nothing above is a made-up number.';
+  }
+}
+
 async function ovLoad(){
   const src=document.getElementById('ov-src');
+  opsLoad();
   try{
     const {denied,rows}=await _netRpc('haf_network_overview');
     if(denied){_noCred('Sign in with your own HAF username and PIN to see the live network — a demo login cannot read real accounts.');return}
@@ -9030,11 +9177,55 @@ async function ovLoad(){
        cannot launch without, so it must never be left looking fine because the
        figures above it loaded. */
     accessLoad();
+    connLoad();
   }catch(e){
     src.className='ov-src bad';
     src.innerHTML='<span class="dot"></span>Could not read the network just now. Nothing below is showing a made-up number — try Refresh in a moment.';
   }
 }
+
+/* ══ SET-UP ACROSS THE NETWORK ════════════════════════════════════════════════
+   How many accounts are actually finished, and what is stopping the rest.
+   Counted from the same per-account checklist the profile shows, so any figure
+   here can be opened on a record and read step by step. It reads and fails on
+   its own: a network that cannot answer says so rather than showing zeros. */
+async function connLoad(){
+  const box=document.getElementById('ov-conn'),blk=document.getElementById('ov-block');
+  if(!box)return;
+  try{
+    const {denied,rows}=await _netRpc('haf_network_connection');
+    if(denied||!rows.length){
+      _rows('ov-conn',[{label:'Set-up',value:'<span style="color:var(--mu)">not readable from this login</span>'}]);
+      _rows('ov-block',[{label:'Blockers',value:'<span style="color:var(--mu)">not readable from this login</span>'}]);
+      return;
+    }
+    const c=rows[0];
+    _rows('ov-conn',[
+      {label:'Fully connected',value:c.fully_connected
+        ?'<span class="chip cg">'+c.fully_connected+' of '+c.accounts+'</span>'
+        :'<span style="color:var(--mu)">none of '+c.accounts+' yet</span>'},
+      {label:'Nearly there',value:c.nearly_there?'<span class="chip ca">'+c.nearly_there+'</span>':'<span style="color:var(--mu)">0</span>'},
+      {label:'Part way',value:c.part_way?'<strong>'+c.part_way+'</strong>':'<span style="color:var(--mu)">0</span>'},
+      {label:'Not started',value:c.not_started?'<span class="chip cr">'+c.not_started+'</span>':'<span style="color:var(--mu)">0</span>'},
+      {label:'Average set-up',value:'<strong>'+(c.average_pct||0)+'%</strong>'},
+      {label:'Alterations logged',value:c.changes_logged_all
+        ?'<strong>'+c.changes_logged_all+'</strong> <span style="color:var(--mu)">('+(c.changes_logged_30d||0)+' in 30 days)</span>'
+        :'<span style="color:var(--mu)">none yet</span>'}
+    ]);
+    const tb=c.top_blockers||[];
+    if(!tb.length){
+      _rows('ov-block',[{label:'Nothing',value:'<span style="color:var(--mu)">no account is missing a step</span>'}]);
+    }else{
+      _rows('ov-block',tb.map(function(b){
+        return {label:b.says,value:'<span class="chip '+(b.accounts>=c.accounts/2?'ca':'')+'">'+b.accounts+'</span>'};
+      }));
+    }
+  }catch(e){
+    _rows('ov-conn',[{label:'Set-up',value:'<span style="color:var(--mu)">could not read it just now</span>'}]);
+    _rows('ov-block',[{label:'Blockers',value:'<span style="color:var(--mu)">could not read it just now</span>'}]);
+  }
+}
+window.connLoad=connLoad;
 
 /* ══ WHO CAN DRIVE ON THE NETWORK ═════════════════════════════════════════════
    The access record, on screen. Two separate answers per account and they are
@@ -9248,6 +9439,56 @@ async function crmOpen(ref){
 
   if(r.membership_note)h+='<div class="crm-warn">'+_esc(r.membership_note)+'</div>';
 
+  /* ── HOW CONNECTED THEY ARE ──
+     A percentage on its own is a claim. Every item behind it is listed, and a
+     step that does not apply to this account type is never counted against
+     them — a freight account is not half-connected for having no van. */
+  const cn=r.connection;
+  h+='<div class="crm-sec">How connected they are</div>';
+  if(!cn){
+    h+='<div class="aa-empty">No set-up record for this account.</div>';
+  }else{
+    const cls=cn.pct>=100?'':(cn.pct>=60?'am':'rd');
+    h+='<div class="cn-hd"><span class="cn-st">'+_esc(cn.state)+'</span>'+
+       '<span class="cn-ct">'+cn.done+' of '+cn.total+' steps done &middot; '+(cn.pct||0)+'%</span></div>'+
+       '<div class="cn-bar"><div class="cn-fill '+cls+'" style="width:'+Math.max(2,cn.pct||0)+'%"></div></div>';
+    h+='<div class="cn-list">'+(cn.checklist||[]).map(function(i){
+      return '<div class="cn-it '+(i.done?'done':'miss')+'">'+
+             '<span class="cn-tk '+(i.done?'y':'n')+'">'+(i.done?'&#10003;':'&#9679;')+'</span>'+
+             '<span>'+_esc(i.done?i.item:i.says)+'</span></div>';
+    }).join('')+'</div>';
+    if(cn.missing&&cn.missing.length)
+      h+='<div class="crm-warn">Still to do before this account is fully connected: '+
+         _esc(cn.missing.join('; '))+'.</div>';
+  }
+
+  /* ── HOW THEY USE IT ── */
+  const us=r.usage;
+  h+='<div class="crm-sec">How they use HAF</div>';
+  if(!us){
+    h+='<div class="aa-empty">No usage recorded against this account.</div>';
+  }else{
+    h+='<div class="us-says">'+_esc(us.says||'Nothing recorded yet.')+'</div>';
+    h+='<div class="us-grid">'+[
+      ['Sign-ins',us.sign_ins||0],['Last 30 days',us.sign_ins_30d||0],
+      ['Days active',us.days_active_30d||0],['Jobs posted',us.jobs_posted||0],
+      ['Jobs claimed',us.jobs_claimed||0],['Delivered',us.jobs_delivered||0],
+      ['Asked JAKO',us.ai_prompts||0],['Documents',us.docs_uploaded||0],
+      ['Failed sign-ins',us.failed_sign_ins||0],['PIN resets',us.pin_resets||0]
+    ].map(function(k){
+      return '<div class="us-c"><b'+(k[1]?'':' style="color:var(--mu)"')+'>'+k[1]+'</b><span>'+k[0]+'</span></div>';
+    }).join('')+'</div>';
+    const sf=us.surfaces||[];
+    h+='<div class="cr" style="margin-top:.6rem"><span class="ck">Where they sign in</span><span class="cv">'+
+       (sf.length?sf.map(function(s){return _esc(s.surface)+' &times;'+s.times}).join(', ')
+                 :'<span style="color:var(--mu)">never signed in</span>')+'</span></div>';
+    h+='<div class="cr"><span class="ck">First seen</span><span class="cv">'+
+       (us.first_seen?_esc(_when(us.first_seen)):'<span style="color:var(--mu)">never</span>')+'</span></div>';
+    h+='<div class="cr"><span class="ck">Last did something</span><span class="cv">'+
+       (us.last_did_something?_esc(_when(us.last_did_something)):'<span style="color:var(--mu)">nothing yet</span>')+'</span></div>';
+    if(us.locked_until)h+='<div class="crm-warn">This account is locked out of sign-in until '+_esc(_when(us.locked_until))+'.</div>';
+  }
+
   const dt=r.dates||{};
   h+='<div class="crm-sec">Where they have got to</div>';
   [['Applied',dt.applied],['Confirmed email',dt.confirmed],['Approved',dt.approved],
@@ -9284,15 +9525,49 @@ async function crmOpen(ref){
        '<div class="aa-right"><span class="mo-amt">'+_money0(p.amount)+'</span><span class="chip">'+_esc(p.status||'—')+'</span></div></div>',
        'Nothing owed or paid on this account.');
 
-  list('Account changes',r.entitlement_changes,c=>'<div class="aa-ev"><span class="aa-ev-t">'+_esc(_when(c.at))+
-       '</span><span>'+_esc(c.reason||c.source||'changed')+(c.by?' <span style="color:var(--mu)">by '+_esc(c.by)+'</span>':'')+'</span></div>',
-       'No membership or entitlement change recorded.');
+  /* ── THE LEDGER ──
+     Every deliberate alteration to this account. Kept apart from the system
+     log on purpose: this answers "who changed what", the log answers "what
+     happened". Lines rebuilt from records HAF already kept say so, so a
+     reconstructed line is never mistaken for one the ledger watched. */
+  h+='<div class="crm-sec">Account ledger &mdash; every alteration</div>';
+  const lg=r.ledger||[];
+  if(!lg.length){
+    h+='<div class="aa-empty">Nothing has been altered on this account.</div>';
+  }else{
+    const imported=lg.filter(function(x){return x.actor_kind==='import'}).length;
+    h+=lg.slice(0,60).map(function(l){
+      const val=(l.was!=null||l.now!=null)
+        ? '<span class="lg-v">'+(l.was!=null?_esc(l.was)+' &rarr; ':'')+'<b>'+_esc(l.now!=null?l.now:'—')+'</b></span>'
+        : '';
+      return '<div class="lg"><span class="lg-t">'+_esc(_when(l.at))+'</span><div class="lg-b">'+
+        '<span class="lg-f">'+_esc(l.area)+': '+_esc(l.field)+'</span> '+val+
+        '<div class="lg-w">'+
+          (l.actor_kind==='import'?'rebuilt from '+_esc(l.source)
+            :'by '+_esc(l.actor||'system')+(l.actor_kind==='person'?'':' (automatic)'))+
+          (l.reason?' &middot; '+_esc(l.reason):'')+
+          (l.note?' &middot; '+_esc(l.note):'')+
+        '</div></div></div>';
+    }).join('');
+    if(lg.length>60)h+='<div class="lg-w" style="padding-top:.4rem">Showing the newest 60 of '+lg.length+' entries.</div>';
+    if(imported)h+='<div class="lg-w" style="padding-top:.4rem">'+imported+' of these were rebuilt from records HAF already kept, before the ledger started watching. Everything from now on is recorded as it happens.</div>';
+  }
 
-  list('Everything that has happened',r.timeline,e=>'<div class="aa-ev"><span class="aa-ev-t">'+_esc(_when(e.at))+
-       '</span><span>'+_esc(_EVENT_LBL[e.event]||e.event)+(e.detail?' <span style="color:var(--mu)">— '+_esc(e.detail)+'</span>':'')+'</span></div>',
-       'Nothing recorded against this account yet.');
+  /* ── THE SYSTEM LOG ── */
+  h+='<div class="crm-sec">System log &mdash; everything that happened</div>';
+  const sl=r.system_log||[];
+  if(!sl.length){
+    h+='<div class="aa-empty">Nothing has happened on this account yet — no sign-in, no job, no document.</div>';
+  }else{
+    h+=sl.slice(0,80).map(function(s){
+      return '<div class="aa-ev"><span class="aa-ev-t">'+_esc(_when(s.at))+'</span>'+
+        '<span><span class="chip">'+_esc(s.kind)+'</span> '+_esc(s.entry)+
+        (s.detail?' <span style="color:var(--mu)">— '+_esc(s.detail)+'</span>':'')+'</span></div>';
+    }).join('');
+    if(sl.length>80)h+='<div class="lg-w" style="padding-top:.4rem">Showing the newest 80 of '+sl.length+' entries.</div>';
+  }
 
-  h+='<div class="dc-note" style="margin-top:1rem">Read-only. Documents, PINs, bank details and home addresses are never loaded into this record.</div>';
+  h+='<div class="dc-note" style="margin-top:1rem">Read-only. Documents, PINs, bank details and home addresses are never loaded into this record. A PIN change is recorded in the ledger; the PIN itself never is.</div>';
   b.innerHTML=h;
 }
 window.crmOpen=crmOpen;window.crmClose=crmClose;
@@ -9458,7 +9733,8 @@ function aaDebounce(){clearTimeout(_aaTimer);_aaTimer=setTimeout(aaLoad,300);}
 async function aaLoad(alsoFeed){
   const list=document.getElementById('aa-list'),cnt=document.getElementById('aa-count');
   try{
-    const {denied,rows}=await _netRpc('haf_network_accounts',{
+    /* `rows` is narrowed by the operational filter below, so it is not const. */
+    let {denied,rows}=await _netRpc('haf_network_accounts',{
       p_type:document.getElementById('aa-type').value,
       p_status:document.getElementById('aa-status').value,
       p_q:document.getElementById('aa-q').value.trim()});
@@ -9466,22 +9742,85 @@ async function aaLoad(alsoFeed){
       list.innerHTML='<div class="aa-empty">Sign in with your own HAF username and PIN to see real accounts.</div>';
       cnt.textContent='';return}
     if(!rows.length){list.innerHTML='<div class="aa-empty">No account matches that.</div>';cnt.textContent='';return}
+
+    /* The operational filter runs here rather than in the database: the rows
+       already carry every state, so asking again would be a second read for
+       an answer we are holding. */
+    const live=(document.getElementById('aa-live')||{}).value||'';
+    const LIVE={
+      online:    r=>r.online,
+      today:     r=>r.active_today,
+      available: r=>r.account_type==='Driver'&&r.availability==='Available'
+                    &&r.compliance==='Approved'&&r.online&&r.job_status==='Idle',
+      onjob:     r=>r.job_status&&r.job_status!=='Idle',
+      blocked:   r=>r.compliance==='Blocked',
+      attention: r=>r.compliance==='Blocked'||r.compliance==='Expired'||r.account_status!=='Active',
+      halfset:   r=>r.connection_state&&r.connection_state!=='Fully connected',
+      neverused: r=>r.knect_access&&!r.sign_ins
+    };
+    if(LIVE[live])rows=rows.filter(LIVE[live]);
+    if(!rows.length){
+      /* An empty answer to a live question is a fact about the network, not a
+         fault in the page, and it should read that way. */
+      const SAY={online:'Nobody is online right now.',
+                 today:'Nobody has done anything operational today yet.',
+                 available:'No driver is available right now. Drivers have no way to set themselves available yet.',
+                 onjob:'No driver is on a job right now.',
+                 blocked:'No account is blocked by Clever.',
+                 attention:'Nothing needs attention.',
+                 halfset:'Every account is fully set up.',
+                 neverused:'Everyone who has been let in has used it.'};
+      list.innerHTML='<div class="aa-empty">'+_esc(SAY[live]||'No account matches that.')+'</div>';
+      cnt.textContent='';return;
+    }
     const real=rows.filter(r=>!r.is_test).length;
     cnt.textContent=real+' account'+(real===1?'':'s')+
       (rows.length-real?' · plus '+(rows.length-real)+' test account'+(rows.length-real===1?'':'s')+', greyed below':'');
-    /* Every row opens its own CRM record — brief section 6. */
+    /* Every row opens its own CRM record — brief section 6.
+       One row = one HAF account, and the states are shown side by side rather
+       than boiled down to a single word. An account can be Active, blocked by
+       Clever, offline and idle all at once, and each of those four is a
+       different thing somebody might need to act on. */
     list.innerHTML=rows.map(r=>
       '<div class="aa-row aa-open'+(r.is_test?' aa-test':'')+'" onclick="crmOpen(\''+
         _esc(r.ref||r.username).replace(/'/g,'')+'\')" title="Open this account\'s record">'+
         '<div class="aa-main">'+
-          '<div class="aa-name">'+_esc(r.name||r.username)+(r.is_test?' <span class="chip ca">test</span>':'')+'</div>'+
-          '<div class="aa-sub">'+_esc(r.username||'—')+' &middot; '+_esc(_TYPE_LBL[r.type]||r.type)+
-            ' &middot; '+_esc(r.why||'')+'</div>'+
+          '<div class="aa-name">'+
+            (r.online?'<span class="aa-dot" title="On now"></span>':'')+
+            _esc(r.name||r.username)+
+            (r.is_master?' <span class="chip co">master</span>':'')+
+            (r.is_founder?' <span class="chip ca">founder</span>':'')+
+            (r.is_test?' <span class="chip ca">test</span>':'')+'</div>'+
+          '<div class="aa-sub">'+_esc(r.username||'—')+' &middot; '+
+            _esc(r.account_type||_TYPE_LBL[r.type]||r.type)+
+            (r.area?' &middot; '+_esc(r.area):'')+
+            (r.vehicle?' &middot; '+_esc(r.vehicle):'')+
+            (r.last_action?' &middot; '+_esc(r.last_action)+' '+_esc(_when(r.last_action_at)):'')+
+            ' &middot; '+(r.sign_ins?_esc(r.sign_ins+' sign-in'+(r.sign_ins===1?'':'s')):'never signed in')+
+          '</div>'+
         '</div>'+
         '<div class="aa-right">'+
-          '<span class="chip '+(_STATUS_CHIP[r.status]||'ca')+'">'+_esc(_STATUS_LBL[r.status]||r.status)+'</span>'+
-          '<span class="chip">'+_esc(r.tier)+'</span>'+
-          (r.docs?'<span class="chip">'+r.docs+' docs</span>':'')+
+          /* account, then compliance, then what they are doing — in that order
+             every time, so the eye can run down one column and compare. */
+          '<span class="chip '+(r.account_status==='Active'?'cg':'cr2')+'">'+_esc(r.account_status)+'</span>'+
+          '<span class="chip '+(_CMP_CHIP[r.compliance]||'ca')+'">'+_esc(r.compliance)+'</span>'+
+          '<span class="chip'+(r.online?' cg':'')+'">'+(r.online?'Online':'Offline')+'</span>'+
+          (r.account_type==='Driver'
+            ? '<span class="chip'+(r.availability==='Available'?' cg':'')+'">'+_esc(r.availability)+'</span>'
+            : '')+
+          (r.job_status&&r.job_status!=='Idle'
+            ? '<span class="chip co">'+_esc(r.job_status)+(r.job_ref?' &middot; '+_esc(r.job_ref):'')+'</span>'
+            : '')+
+          (r.active_today?'<span class="chip cg">today</span>':'')+
+          '<span class="chip">'+_esc(r.membership||r.tier)+'</span>'+
+          /* how far through set-up they are — the one number that says whether
+             this account can actually be used yet */
+          (r.connection_state
+            ? '<span class="chip '+(r.connection_state==='Fully connected'?'cg'
+                :(r.connection_state==='Nearly there'?'ca':''))+'" title="'+
+              _esc(r.steps_done+' of '+r.steps_total+' set-up steps done')+'">Set-up '+
+              (r.connected_pct||0)+'%</span>'
+            : '')+
           (r.has_login?'':'<span class="chip ca">no login</span>')+
         '</div>'+
       '</div>').join('');
@@ -9514,7 +9853,7 @@ async function aaFeed(){
     feed.innerHTML='<div class="aa-empty">Could not read the activity just now.</div>';
   }
 }
-window.ovLoad=ovLoad;window.aaBoot=aaBoot;window.aaLoad=aaLoad;window.aaDebounce=aaDebounce;window.whoLoad=whoLoad;
+window.ovLoad=ovLoad;window.aaBoot=aaBoot;window.aaLoad=aaLoad;window.aaDebounce=aaDebounce;window.whoLoad=whoLoad;window.opsLoad=opsLoad;
 
 /* ═══════════════ HAF LIVE JOB SPINE ═══════════════
    One delivery record, stored once. Each role sees its own permitted slice.
