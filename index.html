@@ -4235,6 +4235,63 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         </div>
       </div>
 
+      <!-- ══ LEVELS & ALLOWANCES — Super Admin only ═════════════════════════
+           Brief section 12: "Do not hard-code limits throughout multiple pages.
+           Store entitlements centrally so the Master Admin can alter them
+           later." The numbers went central on 10 Sep; this is the "later".
+
+           TWO CARDS, AND THEY ARE NOT THE SAME THING.
+             The first changes what a LEVEL carries — every account on Plus, at
+             once, without a deploy.
+             The second changes ONE account: which level it is on, and figures
+             held just for it that beat the level's own.
+
+           WHAT IT WILL NOT PRETEND. Only four of these allowances are counted
+           by anything today. The rest are set on the account and read by
+           nothing yet, and each one says so on its face rather than looking
+           like a limit that bites. A screen that implies an unenforced rule is
+           worse than one that admits it, because somebody sells against it.
+
+           NOTHING HERE TOUCHES DRIVING. A level says how much of the dashboard
+           somebody uses. Clever decides who gets on the road. -->
+      <div class="tp" id="pane-levels">
+        <h1 class="pt">Levels &amp; Allowances</h1>
+        <p class="ps">What Guest, Free, Plus and Pro each carry, and the level every account is on. Changes here are live the moment you save — no rebuild. Admin only.</p>
+        <div id="lv-src" class="ov-src">Reading the allowance book…</div>
+
+        <div class="card">
+          <div class="ct">What each level carries
+            <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">changing a figure here changes it for everybody on that level</span>
+          </div>
+          <div class="aa-wrap"><div id="lv-book"><div class="aa-empty">reading the allowance book…</div></div></div>
+          <div style="margin-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+            <input class="fi2" id="lv-why" placeholder="Why you changed it (optional, kept on the record)" style="max-width:340px">
+            <button class="btn btn-or btn-sm" onclick="lvSaveBook()">Save level changes</button>
+            <button class="btn btn-gh btn-sm" onclick="lvBoot(true)">Undo — reload what is saved</button>
+            <span id="lv-book-msg" style="font-size:.74rem;color:var(--mu)"></span>
+          </div>
+          <div class="cr"><span class="ck" style="color:var(--mu)">Leave a figure empty for unlimited. Only the four marked <span class="chip cg">counted</span> are enforced anywhere today — the rest are stored on the account and nothing reads them yet.</span></div>
+        </div>
+
+        <div class="card">
+          <div class="ct">The level an account is on</div>
+          <div class="aa-filters">
+            <select class="fi2" id="lv-flt" onchange="lvAccounts()">
+              <option value="">Every level</option>
+              <option value="GUEST">Guest</option>
+              <option value="FREE">Free</option>
+              <option value="PLUS">Plus</option>
+              <option value="PRO">Pro</option>
+            </select>
+            <input class="fi2" id="lv-q" placeholder="Name, username or email" oninput="lvDebounce()">
+            <button class="btn btn-gh btn-sm" onclick="lvAccounts()">Refresh</button>
+          </div>
+          <div class="aa-count" id="lv-count"></div>
+          <div class="aa-wrap"><div id="lv-list"><div class="aa-empty">reading the network…</div></div></div>
+          <div class="cr"><span class="ck" style="color:var(--mu)">"Used today" is what has reached the network. An order placed and not yet paid for is not in that figure, but it does count against the person at the moment they press send — the order door adds both.</span></div>
+        </div>
+      </div>
+
       <!-- ══ PAYMENTS & PAYOUTS — Super Admin only ══════════════════════════
            Brief section 8. One line per movement of money, from the customer
            paying to the driver being paid. Every row is a real record; when a
@@ -6707,6 +6764,7 @@ const DRIVER_NAV=[
 const ADMIN_NAV=[
   {id:'admin',l:'Network Overview',s:'Overview',ico:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
   {id:'accounts',l:'Network Directory',s:'Overview',ico:'<path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M4 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
+  {id:'levels',l:'Levels &amp; Allowances',s:'Overview',ico:'<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>'},
   {id:'money',l:'Payments &amp; Payouts',s:'Overview',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'fbadmin',l:'Feedback Control',s:'Overview',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {id:'pools',l:'Network Pools',s:'Overview',ico:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>'},
@@ -9431,6 +9489,7 @@ function switchTab(id){
   if(id==='pane-dc-compare')setTimeout(()=>dcOpen('compare'),40);
   if(id==='pane-dc-sim')setTimeout(()=>dcOpen('sim'),40);
   if(id==='pane-accounts')setTimeout(()=>{if(window.aaBoot)aaBoot();},60);
+  if(id==='pane-levels')setTimeout(()=>{if(window.lvBoot)lvBoot();},60);
   if(id==='pane-money')setTimeout(()=>{if(window.moLoad)moLoad();},60);
   if(id==='pane-billing')setTimeout(()=>{if(window.pyLoad)pyLoad();},60);
   if(id==='pane-fbadmin')setTimeout(()=>{if(window.faLoad)faLoad();},60);
@@ -10305,6 +10364,332 @@ async function faWord(remove){
   if(d.ok){w.value='';faWords()}
 }
 window.faLoad=faLoad;window.faFilter=faFilter;window.faRemove=faRemove;window.faWord=faWord;
+
+/* ═══════════════ LEVELS & ALLOWANCES ═══════════════════════════════════════
+   Brief section 12. Every allowance in the product is one row in the database,
+   and until now the only way in was a function the browser could not reach. So
+   the numbers were central and editable and the one person meant to edit them
+   had no screen. This is that screen.
+
+   THREE RULES IT KEEPS
+   1. IT NEVER GUESSES. Every figure drawn here came back from the database in
+      this page load. If the read fails the cards say so and stay empty.
+   2. IT ONLY SENDS WHAT CHANGED. Saving a level posts the keys that differ
+      from what was loaded, not the whole book — so two people editing two
+      different levels cannot overwrite one another's work.
+   3. IT SAYS WHAT IS REAL. Four allowances are enforced by the order door
+      today. The others are stored and read by nothing, and are labelled that
+      way. Marking an unbuilt feature as a limit is how a sales promise gets
+      made by accident.
+
+   The refusals all live in the database, not here — a screen is a convenience,
+   never a lock. Every one of these calls proves the master's own credential
+   again on arrival, so a crafted call from anywhere else gets nothing back. */
+
+/* The allowance book, in the order it reads best on a screen, with the plain
+   words for each one. `on` marks the four that something actually counts. */
+const LV_KEYS=[
+  {k:'posts_per_day',    l:'Jobs posted a day',        kind:'n', on:true},
+  {k:'active_orders',    l:'Jobs running at once',     kind:'n', on:true},
+  {k:'team_users',       l:'Team logins',              kind:'n', on:true},
+  {k:'direct_send',      l:'Send straight to a driver',kind:'b', on:true},
+  {k:'scheduled_orders', l:'Jobs booked ahead',        kind:'n'},
+  {k:'saved_addresses',  l:'Saved addresses',          kind:'n'},
+  {k:'saved_routes',     l:'Saved routes',             kind:'n'},
+  {k:'preferred_drivers',l:'Preferred drivers',        kind:'n'},
+  {k:'order_history_days',l:'Job history kept (days)', kind:'n'},
+  {k:'booking_page',     l:'Own booking page',         kind:'s', opts:['none','semi','full']},
+  {k:'reporting',        l:'Reporting',                kind:'s', opts:['none','basic','advanced','full']},
+  {k:'export',           l:'Download your data',       kind:'s', opts:['none','limited','full']},
+  {k:'api',              l:'API access',               kind:'s', opts:['none','full']},
+  {k:'webhooks',         l:'Webhooks',                 kind:'b'},
+  {k:'back_office',      l:'Back office',              kind:'b'},
+  {k:'custom_domain',    l:'Own web address',          kind:'b'},
+  {k:'white_label',      l:'Own branding',             kind:'b'},
+];
+const LV_ORDER=['GUEST','FREE','PLUS','PRO'];
+let _lvBook=null;       // exactly what the database last handed back
+let _lvRows=[];
+let _lvOpen=null;       // the username whose editor is expanded
+let _lvTimer=null;
+
+function lvDebounce(){clearTimeout(_lvTimer);_lvTimer=setTimeout(lvAccounts,320)}
+
+/* An allowance the database holds as null is unlimited, and is drawn as an
+   empty box — never as 999, which is the number people then quote at you. */
+function _lvNum(v){return (v===null||v===undefined)?'':String(v)}
+function _lvSay(v){return (v===null||v===undefined)?'unlimited':String(v)}
+
+function _lvField(id,key,val){
+  const d=LV_KEYS.find(x=>x.k===key)||{kind:'n'};
+  if(d.kind==='b'){
+    return '<select class="fi2 lvf" id="'+id+'" style="min-width:82px;padding:.3rem .4rem;font-size:.74rem">'+
+      '<option value="true"'+(val===true?' selected':'')+'>Yes</option>'+
+      '<option value="false"'+(val===false?' selected':'')+'>No</option></select>';
+  }
+  if(d.kind==='s'){
+    const opts=(d.opts||[]).slice();
+    if(val!=null&&opts.indexOf(String(val))<0)opts.push(String(val));
+    return '<select class="fi2 lvf" id="'+id+'" style="min-width:96px;padding:.3rem .4rem;font-size:.74rem">'+
+      opts.map(o=>'<option value="'+_esc(o)+'"'+(String(val)===o?' selected':'')+'>'+_esc(o)+'</option>').join('')+
+      '</select>';
+  }
+  return '<input class="fi2 lvf" id="'+id+'" type="number" min="0" step="1" placeholder="unlimited" '+
+         'value="'+_esc(_lvNum(val))+'" style="width:88px;padding:.3rem .4rem;font-size:.74rem">';
+}
+
+/* Read one box back in the shape the database wants: a number, a true/false,
+   a word, or null for unlimited. An empty NUMBER box is unlimited; an empty
+   dropdown cannot happen because every dropdown always has a value. */
+function _lvRead(id,key){
+  const el=document.getElementById(id);if(!el)return undefined;
+  const d=LV_KEYS.find(x=>x.k===key)||{kind:'n'};
+  if(d.kind==='b')return el.value==='true';
+  if(d.kind==='s')return el.value;
+  const t=String(el.value||'').trim();
+  if(t==='')return null;
+  const n=Number(t);
+  return Number.isFinite(n)?Math.round(n):null;
+}
+
+async function lvBoot(force){
+  const src=document.getElementById('lv-src'),box=document.getElementById('lv-book');
+  if(!box)return;
+  if(force)box.innerHTML='<div class="aa-empty">reading the allowance book…</div>';
+  let r;
+  try{r=await _netRpc('haf_plan_book');}
+  catch(e){r={denied:true,rows:[]}}
+  if(r.denied||!r.rows.length){
+    _lvBook=null;
+    box.innerHTML='<div class="aa-empty">This screen is the master account only. Sign in with your own HAF username and PIN.</div>';
+    if(src)src.textContent='Nothing was read — the allowance book is not showing a guess.';
+    lvAccounts();return;
+  }
+  _lvBook={};r.rows.forEach(x=>{_lvBook[x.level]=x});
+  if(src){
+    const on=r.rows.reduce((a,x)=>a+(x.accounts||0),0);
+    src.textContent='Four levels, read live · '+on+' live accounts across them · last changed '+
+      _lvWhen(r.rows.map(x=>x.updated_at).sort().pop());
+  }
+  lvRenderBook();
+  lvAccounts();
+}
+
+function _lvWhen(iso){
+  if(!iso)return 'never';
+  try{return new Date(iso).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
+  catch(e){return 'never'}
+}
+
+function lvRenderBook(){
+  const box=document.getElementById('lv-book');if(!box||!_lvBook)return;
+  let h='<table class="aa-tbl" style="width:100%;border-collapse:collapse;font-size:.78rem">';
+  h+='<thead><tr><th style="text-align:left;padding:.45rem .5rem;color:var(--mu);font-weight:700">Allowance</th>';
+  LV_ORDER.forEach(L=>{
+    const b=_lvBook[L]||{};
+    h+='<th style="text-align:left;padding:.45rem .5rem"><div style="font-weight:800">'+_esc(b.label||L)+'</div>'+
+       '<div style="font-weight:400;color:var(--mu);font-size:.7rem">'+(b.accounts||0)+' account'+((b.accounts||0)===1?'':'s')+'</div></th>';
+  });
+  h+='</tr></thead><tbody>';
+  LV_KEYS.forEach(d=>{
+    h+='<tr style="border-top:1px solid var(--ln)"><td style="padding:.4rem .5rem">'+_esc(d.l)+
+       (d.on?' <span class="chip cg">counted</span>'
+           :' <span style="color:var(--mu);font-size:.68rem">not counted yet</span>')+'</td>';
+    LV_ORDER.forEach(L=>{
+      const a=((_lvBook[L]||{}).allowances)||{};
+      h+='<td style="padding:.4rem .5rem">'+_lvField('lvb-'+L+'-'+d.k,d.k,a[d.k])+'</td>';
+    });
+    h+='</tr>';
+  });
+  h+='</tbody></table>';
+  box.innerHTML=h;
+}
+
+/* Save the level book. One call per level that actually changed, and the
+   snapshot is refreshed from what came back so a second press sends nothing. */
+async function lvSaveBook(){
+  const msg=document.getElementById('lv-book-msg');
+  if(!_lvBook){if(msg)msg.textContent='Nothing is loaded to save.';return}
+  const why=(document.getElementById('lv-why')||{}).value||'';
+  const jobs=[];
+  LV_ORDER.forEach(L=>{
+    const cur=((_lvBook[L]||{}).allowances)||{};const diff={};
+    LV_KEYS.forEach(d=>{
+      const v=_lvRead('lvb-'+L+'-'+d.k,d.k);
+      if(v===undefined)return;
+      const was=(cur[d.k]===undefined)?null:cur[d.k];
+      if(JSON.stringify(v)!==JSON.stringify(was))diff[d.k]=v;
+    });
+    if(Object.keys(diff).length)jobs.push({level:L,diff:diff});
+  });
+  if(!jobs.length){if(msg){msg.style.color='var(--mu)';msg.textContent='Nothing on the four levels is different.'}return}
+  if(msg){msg.style.color='var(--mu)';msg.textContent='Saving…'}
+  const done=[],failed=[];
+  for(const j of jobs){
+    const d=await _netRpc1('haf_plan_level_set',{p_level:j.level,p_allowances:j.diff,p_reason:why||null});
+    if(d&&d.ok)done.push((_lvBook[j.level]||{}).label||j.level);
+    else failed.push(((_lvBook[j.level]||{}).label||j.level)+' — '+((d&&d.message)||'that did not go through'));
+  }
+  if(msg){
+    msg.style.color=failed.length?'var(--rd)':'var(--gn)';
+    msg.textContent=(done.length?'Saved: '+done.join(', ')+'. ':'')+
+                    (failed.length?'Not saved: '+failed.join('; '):'Live now for everybody on '+
+                     (done.length===1?'that level.':'those levels.'));
+  }
+  /* Read it back rather than trusting the press: what is drawn next is what
+     the database holds, so a partial save can never look like a whole one. */
+  await lvBoot(false);
+}
+
+async function lvAccounts(){
+  const box=document.getElementById('lv-list'),cnt=document.getElementById('lv-count');
+  if(!box)return;
+  const q=((document.getElementById('lv-q')||{}).value||'').trim();
+  const lvl=((document.getElementById('lv-flt')||{}).value||'');
+  let r;
+  try{r=await _netRpc('haf_plan_accounts',{p_q:q||null,p_level:lvl||null,p_limit:300});}
+  catch(e){r={denied:true,rows:[]}}
+  if(r.denied){
+    box.innerHTML='<div class="aa-empty">Sign in with your own master username and PIN to see the accounts.</div>';
+    if(cnt)cnt.textContent='';return;
+  }
+  _lvRows=r.rows||[];
+  if(!_lvRows.length){
+    box.innerHTML='<div class="aa-empty">No account matches that.</div>';
+    if(cnt)cnt.textContent='';return;
+  }
+  if(cnt)cnt.textContent=_lvRows.length+' account'+(_lvRows.length===1?'':'s')+
+    (_lvRows.length===300?' (the first 300 — narrow it with a search)':'');
+  box.innerHTML=_lvRows.map(lvRow).join('');
+}
+
+const _LV_CHIP={GUEST:'cb',FREE:'cb',PLUS:'ca',PRO:'cg'};
+
+function lvRow(a){
+  const u=a.username,use=a.network_use||{};
+  const open=(_lvOpen===u);
+  let h='<div class="cr" style="align-items:center;gap:.5rem;flex-wrap:wrap">'+
+    '<span class="ck" style="min-width:110px">'+_esc(u)+'</span>'+
+    '<span class="cv" style="flex:1;min-width:150px">'+_esc(a.name||'—')+
+      '<span style="color:var(--mu)"> · '+_esc(a.account_type||'—')+'</span>'+
+      (a.is_test?' <span class="chip ca">test</span>':'')+'</span>'+
+    '<span class="chip '+(_LV_CHIP[a.level]||'cb')+'">'+_esc(a.label||a.level)+'</span>'+
+    (a.overridden?'<span class="chip ca">own figures</span>':'')+
+    '<span style="color:var(--mu);font-size:.72rem;min-width:150px">used today: '+
+      (use.posts_today||0)+' posted · '+(use.active_orders||0)+' running · '+
+      (use.team_users||0)+' team</span>'+
+    '<button class="btn btn-gh btn-xs" onclick="lvToggle(\''+_esc(u)+'\')">'+(open?'Close':'Change')+'</button>'+
+    '</div>';
+  if(open)h+=lvEditor(a);
+  return h;
+}
+
+function lvEditor(a){
+  const ovr=a.overrides||{};
+  const base=((_lvBook&&_lvBook[a.level])||{}).allowances||{};
+  let h='<div id="lv-ed" style="border:1px solid var(--ln);border-radius:var(--rs);padding:.9rem;margin:.2rem 0 .8rem">'+
+    '<div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:.7rem">'+
+      '<label style="font-size:.74rem;color:var(--mu)">Level</label>'+
+      '<select class="fi2" id="lv-ed-level" style="max-width:150px">'+
+        LV_ORDER.map(L=>'<option value="'+L+'"'+(a.level===L?' selected':'')+'>'+
+          _esc(((_lvBook&&_lvBook[L])||{}).label||L)+'</option>').join('')+
+      '</select>'+
+      '<input class="fi2" id="lv-ed-why" placeholder="Why (optional, kept on the record)" style="flex:1;min-width:180px">'+
+    '</div>'+
+    '<div style="font-size:.72rem;color:var(--mu);line-height:1.5;margin-bottom:.5rem">'+
+      'Figures held just for this account. Leave one alone and it follows the level. '+
+      'Clearing them all puts the account back on the plain level figures.</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.5rem">';
+  LV_KEYS.forEach(d=>{
+    const has=Object.prototype.hasOwnProperty.call(ovr,d.k);
+    h+='<div style="display:flex;align-items:center;gap:.4rem;justify-content:space-between">'+
+       '<span style="font-size:.74rem">'+_esc(d.l)+(d.on?' <span class="chip cg">counted</span>':'')+
+       '<div style="color:var(--mu);font-size:.66rem">level gives '+_esc(_lvSay(base[d.k]))+'</div></span>'+
+       '<span>'+lvOvrField(d,has?ovr[d.k]:undefined)+'</span></div>';
+  });
+  h+='</div><div style="margin-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">'+
+     '<button class="btn btn-or btn-sm" onclick="lvSaveAccount()">Save this account</button>'+
+     '<button class="btn btn-gh btn-sm" onclick="lvClearAccount()">Put it back on the level figures</button>'+
+     '<span id="lv-ed-msg" style="font-size:.74rem;color:var(--mu)"></span></div>';
+  if(a.set_by)h+='<div class="cr"><span class="ck" style="color:var(--mu)">Last changed by '+_esc(a.set_by)+
+    ' on '+_esc(_lvWhen(a.set_at))+(a.reason?' — '+_esc(a.reason):'')+'</span></div>';
+  h+='</div>';
+  return h;
+}
+
+/* An override box is empty when there is no override, which is different from
+   an empty box on the level book meaning unlimited. So the yes/no and word
+   fields get a "follow the level" option rather than defaulting to one. */
+function lvOvrField(d,val){
+  const id='lv-ov-'+d.k;
+  if(d.kind==='b'||d.kind==='s'){
+    const opts=(d.kind==='b')?['true','false']:(d.opts||[]);
+    return '<select class="fi2" id="'+id+'" style="min-width:120px;padding:.3rem .4rem;font-size:.74rem">'+
+      '<option value="">follow the level</option>'+
+      opts.map(o=>'<option value="'+_esc(o)+'"'+(String(val)===o?' selected':'')+'>'+
+        _esc(d.kind==='b'?(o==='true'?'Yes':'No'):o)+'</option>').join('')+'</select>';
+  }
+  return '<input class="fi2" id="'+id+'" type="number" min="0" step="1" placeholder="follow the level" '+
+    'value="'+_esc(val===undefined?'':_lvNum(val))+'" style="width:120px;padding:.3rem .4rem;font-size:.74rem">';
+}
+
+function lvToggle(u){
+  _lvOpen=(_lvOpen===u)?null:u;
+  const box=document.getElementById('lv-list');
+  if(box)box.innerHTML=_lvRows.map(lvRow).join('');
+}
+
+function _lvGather(){
+  const ovr={};
+  LV_KEYS.forEach(d=>{
+    const el=document.getElementById('lv-ov-'+d.k);if(!el)return;
+    const t=String(el.value||'').trim();
+    if(t==='')return;                       // no override on this one
+    if(d.kind==='b')ovr[d.k]=(t==='true');
+    else if(d.kind==='s')ovr[d.k]=t;
+    else{const n=Number(t);if(Number.isFinite(n))ovr[d.k]=Math.round(n);}
+  });
+  return ovr;
+}
+
+async function lvSaveAccount(){
+  const msg=document.getElementById('lv-ed-msg');
+  const lv=(document.getElementById('lv-ed-level')||{}).value;
+  const why=((document.getElementById('lv-ed-why')||{}).value||'').trim();
+  if(!_lvOpen||!lv)return;
+  if(msg){msg.style.color='var(--mu)';msg.textContent='Saving…'}
+  const d=await _netRpc1('haf_plan_set',
+    {p_target:_lvOpen,p_level:lv,p_overrides:_lvGather(),p_reason:why||null});
+  lvAfterSave(d,msg);
+}
+
+async function lvClearAccount(){
+  const msg=document.getElementById('lv-ed-msg');
+  const lv=(document.getElementById('lv-ed-level')||{}).value;
+  if(!_lvOpen||!lv)return;
+  if(msg){msg.style.color='var(--mu)';msg.textContent='Clearing…'}
+  const d=await _netRpc1('haf_plan_set',
+    {p_target:_lvOpen,p_level:lv,p_overrides:{},p_reason:'back to the level figures'});
+  lvAfterSave(d,msg);
+}
+
+async function lvAfterSave(d,msg){
+  if(!d||d.ok!==true){
+    if(msg){msg.style.color='var(--rd)';msg.textContent=(d&&d.message)||'That did not go through.'}
+    return;
+  }
+  /* Redraw from the database first — the row, its chips and the per-level
+     counts all just moved. The editor is rebuilt by that redraw, so the "saved"
+     line is written onto the NEW element; writing it onto the old one would
+     put it on a node that is about to be thrown away. */
+  await lvBoot(false);                     // account counts per level move too
+  const m=document.getElementById('lv-ed-msg');
+  if(m){m.style.color='var(--gn)';m.textContent='Saved. It applies to their very next job.'}
+}
+
+window.lvBoot=lvBoot;window.lvAccounts=lvAccounts;window.lvDebounce=lvDebounce;
+window.lvSaveBook=lvSaveBook;window.lvToggle=lvToggle;
+window.lvSaveAccount=lvSaveAccount;window.lvClearAccount=lvClearAccount;
 
 /* ── WHO IS ON NOW ──────────────────────────────────────────────────────
    Reads the owner-gated report and nothing else. "On now" means a heartbeat
