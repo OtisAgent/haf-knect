@@ -14,13 +14,6 @@ function pjHTML(s) {
     + '<span class="pj-open-w"><span class="pj-open-t">Got the job in an email? Paste it in</span>'
     + '<span class="pj-open-s">We read it and fill this form in for you &#8212; no retyping</span></span>'
     + '<span class="pj-open-x">&#8594;</span></button>'
-    + '<div class="pj-ask"><span class="pj-ask-t"><strong>Waiting on the details?</strong> '
-    + 'Copy the short list of what a driver needs, email it to whoever wants the delivery, '
-    + 'then paste their reply straight back in above.</span>'
-    + '<span class="pj-ask-r">'
-    + '<button class="btn btn-or btn-sm" type="button" id="pj-cp-' + s + '" onclick="pjCopy(\'' + s + '\')">Copy what we need</button>'
-    + '<button class="btn btn-gh btn-sm" type="button" onclick="pjSee(\'' + s + '\')">See it first</button>'
-    + '</span><pre class="pj-ask-p" id="pj-ask-p-' + s + '" style="display:none"></pre></div>'
     + '<div class="pj-body" id="pj-body-' + s + '" style="display:none">'
     + '<div class="pj-h">Paste the job in</div>'
     + '<p class="pj-p">The whole email, a WhatsApp message, or a note to yourself &#8212; however it was sent to you. '
@@ -40,7 +33,14 @@ function pjHTML(s) {
     + '<div class="fnav" style="justify-content:flex-start">'
     + '<button class="btn btn-or btn-sm" type="button" onclick="pjApply(\'' + s + '\')">Use these details &#8594;</button>'
     + '<button class="btn btn-gh btn-sm" type="button" onclick="pjBack(\'' + s + '\')">&#8592; Edit what I pasted</button>'
-    + '</div></div></div>';
+    + '</div></div></div>'
+    + '<div class="pj-ask"><span class="pj-ask-t"><strong>Waiting on the details?</strong> '
+    + 'Copy the short list of what a driver needs, email it to whoever wants the delivery, '
+    + 'then paste their reply straight back in above.</span>'
+    + '<span class="pj-ask-r">'
+    + '<button class="btn btn-or btn-sm" type="button" id="pj-cp-' + s + '" onclick="pjCopy(\'' + s + '\')">Copy what we need</button>'
+    + '<button class="btn btn-gh btn-sm" type="button" onclick="pjSee(\'' + s + '\')">See it first</button>'
+    + '</span><pre class="pj-ask-p" id="pj-ask-p-' + s + '" style="display:none"></pre></div>';
 }
 /* ── WHAT WE NEED, AS AN EMAIL THEY CAN SEND ────────────────────────────
    The other half of the paste box. Someone who has not been sent the details

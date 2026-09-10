@@ -83,6 +83,16 @@ await pg.locator('.pj-ask button:has-text("See it first")').first().click();
 await pg.waitForTimeout(250);
 ck('and it puts itself away', await pg.locator('#pj-ask-p-a').isVisible(), false);
 
+console.log('\nTHE ROW SAYS "ABOVE", SO THE BOX HAS TO BE ABOVE IT');
+await pg.locator('.calc-box .pj-open').first().click();
+await pg.waitForTimeout(300);
+const yBox = (await pg.locator('#pj-txt-a').boundingBox()).y;
+const yRow = (await pg.locator('.calc-box .pj-ask').first().boundingBox()).y;
+ck('the paste box really is above the copy row', yBox < yRow, true);
+await pg.locator('#pj-body-a button:has-text("Cancel")').click();
+await pg.waitForTimeout(200);
+ck('and the row stays put with the box shut', await pg.locator('.calc-box .pj-ask').first().isVisible(), true);
+
 console.log('\nFILLED IN BY THE CUSTOMER, PASTED BACK IN');
 const filled = TPL
   .replace('COLLECTION\nAddress:', 'COLLECTION\nAddress: Unit 4 Callum Park, Attercliffe Road, Sheffield S9 1AA')
