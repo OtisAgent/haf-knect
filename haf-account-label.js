@@ -52,33 +52,44 @@
      ...with the standing instruction that the wording must be "open and
      understanding to people using the accounts".
 
-     So his meaning is kept exactly and the trade shorthand is spelled out:
-     "TMS" is transport management system, which is the same jargon problem as
-     "freight forwarder" one layer down. A name with no explanation is how
-     "Freight Forwarder" survived nine pages — a person read it and moved on
-     without ever learning what it meant. These sentences travel WITH the name
-     so that cannot happen again. */
+     Then, the same day, reading it back: "change the wording on the paragraph
+     to a much better read and a simple sentence". So his MEANING is kept and
+     his phrasing is not. What went:
+
+       "transport management system"  — the trade name for the thing, which is
+            the same failure as "freight forwarder" one layer down. A person
+            who does not already know the term learns nothing from it, and a
+            person who does know it did not need telling.
+       "full connector and organiser" — two abstract nouns where a verb does
+            the work. Nobody plans their week by being connected and organised;
+            they plan their days and run their jobs.
+       the dashes and the lists — a sentence with a dash in the middle is two
+            sentences pretending to be one, and it reads like a spec.
+
+     The test for each of these is the one Brent set: could somebody who has
+     never heard of HAF read it once and know what they get? One sentence, one
+     idea, ordinary verbs, and nothing a person has to already know. */
   var PRODUCTS = {
     knect: {
       key: 'knect',
       name: KNECT,
       /* The chip-sized form, for when there is room for four words and no more. */
       short: 'Your main HAF dashboard.',
-      what: 'Process work, oversee your account, your PLNA and your deliveries — your transport management system.',
+      what: 'Your dashboard for posting work, tracking deliveries and managing your account.',
       who: 'Everyone with a HAF account.'
     },
     plna: {
       key: 'plna',
       name: 'HAF PLNA',
       short: 'The driver platform.',
-      what: 'The full connector and organiser for drivers and fleet members — jobs, routes and deliveries, day to day.',
+      what: 'Where drivers and fleets plan their days and run their jobs.',
       who: 'Drivers and fleet members only.'
     },
     business: {
       key: 'business',
       name: BUSINESS,
       short: 'A verified company.',
-      what: 'Your company number has been checked against the public register.',
+      what: 'Your company number has been checked on the official register.',
       who: 'Accounts trading as a registered company.'
     }
   };

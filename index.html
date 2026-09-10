@@ -6289,10 +6289,10 @@ const HAF_TYPE_LABEL={driver:'Owner Driver',fleet:'Courier Company',
    Brent, 9 Sep, giving the two definitions himself and asking that the wording
    be "open and understanding to people using the accounts":
 
-       HAF KNECT  — process work, oversee your account, your PLNA and your
-                    deliveries. Your transport management system.
-       HAF PLNA   — the full connector and organiser for drivers and fleet
-                    members.
+       HAF KNECT  — your dashboard for posting work, tracking deliveries and
+                    managing your account.
+       HAF PLNA   — where drivers and fleets plan their days and run their
+                    jobs.
 
    A NAME with no explanation is the same failure as "Freight Forwarder" one
    layer down: a person reads it, does not recognise it, and moves on. So the
@@ -6301,6 +6301,14 @@ const HAF_TYPE_LABEL={driver:'Owner Driver',fleet:'Courier Company',
 function hafDoorLines(acc){
   return ((acc&&acc.label&&acc.label.explains)||[]).map(p=>p.name+' — '+p.what);
 }
+/* The same sentence, for the places that need it mid-line rather than under a
+   name. Read from the shared file, never retyped, so the sidebar cannot end up
+   describing PLNA differently from the account card two inches above it. */
+function hafWhat(key){
+  const p=self.HAFAccountLabel&&self.HAFAccountLabel.product&&self.HAFAccountLabel.product(key);
+  return p?p.what:'';
+}
+function hafLcFirst(s){return s?s.charAt(0).toLowerCase()+s.slice(1):'';}
 
 
 /* ── "ADD TO YOUR ACCOUNT" — its own section in the sidebar ────────────────
@@ -6326,7 +6334,7 @@ function hafAddSection(acc){
   if(acc.released)return '';
   const head=acc.drives?'Finish your checks':'Add to your account';
   const line=acc.drives
-    ? 'Your account is waiting on the Clever checks. Send your documents and HAF PLNA opens up \u2014 the full connector and organiser for drivers and fleet members.'
+    ? 'Your account is waiting on the Clever checks. Send your documents and HAF PLNA opens up: '+hafLcFirst(hafWhat('plna'))
     : 'Want to drive as well as send? Owner driver and fleet accounts go through the Clever checks first.';
   const row=(kind,label,ico)=>
     '<div class="ni ni-add" onclick="hafCleverAdd(\''+kind+'\')">'+
