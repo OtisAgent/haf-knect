@@ -5657,22 +5657,26 @@ function openFlow(type){
    an unlimited level, and any answer we could not get. A row that says "plenty
    left" when the truth is unknown is worse than no row, because the customer
    then believes it. */
-async function fqPaintUsage(){
-  const box=document.getElementById('fq-use');
+async function fqPaintUsage(boxId){
+  const box=document.getElementById(boxId||'fq-use');
   if(!box)return;
   box.style.display='none';box.className='fq-use';
-  const c=(typeof _netCred==='function'&&_netCred())||null;
+  const c=(typeof _apiCred==='function'&&_apiCred())||null;
   if(!c)return;
+  /* Asked of OUR OWN server, not the database directly. The database can only
+     count the jobs that have reached the network; an order placed ten minutes
+     ago and not yet paid for is invisible to it. Our server can see both, and
+     it is the same count the order door refuses on — so this row and the next
+     press can never disagree. */
   let d=null;
   try{
-    const r=await fetch(PLNA_URL+'/rest/v1/rpc/haf_my_plan',{method:'POST',
-      headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
-      body:JSON.stringify(c)});
+    const r=await fetch('/api/order/allowance',{method:'POST',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify(c)});
     if(!r.ok)return;
     d=await r.json();
   }catch(e){return}
-  if(!d||d.error||!d.counted)return;
-  const a=d.allowances||{},u=d.usage||{};
+  if(!d||!d.ok||!d.signed_in||!d.counted)return;
+  const a=d.allowances||{},u=d.used||d.usage||{};
   /* null in an allowance means unlimited — the same word the database uses. An
      unlimited account is told nothing, because there is nothing to watch. */
   const posts=a.posts_per_day,live=a.active_orders;

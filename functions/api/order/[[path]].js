@@ -53,6 +53,7 @@ export async function onRequest(context) {
                                          first_refusal_minutes: FIRST_REFUSAL_MINUTES });
       case 'POST /quote':  return await quote(request, env);
       case 'POST /place':  return await place(request, env);
+      case 'POST /allowance': return await allowance(request, env);
       case 'GET /track':   return await track(request, env);
       default:             return bad('unknown endpoint', 404);
     }
@@ -397,6 +398,39 @@ async function askTheDoor(env, body, postedBy) {
   } catch (_) {
     return null;
   }
+}
+
+/* WHAT HAVE I USED TODAY.
+   The screen must show the SAME number the door will decide on. The database
+   alone cannot answer that — it cannot see an order that has not been paid for
+   yet — so a page asking the database directly would show "0 of 5" to somebody
+   the door is about to refuse. Which is worse than showing nothing: it is a
+   promise the next press breaks.
+
+   So the page asks here instead, and here asks the same question /place asks,
+   through the same function, with the same in-flight count. One number. */
+async function allowance(request, env) {
+  if (!coreReady(env)) return bad('ordering is not switched on yet on this site', 503);
+  const b = await request.json().catch(() => ({}));
+  const asking = await whoIsAsking(b).catch(() => null);
+  if (!asking || !asking.haf_username) return json({ ok: true, signed_in: false, counted: false });
+  const postedBy = String(asking.haf_username).toUpperCase();
+  const gate = await askTheDoor(env, b, postedBy);
+  if (!gate) return json({ ok: true, signed_in: true, counted: false });
+  return json({
+    ok: true, signed_in: true,
+    counted: gate.counted === true,
+    level: gate.level, label: gate.label,
+    allowances: gate.allowances, usage: gate.usage,
+    /* The usage above is what has reached the network. These two are the totals
+       the door actually judges — network plus in flight — which is what the
+       person needs to read. */
+    used: {
+      posts_today: (gate.post_job || {}).used,
+      active_orders: (gate.active_order || {}).used
+    },
+    allowed: gate.allowed, blocked_by: gate.blocked_by, message: gate.message
+  });
 }
 
 /* HAF PAY owns the card page. This project holds no Stripe key and draws no
