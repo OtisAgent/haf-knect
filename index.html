@@ -5766,6 +5766,42 @@ function fqUseDraw(box,d){
        : '.');
   box.style.display='block';
 }
+
+/* ══ ONE ORDER PATH ═══════════════════════════════════════════════════════
+   Brent, 10 Sep 2026: "the one off orders can go through the customer flow,
+   on the knect.usehaf.co.uk. keep it simple."
+
+   Post a Job drew a full posting form and its button was wired to NOTHING. A
+   signed-in customer could fill the whole thing in, press "Post to network",
+   and no job, no deposit and no reference was ever created — the press just
+   did not go anywhere. Meanwhile the order journey on the front of this same
+   site does the real work: it prices from the postcodes, asks for everything
+   a driver needs, raises the holding deposit and hands back a reference and a
+   tracking link.
+
+   So this button opens THAT journey rather than a second one being built
+   beside it, carrying across the two addresses already typed so nothing is
+   asked twice. One path, one set of rules, nothing that can drift out of
+   step — and the simplest thing that makes the press mean something. */
+function hafOrderJourney(){
+  const from=_v('post-caddr'), to=_v('post-daddr');
+  /* Remember they came from inside their account, so closing the journey puts
+     them back on their dashboard instead of stranding them on the front page. */
+  window._orderFromApp=document.getElementById('app').classList.contains('open');
+  goLanding();
+  openFlow('fast');
+  const set=(id,v)=>{const e=document.getElementById(id);if(e&&v)e.value=v;};
+  set('fq-from',from); set('fq-to',to);
+  const a=_hafAcct||{};
+  set('fq-name',a.contact_name||a.full_name||a.name||'');
+  fqStep(1);
+  /* Both addresses already typed? Then price it — they have answered stage one. */
+  if(from&&to)fqNext(2);
+}
+(function wirePostAJob(){
+  const b=document.getElementById('post-submit');
+  if(b)b.addEventListener('click',hafOrderJourney);
+})();
 /* Closing throws the whole consignment away and puts the customer back on the
    calculator. Past the first stage they have typed real work into it, so ask
    before it goes — silently binning five stages of answers is the sort of thing
@@ -5788,6 +5824,14 @@ function closeInlineFlow(){
     const first=wrap.querySelector('.fstep');
     if(first)first.classList.add('on');
   });
+  /* They opened this from inside their account, so closing it takes them back
+     there rather than leaving a signed-in customer looking at the front page
+     with no obvious way home. */
+  if(window._orderFromApp){
+    window._orderFromApp=false;
+    document.getElementById('landing').style.display='none';
+    document.getElementById('app').classList.add('open');
+  }
 }
 
 /* FAST QUOTE */
@@ -6191,6 +6235,13 @@ function fqShowPriceV(){
   if(!_v('fq-caddr')||!_v('fq-daddr')){fErr('fq-err-5','Please enter both the full collection and delivery addresses.');return;}
   /* A street was enough to price the job. It is not enough to drive to, so the
      house or building number is asked for here and nowhere earlier. */
+  /* "S9 1XH" contains digits, so the house-number test above says yes to a bare
+     postcode and a driver was sent to a fence round a few streets. A postcode
+     is not an address, and it is caught HERE as well as on the server so the
+     customer is told on the stage they typed it. */
+  const _justPc=v=>addrIsPostcode(String(v||'').trim());
+  if(_justPc(_v('fq-caddr'))){fErr('fq-err-5','That is the postcode, not the address — please give the collection street and building number so the driver reaches the door.');return;}
+  if(_justPc(_v('fq-daddr'))){fErr('fq-err-5','That is the postcode, not the address — please give the delivery street and building number so the driver reaches the door.');return;}
   if(!addrHasNumber(_v('fq-caddr'))){fErr('fq-err-5','Add the house or building number to the collection address so the driver can find the door.');return;}
   if(!addrHasNumber(_v('fq-daddr'))){fErr('fq-err-5','Add the house or building number to the delivery address so the driver can find the door.');return;}
   /* A coded end is a promise to text somebody. Without a mobile there is
@@ -6198,7 +6249,14 @@ function fqShowPriceV(){
   if(hoffMode('c')==='coded'&&!_v('fq-cphone')){fErr('fq-err-5','A coded release needs a mobile number for the collection contact — that is where the code is sent.');hoffPaint();return;}
   if(hoffMode('d')==='coded'&&!_v('fq-dphone')){fErr('fq-err-5','A coded handover needs a mobile number for the delivery contact — that is where the code is sent.');hoffPaint();return;}
   if(!_v('fq-cname')){fErr('fq-err-5','Please give a collection contact name, so the driver knows who to ask for.');return;}
+  /* A named contact with no number is still a phone call — ours, later, to find
+     one. Brent, 10 Sep: gather everything the driver needs to complete the
+     delivery. Both ends now carry a mobile whether the handover is named or
+     coded, and the server asks for the same thing again. */
+  const _ph10=v=>String(v||'').replace(/\D/g,'').length>=10;
+  if(!_ph10(_v('fq-cphone'))){fErr('fq-err-5','Please give a mobile number for the collection contact — the driver rings ahead rather than turning up blind.');return;}
   if(!_v('fq-dname')){fErr('fq-err-5','Please give a delivery contact name, so we know who is receiving the goods.');return;}
+  if(!_ph10(_v('fq-dphone'))){fErr('fq-err-5','Please give a mobile number for the delivery contact — that is who the driver rings on the way.');return;}
   fErr('fq-err-5','');
   fqShowPrice();
 }
@@ -9182,7 +9240,13 @@ function tmPaint(members){
       +'<div class="of" style="margin-bottom:.55rem"><label class="ol">Their own mobile number</label><input class="oi" id="tm-ph" type="tel" autocomplete="off"></div>'
       +'<div class="cr"><label class="ck" style="cursor:pointer"><input type="checkbox" id="tm-dr" onchange="tmShape()" style="margin-right:.5rem">This person will drive</label></div>'
       +'<div class="of hidden" id="tm-dbBox" style="margin-bottom:.55rem"><label class="ol">Date of birth</label><input class="oi" id="tm-db" type="date">'
-      +'<span class="ck" style="display:block;margin-top:.3rem;opacity:.75">Needed only for someone who drives — it is part of a driver\'s HAF username.</span></div>'
+      +'<span class="ck" style="display:block;margin-top:.3rem;opacity:.75">A driver gives a full date of birth — the licence check needs one.</span></div>'
+      /* Brent, 10 Sep 2026: one username rule for everybody, so a colleague who
+         never drives still needs the last two digits of their birth year. They
+         give the YEAR and nothing more: it is all the rule uses, and it is less
+         of their personal information than HAF held on them yesterday. */
+      +'<div class="of" id="tm-dbyBox" style="margin-bottom:.55rem"><label class="ol">Year of birth</label><input class="oi" id="tm-dby" inputmode="numeric" maxlength="4" placeholder="e.g. 1993">'
+      +'<span class="ck" style="display:block;margin-top:.3rem;opacity:.75">The last two digits are part of their HAF username. We do not ask for the full date.</span></div>'
       +'<div class="cr"><span class="ck" id="tm-preview">Their HAF username will appear here as you type.</span></div>'
       +'<div class="cr" id="tm-msg" style="display:none"></div>'
       +'<button class="btn btn-or btn-sm" id="tm-go" onclick="tmAdd()">Add and send them an invite</button>'
@@ -9191,7 +9255,7 @@ function tmPaint(members){
   }
   document.getElementById('tm-body').innerHTML=h;
   if(_tmAdmin){
-    ['tm-fn','tm-ln','tm-ph','tm-db'].forEach(function(id){
+    ['tm-fn','tm-ln','tm-ph','tm-db','tm-dby'].forEach(function(id){
       const el=document.getElementById(id);if(el)el.addEventListener('input',tmShape);
     });
   }
@@ -9203,6 +9267,7 @@ let _tmShapeTimer=null;
 function tmShape(){
   const drives=document.getElementById('tm-dr').checked;
   document.getElementById('tm-dbBox').classList.toggle('hidden',!drives);
+  document.getElementById('tm-dbyBox').classList.toggle('hidden',drives);
   clearTimeout(_tmShapeTimer);
   _tmShapeTimer=setTimeout(async function(){
     const out=document.getElementById('tm-preview');if(!out)return;
@@ -9211,9 +9276,16 @@ function tmShape(){
     const ph=document.getElementById('tm-ph').value.trim();
     const db=document.getElementById('tm-db').value;
     try{
-      let fn_,args;
-      if(drives){fn_='haf_username_driver';args={p_first:fn,p_last:ln,p_phone:ph,p_dob:db||null};}
-      else{fn_='haf_username_staff';args={p_company:_tmName||'',p_phone:ph};}
+      /* ONE rule, so ONE function asked. Until 10 Sep this branched: a driver
+         was named after the person and a colleague after the COMPANY, which
+         meant two people in the same office previewed the same username. Brent
+         retired that. The year is all either branch ever needed, so a driver's
+         date is reduced to its year here and the same question is asked. */
+      const dby=(document.getElementById('tm-dby')||{}).value||'';
+      const yr=drives?(db||'').split('-')[0]:dby.replace(/\D/g,'');
+      const fn_='haf_username_person';
+      const args={p_first:fn,p_last:ln,p_phone:ph,
+                  p_birth_year:/^\d{4}$/.test(yr)?+yr:null};
       const r=await fetch(PLNA_URL+'/rest/v1/rpc/'+fn_,{method:'POST',
         headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
         body:JSON.stringify(args)});
@@ -9222,7 +9294,7 @@ function tmShape(){
         ?'Their HAF username will be <b style="font-family:ui-monospace,monospace">'+_esc(u)+'</b>'
         :'Their HAF username will appear here once you have '+(drives
             ?'their name, mobile number and date of birth.'
-            :'their name and mobile number.');
+            :'their name, mobile number and year of birth.');
     }catch(e){out.textContent='Their HAF username will appear here as you type.';}
   },220);
 }
@@ -9232,6 +9304,7 @@ const TM_SAYS={
   name_required:'Please give their first and last name.',
   phone_required:'Please give a mobile number we can reach them on.',
   dob_required_for_driver:'A driver\'s HAF username is built from their date of birth, so we need it before we can add them.',
+  birth_year_required:'Every HAF username ends in the last two digits of the person\'s birth year, so we need the year before we can add them.',
   cannot_build_username:'We could not build a HAF username from those details — please check the mobile number.',
   username_taken:'Somebody on HAF already has that username. That usually means this person has already been added.',
   cannot_remove_yourself:'You cannot remove yourself — this account would be left with nobody running it.',
@@ -9258,6 +9331,14 @@ async function tmAdd(){
       p_email:document.getElementById('tm-em').value.trim()||null,
       p_phone:document.getElementById('tm-ph').value.trim(),
       p_dob:(drives?document.getElementById('tm-db').value:null)||null,
+      /* The year on its own for a colleague who does not drive. Sent as a year
+         and never padded into a fake 1 January — a made-up birthday reads as a
+         real one to everybody who sees it afterwards. */
+      p_birth_year:(function(){
+        const y=(drives?(document.getElementById('tm-db').value||'').split('-')[0]
+                       :(document.getElementById('tm-dby').value||'').replace(/\D/g,''));
+        return /^\d{4}$/.test(y)?+y:null;
+      })(),
       p_drives:drives});
     const d=r.rows&&r.rows.length?r.rows[0]:r.rows;
     if(!d||!d.ok){_tmSay(msg,TM_SAYS[d&&d.error]||'We could not add them just then. Nothing has changed.');btn.disabled=false;return;}

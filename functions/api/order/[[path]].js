@@ -104,6 +104,50 @@ async function place(request, env) {
   }
   if (goods.length < 3) return bad('please tell us what is being moved');
 
+  /* ── WHAT A DRIVER CANNOT DO THE JOB WITHOUT ─────────────────────────────
+     Brent, 10 Sep 2026: a one-off delivery has to be "fast and free flowing"
+     AND "gather all the information needed for the driver to complete the
+     delivery". Those pull against each other only if you ask everything at
+     once, so the ORDER of asking carries the frictionless half: nothing below
+     is asked until the price is already on the screen and the customer has
+     decided to book.
+
+     The list is repeated HERE, on the server, because this route is public.
+     The screen asks for every one of these — but a page can be edited and
+     anything can post straight at this address, and what got through that way
+     landed on a driver's board as a postcode with no door, or a name with no
+     number to ring. That phone call is the thing HAF exists to remove, so a
+     job that would need one is refused at the door instead.
+
+     One problem at a time, in the order the screen asks it, so nobody is told
+     "check your details" and left hunting for which one. */
+  const phoneOk = (v) => String(v || '').replace(/\D/g, '').length >= 10;
+  const bare = (v) => String(v || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  for (const end of [{ k: 'collect', label: 'collection', pc: collect },
+                     { k: 'deliver', label: 'delivery', pc: deliver }]) {
+    const addr = String(b[`${end.k}_address`] || '').trim();
+    /* A postcode is not an address. It is a fence round a few streets, and a
+       driver standing in the middle of it still has to ring somebody. */
+    if (addr.length < 6 || bare(addr) === bare(end.pc)) {
+      return bad(`please give the full ${end.label} address, not just the postcode — a driver needs the door`);
+    }
+    /* A coded end has no named person by design — the code is the proof. Every
+       end has somebody to ring, coded or not: that is where the code goes. */
+    if (b[`${end.k}_mode`] !== 'coded' && String(b[`${end.k}_contact`] || '').trim().length < 2) {
+      return bad(`please give the name of someone at the ${end.label} point`);
+    }
+    if (!phoneOk(b[`${end.k}_contact_phone`])) {
+      return bad(`please give a mobile number for the ${end.label} point`);
+    }
+  }
+  /* How much there is and how heavy it is travel on the consignment record the
+     screen builds, and the driver's job card is drawn straight out of it — so
+     an order missing them reaches the board describing a van and a route and
+     nothing about the load. */
+  const cons = b.consignment && typeof b.consignment === 'object' ? b.consignment : null;
+  if (!String((cons || {}).quantity || '').trim()) return bad('please say how many items are being moved');
+  if (!String((cons || {}).weight || '').trim()) return bad('please give a rough total weight — a driver has to know what they are lifting');
+
   /* A username is never confirmed to a stranger. We take what was typed, keep
      it with the order, and let the NETWORK decide whether that driver exists
      and is cleared — which it answers to us, never to the customer. */
