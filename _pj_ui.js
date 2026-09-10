@@ -14,6 +14,13 @@ function pjHTML(s) {
     + '<span class="pj-open-w"><span class="pj-open-t">Got the job in an email? Paste it in</span>'
     + '<span class="pj-open-s">We read it and fill this form in for you &#8212; no retyping</span></span>'
     + '<span class="pj-open-x">&#8594;</span></button>'
+    + '<div class="pj-ask"><span class="pj-ask-t"><strong>Waiting on the details?</strong> '
+    + 'Copy the short list of what a driver needs, email it to whoever wants the delivery, '
+    + 'then paste their reply straight back in above.</span>'
+    + '<span class="pj-ask-r">'
+    + '<button class="btn btn-or btn-sm" type="button" id="pj-cp-' + s + '" onclick="pjCopy(\'' + s + '\')">Copy what we need</button>'
+    + '<button class="btn btn-gh btn-sm" type="button" onclick="pjSee(\'' + s + '\')">See it first</button>'
+    + '</span><pre class="pj-ask-p" id="pj-ask-p-' + s + '" style="display:none"></pre></div>'
     + '<div class="pj-body" id="pj-body-' + s + '" style="display:none">'
     + '<div class="pj-h">Paste the job in</div>'
     + '<p class="pj-p">The whole email, a WhatsApp message, or a note to yourself &#8212; however it was sent to you. '
@@ -35,6 +42,96 @@ function pjHTML(s) {
     + '<button class="btn btn-gh btn-sm" type="button" onclick="pjBack(\'' + s + '\')">&#8592; Edit what I pasted</button>'
     + '</div></div></div>';
 }
+/* ── WHAT WE NEED, AS AN EMAIL THEY CAN SEND ────────────────────────────
+   The other half of the paste box. Someone who has not been sent the details
+   yet copies this, emails it to whoever wants the delivery, and pastes the
+   reply back into the box above — so the round trip finishes where it started.
+
+   Two rules held it to this length. Every heading is one the reader on this
+   page already understands, so a returned template reads itself in with no
+   retyping. And nothing is asked for that a driver could manage without: this
+   is the list you cannot arrive at a door without, not a form. */
+const PJ_ASK = [
+  'Subject: Delivery request',
+  '',
+  'Hello,',
+  '',
+  'So we can price this and book it in, please fill in what you can under each',
+  'heading and send it back. Full addresses with postcodes, and a mobile at',
+  'each end, are the two we cannot manage without.',
+  '',
+  'COLLECTION',
+  'Address:',
+  'Contact:',
+  'Mobile:',
+  'Ready from:',
+  'Anything needed to load it:',
+  '',
+  'DELIVERY',
+  'Address:',
+  'Contact:',
+  'Mobile:',
+  'Deliver before:',
+  'Anything needed to unload it:',
+  '',
+  'THE LOAD',
+  'Goods:',
+  'How many and of what:',
+  'Total weight:',
+  'Largest item:',
+  '',
+  'YOU',
+  'Your name:',
+  'Your email:',
+  'Notes:',
+  '',
+  'Thank you.'
+].join('\n');
+
+/* Show it on the page. Forced open when the clipboard has refused us, because
+   a button that appears to do nothing is worse than no button. */
+function pjSee(s, force) {
+  const p = _pjE('pj-ask-p-' + s);
+  if (!p) return;
+  const shut = p.style.display === 'none';
+  if (shut || force) { p.textContent = PJ_ASK; p.style.display = 'block'; }
+  else p.style.display = 'none';
+}
+
+function pjCopy(s) {
+  const btn = _pjE('pj-cp-' + s);
+  const said = ok => {
+    if (!ok) pjSee(s, true);
+    if (!btn) return;
+    const was = btn.getAttribute('data-w') || btn.textContent;
+    btn.setAttribute('data-w', was);
+    btn.textContent = ok ? 'Copied \u2014 paste it into your email' : 'Copy it from below';
+    setTimeout(() => { btn.textContent = was; }, 2600);
+  };
+  /* The clipboard is refused outright on some phones and inside some in-app
+     browsers, so a refusal puts the text on the page to be selected by hand
+     instead of failing quietly. */
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(PJ_ASK).then(() => said(true), () => said(false));
+      return;
+    }
+  } catch (e) { }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = PJ_ASK;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '-2000px';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, PJ_ASK.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    said(!!ok);
+  } catch (e) { said(false); }
+}
+
 function pjMount() {
   PJ_SLOTS.forEach(s => {
     const el = document.querySelector('[data-pj="' + s + '"]');

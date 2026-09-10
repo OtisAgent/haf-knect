@@ -273,7 +273,15 @@ function pjParse(text, bands, now) {
   if (!r.dPhone) r.missing.push('a phone number at delivery');
 
   /* How much there is, and of what. */
-  const qm = raw.match(/\b([0-9]{1,3})\s*(?:x\s*)?(pallets?|roll\s?cages?|cages?|crates?|cartons?|boxes|box|bags?|sacks?|drums?|totes?|items?|pieces?|pcs?|furniture[a-z\s]{0,10})\b/i);
+  let qm = raw.match(/\b([0-9]{1,3})\s*(?:x\s*)?(pallets?|roll\s?cages?|cages?|crates?|cartons?|boxes|box|bags?|sacks?|drums?|totes?|items?|pieces?|pcs?|furniture[a-z\s]{0,10})\b/i);
+  /* A count the sender labelled but did not name — "How many: 3" off our own
+     template. Read as loose items, which is what the review list then shows
+     them, so a pallet count written that way is corrected by the customer
+     rather than assumed by us. */
+  if (!qm) {
+    const lq = raw.match(/^[ \t]*how\s+many[^:\n]{0,24}[:\-][ \t]*([0-9]{1,3})[ \t]*$/im);
+    if (lq) qm = [lq[0], lq[1], 'items'];
+  }
   if (qm) {
     r.qty = +qm[1];
     const w = PJ_UNIT_W.find(u => u.re.test(qm[2]));
@@ -282,7 +290,13 @@ function pjParse(text, bands, now) {
   } else r.missing.push('how many items there are');
 
   /* How heavy. Only ever from a figure the text really gives. */
-  const wm = raw.match(/(?:^|[^a-z0-9.])([0-9]{1,4}(?:\.[0-9]+)?)\s*(kgs?|kilos?|kilograms?|tonnes?|tons?|te|t)(?![a-z])/i);
+  let wm = raw.match(/(?:^|[^a-z0-9.])([0-9]{1,4}(?:\.[0-9]+)?)\s*(kgs?|kilos?|kilograms?|tonnes?|tons?|te|t)(?![a-z])/i);
+  /* A weight the sender labelled and left the unit off — "Total weight: 300".
+     Kilos, because kilos is what the label asked for. */
+  if (!wm) {
+    const lw = raw.match(/^[ \t]*(?:total\s+weight|gross\s+weight|weight)[^:\n]{0,18}[:\-][ \t]*([0-9]{1,5}(?:\.[0-9]+)?)[ \t]*$/im);
+    if (lw) wm = [lw[0], lw[1], 'kg'];
+  }
   if (wm) {
     const n = parseFloat(wm[1]);
     const u = wm[2].toLowerCase();
@@ -312,7 +326,7 @@ function pjParse(text, bands, now) {
   /* What the goods are, in the sender's own words. */
   let goods = '';
   for (let i = 0; i < lines.length; i++) {
-    const m = lines[i].match(/^\s*(?:goods|load|consignment|description|items?|what)\s*[:\-]\s*(.+)$/i);
+    const m = lines[i].match(/^\s*(?:goods|load|consignment|description|items?|what)(?:\s*\([^)\n]{0,40}\))?\s*[:\-]\s*(.+)$/i);
     if (m) { goods = m[1].trim(); break; }
   }
   if (!goods && qm) {
@@ -343,10 +357,22 @@ function pjParse(text, bands, now) {
   lines.forEach((ln, i) => {
     if (!/fork[\s\-]?lift|fork truck/i.test(ln)) return;
     forkSaid = true;
-    const side = /collect|pick|load/i.test(ln) ? 'c' : (/deliver|drop|unload/i.test(ln) ? 'd' : sides[i]);
-    if (side === 'c' && r.reqs.indexOf('forkc') < 0) r.reqs.push('forkc');
-    else if (side === 'd' && r.reqs.indexOf('forkd') < 0) r.reqs.push('forkd');
-    else r.notes.push(ln.trim());
+    /* One line often names both ends, so each clause is read on its own.
+       A clause that denies a forklift is not a request for one, and
+       "unloading" is a delivery word, never a loading one, even though it
+       contains "loading". A clause that settles nothing passes through as a
+       note for the driver rather than a guessed site. */
+    ln.split(/[,;]|\band\b|\bso\b|\bbut\b/i).forEach(cl => {
+      if (!/fork[\s\-]?lift|fork truck/i.test(cl)) return;
+      if (/\b(?:no|not|without|none|non)\b/i.test(cl)) return;
+      const noUn = cl.replace(/unload(?:ing)?/gi, ' ');
+      const fD = /unload|deliver|drop|consignee|receiver/i.test(cl);
+      const fC = /collect|pick|load|depot|sender|consignor/i.test(noUn);
+      const side = (fC && !fD) ? 'c' : ((fD && !fC) ? 'd' : sides[i]);
+      if (side === 'c' && r.reqs.indexOf('forkc') < 0) r.reqs.push('forkc');
+      else if (side === 'd' && r.reqs.indexOf('forkd') < 0) r.reqs.push('forkd');
+      else if (!side) r.notes.push(ln.trim());
+    });
   });
   r.forkSaid = forkSaid;
 
@@ -385,7 +411,7 @@ function pjParse(text, bands, now) {
 
   /* Anything else the driver needs to know, in the sender's own words. */
   lines.forEach((ln, i) => {
-    const m = ln.match(/^\s*(?:notes?|instructions?|access|please note|nb)\s*[:\-]\s*(.+)$/i);
+    const m = ln.match(/^\s*(?:notes?|instructions?|access|please note|nb)(?:\s*\([^)\n]{0,40}\))?\s*[:\-]\s*(.+)$/i);
     if (m) r.notes.push(m[1].trim());
   });
   r.notes = r.notes.filter((n, i, a) => n && a.indexOf(n) === i).slice(0, 4);
@@ -399,6 +425,11 @@ function pjParse(text, bands, now) {
   if (nm) r.reqName = nm[1].trim();
   if (!r.reqName) {
     nm = raw.match(/\b(?:kind regards|many thanks|best regards|regards|thanks|cheers|best wishes|yours)\b[,!.\t ]*\n+[ \t]*([A-Z][a-z'’\-]+(?:[ \t]+[A-Z][a-z'’\-]+){0,2})/i);
+    if (nm) r.reqName = nm[1].trim();
+  }
+  /* Or written on its own line, which is how our template asks for it. */
+  if (!r.reqName) {
+    nm = raw.match(/^[ \t]*(?:your name|requested by|raised by|ordered by|booked by)[ \t]*[:\-][ \t]*([A-Za-z][A-Za-z'’\-]{1,}(?:[ \t]+[A-Za-z'’\-]{2,}){0,2})[ \t]*$/im);
     if (nm) r.reqName = nm[1].trim();
   }
   return r;
