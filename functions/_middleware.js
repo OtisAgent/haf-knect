@@ -18,18 +18,21 @@
  * /admin/*.test.js paths. Both exist because the same mistake was made twice:
  * believing a file was gone because the repo said so, instead of fetching it.
  */
+/* 10 Sep, later: the new leanness check found README.md answering 200 on the
+ * live site — 93 bytes naming the repository and what it is for. Nothing
+ * dangerous, and nothing a visitor has any use for either. Exact match, not a
+ * prefix: it must not shadow a real route. */
 const REFUSE = ["/.decisions/", "/.tests/"];
+const REFUSE_EXACT = ["/README.md", "/readme.md"];
 
 export async function onRequest(context) {
   const path = new URL(context.request.url).pathname;
-  for (const prefix of REFUSE) {
-    if (path.startsWith(prefix)) {
-      return new Response("Not found", {
-        status: 404,
-        headers: { "content-type": "text/plain; charset=utf-8",
-                   "cache-control": "no-store" },
-      });
-    }
+  if (REFUSE.some(prefix => path.startsWith(prefix)) || REFUSE_EXACT.includes(path)) {
+    return new Response("Not found", {
+      status: 404,
+      headers: { "content-type": "text/plain; charset=utf-8",
+                 "cache-control": "no-store" },
+    });
   }
   return context.next();
 }

@@ -51,6 +51,49 @@ function isOwner(env, user) {
   return allowed.includes(String(user || '').trim().toUpperCase());
 }
 
+/* ── what a public answer may not contain ──────────────────────────────────
+   10 Sep. Taking `lockedBy` off the top of the response was not the fix, and I
+   only know that because the new nightly check said so out loud: the same words
+   are written INSIDE the config blob — feeBasisRuling.lockedBy, networkFeeFloor
+   .setBy and .setOn, supersededAccountLevels.supersededBy — and every flat rate
+   row carried a `note` explaining, in English, which side of a job HAF takes its
+   margin from. All of it public, no login, to anyone with the address.
+
+   So the rule is a deny-list applied to the WHOLE tree on the way out, not a
+   field I remembered to delete. Anything added to the framework later that
+   records who ruled on a price is stripped by name without anyone touching this
+   file again.
+
+   Two things it deliberately does NOT do:
+
+   - It does not strip a number. `networkFeeFloor.pct` and `.ceilingPct` are read
+     by the quote engine on every visit; only the attribution keys beside them
+     go. Checked before writing it: nothing on the site reads any key in this
+     list, so nothing on screen changes.
+   - It does not delete anything from the database. The snapshot row keeps the
+     full record of who changed a price and when — that is the audit trail, and
+     the table is not readable with the key the page ships (an anon read of
+     tier_config returns []). Private record, closed door.
+
+   Guarded nightly by scripts/haf_lean_watch.py, which fetches this endpoint from
+   outside and fails if a name or a dated ruling comes back. */
+const PRIVATE_KEYS = new Set([
+  'lockedBy', 'lockedOn', 'setBy', 'setOn', 'supersededBy', 'supersededOn',
+  'askedOf', 'documentedSource', 'openDecisions', 'note', 'notes',
+  'savedBy', 'savedAt', 'reasoning', 'decidedBy', 'decidedOn'
+]);
+
+function publicOnly(v) {
+  if (Array.isArray(v)) return v.map(publicOnly);
+  if (v && typeof v === 'object') {
+    const out = {};
+    for (const [k, val] of Object.entries(v))
+      if (!PRIVATE_KEYS.has(k)) out[k] = publicOnly(val);
+    return out;
+  }
+  return v;
+}
+
 export function onRequestOptions() { return new Response(null, { headers: CORS }); }
 
 export async function onRequestGet({ env }) {
@@ -68,14 +111,24 @@ export async function onRequestGet({ env }) {
     return j({ ok: false, error: 'no_active_framework' }, 404);
 
   const rec = snap[0];
+  /* 🔴 10 Sep — THE LAST PIECE OF THE PRICING LEAK, AND IT WAS NOT IN THE CODE.
+     The engine files were scrubbed of Brent's name and his dated rulings, and
+     this endpoint went on handing the same thing out in JSON to anyone with the
+     address, no login: `lockedBy` carried his name, the date, and his own words
+     from a September chat. A public GET is a public document.
+
+     So the attribution is no longer emitted. It is NOT deleted — it stays on the
+     snapshot row as the audit trail of who changed a price and when, and that
+     row is not readable with the key the page ships (checked: an anon read of
+     tier_config returns []). Private record, closed door, nothing published.
+     Guarded nightly by scripts/haf_lean_watch.py so it cannot come back. */
   return j({
     ok: true,
     version: rec.value && rec.value.version || rec.code,
     effectiveFrom: rec.value && rec.value.effectiveFrom || null,
-    lockedBy: rec.value && rec.value.lockedBy || null,
     updatedAt: rec.updated_at,
-    config: rec.value && rec.value.config || null,
-    rates: Array.isArray(flat) ? flat : []
+    config: publicOnly(rec.value && rec.value.config || null),
+    rates: publicOnly(Array.isArray(flat) ? flat : [])
   });
 }
 
