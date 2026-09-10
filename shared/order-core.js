@@ -54,6 +54,22 @@ export async function coreSelect(env, table, query) {
   return r.json();
 }
 
+/* HOW MANY, without reading them. PostgREST answers an exact count in the
+   content-range header when asked, so a limit question never has to pull the
+   rows it is counting — and never has to cap the number it will look at, which
+   is the quiet way a count starts lying above some size nobody remembers. */
+export async function coreCount(env, table, query) {
+  const r = await fetch(`${env.CORE_URL}/rest/v1/${table}?select=job_ref&limit=1&${query}`, {
+    headers: { ...coreHeaders(env), prefer: 'count=exact' }
+  });
+  if (!r.ok) throw new Error(`db count failed (${r.status}): ${await r.text()}`);
+  await r.text();
+  const range = r.headers.get('content-range') || '';
+  const total = Number(range.split('/')[1]);
+  if (!Number.isFinite(total)) throw new Error(`db count gave no total: "${range}"`);
+  return total;
+}
+
 export async function coreInsert(env, table, row) {
   const r = await fetch(`${env.CORE_URL}/rest/v1/${table}`, {
     method: 'POST',
