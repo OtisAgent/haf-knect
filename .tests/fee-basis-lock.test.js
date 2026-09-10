@@ -22,7 +22,7 @@
  * ========================================================================== */
 "use strict";
 
-var M = require("./pricing-matrix-v3.js");
+var M = require("../admin/pricing-matrix-v3.js");
 
 var pass = 0, fail = 0;
 function ok(name, cond, detail) {
@@ -85,22 +85,35 @@ section("1. The ruling is the configured basis");
 
 ok("the engine is locked to the ruling", M.config.feeBasis === RULING, M.config.feeBasis);
 ok("a fresh config still carries the ruling", M.resetConfig().feeBasis === RULING);
-ok("the ruling is recorded with a date", !!(M.config.feeBasisRuling || {}).lockedOn);
+/* 10 Sep 2026: the attribution moved OUT of the shipped engine and into
+   .decisions/pricing-rulings.json. The public KNECT app loads pricing-matrix-v3.js
+   in the browser, so anything in it is readable by anyone — the numbers have to
+   be, the decision log does not. These two checks keep their original intent:
+   the ruling is still dated, still attributed, still cannot be changed quietly.
+   They just read the record that does not ship. */
+var RULINGS = JSON.parse(
+  require("fs").readFileSync(
+    require("path").join(__dirname, "..", ".decisions", "pricing-rulings.json"),
+    "utf8")).rulings;
+ok("the ruling is recorded with a date", !!(RULINGS.feeBasisRuling || {}).lockedOn);
 ok("the ruling records who it came from",
-   /Brent/.test((M.config.feeBasisRuling || {}).lockedBy || ""));
-ok("Brent's free-account band is held as data, not a copy",
+   /Brent/.test((RULINGS.feeBasisRuling || {}).lockedBy || ""));
+ok("the shipped engine carries NO attribution",
+   !/Brent/.test(require("fs").readFileSync(
+     require("path").join(__dirname, "..", "admin", "pricing-matrix-v3.js"), "utf8")));
+ok("the free-account band is held as data, not a copy",
    String((M.config.feeBasisRuling || {}).freeAccountKeepBandPct) === "20,30");
-ok("Brent's paid-account floor is held as data",
+ok("the paid-account floor is held as data",
    (M.config.feeBasisRuling || {}).paidAccountKeepFloorPct === 15);
 /* The 2026-09-07 replacement, also held as data rather than typed into logic. */
 ok("the one band that now governs every job is held as data",
    M.config.networkFeeFloor.pct === 15 && M.config.networkFeeFloor.ceilingPct === 50,
    JSON.stringify(M.config.networkFeeFloor));
-ok("the band is marked non-negotiable and attributed",
+ok("the band is marked non-negotiable, and attributed off the public surface",
    M.config.networkFeeFloor.nonNegotiable === true &&
-   /Brent/.test(M.config.networkFeeFloor.setBy || ""));
+   /Brent/.test((RULINGS.networkFeeFloor || {}).setBy || ""));
 ok("the older split bands are marked superseded, not silently left standing",
-   (M.config.feeBasisRuling || {}).supersededOn === "2026-09-07");
+   (RULINGS.feeBasisRuling || {}).supersededOn === "2026-09-07");
 
 var sample = quote({ vehicle: "SMALL_VAN", job: "STD_SAMEDAY", miles: 30 });
 ok("every quote states the basis it was priced on", sample.money.feeBasis === RULING);

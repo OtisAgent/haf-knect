@@ -11,7 +11,7 @@
  * ========================================================================== */
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const M = require('./pricing-matrix-v3.js');
+const M = require('../admin/pricing-matrix-v3.js');
 const { validate } = await import('../functions/api/pricing.js');
 
 let pass = 0, fail = 0;

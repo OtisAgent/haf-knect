@@ -1,6 +1,6 @@
 /* Account Fees V1 — regression tests. Run: node account-fees-v1.test.js */
 "use strict";
-var A = require("./account-fees-v1.js");
+var A = require("../admin/account-fees-v1.js");
 var pass = 0, fail = 0;
 function ok(name, cond, extra) {
   if (cond) { pass++; console.log("  ✓ " + name); }
@@ -206,7 +206,7 @@ ok("VAT treatment is settled: prices are ex-VAT, plus VAT",
 // ---------------------------------------------------------------------------
 console.log("\n9. THE CROWN — Pro identity on any account type");
 // ---------------------------------------------------------------------------
-var C = require("./pro-crown.js");
+var C = require("../admin/pro-crown.js");
 
 ok("Fleet Pro wears the crown", A.identity("FLEET_PRO").crown === true);
 ok("PLNA Pro wears the crown", A.identity("PLNA_PRO").crown === true);
@@ -268,7 +268,7 @@ ok("badge carries the brand accent via its own stylesheet",
 // ---------------------------------------------------------------------------
 console.log("\n8. THE MISSING-FEATURE MARKS — Plus mark and crown on what you lack");
 // ---------------------------------------------------------------------------
-var M = require("./tier-marks-v1.js");
+var M = require("../admin/tier-marks-v1.js");
 
 // --- the ladder itself -----------------------------------------------------
 var liteFeat = A.featuresFor("PLNA_LITE");

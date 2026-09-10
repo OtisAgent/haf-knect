@@ -7,8 +7,8 @@
  * =========================================================================== */
 "use strict";
 
-var Engine = require("./pricing-matrix-v3.js");
-var Rev = require("./revenue-model-v1.js");
+var Engine = require("../admin/pricing-matrix-v3.js");
+var Rev = require("../admin/revenue-model-v1.js");
 
 var pass = 0, fail = 0, failures = [];
 function ok(name, cond, detail) {

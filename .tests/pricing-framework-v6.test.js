@@ -31,7 +31,7 @@
 
 var fs = require("fs");
 var path = require("path");
-var M = require("./pricing-matrix-v3.js");
+var M = require("../admin/pricing-matrix-v3.js");
 
 var pass = 0, fail = 0;
 function ok(name, cond, detail) {

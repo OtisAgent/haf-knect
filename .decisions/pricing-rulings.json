@@ -1,0 +1,39 @@
+{
+  "_why": "Who ruled what, and when. This used to live inside admin/pricing-matrix-v3.js, which the public KNECT app loads in the browser — so anyone could read the decision log along with the numbers. The numbers have to ship because quoting happens client-side. The attribution does not. It lives here instead: a folder whose name starts with a dot, which Cloudflare Pages does not publish. fee-basis-lock.test.js asserts against this file, so the ruling still cannot be changed quietly.",
+  "_moved": "2026-09-10",
+  "rulings": {
+    "feeBasisRuling": {
+      "lockedOn": "2026-08-02",
+      "lockedBy": "Brent — decision delegated to Otis",
+      "freeAccountKeepBandPct": [20, 30],
+      "paidAccountKeepFloorPct": 15,
+      "supersededOn": "2026-09-07",
+      "supersededBy": "networkFeeFloor — one 15-50% band on every job"
+    },
+    "networkFeeFloor": {
+      "pct": 15,
+      "ceilingPct": 50,
+      "nonNegotiable": true,
+      "setBy": "Brent Ford",
+      "setOn": "2026-09-07",
+      "quoted": "i want HAF to make between 15% and 50% depends on the job, account type and the account type"
+    },
+    "supersededAccountLevels": {
+      "supersededBy": "Pricing Matrix and Network Fee Framework §5, 2026-07-31 — confirmed by Brent in chat, same day",
+      "priorModels": [
+        { "source": "PRICING_ENGINE_CONSTANTS §5.5 (2026-07-18)", "PLUS": 4, "PRO": 7 }
+      ]
+    },
+    "fleetSelfEmployedRule": {
+      "setBy": "Brent",
+      "setOn": "2026-07-29",
+      "reason": "Self-employed drivers under a fleet account are difficult to manage and financially unstable."
+    },
+    "plnaProPaymentRunFee": {
+      "documentedSource": "PRICING_ENGINE_CONSTANTS §5.8, approved 2026-07-18",
+      "conflictsWith": "CleverPay fee rule locked 2026-07-29 (no waivers)",
+      "askedOf": "Brent",
+      "status": "OPEN"
+    }
+  }
+}

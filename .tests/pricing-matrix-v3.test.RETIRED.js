@@ -8,7 +8,7 @@
  * longer use. */
 /* Pricing Matrix V3 — regression tests. Run: node pricing-matrix-v3.test.js */
 "use strict";
-var M = require("./pricing-matrix-v3.js");
+var M = require("../admin/pricing-matrix-v3.js");
 var pass = 0, fail = 0;
 function ok(name, cond, extra) {
   if (cond) { pass++; console.log("  ✓ " + name); }

@@ -20,8 +20,8 @@
 
 var fs = require("fs");
 var path = require("path");
-var M = require("./pricing-matrix-v3.js");
-var L = require("./lane-factors-v1.js");
+var M = require("../admin/pricing-matrix-v3.js");
+var L = require("../admin/lane-factors-v1.js");
 
 var pass = 0, fail = 0;
 function ok(name, cond, detail) {

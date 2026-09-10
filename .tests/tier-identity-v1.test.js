@@ -5,8 +5,8 @@
  * both — on every account type, including ones that do not exist yet.
  */
 "use strict";
-var ID = require("./tier-identity-v1.js");
-var Crown = require("./pro-crown.js");
+var ID = require("../admin/tier-identity-v1.js");
+var Crown = require("../admin/pro-crown.js");
 var pass = 0, fail = 0;
 function ok(name, cond, extra) {
   if (cond) { pass++; console.log("  ✓ " + name); }
@@ -120,7 +120,7 @@ ok("the entry-level list is the single place free tiers are named", ID.ENTRY.ind
 // ---------------------------------------------------------------------------
 console.log("\n9. NOT THE SAME THING AS THE FEATURE MARKS");
 // ---------------------------------------------------------------------------
-var Marks = require("./tier-marks-v1.js");
+var Marks = require("../admin/tier-marks-v1.js");
 ok("a locked FEATURE still says 'not included on your tier'",
   Marks.markFor("PLUS").lockedTitle.indexOf("not included") !== -1);
 ok("a MEMBER's mark never says 'not included' — it means they have it",
