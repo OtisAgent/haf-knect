@@ -3656,31 +3656,118 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         </div>
       </div>
 
-      <!-- SHARED: Community Feedback -->
-      <div class="tp" id="pane-feedback">
-        <h1 class="pt">Community Feedback</h1><p class="ps">Propose features and solutions to improve the HAF KNECT network — then vote for the ideas you'd actually use. Top-voted ideas get built first.</p>
-        <div style="background:var(--or-d);border:1px solid var(--or-g);border-radius:var(--rx);padding:.55rem .9rem;font-size:.73rem;color:var(--mu);margin-bottom:1rem"><strong style="color:var(--haf-orange-ink)">House rules:</strong> strictly for suggesting alterations to the network — features, fixes and solutions. Anything rude, abusive or discriminatory is blocked and removed.</div>
-        <div class="g2 fb-g2" style="align-items:start">
+      <!-- The old Community Feedback board used to sit here. It posted to a
+           board on the HUB project that this app holds no key for, so it had
+           been answering "could not load the board" to every member who opened
+           it. It is gone rather than fixed: Brent's 10 Sep decision replaced an
+           open board with a private line to HAF plus updates HAF publishes, and
+           leaving a second, broken way to say something would only split it.
+           switchTab() sends pane-feedback to pane-forum, so old links still land
+           somewhere real. -->
+      <!-- ══ HAF KNECT COMMUNITY ════════════════════════════════════════════
+           Brent, 10 Sep: "a HAF KNECT Community forum where everyone has a say
+           but make sure the words are muted that are rude and vulgar — make it
+           purposely for updates on the HAF KNECT & PLNA".
+
+           Two rooms and a general one, so a post has to be about something.
+           Everyone signed in can post and reply; nobody who is not signed in
+           can see a word of it. The muting is not done here — it is done by the
+           database on the way in, so a page that forgets to filter, or a person
+           posting with curl, gets the same treatment as everybody else. -->
+      <style>
+        .fm-rooms{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
+        .fm-room{padding:.42rem .85rem;border-radius:999px;border:1px solid var(--ln);
+                 background:var(--p2);color:var(--mu);font-size:.78rem;font-weight:700;
+                 cursor:pointer;transition:.15s}
+        .fm-room:hover{color:var(--tx)}
+        .fm-room.on{background:var(--haf-orange);border-color:var(--haf-orange);color:#fff}
+        .fm-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:1rem;align-items:start}
+        @media(max-width:860px){.fm-cols{grid-template-columns:1fr}}
+        .fm-item{border:1px solid var(--ln);border-radius:var(--rx);background:var(--p);
+                 padding:.8rem .9rem;margin-bottom:.6rem;display:flex;gap:.75rem}
+        .fm-item.pin{border-color:var(--haf-orange);background:var(--or-d)}
+        .fm-vote{flex-shrink:0;width:2.6rem;display:flex;flex-direction:column;align-items:center;
+                 gap:.1rem;padding:.35rem 0;border:1px solid var(--ln);border-radius:var(--rx);
+                 background:var(--p2);color:var(--mu);cursor:pointer;font-size:.75rem;font-weight:800}
+        .fm-vote.voted{border-color:var(--haf-orange);color:var(--haf-orange-ink)}
+        .fm-b{min-width:0;flex:1}
+        .fm-t{font-weight:800;font-size:.88rem;line-height:1.35;cursor:pointer}
+        .fm-t:hover{color:var(--haf-orange-ink)}
+        .fm-d{font-size:.79rem;color:var(--mu);margin-top:.25rem;line-height:1.5;white-space:pre-wrap}
+        .fm-m{margin-top:.45rem;display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;font-size:.72rem;color:var(--mu)}
+        .fm-reply{margin-top:.7rem;padding-top:.7rem;border-top:1px solid var(--ln)}
+        .fm-r{padding:.5rem .1rem;font-size:.79rem;line-height:1.5;border-bottom:1px solid var(--ln)}
+        .fm-r:last-of-type{border-bottom:0}
+        .fm-r-who{font-weight:800;font-size:.74rem}
+        .fm-r.team .fm-r-who{color:var(--haf-orange-ink)}
+        .fm-note{font-size:.72rem;color:var(--mu);margin-top:.3rem}
+        .sig-cols{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem}
+        @media(max-width:860px){.sig-cols{grid-template-columns:1fr}}
+        .sig-h{font-size:.74rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;
+               color:var(--mu);margin-bottom:.5rem}
+        .sig-n{color:var(--haf-orange-ink)}
+        .sig-row{border-bottom:1px solid var(--ln);padding:.55rem .1rem;font-size:.8rem}
+        .sig-row:last-child{border-bottom:0}
+        .sig-row-t{font-weight:700;line-height:1.35}
+        .sig-row-m{color:var(--mu);font-size:.73rem;margin-top:.2rem}
+        .sig-acts{margin-top:.4rem;display:flex;gap:.3rem;flex-wrap:wrap}
+      </style>
+      <div class="tp" id="pane-forum">
+        <h1 class="pt">HAF KNECT Community</h1>
+        <p class="ps">Updates on HAF KNECT and HAF PLNA, and your say on both. Everyone on the network can post, reply and vote — what gets the most support gets built first.</p>
+
+        <div style="background:var(--or-d);border:1px solid var(--or-g);border-radius:var(--rx);padding:.55rem .9rem;font-size:.73rem;color:var(--mu);margin-bottom:1rem">
+          <strong style="color:var(--haf-orange-ink)">How this works:</strong>
+          updates about HAF KNECT and HAF PLNA are posted by the HAF team, so everyone
+          gets the same story. Anything you want to say comes straight to us and nobody
+          else on the network sees it. If it is something everyone should know, we post it.
+        </div>
+
+        <div class="fm-rooms">
+          <button class="fm-room on" data-room="all" onclick="fmRoom('all',this)">All updates</button>
+          <button class="fm-room" data-room="knect" onclick="fmRoom('knect',this)">HAF KNECT</button>
+          <button class="fm-room" data-room="plna" onclick="fmRoom('plna',this)">HAF PLNA</button>
+          <button class="fm-room" data-room="general" onclick="fmRoom('general',this)">General</button>
+        </div>
+
+        <div class="fm-cols">
+          <!-- The private line. Deliberately the same size and weight as the
+               updates beside it: sending something in is half the point of the
+               screen, not a footnote at the bottom. -->
           <div class="card">
-            <div class="ct">Post to the board</div>
-            <div class="fr">
-              <div class="fg"><label class="fl">Your name (optional)</label><input class="fi2" id="fb-name" placeholder="Anonymous" maxlength="40"></div>
-              <div class="fg"><label class="fl">You are a…</label><select class="fi2" id="fb-role"><option value="driver">Driver</option><option value="customer">Customer</option><option value="business">Business</option><option value="team">HAF team</option><option value="other">Other</option></select></div>
+            <div class="ct">Tell HAF something</div>
+            <div class="fm-note" style="margin:0 0 .7rem">
+              Goes to the HAF team and nobody else. No other account on the network can
+              see it, ever. If it turns into a change, you will see it in the updates here.
             </div>
-            <div class="fg"><label class="fl">Type</label><select class="fi2" id="fb-cat"><option value="idea">Feature idea</option><option value="not_working">Problem to fix</option><option value="working">Solution that works</option></select></div>
-            <div class="fg"><label class="fl">Summary</label><input class="fi2" id="fb-title" placeholder="One line — e.g. Let me save favourite routes" maxlength="120"></div>
-            <div class="fg"><label class="fl">Details (optional)</label><textarea class="fi2" id="fb-details" placeholder="What should change on the network, and why?" maxlength="1000"></textarea></div>
-            <button class="btn btn-or btn-wide" id="fb-submit" onclick="fbSubmit()">Post to the board</button>
-            <div id="fb-msg" style="display:none;margin-top:.6rem;font-size:.78rem;font-weight:700"></div>
+            <div class="fg"><label class="fl">Which one is it about?</label>
+              <select class="fi2" id="fm-topic">
+                <option value="knect">HAF KNECT</option>
+                <option value="plna">HAF PLNA</option>
+                <option value="general">Something else</option>
+              </select></div>
+            <div class="fg"><label class="fl">What kind of thing?</label>
+              <select class="fi2" id="fm-kind">
+                <option value="idea">An idea</option>
+                <option value="problem">Something not working</option>
+                <option value="question">A question</option>
+                <option value="praise">Something that works well</option>
+              </select></div>
+            <div class="fg"><label class="fl">In one line</label>
+              <input class="fi2" id="fm-title" maxlength="120" placeholder="e.g. Show the whole week on the planner"></div>
+            <div class="fg"><label class="fl">Say more (optional)</label>
+              <textarea class="fi2" id="fm-body" rows="4" maxlength="2000" placeholder="What would you change, and why?"></textarea></div>
+            <button class="btn btn-or btn-wide" id="fm-post" onclick="fmPost()">Send it to HAF</button>
+            <div id="fm-msg" style="display:none;margin-top:.6rem;font-size:.78rem;font-weight:700"></div>
+            <div class="fm-note">Sent as your HAF account so we know who to come back to. Your PIN, email and phone number are never shown.</div>
           </div>
+
           <div>
-            <div class="fb-filters">
-              <button class="fb-fbtn on" onclick="fbFilter('all',this)">All</button>
-              <button class="fb-fbtn" onclick="fbFilter('idea',this)">Feature ideas</button>
-              <button class="fb-fbtn" onclick="fbFilter('not_working',this)">Problems</button>
-              <button class="fb-fbtn" onclick="fbFilter('working',this)">Working well</button>
-            </div>
-            <div id="fb-list"><div class="fb-empty">Loading the board…</div></div>
+            <div id="fm-src" class="ov-src" style="margin:0 0 .7rem">Reading the updates…</div>
+            <div id="fm-list"><div class="aa-empty">Loading…</div></div>
+
+            <div class="sig-h" style="margin-top:1.4rem">What you have sent us</div>
+            <div id="fm-mine"><div class="aa-empty">Nothing yet.</div></div>
           </div>
         </div>
       </div>
@@ -3800,6 +3887,82 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
           </div>
           <div class="kg" id="ops-kpis"></div>
           <div id="ops-note" class="ov-src" style="margin:12px 0 0;display:none"></div>
+        </div>
+
+        <!-- ══ WHAT THE NETWORK IS SAYING ═════════════════════════════════════
+             Brent, 10 Sep: "my aim is to build a full looping system for the
+             network that gathers feedback at speed and fixes in real time."
+
+             So this is not a copy of the forum. It is the loop, measured. The
+             forum is where people talk; this is the two questions that decide
+             whether talking is worth their time — how long before anyone at HAF
+             looks, and how long before it is actually fixed. Everything here is
+             one row per thing said, whichever door it came through: a dashboard
+             note, a forum post, an idea on the board. -->
+        <div class="card" id="sig-card">
+          <div class="ct">What the network is telling you
+            <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem" id="sig-when">reading…</span>
+          </div>
+          <div class="kg" id="sig-kpis"></div>
+          <div id="sig-speed" class="ov-src" style="margin:12px 0 0"></div>
+
+          <div class="sig-cols">
+            <div>
+              <div class="sig-h">Waiting on you <span id="sig-wait-n" class="sig-n"></span></div>
+              <div id="sig-waiting"><div class="aa-empty">reading…</div></div>
+            </div>
+            <div>
+              <div class="sig-h">Answered lately</div>
+              <div id="sig-recent"><div class="aa-empty">reading…</div></div>
+            </div>
+          </div>
+
+          <div style="margin-top:.9rem;display:flex;gap:.45rem;flex-wrap:wrap">
+            <button class="btn btn-or btn-xs" onclick="switchTab('pane-fbadmin')">Open the full inbox →</button>
+            <button class="btn btn-gh btn-xs" onclick="sigLoad(true)">Refresh</button>
+            <span id="sig-held" style="display:none;font-size:.74rem;color:var(--rd);align-self:center"></span>
+          </div>
+        </div>
+
+        <!-- ══ POST AN UPDATE TO THE WHOLE NETWORK ════════════════════════════
+             The other half of Brent's arrangement, 10 Sep. Members send in
+             privately; this is the one box on the platform that speaks outward
+             to everybody. It sits here on the Master Overview rather than off
+             on its own screen because the moment to write an update is the
+             moment you have just read what came in — the "Answer everyone"
+             button on a note beside it fills this box in.
+
+             Nothing but the owner account can write through it. That is not
+             this page being careful: the database refuses everybody else, and
+             it was proved by having a member's own credential try. -->
+        <div class="card" id="pub-card">
+          <div class="ct">Post an update to the whole network
+            <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">every member sees it · nobody can reply to it in public</span>
+          </div>
+          <div class="fr">
+            <div class="fg"><label class="fl">Who is it for?</label>
+              <select class="fi2" id="pub-topic">
+                <option value="knect">HAF KNECT</option>
+                <option value="plna">HAF PLNA</option>
+                <option value="general">Everyone</option>
+              </select></div>
+            <div class="fg"><label class="fl">Keep it at the top?</label>
+              <select class="fi2" id="pub-pin">
+                <option value="no">No, a normal update</option>
+                <option value="yes">Yes, pin it above the rest</option>
+              </select></div>
+          </div>
+          <div class="fg"><label class="fl">Heading</label>
+            <input class="fi2" id="pub-title" maxlength="120" placeholder="e.g. The planner now shows the whole week"></div>
+          <div class="fg"><label class="fl">The update</label>
+            <textarea class="fi2" id="pub-body" rows="4" maxlength="4000" placeholder="What changed, and what it means for them."></textarea></div>
+          <input type="hidden" id="pub-from" value="">
+          <div id="pub-from-note" class="fm-note" style="display:none"></div>
+          <button class="btn btn-or btn-wide" id="pub-go" onclick="sigPublish()">Post it to the network</button>
+          <div id="pub-msg" style="display:none;margin-top:.6rem;font-size:.78rem;font-weight:700"></div>
+
+          <div class="sig-h" style="margin-top:1.2rem">Live on the network now</div>
+          <div id="pub-live"><div class="aa-empty">reading…</div></div>
         </div>
 
         <!-- Where these numbers come from and when they were last true. The old
@@ -3981,12 +4144,34 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
            has, and what stage it is at. -->
       <div class="tp" id="pane-fbadmin">
         <h1 class="pt">Feedback Control</h1>
-        <p class="ps">Everything the network has asked for, as a pipeline you can move. Admin only.</p>
-        <div id="fa-src" class="ov-src">Reading the board…</div>
-        <div class="kg" id="fa-kpis"></div>
+        <p class="ps">Everything the network has said, in one list you can move. The Master Overview shows what is waiting; this shows the lot. Admin only.</p>
+        <div id="fa-src" class="ov-src">Reading the community…</div>
+        <div class="fm-rooms" style="margin-top:1rem">
+          <button class="fm-room on" onclick="faFilter('all',this)">Everything</button>
+          <button class="fm-room" onclick="faFilter('raised',this)">Nobody has looked</button>
+          <button class="fm-room" onclick="faFilter('seen',this)">Seen</button>
+          <button class="fm-room" onclick="faFilter('building',this)">Being built</button>
+          <button class="fm-room" onclick="faFilter('fixed',this)">Fixed</button>
+          <button class="fm-room" onclick="faFilter('not_planned',this)">Not planned</button>
+        </div>
         <div class="card">
-          <div class="ct">Ideas and requests <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">most supported first</span></div>
-          <div class="aa-wrap"><div id="fa-list"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the board…</span></div></div></div>
+          <div class="ct">Everything said <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">most supported first</span></div>
+          <div class="aa-wrap"><div id="fa-list"><div class="aa-empty">reading the community…</div></div></div>
+        </div>
+        <div class="card">
+          <div class="ct">Muted words <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">the list the network is filtered against</span></div>
+          <div id="fa-words" class="cr"><span class="ck">Loading</span><span class="cv">reading the list…</span></div>
+          <div style="margin-top:.7rem;display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">
+            <input class="fi2" id="fa-word" placeholder="a single word" maxlength="30" style="max-width:180px">
+            <select class="fi2" id="fa-sev" style="max-width:220px">
+              <option value="mute">Mute it — the post still goes up</option>
+              <option value="block">Block it — the post does not go up</option>
+            </select>
+            <button class="btn btn-or btn-xs" onclick="faWord(false)">Add</button>
+            <button class="btn btn-gh btn-xs" onclick="faWord(true)">Remove</button>
+            <span id="fa-word-msg" style="font-size:.74rem;color:var(--mu)"></span>
+          </div>
+          <div class="cr"><span class="ck" style="color:var(--mu)">Muting keeps the post and hides the word, so the point somebody was making survives. Blocking is for abuse aimed at a person or a group — those never reach the board and are held for you here.</span></div>
         </div>
       </div>
 
@@ -6208,7 +6393,7 @@ const DRIVER_NAV=[
   {id:'d-dir',l:'Driver Directory',s:'My Account',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'billing',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'My Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
-  {id:'feedback',l:'Feedback',s:'My Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
+  {id:'forum',l:'HAF KNECT Community',s:'My Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
 ];
 const ADMIN_NAV=[
   {id:'admin',l:'Network Overview',s:'Overview',ico:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
@@ -6224,7 +6409,7 @@ const ADMIN_NAV=[
   {id:'f-lanes',l:'Lane Pricing',s:'Freight Tools',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
   {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
-  {id:'feedback',l:'Feedback',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
+  {id:'forum',l:'HAF KNECT Community',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
 ];
 /* ── DEMO CENTRE NAV ──
    Five sections and nothing else. There is no live tab reachable from inside
@@ -6253,7 +6438,7 @@ const BUSINESS_NAV=[
   {id:'b-usage',l:'Usage &amp; Activity',s:'Account',ico:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'},
   {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
-  {id:'feedback',l:'Feedback',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
+  {id:'forum',l:'HAF KNECT Community',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
 ];
 const FREIGHT_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
@@ -6267,7 +6452,7 @@ const FREIGHT_NAV=[
   {id:'f-account',l:'Account Controls',s:'Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
   {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
-  {id:'feedback',l:'Feedback',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
+  {id:'forum',l:'HAF KNECT Community',s:'Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {id:'f-plans',l:'Upgrade',s:'Upgrade',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
 ];
 /* ── PERSONAL NAV (Brent as Pro freight forwarder) ── */
@@ -6280,7 +6465,7 @@ const PERSONAL_NAV=[
   {id:'f-account',l:'Account &amp; Pooling',s:'My Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
   {id:'billing',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'My Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
-  {id:'feedback',l:'Feedback',s:'My Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
+  {id:'forum',l:'HAF KNECT Community',s:'My Account',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {id:'f-plans',l:'Upgrade',s:'Upgrade',ico:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
 ];
 
@@ -7375,12 +7560,35 @@ function submitDemoFeedback(){
   const err=document.getElementById('dfb-err');
   if(!msg){err.textContent='Please write something before sending — even a few words helps.';err.style.display='block';return;}
   err.style.display='none';
-  const subject=encodeURIComponent('HAF KNECT Demo Feedback'+(name?' from '+name:''));
-  const body=encodeURIComponent((name?'Name: '+name+'\n':'')+(email?'Email: '+email+'\n':'')+'\nFeedback:\n'+msg);
-  window.open('mailto:admin@usehaf.co.uk?subject='+subject+'&body='+body,'_blank');
-  document.querySelectorAll('#demo-fb-ov .of').forEach(el=>el.style.display='none');
-  const btn=document.querySelector('#demo-fb-ov .btn-wide');if(btn)btn.style.display='none';
-  document.getElementById('dfb-success').style.display='block';
+  /* This used to open the person's mail client and nothing else, so a dashboard
+     note only ever existed in whatever inbox it happened to reach — never on a
+     screen, never counted, never answerable. It goes to the network now, tagged
+     as having come from a dashboard, and lands on the Master Overview beside
+     everything else the network has said.
+
+     A demo account has no real credential, so for those the mail client is
+     still the only route out and is kept as the fallback. */
+  const done=()=>{
+    document.querySelectorAll('#demo-fb-ov .of').forEach(el=>el.style.display='none');
+    const btn=document.querySelector('#demo-fb-ov .btn-wide');if(btn)btn.style.display='none';
+    document.getElementById('dfb-success').style.display='block';
+  };
+  const head=msg.split(/[.\n!?]/)[0].trim().slice(0,110)||msg.slice(0,110);
+  _netRpc1('haf_signal_post',{p_source:'dashboard',p_surface:'knect',p_kind:'idea',
+      p_topic:'knect',p_title:head,p_body:msg,p_author_name:name||null})
+    .then(d=>{
+      if(d&&d.ok){done();return}
+      const subject=encodeURIComponent('HAF KNECT Demo Feedback'+(name?' from '+name:''));
+      const body=encodeURIComponent((name?'Name: '+name+'\n':'')+(email?'Email: '+email+'\n':'')+'\nFeedback:\n'+msg);
+      window.open('mailto:admin@usehaf.co.uk?subject='+subject+'&body='+body,'_blank');
+      done();
+    })
+    .catch(()=>{
+      const subject=encodeURIComponent('HAF KNECT Demo Feedback'+(name?' from '+name:''));
+      const body=encodeURIComponent((name?'Name: '+name+'\n':'')+(email?'Email: '+email+'\n':'')+'\nFeedback:\n'+msg);
+      window.open('mailto:admin@usehaf.co.uk?subject='+subject+'&body='+body,'_blank');
+      done();
+    });
 }
 
 async function hafAuth(u,s,err,btn){
@@ -7880,7 +8088,7 @@ const HAF_NAV_V1=[
 
   {g:'ACCOUNT', id:'help', l:'Feedback &amp; Help', ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
    tabs:[
-    {id:'feedback',l:'Give feedback'},
+    {id:'forum',l:'HAF KNECT Community'},
     {id:'support', l:'Help &amp; contact HAF'},
    ]},
 
@@ -8818,7 +9026,12 @@ function switchTab(id){
      from a cached page, a typed tab id — lands on the merged one. A merge that
      leaves dead links behind has not finished. */
   if(id==='pane-f-post')id='pane-b-book';
-  if(id==='pane-feedback'){fbPrefill();fbLoad();}
+  /* The old ideas board was a second, separate place to say something — on a
+     database this app cannot read, so it had been showing an error to everyone
+     for a while. The community is the one place now, and every old link lands
+     there rather than on a dead screen. */
+  if(id==='pane-feedback')id='pane-forum';
+  if(id==='pane-forum')setTimeout(()=>{if(window.fmLoad)fmLoad(true);},40);
   /* the previous pane may have been taken out of the document by the audience rule */
   if(ct){const o=document.getElementById(ct);if(o)o.classList.remove('on');const n=document.getElementById('ni-'+ct.replace('pane-',''));if(n)n.classList.remove('on');}
   const p=document.getElementById(id);if(p)p.classList.add('on');
@@ -8828,7 +9041,7 @@ function switchTab(id){
   if(id==='pane-b-book')postingApplyRole();
   if(id==='pane-f-cap')setTimeout(capBootPane,80);
   if(id==='pane-pricing')setTimeout(()=>{if(window.pxBoot)pxBoot();},60);
-  if(id==='pane-admin')setTimeout(()=>{if(window.ovLoad)ovLoad();},60);
+  if(id==='pane-admin')setTimeout(()=>{if(window.ovLoad)ovLoad();if(window.sigLoad)sigLoad(true);},60);
   /* Demo Centre — each section redraws on entry so it always reflects the
      matrix as it is now, not as it was when the tab was first opened. */
   if(id==='pane-dc-free')setTimeout(()=>dcOpen('free'),40);
@@ -9624,48 +9837,93 @@ async function moLoad(){
 }
 window.moLoad=moLoad;
 
-/* ── FEEDBACK CONTROL ──
-   The same board members post to, read as a product pipeline. */
-const _FA_STAGE={planned:'Planned',reviewing:'Reviewing',building:'Building',
-                 released:'Released',rejected:'Rejected',open:'Reviewing'};
+/* ── FEEDBACK CONTROL — the full inbox ─────────────────────────────────────
+   The Master Overview shows what is waiting on an answer. This shows the lot,
+   including the ones already dealt with, because "did anybody ever come back
+   to that driver in July" is a question the overview cannot answer.
+
+   It used to read a board on the HUB project, which this app has no key for —
+   so it had been showing "could not read the feedback board" to Brent every
+   time he opened it. It reads the network database now, the same one every
+   other number on this screen comes from. */
+let faState='all';
+function faFilter(st,btn){
+  faState=st;
+  document.querySelectorAll('#pane-fbadmin .fm-room').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  faLoad();
+}
 async function faLoad(){
   const src=document.getElementById('fa-src'),list=document.getElementById('fa-list');
   if(!list)return;
   try{
-    const r=await fetch(FB_URL+'/knect_feedback_board?select=*&order=votes.desc,created_at.desc&limit=200',{headers:FB_H});
-    if(!r.ok)throw new Error('board '+r.status);
-    const rows=await r.json();
-    const stage=x=>_FA_STAGE[(x.status||'open').toLowerCase()]||'Reviewing';
-    const count=s=>rows.filter(x=>stage(x)===s).length;
-    document.getElementById('fa-kpis').innerHTML=[
-      ['Ideas on the board',rows.length,'','submitted by the network'],
-      ['Reviewing',count('Reviewing'),'am','not yet decided'],
-      ['Building',count('Building'),'or','in progress'],
-      ['Released',count('Released'),'gn','shipped'],
-      ['Total votes',rows.reduce((t,x)=>t+Number(x.votes||0),0),'','support across every idea']
-    ].map(k=>'<div class="kc"><div class="kc-l">'+k[0]+'</div><div class="kc-v'+(k[2]?' '+k[2]:'')+'">'+
-        k[1]+'</div><div class="kc-d" style="color:var(--mu)">'+k[3]+'</div></div>').join('');
+    const {denied,rows}=await _netRpc('haf_signal_inbox',{p_state:faState,p_limit:400});
+    if(denied){
+      src.className='ov-src';
+      src.innerHTML='<span class="dot"></span>Sign in with your own HAF username and PIN to read the inbox.';
+      list.innerHTML='<div class="aa-empty">Nothing is shown to an account that is not the owner.</div>';
+      return}
     src.className='ov-src';
-    src.innerHTML='<span class="dot"></span>Read live from the KNECT feedback board — the same board members post to.';
-    if(!rows.length){list.innerHTML='<div class="aa-empty">Nobody has posted an idea yet.</div>';return}
-    list.innerHTML=rows.map(x=>
-      '<div class="aa-row"><div class="aa-main">'+
-        '<div class="aa-name">'+_esc(x.title||x.idea||'Untitled')+'</div>'+
-        '<div class="aa-sub">'+_esc(x.category||'Uncategorised')+
-        (x.author||x.name?' &middot; '+_esc(x.author||x.name):'')+
-        (x.created_at?' &middot; '+_esc(_when(x.created_at)):'')+'</div>'+
-        (x.detail||x.body?'<div class="aa-sub" style="margin-top:.25rem;color:var(--tx)">'+_esc(String(x.detail||x.body).slice(0,220))+'</div>':'')+
+    src.innerHTML='<span class="dot"></span>'+rows.length+' message'+(rows.length===1?'':'s')+
+      ' sent in by the network'+(faState==='all'?'':' · filtered')+
+      ' · nobody but you can read these';
+    list.innerHTML=rows.length?rows.map(x=>{
+      const k=FM_KIND[x.kind]||FM_KIND.idea,st=FM_STATE[x.state]||FM_STATE.raised;
+      return '<div class="aa-row"><div class="aa-main">'+
+        '<div class="aa-name">'+_esc(x.title)+'</div>'+
+        (x.body?'<div class="aa-sub" style="margin-top:.25rem;color:var(--tx)">'+
+          _esc(String(x.body).slice(0,300))+(String(x.body).length>300?'…':'')+'</div>':'')+
+        '<div class="aa-sub" style="margin-top:.3rem">'+_esc(x.author)+
+          ' · '+(FM_TOPIC[x.topic]||x.topic)+' · '+x.days+' day'+(x.days===1?'':'s')+' ago'+
+          (x.replies?' · '+x.replies+' repl'+(x.replies===1?'y':'ies'):'')+
+          (x.muted?' · '+x.muted+' word'+(x.muted===1?'':'s')+' muted':'')+'</div>'+
+        (x.note?'<div class="aa-sub" style="margin-top:.25rem"><strong>You said:</strong> '+_esc(x.note)+'</div>':'')+
+        '<div class="sig-acts">'+
+          '<button class="btn btn-gh btn-xs" onclick="sigReply(\''+x.id+'\')">Reply to them</button>'+
+          '<button class="btn btn-or btn-xs" onclick="sigAnswerAll(\''+x.id+'\',\''+
+            String(x.title).replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\',\''+x.topic+'\')">Answer everyone</button>'+
+          '<button class="btn btn-gh btn-xs" onclick="sigMove(\''+x.id+'\',\'building\')">Building it</button>'+
+          '<button class="btn btn-gh btn-xs" onclick="sigMove(\''+x.id+'\',\'fixed\')">Done</button>'+
+          '<button class="btn btn-gh btn-xs" onclick="faRemove(\''+x.id+'\')">Remove</button>'+
+        '</div>'+
       '</div><div class="aa-right">'+
-        '<span class="chip">'+(Number(x.votes)||0)+' votes</span>'+
-        '<span class="chip '+(stage(x)==='Released'?'cg':stage(x)==='Rejected'?'cr':'ca')+'">'+stage(x)+'</span>'+
-      '</div></div>').join('');
+        '<span class="chip '+k[1]+'">'+k[0]+'</span>'+
+        '<span class="chip '+st[1]+'">'+st[0]+'</span>'+
+      '</div></div>'}).join('')
+      :'<div class="aa-empty">Nothing here'+(faState==='all'?' — nobody has written in yet':' under that filter')+'.</div>';
+    faWords();
   }catch(e){
     src.className='ov-src bad';
-    src.innerHTML='<span class="dot"></span>Could not read the feedback board just now.';
+    src.innerHTML='<span class="dot"></span>Could not read the inbox just now.';
     list.innerHTML='<div class="aa-empty">Nothing is shown rather than a guess — try again in a moment.</div>';
   }
 }
-window.faLoad=faLoad;
+async function faRemove(id){
+  const why=window.prompt('Remove this from the inbox. Why? (kept on the record)','');
+  if(why===null)return;
+  const d=await _netRpc1('haf_signal_remove',{p_id:id,p_reason:why||null});
+  if(d&&d.ok===false){alert(d.message||'That did not go through.');return}
+  faLoad();
+}
+/* The muted-word list, editable without a deploy. Shown as a count rather than
+   printed in full: a screen listing every slur is not a thing to leave open on
+   a laptop in a cafe. */
+async function faWords(){
+  const el=document.getElementById('fa-words');if(!el)return;
+  const d=await _netRpc1('haf_mute_word_set',{p_word:'',p_severity:'mute',p_remove:false});
+  el.innerHTML='<span class="ck">On the list</span><span class="cv">'+
+    (d&&d.words!=null?d.words+' words':'checked when anything is sent')+'</span>';
+}
+async function faWord(remove){
+  const w=document.getElementById('fa-word'),msg=document.getElementById('fa-word-msg');
+  if(!w.value.trim()){msg.textContent='Type a word first.';return}
+  const d=await _netRpc1('haf_mute_word_set',{p_word:w.value.trim(),
+    p_severity:document.getElementById('fa-sev').value,p_remove:!!remove});
+  msg.textContent=d.ok?(remove?'Removed. ':'Added. ')+d.words+' words on the list':(d.message||'That did not work.');
+  msg.style.color=d.ok?'var(--mu)':'var(--rd)';
+  if(d.ok){w.value='';faWords()}
+}
+window.faLoad=faLoad;window.faFilter=faFilter;window.faRemove=faRemove;window.faWord=faWord;
 
 /* ── WHO IS ON NOW ──────────────────────────────────────────────────────
    Reads the owner-gated report and nothing else. "On now" means a heartbeat
@@ -10680,85 +10938,345 @@ function hafDownloadPod(id){
  if(w){w.document.write(doc);w.document.close();}else{const b=new Blob([doc],{type:'text/html'});window.open(URL.createObjectURL(b),'_blank');}
 }
 
-/* ── COMMUNITY FEEDBACK BOARD (shared HUB database — same board as the demo) ── */
-const FB_URL='https://jsdwvogsxlnczzbefwgp.supabase.co/rest/v1';
-const FB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzZHd2b2dzeGxuY3p6YmVmd2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODgyMzYsImV4cCI6MjA5Njk2NDIzNn0.pxqM-Oh4f_3PlqCbKIKvcKZnNRUZ1ASKqqdNg78M_4M';
-const FB_H={apikey:FB_KEY,Authorization:'Bearer '+FB_KEY,'Content-Type':'application/json'};
-const FB_STATUS={under_review:['Under review','ca'],planned:['Planned','cb'],building:['Building','co'],done:['Done','cg'],declined:['Not planned','cr2']};
-const FB_CAT={idea:['Feature idea','cb'],not_working:['Problem','cr2'],working:['Working well','cg']};
-const FB_ROLE={driver:'Driver',customer:'Customer',business:'Business',team:'HAF team',other:'Other',user:'User'};
-let fbItems=[],fbCat='all',fbLoaded=false,_fbRoleGuess='customer';
-/* decency filter — the board is strictly for network alterations; abusive or racist content never leaves the page (the database blocks it server-side too) */
-const FB_BLOCK=/\b(nigg(?:er|a)s?|paki(?:s)?|chink(?:s)?|spic(?:s)?|coon(?:s)?|kike(?:s)?|gook(?:s)?|raghead(?:s)?|wog(?:s)?|golliwogs?|fuck(?:er|ing|ed|s)?|shit(?:e|ty|s)?|cunt(?:s)?|twat(?:s)?|wanker(?:s)?|bitch(?:es)?|bastard(?:s)?|dickhead(?:s)?|arsehole(?:s)?|asshole(?:s)?|prick(?:s)?|slags?|whore(?:s)?|retard(?:ed|s)?|fag(?:got)?s?|poofs?|trann(?:y|ies))\b/i;
-function fbVoter(){let k=localStorage.getItem('haf_fb_voter');if(!k){k=(crypto.randomUUID?crypto.randomUUID():String(Math.random()).slice(2)+'-'+new Date().getTime());localStorage.setItem('haf_fb_voter',k);}return k}
-function fbMyVotes(){try{return new Set(JSON.parse(localStorage.getItem('haf_fb_voted')||'[]'))}catch(e){return new Set()}}
-function fbEsc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function fbPrefill(){
-  const sel=document.getElementById('fb-role');if(sel&&!sel._set){sel._set=true;sel.value=_fbRoleGuess;}
-  const nm=document.getElementById('fb-name');
-  if(nm&&!nm.value){const u=document.getElementById('tb-user');if(u&&u.textContent.trim())nm.value=u.textContent.trim().slice(0,40);}
-}
-async function fbLoad(force){
-  if(fbLoaded&&!force)return;
+/* ══ THE NETWORK'S VOICE — one spine, two screens ═══════════════════════════
+   Brent, 10 Sep: "a full looping system for the network that gathers feedback
+   at speed and fixes in real time."
+
+   Everything anyone says lands in one place on the network database, whichever
+   door it came through, and comes back through functions that check the same
+   HAF username and PIN the rest of the app already checked. Two consequences
+   worth knowing before changing anything here:
+
+     1. NOTHING is written straight to a table. There is no table grant for the
+        browser's key at all. The only way a post exists is haf_signal_post(),
+        which mutes rude words on the way in. That is why the filter cannot be
+        got round by a page that forgets to call it.
+     2. The author's name and role are read off the account by the database, not
+        sent up from this page — so a form field cannot make somebody post as
+        another driver.                                                        */
+
+/* The network RPCs that return one json object rather than a set. _netRpc
+   assumes a set and throws away anything that is not an array, which silently
+   turned every "did that post go up?" answer into nothing. */
+async function _netRpc1(name,extra){
+  const c=_netCred();
+  if(!c)return {ok:false,message:'Sign in first.'};
   try{
-    const r=await fetch(FB_URL+'/knect_feedback_board?select=*&order=votes.desc,created_at.desc&limit=200',{headers:FB_H});
-    if(!r.ok)throw 0;
-    fbItems=await r.json();fbLoaded=true;fbRender();
-  }catch(e){document.getElementById('fb-list').innerHTML='<div class="fb-empty">Could not load the board — check your connection and try again.</div>'}
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/'+name,{method:'POST',
+      headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify(Object.assign({},c,extra||{}))});
+    if(!r.ok)return {ok:false,message:'That did not go through — try again in a moment.'};
+    const d=await r.json();
+    return (d&&typeof d==='object')?d:{ok:false,message:'That did not go through.'};
+  }catch(e){return {ok:false,message:'That did not go through — check your connection.'}}
 }
-function fbRender(){
-  const voted=fbMyVotes();
-  const list=fbItems.filter(i=>fbCat==='all'||i.category===fbCat);
-  const el=document.getElementById('fb-list');
-  if(!list.length){el.innerHTML='<div class="fb-empty">Nothing here yet — be the first to post.</div>';return}
-  el.innerHTML=list.map(i=>{
-    const st=FB_STATUS[i.status]||FB_STATUS.under_review,ctg=FB_CAT[i.category]||FB_CAT.idea;
-    const v=voted.has(i.id);
-    const when=new Date(i.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-    return `<div class="fb-item">
-      <button class="fb-vote${v?' voted':''}" onclick="fbVote('${i.id}',this)" title="${v?'You voted for this':'Vote for this'}">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-        <span>${i.votes}</span>
-      </button>
-      <div class="fb-body">
-        <div class="fb-title">${fbEsc(i.title)}</div>
-        ${i.details?`<div class="fb-details">${fbEsc(i.details)}</div>`:''}
-        <div class="fb-meta"><span class="chip ${ctg[1]}">${ctg[0]}</span><span class="chip ${st[1]}">${st[0]}</span><span class="fb-by">${fbEsc(i.author_name||'Anonymous')} · ${FB_ROLE[i.author_role]||'User'} · ${when}</span></div>
-      </div>
-    </div>`}).join('');
+
+/* ── THE COMMUNITY ───────────────────────────────────────────────────────
+   Brent, 10 Sep, reversing the open board: "instead of people posting, what
+   about if they send it to me and i post it to the whole network? saves the
+   issues and the worries."
+
+   So this screen is two things that never mix. The right-hand column is what
+   HAF has published — everybody sees the same words, and nothing on it can be
+   replied to in public. Underneath it, and ONLY visible to the person looking,
+   is what that person has sent in and what came back. The left is the private
+   line for sending more.
+
+   Nothing here decides who may see what. The database does, and it was proved
+   with a second member's credential trying to read the first member's note. */
+const FM_KIND={idea:['Idea','cb'],problem:['Not working','cr2'],question:['Question','ca'],
+               praise:['Works well','cg'],update:['HAF update','co']};
+const FM_STATE={raised:['Sent','ca'],seen:['HAF has seen it','cb'],building:['Being built','co'],
+                fixed:['Done','cg'],not_planned:['Not planned','cr2']};
+const FM_TOPIC={knect:'HAF KNECT',plna:'HAF PLNA',general:'General'};
+let fmItems=[],fmTopic='all',fmOpenId=null;
+
+function fmNote(m,good){const el=document.getElementById('fm-msg');if(!el)return;
+  el.textContent=m;el.style.display='block';el.style.color=good?'var(--gn)':'var(--rd)';
+  clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',5200)}
+
+function fmRoom(t,btn){
+  fmTopic=t;fmOpenId=null;
+  document.querySelectorAll('.fm-room').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  const sel=document.getElementById('fm-topic');
+  if(sel&&t!=='all')sel.value=t;
+  fmLoad(true);
 }
-function fbFilter(c,btn){fbCat=c;document.querySelectorAll('.fb-fbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');fbRender()}
-async function fbVote(id,btn){
-  const voted=fbMyVotes();
-  if(voted.has(id)){fbNote("You've already voted for this one.");return}
-  btn.disabled=true;
+
+async function fmLoad(force){
+  const src=document.getElementById('fm-src'),list=document.getElementById('fm-list');
+  if(!list)return;
   try{
-    const r=await fetch(FB_URL+'/knect_feedback_votes',{method:'POST',headers:FB_H,body:JSON.stringify({idea_id:id,voter_key:fbVoter()})});
-    if(!r.ok&&r.status!==409)throw 0;
-    voted.add(id);localStorage.setItem('haf_fb_voted',JSON.stringify([...voted]));
-    const it=fbItems.find(x=>x.id===id);if(it&&r.ok)it.votes++;
-    fbItems.sort((a,b)=>b.votes-a.votes||new Date(b.created_at)-new Date(a.created_at));
-    fbRender();
-  }catch(e){fbNote("Vote didn't go through — try again.");btn.disabled=false}
+    const {denied,rows}=await _netRpc('haf_signal_feed',{p_topic:fmTopic,p_state:null,p_limit:300});
+    if(denied){
+      src.className='ov-src';src.textContent='Sign in with your HAF username and PIN to see the updates.';
+      list.innerHTML='<div class="aa-empty">Nothing is shown to a signed-out browser.</div>';return}
+    fmItems=rows;
+    const ups=rows.filter(i=>i.update).length;
+    src.className='ov-src';
+    src.innerHTML='<span class="dot"></span>'+ups+' update'+(ups===1?'':'s')+
+      (fmTopic==='all'?'':' on '+FM_TOPIC[fmTopic])+' from the HAF team';
+    fmRender();
+  }catch(e){
+    src.className='ov-src bad';
+    src.innerHTML='<span class="dot"></span>Could not reach the updates just now.';
+    list.innerHTML='<div class="aa-empty">Nothing is shown rather than a guess — try again in a moment.</div>';
+  }
 }
-function fbNote(m,good){const el=document.getElementById('fb-msg');el.textContent=m;el.style.display='block';el.style.color=good?'var(--gn)':'var(--rd)';clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',3600)}
-async function fbSubmit(){
-  const title=document.getElementById('fb-title').value.trim();
-  const details=document.getElementById('fb-details').value.trim();
-  const name=document.getElementById('fb-name').value.trim();
-  if(title.length<3){fbNote('Give it a short summary first (3+ characters).');return}
-  if(FB_BLOCK.test(title)||FB_BLOCK.test(details)||FB_BLOCK.test(name)){fbNote('Blocked — keep it clean and about the network. Rude or discriminatory posts are not accepted.');return}
-  const btn=document.getElementById('fb-submit');btn.disabled=true;btn.textContent='Posting…';
-  const body={title,details:details||null,category:document.getElementById('fb-cat').value,author_role:document.getElementById('fb-role').value,author_name:name||'Anonymous'};
+
+function fmRender(){
+  const el=document.getElementById('fm-list'),mine=document.getElementById('fm-mine');
+  if(!el)return;
+
+  /* ── what HAF has published. Read-only by design. ── */
+  const ups=fmItems.filter(i=>i.update);
+  el.innerHTML=ups.length?ups.map(i=>
+    '<div class="fm-item'+(i.pinned?' pin':'')+'"><div class="fm-b">'+
+      '<div class="fm-t" style="cursor:default">'+_esc(i.title)+'</div>'+
+      (i.body?'<div class="fm-d">'+_esc(i.body)+'</div>':'')+
+      '<div class="fm-m">'+
+        '<span class="chip co">HAF update</span>'+
+        '<span class="chip">'+(FM_TOPIC[i.topic]||i.topic)+'</span>'+
+        (i.pinned?'<span class="chip ca">Pinned</span>':'')+
+        '<span>'+_when(i.at)+'</span>'+
+      '</div></div></div>').join('')
+    :'<div class="aa-empty">No updates yet on '+
+      (fmTopic==='all'?'HAF KNECT or HAF PLNA':FM_TOPIC[fmTopic])+
+      '. When something changes, it will be posted here.</div>';
+
+  /* ── and the person's own private line. Nobody else is ever served these
+       rows, so there is nothing to hide in the page. ── */
+  if(!mine)return;
+  const own=fmItems.filter(i=>i.mine);
+  mine.innerHTML=own.length?own.map(i=>{
+    const k=FM_KIND[i.kind]||FM_KIND.idea,st=FM_STATE[i.state]||FM_STATE.raised;
+    const open=(fmOpenId===i.id);
+    return '<div class="fm-item"><div class="fm-b">'+
+      '<div class="fm-t" onclick="fmOpen(\''+i.id+'\')">'+_esc(i.title)+'</div>'+
+      (i.body?'<div class="fm-d">'+_esc(i.body)+'</div>':'')+
+      '<div class="fm-m">'+
+        '<span class="chip '+k[1]+'">'+k[0]+'</span>'+
+        '<span class="chip '+st[1]+'">'+st[0]+'</span>'+
+        '<span class="chip">'+(FM_TOPIC[i.topic]||i.topic)+'</span>'+
+        '<span>sent '+_when(i.at)+' · only HAF can see this</span>'+
+        '<span style="cursor:pointer;font-weight:700;color:var(--haf-orange-ink)" onclick="fmOpen(\''+i.id+'\')">'+
+          (i.replies?i.replies+' repl'+(i.replies===1?'y':'ies'):'Add to it')+' '+(open?'▴':'▾')+'</span>'+
+      '</div>'+
+      (i.state_note?'<div class="fm-note"><strong>From HAF:</strong> '+_esc(i.state_note)+'</div>':'')+
+      (open?'<div class="fm-reply" id="fm-th-'+i.id+'"><div class="fm-note">reading…</div></div>':'')+
+    '</div></div>'}).join('')
+    :'<div class="aa-empty">You have not sent us anything yet.</div>';
+  if(fmOpenId)fmThread(fmOpenId);
+}
+
+function fmOpen(id){fmOpenId=(fmOpenId===id?null:id);fmRender()}
+
+async function fmThread(id){
+  const box=document.getElementById('fm-th-'+id);if(!box)return;
+  let rows=[];
+  try{const r=await _netRpc('haf_signal_thread',{p_id:id});rows=r.rows||[]}catch(e){}
+  box.innerHTML=(rows.length
+      ? rows.map(r=>'<div class="fm-r'+(r.team?' team':'')+'"><span class="fm-r-who">'+
+          _esc(r.author)+(r.team?' · HAF':'')+'</span> <span style="color:var(--mu);font-size:.72rem">'+
+          _when(r.at)+'</span><div>'+_esc(r.body)+'</div></div>').join('')
+      : '<div class="fm-note">No replies yet.</div>')+
+    '<div style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap">'+
+      '<input class="fi2" id="fm-rb-'+id+'" placeholder="Add a reply…" maxlength="1000" style="flex:1;min-width:180px">'+
+      '<button class="btn btn-or btn-xs" onclick="fmReply(\''+id+'\')">Reply</button></div>'+
+    '<div class="fm-note" id="fm-rm-'+id+'"></div>';
+}
+
+async function fmReply(id){
+  const inp=document.getElementById('fm-rb-'+id),msg=document.getElementById('fm-rm-'+id);
+  if(!inp||!inp.value.trim())return;
+  const d=await _netRpc1('haf_signal_reply_add',{p_id:id,p_body:inp.value.trim()});
+  if(msg){msg.textContent=d.message||'';msg.style.color=d.ok?'var(--mu)':'var(--rd)'}
+  if(d.ok){inp.value='';await fmLoad(true)}
+}
+
+async function fmPost(){
+  const t=document.getElementById('fm-title'),b=document.getElementById('fm-body');
+  if(!t.value.trim()||t.value.trim().length<3){fmNote('Give it one line first.');return}
+  const btn=document.getElementById('fm-post');btn.disabled=true;btn.textContent='Sending…';
+  const d=await _netRpc1('haf_signal_post',{
+    p_source:'forum',p_surface:'knect',
+    p_kind:document.getElementById('fm-kind').value,
+    p_topic:document.getElementById('fm-topic').value,
+    p_title:t.value.trim(),p_body:b.value.trim()||null,p_author_name:null});
+  btn.disabled=false;btn.textContent='Send it to HAF';
+  fmNote(d.message||(d.ok?'Sent to HAF.':'That did not go through.'),!!d.ok);
+  if(d.ok){t.value='';b.value='';await fmLoad(true)}
+}
+window.fmLoad=fmLoad;window.fmRoom=fmRoom;window.fmPost=fmPost;
+window.fmOpen=fmOpen;window.fmReply=fmReply;
+
+/* ── THE SAME SPINE, READ AS A LOOP (Master Overview) ────────────────────── */
+async function sigLoad(force){
+  const kp=document.getElementById('sig-kpis');if(!kp)return;
+  const when=document.getElementById('sig-when'),speed=document.getElementById('sig-speed'),
+        wait=document.getElementById('sig-waiting'),rec=document.getElementById('sig-recent'),
+        held=document.getElementById('sig-held'),wn=document.getElementById('sig-wait-n');
   try{
-    const r=await fetch(FB_URL+'/knect_feedback_ideas',{method:'POST',headers:FB_H,body:JSON.stringify(body)});
-    if(!r.ok)throw 0;
-    document.getElementById('fb-title').value='';document.getElementById('fb-details').value='';
-    fbNote('Posted — your idea is live on the board. Top-voted ideas get built first.',true);
-    await fbLoad(true);
-  }catch(e){fbNote("Couldn't post right now — try again in a minute.")}
-  btn.disabled=false;btn.textContent='Post to the board';
+    const {denied,rows}=await _netRpc('haf_signal_overview',{});
+    if(denied||!rows.length){
+      when.textContent='';kp.innerHTML='';
+      speed.className='ov-src';speed.textContent='Sign in with your own HAF username and PIN to read this.';
+      wait.innerHTML='';rec.innerHTML='';return}
+    const d=rows[0];
+    when.textContent='live · '+new Date(d.as_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    kp.innerHTML=[
+      ['Sent in this week',d.this_week,'','notes from the network in the last 7 days'],
+      ['You have not read',d.unseen,d.unseen?'am':'gn','nobody at HAF has answered these'],
+      ['Problems open',d.problems_open,d.problems_open?'or':'gn','reported and not yet fixed'],
+      ['Being built',d.building,'','picked up and in progress'],
+      ['Closed this week',d.fixed_7d,'gn','answered or fixed in the last 7 days'],
+      ['Updates live',d.updates,'','posted by you, on every member screen']
+    ].map(k=>'<div class="kc"><div class="kc-l">'+k[0]+'</div><div class="kc-v'+(k[2]?' '+k[2]:'')+'">'+
+        (k[1]==null?'—':k[1])+'</div><div class="kc-d" style="color:var(--mu)">'+k[3]+'</div></div>').join('');
+
+    /* The speed of the loop, in the plainest words available. An average with
+       nothing behind it is worse than saying so, hence the empty cases. */
+    const bits=[];
+    bits.push(d.hours_to_seen!=null
+      ? 'On average someone at HAF looks within <strong>'+d.hours_to_seen+' hours</strong>'
+      : 'Nothing has been looked at yet, so there is no answer time to report');
+    bits.push(d.days_to_fixed!=null
+      ? 'and it is fixed <strong>'+d.days_to_fixed+' days</strong> later'
+      : 'and nothing has been through to fixed yet');
+    if(d.oldest_unseen_days!=null)
+      bits.push('· oldest one waiting: <strong>'+d.oldest_unseen_days+' days</strong>');
+    speed.className='ov-src'+(d.oldest_unseen_days>3?' bad':'');
+    speed.innerHTML='<span class="dot"></span>'+bits.join(' ')+'.';
+
+    if(wn)wn.textContent=d.unseen?'('+d.unseen+')':'';
+    const W=d.waiting||[];
+    wait.innerHTML=W.length?W.map(w=>
+      '<div class="sig-row"><div class="sig-row-t">'+_esc(w.title)+'</div>'+
+      (w.body?'<div class="sig-row-m" style="color:var(--tx);margin-top:.25rem">'+
+        _esc(String(w.body).slice(0,260))+(String(w.body).length>260?'…':'')+'</div>':'')+
+      '<div class="sig-row-m">'+(FM_TOPIC[w.topic]||w.topic)+' · '+_esc(w.author)+' · '+
+        w.days+' day'+(w.days===1?'':'s')+' ago · '+
+        ({dashboard:'from a dashboard',forum:'from their community screen',board:'from the ideas board'}[w.source]||w.source)+
+        (w.replies?' · '+w.replies+' repl'+(w.replies===1?'y':'ies'):'')+'</div>'+
+      '<div class="sig-acts">'+
+        '<button class="btn btn-gh btn-xs" onclick="sigReply(\''+w.id+'\')">Reply to them</button>'+
+        '<button class="btn btn-or btn-xs" onclick="sigAnswerAll(\''+w.id+'\',\''+
+          String(w.title).replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\',\''+w.topic+'\')">Answer everyone</button>'+
+        '<button class="btn btn-gh btn-xs" onclick="sigMove(\''+w.id+'\',\'building\')">Building it</button>'+
+        '<button class="btn btn-gh btn-xs" onclick="sigMove(\''+w.id+'\',\'fixed\')">Done</button>'+
+        '<button class="btn btn-gh btn-xs" onclick="sigMove(\''+w.id+'\',\'not_planned\')">Not planned</button>'+
+      '</div></div>').join('')
+      :'<div class="aa-empty">Nothing waiting — everyone who wrote in has had an answer.</div>';
+
+    const R=d.recent||[];
+    rec.innerHTML=R.length?R.map(r=>{
+      const st=FM_STATE[r.state]||FM_STATE.seen;
+      return '<div class="sig-row"><div class="sig-row-t">'+_esc(r.title)+'</div>'+
+        '<div class="sig-row-m"><span class="chip '+st[1]+'">'+st[0]+'</span> '+
+        _when(r.at)+' · '+_esc(r.author)+(r.note?' — '+_esc(r.note):'')+'</div></div>'}).join('')
+      :'<div class="aa-empty">Nothing has been answered yet.</div>';
+
+    /* what is out there on every member's screen right now, and the way to
+       take one back down if it turns out to be wrong */
+    const live=document.getElementById('pub-live');
+    if(live){
+      const L=d.live||[];
+      live.innerHTML=L.length?L.map(u=>
+        '<div class="sig-row"><div class="sig-row-t">'+(u.pinned?'<span class="chip ca">Pinned</span> ':'')+
+          _esc(u.title)+'</div>'+
+        '<div class="sig-row-m">'+(FM_TOPIC[u.topic]||u.topic)+' · posted '+_when(u.at)+
+          ' <span style="cursor:pointer;font-weight:700;color:var(--rd)" onclick="sigPull(\''+u.id+'\')">take it down</span>'+
+        '</div></div>').join('')
+        :'<div class="aa-empty">You have not posted an update to the network yet.</div>';
+    }
+
+    if(held){
+      if(d.held){held.style.display='';held.textContent=d.held+' message'+(d.held===1?'':'s')+
+        ' refused for abusive language and held for review';}
+      else held.style.display='none';
+    }
+  }catch(e){
+    speed.className='ov-src bad';
+    speed.innerHTML='<span class="dot"></span>Could not read what the network is telling you just now.';
+  }
 }
+
+/* ── ANSWERING ONE PERSON, AND ANSWERING EVERYONE ────────────────────────
+   Two different actions on purpose. A reply goes to that one account and
+   nobody else can read it. An update goes on every member's screen and takes
+   no replies at all — which is the whole reason Brent asked for it this way
+   round rather than an open board. */
+async function sigReply(id){
+  const body=window.prompt('Your reply goes to that person only. Nobody else on the network sees it.','');
+  if(body===null||!body.trim())return;
+  const d=await _netRpc1('haf_signal_reply_add',{p_id:id,p_body:body.trim()});
+  if(d&&d.ok===false){alert(d.message||'That did not go through.');return}
+  sigLoad(true);
+}
+
+function sigAnswerAll(id,title,topic){
+  const t=document.getElementById('pub-title'),b=document.getElementById('pub-body'),
+        f=document.getElementById('pub-from'),n=document.getElementById('pub-from-note'),
+        tp=document.getElementById('pub-topic');
+  if(!t)return;
+  f.value=id;
+  if(tp&&topic)tp.value=topic;
+  if(!t.value.trim())t.value=title;
+  n.style.display='';
+  n.innerHTML='This will also close what that person sent in and tell them the answer went out to the whole network. '+
+    '<span style="cursor:pointer;font-weight:700;color:var(--haf-orange-ink)" onclick="sigAnswerClear()">post it on its own instead</span>';
+  document.getElementById('pub-card').scrollIntoView({behavior:'smooth',block:'center'});
+  b.focus();
+}
+function sigAnswerClear(){
+  document.getElementById('pub-from').value='';
+  document.getElementById('pub-from-note').style.display='none';
+}
+
+async function sigPublish(){
+  const t=document.getElementById('pub-title'),b=document.getElementById('pub-body'),
+        msg=document.getElementById('pub-msg'),go=document.getElementById('pub-go');
+  const say=(m,good)=>{msg.textContent=m;msg.style.display='block';
+    msg.style.color=good?'var(--gn)':'var(--rd)';clearTimeout(msg._t);
+    msg._t=setTimeout(()=>msg.style.display='none',6000)};
+  if(!t.value.trim()||t.value.trim().length<3){say('Give the update a heading first.');return}
+  const topic=document.getElementById('pub-topic').value;
+  const who=topic==='plna'?'every HAF PLNA member':topic==='knect'?'every HAF KNECT member':'everyone on the network';
+  if(!window.confirm('Post this to '+who+'?\n\n'+t.value.trim()+
+     '\n\nIt appears on their screen straight away. You can take it back down afterwards.'))return;
+  go.disabled=true;go.textContent='Posting…';
+  const d=await _netRpc1('haf_broadcast_post',{
+    p_topic:topic,p_title:t.value.trim(),p_body:b.value.trim()||null,
+    p_pin:document.getElementById('pub-pin').value==='yes',
+    p_from:document.getElementById('pub-from').value||null});
+  go.disabled=false;go.textContent='Post it to the network';
+  say(d.message||(d.ok?'Posted.':'That did not go through.'),!!d.ok);
+  if(d.ok){t.value='';b.value='';sigAnswerClear();sigLoad(true)}
+}
+
+async function sigPull(id){
+  if(!window.confirm('Take this update off every member screen? It stops being visible straight away.'))return;
+  const d=await _netRpc1('haf_broadcast_pull',{p_id:id});
+  if(d&&d.ok===false){alert(d.message||'That did not go through.');return}
+  sigLoad(true);
+}
+window.sigReply=sigReply;window.sigAnswerAll=sigAnswerAll;window.sigAnswerClear=sigAnswerClear;
+window.sigPublish=sigPublish;window.sigPull=sigPull;
+
+async function sigMove(id,state){
+  let note=null;
+  if(state==='fixed'||state==='not_planned'){
+    note=window.prompt(state==='fixed'
+      ? 'What was done? The person who raised it is told this.'
+      : 'Why not? The person who raised it is told this.','');
+    if(note===null)return;
+  }
+  const d=await _netRpc1('haf_signal_set_state',{p_id:id,p_state:state,p_note:note||null});
+  if(d&&d.ok===false){alert(d.message||'That did not go through.');return}
+  sigLoad(true);
+}
+window.sigLoad=sigLoad;window.sigMove=sigMove;
 
 // Day is the default, but a night choice made on any HAF site is remembered.
 // haf-theme.js has already applied it before first paint; don't undo it here.
