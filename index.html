@@ -1516,7 +1516,10 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
       <div class="llogo-t">HAF <span>KNECT</span></div>
     </a>
     <div class="nav-r">
-      <button class="track-btn" onclick="toggleTrack()">Track delivery</button>
+      <!-- "Track" on a narrow screen. Three buttons and a logo do not fit across
+           360px once one of them says Dashboard, and a page that scrolls
+           sideways on a phone is worse than a shorter word. -->
+      <button class="track-btn" onclick="toggleTrack()"><span class="nd-wide">Track delivery</span><span class="nd-narrow">Track</span></button>
       <!-- Says "Log in" to a visitor and "Your dashboard" to a member —
            hafSideAccount owns both, so the top of the page and the side of it
            can never disagree about whether somebody is signed in. -->
