@@ -10418,7 +10418,21 @@ function lvDebounce(){clearTimeout(_lvTimer);_lvTimer=setTimeout(lvAccounts,320)
 /* An allowance the database holds as null is unlimited, and is drawn as an
    empty box — never as 999, which is the number people then quote at you. */
 function _lvNum(v){return (v===null||v===undefined)?'':String(v)}
-function _lvSay(v){return (v===null||v===undefined)?'unlimited':String(v)}
+function _lvSay(v){
+  if(v===null||v===undefined)return 'unlimited';
+  if(v===true)return 'yes';
+  if(v===false)return 'no';
+  return String(v);
+}
+
+/* The database names an allowance by its key, because a log has to be precise.
+   Brent does not read keys. Any message on its way to the screen gets the key
+   swapped for the words that are printed next to the box it came from. */
+function _lvWords(s){
+  let t=String(s||'');
+  LV_KEYS.forEach(d=>{t=t.split('"'+d.k+'"').join('"'+d.l.toLowerCase()+'"')});
+  return t;
+}
 
 function _lvField(id,key,val){
   const d=LV_KEYS.find(x=>x.k===key)||{kind:'n'};
@@ -10532,7 +10546,7 @@ async function lvSaveBook(){
   for(const j of jobs){
     const d=await _netRpc1('haf_plan_level_set',{p_level:j.level,p_allowances:j.diff,p_reason:why||null});
     if(d&&d.ok)done.push((_lvBook[j.level]||{}).label||j.level);
-    else failed.push(((_lvBook[j.level]||{}).label||j.level)+' — '+((d&&d.message)||'that did not go through'));
+    else failed.push(((_lvBook[j.level]||{}).label||j.level)+' — '+_lvWords((d&&d.message)||'that did not go through'));
   }
   if(msg){
     msg.style.color=failed.length?'var(--rd)':'var(--gn)';
@@ -10685,7 +10699,7 @@ async function lvClearAccount(){
 
 async function lvAfterSave(d,msg){
   if(!d||d.ok!==true){
-    if(msg){msg.style.color='var(--rd)';msg.textContent=(d&&d.message)||'That did not go through.'}
+    if(msg){msg.style.color='var(--rd)';msg.textContent=_lvWords((d&&d.message)||'That did not go through.')}
     return;
   }
   /* Redraw from the database first — the row, its chips and the per-level
