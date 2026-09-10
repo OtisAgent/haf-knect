@@ -24,8 +24,8 @@
       ],
       otherwise: "The driver sets up their own PLNA account and is billed as an " +
                  "independent driver.",
-      reason: "Brent 2026-07-29: self-employed drivers under a fleet account are " +
-              "difficult to manage and financially unstable."
+      reason: "Self-employed drivers under a fleet account are difficult to " +
+              "manage and financially unstable."
     },
 
     accountTypes: {
@@ -55,9 +55,9 @@
         sourceConflict: {
           field: "paymentRunFeeGbp",
           documented: 0,
-          documentedSource: "PRICING_ENGINE_CONSTANTS §5.8, approved 2026-07-18",
-          conflictsWith: "CleverPay fee rule locked 2026-07-29 (no waivers)",
-          askedOf: "Brent",
+          documentedSource: "internal pricing reference",
+          conflictsWith: "the CleverPay no-waiver fee rule",
+          askedOf: "OWNER",
           status: "OPEN"
         },
         maxDrivers: 1

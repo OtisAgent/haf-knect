@@ -46,9 +46,7 @@
     networkFeeFloor: {
       pct: 15,
       ceilingPct: 50,
-      nonNegotiable: true,
-      setBy: "Brent Ford",
-      setOn: "2026-09-07"
+      nonNegotiable: true
     },
 
     driverLevelFrom: {
@@ -66,9 +64,9 @@
     },
 
     supersededAccountLevels: {
-      supersededBy: "Pricing Matrix and Network Fee Framework §5, 2026-07-31 — confirmed by Brent in chat, same day",
+      supersededBy: "the current Pricing Matrix and Network Fee Framework",
       priorModels: [
-        { source: "PRICING_ENGINE_CONSTANTS §5.5 (2026-07-18)", PLUS: 4,  PRO: 7 },
+        { source: "prior pricing reference v5.5", PLUS: 4,  PRO: 7 },
         { source: "tier_config freight_tier.feeAdjPts seed v1",  FREE: 4, PLUS: 0, PRO: -3 },
         { source: "tier_config knect_member.FEE_BENEFIT seed v2", MEMBER_PTS: 1 }
       ]
@@ -103,8 +101,6 @@
     feeBasis: "SHARE_OF_CUSTOMER_PRICE",
 
     feeBasisRuling: {
-      lockedOn: "2026-08-02",
-      lockedBy: "Brent — decision delegated to Otis",
       freeAccountKeepBandPct: [20, 30],
       paidAccountKeepFloorPct: 15,
 
@@ -665,7 +661,7 @@
     { label: "Margin override — account retention (admin, logged)",
       input: { miles: 80, vehicleCode: "MWB_VAN", jobTypeCode: "STD_SAMEDAY",
                plnaTier: "FREE", knectTier: "PAID", weight: "STANDARD", handling: "KERBSIDE",
-               override: { marginPct: 16, operator: "Brent", reason: "Key account retention" } } },
+               override: { marginPct: 16, operator: "OWNER", reason: "Key account retention" } } },
     { label: "Direct booking within quota — HAF margin 0%",
       input: { miles: 30, vehicleCode: "SMALL_VAN", jobTypeCode: "STD_SAMEDAY",
                plnaTier: "FREE", knectTier: "FREE", weight: "STANDARD", handling: "KERBSIDE",
