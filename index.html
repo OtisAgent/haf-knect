@@ -990,6 +990,15 @@ textarea.fi2{resize:vertical;min-height:70px}
 .fbox-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem}
 .fbox-title{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em}
 .fstep{display:none}.fstep.on{display:block}
+/* What this account has used today. A quiet row by design: it is a fact the
+   customer may want, not a warning — until it is nearly gone, when .low turns
+   it amber, and .out turns it red because the next press will be refused. */
+.fq-use{background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.6rem .75rem;margin-bottom:1rem;font-size:.76rem;line-height:1.5;color:var(--mu)}
+.fq-use b{color:var(--tx);font-weight:800}
+.fq-use .fq-use-lvl{font-size:.64rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mu);display:block;margin-bottom:.2rem}
+.fq-use.low{border-color:var(--haf-orange-ink);background:var(--or-d)}
+.fq-use.low b,.fq-use.low .fq-use-lvl{color:var(--haf-orange-ink)}
+.fq-use.out{border-color:var(--rd)}.fq-use.out b,.fq-use.out .fq-use-lvl{color:var(--rd)}
 .slbl{font-size:.7rem;font-weight:800;letter-spacing:.1em;color:var(--haf-orange-ink);text-transform:uppercase;margin-bottom:.7rem}
 .ogrid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:.9rem}
 .oopt{background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.7rem .85rem;font-size:.88rem;font-weight:700;text-align:left;cursor:pointer;transition:all .14s;line-height:1.4}
@@ -1642,6 +1651,18 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
                it becomes the consignment record, so the driver turns up knowing
                exactly what they are collecting. ═══════════════════════════ -->
           <div id="if-fast" style="display:none">
+
+            <!-- ── WHAT YOU HAVE USED TODAY ──
+                 Brent, 10 Sep: the workspace is open to everyone and the account
+                 level only limits how much of it gets used. A limit a person
+                 cannot see is a limit that arrives as a surprise at the button,
+                 so it is said here, at the top of the order, in the ordinary
+                 words the refusal itself would use.
+
+                 Only drawn for a signed-in account on a level that is actually
+                 counted. An unlimited account and a one-off customer are shown
+                 nothing rather than a reassuring row that means nothing. -->
+            <div id="fq-use" class="fq-use" style="display:none"></div>
 
             <!-- ── 1 · WHERE IS IT GOING? ── -->
             <div class="fstep on" id="fq-1">
@@ -5550,6 +5571,59 @@ function openFlow(type){
   if(type==='fast'){for(const k in fqData)delete fqData[k];document.querySelectorAll('#if-fast .oopt').forEach(b=>b.classList.remove('sel'));}
   /* scroll so the flow panel is visible below the calculator */
   setTimeout(()=>flow.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
+  /* And say what today has already used. Asked fresh every time the flow opens
+     rather than cached at sign-in: a person who books three jobs in a morning
+     should watch the number come down, not read a figure from an hour ago. */
+  if(type==='fast')fqPaintUsage();
+}
+
+/* ── WHAT TODAY HAS USED ─────────────────────────────────────────────────────
+   Read with the account's own credential from the one function a browser is
+   allowed to call about its own plan. Everything about levels and allowances is
+   refused to the anon key on purpose, so this cannot be turned into a way to
+   read somebody else's account by editing a username in the address bar.
+
+   Three cases are deliberately shown NOTHING: nobody signed in, an account on
+   an unlimited level, and any answer we could not get. A row that says "plenty
+   left" when the truth is unknown is worse than no row, because the customer
+   then believes it. */
+async function fqPaintUsage(){
+  const box=document.getElementById('fq-use');
+  if(!box)return;
+  box.style.display='none';box.className='fq-use';
+  const c=(typeof _netCred==='function'&&_netCred())||null;
+  if(!c)return;
+  let d=null;
+  try{
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/haf_my_plan',{method:'POST',
+      headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify(c)});
+    if(!r.ok)return;
+    d=await r.json();
+  }catch(e){return}
+  if(!d||d.error||!d.counted)return;
+  const a=d.allowances||{},u=d.usage||{};
+  /* null in an allowance means unlimited — the same word the database uses. An
+     unlimited account is told nothing, because there is nothing to watch. */
+  const posts=a.posts_per_day,live=a.active_orders;
+  if(posts==null&&live==null)return;
+  const bits=[];
+  if(posts!=null)bits.push('<b>'+(u.posts_today||0)+' of '+posts+'</b> jobs posted today');
+  if(live!=null)bits.push('<b>'+(u.active_orders||0)+' of '+live+'</b> jobs running');
+  /* Amber when one is left, red when none is — the colour is doing the same job
+     the sentence does, for somebody scanning rather than reading. */
+  const left=n=>n==null?99:n;
+  const shortest=Math.min(
+    posts!=null?left(posts)-(u.posts_today||0):99,
+    live!=null?left(live)-(u.active_orders||0):99);
+  if(shortest<=0)box.classList.add('out');
+  else if(shortest===1)box.classList.add('low');
+  box.innerHTML='<span class="fq-use-lvl">'+(d.label||d.level)+'</span>'+bits.join(' &#183; ')
+    +(shortest<=0
+       ? '. That is your allowance for now &#8212; the daily one resets at midnight, and '
+         +'everything already running carries on as normal.'
+       : '.');
+  box.style.display='block';
 }
 /* Closing throws the whole consignment away and puts the customer back on the
    calculator. Past the first stage they have typed real work into it, so ask
@@ -6115,7 +6189,16 @@ function fqOrderPayload(){
     if(!el||!typed||addrIsPostcode(typed))return _v(addrId);
     return _v(addrId)||typed;
   };
+  /* WHO IS ORDERING. The credential this browser already holds, sent with the
+     order so the job belongs to the account that placed it — its own Live Load
+     board, its own allowance, its own responsibility trail. The server proves
+     it with the same call the sign-in screen makes; nothing here is taken on
+     trust. Nobody signed in sends nothing, which is a one-off customer and a
+     perfectly normal order. */
+  const cred=(typeof _apiCred==='function'&&_apiCred())||{};
   return{
+    username:cred.username||null, hash:cred.hash||null,
+    relay:cred.relay||null, cp:cred.cp||null,
     collect_mode:hoffMode('c'), deliver_mode:hoffMode('d'),
     collect_contact:_v('fq-cname'), collect_contact_phone:_v('fq-cphone'),
     deliver_contact:_v('fq-dname'), deliver_contact_phone:_v('fq-dphone'),

@@ -149,6 +149,47 @@ async function place(request, env) {
     });
   }
 
+  /* ── WHOSE ORDER IS THIS ──────────────────────────────────────────────────
+     Until now this screen recorded nobody. An order placed by a signed-in HAF
+     account looked exactly like one placed by a stranger, so the account's own
+     Live Load board never showed it, the affiliate trail had nowhere to hang,
+     and — since 10 Sep — the daily allowance had nothing to count.
+
+     The browser does not simply get to SAY who it is. The credential it sends
+     is the credential the sign-in screen took, checked by the same function, so
+     a person cannot post as somebody else and cannot post as nobody in order to
+     dodge their own allowance while signed in.
+
+     Nobody signed in is a normal, allowed case: the order screen is public and
+     a one-off customer has no account to name. They are counted as nothing
+     because there is nothing to count them against, not because they slipped
+     past something. */
+  const asking = await whoIsAsking(b).catch(() => null);
+  const postedBy = asking && asking.haf_username
+    ? String(asking.haf_username).toUpperCase()
+    : null;
+
+  /* ── AND MAY THEY? ────────────────────────────────────────────────────────
+     Deliberately AFTER the duplicate check above: a second press, a back button
+     or a retried request must never cost a second slot. And deliberately BEFORE
+     the order and the deposit below, which is the whole point — the customer is
+     told now, rather than charged now and refused later.
+
+     Nothing here touches tracking, payment, proof of delivery or completion. A
+     job already running is a promise, and a promise is not rationed. */
+  const gate = await askTheDoor(env, b, postedBy);
+  if (gate && gate.allowed === false) {
+    return json({
+      ok: false,
+      error: gate.message,
+      allowance: {
+        blocked_by: gate.blocked_by, level: gate.level, label: gate.label,
+        limit: (gate[gate.blocked_by === 'active_orders' ? 'active_order' : 'post_job'] || {}).limit,
+        used: (gate[gate.blocked_by === 'active_orders' ? 'active_order' : 'post_job'] || {}).used
+      }
+    }, 409);
+  }
+
   /* The free HAF KNECT account, opened quietly. No compliance and no checks —
      they are not driving. It exists so this person is a record we can find and
      contact, rather than an order floating on its own. */
@@ -189,6 +230,12 @@ async function place(request, env) {
     quote_detail: {
       ...q, from: leg.from, to: leg.to,
       consignment: b.consignment || null,
+      /* The account this order belongs to, proved above and never taken on the
+         browser's word. The pipeline that pushes paid orders to the network has
+         been reading this field since 8 Sep and finding nothing in it; it is
+         what puts the job on the account's own Live Load board, and what the
+         allowance counts. Null for a one-off customer with no account. */
+      posted_by: postedBy,
       direct_username: directUser,
       first_refusal_minutes: FIRST_REFUSAL_MINUTES,
       whatsapp_updates: Boolean(b.whatsapp_updates),
@@ -249,6 +296,107 @@ async function place(request, env) {
     pay_url: `${payBase(env)}/pay/${deposit.payment_reference}`,
     track_url: jobPage(request, token)
   });
+}
+
+/* ── HOW MUCH OF IT YOU MAY USE, ASKED BEFORE THE CARD ──────────────────────
+   Brent, 10 Sep: the dashboard is open to everyone and the account level only
+   limits HOW MUCH of it gets used.
+
+   The network already refuses to take a job past a level's allowance. But the
+   network only ever sees a job AFTER the holding deposit is paid, so a refusal
+   there is a refund, not an answer. This is the same question asked one step
+   earlier — at the button, before a penny moves.
+
+   The number the network cannot know
+   ----------------------------------
+   An order exists in haf-core from the moment it is placed and only reaches the
+   network once it is paid for. So the network's own count of "posted today" is
+   blind to every order still in flight. This worker is the only thing that can
+   see both sides, so it counts the in-flight ones here and hands that figure to
+   the network — which still makes the decision. One rule, in one place, asked
+   with a complete number instead of half of one.
+
+   Statuses: 'new' is placed and unpaid, 'deposit_held' is paid and not yet
+   pushed. 'on_network' and everything after it is already in the network's own
+   count, and 'cancelled' and 'refunded' are not work anybody is doing. */
+async function pendingFor(env, postedBy) {
+  if (!postedBy) return { posts_today: 0, active_orders: 0 };
+  const mine = 'quote_detail->>posted_by=eq.' + encodeURIComponent(postedBy)
+             + '&status=in.(new,deposit_held)';
+  const [postsToday, activeOrders] = await Promise.all([
+    coreCount(env, 'job_order', mine + '&created_at=gte.' + encodeURIComponent(dayStart())),
+    coreCount(env, 'job_order', mine)
+  ]);
+  return { posts_today: postsToday, active_orders: activeOrders };
+}
+
+/* "Your allowance resets at midnight" is a sentence the customer reads, so
+   midnight has to mean midnight where they are. The network counts its own half
+   from London midnight for the same reason; both halves of one number cannot be
+   measured from two different times. Returned as an instant, so British Summer
+   Time is handled by the clock rather than by an offset written down here. */
+/* London's clock, as numbers. hourCycle: 'h23' and not hour12: false — with
+   hour12: false several locales report midnight as hour "24" instead of "00",
+   which is enough on its own to put a day's allowance a day out. */
+function londonParts(instant) {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+  }).formatToParts(instant).reduce((a, p) => (a[p.type] = p.value, a), {});
+}
+
+/* How far ahead of UTC London is at a given instant, in milliseconds. */
+function londonOffsetMs(instant) {
+  const p = londonParts(instant);
+  return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second)
+       - Math.floor(instant.getTime() / 1000) * 1000;
+}
+
+function dayStart(now = new Date()) {
+  const p = londonParts(now);
+  /* Midnight on London's calendar date, read as if London were UTC, then pulled
+     back by London's real offset.
+     NOT "subtract however far into the day we are" — that was the first version
+     and it is wrong on the two Sundays a year when the day is 23 or 25 hours
+     long. On 29 March 2026 it put the start of the day an hour into the day
+     before, which would have handed a Free account a sixth post. Applying the
+     offset twice settles the clocks-change morning: the first pass lands near
+     the right instant, the second reads the offset that actually applies there. */
+  const asIfUtc = Date.UTC(+p.year, +p.month - 1, +p.day);
+  const near = asIfUtc - londonOffsetMs(new Date(asIfUtc));
+  return new Date(asIfUtc - londonOffsetMs(new Date(near))).toISOString();
+}
+
+/* The network's answer, with the in-flight orders included. Asked with the
+   credential the browser already holds — the same one the sign-in screen took —
+   so the order door can never be a softer door than the front one.
+
+   If this call fails we do NOT refuse the order. A limit that turns into an
+   outage when a database blinks costs Brent a delivery to save him nothing; the
+   network's own check is still there behind it and will catch a genuine
+   overrun before any job reaches a driver. */
+async function askTheDoor(env, body, postedBy) {
+  if (!postedBy) return null;
+  try {
+    const pending = await pendingFor(env, postedBy);
+    const r = await fetch(`${PLNA_URL}/rest/v1/rpc/haf_order_door`, {
+      method: 'POST',
+      headers: { apikey: PLNA_KEY, authorization: `Bearer ${PLNA_KEY}`, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        p_username: postedBy,
+        p_hash: body.hash || null,
+        p_relay: body.relay || null,
+        p_cp: body.cp || null,
+        p_pending: pending
+      })
+    });
+    if (!r.ok) return null;
+    const d = await r.json().catch(() => null);
+    return d && !d.error ? d : null;
+  } catch (_) {
+    return null;
+  }
 }
 
 /* HAF PAY owns the card page. This project holds no Stripe key and draws no
