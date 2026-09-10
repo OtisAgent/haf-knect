@@ -225,6 +225,12 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .sc-err{font-size:.7rem;color:var(--rd);margin:.3rem 0 .4rem;display:none}
 .sc-foot{font-size:.72rem;color:var(--mu);text-align:center;margin-top:.45rem;line-height:1.55}
 .sc-foot a{color:var(--haf-orange-ink)}
+/* The signed-in card that takes the login card's place — same width, same
+   chrome, so the column does not jump when one swaps for the other. */
+.sa-who{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
+.sa-av{flex:none;width:2rem;height:2rem;border-radius:50%;background:var(--haf-orange-ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.72rem;letter-spacing:.02em}
+.sa-nm{font-weight:800;font-size:.9rem;letter-spacing:-.01em;word-break:break-all}
+.sa-note{font-size:.72rem;color:var(--mu);line-height:1.55;margin:0 0 .7rem}
 /* The demo strip at the foot of the login card. Styled here rather than inline
    so the phone rule below can actually override it — an inline style would win
    and leave a divider floating on its own once the card around it is hidden. */
@@ -2069,6 +2075,19 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
           <a href="https://demo.usehaf.co.uk" target="_blank" class="btn btn-or btn-wide" style="display:inline-flex;align-items:center;justify-content:center;gap:.4rem;font-size:.72rem;text-decoration:none">Try a live demo →</a>
           <p style="margin:.45rem 0 0;font-size:.58rem;color:var(--mu)">No login needed · Driver, Freight &amp; Business views</p>
         </div>
+      </div>
+      <!-- ══ SIGNED IN ═══════════════════════════════════════════════════
+           What a member sees here instead of the login card above. Only one of
+           the two is ever on show, and hafSideAccount is the only thing that
+           decides. It carries no figures of its own — the allowance line inside
+           the form is the one place today's numbers are stated, so the two can
+           never disagree. -->
+      <div class="side-card" id="side-acct" style="display:none">
+        <div class="sc-title">Signed in</div>
+        <div class="sa-who"><span class="sa-av" id="sa-av">&#8212;</span><span class="sa-nm" id="sa-user">&#8212;</span></div>
+        <p class="sa-note">This consignment will be placed on your account.</p>
+        <button class="btn btn-or btn-wide" type="button" onclick="hafBackToApp()">Your dashboard &#8594;</button>
+        <p class="sc-foot"><a href="#" onclick="signOut();return false">Sign out</a></p>
       </div>
       <!-- ══ OTHER WAYS TO BOOK ══════════════════════════════════════════
            Brent, 14 Aug: the three ways to book sit under the login. Repeat and
@@ -5656,31 +5675,79 @@ function openFlow(type){
    Three cases are deliberately shown NOTHING: nobody signed in, an account on
    an unlimited level, and any answer we could not get. A row that says "plenty
    left" when the truth is unknown is worse than no row, because the customer
-   then believes it. */
+   then believes it.
+
+   WHY THE ANSWER IS KEPT
+   ---------------------
+   Asked of OUR OWN server, not the database directly. The database can only
+   count the jobs that have reached the network; an order placed ten minutes ago
+   and not yet paid for is invisible to it. Our server can see both, and it is
+   the same count the order door refuses on — so this row and the next press can
+   never disagree.
+
+   That answer costs a real wait, so it is kept for the session and drawn
+   straight away next time, while a fresh one is fetched behind it and redrawn
+   the moment it lands. Two rules make that safe: the kept answer is thrown away
+   the instant this person places an order (the only thing that routinely
+   changes it), and the number on the screen is never what decides anything —
+   the door decides, on the server, at the press. So the worst a kept answer can
+   do is be optimistic for under a second before it corrects itself, and it can
+   never let a job past a limit. */
+let _fqUse=null,_fqUseAt=0,_fqUseFor='',_fqUseFly=null;
+const FQ_USE_KEEP=600000;   /* ten minutes, then we would rather show nothing */
+function fqUsageForget(){_fqUse=null;_fqUseAt=0;_fqUseFor='';}
+/* One request at a time, whoever asks. Two panels opening together used to mean
+   two identical lookups racing each other. */
+function fqUsageAsk(){
+  const c=(typeof _apiCred==='function'&&_apiCred())||null;
+  if(!c)return Promise.resolve(null);
+  if(_fqUseFly)return _fqUseFly;
+  _fqUseFly=(async()=>{
+    try{
+      const r=await fetch('/api/order/allowance',{method:'POST',
+        headers:{'Content-Type':'application/json'},body:JSON.stringify(c)});
+      if(!r.ok)return null;
+      const d=await r.json();
+      _fqUse=d;_fqUseAt=Date.now();_fqUseFor=c.username;
+      return d;
+    }catch(e){return null}
+    finally{_fqUseFly=null}
+  })();
+  return _fqUseFly;
+}
+/* Fetched at sign-in, before anybody has asked to see it, so that opening the
+   form is instant rather than a wait. Nothing is drawn and nothing waits. */
+function fqUsageWarm(){try{fqUsageAsk();}catch(e){}}
+function fqUseKept(){
+  const c=(typeof _apiCred==='function'&&_apiCred())||null;
+  if(!c||!_fqUse)return null;
+  if(_fqUseFor!==c.username)return null;              /* somebody else's number */
+  return Date.now()-_fqUseAt<FQ_USE_KEEP?_fqUse:null;
+}
 async function fqPaintUsage(boxId){
   const box=document.getElementById(boxId||'fq-use');
   if(!box)return;
-  box.style.display='none';box.className='fq-use';
   const c=(typeof _apiCred==='function'&&_apiCred())||null;
-  if(!c)return;
-  /* Asked of OUR OWN server, not the database directly. The database can only
-     count the jobs that have reached the network; an order placed ten minutes
-     ago and not yet paid for is invisible to it. Our server can see both, and
-     it is the same count the order door refuses on — so this row and the next
-     press can never disagree. */
-  let d=null;
-  try{
-    const r=await fetch('/api/order/allowance',{method:'POST',
-      headers:{'Content-Type':'application/json'},body:JSON.stringify(c)});
-    if(!r.ok)return;
-    d=await r.json();
-  }catch(e){return}
-  if(!d||!d.ok||!d.signed_in||!d.counted)return;
+  if(!c){box.style.display='none';box.className='fq-use';return}
+  /* Instantly, from what we already know — then again from the fresh answer.
+     Deliberately NOT blanked first: hiding a correct row for a second to
+     replace it with the same row is the flicker, not the fix. */
+  const kept=fqUseKept();
+  if(kept)fqUseDraw(box,kept);
+  fqUseDraw(box,await fqUsageAsk());
+}
+function fqUseDraw(box,d){
+  if(!box)return;
+  /* An answer we could not get must not wipe a good row that is already up. */
+  if(!d)return;
+  box.className='fq-use';
+  const hide=()=>{box.style.display='none'};
+  if(!d.ok||!d.signed_in||!d.counted)return hide();
   const a=d.allowances||{},u=d.used||d.usage||{};
   /* null in an allowance means unlimited — the same word the database uses. An
      unlimited account is told nothing, because there is nothing to watch. */
   const posts=a.posts_per_day,live=a.active_orders;
-  if(posts==null&&live==null)return;
+  if(posts==null&&live==null)return hide();
   const bits=[];
   if(posts!=null)bits.push('<b>'+(u.posts_today||0)+' of '+posts+'</b> jobs posted today');
   if(live!=null)bits.push('<b>'+(u.active_orders||0)+' of '+live+'</b> jobs running');
@@ -6312,8 +6379,14 @@ async function fqBook(){
     const r=await fetch('/api/order/place',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify(fqOrderPayload())});
     d=await r.json();
+    /* Whatever happened next, today's figures are no longer the ones we hold —
+       so the kept answer goes, and the next form asks fresh. Done on the way
+       through the failure path too: a request that errored may still have
+       created the order. */
+    try{fqUsageForget();}catch(_){}
     if(!r.ok||!d||!d.ok)throw new Error((d&&d.error)||'We could not place that order just now.');
   }catch(e){
+    try{fqUsageForget();}catch(_){}
     btns.forEach(b=>{b.disabled=false;b.textContent='Confirm and book →';});
     fErr('fq-err-7',(e&&e.message)||'We could not place that order just now. Please try again, or call us.');
     return;
@@ -6497,7 +6570,13 @@ let _hafAcct=null;
 /* Exposed on window as well as here: the browser walk-through signs in as each
    account type through this exact door, so it tests the real path rather than a
    test-only shortcut that could drift from it. */
-function hafGo(u,k,t,acct){localStorage.setItem('knect-user',u);_hafCred={hash:t==='p'?null:k,relay:t==='p'?k:null};_hafAcct=acct||null;enterKnectApp(u,acct);}
+function hafGo(u,k,t,acct){localStorage.setItem('knect-user',u);_hafCred={hash:t==='p'?null:k,relay:t==='p'?k:null};_hafAcct=acct||null;
+  /* Two things that belong to being signed in rather than to any one screen:
+     the send page must stop offering a login box, and today's allowance is
+     fetched now so the booking form never has to wait for it. */
+  try{hafSideAccount();}catch(e){}
+  try{fqUsageWarm();}catch(e){}
+  enterKnectApp(u,acct);}
 /* ── WHO IS ACTUALLY ON THE SYSTEM ───────────────────────────────────────
    Nothing on HAF recorded a sign-in until now. The log table and the note
    function were built in August and never called, so the master overview
@@ -7859,11 +7938,46 @@ async function pinSave(){
     hafGo(hafPend.u,hafPend.hash,'w',hafPend.acct);
   }catch(e){hafErr(err,'Connection problem — please try again.');btn.textContent='Save PIN and continue';btn.disabled=false}
 }
-function goLanding(){document.getElementById('app').classList.remove('open');document.getElementById('landing').style.display='flex'}
+function goLanding(){document.getElementById('app').classList.remove('open');document.getElementById('landing').style.display='flex';try{hafSideAccount();}catch(e){}}
+/* ── WHO THE SEND PAGE THINKS YOU ARE ──────────────────────────────────────
+   "Back to send page" brings a signed-in member here, and the side column then
+   asked them to log in again — which reads like they have been signed out, on
+   the very screen where they are about to spend money. Exactly one of the two
+   cards is on show at any time, and this is the only thing that decides which.
+
+   Decided on the credential in memory, never on the username alone: a username
+   with no credential cannot post anything, so it is not signed in. */
+function hafSideAccount(){
+  const login=document.getElementById('side-login'),acct=document.getElementById('side-acct');
+  if(!login||!acct)return;
+  const u=(localStorage.getItem('knect-user')||'').toUpperCase();
+  const on=!!(u&&_hafCred);
+  login.style.display=on?'none':'';
+  acct.style.display=on?'':'none';
+  if(!on)return;
+  const demo=(typeof DEMO_ACCOUNTS!=='undefined'&&DEMO_ACCOUNTS[u])||null;
+  const nm=document.getElementById('sa-user'),av=document.getElementById('sa-av');
+  if(nm)nm.textContent=demo?demo.name:u;
+  if(av)av.textContent=(demo?demo.initials:u.slice(0,2)).toUpperCase();
+}
+/* The way back to the dashboard from the send page. closeInlineFlow asks before
+   it throws a part-written consignment away; if they choose to stay, we stay. */
+function hafBackToApp(){
+  const u=(localStorage.getItem('knect-user')||'').toUpperCase();
+  if(!u||!_hafCred)return;
+  try{closeInlineFlow();}catch(e){}
+  const flow=document.getElementById('inline-flow');
+  if(flow&&flow.style.display&&flow.style.display!=='none')return;
+  document.getElementById('landing').style.display='none';
+  document.getElementById('app').classList.add('open');
+}
 /* Signing out has to take the previous person's PLNA card off the screen with
    them. It carries their money and their work; leaving it up for whoever signs
    in next on the same machine would be showing one driver another's day. */
-function signOut(){localStorage.removeItem('knect-user');_hafCred=null;_hafAcct=null;window._hafAccView=null;_plnaAt=0;_affAt=0;try{hafPlnaPaint(true);}catch(e){}try{hafAffPaint(true);}catch(e){}hafSetSeed(false);goLanding();}
+function signOut(){localStorage.removeItem('knect-user');_hafCred=null;_hafAcct=null;window._hafAccView=null;_plnaAt=0;_affAt=0;
+  /* Their allowance goes with them. Whoever signs in next on the same machine
+     must never read the last person's figures, even for a moment. */
+  try{fqUsageForget();}catch(e){}try{hafPlnaPaint(true);}catch(e){}try{hafAffPaint(true);}catch(e){}hafSetSeed(false);goLanding();}
 /* EXCHANGE */
 let _xchOnline=true;
 let _xchActiveJob=null;

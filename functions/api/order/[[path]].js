@@ -408,13 +408,32 @@ async function askTheDoor(env, body, postedBy) {
    promise the next press breaks.
 
    So the page asks here instead, and here asks the same question /place asks,
-   through the same function, with the same in-flight count. One number. */
+   through the same function, with the same in-flight count. One number.
+
+   ONE SIGN-IN CHECK, NOT TWO
+   --------------------------
+   This used to call knect_auth first and then the order door, and the order
+   door starts by checking the very same credential itself (plna_cred_kind —
+   which is why it is safe for a browser to call at all). So the account was
+   proved twice, one after the other, and the customer waited through both. A
+   person opening the booking form sat looking at nothing for up to four
+   seconds.
+
+   The username now comes straight off the request and the door does the
+   proving, exactly as it does for /place. A wrong credential gets the same
+   answer it always did — the row is simply not shown — because askTheDoor
+   returns nothing when the door answers 'auth'. Nothing about anybody's plan
+   is returned without their own credential.
+
+   The one thing asked before the databases are touched: some credential has to
+   be present. A body with no PIN and no password hash cannot possibly be
+   signed in, so it is answered here rather than costing three lookups. */
 async function allowance(request, env) {
   if (!coreReady(env)) return bad('ordering is not switched on yet on this site', 503);
   const b = await request.json().catch(() => ({}));
-  const asking = await whoIsAsking(b).catch(() => null);
-  if (!asking || !asking.haf_username) return json({ ok: true, signed_in: false, counted: false });
-  const postedBy = String(asking.haf_username).toUpperCase();
+  const postedBy = String(b.username || '').trim().toUpperCase();
+  const hasCred = Boolean(b.hash || b.relay || b.cp);
+  if (!postedBy || !hasCred) return json({ ok: true, signed_in: false, counted: false });
   const gate = await askTheDoor(env, b, postedBy);
   if (!gate) return json({ ok: true, signed_in: true, counted: false });
   return json({
