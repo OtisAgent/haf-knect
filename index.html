@@ -8308,9 +8308,12 @@ function setSave(){
    comes back is drawn as it is: no pay figure is shown, because the board does
    not carry one and a number invented here would be a promise to a driver.
 
-   Claiming is NOT opened by this. The button appears only for an account the
-   Clever check has released; everybody else sees the work and is told, in one
-   line, what is still in the way. Seeing the network is not driving on it. */
+   Brent, 10 Sep: seeing the work now waits on the Clever release, same as
+   taking it. An account that has not been released is not shown the network's
+   work at all — it is told what opens it, and pointed at its own compliance
+   list. Signing in, their account and posting work are all untouched; it is
+   the NETWORK'S work that waits. (This reverses the 2 Sep position that a
+   driver could browse while their documents were in the queue. His call.) */
 async function hafJobsPaint(){
   const box=document.getElementById('dj-live');
   if(!box)return;
@@ -8329,9 +8332,10 @@ async function hafJobsPaint(){
 
      plna_exchange_visible proves who is asking and then returns the very same
      plna_exchange_board — one place decides what is open work, so this screen
-     and the driving site can never disagree about the same job. It answers for
-     a driver whose Clever checks are still in the queue too; TAKING the work is
-     a separate question, asked below and answered by the database. */
+     and the driving site can never disagree about the same job. Since 10 Sep it
+     also asks the clearance question: an unreleased account gets 'not_cleared'
+     and a sentence, never a job. The database decides that, not this screen, so
+     editing the page cannot open the board. */
   const cred=_netCred();
   if(!cred){
     box.innerHTML='<div class="aa-empty">Sign in again to see the open work on '+
@@ -8347,6 +8351,17 @@ async function hafJobsPaint(){
     /* A refusal comes back as an object, not a list. Treated as the failure it
        is rather than drawn as an empty board — "no work today" and "we could not
        ask" are different sentences and a driver plans differently on each. */
+    /* Waiting on the Clever release is not a fault and must never read like one.
+       The sentence is the database's, so this screen and the driving site tell a
+       driver the same thing on the same day. */
+    if(jobs&&!Array.isArray(jobs)&&jobs.error==='not_cleared'){
+      box.innerHTML='<div class="aa-empty">'+_esc(jobs.message||'Open work on the '+
+        'network appears here as soon as your Clever checks are released.')+
+        '<div style="margin-top:.75rem"><button class="btn btn-gh btn-sm" '+
+        'onclick="switchTab(\'pane-d-comp\')">See what’s outstanding →</button>'+
+        '</div></div>';
+      return;
+    }
     if(jobs&&!Array.isArray(jobs)&&jobs.error)throw new Error('board '+jobs.error);
   }catch(e){
     /* A board that cannot be read says so. It never falls back to a sample —
