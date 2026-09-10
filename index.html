@@ -21,7 +21,7 @@
 :root{
   /* DAY (default) */
   --bg:#f5f3ef;--p:#ffffff;--p2:#f0ede8;--p3:#e8e3db;
-  --tx:#1a1e22;--mu:#6b7580;--su:#9aa3ad;
+  --tx:#1a1e22;--mu:#545c63;--su:#5a646e;
   --ln:rgba(26,30,34,.1);--lns:rgba(26,30,34,.18);
   --or:#f18e00;--or-d:rgba(241,142,0,.1);--or-g:rgba(241,142,0,.28);
   --gn:var(--gn, #4f7f58);--gn-d:rgba(45,171,96,.1);
@@ -36,7 +36,7 @@
 }
 [data-theme=dark]{
   --bg:#0e1113;--p:#171a1d;--p2:#1e2226;--p3:#252b30;
-  --tx:#f0edea;--mu:#8a9298;--su:#4f5a62;
+  --tx:#f0edea;--mu:#a9b0b4;--su:#8f989f;
   --ln:rgba(240,237,234,.08);--lns:rgba(240,237,234,.16);
   --sd:0 1px 4px rgba(0,0,0,.3),0 2px 12px rgba(0,0,0,.25);
   --sd-h:0 4px 24px rgba(0,0,0,.45);
@@ -48,7 +48,7 @@ ul{list-style:none}a{color:var(--haf-orange-ink);text-decoration:none}
 button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none;background:none;cursor:pointer}
 
 /* ── VERSION ─── */
-.vbadge{position:fixed;bottom:14px;right:14px;z-index:9999;background:var(--or);color:#fff;font-family:var(--dp);font-weight:900;font-size:.6rem;letter-spacing:.08em;padding:.18rem .5rem;border-radius:var(--pill);pointer-events:none}
+.vbadge{position:fixed;bottom:14px;right:14px;z-index:9999;background:var(--or);color:var(--haf-on-orange, #2f373e);font-family:var(--dp);font-weight:900;font-size:.6rem;letter-spacing:.08em;padding:.18rem .5rem;border-radius:var(--pill);pointer-events:none}
 
 /* ── SHARED OVERLAY SHELL (the direct-book panel uses it; the demo-request
       form that named it was removed 14 Aug) ── */
@@ -66,7 +66,7 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 
 /* ── BUTTONS ── */
 .btn{display:inline-flex;align-items:center;gap:.35rem;font-weight:800;font-size:.88rem;letter-spacing:.01em;border-radius:var(--pill);padding:.55rem 1.35rem;transition:all .14s;cursor:pointer;line-height:1;white-space:nowrap}
-.btn-or{background:var(--or);color:#fff;box-shadow:0 4px 16px var(--or-g)}
+.btn-or{background:var(--or);color:var(--haf-on-orange, #2f373e);box-shadow:0 4px 16px var(--or-g)}
 .btn-or:hover{filter:brightness(1.07);transform:translateY(-1px)}
 .btn-gh{background:transparent;color:var(--tx);border:1.5px solid var(--lns)}
 .btn-gh:hover{background:var(--ln)}
@@ -80,7 +80,7 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 /* NAV */
 .land-nav{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.8rem;background:var(--p);border-bottom:1px solid var(--ln)}
 .llogo{display:flex;align-items:center;gap:.5rem;text-decoration:none}
-.llogo-m{width:30px;height:30px;background:var(--or);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:.9rem;color:#fff}
+.llogo-m{width:30px;height:30px;background:var(--or);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:.9rem;color:var(--haf-on-orange, #2f373e)}
 .llogo-t{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em;color:var(--tx);white-space:nowrap}
 .llogo-t span{color:var(--haf-orange-ink)}
 .nav-r{display:flex;align-items:center;gap:.5rem}
@@ -231,7 +231,7 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 /* --or, deliberately. Much of this page reaches for --haf-orange-ink, which
    nothing on the live site actually defines — so it falls back, and here that
    meant white initials on a white circle. */
-.sa-av{flex:none;width:2rem;height:2rem;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.72rem;letter-spacing:.02em}
+.sa-av{flex:none;width:2rem;height:2rem;border-radius:50%;background:var(--or);color:var(--haf-on-orange, #2f373e);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.72rem;letter-spacing:.02em}
 .sa-nm{font-weight:800;font-size:.9rem;letter-spacing:-.01em;word-break:break-all}
 .sa-note{font-size:.72rem;color:var(--mu);line-height:1.55;margin:0 0 .7rem}
 .nd-narrow{display:none}
@@ -274,7 +274,7 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
    the right of a phone screen — which it did, on production, before this. */
 .tb-l{display:flex;align-items:center;gap:.8rem;min-width:0}
 .tlogo{display:flex;align-items:center;gap:.45rem;text-decoration:none}
-.tlogo-m{width:26px;height:26px;background:var(--or);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:.82rem;color:#fff}
+.tlogo-m{width:26px;height:26px;background:var(--or);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;font-size:.82rem;color:var(--haf-on-orange, #2f373e)}
 .tlogo-t{font-family:var(--dp);font-weight:900;font-size:.92rem;letter-spacing:-.04em;color:var(--tx)}
 .tlogo-t span{color:var(--haf-orange-ink)}
 .menu-btn{display:none;width:30px;height:30px;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln);align-items:center;justify-content:center;color:var(--mu);cursor:pointer}
@@ -285,7 +285,7 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .role-chip{font-size:.64rem;font-weight:700;letter-spacing:.06em;padding:.13rem .5rem;border-radius:var(--pill);text-transform:uppercase}
 .ib{width:28px;height:28px;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;color:var(--mu);transition:all .14s;cursor:pointer}
 .ib:hover{color:var(--tx);background:var(--p3)}
-.av{width:28px;height:28px;border-radius:50%;background:var(--or);color:#fff;font-size:.65rem;font-weight:800;font-family:var(--dp);display:flex;align-items:center;justify-content:center}
+.av{width:28px;height:28px;border-radius:50%;background:var(--or);color:var(--haf-on-orange, #2f373e);font-size:.65rem;font-weight:800;font-family:var(--dp);display:flex;align-items:center;justify-content:center}
 
 /* SIDEBAR */
 .app-body{display:flex;flex:1;min-height:calc(100vh - var(--tb))}
@@ -296,7 +296,7 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .ni:hover{background:var(--ln);color:var(--tx)}
 .ni.on{background:var(--or-d);color:var(--haf-orange-ink);font-weight:700}
 .ni-ic{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.nb{margin-left:auto;background:var(--or);color:#fff;font-size:.56rem;font-weight:800;padding:.06rem .36rem;border-radius:var(--pill)}
+.nb{margin-left:auto;background:var(--or);color:var(--haf-on-orange, #2f373e);font-size:.56rem;font-weight:800;padding:.06rem .36rem;border-radius:var(--pill)}
 .sdiv{border:none;border-top:1px solid var(--ln);margin:.4rem .85rem}
 .sb-bot{margin-top:auto;padding:.35rem}
 /* ── DASHBOARD V1 SHELL (Brent's override document, 14 Aug 2026) ──
@@ -710,7 +710,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .van-pills{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
 .vp{background:var(--p2);border:1.5px solid var(--ln);border-radius:var(--pill);padding:.45rem .9rem;font-size:.8rem;font-weight:700;color:var(--mu);cursor:pointer;transition:all .14s;flex:1;min-width:80px;text-align:center;line-height:1.35}
 .vp:hover{border-color:var(--haf-orange-ink);color:var(--tx)}
-.vp.sel{background:var(--or);border-color:var(--haf-orange-ink);color:#fff}
+.vp.sel{background:var(--or);border-color:var(--haf-orange-ink);color:var(--haf-on-orange, #2f373e)}
 .vp-sub{font-size:.62rem;font-weight:400;color:var(--su);display:block}
 .vp.sel .vp-sub{color:rgba(14,17,19,.65)}
 /* A van that cannot take what the customer has told us — still choosable, but
@@ -868,7 +868,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .owb-c{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:1.1rem 1.15rem 1rem;box-shadow:var(--sd);transition:all .17s;position:relative}
 .owb-c.live{cursor:pointer}
 .owb-c.live:hover{border-color:var(--haf-orange-ink);transform:translateY(-2px);box-shadow:var(--sd-h)}
-.owb-c.soon{opacity:.72}
+.owb-c.soon{opacity:1}  /* the "Soon" pill says it; a fade only made it unreadable */
 .owb-ico{width:30px;height:30px;border-radius:var(--rx);background:var(--or-d);display:flex;align-items:center;justify-content:center;margin-bottom:.6rem}
 .owb-ico svg{width:14px;height:14px;stroke:var(--or);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .owb-h{font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.03em;margin-bottom:.25rem}
@@ -920,7 +920,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .wtb-c{display:flex;gap:.65rem;align-items:stretch;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.6rem .8rem;text-align:left;width:100%;font:inherit;color:inherit;transition:background .15s,border-color .15s;position:relative}
 .wtb-c.live{cursor:pointer}
 .wtb-c.live:hover{background:var(--p3);border-color:var(--haf-orange-ink)}
-.wtb-c.soon{opacity:.7;cursor:default}
+.wtb-c.soon{opacity:1;cursor:default}  /* same: the pill carries the meaning */
 .wtb-ico{align-self:flex-start;width:26px;height:26px;border-radius:var(--rx);background:var(--or-d);display:flex;align-items:center;justify-content:center;flex:none;margin-top:.05rem}
 .wtb-ico svg{width:13px;height:13px;stroke:var(--or);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .wtb-c.soon .wtb-ico{background:var(--p3)}
@@ -1059,7 +1059,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 
 /* Money-flow card: customer -> HAF -> driver, in that order, always. */
 .dc-flow{display:flex;align-items:stretch;gap:.4rem;flex-wrap:wrap;margin:.15rem 0 .3rem}
-.dc-fl{flex:1 1 130px;background:var(--pl);border:1px solid var(--lns);border-radius:10px;padding:.6rem .65rem}
+.dc-fl{flex:1 1 130px;background:var(--p2);border:1px solid var(--lns);border-radius:10px;padding:.6rem .65rem}
 .dc-fl-l{font-size:.63rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mu);margin-bottom:.25rem}
 .dc-fl-v{font-family:var(--dp);font-weight:900;font-size:1.15rem;letter-spacing:-.03em}
 .dc-fl-d{font-size:.64rem;color:var(--mu);margin-top:.2rem;line-height:1.4}
@@ -1107,7 +1107,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 #dash-map .leaflet-container{background:var(--p3, #e9e5dd)}
 .leaflet-container{background:#0a1a2b}
 .cap-role{border:none;background:transparent;color:var(--mu);font-weight:800;font-size:.74rem;padding:.32rem .8rem;border-radius:18px;cursor:pointer;transition:all .14s;white-space:nowrap}
-.cap-role.on{background:var(--or);color:#fff}
+.cap-role.on{background:var(--or);color:var(--haf-on-orange, #2f373e)}
 .cap-back{position:absolute;top:10px;left:10px;z-index:1000;background:rgba(14,17,19,.86);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:18px;padding:.34rem .7rem;font-size:.7rem;font-weight:700;cursor:pointer;display:none;align-items:center;gap:.3rem;backdrop-filter:blur(4px)}
 /* Region overview card that floats over the map on hover — the map reads as an overview at a glance */
 .cap-tip{background:rgba(14,17,19,.92)!important;border:1px solid rgba(255,255,255,.16)!important;border-radius:12px!important;box-shadow:0 6px 22px rgba(0,0,0,.45)!important;padding:0!important;color:#fff!important;backdrop-filter:blur(6px)}
@@ -1335,7 +1335,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .dmsw{display:inline-flex;align-items:center;gap:0;background:var(--p2);border:1px solid var(--lns);border-radius:var(--pill);padding:2px}
 .dmsw-b{font-family:var(--fn);font-size:.62rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mu);background:none;border:0;border-radius:var(--pill);padding:.22rem .62rem;cursor:pointer;transition:background .14s,color .14s;white-space:nowrap}
 .dmsw-b:hover{color:var(--tx)}
-.dmsw-b.on{background:var(--or);color:#fff}
+.dmsw-b.on{background:var(--or);color:var(--haf-on-orange, #2f373e)}
 #dash-basic-focus{display:none;background:var(--p);border:1.5px solid var(--or-g);border-radius:var(--r);padding:1rem 1.1rem;margin-bottom:.9rem}
 .dbf-k{font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--haf-orange-ink);margin-bottom:.35rem}
 .dbf-route{font-size:1.12rem;font-weight:800;color:var(--tx);line-height:1.25;margin-bottom:.15rem}
@@ -1359,10 +1359,10 @@ textarea.fi2{resize:vertical;min-height:70px}
 .rr-hd{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.25rem}
 .rr-k{font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--haf-orange-ink)}
 .rr-tier{font-size:.55rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.1rem .45rem;border-radius:var(--pill);border:1px solid var(--lns);color:var(--mu)}
-.rr-tier.pro{background:var(--or);border-color:var(--haf-orange-ink);color:#fff}
+.rr-tier.pro{background:var(--or);border-color:var(--haf-orange-ink);color:var(--haf-on-orange, #2f373e)}
 .rr-demo{margin-left:auto;display:flex;align-items:center;gap:.3rem}
 .rr-demo .dmsw-b{font-size:.55rem;padding:.16rem .5rem;border:1px solid var(--lns);border-radius:var(--pill);background:var(--p2)}
-.rr-demo .dmsw-b.on{background:var(--or);border-color:var(--haf-orange-ink);color:#fff}
+.rr-demo .dmsw-b.on{background:var(--or);border-color:var(--haf-orange-ink);color:var(--haf-on-orange, #2f373e)}
 .rr-sub{font-size:.75rem;color:var(--mu);margin-bottom:.75rem;line-height:1.5}
 .rr-item{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;padding:.6rem 0;border-top:1px solid var(--ln)}
 .rr-rt{font-weight:800;font-size:.9rem;color:var(--tx)}
@@ -1452,7 +1452,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 .hv-b{font-size:.62rem;font-weight:700;padding:.24rem .55rem;border-radius:var(--pill);
   border:1px solid var(--ln);background:var(--p);color:var(--mu);cursor:pointer;transition:all .14s}
 .hv-b:hover{color:var(--tx);border-color:var(--lns)}
-.hv-b.on{background:var(--or);border-color:var(--haf-orange-ink);color:#fff}
+.hv-b.on{background:var(--or);border-color:var(--haf-orange-ink);color:var(--haf-on-orange, #2f373e)}
 .hv-bar-sp{flex:1 1 auto}
 .hv-b.hv-bl.on{background:var(--tx);border-color:var(--tx);color:var(--p)}
 
@@ -1520,7 +1520,15 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 .pj-open-w{display:flex;flex-direction:column;gap:.1rem;min-width:0}
 .pj-open-t{font-family:var(--dp);font-weight:800;font-size:.84rem;letter-spacing:-.02em}
 .pj-open-s{font-size:.72rem;color:var(--mu);line-height:1.4}
-.pj-open-x{margin-left:auto;color:var(--or);font-weight:800}
+.pj-open-x{margin-left:auto;color:var(--haf-orange-ink);font-weight:800}
+.pj-ask{margin-top:.5rem;padding:.6rem .7rem;border:1px dashed var(--ln);border-radius:var(--rs);
+  display:flex;flex-direction:column;gap:.5rem;background:var(--p2)}
+.pj-ask-t{font-size:.72rem;color:var(--mu);line-height:1.5}
+.pj-ask-t strong{color:var(--tx)}
+.pj-ask-r{display:flex;gap:.4rem;flex-wrap:wrap}
+.pj-ask-p{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.68rem;
+  line-height:1.55;color:var(--tx);background:var(--bg);border:1px solid var(--ln);border-radius:var(--rs);
+  padding:.65rem .75rem;margin:0;max-height:16rem;overflow:auto}
 .pj-body{border:1px solid var(--ln);border-radius:var(--rs);background:var(--p2);padding:.9rem .95rem;margin-top:.55rem}
 .pj-h{font-family:var(--dp);font-weight:900;font-size:.95rem;letter-spacing:-.03em;margin-bottom:.4rem}
 .pj-h2{margin-top:.9rem}
@@ -3165,6 +3173,15 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         <div id="mb-feats"></div>
       </div>
 
+      <!-- MY PLAN & BILLING — the member's own money screen. Everything on it
+           is read from their membership record; nothing here is illustrative,
+           and nothing here can raise a plan on its own. -->
+      <div class="tp" id="pane-myplan">
+        <h1 class="pt">My Plan &amp; Billing</h1>
+        <p class="ps">Your plan, what it costs and when you next pay. Change it or stop it whenever you like &#8212; your account and everything on it stays either way.</p>
+        <div id="mp-body"><div class="card"><div class="cr"><span class="ck">Loading your plan&#8230;</span></div></div></div>
+      </div>
+
       <!-- SETTINGS — document §16: account configuration, not operational
            work, and deliberately NOT a second place to manage documents.
            Compliance lives in Compliance &amp; Documents and only there. -->
@@ -3659,7 +3676,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <div class="pl-f">Card or CleverPay prepayment before release to the network</div>
               <div class="pl-f">Job status, allocation, delivery updates and POD history</div>
               <div class="pl-f">Fair job matching &mdash; the best-placed driver wins the load, whatever you pay us</div>
-              <div class="pl-f" style="opacity:.45">Groupage <span style="opacity:.55;font-size:.9em">coming soon</span></div>
+              <div class="pl-f" style="opacity:.75">Groupage <span style="font-size:.9em">coming soon</span></div>
               <div class="pl-f" style="opacity:.45">Post up to 10 loads a day</div>
               <div class="pl-f" style="opacity:.45">Saved clients, addresses and load templates</div>
               <div class="pl-f" style="opacity:.45">Searchable history, reporting and exports</div>
@@ -3701,7 +3718,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <div class="pl-f">Custom branded booking experience for your own clients</div>
               <div class="pl-f">Dedicated account support</div>
               <div class="pl-f">JAKO AI for freight operations, insight and a weekly exception report</div>
-              <div class="pl-f" style="opacity:.45">Bulk posting and import tools <span style="opacity:.55;font-size:.9em">coming soon</span></div>
+              <div class="pl-f" style="opacity:.75">Bulk posting and import tools <span style="font-size:.9em">coming soon</span></div>
             </div>
             <button class="btn btn-gh btn-sm btn-wide">Upgrade to Pro</button>
           </div>
@@ -3780,7 +3797,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
                  background:var(--p2);color:var(--mu);font-size:.78rem;font-weight:700;
                  cursor:pointer;transition:.15s}
         .fm-room:hover{color:var(--tx)}
-        .fm-room.on{background:var(--haf-orange);border-color:var(--haf-orange);color:#fff}
+        .fm-room.on{background:var(--haf-orange);border-color:var(--haf-orange);color:var(--haf-on-orange, #2f373e)}
         .fm-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:1rem;align-items:start}
         @media(max-width:860px){.fm-cols{grid-template-columns:1fr}}
         .fm-item{border:1px solid var(--ln);border-radius:var(--rx);background:var(--p);
@@ -3823,7 +3840,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
            so a member can catch up in one scroll without the newest item being
            lost among ten older ones. */
         .an-head{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
-        .an-new{background:var(--haf-orange);color:#fff;border-radius:999px;padding:.05rem .45rem;
+        .an-new{background:var(--haf-orange);color:var(--haf-on-orange, #2f373e);border-radius:999px;padding:.05rem .45rem;
                 font-size:.66rem;font-weight:800;letter-spacing:.03em;margin-left:.35rem}
         .an-lead{border:1px solid var(--or-g);border-left:3px solid var(--haf-orange);
                  background:var(--or-d);border-radius:var(--rx);padding:1rem 1.1rem;margin-bottom:.9rem}
@@ -6002,7 +6019,15 @@ function pjParse(text, bands, now) {
   if (!r.dPhone) r.missing.push('a phone number at delivery');
 
   /* How much there is, and of what. */
-  const qm = raw.match(/\b([0-9]{1,3})\s*(?:x\s*)?(pallets?|roll\s?cages?|cages?|crates?|cartons?|boxes|box|bags?|sacks?|drums?|totes?|items?|pieces?|pcs?|furniture[a-z\s]{0,10})\b/i);
+  let qm = raw.match(/\b([0-9]{1,3})\s*(?:x\s*)?(pallets?|roll\s?cages?|cages?|crates?|cartons?|boxes|box|bags?|sacks?|drums?|totes?|items?|pieces?|pcs?|furniture[a-z\s]{0,10})\b/i);
+  /* A count the sender labelled but did not name — "How many: 3" off our own
+     template. Read as loose items, which is what the review list then shows
+     them, so a pallet count written that way is corrected by the customer
+     rather than assumed by us. */
+  if (!qm) {
+    const lq = raw.match(/^[ \t]*how\s+many[^:\n]{0,24}[:\-][ \t]*([0-9]{1,3})[ \t]*$/im);
+    if (lq) qm = [lq[0], lq[1], 'items'];
+  }
   if (qm) {
     r.qty = +qm[1];
     const w = PJ_UNIT_W.find(u => u.re.test(qm[2]));
@@ -6011,7 +6036,13 @@ function pjParse(text, bands, now) {
   } else r.missing.push('how many items there are');
 
   /* How heavy. Only ever from a figure the text really gives. */
-  const wm = raw.match(/(?:^|[^a-z0-9.])([0-9]{1,4}(?:\.[0-9]+)?)\s*(kgs?|kilos?|kilograms?|tonnes?|tons?|te|t)(?![a-z])/i);
+  let wm = raw.match(/(?:^|[^a-z0-9.])([0-9]{1,4}(?:\.[0-9]+)?)\s*(kgs?|kilos?|kilograms?|tonnes?|tons?|te|t)(?![a-z])/i);
+  /* A weight the sender labelled and left the unit off — "Total weight: 300".
+     Kilos, because kilos is what the label asked for. */
+  if (!wm) {
+    const lw = raw.match(/^[ \t]*(?:total\s+weight|gross\s+weight|weight)[^:\n]{0,18}[:\-][ \t]*([0-9]{1,5}(?:\.[0-9]+)?)[ \t]*$/im);
+    if (lw) wm = [lw[0], lw[1], 'kg'];
+  }
   if (wm) {
     const n = parseFloat(wm[1]);
     const u = wm[2].toLowerCase();
@@ -6041,7 +6072,7 @@ function pjParse(text, bands, now) {
   /* What the goods are, in the sender's own words. */
   let goods = '';
   for (let i = 0; i < lines.length; i++) {
-    const m = lines[i].match(/^\s*(?:goods|load|consignment|description|items?|what)\s*[:\-]\s*(.+)$/i);
+    const m = lines[i].match(/^\s*(?:goods|load|consignment|description|items?|what)(?:\s*\([^)\n]{0,40}\))?\s*[:\-]\s*(.+)$/i);
     if (m) { goods = m[1].trim(); break; }
   }
   if (!goods && qm) {
@@ -6072,10 +6103,22 @@ function pjParse(text, bands, now) {
   lines.forEach((ln, i) => {
     if (!/fork[\s\-]?lift|fork truck/i.test(ln)) return;
     forkSaid = true;
-    const side = /collect|pick|load/i.test(ln) ? 'c' : (/deliver|drop|unload/i.test(ln) ? 'd' : sides[i]);
-    if (side === 'c' && r.reqs.indexOf('forkc') < 0) r.reqs.push('forkc');
-    else if (side === 'd' && r.reqs.indexOf('forkd') < 0) r.reqs.push('forkd');
-    else r.notes.push(ln.trim());
+    /* One line often names both ends, so each clause is read on its own.
+       A clause that denies a forklift is not a request for one, and
+       "unloading" is a delivery word, never a loading one, even though it
+       contains "loading". A clause that settles nothing passes through as a
+       note for the driver rather than a guessed site. */
+    ln.split(/[,;]|\band\b|\bso\b|\bbut\b/i).forEach(cl => {
+      if (!/fork[\s\-]?lift|fork truck/i.test(cl)) return;
+      if (/\b(?:no|not|without|none|non)\b/i.test(cl)) return;
+      const noUn = cl.replace(/unload(?:ing)?/gi, ' ');
+      const fD = /unload|deliver|drop|consignee|receiver/i.test(cl);
+      const fC = /collect|pick|load|depot|sender|consignor/i.test(noUn);
+      const side = (fC && !fD) ? 'c' : ((fD && !fC) ? 'd' : sides[i]);
+      if (side === 'c' && r.reqs.indexOf('forkc') < 0) r.reqs.push('forkc');
+      else if (side === 'd' && r.reqs.indexOf('forkd') < 0) r.reqs.push('forkd');
+      else if (!side) r.notes.push(ln.trim());
+    });
   });
   r.forkSaid = forkSaid;
 
@@ -6114,7 +6157,7 @@ function pjParse(text, bands, now) {
 
   /* Anything else the driver needs to know, in the sender's own words. */
   lines.forEach((ln, i) => {
-    const m = ln.match(/^\s*(?:notes?|instructions?|access|please note|nb)\s*[:\-]\s*(.+)$/i);
+    const m = ln.match(/^\s*(?:notes?|instructions?|access|please note|nb)(?:\s*\([^)\n]{0,40}\))?\s*[:\-]\s*(.+)$/i);
     if (m) r.notes.push(m[1].trim());
   });
   r.notes = r.notes.filter((n, i, a) => n && a.indexOf(n) === i).slice(0, 4);
@@ -6128,6 +6171,11 @@ function pjParse(text, bands, now) {
   if (nm) r.reqName = nm[1].trim();
   if (!r.reqName) {
     nm = raw.match(/\b(?:kind regards|many thanks|best regards|regards|thanks|cheers|best wishes|yours)\b[,!.\t ]*\n+[ \t]*([A-Z][a-z'’\-]+(?:[ \t]+[A-Z][a-z'’\-]+){0,2})/i);
+    if (nm) r.reqName = nm[1].trim();
+  }
+  /* Or written on its own line, which is how our template asks for it. */
+  if (!r.reqName) {
+    nm = raw.match(/^[ \t]*(?:your name|requested by|raised by|ordered by|booked by)[ \t]*[:\-][ \t]*([A-Za-z][A-Za-z'’\-]{1,}(?:[ \t]+[A-Za-z'’\-]{2,}){0,2})[ \t]*$/im);
     if (nm) r.reqName = nm[1].trim();
   }
   return r;
@@ -6149,6 +6197,13 @@ function pjHTML(s) {
     + '<span class="pj-open-w"><span class="pj-open-t">Got the job in an email? Paste it in</span>'
     + '<span class="pj-open-s">We read it and fill this form in for you &#8212; no retyping</span></span>'
     + '<span class="pj-open-x">&#8594;</span></button>'
+    + '<div class="pj-ask"><span class="pj-ask-t"><strong>Waiting on the details?</strong> '
+    + 'Copy the short list of what a driver needs, email it to whoever wants the delivery, '
+    + 'then paste their reply straight back in above.</span>'
+    + '<span class="pj-ask-r">'
+    + '<button class="btn btn-or btn-sm" type="button" id="pj-cp-' + s + '" onclick="pjCopy(\'' + s + '\')">Copy what we need</button>'
+    + '<button class="btn btn-gh btn-sm" type="button" onclick="pjSee(\'' + s + '\')">See it first</button>'
+    + '</span><pre class="pj-ask-p" id="pj-ask-p-' + s + '" style="display:none"></pre></div>'
     + '<div class="pj-body" id="pj-body-' + s + '" style="display:none">'
     + '<div class="pj-h">Paste the job in</div>'
     + '<p class="pj-p">The whole email, a WhatsApp message, or a note to yourself &#8212; however it was sent to you. '
@@ -6170,6 +6225,96 @@ function pjHTML(s) {
     + '<button class="btn btn-gh btn-sm" type="button" onclick="pjBack(\'' + s + '\')">&#8592; Edit what I pasted</button>'
     + '</div></div></div>';
 }
+/* ── WHAT WE NEED, AS AN EMAIL THEY CAN SEND ────────────────────────────
+   The other half of the paste box. Someone who has not been sent the details
+   yet copies this, emails it to whoever wants the delivery, and pastes the
+   reply back into the box above — so the round trip finishes where it started.
+
+   Two rules held it to this length. Every heading is one the reader on this
+   page already understands, so a returned template reads itself in with no
+   retyping. And nothing is asked for that a driver could manage without: this
+   is the list you cannot arrive at a door without, not a form. */
+const PJ_ASK = [
+  'Subject: Delivery request',
+  '',
+  'Hello,',
+  '',
+  'So we can price this and book it in, please fill in what you can under each',
+  'heading and send it back. Full addresses with postcodes, and a mobile at',
+  'each end, are the two we cannot manage without.',
+  '',
+  'COLLECTION',
+  'Address:',
+  'Contact:',
+  'Mobile:',
+  'Ready from:',
+  'Anything needed to load it:',
+  '',
+  'DELIVERY',
+  'Address:',
+  'Contact:',
+  'Mobile:',
+  'Deliver before:',
+  'Anything needed to unload it:',
+  '',
+  'THE LOAD',
+  'Goods:',
+  'How many and of what:',
+  'Total weight:',
+  'Largest item:',
+  '',
+  'YOU',
+  'Your name:',
+  'Your email:',
+  'Notes:',
+  '',
+  'Thank you.'
+].join('\n');
+
+/* Show it on the page. Forced open when the clipboard has refused us, because
+   a button that appears to do nothing is worse than no button. */
+function pjSee(s, force) {
+  const p = _pjE('pj-ask-p-' + s);
+  if (!p) return;
+  const shut = p.style.display === 'none';
+  if (shut || force) { p.textContent = PJ_ASK; p.style.display = 'block'; }
+  else p.style.display = 'none';
+}
+
+function pjCopy(s) {
+  const btn = _pjE('pj-cp-' + s);
+  const said = ok => {
+    if (!ok) pjSee(s, true);
+    if (!btn) return;
+    const was = btn.getAttribute('data-w') || btn.textContent;
+    btn.setAttribute('data-w', was);
+    btn.textContent = ok ? 'Copied \u2014 paste it into your email' : 'Copy it from below';
+    setTimeout(() => { btn.textContent = was; }, 2600);
+  };
+  /* The clipboard is refused outright on some phones and inside some in-app
+     browsers, so a refusal puts the text on the page to be selected by hand
+     instead of failing quietly. */
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(PJ_ASK).then(() => said(true), () => said(false));
+      return;
+    }
+  } catch (e) { }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = PJ_ASK;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '-2000px';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, PJ_ASK.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    said(!!ok);
+  } catch (e) { said(false); }
+}
+
 function pjMount() {
   PJ_SLOTS.forEach(s => {
     const el = document.querySelector('[data-pj="' + s + '"]');
@@ -9147,6 +9292,10 @@ const HAF_NAV_V1=[
   {g:'ACCOUNT', id:'membership', l:'Account &amp; Plan', ico:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
    tabs:[
     {id:'membership',l:'What my account includes'},
+    /* Brent, 10 Sep: upgrading, downgrading and cancelling must be reachable
+       from the sidebar, simply. Its own row, named for what a person comes
+       here to do, rather than buried in the features list above. */
+    {id:'myplan',    l:'My Plan &amp; Billing'},
     {id:'team',      l:'Team Members',          need:'team'},
     {id:'b-usage',   l:'Usage &amp; Activity', need:'post'},
     {id:'f-account', l:'Account Controls',     need:'freight'},
@@ -9564,6 +9713,176 @@ function mbRender(){
         soon.map(r=>li(r.text,'<span class="cv"><span class="chip cb">Coming soon</span></span>')).join('')+'</div>';
   ft.innerHTML=h;
 }
+
+/* ── MY PLAN & BILLING ────────────────────────────────────────────────────
+   Brent, 10 Sep: members change their own plan from the sidebar — upgrade,
+   downgrade, cancel, at any time. Prices are PLUS 25 and PRO 100 a month, the
+   member picks the 1st or the 15th, an upgrade pays the part month now and the
+   full amount from that day on, and a mid-month move pays only the difference
+   for the days left.
+
+   Not one of those figures is written in this file. They all arrive from
+   knect_membership_get, which reads the prices out of the plan table, so the
+   page cannot fall out of step with what the account is actually charged.
+
+   The one rule this screen exists to keep: NOTHING here raises a plan. Down,
+   off and back on are done in the database; up goes through the checkout,
+   because only a cleared payment may move somebody up. */
+let _mp=null,_mpBusy=false;
+
+function _mpMoney(p){
+  if(p==null)return '';
+  return '£'+(p/100).toFixed(2).replace(/\.00$/,'');
+}
+function _mpDate(d){
+  if(!d)return '';
+  const t=new Date(d+'T00:00:00');
+  if(isNaN(t))return '';
+  return t.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+}
+async function _mpRpc(fn,extra){
+  const u=(localStorage.getItem('knect-user')||'').toUpperCase();
+  if(!u||!_hafCred)return null;
+  const body=Object.assign({p_username:u,p_hash:_hafCred.hash,p_relay:_hafCred.relay},extra||{});
+  const r=await fetch(PLNA_URL+'/rest/v1/rpc/'+fn,{method:'POST',
+    headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify(body)});
+  if(!r.ok)throw new Error('rpc '+r.status);
+  return await r.json();
+}
+
+async function mpLoad(){
+  const el=document.getElementById('mp-body'); if(!el)return;
+  try{
+    _mp=await _mpRpc('knect_membership_get');
+  }catch(e){ _mp=null; }
+  if(!_mp||_mp.ok!==true){
+    /* Same rule as the rest of this app: when the record cannot be read the
+       page says so. It never guesses a plan, because being told you are on
+       Free when you are paying for Pro is worse than being told nothing. */
+    el.innerHTML='<div class="card"><div class="ct">Your plan</div><div class="cr"><span class="ck">We could not read your plan just now, so this page is not saying either way. Reload and it will come back.</span></div></div>';
+    return;
+  }
+  mpPaint();
+}
+window.mpLoad=mpLoad;
+
+function mpPaint(){
+  const el=document.getElementById('mp-body'),d=_mp; if(!el||!d)return;
+  const paid=d.plan!=='FREE';
+  let h='';
+
+  /* ---- what you are on ---- */
+  h+='<div class="card"><div class="ct">Your plan</div>'+
+     '<div class="cr"><span class="ck">Plan</span><span class="cv"><span class="chip cb">HAF KNECT '+_esc(d.plan_label||d.plan)+'</span></span></div>'+
+     '<div class="cr"><span class="ck">What it costs</span><span class="cv">'+
+       (paid?_mpMoney(d.price_pence)+' a month':'Free')+'</span></div>';
+  if(d.billing_anchor)h+='<div class="cr"><span class="ck">Billing day</span><span class="cv">The '+(d.billing_anchor===1?'1st':'15th')+' of the month</span></div>';
+  if(d.next_payment_on)h+='<div class="cr"><span class="ck">Next payment</span><span class="cv">'+_mpDate(d.next_payment_on)+'</span></div>';
+  if(d.card_last4)h+='<div class="cr"><span class="ck">Card</span><span class="cv">Ending '+_esc(d.card_last4)+'</span></div>';
+  if(d.last_payment_status==='failed')h+='<div class="cr"><span class="ck">Last payment</span><span class="cv"><span class="chip ca">Did not go through</span></span></div>';
+  h+='</div>';
+
+  /* ---- anything already booked in ---- */
+  if(d.cancel_at_period_end){
+    h+='<div class="card"><div class="ct">Your plan is ending</div>'+
+       '<div class="cr"><span class="ck">You keep HAF KNECT '+_esc(d.plan_label||d.plan)+' until '+_mpDate(d.ends_on)+
+       ', then you move to Free. Your account, your jobs and everything you have built up stay exactly as they are.</span></div>'+
+       '<div style="padding:.7rem 0 0"><button class="btn btn-or btn-sm" onclick="mpDo(\'reactivate\')">Keep my plan</button></div></div>';
+  } else if(d.pending_plan){
+    h+='<div class="card"><div class="ct">A change is booked in</div>'+
+       '<div class="cr"><span class="ck">You stay on HAF KNECT '+_esc(d.plan_label||d.plan)+' until '+_mpDate(d.current_period_end)+
+       ', then you move to HAF KNECT '+_esc(d.pending_plan_label||d.pending_plan)+'. Nothing changes before then, and you have already paid for this month.</span></div>'+
+       '<div style="padding:.7rem 0 0"><button class="btn btn-or btn-sm" onclick="mpDo(\'reactivate\')">Cancel this change</button></div></div>';
+  }
+
+  /* ---- a plan HAF set by hand is not the member's to change ---- */
+  if(d.can_manage===false){
+    h+='<div class="card"><div class="ct">Changing your plan</div>'+
+       '<div class="cr"><span class="ck">HAF set this plan up for you, so there is no payment of yours behind it to change. Ask HAF and we will sort it out.</span></div></div>';
+    el.innerHTML=h; return;
+  }
+
+  /* ---- moving up ---- */
+  const ups=(d.options||[]).filter(o=>o.direction==='up');
+  if(ups.length){
+    h+='<div class="card"><div class="ct">Move up</div>';
+    ups.forEach(o=>{
+      const a=d.billing_anchor||1, due=(o.due_now_by_anchor||{})[String(a)];
+      h+='<div class="cr"><span class="ck">HAF KNECT '+_esc(o.label)+'</span>'+
+         '<span class="cv">'+_mpMoney(o.price_pence)+' a month</span></div>'+
+         '<div style="font-size:.74rem;color:var(--mu);line-height:1.6;padding:0 0 .6rem">'+
+         (d.billing_anchor
+           ? 'You would pay '+_mpMoney(due)+' today for the rest of this month, then '+_mpMoney(o.price_pence)+' on the '+(a===1?'1st':'15th')+'.'
+           : 'You pick the 1st or the 15th as your billing day. Starting today that is '+
+             _mpMoney((o.due_now_by_anchor||{})['1'])+' for the part month on the 1st, or '+
+             _mpMoney((o.due_now_by_anchor||{})['15'])+' on the 15th, then '+_mpMoney(o.price_pence)+' every month after.')+
+         '</div>';
+    });
+    /* Honest about where this stands. The screen will not offer a button that
+       cannot finish, and it will not imply a payment has been set up. */
+    h+='<div class="cr"><span class="ck"><strong>Card payments for plan upgrades are not switched on yet.</strong> Until they are, ask HAF and we will move you up by hand. Nothing on this page can change your plan on its own.</span></div></div>';
+  }
+
+  /* ---- moving down, and stopping ---- */
+  const downs=(d.options||[]).filter(o=>o.direction==='down'&&o.plan!=='FREE');
+  if(paid&&!d.pending_plan&&!d.cancel_at_period_end){
+    if(downs.length){
+      h+='<div class="card"><div class="ct">Move down</div>';
+      downs.forEach(o=>{
+        h+='<div class="cr"><span class="ck">HAF KNECT '+_esc(o.label)+'</span>'+
+           '<span class="cv">'+_mpMoney(o.price_pence)+' a month</span></div>'+
+           '<div style="font-size:.74rem;color:var(--mu);line-height:1.6;padding:0 0 .6rem">'+
+           'Nothing to pay now. You keep everything you have until '+_mpDate(d.current_period_end)+
+           ', and you move down on that day.</div>'+
+           '<div style="padding:0 0 .8rem"><button class="btn btn-sm" onclick="mpDo(\'downgrade\',\''+o.plan+'\')">Move to '+_esc(o.label)+'</button></div>';
+      });
+      h+='</div>';
+    }
+    h+='<div class="card"><div class="ct">Stop my plan</div>'+
+       '<div class="cr"><span class="ck">You keep HAF KNECT '+_esc(d.plan_label||d.plan)+' until '+_mpDate(d.current_period_end)+
+       '. After that you are on Free. Your account is not closed and nothing you have built up is deleted &#8212; only the paid features stop. You can turn it back on at any time before then.</span></div>'+
+       '<div style="padding:.7rem 0 0"><button class="btn btn-sm" onclick="mpDo(\'cancel\')">Cancel my plan</button></div></div>';
+  } else if(!paid){
+    h+='<div class="card"><div class="ct">Stop my plan</div>'+
+       '<div class="cr"><span class="ck">You are on Free, so there is nothing to cancel and nothing being taken.</span></div></div>';
+  }
+
+  h+='<div id="mp-msg" style="font-size:.8rem;margin:.2rem 0 0"></div>';
+  el.innerHTML=h;
+}
+
+async function mpDo(action,plan){
+  if(_mpBusy)return; /* a second click must not book a second change */
+  const msg=()=>document.getElementById('mp-msg');
+  /* Stopping or stepping down is a real decision. It is reversible right up to
+     the end of the month, and the wording says so, but it is still asked. */
+  if(action==='cancel'&&!confirm('Cancel your plan? You keep everything until the end of the month you have paid for, then move to Free. Your account stays.'))return;
+  if(action==='downgrade'&&!confirm('Move down at the end of the month you have paid for? Nothing changes before then.'))return;
+  _mpBusy=true;
+  let r=null;
+  try{
+    r=await _mpRpc('knect_membership_change',{p_action:action,p_plan:plan||null});
+  }catch(e){ r=null; }
+  _mpBusy=false;
+  if(!r){
+    const m=msg(); if(m){m.style.color='var(--or)';m.textContent='That did not go through. Nothing has changed on your account. Try again in a moment.';}
+    return;
+  }
+  if(r.ok!==true){
+    const m=msg(); if(m){m.style.color='var(--or)';m.textContent=r.message||'That did not go through, and nothing has changed on your account.';}
+    return;
+  }
+  /* Read the record back rather than trusting what we just sent — the screen
+     shows what is true, not what we asked for. */
+  await mpLoad();
+  const m=msg();
+  if(m){m.style.color='var(--mu)';m.textContent=
+    action==='reactivate'?'Done. Your plan carries on as it was.'
+    :action==='cancel'?'Done. Your plan runs to the end of the month you have paid for, then moves to Free.'
+    :'Done. Your new plan starts at the end of the month you have paid for.';}
+}
+window.mpDo=mpDo;
 
 /* ── SETTINGS (document §16) ──────────────────────────────────────────────
    Account configuration only. Saved on this device for now — when the account
@@ -10153,6 +10472,7 @@ function switchTab(id){
   if(id==='pane-d-jobs')setTimeout(hafJobsPaint,40);
   if(id==='pane-fl-manage')setTimeout(flRenderOverview,40);
   if(id==='pane-membership')setTimeout(mbRender,40);
+  if(id==='pane-myplan')setTimeout(()=>{if(window.mpLoad)mpLoad();},40);
   if(id==='pane-team')setTimeout(tmLoad,40);
   if(id==='pane-settings')setTimeout(setRender,40);
   /* area rule applied to whatever this page just drew */
