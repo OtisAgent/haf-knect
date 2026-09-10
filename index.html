@@ -228,7 +228,10 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 /* The signed-in card that takes the login card's place — same width, same
    chrome, so the column does not jump when one swaps for the other. */
 .sa-who{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
-.sa-av{flex:none;width:2rem;height:2rem;border-radius:50%;background:var(--haf-orange-ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.72rem;letter-spacing:.02em}
+/* --or, deliberately. Much of this page reaches for --haf-orange-ink, which
+   nothing on the live site actually defines — so it falls back, and here that
+   meant white initials on a white circle. */
+.sa-av{flex:none;width:2rem;height:2rem;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.72rem;letter-spacing:.02em}
 .sa-nm{font-weight:800;font-size:.9rem;letter-spacing:-.01em;word-break:break-all}
 .sa-note{font-size:.72rem;color:var(--mu);line-height:1.55;margin:0 0 .7rem}
 /* The demo strip at the foot of the login card. Styled here rather than inline
@@ -1512,7 +1515,10 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
     </a>
     <div class="nav-r">
       <button class="track-btn" onclick="toggleTrack()">Track delivery</button>
-      <button class="btn btn-gh btn-sm" onclick="openLogin()">Log in →</button>
+      <!-- Says "Log in" to a visitor and "Your dashboard" to a member —
+           hafSideAccount owns both, so the top of the page and the side of it
+           can never disagree about whether somebody is signed in. -->
+      <button class="btn btn-gh btn-sm" id="nav-login" onclick="hafNavDoor()">Log in →</button>
       <button class="theme-btn" onclick="toggleTheme()" title="Toggle day / night">
         <svg id="theme-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
       </button>
@@ -8012,11 +8018,19 @@ function hafSideAccount(){
   const on=!!(u&&_hafCred);
   login.style.display=on?'none':'';
   acct.style.display=on?'':'none';
+  const nav=document.getElementById('nav-login');
+  if(nav)nav.innerHTML=on?'Your dashboard &#8594;':'Log in &#8594;';
   if(!on)return;
   const demo=(typeof DEMO_ACCOUNTS!=='undefined'&&DEMO_ACCOUNTS[u])||null;
   const nm=document.getElementById('sa-user'),av=document.getElementById('sa-av');
   if(nm)nm.textContent=demo?demo.name:u;
   if(av)av.textContent=(demo?demo.initials:u.slice(0,2)).toUpperCase();
+}
+/* The one button in the top bar, which is a door either way. */
+function hafNavDoor(){
+  const u=(localStorage.getItem('knect-user')||'').toUpperCase();
+  if(u&&_hafCred)return hafBackToApp();
+  openLogin();
 }
 /* The way back to the dashboard from the send page. closeInlineFlow asks before
    it throws a part-written consignment away; if they choose to stay, we stay. */
