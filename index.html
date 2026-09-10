@@ -8667,8 +8667,26 @@ function buildNavV1(acc,keepOpen){
   /* and the phone's bottom bar, off the very same model */
   _tbAcc=acc; hafTabBarPaint();
 }
+/* Crossing to PLNA, from anywhere the navigation offers it.
+   Two things this settles.
+   ONE, it is the same tab. The menu used to open PLNA in a new tab while the
+   bottom bar navigated to it; two routes to the same place behaving differently
+   is exactly what makes two websites feel like two websites.
+   TWO, a PREVIEW crosses to the other PREVIEW. Production is never served from
+   pages.dev, so nothing about the live site changes — but without this, trying
+   the round trip on a preview link drops you onto the live site and the pair
+   cannot be judged together. */
+function _hafCross(url){
+  try{
+    if(/\.pages\.dev$/.test(location.hostname)&&/plna\.usehaf\.co\.uk/.test(url))
+      return url.replace('https://plna.usehaf.co.uk','https://mobile-bottom-nav.plna-live.pages.dev');
+  }catch(e){}
+  return url;
+}
+window._hafCross=_hafCross;
+
 function _navGo(t){
-  if(t.ext)return "window.open('"+t.ext+"','_blank','noopener')";
+  if(t.ext)return "window.location.href=_hafCross('"+t.ext+"')";
   return t.id==='livejob'?'hafOpenJobs()':"switchTab('pane-"+t.id+"')";
 }
 
@@ -8764,7 +8782,7 @@ function _tbGo(item){
   /* PLNA is the driver's own site. Brent's call, 10 Sep: it carries this same
      bar, so it is navigated TO, in this tab, like any other destination —
      opening a second tab is the one thing that would break the app feel. */
-  if(t.ext){window.location.href=t.ext;return}
+  if(t.ext){window.location.href=_hafCross(t.ext);return}
   if(t.id==='livejob'){hafOpenJobs();return}
   switchTab('pane-'+t.id);
 }
