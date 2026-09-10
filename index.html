@@ -2470,6 +2470,11 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
       <!-- EXCHANGE DASHBOARD (all member roles) -->
       <div class="tp" id="pane-d-home">
 
+        <!-- HAF NEWS — the newest announcement this member has not read yet.
+             Drawn by anStrip() and left completely empty when there is nothing
+             unread, so it is never a permanent decorative bar. -->
+        <div id="an-strip"></div>
+
         <!-- FOUNDING MEMBER — first thing a founder sees on the overview, above
              the detail switch, so it is never hidden by Basic mode. Switched on
              only by hafFounderPaint() after a live check against the founders
@@ -3732,6 +3737,43 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         .sig-row-t{font-weight:700;line-height:1.35}
         .sig-row-m{color:var(--mu);font-size:.73rem;margin-top:.2rem}
         .sig-acts{margin-top:.4rem;display:flex;gap:.3rem;flex-wrap:wrap}
+
+        /* ── ANNOUNCEMENTS ──────────────────────────────────────────────────
+           Brent, 10 Sep: "add announcements as well, where we showcase updates
+           and running news."
+
+           Two weights on purpose. The lead is the one thing HAF most wants a
+           member to have read — pinned, or failing that the newest — and it is
+           given the size of a headline rather than a row in a list. Everything
+           after it is running news: same information, quieter, in date order,
+           so a member can catch up in one scroll without the newest item being
+           lost among ten older ones. */
+        .an-head{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+        .an-new{background:var(--haf-orange);color:#fff;border-radius:999px;padding:.05rem .45rem;
+                font-size:.66rem;font-weight:800;letter-spacing:.03em;margin-left:.35rem}
+        .an-lead{border:1px solid var(--or-g);border-left:3px solid var(--haf-orange);
+                 background:var(--or-d);border-radius:var(--rx);padding:1rem 1.1rem;margin-bottom:.9rem}
+        .an-lead.urgent{border-color:rgba(180,72,63,.4);border-left-color:var(--rd);background:var(--rd-d)}
+        .an-lead-t{font-size:1.02rem;font-weight:800;line-height:1.3}
+        .an-lead-b{font-size:.84rem;line-height:1.6;margin-top:.45rem;white-space:pre-wrap;color:var(--tx)}
+        .an-row{border:1px solid var(--ln);border-radius:var(--rx);background:var(--p);
+                padding:.75rem .9rem;margin-bottom:.55rem}
+        .an-row.is-new{border-left:3px solid var(--haf-orange)}
+        .an-t{font-weight:800;font-size:.87rem;line-height:1.35}
+        .an-b{font-size:.79rem;color:var(--mu);margin-top:.3rem;line-height:1.55;white-space:pre-wrap}
+        .an-m{margin-top:.45rem;display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;
+              font-size:.72rem;color:var(--mu)}
+
+        /* The news strip on the dashboard. It is the showcase half: a member who
+           never opens the community tab still sees that something has changed,
+           and it disappears the moment they have read it rather than nagging. */
+        .an-strip{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;
+                  border:1px solid var(--or-g);border-left:3px solid var(--haf-orange);
+                  background:var(--or-d);border-radius:var(--rx);padding:.7rem 1rem;margin-bottom:1rem}
+        .an-strip.urgent{border-color:rgba(180,72,63,.4);border-left-color:var(--rd);background:var(--rd-d)}
+        .an-strip-b{min-width:0;flex:1}
+        .an-strip-t{font-weight:800;font-size:.86rem;line-height:1.35}
+        .an-strip-m{font-size:.72rem;color:var(--mu);margin-top:.15rem}
       </style>
       <div class="tp" id="pane-forum">
         <h1 class="pt">HAF KNECT Community</h1>
@@ -3788,7 +3830,16 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
           </div>
 
           <div>
-            <div id="fm-src" class="ov-src" style="margin:0 0 .7rem">Reading the updates…</div>
+            <div class="an-head" style="margin-bottom:.55rem">
+              <div class="sig-h" style="margin:0">Announcements<span id="fm-new" class="an-new" hidden></span></div>
+              <button class="btn btn-gh btn-xs" onclick="fmLoad(true)">Refresh</button>
+            </div>
+            <div id="fm-src" class="ov-src" style="margin:0 0 .7rem">Reading the announcements…</div>
+
+            <!-- the headline, then everything else. Both come out of the same
+                 read; nothing is fetched twice to fill two boxes. -->
+            <div id="fm-lead"></div>
+            <div class="sig-h" id="fm-run-h" style="margin-top:1.1rem;display:none">Running news</div>
             <div id="fm-list"><div class="aa-empty">Loading…</div></div>
 
             <div class="sig-h" style="margin-top:1.4rem">What you have sent us</div>
@@ -3961,9 +4012,11 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
              this page being careful: the database refuses everybody else, and
              it was proved by having a member's own credential try. -->
         <div class="card" id="pub-card">
-          <div class="ct">Post an update to the whole network
+          <div class="ct">Announcements
             <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">every member sees it · nobody can reply to it in public</span>
           </div>
+          <div class="kg" id="pub-kpis"></div>
+
           <div class="fr">
             <div class="fg"><label class="fl">Who is it for?</label>
               <select class="fi2" id="pub-topic">
@@ -3971,22 +4024,39 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
                 <option value="plna">HAF PLNA</option>
                 <option value="general">Everyone</option>
               </select></div>
+            <!-- What kind of thing this is. A member reads "Planned work" and
+                 "New feature" completely differently, and until now every
+                 announcement arrived wearing the same grey chip. -->
+            <div class="fg"><label class="fl">What kind of announcement?</label>
+              <select class="fi2" id="pub-kind">
+                <option value="news">News — something worth knowing</option>
+                <option value="release">New feature — something they can now do</option>
+                <option value="improvement">Improvement — something that works better</option>
+                <option value="fix">Fixed — something that was broken</option>
+                <option value="maintenance">Planned work — booked downtime</option>
+                <option value="notice">Important — they need to act or be warned</option>
+              </select></div>
             <div class="fg"><label class="fl">Keep it at the top?</label>
               <select class="fi2" id="pub-pin">
-                <option value="no">No, a normal update</option>
-                <option value="yes">Yes, pin it above the rest</option>
+                <option value="no">No, run it with the news</option>
+                <option value="yes">Yes, make it the headline</option>
               </select></div>
           </div>
           <div class="fg"><label class="fl">Heading</label>
             <input class="fi2" id="pub-title" maxlength="120" placeholder="e.g. The planner now shows the whole week"></div>
-          <div class="fg"><label class="fl">The update</label>
+          <div class="fg"><label class="fl">The announcement</label>
             <textarea class="fi2" id="pub-body" rows="4" maxlength="4000" placeholder="What changed, and what it means for them."></textarea></div>
           <input type="hidden" id="pub-from" value="">
+          <input type="hidden" id="pub-edit" value="">
           <div id="pub-from-note" class="fm-note" style="display:none"></div>
           <button class="btn btn-or btn-wide" id="pub-go" onclick="sigPublish()">Post it to the network</button>
           <div id="pub-msg" style="display:none;margin-top:.6rem;font-size:.78rem;font-weight:700"></div>
 
-          <div class="sig-h" style="margin-top:1.2rem">Live on the network now</div>
+          <!-- Running news, as Brent sees it: what is out there, what kind it
+               is, and how many of the network have actually opened it. The
+               reach figure is a count of real reads, not an assumption that
+               posting equals reading. -->
+          <div class="sig-h" style="margin-top:1.2rem">Running on the network now</div>
           <div id="pub-live"><div class="aa-empty">reading…</div></div>
         </div>
 
@@ -9124,7 +9194,8 @@ function switchTab(id){
   const p=document.getElementById(id);if(p)p.classList.add('on');
   const n=document.getElementById('ni-'+id.replace('pane-',''));if(n)n.classList.add('on');
   ct=id;
-  if(id==='pane-d-home'){setTimeout(renderDashAreas,80);loadDashMode();}
+  if(id==='pane-d-home'){setTimeout(renderDashAreas,80);loadDashMode();
+    setTimeout(()=>{if(window.anStrip)anStrip();},80);}
   if(id==='pane-b-book')postingApplyRole();
   if(id==='pane-f-cap')setTimeout(capBootPane,80);
   if(id==='pane-pricing')setTimeout(()=>{if(window.pxBoot)pxBoot();},60);
@@ -11073,6 +11144,11 @@ async function _netRpc1(name,extra){
    with a second member's credential trying to read the first member's note. */
 const FM_KIND={idea:['Idea','cb'],problem:['Not working','cr2'],question:['Question','ca'],
                praise:['Works well','cg'],update:['HAF update','co']};
+/* What kind of announcement it is, in the words a member would use. 'notice' is
+   the only one allowed to look alarming, which is why it is never the default:
+   nothing becomes urgent because somebody forgot to change a dropdown. */
+const AN_KIND={news:['News','cb'],release:['New feature','co'],improvement:['Improvement','cb'],
+               fix:['Fixed','cg'],maintenance:['Planned work','ca'],notice:['Important','cr2']};
 const FM_STATE={raised:['Sent','ca'],seen:['HAF has seen it','cb'],building:['Being built','co'],
                 fixed:['Done','cg'],not_planned:['Not planned','cr2']};
 const FM_TOPIC={knect:'HAF KNECT',plna:'HAF PLNA',general:'General'};
@@ -11100,11 +11176,19 @@ async function fmLoad(force){
       src.className='ov-src';src.textContent='Sign in with your HAF username and PIN to see the updates.';
       list.innerHTML='<div class="aa-empty">Nothing is shown to a signed-out browser.</div>';return}
     fmItems=rows;
-    const ups=rows.filter(i=>i.update).length;
+    const ups=rows.filter(i=>i.update),nw=ups.filter(i=>i.unread).length;
     src.className='ov-src';
-    src.innerHTML='<span class="dot"></span>'+ups+' update'+(ups===1?'':'s')+
-      (fmTopic==='all'?'':' on '+FM_TOPIC[fmTopic])+' from the HAF team';
+    src.innerHTML='<span class="dot"></span>'+ups.length+' announcement'+(ups.length===1?'':'s')+
+      (fmTopic==='all'?'':' about '+FM_TOPIC[fmTopic])+' from the HAF team'+
+      (nw?' · '+nw+' you have not read':'');
+    const badge=document.getElementById('fm-new');
+    if(badge){badge.hidden=!nw;badge.textContent=nw+' new';}
     fmRender();
+    /* Read means read: the rows are on the screen at this point, so they are
+       marked afterwards rather than at load time. Nothing else on the page
+       waits for it — a failed mark leaves the badge on, which is the harmless
+       way round. */
+    anMarkRead(ups.filter(i=>i.unread).map(i=>i.id));
   }catch(e){
     src.className='ov-src bad';
     src.innerHTML='<span class="dot"></span>Could not reach the updates just now.';
@@ -11116,21 +11200,42 @@ function fmRender(){
   const el=document.getElementById('fm-list'),mine=document.getElementById('fm-mine');
   if(!el)return;
 
-  /* ── what HAF has published. Read-only by design. ── */
+  /* ── the announcements. Read-only by design: a member cannot reply to one
+       here, and that is the whole reason Brent asked for it this way round. ──
+       The first is given headline treatment — pinned if there is one, newest
+       otherwise, which is the order the database already returns. The rest is
+       running news underneath. */
   const ups=fmItems.filter(i=>i.update);
-  el.innerHTML=ups.length?ups.map(i=>
-    '<div class="fm-item'+(i.pinned?' pin':'')+'"><div class="fm-b">'+
-      '<div class="fm-t" style="cursor:default">'+_esc(i.title)+'</div>'+
-      (i.body?'<div class="fm-d">'+_esc(i.body)+'</div>':'')+
-      '<div class="fm-m">'+
-        '<span class="chip co">HAF update</span>'+
-        '<span class="chip">'+(FM_TOPIC[i.topic]||i.topic)+'</span>'+
-        (i.pinned?'<span class="chip ca">Pinned</span>':'')+
-        '<span>'+_when(i.at)+'</span>'+
-      '</div></div></div>').join('')
-    :'<div class="aa-empty">No updates yet on '+
-      (fmTopic==='all'?'HAF KNECT or HAF PLNA':FM_TOPIC[fmTopic])+
-      '. When something changes, it will be posted here.</div>';
+  const lead=document.getElementById('fm-lead'),runh=document.getElementById('fm-run-h');
+  const meta=i=>{const k=AN_KIND[i.announce]||AN_KIND.news;
+    return '<span class="chip '+k[1]+'">'+k[0]+'</span>'+
+      '<span class="chip">'+(FM_TOPIC[i.topic]||i.topic)+'</span>'+
+      (i.pinned?'<span class="chip ca">Pinned</span>':'')+
+      (i.unread?'<span class="an-new" style="margin:0">New</span>':'')+
+      '<span>'+_when(i.at)+(i.edited?' · edited since':'')+'</span>'};
+
+  if(lead){
+    const i=ups[0];
+    lead.innerHTML=i
+      ? '<div class="an-lead'+(i.announce==='notice'?' urgent':'')+'">'+
+          '<div class="an-lead-t">'+_esc(i.title)+'</div>'+
+          (i.body?'<div class="an-lead-b">'+_esc(i.body)+'</div>':'')+
+          '<div class="an-m" style="margin-top:.6rem">'+meta(i)+'</div>'+
+        '</div>'
+      : '';
+  }
+  const rest=ups.slice(1);
+  if(runh)runh.style.display=rest.length?'':'none';
+  el.innerHTML=rest.length?rest.map(i=>
+    '<div class="an-row'+(i.unread?' is-new':'')+'">'+
+      '<div class="an-t">'+_esc(i.title)+'</div>'+
+      (i.body?'<div class="an-b">'+_esc(i.body)+'</div>':'')+
+      '<div class="an-m">'+meta(i)+'</div>'+
+    '</div>').join('')
+    :(ups.length?''
+      :'<div class="aa-empty">No announcements yet about '+
+        (fmTopic==='all'?'HAF KNECT or HAF PLNA':FM_TOPIC[fmTopic])+
+        '. When something changes, it is posted here first.</div>');
 
   /* ── and the person's own private line. Nobody else is ever served these
        rows, so there is nothing to hide in the page. ── */
@@ -11198,6 +11303,49 @@ async function fmPost(){
 window.fmLoad=fmLoad;window.fmRoom=fmRoom;window.fmPost=fmPost;
 window.fmOpen=fmOpen;window.fmReply=fmReply;
 
+/* ── READ MEANS READ ─────────────────────────────────────────────────────
+   The one thing that turns "posted" into "reached". It is deliberately quiet:
+   nothing on the page waits for it, and if it fails the member simply keeps
+   the New badge, which is the harmless way for this to be wrong.
+
+   The database will not write a read against anybody but the account it just
+   authenticated, so this cannot be used to mark the network as having seen
+   something — proved by having a second member's credential try. */
+async function anMarkRead(ids){
+  if(!ids||!ids.length)return;
+  try{await _netRpc1('haf_announce_seen',{p_ids:ids})}catch(e){}
+}
+window.anMarkRead=anMarkRead;
+
+/* ── THE NEWS STRIP ON THE DASHBOARD ─────────────────────────────────────
+   Brent: "showcase updates and running news". The community screen is where
+   news lives; this is how a member who never opens that tab still learns
+   something changed. One line, the newest thing they have not read, and it is
+   gone the moment they have read it rather than sitting there nagging.
+
+   It reads the same feed the community screen does and invents nothing: no
+   strip is drawn unless there is a real unread announcement to point at. */
+async function anStrip(){
+  const host=document.getElementById('an-strip');if(!host)return;
+  let rows=[];
+  try{const r=await _netRpc('haf_signal_feed',{p_topic:'all',p_state:null,p_limit:60});
+      if(r.denied){host.innerHTML='';return}rows=r.rows||[]}
+  catch(e){host.innerHTML='';return}                       // silence beats a guess
+  const nw=rows.filter(i=>i.update&&i.unread);
+  if(!nw.length){host.innerHTML='';return}
+  const i=nw[0],k=AN_KIND[i.announce]||AN_KIND.news;
+  host.innerHTML='<div class="an-strip'+(i.announce==='notice'?' urgent':'')+'">'+
+    '<div class="an-strip-b">'+
+      '<div class="an-strip-t">'+_esc(i.title)+'</div>'+
+      '<div class="an-strip-m"><span class="chip '+k[1]+'">'+k[0]+'</span> '+
+        (FM_TOPIC[i.topic]||i.topic)+' · '+_when(i.at)+
+        (nw.length>1?' · '+(nw.length-1)+' more you have not read':'')+'</div>'+
+    '</div>'+
+    '<button class="btn btn-or btn-xs" onclick="switchTab(\'pane-forum\')">Read it</button>'+
+  '</div>';
+}
+window.anStrip=anStrip;
+
 /* ── THE SAME SPINE, READ AS A LOOP (Master Overview) ────────────────────── */
 async function sigLoad(force){
   const kp=document.getElementById('sig-kpis');if(!kp)return;
@@ -11264,18 +11412,43 @@ async function sigLoad(force){
         _when(r.at)+' · '+_esc(r.author)+(r.note?' — '+_esc(r.note):'')+'</div></div>'}).join('')
       :'<div class="aa-empty">Nothing has been answered yet.</div>';
 
-    /* what is out there on every member's screen right now, and the way to
-       take one back down if it turns out to be wrong */
+    /* ── the announcements board ──
+       What is out there on every member's screen right now: what kind of thing
+       each one is, how many people have actually opened it, and the two ways to
+       change your mind — fix the wording, or take it off entirely. */
+    const pk=document.getElementById('pub-kpis');
+    if(pk){
+      const reach=d.reach_of||0;
+      pk.innerHTML=[
+        ['Running now',d.announce_live,'','on every member screen'],
+        ['Headlines',d.announce_pinned,'','pinned to the top'],
+        ['Posted this month',d.announce_30d,'','in the last 30 days'],
+        ['Times opened',d.announce_reads,d.announce_live&&!d.announce_reads?'am':'',
+         reach?'across '+reach+' accounts on the network':'reads recorded by members']
+      ].map(k=>'<div class="kc"><div class="kc-l">'+k[0]+'</div><div class="kc-v'+(k[2]?' '+k[2]:'')+'">'+
+          (k[1]==null?'—':k[1])+'</div><div class="kc-d" style="color:var(--mu)">'+k[3]+'</div></div>').join('');
+    }
     const live=document.getElementById('pub-live');
     if(live){
-      const L=d.live||[];
-      live.innerHTML=L.length?L.map(u=>
-        '<div class="sig-row"><div class="sig-row-t">'+(u.pinned?'<span class="chip ca">Pinned</span> ':'')+
-          _esc(u.title)+'</div>'+
-        '<div class="sig-row-m">'+(FM_TOPIC[u.topic]||u.topic)+' · posted '+_when(u.at)+
-          ' <span style="cursor:pointer;font-weight:700;color:var(--rd)" onclick="sigPull(\''+u.id+'\')">take it down</span>'+
-        '</div></div>').join('')
-        :'<div class="aa-empty">You have not posted an update to the network yet.</div>';
+      const L=d.live||[],reach=d.reach_of||0;
+      anLive=L;
+      live.innerHTML=L.length?L.map(u=>{
+        const k=AN_KIND[u.announce]||AN_KIND.news;
+        return '<div class="sig-row"><div class="sig-row-t">'+
+          (u.pinned?'<span class="chip ca">Headline</span> ':'')+_esc(u.title)+'</div>'+
+        '<div class="sig-row-m" style="margin-top:.3rem">'+
+          '<span class="chip '+k[1]+'">'+k[0]+'</span> '+
+          (FM_TOPIC[u.topic]||u.topic)+' · posted '+_when(u.at)+
+          (u.edited?' · edited since':'')+
+          ' · <strong>'+(u.readers||0)+'</strong> of '+reach+' have opened it'+
+          (u.from_signal?' · answers something a member sent in':'')+'</div>'+
+        '<div class="sig-acts">'+
+          '<button class="btn btn-gh btn-xs" onclick="anEdit(\''+u.id+'\')">Edit the wording</button>'+
+          '<button class="btn btn-gh btn-xs" onclick="anPin(\''+u.id+'\','+(u.pinned?'false':'true')+')">'+
+            (u.pinned?'Stop it being the headline':'Make it the headline')+'</button>'+
+          '<button class="btn btn-gh btn-xs" onclick="sigPull(\''+u.id+'\')">Take it down</button>'+
+        '</div></div>'}).join('')
+        :'<div class="aa-empty">You have not announced anything to the network yet.</div>';
     }
 
     if(held){
@@ -11307,6 +11480,11 @@ function sigAnswerAll(id,title,topic){
         f=document.getElementById('pub-from'),n=document.getElementById('pub-from-note'),
         tp=document.getElementById('pub-topic');
   if(!t)return;
+  /* if the box was mid-edit of a live announcement, that is a different job —
+     drop out of it rather than quietly rewriting the wrong thing */
+  const ed=document.getElementById('pub-edit');
+  if(ed&&ed.value){ed.value='';document.getElementById('pub-go').textContent='Post it to the network';
+    t.value='';b.value='';}
   f.value=id;
   if(tp&&topic)tp.value=topic;
   if(!t.value.trim())t.value=title;
@@ -11327,20 +11505,78 @@ async function sigPublish(){
   const say=(m,good)=>{msg.textContent=m;msg.style.display='block';
     msg.style.color=good?'var(--gn)':'var(--rd)';clearTimeout(msg._t);
     msg._t=setTimeout(()=>msg.style.display='none',6000)};
-  if(!t.value.trim()||t.value.trim().length<3){say('Give the update a heading first.');return}
+  if(!t.value.trim()||t.value.trim().length<3){say('Give the announcement a heading first.');return}
   const topic=document.getElementById('pub-topic').value;
+  const kind=document.getElementById('pub-kind').value;
+  const pin=document.getElementById('pub-pin').value==='yes';
+  const editing=document.getElementById('pub-edit').value;
+
+  /* Changing something that is already on 51 screens is a different question
+     from posting something new, so it asks a different one. */
+  if(editing){
+    if(!window.confirm('Change this announcement where it already is?\n\n'+t.value.trim()+
+       '\n\nEvery member who has it open sees the new wording, and it is marked as edited.'))return;
+    go.disabled=true;go.textContent='Saving…';
+    const e=await _netRpc1('haf_broadcast_edit',{p_id:editing,p_title:t.value.trim(),
+      p_body:b.value.trim()||null,p_pin:pin,p_announce:kind});
+    go.disabled=false;go.textContent='Post it to the network';
+    say(e.message||(e.ok?'Updated.':'That did not go through.'),!!e.ok);
+    if(e.ok){anEditClear();sigLoad(true)}
+    return;
+  }
+
   const who=topic==='plna'?'every HAF PLNA member':topic==='knect'?'every HAF KNECT member':'everyone on the network';
-  if(!window.confirm('Post this to '+who+'?\n\n'+t.value.trim()+
-     '\n\nIt appears on their screen straight away. You can take it back down afterwards.'))return;
+  if(!window.confirm('Announce this to '+who+'?\n\n'+t.value.trim()+
+     '\n\nIt appears on their screen straight away. You can edit it or take it back down afterwards.'))return;
   go.disabled=true;go.textContent='Posting…';
   const d=await _netRpc1('haf_broadcast_post',{
     p_topic:topic,p_title:t.value.trim(),p_body:b.value.trim()||null,
-    p_pin:document.getElementById('pub-pin').value==='yes',
-    p_from:document.getElementById('pub-from').value||null});
+    p_pin:pin,p_from:document.getElementById('pub-from').value||null,
+    p_announce:kind});
   go.disabled=false;go.textContent='Post it to the network';
   say(d.message||(d.ok?'Posted.':'That did not go through.'),!!d.ok);
   if(d.ok){t.value='';b.value='';sigAnswerClear();sigLoad(true)}
 }
+
+/* ── CHANGING ONE THAT IS ALREADY OUT ────────────────────────────────────
+   A typo in something 51 people can read should be correctable without taking
+   it down and posting it again, which reads to a member as two separate pieces
+   of news. The same box does both jobs so there is nowhere else to look; what
+   changes is the button and the question it asks before it saves. */
+let anLive=[];
+function anEdit(id){
+  const u=(anLive||[]).find(x=>x.id===id);if(!u)return;
+  document.getElementById('pub-edit').value=id;
+  document.getElementById('pub-title').value=u.title||'';
+  document.getElementById('pub-body').value=u.body||'';
+  document.getElementById('pub-topic').value=u.topic||'knect';
+  document.getElementById('pub-kind').value=u.announce||'news';
+  document.getElementById('pub-pin').value=u.pinned?'yes':'no';
+  document.getElementById('pub-go').textContent='Save the change';
+  const n=document.getElementById('pub-from-note');
+  n.style.display='';
+  n.innerHTML='Editing an announcement that is already on every member screen. '+
+    '<span style="cursor:pointer;font-weight:700;color:var(--haf-orange-ink)" onclick="anEditClear()">post a new one instead</span>';
+  document.getElementById('pub-card').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function anEditClear(){
+  document.getElementById('pub-edit').value='';
+  document.getElementById('pub-title').value='';
+  document.getElementById('pub-body').value='';
+  document.getElementById('pub-go').textContent='Post it to the network';
+  document.getElementById('pub-from-note').style.display='none';
+}
+/* Pinning is an edit with one field in it. It reuses the same door rather than
+   having its own, so there is exactly one function in the database that can
+   change a live announcement. */
+async function anPin(id,on){
+  const u=(anLive||[]).find(x=>x.id===id);if(!u)return;
+  const d=await _netRpc1('haf_broadcast_edit',{p_id:id,p_title:u.title,p_body:u.body||null,
+    p_pin:!!on,p_announce:u.announce||null});
+  if(d&&d.ok===false){alert(d.message||'That did not go through.');return}
+  sigLoad(true);
+}
+window.anEdit=anEdit;window.anEditClear=anEditClear;window.anPin=anPin;
 
 async function sigPull(id){
   if(!window.confirm('Take this update off every member screen? It stops being visible straight away.'))return;
