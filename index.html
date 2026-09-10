@@ -10463,7 +10463,7 @@ async function lvBoot(force){
     _lvBook=null;
     box.innerHTML='<div class="aa-empty">This screen is the master account only. Sign in with your own HAF username and PIN.</div>';
     if(src)src.textContent='Nothing was read — the allowance book is not showing a guess.';
-    lvAccounts();return;
+    await lvAccounts();return;
   }
   _lvBook={};r.rows.forEach(x=>{_lvBook[x.level]=x});
   if(src){
@@ -10472,7 +10472,11 @@ async function lvBoot(force){
       _lvWhen(r.rows.map(x=>x.updated_at).sort().pop());
   }
   lvRenderBook();
-  lvAccounts();
+  /* awaited, not fired and forgotten. Whatever runs after a reload needs the
+     list to have finished redrawing — writing onto the old rows and then having
+     them replaced a moment later is how a "Saved" line vanished on the first
+     live run of this screen. */
+  await lvAccounts();
 }
 
 function _lvWhen(iso){
@@ -10555,7 +10559,13 @@ async function lvAccounts(){
   }
   _lvRows=r.rows||[];
   if(!_lvRows.length){
-    box.innerHTML='<div class="aa-empty">No account matches that.</div>';
+    /* Empty because there is nothing to show, or empty because you are not
+       allowed to see it? Those are different sentences and must never be the
+       same one — "No account matches that" to a non-master reads as a search
+       result and hides the fact that they were refused. */
+    box.innerHTML='<div class="aa-empty">'+(_lvBook===null
+      ? 'Sign in with your own master username and PIN to see the accounts.'
+      : 'No account matches that.')+'</div>';
     if(cnt)cnt.textContent='';return;
   }
   if(cnt)cnt.textContent=_lvRows.length+' account'+(_lvRows.length===1?'':'s')+
