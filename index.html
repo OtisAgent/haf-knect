@@ -1507,6 +1507,33 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
   .hv-bar-lbl{display:none}
 }
 
+/* ── PASTE THE JOB IN ──
+   Brent, 10 Sep: a job arrives written down already. The tile opens with a box
+   to paste it into. Styled from the tokens, so it reads the same by day and by
+   night rather than being a light panel pinned to a dark page. */
+.pj{margin-bottom:.85rem}
+.pj-open{width:100%;display:flex;align-items:center;gap:.7rem;text-align:left;cursor:pointer;
+  background:var(--or-d);border:1px dashed var(--or-g);border-radius:var(--rs);
+  padding:.7rem .85rem;color:var(--tx);transition:background .15s,border-color .15s}
+.pj-open:hover{background:rgba(241,142,0,.16);border-color:var(--or)}
+.pj-open svg{width:20px;height:20px;flex:0 0 20px;fill:none;stroke:var(--or);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pj-open-w{display:flex;flex-direction:column;gap:.1rem;min-width:0}
+.pj-open-t{font-family:var(--dp);font-weight:800;font-size:.84rem;letter-spacing:-.02em}
+.pj-open-s{font-size:.72rem;color:var(--mu);line-height:1.4}
+.pj-open-x{margin-left:auto;color:var(--or);font-weight:800}
+.pj-body{border:1px solid var(--ln);border-radius:var(--rs);background:var(--p2);padding:.9rem .95rem;margin-top:.55rem}
+.pj-h{font-family:var(--dp);font-weight:900;font-size:.95rem;letter-spacing:-.03em;margin-bottom:.4rem}
+.pj-h2{margin-top:.9rem}
+.pj-p{font-size:.76rem;color:var(--mu);line-height:1.6;margin-bottom:.6rem}
+.pj-ta{min-height:170px;font-size:.78rem;line-height:1.6}
+.pj-err{font-size:.75rem;color:var(--rd);line-height:1.5;margin:.4rem 0}
+.pj-found{border-top:1px solid var(--ln);margin-top:.8rem;padding-top:.2rem}
+.pj-list{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.6rem}
+.pj-row{display:flex;gap:.6rem;font-size:.78rem;line-height:1.5;align-items:baseline}
+.pj-row-l{flex:0 0 38%;max-width:172px;color:var(--mu);font-size:.71rem;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.pj-row-v{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere}
+.pj-miss{font-size:.75rem;color:var(--tx);background:var(--am-d);border:1px solid rgba(185,133,48,.28);border-radius:var(--rx);padding:.55rem .65rem;line-height:1.55;margin-bottom:.7rem}
+@media(max-width:480px){.pj-row{flex-direction:column;gap:.05rem}.pj-row-l{max-width:none;flex:none}}
 </style>
 <link rel="stylesheet" href="/haf-bridge.css">
 </head>
@@ -1550,6 +1577,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 
       <!-- ALWAYS-ON PRICE CALCULATOR -->
       <div class="calc-box">
+        <div class="pj" data-pj="a"></div>
         <div class="pc-row">
           <div class="fi">
             <span class="fi-lbl">Collect from</span>
@@ -1690,6 +1718,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
             <!-- ── 1 · WHERE IS IT GOING? ── -->
             <div class="fstep on" id="fq-1">
               <div class="slbl">Step 1 of 7 &#8212; Where is it going?</div>
+              <div class="pj" data-pj="b"></div>
               <div class="of" style="margin-bottom:.55rem"><label class="ol">Collecting from</label><input class="oi" id="fq-from" placeholder="e.g. S9 1AA" maxlength="8" autocomplete="off"></div>
               <div class="of"><label class="ol">Delivering to</label><input class="oi" id="fq-to" placeholder="e.g. M1 1AA" maxlength="8" autocomplete="off"></div>
               <div class="fstep-err" id="fq-err-1"></div>
@@ -5697,6 +5726,610 @@ function doTrack(){
 }
 
 /* ── CUSTOMER FLOWS (inline, no modal) ── */
+/* ══ PASTE THE JOB IN — READ AN EMAIL INTO THE ORDER ════════════════════
+   Brent, 10 Sep 2026: nearly every job arrives already written down, in an
+   email or a message. Retyping it is the whole friction. So the job tile opens
+   with a paste box: the text goes in, we read it, we SHOW the customer what we
+   read, and only then — on their press — does it fill the form.
+
+   The one rule this thing lives by: it never invents a detail. Every value in
+   the review list came out of the pasted text. Anything the text did not say is
+   named as missing in the same list, so a blank is a blank the customer can see
+   rather than a guess the driver finds out about at the door. */
+
+const PJ_PC_RE = /\b([A-Z]{1,2}[0-9][A-Z0-9]?)\s*([0-9][A-Z]{2})\b/gi;
+const PJ_MOB_RE = /(?:\+44\s?7|\b07)[0-9]{2,3}[\s.\-]?[0-9]{3}[\s.\-]?[0-9]{3,4}\b/;
+const PJ_LAND_RE = /\b0(?:1|2)[0-9]{2,3}[\s.\-]?[0-9]{3}[\s.\-]?[0-9]{3,4}\b/;
+const PJ_EMAIL_RE = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
+
+/* The words that say which end of the job a line is talking about. A line that
+   names both ends settles nothing, so the section it is already in is kept. */
+const PJ_CUE_C = /(collect|collection|pick[\s\-]?up|picking up|origin|load(?:ing)?\s+(?:from|at)|from site|depot|sender|shipper|consignor)/i;
+const PJ_CUE_D = /(deliver|delivery|drop[\s\-]?off|dropping|destination|to site|consignee|receiver|recipient|unload)/i;
+
+const PJ_UNIT_W = [
+  { re: /pallets?/i, k: 'pallets' },
+  { re: /roll\s?cages?|cages?/i, k: 'cages' },
+  { re: /crates?/i, k: 'crates' },
+  { re: /cartons?|boxes|box\b/i, k: 'boxes' },
+  { re: /bags?|sacks?/i, k: 'bags' },
+  { re: /furniture/i, k: 'furn' },
+  { re: /items?|pieces?|pcs?\b|drums?|totes?/i, k: 'items' }
+];
+
+/* Brent's eleven handling toggles, in the words a real email uses for them.
+   Order matters: "non-stackable" contains "stackable", so it is tested first. */
+const PJ_REQ_W = [
+  { re: /tail[\s\-]?lift/i, k: 'tail' },
+  { re: /fragile|handle with care|delicate|glassware/i, k: 'fragile' },
+  { re: /non[\s\-]?stack|not stackable|do not stack|no stacking|cannot be stacked|can'?t be stacked/i, k: 'nostack' },
+  { re: /stackable|can be stacked|stack them/i, k: 'stack' },
+  { re: /palletis|palletiz|on pallets|shrink[\s\-]?wrapped/i, k: 'pallet' },
+  { re: /loose[\s\-]?load|hand[\s\-]?ball|loose in the van/i, k: 'loose' },
+  { re: /two[\s\-]?(?:person|man|people)|2[\s\-]?(?:person|man)|second pair of hands/i, k: 'two' },
+  { re: /(?:help|labour|hand|assistance)[^.\n]{0,18}load(?:ing)?\b/i, k: 'helpc' },
+  { re: /(?:help|labour|hand|assistance)[^.\n]{0,18}unload(?:ing)?\b/i, k: 'helpd' }
+];
+const PJ_OPP = { nostack: 'stack', stack: 'nostack', pallet: 'loose', loose: 'pallet' };
+const PJ_MON = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+
+function pjISO(y, m, d) {
+  return y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+}
+
+/* A date only where the text really gives one. The numeric form insists on a
+   slash or a dash, never a dot, because "1.2m x 1m x 1.5m" is a pallet, not a
+   date, and reading it as one is exactly the kind of invention this is here to
+   avoid. */
+function pjDate(t, now) {
+  now = now || new Date();
+  let m = t.match(/\b([0-9]{1,2})[\/\-]([0-9]{1,2})(?:[\/\-]([0-9]{2,4}))?\b/);
+  if (m) {
+    const d = +m[1], mo = +m[2];
+    let y = m[3] ? +m[3] : now.getFullYear();
+    if (y < 100) y += 2000;
+    if (d >= 1 && d <= 31 && mo >= 1 && mo <= 12) return pjISO(y, mo, d);
+  }
+  m = t.match(/\b([0-9]{1,2})(?:st|nd|rd|th)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?(?:\s+([0-9]{4}))?/i);
+  if (m) return pjISO(m[3] ? +m[3] : now.getFullYear(), PJ_MON[m[2].toLowerCase()], +m[1]);
+  m = t.match(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+([0-9]{1,2})(?:st|nd|rd|th)?(?:\s+([0-9]{4}))?/i);
+  if (m) return pjISO(m[3] ? +m[3] : now.getFullYear(), PJ_MON[m[1].toLowerCase()], +m[2]);
+  if (/\btomorrow\b/i.test(t)) {
+    const d = new Date(now.getTime() + 864e5);
+    return pjISO(d.getFullYear(), d.getMonth() + 1, d.getDate());
+  }
+  if (/\btoday\b/i.test(t)) return pjISO(now.getFullYear(), now.getMonth() + 1, now.getDate());
+  m = t.match(/\b(mon|tues?|wed|thur?s?|fri|sat|sun)(?:day|nesday|rsday|urday)?\b/i);
+  if (m) {
+    const names = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    const target = names.indexOf(m[1].slice(0, 3).toLowerCase());
+    if (target < 0) return '';
+    let add = (target - now.getDay() + 7) % 7;
+    if (add === 0) add = 7;
+    const d = new Date(now.getTime() + add * 864e5);
+    return pjISO(d.getFullYear(), d.getMonth() + 1, d.getDate());
+  }
+  return '';
+}
+
+function pjTime(s) {
+  let m = s.match(/\b([0-9]{1,2})[:.]([0-9]{2})\s*(am|pm)?/i);
+  if (m) {
+    let h = +m[1];
+    const p = (m[3] || '').toLowerCase();
+    if (p === 'pm' && h < 12) h += 12;
+    if (p === 'am' && h === 12) h = 0;
+    if (h < 24 && +m[2] < 60) return String(h).padStart(2, '0') + ':' + m[2];
+  }
+  m = s.match(/\b([0-9]{1,2})\s*(am|pm)\b/i);
+  if (m) {
+    let h = +m[1];
+    const p = m[2].toLowerCase();
+    if (p === 'pm' && h < 12) h += 12;
+    if (p === 'am' && h === 12) h = 0;
+    return String(h).padStart(2, '0') + ':00';
+  }
+  return '';
+}
+
+/* Strip a leading label off a line — "Collection address:" — but only when the
+   words before the colon really are a label. "John: ring the buzzer" keeps its
+   whole sentence. */
+function pjDelabel(l) {
+  const m = l.match(/^([^:]{1,44}):\s*(.+)$/);
+  if (!m) return l.trim();
+  if (/collect|delivery|deliver|address|pick|drop|from|to|contact|site|depot|goods|load|when|date|time|ref/i.test(m[1])) return m[2].trim();
+  return l.trim();
+}
+
+function pjPhone(s) {
+  const m = s.match(PJ_MOB_RE) || s.match(PJ_LAND_RE);
+  return m ? m[0].replace(/[.\-]/g, ' ').replace(/\s+/g, ' ').trim() : '';
+}
+
+/* Which end of the job is each line about? Sticky: an email writes "Collection"
+   once and then four lines that all belong to it. */
+function pjSides(lines) {
+  const out = [];
+  let cur = '';
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i].trim();
+    const hasC = PJ_CUE_C.test(l), hasD = PJ_CUE_D.test(l);
+    if (l && hasC && !hasD) cur = 'c';
+    else if (l && hasD && !hasC) cur = 'd';
+    else if (l && /^from\s*:/i.test(l) && l.indexOf('@') < 0) cur = 'c';
+    else if (l && /^to\s*:/i.test(l) && l.indexOf('@') < 0) cur = 'd';
+    out[i] = cur;
+  }
+  return out;
+}
+
+/* An address has to be an address. A bare postcode is not one — a driver cannot
+   deliver to "S9 1AA" — and the house-number check says yes to a postcode
+   because a postcode contains digits, so this counts real words instead. */
+const PJ_STREETY = /\b(road|rd|street|st|lane|ln|avenue|ave|drive|dr|close|way|court|estate|industrial|unit|yard|works|house|farm|place|terrace|square|hill|gate|wharf|dock|depot|trading|business|retail|centre|center|mill|bank|green|grove|crescent|walk|row|mews|trade|park|building|floor|suite|warehouse|shop|store|garage|barn|lodge|villas?|cottages?)\b/i;
+const PJ_LABEL_ONLY = /^[a-z&'\s]{2,30}:?\s*$/i;
+/* The words a sentence uses to hand over to a place. Everything after the last
+   one of them is the address; everything before it is the sentence. */
+const PJ_PREP = /\b(?:collection|collect(?:ed)?\s*(?:from|at)?|pick(?:ed)?[\s-]?up\s*(?:from|at)?|deliver(?:y|ed)?\s*(?:to|at)?|drop(?:ped)?\s*(?:off)?\s*(?:at|to)?|from|to|at|address)\b\s*:?\s*/gi;
+
+/* An address has to be an address. A bare postcode is not one — a driver cannot
+   deliver to "S9 1AA" — and the house-number check says yes to a postcode
+   because a postcode contains digits, so this counts real words instead, and
+   then insists on something that could actually be a place. */
+function pjAddrOk(addr, pc) {
+  const rest = addr.replace(new RegExp(pc.replace(/\s/g, '\\s*'), 'i'), ' ')
+    .replace(/[,\s]+/g, ' ').trim();
+  const words = rest.split(' ').filter(w => /[a-z]/i.test(w));
+  if (words.length < 2) return false;
+  return /\b[0-9]+[a-z]?\b/i.test(rest) || PJ_STREETY.test(rest);
+}
+
+/* Read backwards from the postcode until the address runs out. Works the same
+   whether the email lays it out in a block or writes it into a sentence. */
+function pjAddress(lines, sides, hit) {
+  let head = lines[hit.line].slice(0, hit.idx);
+  /* Nothing but a town in front of the postcode? Then the street is on the
+     lines above it — walk back while they still belong to this end of the job. */
+  const thin = s => s.replace(/[,\s]+/g, ' ').trim().split(' ').filter(w => /[a-z]/i.test(w)).length < 2;
+  if (thin(head)) {
+    const parts = [];
+    for (let i = hit.line - 1; i >= 0 && i >= hit.line - 4; i--) {
+      const ln = lines[i].trim();
+      if (!ln) continue;
+      if (sides[i] && hit.side && sides[i] !== hit.side) break;
+      if (PJ_LABEL_ONLY.test(ln) && ln.indexOf(':') >= 0) continue;
+      if (PJ_EMAIL_RE.test(ln) || pjPhone(ln)) continue;
+      /* A line that already holds its own postcode belongs to the other place —
+         except in prose, where the address simply wrapped onto the next line, so
+         whatever follows that postcode is taken and the walk stops there. */
+      const pcRe = new RegExp(PJ_PC_RE.source, 'gi');
+      let last = null, mm;
+      while ((mm = pcRe.exec(ln))) last = mm;
+      if (last) {
+        const tail = ln.slice(last.index + last[0].length).trim();
+        if (!thin(tail)) parts.unshift(tail);
+        break;
+      }
+      parts.unshift(pjDelabel(ln));
+    }
+    head = parts.concat([head]).map(s => s.replace(/[,\s]+$/, '').trim())
+      .filter(Boolean).join(', ');
+  }
+  /* Cut the sentence off in front of the address. */
+  let cut = 0, m;
+  const re = new RegExp(PJ_PREP.source, 'gi');
+  while ((m = re.exec(head))) cut = m.index + m[0].length;
+  if (cut) head = head.slice(cut);
+  head = pjDelabel(head).replace(/^[,\s:;\-–—]+|[,\s:;\-–—]+$/g, '');
+  const addr = (head ? head + ' ' : '') + hit.pc;
+  return pjAddrOk(addr, hit.pc) ? addr.replace(/\s+/g, ' ') : '';
+}
+
+/* A name, out of the way an email actually writes one. */
+function pjName(lines, sides, side) {
+  const clean = raw => {
+    let t = raw.replace(PJ_MOB_RE, ' ').replace(PJ_LAND_RE, ' ').replace(PJ_EMAIL_RE, ' ');
+    t = t.replace(/\b(?:on|tel|telephone|mob|mobile|phone|no|number|m|t)\b\s*[:.\-]?\s*/gi, ' ');
+    t = t.replace(/[|,;()\-–—]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const words = t.split(' ').filter(w => /^[A-Z][a-z'’\-]{1,}$/.test(w) || /^[A-Z]{2,}$/.test(w));
+    return words.slice(0, 3).join(' ');
+  };
+  for (let i = 0; i < lines.length; i++) {
+    if (side && sides[i] !== side) continue;
+    const m = lines[i].match(/(?:contact(?:\s*name)?|ask for|attn|c\/o|speak to|site contact)\s*[:\-]?\s*(.+)$/i);
+    if (m) { const n = clean(m[1]); if (n) return n; }
+  }
+  /* No label, but a phone number with a name sitting in front of it. */
+  for (let i = 0; i < lines.length; i++) {
+    if (side && sides[i] !== side) continue;
+    const ph = pjPhone(lines[i]);
+    if (!ph) continue;
+    const before = lines[i].slice(0, lines[i].indexOf(ph.split(' ')[0]));
+    const n = clean(before);
+    if (n) return n;
+  }
+  return '';
+}
+
+function pjSidePhone(lines, sides, side) {
+  for (let i = 0; i < lines.length; i++) {
+    if (sides[i] !== side) continue;
+    const p = pjPhone(lines[i]);
+    if (p) return p;
+  }
+  return '';
+}
+
+/* ── THE READER ────────────────────────────────────────────────────────── */
+function pjParse(text, bands, now) {
+  const WT = bands.WT_BAND, SZ = bands.SZ_BAND;
+  const raw = String(text || '').replace(/\r/g, '');
+  const lines = raw.split('\n');
+  const sides = pjSides(lines);
+  const r = { missing: [], notes: [] };
+
+  /* Postcodes, and which end each one belongs to. */
+  const hits = [];
+  lines.forEach((ln, i) => {
+    const re = new RegExp(PJ_PC_RE.source, 'gi');
+    let m;
+    while ((m = re.exec(ln))) hits.push({ pc: (m[1] + ' ' + m[2]).toUpperCase(), line: i, side: sides[i], idx: m.index });
+  });
+  const cHit = hits.find(h => h.side === 'c') || hits[0] || null;
+  let dHit = hits.find(h => h.side === 'd' && h !== cHit);
+  if (!dHit) dHit = hits.filter(h => h !== cHit).pop() || null;
+  if (cHit) r.from = cHit.pc; else r.missing.push('the collection postcode');
+  if (dHit) r.to = dHit.pc; else r.missing.push('the delivery postcode');
+
+  /* Full addresses, contacts. */
+  if (cHit) {
+    r.cAddr = pjAddress(lines, sides, cHit);
+    if (!r.cAddr) r.missing.push('the full collection address');
+  }
+  if (dHit) {
+    r.dAddr = pjAddress(lines, sides, dHit);
+    if (!r.dAddr) r.missing.push('the full delivery address');
+  }
+  r.cName = pjName(lines, sides, 'c') || (hits.length && !sides.some(s => s) ? pjName(lines, sides, '') : '');
+  r.dName = pjName(lines, sides, 'd');
+  r.cPhone = pjSidePhone(lines, sides, 'c');
+  r.dPhone = pjSidePhone(lines, sides, 'd');
+  if (!r.cName) r.missing.push('who the driver asks for at collection');
+  if (!r.cPhone) r.missing.push('a phone number at collection');
+  if (!r.dName) r.missing.push('who receives it at delivery');
+  if (!r.dPhone) r.missing.push('a phone number at delivery');
+
+  /* How much there is, and of what. */
+  const qm = raw.match(/\b([0-9]{1,3})\s*(?:x\s*)?(pallets?|roll\s?cages?|cages?|crates?|cartons?|boxes|box|bags?|sacks?|drums?|totes?|items?|pieces?|pcs?|furniture[a-z\s]{0,10})\b/i);
+  if (qm) {
+    r.qty = +qm[1];
+    const w = PJ_UNIT_W.find(u => u.re.test(qm[2]));
+    r.unit = w ? w.k : 'items';
+    r.qtyWords = qm[0].trim();
+  } else r.missing.push('how many items there are');
+
+  /* How heavy. Only ever from a figure the text really gives. */
+  const wm = raw.match(/(?:^|[^a-z0-9.])([0-9]{1,4}(?:\.[0-9]+)?)\s*(kgs?|kilos?|kilograms?|tonnes?|tons?|te|t)(?![a-z])/i);
+  if (wm) {
+    const n = parseFloat(wm[1]);
+    const u = wm[2].toLowerCase();
+    r.kg = /^(t|te|ton|tons|tonne|tonnes)$/.test(u) ? Math.round(n * 1000) : Math.round(n);
+    const b = WT.find(x => r.kg <= x.kg) || WT[WT.length - 1];
+    r.wtKey = b.k;
+    r.wtName = b.n;
+  } else r.missing.push('how heavy it is');
+
+  /* How much room it takes. Worked out from the count, shown as the band it
+     lands on with the count that put it there, so the customer can see the
+     reasoning and move it. */
+  if (r.qty && r.unit) {
+    const lvl = (() => {
+      if (r.unit === 'pallets' || r.unit === 'crates' || r.unit === 'cages')
+        return r.qty <= 1 ? 3 : (r.qty <= 3 ? 4 : 5);
+      if (r.unit === 'boxes' || r.unit === 'bags')
+        return r.qty <= 1 ? 1 : (r.qty <= 6 ? 2 : 3);
+      if (r.unit === 'furn') return r.qty <= 2 ? 2 : 4;
+      return r.qty <= 1 ? 1 : (r.qty <= 6 ? 2 : 3);
+    })();
+    const b = SZ.find(x => x.lvl === lvl) || SZ[1];
+    r.szKey = b.k;
+    r.szName = b.n;
+  }
+
+  /* What the goods are, in the sender's own words. */
+  let goods = '';
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/^\s*(?:goods|load|consignment|description|items?|what)\s*[:\-]\s*(.+)$/i);
+    if (m) { goods = m[1].trim(); break; }
+  }
+  if (!goods && qm) {
+    const ln = lines.find(l => l.indexOf(qm[0]) >= 0);
+    if (ln) goods = pjDelabel(ln).replace(/\s+/g, ' ').trim();
+  }
+  if (goods) r.goods = goods.slice(0, 200);
+  else r.missing.push('what the goods are');
+
+  /* Dimensions, if they are written as one. */
+  const dm = raw.match(/([0-9]+(?:\.[0-9]+)?)\s*(m|cm|mm|ft)?\s*[x×]\s*([0-9]+(?:\.[0-9]+)?)\s*(m|cm|mm|ft)?\s*[x×]\s*([0-9]+(?:\.[0-9]+)?)\s*(m|cm|mm|ft)?/i);
+  if (dm) {
+    const u = (dm[6] || dm[4] || dm[2] || 'cm').toLowerCase();
+    r.dims = { l: dm[1], w: dm[3], h: dm[5], unit: u === 'mm' ? 'cm' : u };
+  }
+
+  /* Loading and handling. */
+  r.reqs = [];
+  PJ_REQ_W.forEach(w => {
+    if (r.reqs.indexOf(w.k) >= 0) return;
+    if (PJ_OPP[w.k] && r.reqs.indexOf(PJ_OPP[w.k]) >= 0) return;
+    if (w.re.test(raw)) r.reqs.push(w.k);
+  });
+  /* A forklift belongs to an end of the job. Where the text says which end, it
+     is set; where it does not, nothing is ticked and it is passed through as a
+     note for the driver rather than guessed onto the wrong site. */
+  let forkSaid = false;
+  lines.forEach((ln, i) => {
+    if (!/fork[\s\-]?lift|fork truck/i.test(ln)) return;
+    forkSaid = true;
+    const side = /collect|pick|load/i.test(ln) ? 'c' : (/deliver|drop|unload/i.test(ln) ? 'd' : sides[i]);
+    if (side === 'c' && r.reqs.indexOf('forkc') < 0) r.reqs.push('forkc');
+    else if (side === 'd' && r.reqs.indexOf('forkd') < 0) r.reqs.push('forkd');
+    else r.notes.push(ln.trim());
+  });
+  r.forkSaid = forkSaid;
+
+  /* When. */
+  const whenLines = lines.filter(l => /collect|collection|pick|ready|available|deliver|delivery|date|when|asap|today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|before|by |no later/i.test(l));
+  for (const l of whenLines) {
+    const d = pjDate(l, now);
+    if (d) { r.cdate = d; break; }
+  }
+  if (!r.cdate) {
+    const d = pjDate(raw, now);
+    if (d) r.cdate = d;
+  }
+  /* One line often carries both halves — "collection Friday from 9am, must be on
+     site before 4pm" — so the clauses are read separately. Reading the line whole
+     would put the deadline in the collection time box and leave the deadline
+     blank, which is the worst of both. */
+  const DEADLINE = /\b(before|by|no later than|deadline|must be|needs? to be|prior to|latest)\b/i;
+  const clauses = [];
+  lines.forEach((l, i) => l.split(/[,;]|\.\s|\bthen\b/).forEach(c => {
+    if (c.trim()) clauses.push({ t: c.trim(), side: sides[i] });
+  }));
+  for (const c of clauses) {
+    if (DEADLINE.test(c.t)) continue;
+    if (c.side !== 'c' && !/collect|pick|ready|available/i.test(c.t)) continue;
+    const t = pjTime(c.t);
+    if (t) { r.ctime = t; break; }
+  }
+  for (const c of clauses) {
+    if (!DEADLINE.test(c.t)) continue;
+    if (!pjTime(c.t) && !/\b(am|pm|noon|close of|end of)\b/i.test(c.t)) continue;
+    r.dreq = pjDelabel(c.t).slice(0, 90);
+    break;
+  }
+  if (!r.cdate && !r.ctime && !r.dreq) r.missing.push('when it needs moving');
+
+  /* Anything else the driver needs to know, in the sender's own words. */
+  lines.forEach((ln, i) => {
+    const m = ln.match(/^\s*(?:notes?|instructions?|access|please note|nb)\s*[:\-]\s*(.+)$/i);
+    if (m) r.notes.push(m[1].trim());
+  });
+  r.notes = r.notes.filter((n, i, a) => n && a.indexOf(n) === i).slice(0, 4);
+
+  /* Who is asking. An email signature is the one place a person's own details
+     are reliably written down. */
+  const em = raw.match(new RegExp(PJ_EMAIL_RE.source, 'gi')) || [];
+  const mine = em.find(e => !/usehaf\.co\.uk|quote@/i.test(e));
+  if (mine) r.reqEmail = mine;
+  let nm = raw.match(/^from\s*:\s*([^<\n]{2,50})</im);
+  if (nm) r.reqName = nm[1].trim();
+  if (!r.reqName) {
+    nm = raw.match(/\b(?:kind regards|many thanks|best regards|regards|thanks|cheers|best wishes|yours)\b[,!.\t ]*\n+[ \t]*([A-Z][a-z'’\-]+(?:[ \t]+[A-Z][a-z'’\-]+){0,2})/i);
+    if (nm) r.reqName = nm[1].trim();
+  }
+  return r;
+}
+
+/* ── THE PASTE BOX ITSELF ───────────────────────────────────────────────
+   Two mount points, one panel: the job tile on the front page and step one of
+   the order flow, so a signed-in member posting a job gets the same box as a
+   stranger pricing one. Both are drawn from this single template — a second
+   copy of the wording is a second place for it to go stale. */
+const pjFound = {};
+const PJ_SLOTS = ['a', 'b'];
+
+function pjHTML(s) {
+  return '<button class="pj-open" type="button" onclick="pjOpen(\'' + s + '\')">'
+    + '<svg viewBox="0 0 24 24"><rect x="8" y="2.5" width="8" height="4" rx="1.2"/>'
+    + '<path d="M9 4.5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-13a2 2 0 0 0-2-2h-3"/>'
+    + '<path d="M8.5 12h7M8.5 16h4.5"/></svg>'
+    + '<span class="pj-open-w"><span class="pj-open-t">Got the job in an email? Paste it in</span>'
+    + '<span class="pj-open-s">We read it and fill this form in for you &#8212; no retyping</span></span>'
+    + '<span class="pj-open-x">&#8594;</span></button>'
+    + '<div class="pj-body" id="pj-body-' + s + '" style="display:none">'
+    + '<div class="pj-h">Paste the job in</div>'
+    + '<p class="pj-p">The whole email, a WhatsApp message, or a note to yourself &#8212; however it was sent to you. '
+    + 'We pick out the addresses, the contacts, what is being moved and when, and <strong>show you what we found</strong> before anything is filled in.</p>'
+    + '<textarea class="ta pj-ta" id="pj-txt-' + s + '" placeholder="Paste here. Something like:&#10;&#10;'
+    + 'Collection: Unit 4 Callum Park, Sheffield S9 1AA&#10;Contact: John Wright 07700 900123&#10;'
+    + 'Delivery: 22 Trafford Way, Manchester M1 1AA&#10;Contact: Sarah Ellis 07700 900456&#10;'
+    + '3 pallets of boxed clothing, 300kg, tail lift needed&#10;Collect Friday from 9am, on site before 4pm"></textarea>'
+    + '<div class="pj-err" id="pj-err-' + s + '" style="display:none"></div>'
+    + '<div class="fnav" style="justify-content:flex-start">'
+    + '<button class="btn btn-or btn-sm" type="button" onclick="pjRead(\'' + s + '\')">Read it &#8594;</button>'
+    + '<button class="btn btn-gh btn-sm" type="button" onclick="pjClose(\'' + s + '\')">Cancel</button></div>'
+    + '<div class="pj-found" id="pj-found-' + s + '" style="display:none">'
+    + '<div class="pj-h pj-h2">Here is what we found</div>'
+    + '<div class="pj-list" id="pj-list-' + s + '"></div>'
+    + '<div class="pj-miss" id="pj-miss-' + s + '" style="display:none"></div>'
+    + '<div class="fnav" style="justify-content:flex-start">'
+    + '<button class="btn btn-or btn-sm" type="button" onclick="pjApply(\'' + s + '\')">Use these details &#8594;</button>'
+    + '<button class="btn btn-gh btn-sm" type="button" onclick="pjBack(\'' + s + '\')">&#8592; Edit what I pasted</button>'
+    + '</div></div></div>';
+}
+function pjMount() {
+  PJ_SLOTS.forEach(s => {
+    const el = document.querySelector('[data-pj="' + s + '"]');
+    if (el) el.innerHTML = pjHTML(s);
+  });
+}
+pjMount();
+
+const _pjE = id => document.getElementById(id);
+function pjOpen(s) {
+  const b = _pjE('pj-body-' + s);
+  if (!b) return;
+  b.style.display = 'block';
+  const t = _pjE('pj-txt-' + s);
+  if (t) t.focus();
+}
+function pjClose(s) {
+  const b = _pjE('pj-body-' + s);
+  if (b) b.style.display = 'none';
+}
+function pjBack(s) {
+  const f = _pjE('pj-found-' + s);
+  if (f) f.style.display = 'none';
+}
+
+const PJ_UNAME = k => (UNIT.find(u => u.k === k) || {}).n || k;
+function pjDateWords(iso) {
+  if (!iso) return '';
+  const p = iso.split('-');
+  const d = new Date(+p[0], +p[1] - 1, +p[2]);
+  const dy = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()];
+  const mo = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][d.getMonth()];
+  return dy + ' ' + (+p[2]) + ' ' + mo;
+}
+
+/* Read it, then say what was read. Nothing is written into the form at this
+   point — the customer sees the list first and presses to accept it. */
+function pjRead(s) {
+  const txt = (_pjE('pj-txt-' + s) || {}).value || '';
+  const er = _pjE('pj-err-' + s);
+  const show = m => { if (er) { er.textContent = m; er.style.display = m ? 'block' : 'none'; } };
+  if (txt.trim().length < 12) { show('Paste the job in first — the email, the message, or your own note of it.'); return; }
+  let r;
+  try { r = pjParse(txt, { WT_BAND: WT_BAND, SZ_BAND: SZ_BAND }); }
+  catch (e) { show('We could not read that. You can still fill the form in below.'); return; }
+  if (!r.from && !r.to) {
+    show('We could not find a collection or a delivery place in that. Paste a bit more of the email, or just type the two postcodes in below.');
+    return;
+  }
+  show('');
+  pjFound[s] = r;
+  const row = (l, v) => '<div class="pj-row"><span class="pj-row-l">' + l + '</span><span class="pj-row-v">' + pjEsc(v) + '</span></div>';
+  let h = '';
+  if (r.from) h += row('Collecting from', r.cAddr || r.from);
+  if (r.cName || r.cPhone) h += row('At collection, ask for', [r.cName, r.cPhone].filter(Boolean).join(' &#183; '));
+  if (r.to) h += row('Delivering to', r.dAddr || r.to);
+  if (r.dName || r.dPhone) h += row('At delivery, ask for', [r.dName, r.dPhone].filter(Boolean).join(' &#183; '));
+  if (r.goods) h += row('What is moving', r.goods);
+  if (r.qty) h += row('How much there is', r.qty + ' ' + PJ_UNAME(r.unit).toLowerCase() + (r.szName ? ' &#8212; ' + r.szName.toLowerCase() : ''));
+  if (r.kg) h += row('How heavy', r.kg + ' kg' + (r.wtName ? ' &#8212; ' + r.wtName.toLowerCase() : ''));
+  if (r.dims) h += row('Largest item', r.dims.l + ' &#215; ' + r.dims.w + ' &#215; ' + r.dims.h + ' ' + r.dims.unit);
+  if (r.reqs && r.reqs.length) h += row('Loading and handling', r.reqs.map(REQ_N).join(' &#183; '));
+  if (r.cdate || r.ctime) h += row('Collection', [pjDateWords(r.cdate), r.ctime ? 'from ' + r.ctime : ''].filter(Boolean).join(', '));
+  if (r.dreq) h += row('Must be delivered', r.dreq);
+  if (r.notes && r.notes.length) h += row('For the driver', r.notes.join(' &#183; '));
+  if (r.reqName || r.reqEmail) h += row('You', [r.reqName, r.reqEmail].filter(Boolean).join(' &#183; '));
+  const list = _pjE('pj-list-' + s);
+  if (list) list.innerHTML = h;
+  const miss = _pjE('pj-miss-' + s);
+  if (miss) {
+    if (r.missing.length) {
+      miss.innerHTML = '<strong>Not in what you pasted:</strong> ' + pjEsc(r.missing.join(', '))
+        + '. We have left those blank rather than guessing &#8212; the form will ask you for them.';
+      miss.style.display = 'block';
+    } else miss.style.display = 'none';
+  }
+  const f = _pjE('pj-found-' + s);
+  if (f) { f.style.display = 'block'; setTimeout(() => f.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50); }
+}
+function pjEsc(v) {
+  return String(v == null ? '' : v).replace(/&(?![a-z#0-9]+;)/gi, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* ── FILL IT IN ────────────────────────────────────────────────────────
+   The front tile first, so the guide price is already worked out, then into the
+   order flow and as far through it as the pasted text actually gets us. Where a
+   detail is missing the flow stops on its own step with its own words, which is
+   exactly where the customer needs to be. */
+function pjApply(s) {
+  const r = pjFound[s];
+  if (!r) return;
+  const set = (id, v) => { const e = _pjE(id); if (e && v) e.value = v; };
+  const click = sel => { const e = document.querySelector(sel); if (e) e.click(); return !!e; };
+
+  set('pc-from', r.from); set('pc-to', r.to);
+  if (r.wtKey) click('#wt-pills .lp-tile[data-wt="' + r.wtKey + '"]');
+  if (r.szKey) click('#sz-pills .lp-tile[data-sz="' + r.szKey + '"]');
+  try { if (typeof onPcInput === 'function') onPcInput(); } catch (e) { }
+
+  pjClose('a'); pjClose('b');
+  startConsignment();
+
+  /* Step 1 — where. startConsignment carries the two places over; this covers
+     the member who opened the flow straight from Post a Job. */
+  set('fq-from', r.from); set('fq-to', r.to);
+  /* Step 2 — what. */
+  if (r.kg) set('fq-exact', String(r.kg));
+  if (r.qty) set('fq-qty', String(r.qty));
+  if (r.unit) set('fq-unit', r.unit);
+  if (r.goods) set('fq-goods', r.goods);
+  if (r.dims) {
+    set('fq-dl', r.dims.l); set('fq-dw', r.dims.w); set('fq-dh', r.dims.h);
+    set('fq-dunit', r.dims.unit);
+  }
+  (r.reqs || []).forEach(k => click('#fq-reqs .tgl[data-req="' + k + '"]'));
+  if (r.notes && r.notes.length) set('fq-notes', r.notes.join('. '));
+  /* Step 4 — when. Only where the text says so: a date makes it a pre-book,
+     "asap" makes it urgent, today makes it same-day. Nothing said, nothing
+     chosen, and the customer answers it themselves. */
+  const urg = /\basap|urgent|straight away|immediately\b/i.test((_pjE('pj-txt-' + s) || {}).value || '') ? 'urg'
+    : (r.cdate ? (r.cdate === pjISO(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate()) ? 'sday' : 'timed') : '');
+  if (urg) click('#fq-4 .oopt[onclick*="\'urg\',\'' + urg + '\'"]');
+  set('fq-cdate', r.cdate); set('fq-ctime', r.ctime); set('fq-dreq', r.dreq);
+  /* Step 5 — the door. */
+  set('fq-caddr', r.cAddr); set('fq-cname', r.cName); set('fq-cphone', r.cPhone);
+  set('fq-daddr', r.dAddr); set('fq-dname', r.dName); set('fq-dphone', r.dPhone);
+  /* Step 7 — who is asking. */
+  set('fq-name', r.reqName); set('fq-email', r.reqEmail);
+  try { if (typeof fqLoadChanged === 'function') fqLoadChanged(); } catch (e) { }
+
+  /* Walk it forward. Each stage is the page's own check, so a stage that is not
+     satisfied refuses in its own words and the walk stops there. */
+  const on = n => { const e = _pjE('fq-' + n); return !!e && e.classList.contains('on'); };
+  try {
+    for (const n of [2, 3, 4, 5]) { fqNext(n); if (!on(n)) break; }
+    if (on(5) && typeof fqShowPriceV === 'function') fqShowPriceV();
+  } catch (e) { }
+  pjSaid(r);
+}
+
+/* One line at the top of the flow saying where these answers came from, so a
+   filled-in form is never mistaken for one the customer typed themselves. */
+function pjSaid(r) {
+  const host = _pjE('if-fast');
+  if (!host) return;
+  let b = _pjE('pj-said');
+  if (!b) {
+    b = document.createElement('div');
+    b.id = 'pj-said';
+    b.className = 'cf-offer';
+    b.style.marginBottom = '.8rem';
+    host.insertBefore(b, host.firstChild);
+  }
+  b.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><span>'
+    + 'Filled in from what you pasted. Please check it over&#8212; '
+    + (r.missing && r.missing.length
+      ? 'we could not find ' + pjEsc(r.missing.join(', ')) + ', so the form will ask you.'
+      : 'everything the driver needs was in there.')
+    + '</span>';
+}
+
 const FLOW_TITLES={fast:'Your consignment',repeat:'Repeat an order',pick:'HAF Pick'};
 
 /* ── THE ONE DOOR INTO THE CONSIGNMENT ─────────────────────────────────
@@ -14224,6 +14857,288 @@ window.pxSave=async function(){
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })();
+</script>
+<script>
+/* HAFJC:START — stamped from haf-shared/job-card.js. Do not edit here. */
+/* HAF JOB CARD — written once, used by the KNECT calendar and the PLNA calendar.
+ *
+ * SOURCE OF TRUTH. Do not edit the copy inside plna-cf/dashboard.html or
+ * knect-consign/index.html by hand — they are stamped from this file by
+ * scripts/haf_stamp_job_card.py, between the HAFJC markers. If you edit a
+ * stamped copy it will be overwritten on the next stamp, and the two calendars
+ * will disagree in the meantime, which is the exact thing this file exists to
+ * prevent.
+ *
+ * It renders one job from public.haf_calendar and nothing else. It does not
+ * fetch, it does not know about sign-in, and it never decides what a person may
+ * see — that is all settled once, in the database function.
+ *
+ * The three levels come straight from Brent's brief:
+ *   1 GLANCE   time, route, status colour            — always shown
+ *   2 DETAIL   van, miles, money, reference          — shown when there is room
+ *   3 ACTION   the drawer                            — on click
+ *
+ * The two apps use different CSS variable names for the same colours (PLNA has
+ * --panel/--text/--orange, KNECT has --p/--tx/--or), so this card owns its
+ * palette under --jc-* and each host maps its own tokens onto it in one small
+ * block below. Every --jc-* has a hard fallback, so a token that is missing on
+ * one site cannot make the card invisible there.
+ */
+(function (root) {
+  'use strict';
+
+  var CSS = [
+    /* ---- palette ----
+     * The surface colours are read from the HOST with an inline fallback, e.g.
+     * var(--jc-panel,#14161a). They are deliberately NOT declared with a
+     * default here: a default declared on .hafjc-scope would beat the host's
+     * own map unless the host's stylesheet happened to be appended later, and
+     * "it works because of the order two <style> tags load in" is not a thing
+     * to build a live surface on.
+     *
+     * The status colours are the card's own on both sites, on purpose. A job
+     * that is on the road must look the same to the customer and the driver.
+     */
+    '.hafjc-scope{container-type:inline-size;}',
+
+    /* ---- the card ---- */
+    '.hafjc{position:relative;display:flex;align-items:stretch;gap:.7rem;width:100%;',
+    'min-height:56px;padding:.62rem .8rem .62rem .7rem;text-align:left;',
+    'background:var(--jc-panel,#14161a);border:1px solid var(--jc-line,rgba(255,255,255,.09));',
+    'border-radius:var(--jc-radius,12px);color:var(--jc-text,#f2f3f5);cursor:pointer;',
+    'font:inherit;transition:border-color .13s,background .13s,transform .13s;}',
+    '.hafjc:hover{border-color:var(--jc-line-strong,rgba(255,255,255,.16));background:var(--jc-panel-2,#1b1e24);}',
+    '.hafjc:active{transform:scale(.995);}',
+    '.hafjc:focus-visible{outline:2px solid var(--jc-orange,#f18e00);outline-offset:2px;}',
+
+    /* status belongs to the JOB, never to the customer (brief s7) */
+    '.hafjc-bar{flex:0 0 4px;border-radius:3px;background:var(--jc-muted,#9aa1ab);align-self:stretch;}',
+    '.hafjc[data-stage="awaiting_allocation"] .hafjc-bar{background:var(--jc-amber,#e0a53a);}',
+    '.hafjc[data-stage="allocated"] .hafjc-bar{background:var(--jc-blue,#4b9fd6);}',
+    '.hafjc[data-stage="at_collection"] .hafjc-bar{background:var(--jc-orange,#f18e00);}',
+    '.hafjc[data-stage="in_transit"] .hafjc-bar{background:var(--jc-orange-text,#ffa726);}',
+    '.hafjc[data-stage="delivered"] .hafjc-bar{background:var(--jc-green,#5db87a);}',
+    '.hafjc[data-stage="exception"] .hafjc-bar{background:var(--jc-red,#d96a6a);}',
+    '.hafjc[data-stage="cancelled"] .hafjc-bar{background:var(--jc-muted,#9aa1ab);}',
+    '.hafjc[data-stage="cancelled"] .hafjc-main{opacity:.55;text-decoration:line-through;}',
+    '.hafjc[data-stage="delivered"]{opacity:.82;}',
+
+    '.hafjc-main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:.16rem;justify-content:center;}',
+    '.hafjc-line1{display:flex;align-items:baseline;gap:.5rem;min-width:0;}',
+    '.hafjc-time{font-weight:800;font-size:.86rem;letter-spacing:-.02em;white-space:nowrap;}',
+    '.hafjc-time.is-unplaced{color:var(--jc-amber,#e0a53a);font-weight:700;font-size:.78rem;}',
+    '.hafjc-route{font-size:.86rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+    '.hafjc-arrow{color:var(--jc-muted,#9aa1ab);padding:0 .18rem;}',
+    '.hafjc-line2{display:flex;align-items:center;gap:.45rem;font-size:.72rem;color:var(--jc-muted,#9aa1ab);min-width:0;}',
+    '.hafjc-sep{opacity:.45;}',
+    '.hafjc-stage{font-weight:600;}',
+    '.hafjc-ref{font-variant-numeric:tabular-nums;opacity:.75;overflow:hidden;text-overflow:ellipsis;}',
+
+    '.hafjc-right{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:.15rem;}',
+    '.hafjc-money{font-weight:800;font-size:.9rem;letter-spacing:-.02em;color:var(--jc-orange-text,#ffa726);white-space:nowrap;}',
+    '.hafjc-van{font-size:.63rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--jc-muted,#9aa1ab);',
+    'border:1px solid var(--jc-line-strong,rgba(255,255,255,.16));border-radius:999px;padding:.1rem .42rem;white-space:nowrap;}',
+    '.hafjc-test{font-size:.6rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#000;',
+    'background:var(--jc-amber,#e0a53a);border-radius:999px;padding:.08rem .4rem;white-space:nowrap;}',
+    '.hafjc-chips{display:flex;align-items:center;gap:.28rem;}',
+
+    /* ---- level 2 appears only when the card has room for it ---- */
+    '.hafjc-l2{display:none;}',
+    '@container (min-width:230px){.hafjc-l2{display:inline;}}',
+    '@container (min-width:340px){.hafjc-l2-wide{display:inline;}}',
+    '@container (max-width:339px){.hafjc-l2-wide{display:none;}}',
+    '@container (max-width:229px){.hafjc-right{display:none;}.hafjc{padding:.5rem .55rem;min-height:48px;}}',
+
+    /* ---- phone: bigger tap target, nothing hidden that matters ---- */
+    '@media (max-width:640px){',
+    '.hafjc{min-height:64px;padding:.7rem .75rem .7rem .65rem;border-radius:14px;}',
+    '.hafjc-time,.hafjc-route{font-size:.9rem;}',
+    '.hafjc-money{font-size:.95rem;}',
+    '}',
+
+    /* ---- a month cell holds a bare pill, not a card ---- */
+    '.hafjc.is-pill{min-height:0;padding:.14rem .34rem;gap:.28rem;border-radius:6px;font-size:.62rem;}',
+    '.hafjc.is-pill .hafjc-line2,.hafjc.is-pill .hafjc-right{display:none;}',
+    '.hafjc.is-pill .hafjc-time,.hafjc.is-pill .hafjc-route{font-size:.62rem;font-weight:700;}',
+    '.hafjc.is-pill .hafjc-bar{flex-basis:3px;}',
+    '.hafjc.is-pill .hafjc-line1{gap:.24rem;}',
+    '.hafjc.is-pill .hafjc-arrow{padding:0;}',
+    '.hafjc.is-pill .hafjc-time.is-unplaced{font-size:.62rem;opacity:.7;}',
+
+    /* ---- the strip for jobs with no readable time ---- */
+    '.hafjc-unplaced-head{display:flex;align-items:center;gap:.4rem;margin:.9rem 0 .45rem;',
+    'font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--jc-amber,#e0a53a);}',
+    '.hafjc-empty{padding:1.6rem 1rem;text-align:center;color:var(--jc-muted,#9aa1ab);font-size:.82rem;}'
+  ].join('');
+
+  var STAGE_WORD = {
+    awaiting_allocation: 'Needs a driver',
+    allocated: 'Driver assigned',
+    at_collection: 'At collection',
+    in_transit: 'On the road',
+    delivered: 'Delivered',
+    exception: 'Needs attention',
+    cancelled: 'Cancelled'
+  };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* A time we did not read from the job is never invented. A job with no
+   * window says so, and keeps its place in the day. */
+  function hhmm(iso) {
+    if (!iso) return null;
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return null;
+    return new Intl.DateTimeFormat('en-GB', {
+      hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/London'
+    }).format(d);
+  }
+
+  function timeLabel(job) {
+    var from = hhmm(job.collect_from), to = hhmm(job.collect_to);
+    if (from && to && from !== to) return from + '-' + to;
+    if (from) return from;
+    // No collection time. A delivery deadline is a real, different thing.
+    var by = hhmm(job.deliver_to) || hhmm(job.deliver_from);
+    if (by) return 'by ' + by;
+    return null;
+  }
+
+  function money(job) {
+    // Null is not zero. A job with no pay set yet shows nothing at all.
+    var v = job.role === 'driver' ? job.driver_pay : job.customer_fee;
+    if (v == null || v === '') return null;
+    var n = Number(v);
+    if (!isFinite(n)) return null;
+    return '£' + n.toFixed(2);
+  }
+
+  /* Build one card. `variant` is 'card' (default) or 'pill' for a month cell. */
+  function render(job, variant) {
+    var stage = job.stage || 'awaiting_allocation';
+    var t = timeLabel(job);
+    var m = money(job);
+    var route = (job.from_pc || '??') + '<span class="hafjc-arrow">→</span>' + (job.to_pc || '??');
+
+    var bits = [];
+    bits.push('<button type="button" class="hafjc' + (variant === 'pill' ? ' is-pill' : '') + '"');
+    bits.push(' data-stage="' + esc(stage) + '" data-job-id="' + esc(job.id) + '"');
+    bits.push(' data-role="' + esc(job.role || '') + '"');
+    bits.push(' aria-label="' + esc((t || 'Time to confirm') + ', ' + (job.from_pc || '') + ' to ' + (job.to_pc || '') + ', ' + (STAGE_WORD[stage] || stage)) + '">');
+
+    bits.push('<span class="hafjc-bar" aria-hidden="true"></span>');
+    bits.push('<span class="hafjc-main">');
+    bits.push('<span class="hafjc-line1">');
+    if (t) {
+      bits.push('<span class="hafjc-time">' + esc(t) + '</span>');
+    } else if (variant !== 'pill') {
+      bits.push('<span class="hafjc-time is-unplaced">Time to confirm</span>');
+    } else {
+      // A month cell is barely wider than a word. "Time to confirm" clipped to
+      // "Time to c" tells nobody anything, so a pill with no time shows the
+      // route and says the rest with its amber bar.
+      bits.push('<span class="hafjc-time is-unplaced" aria-hidden="true">·</span>');
+    }
+    bits.push('<span class="hafjc-route">' + route + '</span>');
+    bits.push('</span>');
+
+    if (variant !== 'pill') {
+      bits.push('<span class="hafjc-line2">');
+      bits.push('<span class="hafjc-stage">' + esc(STAGE_WORD[stage] || stage) + '</span>');
+      if (job.miles != null && job.miles !== '') {
+        bits.push('<span class="hafjc-l2"><span class="hafjc-sep">·</span> ' + esc(Math.round(job.miles)) + ' mi</span>');
+      }
+      if (job.ref) {
+        bits.push('<span class="hafjc-l2-wide hafjc-ref"><span class="hafjc-sep">·</span> ' + esc(job.ref) + '</span>');
+      }
+      bits.push('</span>');
+      bits.push('</span>');
+
+      bits.push('<span class="hafjc-right">');
+      if (m) bits.push('<span class="hafjc-money">' + esc(m) + '</span>');
+      // The van is part of the glance and does not get pushed off by the test
+      // flag — a test row is still a row someone is reading for its van.
+      bits.push('<span class="hafjc-chips">');
+      if (job.vehicle) bits.push('<span class="hafjc-van">' + esc(job.vehicle) + '</span>');
+      if (job.is_test) bits.push('<span class="hafjc-test">Test</span>');
+      bits.push('</span>');
+      bits.push('</span>');
+    } else {
+      bits.push('</span>');
+    }
+
+    bits.push('</button>');
+    return bits.join('');
+  }
+
+  /* Render a day's worth. Jobs with a real time first, in time order; jobs with
+   * no readable time go into their own strip underneath, never dropped. */
+  function renderDay(jobs, opts) {
+    opts = opts || {};
+    var list = (jobs || []).slice();
+    var placed = list.filter(function (j) { return j.placed; });
+    var unplaced = list.filter(function (j) { return !j.placed; });
+
+    placed.sort(function (a, b) {
+      return String(a.starts_at || '').localeCompare(String(b.starts_at || ''));
+    });
+
+    if (!placed.length && !unplaced.length) {
+      return '<div class="hafjc-empty">' + esc(opts.emptyText || 'Nothing booked for this day.') + '</div>';
+    }
+
+    var out = placed.map(function (j) { return render(j); });
+    if (unplaced.length) {
+      out.push('<div class="hafjc-unplaced-head">No time yet · ' + unplaced.length + '</div>');
+      out = out.concat(unplaced.map(function (j) { return render(j); }));
+    }
+    return out.join('');
+  }
+
+  /* Inject the stylesheet once, and mark the scope so the container queries
+   * have something to measure. */
+  function mount(el) {
+    if (!document.getElementById('hafjc-css')) {
+      var s = document.createElement('style');
+      s.id = 'hafjc-css';
+      s.textContent = CSS;
+      document.head.appendChild(s);
+    }
+    if (el) el.classList.add('hafjc-scope');
+  }
+
+  /* One click handler for a whole container. The host decides what opening a
+   * job means; the card only says which job was pressed. */
+  function onOpen(container, handler) {
+    if (!container || container.__hafjcBound) return;
+    container.__hafjcBound = true;
+    container.addEventListener('click', function (e) {
+      var btn = e.target.closest ? e.target.closest('.hafjc') : null;
+      if (!btn || !container.contains(btn)) return;
+      handler(btn.getAttribute('data-job-id'), btn);
+    });
+  }
+
+  root.HAFJobCard = {
+    version: '1.0.0',
+    css: CSS,
+    render: render,
+    renderDay: renderDay,
+    mount: mount,
+    onOpen: onOpen,
+    stageWord: function (s) { return STAGE_WORD[s] || s; },
+    timeLabel: timeLabel,
+    money: money
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* host palette map — see scripts/haf_stamp_job_card.py */
+(function(){var s=document.createElement('style');s.id='hafjc-host';s.textContent='.hafjc-scope{--jc-panel:var(--p);--jc-panel-2:var(--p2);--jc-line:var(--ln);--jc-line-strong:var(--lns);--jc-text:var(--tx);--jc-muted:var(--mu);--jc-orange:var(--or);--jc-orange-text:var(--or);--jc-radius:var(--rs);}';document.head.appendChild(s);})();
+/* HAFJC:END */
 </script>
 </body>
 </html>
