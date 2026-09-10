@@ -2201,7 +2201,28 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
       </div>
     </div>
 
-    <!-- ══ DOOR FIVE — SEE WHAT A MEMBER SEES ════════════════════════════
+    <!-- ══ DOOR FIVE — HAF DEV ═══════════════════════════════════════════
+         Brent, 10 Sep: a place to try changes "without it effecting the whole
+         network and disturbing the system and the data".
+
+         It leaves this app for the same reason doors three and four do, and
+         one more: HAF DEV is a copy of THIS page running on its own database.
+         Drawing it inside here would put the sandbox and the live network in
+         one browser tab, which is exactly the confusion it exists to prevent.
+         It opens in a new tab, and it asks for a login of its own. -->
+    <div class="card sm-card" onclick="openHafDev()" style="cursor:pointer;margin-top:.7rem;border:1px solid var(--or,#f18e00)">
+      <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.5rem">
+        <div style="background:var(--or,#f18e00);border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6"/><path d="M8 6l-6 6 6 6"/></svg>
+        </div>
+        <div style="font-weight:800;font-size:.9rem">HAF DEV</div>
+        <span class="chip" style="background:var(--lns);color:var(--mu);font-size:.6rem">Sandbox · own database</span>
+      </div>
+      <div style="font-size:.74rem;color:var(--mu);line-height:1.55">Where new features are built and tried. A full copy of KNECT on its own database with its own test accounts, sealed off from the live network — nothing in there can reach a real member, a real job or a real email. Each trial is numbered, and only a feature you accept gets a project code and moves across.</div>
+      <div style="margin-top:.6rem;font-size:.7rem;font-weight:700;color:var(--or,#f18e00)">dev.usehaf.co.uk · signs in separately</div>
+    </div>
+
+    <!-- ══ DOOR SIX — SEE WHAT A MEMBER SEES ═════════════════════════════
          Brent, 14 Aug: "i can't see it".
 
          He was right, and this is why. His own login is the master login, and
@@ -6622,8 +6643,13 @@ function showModeSelector(){
 const PLNA_PANEL_URL = 'https://plna.usehaf.co.uk';
 const DEMO_CENTRE_URL = 'https://demo.usehaf.co.uk';
 const DEMO_MASTER_CODE = 'HAFDEMO';
+/* HAF DEV is a private door: its own database, its own accounts, no key in
+   this page. Nothing here reaches it, so there is nothing to protect beyond
+   the address itself — the sandbox refuses everyone who cannot sign in. */
+const HAF_DEV_URL = 'https://dev.usehaf.co.uk';
 
 function openPlnaPanel(){ window.open(PLNA_PANEL_URL, '_blank', 'noopener'); }
+function openHafDev(){ window.open(HAF_DEV_URL, '_blank', 'noopener'); }
 function openDemoCentre(){
   window.open(DEMO_CENTRE_URL + '/?code=' + DEMO_MASTER_CODE, '_blank', 'noopener');
 }
