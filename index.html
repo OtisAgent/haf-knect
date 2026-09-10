@@ -234,6 +234,8 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .sa-av{flex:none;width:2rem;height:2rem;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.72rem;letter-spacing:.02em}
 .sa-nm{font-weight:800;font-size:.9rem;letter-spacing:-.01em;word-break:break-all}
 .sa-note{font-size:.72rem;color:var(--mu);line-height:1.55;margin:0 0 .7rem}
+.nd-narrow{display:none}
+@media(max-width:560px){.nd-wide{display:none}.nd-narrow{display:inline}}
 /* The demo strip at the foot of the login card. Styled here rather than inline
    so the phone rule below can actually override it — an inline style would win
    and leave a divider floating on its own once the card around it is hidden. */
@@ -8018,8 +8020,13 @@ function hafSideAccount(){
   const on=!!(u&&_hafCred);
   login.style.display=on?'none':'';
   acct.style.display=on?'':'none';
+  /* Two labels, because "Your dashboard →" beside "Track delivery" is wider
+     than a phone and pushed the whole page sideways. The narrow one is not an
+     abbreviation of the wide one for its own sake — it is the same door. */
   const nav=document.getElementById('nav-login');
-  if(nav)nav.innerHTML=on?'Your dashboard &#8594;':'Log in &#8594;';
+  if(nav)nav.innerHTML=on
+    ?'<span class="nd-wide">Your dashboard &#8594;</span><span class="nd-narrow">Dashboard</span>'
+    :'Log in &#8594;';
   if(!on)return;
   const demo=(typeof DEMO_ACCOUNTS!=='undefined'&&DEMO_ACCOUNTS[u])||null;
   const nm=document.getElementById('sa-user'),av=document.getElementById('sa-av');
