@@ -123,13 +123,43 @@
   /* ── What they DO, in words anyone recognises ─────────────────────────────
      Not shown as the account name any more. It is the question the sign-up
      asks, because it still decides compliance and company details. The old
-     labels are gone: "Freight Forwarder" told a haulier nothing. */
+     labels are gone: "Freight Forwarder" told a haulier nothing.
+
+     Brent, 10 Sep 2026, on the replacement: "i think we need to change the
+     wording of organise freight or find a courier or find a driver or need a
+     courier? something like maybe work better".
+
+     He is right, and "Organise Freight" failed for the same reason its
+     predecessor did. It names the TRADE ("freight", "organise") rather than
+     the job to be done. Nobody wakes up wanting to organise freight; they wake
+     up needing somebody to take something somewhere. COURIER is the word an
+     ordinary person already reaches for, so it is the word both non-driving
+     tiles now use.
+
+     Only the label Brent named is renamed. The BUSINESS blurb moves with it,
+     and that is not scope creep — it is the same change finishing. The two
+     tiles are read side by side, and once one of them says "Find a Courier"
+     the other has to say who ELSE needs a courier, or a sole trader with their
+     own pallet picks the wrong one and is asked for a company number they do
+     not have. So the pair reads:
+
+         Find a Courier   "You arrange deliveries for your customers."
+         Business         "You need a courier for your own goods."
+
+     Same word, and the only thing that separates them is the one thing that
+     actually differs: whose goods are in the van. Reverting any of it is one
+     line, here, and every surface follows.
+
+     `group` is how to speak about SEVERAL of these accounts in a sentence
+     ("applies to all ..."). It exists because "Organise Freight accounts" was
+     already reading like a category code in five places, and "Find a Courier
+     accounts" would read worse. */
   var DOES = {
-    driver: { label: 'Owner Driver', blurb: 'You drive your own van.' },
-    fleet: { label: 'Courier Company', blurb: 'You run a fleet of drivers.' },
-    freight_forwarder: { label: 'Organise Freight', blurb: 'You arrange and post freight for your customers.' },
-    business: { label: 'Business', blurb: 'You have your own goods to move.' },
-    admin: { label: 'HAF Team', blurb: 'HAF staff account.' }
+    driver: { label: 'Owner Driver', blurb: 'You drive your own van.', group: 'owner drivers' },
+    fleet: { label: 'Courier Company', blurb: 'You run a fleet of drivers.', group: 'courier companies' },
+    freight_forwarder: { label: 'Find a Courier', blurb: 'You arrange deliveries for your customers.', group: 'accounts that post for clients' },
+    business: { label: 'Business', blurb: 'You need a courier for your own goods.', group: 'accounts sending their own goods' },
+    admin: { label: 'HAF Team', blurb: 'HAF staff account.', group: 'HAF staff' }
   };
 
   /* ── Does this account have a PLNA login attached? ────────────────────────
@@ -174,6 +204,7 @@
       tags: tags,            // ["Business"] or []
       does: does.label,      // what they do, in plain words
       blurb: does.blurb,
+      group: does.group,     // how to say "all of these accounts" in a sentence
       /* The one-line form for a sidebar, a chip row or an email. */
       full: tags.length ? product + ' · ' + tags.join(' · ') : product,
       /* Every door this account holds, each with the sentence that says what

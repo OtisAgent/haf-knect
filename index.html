@@ -2222,7 +2222,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
       <div style="font-size:.72rem;color:var(--mu);line-height:1.5;margin-bottom:.7rem">Your master login skips the member front door, so it never shows you a member's sidebar. Pick an account type and you get the real one — the same code a member's sign-in runs.</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.45rem">
         <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('business',false)">Business — sends only</button>
-        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('freight_forwarder',false)">Organise Freight — sends only</button>
+        <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('freight_forwarder',false)">Find a Courier — sends only</button>
         <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('driver',false)">Owner driver — checks not done</button>
         <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('driver',true)">Owner driver — released</button>
         <button class="btn btn-gh btn-xs" style="justify-content:flex-start" onclick="viewAsMember('fleet',false)">Fleet — checks not done</button>
@@ -3489,7 +3489,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 
       <!-- FREIGHT: Upgrade (plans & tiers) -->
       <div class="tp" id="pane-f-plans">
-        <h1 class="pt">Upgrade</h1><p class="ps">All Organise Freight accounts can post loads for any client. Your tier sets your network fee, profit pooling, and tools — upgrade any time.</p>
+        <h1 class="pt">Upgrade</h1><p class="ps">All accounts that post for clients can post loads for any client. Your tier sets your network fee, profit pooling, and tools — upgrade any time.</p>
         <div class="plg" style="grid-template-columns:repeat(auto-fit,minmax(195px,1fr))">
           <div class="plc">
             <div class="pl-n">HAF KNECT Free</div>
@@ -3713,7 +3713,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
             </div>
             <div class="dc-sub">Account posting the load</div>
             <div class="dc-grid">
-              <div><label class="ol">Role</label><select class="fi2" id="dc-s-prole" onchange="dcSim()"><option value="freight">Organise Freight</option><option value="business">Business</option><option value="fleet">Fleet / courier company</option><option value="driver">Driver</option></select></div>
+              <div><label class="ol">Role</label><select class="fi2" id="dc-s-prole" onchange="dcSim()"><option value="freight">Find a Courier</option><option value="business">Business</option><option value="fleet">Fleet / courier company</option><option value="driver">Driver</option></select></div>
               <div><label class="ol">Plan</label><select class="fi2" id="dc-s-ptier" onchange="dcSim()"><option value="lite">HAF KNECT Free</option><option value="plus">HAF KNECT Plus</option><option value="pro">HAF KNECT Pro</option></select></div>
               <div><label class="ol">Founder status</label><select class="fi2" id="dc-s-pfnd" onchange="dcSim()"><option value="no">No</option><option value="yes">Yes</option></select></div>
               <div><label class="ol">VAT applies</label><select class="fi2" id="dc-s-vat" onchange="dcSim()"><option value="yes">Yes</option><option value="no">No</option></select></div>
@@ -3822,7 +3822,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
             <select class="fi2" id="aa-type" onchange="aaLoad()">
               <option value="">All account types</option>
               <option value="driver">Drivers (PLNA)</option>
-              <option value="freight">Organise Freight</option>
+              <option value="freight">Find a Courier</option>
               <option value="business">Business accounts</option>
               <option value="fleet">Fleet accounts</option>
               <option value="fleet_driver">Drivers inside fleets</option>
@@ -6283,7 +6283,7 @@ function hafAccess(acct){
    of their ACCOUNT is acc.account_name and comes from the shared file above:
    "Freight Forwarder" is gone from every screen a customer reads. */
 const HAF_TYPE_LABEL={driver:'Owner Driver',fleet:'Courier Company',
-                      business:'Business',freight_forwarder:'Organise Freight'};
+                      business:'Business',freight_forwarder:'Find a Courier'};
 
 /* ── And what each of those doors IS ──────────────────────────────────────────
    Brent, 9 Sep, giving the two definitions himself and asking that the wording
@@ -6802,7 +6802,7 @@ const DC_TIERS={
 };
 const DC_ROLES=[
   {k:'driver' ,l:'Driver'                ,side:'DRIVER' ,posts:false},
-  {k:'freight',l:'Organise Freight'     ,side:'FREIGHT',posts:true },
+  {k:'freight',l:'Find a Courier'     ,side:'FREIGHT',posts:true },
   {k:'business',l:'Business'             ,side:null     ,posts:true },
   {k:'fleet'  ,l:'Fleet / courier company',side:'FLEET' ,posts:true },
 ];
@@ -6954,7 +6954,7 @@ function dcFeatureSections(tier,roleDef,lvl){
   const miss=(n,title,why)=>dcSecHead(n,title,'')+'<div class="card"><div class="dc-note">'+why+'</div></div>';
 
   if(!roleDef.side)
-    return miss(2,'Dashboard features','The shared feature catalogue does not carry a Business list yet — it holds Driver, Fleet and Organise Freight. Rather than invent one here, this is left blank until the real list is added to the catalogue every other screen reads.');
+    return miss(2,'Dashboard features','The shared feature catalogue does not carry a Business list yet — it holds the Driver, Fleet and Find a Courier lists. Rather than invent one here, this is left blank until the real list is added to the catalogue every other screen reads.');
   if(!A||!A.featureSections)
     return miss(2,'Dashboard features','The shared feature catalogue did not load, so no feature list is shown. It is never guessed at from this page.');
 
@@ -7155,7 +7155,7 @@ function dcSim(){
      '<div class="cr"><span class="ck">Effective network fee</span><span class="cv">'+DC_PCT(r.feePct)+'</span></div>'+
      '<div class="cr"><span class="ck"><strong>HAF connection margin</strong></span><span class="cv"><strong style="color:var(--haf-orange-ink)">'+DC_MONEY(r.fee)+'</strong></span></div></div>';
   h+='</div>';
-  h+='<div class="card"><div class="ct">'+(g('dc-s-prole').value==='freight'?'Organise Freight':'Load poster')+'</div>'+
+  h+='<div class="card"><div class="ct">'+(g('dc-s-prole').value==='freight'?'Find a Courier':'Load poster')+'</div>'+
      '<div class="cr"><span class="ck">Amount paid to HAF KNECT</span><span class="cv">'+DC_MONEY(r.sub)+' ex VAT</span></div>'+
      '<div class="cr"><span class="ck">VAT</span><span class="cv">'+(r.vat?DC_MONEY(r.vat)+' at '+DC_PCT(HAF_VAT):'not applied')+'</span></div>'+
      '<div class="cr"><span class="ck"><strong>Total cost</strong></span><span class="cv"><strong>'+DC_MONEY(r.total)+'</strong></span></div>';
@@ -8155,7 +8155,7 @@ function mbRender(){
     row('Accept network jobs',P.drive,acc.drives?'Complete your Clever checks':'Add owner driver to your account')+
     row('PLNA driver planner',P.plna,acc.drives?'Complete your Clever checks':'Drivers only')+
     row('Fleet Management',P.fleet,acc.type==='fleet'?'Complete your Clever checks':'Register a fleet on your account')+
-    row('Post third-party client loads',P.freight,'Organise Freight accounts');
+    row('Post third-party client loads',P.freight,'accounts that post for clients');
 
   if(!A||!A.featuresForSideLevel){
     ft.innerHTML='<div class="card"><div class="ct">Features</div><div class="cr"><span class="ck">The feature list has not loaded, so this page is not showing one. Reload the page and it will come back.</span></div></div>';
@@ -8894,7 +8894,7 @@ function _when(iso){
 const _STATUS_CHIP={active:'cg',on_hold:'ca',missing_documents:'ca',rejected:'cr',blocked:'cr'};
 const _STATUS_LBL={active:'Active',on_hold:'On hold',missing_documents:'Missing documents',
                    rejected:'Rejected',blocked:'Blocked'};
-const _TYPE_LBL={driver:'Driver',freight:'Organise Freight',business:'Business',
+const _TYPE_LBL={driver:'Driver',freight:'Find a Courier',business:'Business',
                  fleet:'Fleet',fleet_driver:'Fleet driver'};
 const _EVENT_LBL={signed_up:'applied',email_confirmed:'confirmed their email',
                   approved:'was approved',released:'was let into the network',
