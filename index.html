@@ -1007,8 +1007,14 @@ textarea.fi2{resize:vertical;min-height:70px}
 .fq-use{background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);padding:.6rem .75rem;margin-bottom:1rem;font-size:.76rem;line-height:1.5;color:var(--mu)}
 .fq-use b{color:var(--tx);font-weight:800}
 .fq-use .fq-use-lvl{font-size:.64rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mu);display:block;margin-bottom:.2rem}
-.fq-use.low{border-color:var(--haf-orange-ink);background:var(--or-d)}
-.fq-use.low b,.fq-use.low .fq-use-lvl{color:var(--haf-orange-ink)}
+/* --am, not --haf-orange-ink. The orange name this row used to reach for is
+   defined nowhere on the site, so "one left" was drawing itself in whatever
+   colour it inherited — a warning that did not look like one. Swapped for the
+   amber token that IS defined, in both day and night, rather than defining the
+   missing name, which would repaint about forty other things on the live front
+   page at the same time. That one is Brent's call, not a side effect of this. */
+.fq-use.low{border-color:var(--am);background:var(--am-d)}
+.fq-use.low b,.fq-use.low .fq-use-lvl{color:var(--am)}
 .fq-use.out{border-color:var(--rd)}.fq-use.out b,.fq-use.out .fq-use-lvl{color:var(--rd)}
 .slbl{font-size:.7rem;font-weight:800;letter-spacing:.1em;color:var(--haf-orange-ink);text-transform:uppercase;margin-bottom:.7rem}
 .ogrid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:.9rem}
@@ -2531,6 +2537,14 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
             </div>
           </div>
         </div>
+
+        <!-- WHAT TODAY HAS USED — the same row the booking form carries, in the
+             place a person looks BEFORE they decide to post. Painted by the one
+             function that draws it on the form, from the one count the order
+             door refuses on, so the two can never say different things. Drawn
+             empty for anyone on an unlimited level, anyone not signed in, and
+             any answer we could not get. -->
+        <div id="dash-use" class="fq-use" style="display:none"></div>
 
         <!-- Detail switch — lives on the dashboard it controls -->
         <div class="dm-row">
@@ -5899,6 +5913,10 @@ function closeInlineFlow(){
     window._orderFromApp=false;
     document.getElementById('landing').style.display='none';
     document.getElementById('app').classList.add('open');
+    /* This way back does not go through switchTab, so nothing else would
+       redraw the dashboard's row. They may have just spent a job out of
+       today's allowance — the number they land on has to be the new one. */
+    try{if(window.fqPaintUsage)fqPaintUsage('dash-use');}catch(e){}
   }
 }
 
@@ -9476,7 +9494,11 @@ function switchTab(id){
   const n=document.getElementById('ni-'+id.replace('pane-',''));if(n)n.classList.add('on');
   ct=id;
   if(id==='pane-d-home'){setTimeout(renderDashAreas,80);loadDashMode();
-    setTimeout(()=>{if(window.anStrip)anStrip();},80);}
+    setTimeout(()=>{if(window.anStrip)anStrip();},80);
+    /* Asked on every entry rather than once at sign-in: someone who posts two
+       jobs and comes back should see the number that is true now. The kept
+       answer draws instantly, the fresh one redraws behind it. */
+    try{if(window.fqPaintUsage)fqPaintUsage('dash-use');}catch(e){}}
   if(id==='pane-b-book')postingApplyRole();
   if(id==='pane-f-cap')setTimeout(capBootPane,80);
   if(id==='pane-pricing')setTimeout(()=>{if(window.pxBoot)pxBoot();},60);
