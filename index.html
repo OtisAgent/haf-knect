@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <script src="/brand/haf-theme.js"></script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- viewport-fit=cover is what makes env(safe-area-inset-bottom) return a real
+     number on a modern iPhone. Without it the bottom bar sits underneath the
+     home indicator and the last row of every screen is unreachable. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache">
 <title>HAF KNECT — Send a delivery</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -290,7 +293,28 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 /* SIDEBAR */
 .app-body{display:flex;flex:1;min-height:calc(100vh - var(--tb))}
 .sidebar{width:var(--sb);flex-shrink:0;background:var(--p);border-right:1px solid var(--ln);display:flex;flex-direction:column;padding:.7rem 0;position:sticky;top:var(--tb);height:calc(100vh - var(--tb));overflow-y:auto;transition:transform .22s}
-@media(max-width:768px){.sidebar{position:fixed;top:var(--tb);left:0;bottom:0;z-index:150;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.menu-btn{display:flex}}
+/* Brent, 10 Sep 2026: "turn the current nav bar into a drop down menu ... the
+   bottom nav needs to stay on constantly". So the side column stops being a
+   column at every width and becomes one panel that drops in over the screen,
+   opened from MORE on the bar. It keeps everything it ever had — the live job
+   tracker, the PLNA card, every nav row with its padlock sentence, the account
+   foot and Sign out — so nothing is lost and there is still only ONE menu. */
+.sidebar{position:fixed;top:var(--tb);left:0;bottom:0;height:auto;z-index:150;
+  width:min(320px,88vw);transform:translateX(-100%);
+  box-shadow:0 10px 40px rgba(0,0,0,.20)}
+.sidebar.open{transform:translateX(0)}
+/* the panel stops above the bar, so the bar is never covered by its own menu */
+body.haf-tabbar-on .sidebar{bottom:calc(var(--tabbar-h) + 22px + env(safe-area-inset-bottom,0px))}
+.menu-btn{display:flex}
+#sb-ov{position:fixed;inset:0;z-index:149;background:rgba(0,0,0,.42);
+  opacity:0;pointer-events:none;transition:opacity .18s}
+#sb-ov.on{opacity:1;pointer-events:auto}
+.sb-x{display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+  padding:.6rem .85rem .4rem;font-size:.6rem;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--su)}
+.sb-x button{width:28px;height:28px;flex:0 0 auto;border-radius:var(--rx);
+  background:var(--p2);border:1px solid var(--ln);color:var(--mu);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;line-height:1}
 .nav-sec{padding:.5rem .85rem .12rem;font-size:.6rem;font-weight:700;letter-spacing:.1em;color:var(--su);text-transform:uppercase}
 .ni{display:flex;align-items:center;gap:.6rem;padding:.5rem .85rem;margin:.06rem .4rem;border-radius:var(--rx);cursor:pointer;color:var(--mu);font-weight:600;font-size:.82rem;transition:all .14s}
 .ni:hover{background:var(--ln);color:var(--tx)}
@@ -1543,6 +1567,171 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 .pj-row-v{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere}
 .pj-miss{font-size:.75rem;color:var(--tx);background:var(--am-d);border:1px solid rgba(185,133,48,.28);border-radius:var(--rx);padding:.55rem .65rem;line-height:1.55;margin-bottom:.7rem}
 @media(max-width:480px){.pj-row{flex-direction:column;gap:.05rem}.pj-row-l{max-width:none;flex:none}}
+/* ══════════════ HAF MOBILE BOTTOM NAVIGATION ══════════════════════════════
+   Brent's directive, 10 Sep 2026: on a phone the sidebar is a desktop menu
+   squeezed onto glass. This is the thumb-first replacement — five positions,
+   the middle one an action rather than a destination.
+
+   It draws NOTHING of its own. Every position is resolved out of hafNavModel(),
+   the same permission-filtered model the sidebar draws, so the bar and the
+   sidebar can never disagree about what an account has. Adding a section to
+   HAF_NAV_V1 puts it in the More panel automatically.
+
+   Everything here is scoped to the mobile breakpoint. On desktop these rules
+   do not apply at all and the sidebar is untouched. */
+:root{--tabbar-h:60px}
+
+#haf-tabbar{display:none}
+
+@media(min-width:0px){
+  /* The floating container Brent asked for: 16px of air each side, the screen
+     showing through underneath it. */
+  #haf-tabbar{
+    display:flex;position:fixed;z-index:400;
+    left:16px;right:16px;
+    bottom:calc(10px + env(safe-area-inset-bottom,0px));
+    height:var(--tabbar-h);
+    align-items:stretch;justify-content:space-around;
+    background:var(--p);border:1px solid var(--lns);
+    border-radius:var(--r);
+    box-shadow:0 2px 10px rgba(0,0,0,.10),0 10px 30px rgba(0,0,0,.14);
+    font-family:var(--fn);
+    /* the bar must never be the thing that scrolls */
+    overscroll-behavior:contain;
+  }
+  /* Content must clear the bar, its 16px margin and the iPhone home indicator,
+     or the last row of every screen sits behind it. */
+  .main{padding-bottom:calc(var(--tabbar-h) + 34px + env(safe-area-inset-bottom,0px))!important}
+
+  .tbi{
+    flex:1 1 0;min-width:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:2px;padding:0 2px;
+    background:none;border:0;cursor:pointer;
+    color:var(--mu);
+    -webkit-tap-highlight-color:transparent;
+    transition:color .14s;
+  }
+  /* 44px minimum touch area, as the directive asks, even though the drawn
+     symbol is smaller. */
+  .tbi{min-height:44px}
+  .tbi-ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;transition:transform .16s}
+  .tbi-l{font-size:.56rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+    max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    opacity:1;height:auto;transition:opacity .16s}
+  /* The active tab expands and shows its label. Everything else stays a symbol,
+     which is what keeps the bar quiet. */
+  .tbi.on{color:var(--or)}
+  .tbi.on .tbi-ic{transform:translateY(-1px)}
+  .tbi.on .tbi-l{opacity:1;height:auto}
+  .tbi:active .tbi-ic{transform:scale(.9)}
+
+  /* The centre HAF action. Raised, filled, unmistakably the primary thing. */
+  .tbi-act{flex:0 0 auto;justify-content:flex-start;padding-top:6px}
+  .tbi-act .tba-btn{
+    width:46px;height:46px;border-radius:15px;
+    background:var(--or);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 3px 10px rgba(241,142,0,.42);
+    transition:transform .14s,box-shadow .14s;
+  }
+  .tbi-act:active .tba-btn{transform:scale(.93);box-shadow:0 1px 5px rgba(241,142,0,.5)}
+  .tbi-act .tbi-ic{width:24px;height:24px;stroke-width:2.4}
+  .tbi-act .tbi-l{opacity:1;height:auto;color:var(--mu);font-size:.5rem;margin-top:1px}
+
+  /* A count only ever appears where a real one exists — see hafTabBadge. */
+  .tbi-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+  .tbi-bdg{position:absolute;top:-4px;right:-9px;min-width:15px;height:15px;
+    padding:0 4px;border-radius:var(--pill);background:var(--rd);color:#fff;
+    font-size:.54rem;font-weight:800;line-height:15px;text-align:center;
+    border:1.5px solid var(--p)}
+
+  /* The hamburger is retired on mobile ONLY where the bar actually drew — the
+     More panel then carries every section the sidebar has, from the same
+     model, and two menus that could disagree is worse than one. The demo and
+     master screens do not resolve to an account, so they keep the hamburger
+     and are never stranded. The sidebar element itself always stays in the
+     page: plenty of code paints into it. */
+  body.haf-tabbar-on .menu-btn{display:none!important}
+  body:not(.haf-tabbar-on) #haf-tabbar{display:none}
+  body:not(.haf-tabbar-on) .main{padding-bottom:1rem!important}
+
+  /* The build tag is pinned to the bottom-right corner at z-index 9999, which
+     put it on top of the bar and on top of both sheets. It keeps its corner,
+     above the bar rather than across it, and stops out-ranking the panels. */
+  body.haf-tabbar-on .vbadge{
+    bottom:calc(var(--tabbar-h) + 22px + env(safe-area-inset-bottom,0px));
+    z-index:399;
+  }
+}
+
+/* ── THE SHEETS ────────────────────────────────────────────────────────────
+   One panel component, two uses: the centre action list and the More panel.
+   Outside the mobile breakpoint neither can be opened. */
+.tbs-ov{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.42);
+  opacity:0;pointer-events:none;transition:opacity .18s}
+.tbs-ov.on{opacity:1;pointer-events:auto}
+.tbs{
+  position:fixed;left:0;right:0;bottom:0;z-index:501;
+  background:var(--bg);
+  border-top-left-radius:20px;border-top-right-radius:20px;
+  box-shadow:0 -6px 30px rgba(0,0,0,.22);
+  transform:translateY(101%);transition:transform .2s ease-out;
+  max-height:82vh;display:flex;flex-direction:column;
+  font-family:var(--fn);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.tbs.on{transform:translateY(0)}
+.tbs-grab{flex:0 0 auto;padding:9px 0 3px;display:flex;justify-content:center;cursor:grab}
+.tbs-grab i{display:block;width:38px;height:4px;border-radius:2px;background:var(--lns)}
+.tbs-h{flex:0 0 auto;padding:.15rem 1.1rem .5rem;display:flex;align-items:baseline;gap:.5rem}
+.tbs-t{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.03em;color:var(--tx)}
+.tbs-s{font-size:.7rem;color:var(--mu);font-weight:600}
+.tbs-b{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 .75rem 1rem}
+.tbs-sec{padding:.75rem .4rem .2rem;font-size:.58rem;font-weight:800;letter-spacing:.1em;
+  color:var(--su);text-transform:uppercase}
+.tbs-row{display:flex;align-items:center;gap:.7rem;width:100%;
+  padding:.72rem .6rem;margin:.14rem 0;border:0;border-radius:var(--rs);
+  background:var(--p);color:var(--tx);font-family:var(--fn);font-size:.86rem;font-weight:600;
+  text-align:left;cursor:pointer;min-height:46px;
+  -webkit-tap-highlight-color:transparent}
+.tbs-row:active{background:var(--p2)}
+.tbs-row .ni-ic{width:17px;height:17px;color:var(--mu);flex-shrink:0}
+/* the rows under a section's first keep its indent without repeating its mark */
+.tbs-row .tbs-tick{display:block;position:relative}
+.tbs-row .tbs-tick:before{content:'';position:absolute;left:6px;top:7px;width:4px;height:4px;
+  border-radius:50%;background:var(--su)}
+.tbs-row.on .tbs-tick:before{background:var(--or)}
+.tbs-row.on{background:var(--or-d);color:var(--or);font-weight:800}
+.tbs-row.on .ni-ic{color:var(--or)}
+.tbs-row .tbs-ext{margin-left:auto;font-size:.6rem;font-weight:700;color:var(--su)}
+/* A locked section keeps its honest sentence here, exactly as the sidebar
+   shows it — the phone must not quietly hide what the desktop explains. */
+.tbs-row.lk{opacity:.62}
+.tbs-why{font-size:.68rem;color:var(--mu);line-height:1.5;padding:.1rem .95rem .5rem}
+/* The action grid — the centre button's contents. */
+.tba-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;padding:.3rem .4rem .2rem}
+.tba-c{display:flex;flex-direction:column;align-items:flex-start;gap:.4rem;
+  padding:.85rem .8rem;border:1px solid var(--ln);border-radius:var(--rs);
+  background:var(--p);color:var(--tx);cursor:pointer;text-align:left;
+  font-family:var(--fn);min-height:76px;
+  -webkit-tap-highlight-color:transparent}
+.tba-c:active{background:var(--p2)}
+.tba-c .ni-ic{width:19px;height:19px;color:var(--or)}
+.tba-c b{font-size:.8rem;font-weight:800;line-height:1.2}
+.tba-c span{font-size:.65rem;color:var(--mu);font-weight:600;line-height:1.35}
+.tbs-foot{padding:.5rem .4rem .2rem}
+.tbs-out{width:100%;padding:.7rem;border:1px solid var(--lns);border-radius:var(--rs);
+  background:none;color:var(--mu);font-family:var(--fn);font-size:.8rem;font-weight:700;cursor:pointer}
+/* On a wide screen the bar does not stretch across a monitor: it sits centred,
+   about the width of a phone, so five thumb positions never become five
+   distant corners. */
+@media(min-width:769px){
+  #haf-tabbar{left:50%;right:auto;transform:translateX(-50%);
+    width:min(560px,calc(100% - 32px))}
+}
+
 </style>
 <link rel="stylesheet" href="/haf-bridge.css">
 </head>
@@ -2465,6 +2654,11 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 
   <div class="app-body">
     <nav class="sidebar" id="sidebar">
+      <!-- The panel's own head. The hamburger is retired wherever the bar drew,
+           so the way out has to live inside the panel: this row, the shaded
+           backdrop, or Escape. -->
+      <div class="sb-x"><span>Menu</span>
+        <button type="button" aria-label="Close menu" onclick="hafSbClose()">&times;</button></div>
       <div class="sb-livejob" id="sb-livejob"></div>
       <!-- PLNA at a glance. Sits outside nav-list on purpose: buildNavV1
            rewrites nav-list on every redraw, and this card owns its own
@@ -8989,7 +9183,27 @@ function toggleXchAvail(){
   if(stLbl)stLbl.textContent=_xchOnline?'● Online — Taking jobs':'○ Offline — Not taking jobs';
   if(stLbl)stLbl.style.color=_xchOnline?'var(--gn)':'var(--mu)';
 }
-function toggleSb(){document.getElementById('sidebar').classList.toggle('open')}
+/* The drop-down menu. MORE on the bar opens it, the backdrop, the × and Escape
+   all close it, and choosing anything inside it closes it too — a menu you have
+   to dismiss by hand after you have already chosen is the commonest complaint
+   about a panel like this. */
+function hafSbOpen(){
+  const s=document.getElementById('sidebar'); if(!s)return;
+  let ov=document.getElementById('sb-ov');
+  if(!ov){ov=document.createElement('div');ov.id='sb-ov';ov.onclick=hafSbClose;
+    document.body.appendChild(ov)}
+  s.classList.add('open'); ov.classList.add('on');
+}
+function hafSbClose(){
+  const s=document.getElementById('sidebar'),ov=document.getElementById('sb-ov');
+  if(s)s.classList.remove('open'); if(ov)ov.classList.remove('on');
+}
+function toggleSb(){
+  const s=document.getElementById('sidebar');
+  if(s&&s.classList.contains('open'))hafSbClose(); else hafSbOpen();
+}
+window.hafSbOpen=hafSbOpen; window.hafSbClose=hafSbClose;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')hafSbClose()});
 
 /* The demo-request form and its three functions were removed on 14 Aug. Demo
    interest is collected by demo.usehaf.co.uk now, so nothing on this page
@@ -9512,11 +9726,331 @@ function buildNavV1(acc,keepOpen){
   /* keep the highlight on whatever pane is showing */
   const cur=document.getElementById('ni-'+(ct||'').replace('pane-',''));
   if(cur)cur.classList.add('on');
+  /* and the phone's bottom bar, off the very same model */
+  _tbAcc=acc; hafTabBarPaint();
 }
+/* Crossing to PLNA, from anywhere the navigation offers it.
+   Two things this settles.
+   ONE, it is the same tab. The menu used to open PLNA in a new tab while the
+   bottom bar navigated to it; two routes to the same place behaving differently
+   is exactly what makes two websites feel like two websites.
+   TWO, a PREVIEW crosses to the other PREVIEW. Production is never served from
+   pages.dev, so nothing about the live site changes — but without this, trying
+   the round trip on a preview link drops you onto the live site and the pair
+   cannot be judged together. */
+function _hafCross(url){
+  try{
+    if(/\.pages\.dev$/.test(location.hostname)&&/plna\.usehaf\.co\.uk/.test(url))
+      return url.replace('https://plna.usehaf.co.uk','https://mobile-bottom-nav.plna-live.pages.dev');
+  }catch(e){}
+  return url;
+}
+window._hafCross=_hafCross;
+
 function _navGo(t){
-  if(t.ext)return "window.open('"+t.ext+"','_blank','noopener')";
+  if(t.ext)return "window.location.href=_hafCross('"+t.ext+"')";
   return t.id==='livejob'?'hafOpenJobs()':"switchTab('pane-"+t.id+"')";
 }
+
+/* ═══════════════ HAF MOBILE BOTTOM NAVIGATION ═══════════════════════════════
+   Brent's directive, 10 Sep 2026. Thumb-first: five positions, one tap to
+   anywhere that matters, no hamburger.
+
+   THE ONE RULE THIS FILE OBEYS: it decides nothing about permissions. Every
+   position, every row in the More panel and every action on the centre button
+   is resolved out of hafNavModel(acc) — the same model the sidebar draws. If
+   an account has not got a screen, this cannot show it, because it never sees
+   it. That is also why there is no per-account-type navigation code here, only
+   candidate lists that get filtered by what came back.
+
+   WHAT IS DELIBERATELY NOT HERE: a count on the Jobs tab, and a centre button
+   that changes with the delivery in progress. The only active-job state this
+   page holds is the seeded demo set (HAF_JOBS), which a real account never
+   sees — driving the bar off it would announce a job that does not exist. Both
+   land the day a real job feed does; the shape below has the room for them. */
+
+const TB_ICO={
+  home :'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.6V21h14V9.6"/>',
+  work :'<rect x="1" y="4" width="14" height="12" rx="1.5"/><path d="M15 8h4l3.2 3.2V16H15z"/><circle cx="5.5" cy="19" r="2.2"/><circle cx="18" cy="19" r="2.2"/>',
+  plan :'<rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/>',
+  money:'<rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/>',
+  act  :'<path d="M12 6v12M6 12h12"/>',
+  more :'<circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/>'
+};
+
+/* Five positions. Each destination position carries CANDIDATES in priority
+   order and takes the first one the account actually has. A freight forwarder
+   lands on Loads, a driver on the network's work, everybody else on their own
+   posted jobs — one list, no branching. */
+const HAF_TABBAR_V1=[
+  {id:'home', ico:TB_ICO.home, want:[{sec:'home', tab:'d-home',  l:'Home'}]},
+  {id:'work', ico:TB_ICO.work, want:[
+      {sec:'jobs', tab:'f-loads', l:'Loads'},   /* freight forwarder */
+      {sec:'jobs', tab:'d-jobs',  l:'Jobs'},    /* anyone who drives */
+      {sec:'jobs', tab:'b-del',   l:'Orders'}   /* everybody else: their own */
+  ]},
+  {id:'action', act:'knect', ico:TB_ICO.act, l:'HAF'},
+  {id:'plan', ico:TB_ICO.plan, want:[
+      {sec:'plna',     tab:'__plna', l:'PLNA'},     /* the driving day */
+      {sec:'payments', tab:'billing', l:'Payments', ico:TB_ICO.money}
+  ]},
+  {id:'more', act:'more', ico:TB_ICO.more, l:'More'}
+];
+
+/* The account's model, indexed so a candidate can be looked up in one step.
+   A locked section is deliberately NOT available to the bar: a padlock is a
+   sentence worth reading, and it belongs in the More panel where there is room
+   for it, never as one of five symbols with nowhere to explain itself. */
+function _tbIndex(acc){
+  const ix={};
+  (window.hafNavModel?hafNavModel(acc):[]).forEach(sec=>{
+    if(sec.locked)return;
+    const m={}; (sec.tabs||[]).forEach(t=>m[t.id]=t);
+    ix[sec.id]=m;
+  });
+  return ix;
+}
+
+function hafTabModel(acc){
+  if(!acc)return null;
+  const ix=_tbIndex(acc),out=[];
+  for(const slot of HAF_TABBAR_V1){
+    if(slot.act){out.push({id:slot.id,act:slot.act,ico:slot.ico,l:slot.l});continue}
+    let hit=null;
+    for(const c of slot.want){ const t=ix[c.sec]&&ix[c.sec][c.tab]; if(t){hit={c:c,t:t};break} }
+    /* A position with nothing behind it is left out rather than drawn dead.
+       The bar then has four, which is a legitimate bar — a symbol that does
+       nothing is not. */
+    if(!hit)continue;
+    out.push({id:slot.id,ico:hit.c.ico||slot.ico,l:hit.c.l,tab:hit.t});
+  }
+  return out;
+}
+window.hafTabModel=hafTabModel;
+
+/* The only number this bar will print. hafNotes() derives its items from what
+   the page already knows to be true for this account — an outstanding Clever
+   check, a driving side that could be added — and calls nothing. Empty means
+   no badge at all, never a decorative dot. */
+function hafTabBadge(id){
+  if(id!=='more')return 0;
+  try{return (hafNotes()||[]).length}catch(e){return 0}
+}
+
+function _tbGo(item){
+  hafTabSheetClose();
+  const t=item.tab;
+  if(!t)return;
+  /* PLNA is the driver's own site. Brent's call, 10 Sep: it carries this same
+     bar, so it is navigated TO, in this tab, like any other destination —
+     opening a second tab is the one thing that would break the app feel. */
+  if(t.ext){window.location.href=_hafCross(t.ext);return}
+  if(t.id==='livejob'){hafOpenJobs();return}
+  switchTab('pane-'+t.id);
+}
+
+/* Which account the BAR is for, which is not always the account the page last
+   viewed. A master switching into a demo or an admin mode leaves _hafAccView
+   holding whoever was looked at last; the bar must go with the screen, not
+   with the leftover. buildNavV1 sets this; the demo/master builder clears it. */
+let _tbAcc=null;
+let _tbLastPaint='';
+function hafTabBarPaint(){
+  const acc=_tbAcc;
+  const model=hafTabModel(acc);
+  let bar=document.getElementById('haf-tabbar');
+  if(!model||model.length<2){
+    /* demo screens, master mode, signed out: no account, no bar, and the
+       hamburger stays exactly where it was */
+    document.body.classList.remove('haf-tabbar-on');
+    if(bar)bar.remove();
+    _tbLastPaint='';
+    return;
+  }
+  if(!bar){
+    bar=document.createElement('nav');
+    bar.id='haf-tabbar';
+    bar.setAttribute('role','navigation');
+    bar.setAttribute('aria-label','Main');
+    document.body.appendChild(bar);
+    _tbEnsureSheet();
+  }
+  const cur=(ct||'').replace('pane-','');
+  const key=model.map(m=>m.id+':'+(m.tab?m.tab.id:m.act)).join('|')+'#'+cur+'#'+hafTabBadge('more');
+  if(key===_tbLastPaint){document.body.classList.add('haf-tabbar-on');return}
+  _tbLastPaint=key;
+
+  bar.innerHTML=model.map(m=>{
+    if(m.act){
+      const on=m.act==='knect'?'hafTabAction()':'hafTabMore()';
+      const bdg=hafTabBadge(m.id);
+      if(m.act==='knect'){
+        return '<button class="tbi tbi-act" type="button" aria-label="HAF actions" onclick="'+on+'">'+
+          '<span class="tba-btn"><svg class="tbi-ic" viewBox="0 0 24 24">'+m.ico+'</svg></span>'+
+          '<span class="tbi-l">'+m.l+'</span></button>';
+      }
+      return '<button class="tbi" type="button" aria-label="More" onclick="'+on+'">'+
+        '<span class="tbi-wrap"><svg class="tbi-ic" viewBox="0 0 24 24">'+m.ico+'</svg>'+
+        (bdg?'<span class="tbi-bdg">'+(bdg>9?'9+':bdg)+'</span>':'')+'</span>'+
+        '<span class="tbi-l">'+m.l+'</span></button>';
+    }
+    /* PLNA lives on another site, so it is never "the page you are on" here */
+    const on=(!m.tab.ext&&m.tab.id===cur);
+    return '<button class="tbi'+(on?' on':'')+'" type="button"'+
+      ' aria-current="'+(on?'page':'false')+'"'+
+      ' aria-label="'+_esc(m.l)+'" onclick="_tbGoId(\''+m.id+'\')">'+
+      '<svg class="tbi-ic" viewBox="0 0 24 24">'+m.ico+'</svg>'+
+      '<span class="tbi-l">'+_esc(m.l)+'</span></button>';
+  }).join('');
+  document.body.classList.add('haf-tabbar-on');
+}
+window.hafTabBarPaint=hafTabBarPaint;
+
+/* Tapping a tab you are already on returns that section to its root, which on
+   a one-screen section means scrolling back to the top — the behaviour the
+   directive asks for and the one people already expect from a phone. */
+function _tbGoId(id){
+  const m=(hafTabModel(_tbAcc)||[]).find(x=>x.id===id);
+  if(!m)return;
+  if(m.tab&&!m.tab.ext&&m.tab.id===(ct||'').replace('pane-','')){
+    const main=document.querySelector('.main');
+    if(main&&main.scrollTo)main.scrollTo({top:0,behavior:'smooth'});
+    else window.scrollTo({top:0,behavior:'smooth'});
+    return;
+  }
+  _tbGo(m);
+}
+window._tbGoId=_tbGoId;
+
+/* ── THE SHEETS ───────────────────────────────────────────────────────────
+   One panel, two uses. Built once and refilled, so opening it is instant and
+   nothing is fetched on the way. */
+function _tbEnsureSheet(){
+  if(document.getElementById('tbs'))return;
+  const ov=document.createElement('div');
+  ov.className='tbs-ov';ov.id='tbs-ov';ov.onclick=hafTabSheetClose;
+  const sh=document.createElement('div');
+  sh.className='tbs';sh.id='tbs';
+  sh.setAttribute('role','dialog');sh.setAttribute('aria-modal','true');
+  sh.innerHTML='<div class="tbs-grab" id="tbs-grab"><i></i></div>'+
+    '<div class="tbs-h"><span class="tbs-t" id="tbs-t"></span><span class="tbs-s" id="tbs-s"></span></div>'+
+    '<div class="tbs-b" id="tbs-b"></div>';
+  document.body.appendChild(ov);document.body.appendChild(sh);
+  /* drag the handle down to close, as the directive asks */
+  let y0=null;
+  const g=document.getElementById('tbs-grab');
+  g.addEventListener('touchstart',e=>{y0=e.touches[0].clientY},{passive:true});
+  g.addEventListener('touchmove',e=>{
+    if(y0===null)return;const dy=e.touches[0].clientY-y0;
+    if(dy>0)sh.style.transform='translateY('+dy+'px)';
+  },{passive:true});
+  g.addEventListener('touchend',e=>{
+    const dy=(e.changedTouches[0].clientY-(y0===null?0:y0));
+    sh.style.transform='';
+    if(y0!==null&&dy>70)hafTabSheetClose();
+    y0=null;
+  },{passive:true});
+  /* Escape closes it, and the bar is never trapped behind a keyboard */
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')hafTabSheetClose()});
+}
+
+function _tbSheetOpen(title,sub,html){
+  _tbEnsureSheet();
+  document.getElementById('tbs-t').textContent=title;
+  document.getElementById('tbs-s').textContent=sub||'';
+  document.getElementById('tbs-b').innerHTML=html;
+  document.getElementById('tbs-ov').classList.add('on');
+  document.getElementById('tbs').classList.add('on');
+}
+function hafTabSheetClose(){
+  const o=document.getElementById('tbs-ov'),s=document.getElementById('tbs');
+  if(o)o.classList.remove('on');
+  if(s){s.classList.remove('on');s.style.transform=''}
+}
+window.hafTabSheetClose=hafTabSheetClose;
+
+/* ── THE CENTRE HAF BUTTON ────────────────────────────────────────────────
+   The directive's "one centre action handles the main actions across the
+   platform". Every entry names a screen that already exists; an account that
+   has not got that screen never sees the entry, because the lookup is the
+   permission model again.
+
+   The two orders below are the whole of the role-awareness: somebody who
+   drives is looking for work, somebody who sends is looking to move something.
+   Same list, read from a different end. */
+const TB_ACTIONS=[
+  {tab:'b-book',   l:'Post a Job',    d:'Price it and put it on the network',
+   ico:'<path d="M12 5v14M5 12h14"/>',                    send:1, drive:5},
+  {tab:'d-jobs',   l:'Find Work',     d:'Open work on the network',
+   ico:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.4-3.4"/>', send:0, drive:1},
+  {tab:'d-invites',l:'Job Offers',    d:'Jobs offered directly to you',
+   ico:'<path d="M4 5h16v14H4z"/><path d="M4 6l8 6 8-6"/>', send:0, drive:2},
+  {tab:'livejob',  l:'Active Job',    d:'Follow a job that is running',
+   ico:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/>', send:3, drive:3},
+  {tab:'f-loads',  l:'Active Loads',  d:'Your clients’ loads',
+   ico:'<rect x="3" y="6" width="13" height="10" rx="1"/><path d="M16 9h3l2 2.5V16h-5z"/>', send:2, drive:0},
+  {tab:'d-empty',  l:'Backload',      d:'Fill the run home',
+   ico:'<path d="M21 12H3"/><path d="M8 7l-5 5 5 5"/>',    send:0, drive:4},
+  {tab:'fl-manage',l:'View Fleet',    d:'Drivers and vans at a glance',
+   ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>', send:4, drive:6},
+  {tab:'b-saved',  l:'Saved Addresses',d:'The places you send to often',
+   ico:'<path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.4"/>', send:5, drive:0}
+];
+
+function hafTabAction(){
+  const acc=_tbAcc; if(!acc)return;
+  const ix=_tbIndex(acc);
+  const flat={}; Object.keys(ix).forEach(s=>Object.keys(ix[s]).forEach(t=>flat[t]=ix[s][t]));
+  const drives=!!acc.drives;
+  const list=TB_ACTIONS
+    .map(a=>({a:a,rank:drives?a.drive:a.send}))
+    .filter(x=>x.rank>0&&flat[x.a.tab])
+    .sort((p,q)=>p.rank-q.rank)
+    .slice(0,6);
+  if(!list.length){
+    _tbSheetOpen('HAF','','<div class="tbs-why">There is nothing to start from this account yet.</div>');
+    return;
+  }
+  const html='<div class="tba-grid">'+list.map(x=>
+    '<button class="tba-c" type="button" onclick="hafTabDo(\''+x.a.tab+'\')">'+
+      '<svg class="ni-ic" viewBox="0 0 24 24">'+x.a.ico+'</svg>'+
+      '<b>'+_esc(x.a.l)+'</b><span>'+_esc(x.a.d)+'</span></button>').join('')+'</div>';
+  _tbSheetOpen('What would you like to do?',drives?'':'','' +html);
+}
+window.hafTabAction=hafTabAction;
+
+function hafTabDo(tabId){
+  const acc=_tbAcc; if(!acc)return;
+  const ix=_tbIndex(acc);
+  let t=null;
+  Object.keys(ix).forEach(s=>{if(!t&&ix[s][tabId])t=ix[s][tabId]});
+  if(!t)return;
+  _tbGo({tab:t});
+}
+window.hafTabDo=hafTabDo;
+
+/* ── THE MORE PANEL ───────────────────────────────────────────────────────
+   Everything the sidebar has, in the sidebar's own order and grouping, drawn
+   from the same model. This is what makes retiring the hamburger honest: a
+   section cannot go missing from here, because nothing here is typed out — a
+   new entry in HAF_NAV_V1 appears in this panel without touching this code.
+
+   A locked section keeps its padlock and its reason. The phone is not allowed
+   to quietly drop what the desktop takes the trouble to explain. */
+function hafTabMore(){
+  if(!_tbAcc)return;
+  hafTabSheetClose();
+  hafSbOpen();
+}
+window.hafTabMore=hafTabMore;
+
+function hafTabRow(secId,tabId){
+  const acc=_tbAcc; if(!acc)return;
+  const sec=hafNavModel(acc).find(s=>s.id===secId); if(!sec)return;
+  const t=(sec.tabs||[]).find(x=>x.id===tabId); if(!t)return;
+  _tbGo({tab:t});
+}
+window.hafTabRow=hafTabRow;
 
 /* ── THE SIGNED-IN ACCOUNT, AT THE FOOT OF THE SIDEBAR ────────────────────
    Document §17: name, membership, username, then Sign Out. Nothing here is
@@ -9615,6 +10149,10 @@ function buildNav(tabs,role,acc){
   if(afCard&&!acc){afCard.style.display='none';afCard.innerHTML='';}
   if(plCard&&!acc){plCard.style.display='none';plCard.innerHTML='';}
   else {hafPlnaPaint(true);hafAffPaint(true);}
+  /* Demo and master screens are not somebody's account, so they get no bottom
+     bar and keep the hamburger — the alternative is a phone menu built from
+     whichever real account happened to be looked at last. */
+  _tbAcc=acc||null; hafTabBarPaint();
 }
 let ct=null;
 /* ── FLEET OVERVIEW ────────────────────────────────────────────────────────
@@ -10485,6 +11023,9 @@ function switchTab(id){
   /* area rule applied to whatever this page just drew */
   setTimeout(()=>{try{hafMaskSweep(p);}catch(e){}},140);
   if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
+  /* the bar follows the screen: a sheet that opened it closes, and the newly
+     selected position takes the highlight */
+  try{hafTabSheetClose();hafSbClose();hafTabBarPaint();}catch(e){}
 }
 
 /* ═══════════════ NETWORK OVERVIEW + ACCOUNT ACTIVITY ═══════════════
