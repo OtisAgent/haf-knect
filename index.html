@@ -1616,7 +1616,11 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 .kncal-dot{width:5px;height:5px;border-radius:50%;background:var(--or);flex:0 0 auto}
 .kncal-more{font-size:.55rem;font-weight:800;color:var(--mu)}
 @media(min-width:900px){
-  .kncal-month{max-width:1080px;gap:.3rem}
+  /* Capped AND centred, the way PLNA's month sits. Uncapped, a 1920 screen
+     gave 262px-wide, 84px-tall cells — a letterbox, not a calendar. Capped but
+     left-aligned, a third of a 1440 screen sat empty beside it. Centred is
+     both: a readable day, and the month in the middle of the screen. */
+  .kncal-month{max-width:1080px;margin-inline:auto;gap:.3rem}
   .kncal-cell{aspect-ratio:auto;height:clamp(50px,8vh,84px);gap:.18rem;font-size:.8rem;border-radius:9px}
   .kncal-mhead{padding:.2rem 0}
 }
