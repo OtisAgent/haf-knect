@@ -369,6 +369,14 @@ body.haf-tabbar-on .sidebar{bottom:calc(var(--tabbar-h) + 22px + env(safe-area-i
 /* MAIN CONTENT */
 .main{flex:1;padding:1.8rem 2rem;overflow-y:auto}
 @media(max-width:768px){.main{padding:1rem}}
+/* Since the bottom bar took over navigation everywhere, the desktop no longer
+   keeps a permanent side column, which handed every screen the full width of
+   the monitor and left a job card 1,800px wide with four numbers floating in
+   it. A reading measure, centred. Nothing below 1180px is affected. */
+@media(min-width:1180px){
+  .main{padding-left:max(2rem,calc((100% - 1180px) / 2));
+        padding-right:max(2rem,calc((100% - 1180px) / 2))}
+}
 .tp{display:none}.tp.on{display:block}
 .pt{font-family:var(--dp);font-weight:900;font-size:1.65rem;letter-spacing:-.04em;margin-bottom:.2rem}
 .ps{color:var(--mu);font-size:.88rem;margin-bottom:1.5rem}
@@ -656,38 +664,56 @@ textarea.fi2{resize:vertical;min-height:70px}
 .xc.xc-invite{border-color:var(--or-g)}
 /* a job this account posted — its own work, shown to nobody else */
 .xc.xc-own{border-color:var(--ln)}
-.xc.xc-own .xb.inv{color:#fff}
+/* was color:#fff — white letters on the fill orange, 2.3:1, unreadable. The
+   badge now takes its ink from --xb-c like every other card. */
 .xc-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.5rem}
 .xc-badges{display:flex;gap:.28rem;align-items:center;flex-wrap:wrap}
-.xb{font-size:.57rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;padding:.18rem .5rem;border-radius:4px}
-.xb.inv{background:rgba(241,142,0,.15);color:var(--haf-orange-ink);border:1px solid var(--or-g)}
+.xb{font-size:.73rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:.18rem .5rem;border-radius:4px}
+/* ONE variable drives all three: the ink, the tint behind it and the hairline.
+   The status badge took a solid fill from an inline style and its ink from a
+   stylesheet rule, so the two could disagree, and on a sample card they did:
+   full-strength orange behind desaturated grey-blue letters, which is the
+   smudge in the screenshot. A single --xb-c cannot disagree with itself. If
+   color-mix is ever unavailable the tint drops out and the text stays
+   readable, which is the right way round to fail. */
+.xb.inv{--xb-c:var(--haf-orange-ink, #8f5400);
+  background:color-mix(in srgb, var(--xb-c) 13%, transparent);
+  color:var(--xb-c);
+  border:1px solid color-mix(in srgb, var(--xb-c) 34%, transparent)}
 .xb.urg{background:rgba(180,72,63,.13);color:var(--rd)}
 .xb.sdy{background:rgba(241,142,0,.13);color:var(--am)}
 .xb.flx{background:var(--ln);color:var(--mu)}
 .xb.pref{background:rgba(45,171,96,.12);color:var(--gn)}
-.xb-ref{font-size:.65rem;color:var(--mu);font-weight:600}
+.xb-ref{font-size:.76rem;color:var(--mu);font-weight:600}
+/* The same one-variable tint, for the status chips that are not badges. They
+   were written as `${colour}22` — string-pasting an alpha suffix onto the end
+   of a value that is itself var(--x, #hex), which is not a colour at all, so
+   those chips had no tint and no border. */
+.xb-tint{background:color-mix(in srgb, var(--xb-c, var(--mu)) 13%, transparent);
+  color:var(--xb-c, var(--mu));
+  border:1px solid color-mix(in srgb, var(--xb-c, var(--mu)) 34%, transparent)}
 .xc-viewers{font-size:.63rem;color:var(--mu);display:flex;align-items:center;gap:.22rem}
 .xc-route{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.025em;margin-bottom:.55rem;line-height:1.2}
 .xc-sr{display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg);border:1px solid var(--ln);border-radius:6px;overflow:hidden;margin-bottom:.5rem}
 .xcs{padding:.38rem .4rem;text-align:center;border-right:1px solid var(--ln)}.xcs:last-child{border-right:none}
-.xcs-v{font-weight:800;font-size:.8rem;white-space:nowrap}.xcs-k{font-size:.56rem;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;margin-top:.05rem}
-.xcs.rate .xcs-v{color:var(--gn);font-size:.92rem}
-.xc-goods{font-size:.71rem;color:var(--mu);padding:.3rem .5rem;background:var(--bg);border:1px solid var(--ln);border-radius:5px;margin-bottom:.55rem}
+.xcs-v{font-weight:800;font-size:.88rem;white-space:nowrap}.xcs-k{font-size:.73rem;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;margin-top:.1rem}
+.xcs.rate .xcs-v{color:var(--gn);font-size:1rem}
+.xc-goods{font-size:.77rem;color:var(--mu);padding:.34rem .55rem;background:var(--bg);border:1px solid var(--ln);border-radius:5px;margin-bottom:.55rem}
 .xc-pref{font-size:.68rem;color:var(--gn);font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.28rem}
 .xc-foot{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
-.xc-meta{font-size:.63rem;color:var(--mu);line-height:1.5}
+.xc-meta{font-size:.76rem;color:var(--mu);line-height:1.5}
 /* The fuller load card, 8 Sep. The board already returned the windows, the doors, the
    pallets and the pay; this screen printed a postcode pair and a date, so whoever posted
    the load could not tell from it what a driver was being asked to do. */
 .xc-legs{display:grid;gap:.4rem;margin-bottom:.55rem}
 @media(min-width:720px){.xc-legs{grid-template-columns:1fr 1fr;gap:.6rem}}
 .xc-leg{border-left:2px solid var(--ln);padding-left:.5rem}
-.xc-leg .k{font-size:.56rem;text-transform:uppercase;letter-spacing:.04em;color:var(--mu)}
-.xc-leg .w{font-size:.72rem;line-height:1.45}
-.xc-leg .n{font-size:.66rem;color:var(--mu);line-height:1.45;margin-top:.1rem}
+.xc-leg .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--mu)}
+.xc-leg .w{font-size:.78rem;line-height:1.45}
+.xc-leg .n{font-size:.72rem;color:var(--mu);line-height:1.45;margin-top:.1rem}
 .xc-chips{display:flex;flex-wrap:wrap;gap:.25rem;margin-bottom:.55rem}
-.xc-chips span{font-size:.63rem;padding:.13rem .45rem;border-radius:999px;background:var(--bg);border:1px solid var(--ln);color:var(--mu)}
-.xc-dist{font-size:.66rem;color:var(--mu);line-height:1.5;margin-bottom:.5rem}
+.xc-chips span{font-size:.74rem;padding:.16rem .5rem;border-radius:999px;background:var(--bg);border:1px solid var(--ln);color:var(--mu)}
+.xc-dist{font-size:.72rem;color:var(--mu);line-height:1.5;margin-bottom:.5rem}
 .xc-dist b{color:var(--tx,inherit);font-weight:700}
 .xc-cd{font-size:.65rem;font-weight:700;color:var(--rd);display:flex;align-items:center;gap:.2rem}
 .xc-btns{display:flex;gap:.35rem;flex-shrink:0}
@@ -1422,7 +1448,11 @@ body.haf-no-seed [data-seed-none]{display:block}
 /* ── SAMPLE vs LIVE, PRIVACY BLUR, VIEW FORMATS ─────────────── */
 /* Sample runs are deliberately desaturated and dashed so a real
    run — which keeps the normal brand colours — stands out at a glance. */
-:root{--hv-s:#78889b;--hv-s-bg:rgba(120,136,155,.07);--hv-s-ln:rgba(120,136,155,.45)}
+/* #78889b was 3.3:1 on the day background — desaturated had quietly become
+   unreadable, and the route line, the most important line on the card, was
+   the one wearing it. #5f6e80 is 5.4:1 and still reads as clearly "not a real
+   run" beside a full-colour card. */
+:root{--hv-s:#5f6e80;--hv-s-bg:rgba(120,136,155,.07);--hv-s-ln:rgba(120,136,155,.45)}
 [data-theme=night]{--hv-s:#8c9bad;--hv-s-bg:rgba(140,155,173,.08);--hv-s-ln:rgba(140,155,173,.38)}
 
 .hv-tile{position:relative}
@@ -1441,12 +1471,18 @@ body.haf-no-seed [data-seed-none]{display:block}
 .xc.hv-sample .xc-route,.cap-sec.hv-sample .cap-sec-nm,
 #sb-livejob.hv-sample .sb-lj-route,
 #dash-basic-focus.hv-sample .dbf-route,#dash-return.hv-sample .rr-rt{color:var(--hv-s)}
-.xc.hv-sample .xb.inv{background:rgba(120,136,155,.16);color:var(--hv-s);border-color:var(--hv-s-ln)}
-.hv-stag{font-size:.53rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
-  padding:.16rem .42rem;border-radius:4px;background:rgba(120,136,155,.16);
+/* One override, not three: --xb-c carries the ink, the tint and the hairline
+   with it. !important because the card writes --xb-c inline, and a sample is
+   allowed to overrule the status colour, which is the whole point of it. */
+.xc.hv-sample .xb.inv{--xb-c:var(--hv-s)!important}
+/* A sample price is not a real price, so it does not get to be the one bright
+   green thing on a deliberately quiet card. */
+.xc.hv-sample .xcs.rate .xcs-v{color:var(--hv-s)}
+.hv-stag{font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  padding:.18rem .46rem;border-radius:4px;background:rgba(120,136,155,.16);
   color:var(--hv-s);border:1px dashed var(--hv-s-ln);white-space:nowrap}
-.hv-live{font-size:.53rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
-  padding:.16rem .42rem;border-radius:4px;background:var(--gn-d);color:var(--gn);white-space:nowrap}
+.hv-live{font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  padding:.18rem .46rem;border-radius:4px;background:var(--gn-d);color:var(--gn);white-space:nowrap}
 
 /* privacy blur — the eye stays sharp and clickable, everything else goes soft */
 /* .hv-show is a card the person has explicitly asked to see again while "Blur
@@ -1690,7 +1726,10 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
   .tbi{min-height:44px}
   .tbi-ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;
     stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;transition:transform .16s}
-  .tbi-l{font-size:.56rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+  /* .56rem is 9px. Five words at 9px along the bottom of a phone is the thing
+     Brent was squinting at. The narrow rule below takes the letter-spacing out
+     rather than shrinking the word again, so "Payments" still says Payments. */
+  .tbi-l{font-size:.74rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase;
     max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
     opacity:1;height:auto;transition:opacity .16s}
   /* The active tab expands and shows its label. Everything else stays a symbol,
@@ -1711,7 +1750,13 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
   }
   .tbi-act:active .tba-btn{transform:scale(.93);box-shadow:0 1px 5px rgba(241,142,0,.5)}
   .tbi-act .tbi-ic{width:24px;height:24px;stroke-width:2.4}
-  .tbi-act .tbi-l{opacity:1;height:auto;color:var(--mu);font-size:.5rem;margin-top:1px}
+  .tbi-act .tbi-l{opacity:1;height:auto;color:var(--mu);font-size:.67rem;margin-top:2px}
+
+  /* Small phones: take the letter-spacing out before taking the size out. */
+  @media(max-width:359px){
+    .tbi-l{font-size:.68rem;letter-spacing:0}
+    .tbi{padding:0 1px}
+  }
 
   /* A count only ever appears where a real one exists — see hafTabBadge. */
   .tbi-wrap{position:relative;display:flex;align-items:center;justify-content:center}
@@ -9648,7 +9693,7 @@ function dashBuildOwnFeed(){
       .concat(money.slice(0,1).map(m=>[m[0],m[1]]));
     return '<div class="xc xc-own">'+
       '<div class="xc-head"><div class="xc-badges">'+
-        '<span class="xb inv" style="background:'+st[1]+'">'+hafEsc(st[0])+'</span>'+
+        '<span class="xb inv" style="--xb-c:'+st[1]+'">'+hafEsc(st[0])+'</span>'+
         '<span class="xb-ref">'+hafEsc(j.id)+'</span></div></div>'+
       '<div class="xc-route">'+hafEsc(hafArea(j.from.name))+' → '+hafEsc(hafArea(j.to.name))+'</div>'+
       '<div class="xc-sr">'+cells.map((c,i)=>
@@ -9983,13 +10028,42 @@ function buildNavV1(acc,keepOpen){
    the round trip on a preview link drops you onto the live site and the pair
    cannot be judged together. */
 function _hafCross(url){
+  let u=url;
   try{
-    if(/\.pages\.dev$/.test(location.hostname)&&/plna\.usehaf\.co\.uk/.test(url))
-      return url.replace('https://plna.usehaf.co.uk','https://mobile-bottom-nav.plna-live.pages.dev');
+    if(/\.pages\.dev$/.test(location.hostname)&&/plna\.usehaf\.co\.uk/.test(u))
+      u=u.replace('https://plna.usehaf.co.uk','https://mobile-bottom-nav.plna-live.pages.dev');
   }catch(e){}
-  return url;
+  return _hafHandPlna(u);
 }
 window._hafCross=_hafCross;
+
+/* ── ONE SIGN-IN, BOTH DOORS — the giving half ────────────────────────────
+   Crossing to the driving app used to land on its sign-in page, because they
+   are two sites with two sessions: the bar was right and the sign-in was what
+   was missing.
+
+   The person has already proved who they are to have this page open at all, so
+   they are handed through rather than asked the same question twice. The token
+   is the credential hash the session is already holding — never a PIN, never a
+   password, nothing a person could read off a screen and type in as one.
+
+   It travels in the URL FRAGMENT, which a browser never puts in a request, so
+   it reaches no server log on the way; PLNA's sso page spends it and wipes it
+   out of history before it draws anything. No credential in hand means no
+   shortcut: the plain front door instead, exactly as today. */
+function _hafHandPlna(base){
+  try{
+    if(!/plna(\.usehaf\.co\.uk|-live\.pages\.dev)/.test(base))return base;
+    if(/\/sso\.html/.test(base))return base;
+    const c=(typeof hafPlnaCred==='function')?hafPlnaCred():null;
+    if(!c)return base;
+    const k=c.p_relay||c.p_hash;
+    if(!k||!c.p_username)return base;
+    return base.replace(/\/+$/,'')+'/sso.html#u='+encodeURIComponent(c.p_username)+
+           '&k='+encodeURIComponent(k)+'&t='+(c.p_relay?'p':'w');
+  }catch(e){return base}
+}
+window._hafHandPlna=_hafHandPlna;
 
 function _navGo(t){
   if(t.ext)return "window.location.href=_hafCross('"+t.ext+"')";
@@ -13067,13 +13141,11 @@ function hafPlnaCred(){
    written for. The token travels in the URL fragment, which a browser never
    sends to a server, and PLNA's sso page clears it out of history the moment
    it has used it. No credential, no shortcut: the plain front door instead. */
-function hafOpenPlna(){
-  const c=hafPlnaCred();
-  if(!c||!(c.p_relay||c.p_hash)){window.open(HAF_PLNA_URL,'_blank','noopener');return}
-  const k=c.p_relay||c.p_hash, t=c.p_relay?'p':'w';
-  window.open(HAF_PLNA_URL+'/sso.html#u='+encodeURIComponent(c.p_username)+
-              '&k='+encodeURIComponent(k)+'&t='+t,'_blank','noopener');
-}
+/* Same tab, not a second one: since the driving app carries this same bottom
+   bar, opening a new window is the one thing that would break the feeling of
+   one app. _hafCross builds the handover and points a preview at a preview, so
+   this button and the bar's fourth position can never take different routes. */
+function hafOpenPlna(){window.location.href=_hafCross(HAF_PLNA_URL);}
 
 /* What a driver reads when a field on their record is empty. The database
    returns ids; a driver is never shown an id. */
@@ -13386,7 +13458,7 @@ function hafRenderJobsList(){
    const drv=(j.driverName&&j.driverName!=='—')?`Driver <b>${hafEsc(j.driverName)}</b>`:`<b style="color:var(--haf-orange-ink)">Finding driver…</b>`;
    const eta=j.status==='delivered'?`Delivered <b>${hafEsc(j.pod?j.pod.time:'')}</b>`:((j.eta&&j.eta!=='—')?`ETA <b>${hafEsc(j.eta)}</b>`:`<b>—</b>`);
    return `<button class="ljl-row" style="border-left-color:${j.colour}" onclick="hafOpenJob('${j.id}')">
-     <div class="ljl-r1"><span class="ljl-ref">${j.id}</span><span class="chip" style="background:${st[1]}22;color:${st[1]};font-weight:800;font-size:.56rem;border:1px solid ${st[1]}55">● ${st[0]}</span></div>
+     <div class="ljl-r1"><span class="ljl-ref">${j.id}</span><span class="chip xb-tint" style="--xb-c:${st[1]};font-weight:800;font-size:.74rem">● ${st[0]}</span></div>
      <div class="ljl-route">${hafEsc(j.from.name)} → ${hafEsc(j.to.name)}</div>
      <div class="ljl-meta"><span>${drv}</span><span>${eta}</span><span>${extra}</span></div>
      <div class="ljl-bar"><div class="ljl-fill" style="width:${j.progress}%;background:${j.colour}"></div></div>
@@ -13478,7 +13550,7 @@ function hafRenderLiveJob(){
       <button class="btn btn-gh btn-xs" onclick="hafBackToList()" style="margin-bottom:.45rem">← All ${role==='freight'?'loads':'deliveries'}</button>
       <h1 class="pt" style="margin-bottom:.15rem">${cfg.title}</h1><p class="ps" style="margin:0">${hafEsc(j.from.name)} → ${hafEsc(j.to.name)} · ${j.id}</p>
     </div>
-    <span class="chip" style="background:${st[1]}22;color:${st[1]};font-weight:800;border:1px solid ${st[1]}55">● ${st[0]}</span>
+    <span class="chip xb-tint" style="--xb-c:${st[1]};font-weight:800">● ${st[0]}</span>
   </div>
   <div class="lj-head">
     <div class="lj-head-i"><div class="lj-head-l">Status</div><div class="lj-head-v" style="color:${st[1]}">${st[0]}</div></div>
@@ -16429,6 +16501,76 @@ window.pxSave=async function(){
   window.knCalStep=step;
   window.knCalToday=goToday;
   window.knCalState=function(){return S;};
+})();
+</script>
+<script>
+/* ONE SIGN-IN, BOTH DOORS — the receiving half.
+   The mirror of _hafHandPlna. The driving app hands a session BACK to here the
+   same way this page hands one over to it, so the round trip is whole in both
+   directions instead of only one.
+
+   Three things this deliberately does NOT do:
+
+   - It does not trust the ticket. The token is checked against the database by
+     the same knect_auth every typed sign-in goes through: same function, same
+     refusals, same email-confirmation rule. A ticket is a saved keystroke, not
+     a way past the door. A forged one gets what a wrong PIN gets.
+   - It does not leave the token lying about. The fragment is wiped from the
+     address bar before the call is made, so a refresh, a shared link or a back
+     button carries nothing.
+   - It does not invent a fallback. No ticket, a bad ticket, an unconfirmed
+     email or a failed connection all land on the ordinary front door, which is
+     the behaviour today and is never worse than today. */
+(function(){
+  var h=(location.hash||'').replace(/^#/,'');
+  if(!/(^|&)sso(=|&|$)/.test(h))return;
+  var q=new URLSearchParams(h);
+  var u=(q.get('u')||'').trim().toUpperCase(),k=(q.get('k')||'').trim();
+  /* out of the address bar and out of history, before anything else happens */
+  try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
+  if(!u||!k||!/^[a-f0-9]{32,128}$/i.test(k))return;
+
+  var veil=document.createElement('div');
+  veil.id='haf-sso-veil';
+  veil.setAttribute('style','position:fixed;inset:0;z-index:9000;display:flex;'+
+    'align-items:center;justify-content:center;background:#f5f3ef;'+
+    'font-family:Inter,system-ui,sans-serif;color:#1a1e22');
+  veil.innerHTML='<div style="text-align:center">'+
+    '<div style="width:34px;height:34px;border:3px solid rgba(26,30,34,.12);'+
+    'border-top-color:#f18e00;border-radius:50%;margin:0 auto 14px;'+
+    'animation:hafssospin .8s linear infinite"></div>'+
+    '<div style="font-size:.95rem;font-weight:600">Signing you in&hellip;</div></div>'+
+    '<style>@keyframes hafssospin{to{transform:rotate(360deg)}}</style>';
+  function drop(){var v=document.getElementById('haf-sso-veil');if(v)v.remove();}
+  function paint(){(document.body||document.documentElement).appendChild(veil);}
+  if(document.body)paint(); else document.addEventListener('DOMContentLoaded',paint);
+
+  function start(){
+    /* The token goes into ALL THREE credential slots and the sender's own idea
+       of which form it is gets no say. Three stored forms exist on one account
+       — a password hash, the relay PIN hash and the CleverPay PIN hash — and
+       only the sign-in that originally matched one knew which. Carrying that
+       label across meant a session made before this build had none, and a
+       correct credential was offered to the wrong column and refused.
+       Nothing is widened: each slot is compared against its own column on this
+       one username, so a slot only matches if that column genuinely holds this
+       exact value, which is the same as saying the person already had it. */
+    fetch(PLNA_URL+'/rest/v1/rpc/knect_auth',{method:'POST',
+      headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({p_username:u,p_hash:k,p_relay:k,p_cp:k})})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(!Array.isArray(d)||!d.length||!d[0]||!d[0].cred){drop();return}
+      if(d[0].email_confirm_required&&!d[0].email_confirmed){drop();return}
+      /* Which form it turned out to be is read off the ANSWER, never off the
+         ticket: `cred` is the database saying which column opened the account. */
+      hafGo(u,k,(d[0].cred==='password'?'w':'p'),d[0]);
+      drop();
+    })
+    .catch(function(){drop()});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);
+  else start();
 })();
 </script>
 <script>
