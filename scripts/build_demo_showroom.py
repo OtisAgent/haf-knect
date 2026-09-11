@@ -82,17 +82,35 @@ SAME_ON_EVERY_LEVEL = [
     "Raise a ticket and get a person",
 ]
 
-# ── what may never reach a public page ───────────────────────────────────────
-# The pricing matrix holds HAF's own commercials next to the customer's rates:
-# what each job type earns, the fee floor and ceiling, the pool splits, what the
-# driver is paid. A public page is a one-way door, so the build refuses to ship
-# if any of it appears — by name or by the phrasing it travels under. Brent can
-# have any of it added on his word; it will not arrive by accident.
-NEVER_PUBLISH = [
+# ── HAF's own figures, and where they are allowed to be ──────────────────────
+# Brent, 11 Sep: "Yes, add all of them & the pooling is TBC". So what HAF earns
+# on a job, the fee floor and the pools now go on the page — inside ONE marked
+# band at the end of the pricing section, and nowhere else.
+#
+# The guard is not deleted, it is narrowed, because what it was really protecting
+# against was never Brent's decision: it was these figures arriving somewhere
+# nobody chose to put them, carried in by the engine's own answer. The engine
+# hands back HAF's side of a job in the same object as the customer's price, so a
+# careless line anywhere on the page can leak it. Hence:
+#
+#   OWN_FIGURES_BAND_ONLY  plain English for HAF's commercials — allowed in the
+#                          band, refused everywhere else on the page.
+#   CODE_NAMES_NEVER       the engine's own field names. A code word on a page a
+#                          customer can read is nobody's decision, so these are
+#                          refused everywhere, band included.
+#
+# And because a guard that only ever removes things can quietly remove what was
+# asked for, the band is also checked POSITIVELY further down: the figures Brent
+# asked for must be present, or the build stops.
+OWN_FIGURES_BAND_ONLY = [
+    "HAF keeps", "HAF's own side", "fee floor", "the ceiling", "margin",
+    "the drivers' pool", "the freight pool", "relay and storage", "affiliate",
+]
+CODE_NAMES_NEVER = [
     "marginPct", "floorPct", "hafMargin", "networkFee", "feeFloor", "feeCeiling",
     "minRetained", "driverPay", "carrierTransportValue", "relayStorage",
-    "freightPool", "driverPool", "affiliate", "pctOfMargin", "feeBasis",
-    "funded by HAF", "HAF margin", "what HAF keeps",
+    "freightPool", "driverPool", "pctOfMargin", "feeBasis", "hafKeeps",
+    "hafNet", "totalPctOfMargin", "funded by HAF",
 ]
 
 # ── the three guided walks ───────────────────────────────────────────────────
@@ -324,6 +342,79 @@ def price_row(grid, levels):
             % "".join(tds))
 
 
+def visible_text(html):
+    """What a person actually reads — stylesheet and scripts taken out, then tags.
+
+    Used by the guard on HAF's own figures. A word in a CSS property or a variable
+    name is not the page saying it; a word in the prose is.
+    """
+    t = re.sub(r"<style\b.*?</style>", " ", html, flags=re.S | re.I)
+    t = re.sub(r"<script\b.*?</script>", " ", t, flags=re.S | re.I)
+    t = re.sub(r"<[^>]+>", " ", t)
+    return re.sub(r"\s+", " ", t)
+
+
+def own_side(grid, levels, heads):
+    """HAF's own side of the opening job — rendered here as well as by the picker.
+
+    Same reason as the price row: the band has to read correctly with JavaScript
+    off, and a row of dashes on a screen share is worse than no band at all.
+
+    The driver's pay is ONE figure printed three times on purpose. It is the point
+    the band is making — a paid account takes money off the customer's price and
+    none off the driver — and quote_grid.mjs refuses to build if the engine ever
+    pays a driver differently by the customer's account level.
+    """
+    key = "%s|%s|%d" % OPENS_ON
+    h = grid["haf"]["cells"].get(key)
+    cell = grid["cells"].get(key)
+    if not h or not cell:
+        raise ReadFailed("the engine did not price HAF's side of the example job (%s)" % key)
+
+    th = ['<th>On the job picked above</th>'] + [
+        '<th class="lvl">%s</th>' % esc(x) for x in heads]
+
+    price = "".join('<td class="own-n" id="own-price-%s">£%.2f</td>' % (L, cell[i])
+                    for i, L in enumerate(levels))
+    pay = "".join('<td class="own-n" id="own-pay-%s">£%.2f</td>' % (L, h[1])
+                  for L in levels)
+    keep = []
+    for i, L in enumerate(levels):
+        k = h[0][i]
+        share = round((k / cell[i]) * 10000) / 100.0
+        keep.append('<td class="own-n" id="own-keep-%s">£%.2f<span class="sub">%.2f%% of '
+                    'what the customer pays%s</span></td>'
+                    % (L, k, share, ", lifted to the floor" if h[2][i] else ""))
+
+    rows = ('<tr><td>The customer pays<span class="sub">Before VAT</span></td>%s</tr>'
+            '<tr><td>The driver is paid<span class="sub">The same on all three</span></td>%s</tr>'
+            '<tr class="keep"><td>What HAF keeps</td>%s</tr>'
+            % (price, pay, "".join(keep)))
+    return "".join(th), rows
+
+
+def pool_list(grid):
+    """The pools, by name, with no share against any of them.
+
+    Brent, 11 Sep: "the pooling is TBC". The names are read off the live matrix by
+    quote_grid.mjs, which stops the build if the matrix grows a pool this code has
+    no plain words for. A figure reaching this list is caught below.
+    """
+    pools = grid["haf"]["pools"]
+    if pools.get("settled"):
+        raise ReadFailed("the pools are marked settled now — the page still says they are "
+                         "to be confirmed, so say the figures or change the page")
+    names = pools.get("destinations") or []
+    if len(names) < 2:
+        raise ReadFailed("the live matrix names %d pools; the page talks about them in "
+                         "the plural" % len(names))
+    for n in names:
+        if re.search(r"\d", n):
+            raise ReadFailed("a pool destination carries a figure (%r) and the split is "
+                             "not agreed yet" % n)
+    return "".join("<li>%s</li>" % esc(n) for n in names)
+
+
 def ladders(pm):
     """The vehicle and service ladders, and the named extras — all read live."""
     veh = "".join(
@@ -434,6 +525,20 @@ def main() -> int:
         tds = "".join(cell(b[L]["allowances"].get(key), kind) for L in LEVELS)
         body.append("<tr><td>%s</td>%s</tr>" % (label, tds))
 
+    # HAF's own band. Inside its own guard for the same reason as everything else
+    # that is read rather than typed: if the engine stops handing back HAF's side
+    # of a job, the band must stop the build, not quietly render empty cells.
+    try:
+        own_heads, own_rows = own_side(grid, LEVELS, [b[L]["label"] for L in LEVELS])
+        pools_html = pool_list(grid)
+    except ReadFailed as e:
+        print("REFUSING TO BUILD: %s" % e, file=sys.stderr)
+        print("HAF's own figures were asked for by name — an empty band is not an "
+              "answer.", file=sys.stderr)
+        return 1
+    floor_hits = sum(1 for c in grid["haf"]["cells"].values() if any(c[2]))
+    hafside = grid["haf"]
+
     html = SRC.read_text(encoding="utf8")
     for token, value in (("<!--LEVEL_HEADS-->", "".join(heads)),
                          ("<!--LEVEL_ROWS-->", "".join(body)),
@@ -461,6 +566,17 @@ def main() -> int:
                          ("<!--LOCAL_BAND-->", "%g" % pm["local"]["band_miles"]),
                          ("<!--LOCAL_OFF-->", "%g" % pm["local"]["max_off_pct"]),
                          ("<!--LOCAL_FULL-->", "%g" % pm["local"]["full_from_miles"]),
+                         ("<!--OWN_HEADS-->", own_heads),
+                         ("<!--OWN_ROWS-->", own_rows),
+                         ("<!--OWN_JOB_COUNT-->", str(len(grid["cells"]))),
+                         ("<!--FLOOR_PCT-->", "%g" % hafside["floor"]),
+                         ("<!--CEILING_PCT-->", "%g" % hafside["ceiling"]),
+                         ("<!--FLOOR_FIXED-->",
+                          "Fixed by the matrix, not negotiable per job."
+                          if hafside["fixed"] else
+                          "Set by the matrix and movable per job."),
+                         ("<!--FLOOR_HITS-->", "%d" % floor_hits),
+                         ("<!--POOL_LIST-->", pools_html),
                          ("<!--FUEL_TRIGGER-->", "%g" % pm["fuel"]["trigger_pct"]),
                          ("<!--FUEL_CAP-->", "%g" % pm["fuel"]["cap_pct"]),
                          ("<!--READ_ON-->", on)):
@@ -483,15 +599,66 @@ def main() -> int:
               % html[max(0, leak.start() - 60):leak.start() + 60], file=sys.stderr)
         return 1
 
-    # ── the business's own commercials are not a customer's ───────────────────
-    # Checked on the finished page, not on the source, because the prices are
-    # injected from the engine and the engine's answer carries HAF's side of the
-    # job in the same object as the customer's.
-    for word in NEVER_PUBLISH:
+    # ── HAF's own figures: all present, and all inside the band ───────────────
+    # Checked on the FINISHED page, not the source, because the figures are
+    # injected from the engine and the engine's answer carries HAF's side of a job
+    # in the same object as the customer's price.
+    #
+    # First the positive half. Brent asked for three things by name, so the build
+    # proves all three arrived: the margin on the opening job, the floor and the
+    # ceiling, and the pools. A guard that can only subtract would happily ship a
+    # page that quietly lost them.
+    # The band runs from its own opening tag to the end of the pricing section —
+    # it is deliberately the last thing in it, so the walk can stop before it.
+    # Anchored on both ends rather than counting closing tags, because a nested
+    # </div> is exactly the kind of thing that makes a guard match the wrong half.
+    band = re.search(r'<div class="own" id="own">.*?</section>', html, re.S)
+    if not band:
+        print("REFUSING TO BUILD: HAF's own band is not on the finished page, and it "
+              "was asked for by name.", file=sys.stderr)
+        return 1
+    band_text = band.group(0)
+    opening = grid["haf"]["cells"]["%s|%s|%d" % OPENS_ON]
+    must_say = [("what HAF keeps on the opening job",
+                 "£%.2f" % opening[0][len(LEVELS) - 1]),
+                ("what the driver is paid on it", "£%.2f" % opening[1]),
+                ("the fee floor", "%g%%" % grid["haf"]["floor"]),
+                ("the ceiling", "%g%%" % grid["haf"]["ceiling"]),
+                ("that the pooling is not settled", "To be confirmed")]
+    for what, figure in must_say:
+        if figure not in band_text:
+            print("REFUSING TO BUILD: the band does not state %s (%s). Brent asked for "
+                  "these by name." % (what, figure), file=sys.stderr)
+            return 1
+    for name in grid["haf"]["pools"]["destinations"]:
+        if name not in band_text:
+            print("REFUSING TO BUILD: the pool %r is in the live matrix and not on the "
+                  "page." % name, file=sys.stderr)
+            return 1
+
+    # Then the negative half, on the page with the band cut out of it. HAF's
+    # commercials are allowed in one place by decision; anywhere else they arrived
+    # by accident, and that is the failure this has always been guarding against.
+    # On the WORDS, not the markup. The first version of this check failed on
+    # "margin:0" in the stylesheet — a guard that fires on CSS teaches you to
+    # switch it off, which is how the thing it was guarding gets out.
+    rest = visible_text(html.replace(band.group(0), ""))
+    for word in OWN_FIGURES_BAND_ONLY:
+        hit = re.search(re.escape(word), rest, re.I)
+        if hit:
+            print("REFUSING TO BUILD: %r reached the page OUTSIDE HAF's own band, near "
+                  "%r. Inside the band is a decision; outside it is a leak."
+                  % (word, rest[max(0, hit.start() - 70):hit.start() + 70]),
+                  file=sys.stderr)
+            return 1
+
+    # And the engine's own field names, which are nobody's decision: a code word
+    # on a page a customer reads is a mistake wherever it lands, band included.
+    for word in CODE_NAMES_NEVER:
         hit = re.search(re.escape(word), html, re.I)
         if hit:
-            print("REFUSING TO BUILD: %r reached the page near %r. That is HAF's own "
-                  "commercials on a public address — a one-way door."
+            print("REFUSING TO BUILD: the engine's own field name %r reached the page "
+                  "near %r. Say it in English or do not say it."
                   % (word, html[max(0, hit.start() - 70):hit.start() + 70]),
                   file=sys.stderr)
             return 1

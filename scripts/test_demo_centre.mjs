@@ -220,21 +220,115 @@ console.log('\nTHE PRICING ENGINE BEHIND THE COMPARISON');
   ok(hard.includes(String(MATRIX.fuel.cap_pct)), 'the fuel cap is the live one');
 }
 
-console.log('\nWHAT HAF EARNS IS NOT ON A PUBLIC PAGE');
+console.log("\nHAF'S OWN SIDE — ON THE PAGE, AND IT IS THE ENGINE'S OWN FIGURE");
 {
-  /* The engine's answer carries HAF's side of a job in the same object as the
-     customer's. Checked here on the finished page as well as in the build,
-     because this is the one that cannot be undone once it is out. */
+  /* Brent, 11 Sep: "Yes, add all of them & the pooling is TBC". So this section
+     changed sides: it used to prove these figures were absent, and now it proves
+     they are present, correct, and confined to the one band.
+
+     ENGINE below is the live engine run again, independently of the build. If the
+     band and the engine disagree by a penny, the band is wrong. */
+  const ENGINE = JSON.parse(execFileSync('node', [ROOT + 'scripts/quote_grid.mjs'],
+    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, cwd: ROOT }));
+
+  ok(await pg.isVisible('#own'), "HAF's own band is on the page and visible");
+
+  /* Four jobs of different shapes, including one the engine had to lift to its
+     floor — the flag on the page is only worth anything if a job that trips it
+     is actually walked. */
+  const lifted = Object.entries(ENGINE.haf.cells).find(([, c]) => c[2].some(f => f));
+  const jobs = [
+    ['LWB_VAN', 'STD_SAMEDAY', '50'],
+    ['LUTON_TAIL', 'URGENT', '150'],
+    ['MWB_VAN', 'TIMED', '200'],
+    ...(lifted ? [lifted[0].split('|')] : []),
+  ];
+  for (const [v, j, m] of jobs) {
+    await pg.selectOption('#pk-veh', v);
+    await pg.selectOption('#pk-job', j);
+    await pg.selectOption('#pk-mi', m);
+    const key = v + '|' + j + '|' + m;
+    const H = ENGINE.haf.cells[key], C = ENGINE.cells[key];
+    const levels = ENGINE.levels || ['FREE', 'PLUS', 'PRO'];
+
+    const keeps = [];
+    for (const L of levels) keeps.push(await pg.textContent('#own-keep-' + L));
+    const wantKeep = H[0].map(x => '£' + x.toFixed(2));
+    ok(keeps.every((t, i) => t.trim().startsWith(wantKeep[i])),
+      key + ': what HAF keeps is the engine\'s own figure (' + wantKeep.join(' / ') + ')');
+
+    const pays = [];
+    for (const L of levels) pays.push((await pg.textContent('#own-pay-' + L)).trim());
+    ok(pays.every(t => t === '£' + H[1].toFixed(2)),
+      '  the driver is paid £' + H[1].toFixed(2) + ' whatever the customer\'s level');
+
+    /* The sentence under the table is the claim. This is the claim itself. */
+    const narrows = H[0][0] > H[0][levels.length - 1];
+    const custFalls = C[0] > C[levels.length - 1];
+    ok(!custFalls || narrows,
+      '  a cheaper price for the customer comes out of HAF, not the driver');
+
+    const shares = keeps.map((t, i) => Math.round((H[0][i] / C[i]) * 10000) / 100);
+    ok(keeps.every((t, i) => t.includes(shares[i].toFixed(2) + '%')),
+      '  and the share of the price is stated: ' + shares.map(s => s + '%').join(' / '));
+
+    const floorFlagged = keeps.filter(t => /lifted to the floor/i.test(t)).length;
+    ok(floorFlagged === H[2].filter(f => f).length,
+      '  the floor is flagged on exactly the levels the engine lifted (' + floorFlagged + ')');
+  }
+
+  /* The floor and the ceiling, against the live matrix rather than themselves. */
+  const bandTxt = await pg.textContent('#own .band');
+  ok(bandTxt.includes(ENGINE.haf.floor + '%'),
+    'the fee floor on the page is the live one (' + ENGINE.haf.floor + '%)');
+  ok(bandTxt.includes(ENGINE.haf.ceiling + '%'),
+    'and the ceiling is the live one (' + ENGINE.haf.ceiling + '%)');
+  const hits = Object.values(ENGINE.haf.cells).filter(c => c[2].some(f => f)).length;
+  ok(bandTxt.includes(String(hits)),
+    'the count of jobs lifted to the floor is counted, not guessed (' + hits + ')');
+
+  /* The pooling. Brent's word is TBC, so the test that matters is the ABSENCE of
+     a figure — every destination named, and not a percentage among them. */
+  const pools = await pg.$$eval('#own ul.pools li', ns => ns.map(n => n.textContent.trim()));
+  same(pools, ENGINE.haf.pools.destinations, 'every pool in the live matrix is named');
+  ok(!pools.some(p => /\d|%/.test(p)), 'and not one of them carries a figure — it is not agreed');
+  const tbc = await pg.textContent('#own');
+  ok(/to be confirmed/i.test(tbc), 'the page says outright that the pooling is to be confirmed');
+  ok(/not settled yet/i.test(tbc), 'and says it in a full sentence, not just a badge');
+
+  /* Confined to the band: nothing about HAF's side anywhere else on the page, and
+     the engine file is still not shipped. */
+  /* A detached clone has no layout, so innerText quietly falls back to
+     textContent — which includes the contents of <script>. The first version of
+     this check failed on the pool names inside the page's own data, where no
+     reader will ever see them. What is being checked is the WORDS on the page, so
+     the scripts and the stylesheet come out first. */
+  const outside = await pg.evaluate(() => {
+    const clone = document.body.cloneNode(true);
+    const o = clone.querySelector('#own'); if (o) o.remove();
+    clone.querySelectorAll('script,style').forEach(n => n.remove());
+    return clone.textContent;
+  });
+  const leaks = ['HAF keeps', 'fee floor', 'margin', 'affiliate'].filter(w =>
+    new RegExp(w.replace(/ /g, '\\s+'), 'i').test(outside));
+  ok(leaks.length === 0, "HAF's own figures appear in the band and nowhere else"
+    + (leaks.length ? ': ' + leaks.join(', ') : ''));
+
   const src = await pg.content();
-  const banned = ['marginPct', 'floorPct', 'hafMargin', 'networkFee', 'feeFloor',
+  const codeNames = ['marginPct', 'floorPct', 'hafMargin', 'networkFee', 'feeFloor',
     'feeCeiling', 'minRetained', 'driverPay', 'carrierTransportValue',
-    'relayStorage', 'freightPool', 'driverPool', 'pctOfMargin', 'feeBasis',
-    'funded by HAF', 'HAF margin'];
-  const found = banned.filter(w => new RegExp(w.replace(/ /g, '\\s+'), 'i').test(src));
-  ok(found.length === 0, 'none of HAF\'s own commercials reached the page'
+    'relayStorage', 'freightPool', 'driverPool', 'pctOfMargin', 'feeBasis'];
+  const found = codeNames.filter(w => new RegExp(w, 'i').test(src));
+  ok(found.length === 0, 'no engine field name reached the page'
     + (found.length ? ': ' + found.join(', ') : ''));
   ok(!/pricing-matrix-v3|HAFPricingMatrix/.test(src),
-    'the engine file itself is not shipped to the public page');
+    'the engine file itself is still not shipped to the page');
+
+  /* Put the picker back where the page opens, so the checks after this one see
+     the page a visitor sees. */
+  await pg.selectOption('#pk-veh', 'LWB_VAN');
+  await pg.selectOption('#pk-job', 'STD_SAMEDAY');
+  await pg.selectOption('#pk-mi', '50');
 }
 
 console.log('\nNOTHING THAT TEACHES THE WRONG PRODUCT');

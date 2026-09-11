@@ -58,8 +58,20 @@ const run = async () => {
   const resp = await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   ok('page answers 200', resp.status() === 200, 'status ' + resp.status());
 
-  const bytes = (await resp.text()).length;
-  ok('page is light', bytes < 60000, bytes.toLocaleString() + ' bytes (was 798,475)');
+  /* What this check is really for: the thing it replaced was the live app with a
+     door bolted on, and the failure to catch is a second copy of the app creeping
+     back in. A flat byte ceiling stopped being that check once the page started
+     carrying the engine's answers for 288 example jobs — so the page's own words
+     and markup are weighed apart from its lookup table, which is the half that
+     would actually grow if an app got in. */
+  const full = await resp.text();
+  const bytes = full.length;
+  const data = (full.match(/window\.HAF_DEMO_PRICES=[^\n]*/) || [''])[0].length;
+  ok('the page itself is still a page of words', bytes - data < 70000,
+     (bytes - data).toLocaleString() + ' bytes of page (was 798,475 for the app copy)');
+  ok('and the engine answers it carries are a lookup table, not an app',
+     bytes < 140000, bytes.toLocaleString() + ' bytes all in, ' + data.toLocaleString()
+     + ' of it priced jobs');
 
   ok('the door is what you land on', await page.isVisible('#step-email'));
   ok('the showroom is shut until the door opens', !(await page.isVisible('#show')));
@@ -147,8 +159,13 @@ const run = async () => {
   ok('no emoji in the page text', !/[\u{1F300}-\u{1FAFF}\u{2700}-\u{27BF}]/u.test(await page.textContent('body')));
 
   // ── the way on ─────────────────────────────────────────────────────────
+  /* One public sign-up door, join.usehaf.co.uk — with or without its trailing
+     slash. The first version of this compared the whole string and failed the day
+     the href gained a slash, which is a test failing on punctuation while the page
+     was right. */
   const join = await page.getAttribute('a.btn-or[href*="join"]', 'href');
-  ok('joining points at the one public door', join === 'https://join.usehaf.co.uk', join);
+  ok('joining points at the one public door',
+     /^https:\/\/join\.usehaf\.co\.uk\/?$/.test(join || ''), join);
 
   // ── the reload, which is where a session usually breaks ────────────────
   await page.reload({ waitUntil: 'networkidle' });

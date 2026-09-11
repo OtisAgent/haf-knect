@@ -228,6 +228,45 @@ td.price .off{display:block;font-family:var(--haf-font);font-size:.7rem;font-wei
 .mcard ul.ticks li{font-size:.83rem}
 .mcard ul.ticks b{font-weight:700}
 
+/* ── HAF's own side of the job ──────────────────────────────────────────────
+   Everything above this on the page is the customer's half of the matrix. This
+   band is not, and it is drawn so that nobody has to be told twice: its own
+   rule across the top, its own surface, and a heading that says whose figures
+   they are. On a call it is the last thing in the section, so the walk can stop
+   before it. Orange is the rule and the label only — the fill does not read as
+   text, so figures stay on ink. */
+.own{margin-top:2.6rem;background:var(--haf-surface-2);
+  border:1px solid var(--haf-line-strong);border-top:3px solid var(--haf-orange);
+  border-radius:var(--haf-radius-sm);padding:1.45rem 1.35rem}
+.own .k{font-size:.63rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--haf-orange-ink)}
+.own h3{margin:.35rem 0 .5rem}
+.own p{font-size:.87rem;color:var(--haf-ink-muted);max-width:74ch}
+.own .tblwrap{margin-top:1.15rem}
+.own table{min-width:440px}
+.own td.own-n{font-family:var(--haf-font-display);font-weight:700;font-size:1.02rem;
+  font-variant-numeric:tabular-nums}
+.own tr.keep td{background:var(--haf-surface-3);border-top:1px solid var(--haf-line-strong)}
+.own tr.keep td:first-child{font-weight:700}
+.own td .sub{display:block;font-size:.69rem;font-weight:600;color:var(--haf-ink-muted);
+  margin-top:.12rem;font-family:var(--haf-font)}
+.own .band{margin-top:1.2rem;display:flex;flex-wrap:wrap;gap:.7rem .9rem}
+.own .band .b{flex:1 1 210px;background:var(--haf-surface);border:1px solid var(--haf-line);
+  border-radius:var(--haf-radius-sm);padding:.8rem .9rem}
+.own .band .b .t{font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--haf-ink-muted)}
+.own .band .b .v{font-family:var(--haf-font-display);font-weight:700;font-size:1.3rem;
+  font-variant-numeric:tabular-nums;margin-top:.15rem}
+.own .band .b .s{font-size:.76rem;color:var(--haf-ink-muted);margin-top:.18rem}
+.own .tbc{display:inline-flex;align-items:center;background:var(--haf-caution-wash);
+  color:var(--haf-caution);border:1px solid var(--haf-caution);border-radius:var(--haf-pill);
+  padding:.1rem .55rem;font-size:.62rem;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase}
+.own ul.pools{list-style:none;margin:.8rem 0 0;padding:0;display:flex;flex-wrap:wrap;
+  gap:.4rem .5rem}
+.own ul.pools li{background:var(--haf-surface);border:1px solid var(--haf-line);
+  border-radius:var(--haf-pill);padding:.26rem .7rem;font-size:.78rem;font-weight:600}
+
 /* ── the jump bar and the three guided walks ──────────────────────────────
    Brent, 11 Sep: "create the demo centre for me to showcase how the HAF KNECT
    works in the simpliest format... the features of how to use the PLNA as a
@@ -749,8 +788,74 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
 
     <div class="note">Read out of the live pricing matrix on <!--READ_ON-->:
       <!--MATRIX_VERSION-->, in force since <!--MATRIX_FROM-->. Rates shown exclude VAT
-      at <!--VAT_PCT-->%. This is the customer's half of the matrix — what HAF earns on
-      a job is the business's own and is not published here.</div>
+      at <!--VAT_PCT-->%. Everything above this line is the customer's half of the
+      matrix.</div>
+
+    <!-- ── HAF's own side ─────────────────────────────────────────────────────
+         Brent, 11 Sep: "Yes, add all of them & the pooling is TBC" — in answer to
+         what HAF earns on a job, the fee floor and the pool splits.
+
+         So all three are here, and each is shown at the strength it is actually
+         agreed to. The margin and the floor are settled and come off the engine.
+         The pooling is not settled, so it is named and left at that: an unsettled
+         split printed as a percentage is a percentage somebody reads back to you
+         in a meeting six weeks later.
+
+         The figures move with the picker above, because the whole point of the
+         band is the relationship — the same job, the same driver's pay, and a
+         different amount left with HAF at each account level. -->
+    <div class="own" id="own">
+      <div class="k">HAF's own side</div>
+      <h3>The same job, from HAF's end of it.</h3>
+      <p>Everything above is what the customer is quoted. This is what is left with
+        HAF once the driver is paid, on the job picked above. Change the job and these
+        move with it.</p>
+
+      <div class="tblwrap">
+        <table>
+          <thead><tr><!--OWN_HEADS--></tr></thead>
+          <tbody><!--OWN_ROWS--></tbody>
+        </table>
+      </div>
+
+      <p style="margin-top:1.1rem"><strong>A paid account costs the customer less and
+        costs the driver nothing.</strong> The driver's pay is the same figure in all
+        three columns above, so the whole of the difference comes out of what HAF keeps.
+        That is what an account level is actually buying, and the build checks it on
+        every one of the <!--OWN_JOB_COUNT--> example jobs rather than taking it on trust.</p>
+
+      <div class="band">
+        <div class="b">
+          <div class="t">The fee floor</div>
+          <div class="v"><!--FLOOR_PCT-->%</div>
+          <div class="s">The least the network takes on a job. <!--FLOOR_FIXED--></div>
+        </div>
+        <div class="b">
+          <div class="t">The ceiling</div>
+          <div class="v"><!--CEILING_PCT-->%</div>
+          <div class="s">The most it takes, whatever else the job does.</div>
+        </div>
+        <div class="b">
+          <div class="t">Jobs lifted to the floor</div>
+          <div class="v"><!--FLOOR_HITS--></div>
+          <div class="s">Of the <!--OWN_JOB_COUNT--> examples, the ones where the price had
+            to come up to keep the fee at its floor.</div>
+        </div>
+      </div>
+
+      <p style="margin-top:1.3rem"><span class="tbc">To be confirmed</span></p>
+      <h3 style="margin-top:.5rem">Where a share of that margin is going to go.</h3>
+      <p>A slice of what HAF keeps is earmarked to flow back out into the network. The
+        destinations are set. <strong>The size of the slice and the split between them
+        are not settled yet</strong>, so no figure for them appears on this page, and
+        none should be quoted on a call until they are.</p>
+      <ul class="pools"><!--POOL_LIST--></ul>
+
+      <div class="note" style="margin-top:1.3rem"><strong>These are HAF's figures, not a
+        customer's.</strong> They are on this page deliberately, and they are readable by
+        anyone who has been given a code. All of them came out of the same engine that
+        quotes the customer, read on <!--READ_ON-->.</div>
+    </div>
   </div>
 </section>
 
@@ -935,6 +1040,25 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
                 :'<span class="off" style="color:var(--haf-ink-faint)">£'+inc.toFixed(2)+' with VAT</span>');
       td.className='price'+(k===levels.length-1?' best':'');
     }
+    /* ── HAF's own side of the same job ─────────────────────────────────────
+       Looked up, never worked out. The one exception is the share of the price,
+       which is a division of two figures that were both looked up — and the
+       build refuses to ship unless the engine agreed with that division on every
+       job at every level. */
+    var H=P.haf&&P.haf.cells&&P.haf.cells[v.value+'|'+j.value+'|'+m.value];
+    for(var n=0;n<levels.length;n++){
+      var pr=document.getElementById('own-price-'+levels[n]),
+          pa=document.getElementById('own-pay-'+levels[n]),
+          kp=document.getElementById('own-keep-'+levels[n]);
+      if(!pr||!pa||!kp)continue;
+      if(!H||!cell){pr.textContent='—';pa.textContent='—';kp.innerHTML='—';continue}
+      pr.textContent='£'+cell[n].toFixed(2);
+      pa.textContent='£'+H[1].toFixed(2);
+      var keep=H[0][n], share=Math.round((keep/cell[n])*10000)/100;
+      kp.innerHTML='£'+keep.toFixed(2)+'<span class="sub">'+share.toFixed(2)
+        +'% of what the customer pays'+(H[2][n]?', lifted to the floor':'')+'</span>';
+    }
+
     if(why){
       var label=v.options[v.selectedIndex].text+', '+j.options[j.selectedIndex].text
                +', '+m.options[m.selectedIndex].text;
