@@ -27,10 +27,10 @@
   --tx:#1a1e22;--mu:#545c63;--su:#5a646e;
   --ln:rgba(26,30,34,.1);--lns:rgba(26,30,34,.18);
   --or:#f18e00;--or-d:rgba(241,142,0,.1);--or-g:rgba(241,142,0,.28);
-  --gn:var(--gn, #4f7f58);--gn-d:rgba(45,171,96,.1);
-  --am:var(--am, #b98530);--am-d:rgba(185,133,48,.1);
+  --gn:#46704e;--gn-d:rgba(45,171,96,.1);
+  --am:#8a6320;--am-d:rgba(185,133,48,.1);
   --rd:var(--haf-negative);--rd-d:rgba(180,72,63,.1);
-  --bl:var(--mu, #6f777d);--bl-d:rgba(111,119,125,.1);
+  --bl:var(--mu);--bl-d:rgba(111,119,125,.1);
   --r:16px;--rs:12px;--rx:8px;--pill:999px;
   --fn:"Inter",sans-serif;--dp:"Montserrat",sans-serif;
   --sb:252px;--tb:56px;
@@ -39,6 +39,7 @@
 }
 [data-theme=dark]{
   --bg:#0e1113;--p:#171a1d;--p2:#1e2226;--p3:#252b30;
+  --gn:#6fa87a;--am:#d8a34d;
   --tx:#f0edea;--mu:#a9b0b4;--su:#8f989f;
   --ln:rgba(240,237,234,.08);--lns:rgba(240,237,234,.16);
   --sd:0 1px 4px rgba(0,0,0,.3),0 2px 12px rgba(0,0,0,.25);
@@ -1631,7 +1632,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
   .tbi-act{flex:0 0 auto;justify-content:flex-start;padding-top:6px}
   .tbi-act .tba-btn{
     width:46px;height:46px;border-radius:15px;
-    background:var(--or);color:#fff;
+    background:var(--or);color:var(--haf-on-orange);
     display:flex;align-items:center;justify-content:center;
     box-shadow:0 3px 10px rgba(241,142,0,.42);
     transition:transform .14s,box-shadow .14s;
@@ -2864,7 +2865,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         </div>
 
         <!-- Direct invites preview (driver-relevant) -->
-        <div class="xfeed-hdr" id="dash-feed-hdr" data-aud="network">Direct invites <span style="background:var(--or);color:#fff;padding:.1rem .5rem;border-radius:4px;font-size:.58rem;margin-left:.25rem">2</span></div>
+        <div class="xfeed-hdr" id="dash-feed-hdr" data-aud="network">Direct invites <span style="background:var(--or);color:var(--haf-on-orange);padding:.1rem .5rem;border-radius:4px;font-size:.58rem;margin-left:.25rem">2</span></div>
 
         <div class="xc xc-invite" data-aud="network">
           <div class="xc-head">
@@ -2958,7 +2959,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         </div>
 
         <!-- Direct invites -->
-        <div class="xfeed-hdr">Direct invites <span style="background:var(--or);color:#fff;padding:.1rem .5rem;border-radius:4px;font-size:.58rem;margin-left:.25rem">2</span></div>
+        <div class="xfeed-hdr">Direct invites <span style="background:var(--or);color:var(--haf-on-orange);padding:.1rem .5rem;border-radius:4px;font-size:.58rem;margin-left:.25rem">2</span></div>
 
         <div class="xc xc-invite" id="xc-HAF-2858">
           <div class="xc-head">
@@ -3180,7 +3181,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <div style="font-weight:700;font-size:.84rem">Show me in the load poster directory</div>
               <div style="font-size:.72rem;color:var(--mu);margin-top:.12rem">Companies posting loads can contact and book you directly</div>
             </div>
-            <button id="dir-tog" onclick="dirToggle()" style="padding:.32rem .75rem;border-radius:var(--pill);font-size:.72rem;font-weight:800;background:var(--gn);color:#fff;border:none;cursor:pointer;transition:background .15s;white-space:nowrap">● Listed</button>
+            <button id="dir-tog" onclick="dirToggle()" style="padding:.32rem .75rem;border-radius:var(--pill);font-size:.72rem;font-weight:800;background:#46704e;color:#fff;border:none;cursor:pointer;transition:background .15s;white-space:nowrap">● Listed</button>
           </div>
           <div class="fr" style="margin:0 0 .65rem">
             <div class="fg"><label class="fl">Contact via WhatsApp</label><input class="fi2" id="dir-wa" placeholder="07xxx xxxxxx" type="tel"></div>
@@ -3870,11 +3871,11 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <div class="pl-f">Card or CleverPay prepayment before release to the network</div>
               <div class="pl-f">Job status, allocation, delivery updates and POD history</div>
               <div class="pl-f">Fair job matching &mdash; the best-placed driver wins the load, whatever you pay us</div>
-              <div class="pl-f" style="opacity:.75">Groupage <span style="font-size:.9em">coming soon</span></div>
-              <div class="pl-f" style="opacity:.45">Post up to 10 loads a day</div>
-              <div class="pl-f" style="opacity:.45">Saved clients, addresses and load templates</div>
-              <div class="pl-f" style="opacity:.45">Searchable history, reporting and exports</div>
-              <div class="pl-f" style="opacity:.45">Team roles, client sub-accounts and JAKO AI</div>
+              <div class="pl-f">Groupage <span style="font-size:.9em">coming soon</span></div>
+              <div class="pl-f">Post up to 10 loads a day</div>
+              <div class="pl-f">Saved clients, addresses and load templates</div>
+              <div class="pl-f">Searchable history, reporting and exports</div>
+              <div class="pl-f">Team roles, client sub-accounts and JAKO AI</div>
             </div>
             <button class="btn btn-gh btn-sm btn-wide">Current plan</button>
           </div>
@@ -3894,7 +3895,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <div class="pl-f">Client load-management dashboard</div>
               <div class="pl-f">Searchable history, reporting and exports</div>
               <div class="pl-f">Priority account support</div>
-              <div class="pl-f" style="opacity:.45">Team roles, client sub-accounts and JAKO AI</div>
+              <div class="pl-f">Team roles, client sub-accounts and JAKO AI</div>
             </div>
             <button class="btn btn-or btn-sm btn-wide">Upgrade to Plus</button>
           </div>
@@ -3912,7 +3913,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <div class="pl-f">Custom branded booking experience for your own clients</div>
               <div class="pl-f">Dedicated account support</div>
               <div class="pl-f">JAKO AI for freight operations, insight and a weekly exception report</div>
-              <div class="pl-f" style="opacity:.75">Bulk posting and import tools <span style="font-size:.9em">coming soon</span></div>
+              <div class="pl-f">Bulk posting and import tools <span style="font-size:.9em">coming soon</span></div>
             </div>
             <button class="btn btn-gh btn-sm btn-wide">Upgrade to Pro</button>
           </div>
@@ -3924,7 +3925,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
             <div style="font-family:var(--dp);font-weight:900;font-size:1rem;color:#fff;margin-bottom:.3rem">Network Profit Share</div>
             <div style="font-size:.73rem;color:#888;line-height:1.5;max-width:480px">A separate membership above the plans. Founders Members earn a share of the HAF KNECT network revenue — not just per-job pooling, a direct cut of the platform's growth. Apply-only. Limited seats.</div>
           </div>
-          <button class="btn btn-sm" style="background:var(--or);color:#fff;white-space:nowrap;flex-shrink:0">Apply for membership →</button>
+          <button class="btn btn-sm" style="background:var(--or);color:var(--haf-on-orange);white-space:nowrap;flex-shrink:0">Apply for membership →</button>
         </div>
       </div>
 
@@ -10222,7 +10223,7 @@ function mbRender(){
     } else if(nchk){
       n+='<div class="cr"><span class="ck">Your status</span><span class="cv"><span class="chip cb">Not a network member</span></span></div>'+
          '<div style="font-size:.74rem;color:var(--mu);line-height:1.6;padding:.55rem 0 0">Network members are the ones who pay for the wider HAF KNECT network. It is a one-off purchase that sits on top of whichever plan you are on, and it opens the member section above. Your plan is unaffected either way, and nothing you have built up is lost.</div>'+
-         '<div style="padding:.7rem 0 0"><a class="btn btn-sm" style="background:var(--or);color:#fff;text-decoration:none" href="https://join.usehaf.co.uk/" target="_blank" rel="noopener">Become a Network Member &#8594;</a></div>';
+         '<div style="padding:.7rem 0 0"><a class="btn btn-sm" style="background:var(--or);color:var(--haf-on-orange);text-decoration:none" href="https://join.usehaf.co.uk/" target="_blank" rel="noopener">Become a Network Member &#8594;</a></div>';
     } else {
       n+='<div class="cr"><span class="ck">We could not read the network register just now, so this is not saying either way. Reload the page and it will come back.</span></div>';
     }

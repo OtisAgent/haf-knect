@@ -19,10 +19,10 @@
   --tx:#1a1e22;--mu:#6b7580;--su:#9aa3ad;
   --ln:rgba(26,30,34,.1);--lns:rgba(26,30,34,.18);
   --or:#f18e00;--or-d:rgba(241,142,0,.1);--or-g:rgba(241,142,0,.28);
-  --gn:var(--gn, #4f7f58);--gn-d:rgba(45,171,96,.1);
-  --am:var(--am, #b98530);--am-d:rgba(185,133,48,.1);
+  --gn:#46704e;--gn-d:rgba(45,171,96,.1);
+  --am:#8a6320;--am-d:rgba(185,133,48,.1);
   --rd:var(--haf-negative);--rd-d:rgba(180,72,63,.1);
-  --bl:var(--mu, #6f777d);--bl-d:rgba(111,119,125,.1);
+  --bl:var(--mu);--bl-d:rgba(111,119,125,.1);
   --r:16px;--rs:12px;--rx:8px;--pill:999px;
   --fn:"Inter",sans-serif;--dp:"Montserrat",sans-serif;
   --sb:252px;--tb:56px;
@@ -31,6 +31,7 @@
 }
 [data-theme=dark]{
   --bg:#0e1113;--p:#171a1d;--p2:#1e2226;--p3:#252b30;
+  --gn:#6fa87a;--am:#d8a34d;
   --tx:#f0edea;--mu:#8a9298;--su:#4f5a62;
   --ln:rgba(240,237,234,.08);--lns:rgba(240,237,234,.16);
   --sd:0 1px 4px rgba(0,0,0,.3),0 2px 12px rgba(0,0,0,.25);
@@ -43,7 +44,7 @@ ul{list-style:none}a{color:var(--haf-orange-ink);text-decoration:none}
 button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none;background:none;cursor:pointer}
 
 /* ── VERSION ─── */
-.vbadge{position:fixed;bottom:14px;right:14px;z-index:9999;background:var(--or);color:#fff;font-family:var(--dp);font-weight:900;font-size:.6rem;letter-spacing:.08em;padding:.18rem .5rem;border-radius:var(--pill);pointer-events:none}
+.vbadge{position:fixed;bottom:14px;right:14px;z-index:9999;background:var(--or);color:var(--haf-on-orange);font-family:var(--dp);font-weight:900;font-size:.6rem;letter-spacing:.08em;padding:.18rem .5rem;border-radius:var(--pill);pointer-events:none}
 
 /* ── SHARED OVERLAY SHELL (the direct-book panel uses it; the demo-request
       form that named it was removed 14 Aug) ── */
@@ -61,7 +62,7 @@ button,input,select,textarea{font:inherit;color:inherit;outline:none;border:none
 
 /* ── BUTTONS ── */
 .btn{display:inline-flex;align-items:center;gap:.35rem;font-weight:800;font-size:.88rem;letter-spacing:.01em;border-radius:var(--pill);padding:.55rem 1.35rem;transition:all .14s;cursor:pointer;line-height:1;white-space:nowrap}
-.btn-or{background:var(--or);color:#fff;box-shadow:0 4px 16px var(--or-g)}
+.btn-or{background:var(--or);color:var(--haf-on-orange);box-shadow:0 4px 16px var(--or-g)}
 .btn-or:hover{filter:brightness(1.07);transform:translateY(-1px)}
 .btn-gh{background:transparent;color:var(--tx);border:1.5px solid var(--lns)}
 .btn-gh:hover{background:var(--ln)}
@@ -257,7 +258,7 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .role-chip{font-size:.64rem;font-weight:700;letter-spacing:.06em;padding:.13rem .5rem;border-radius:var(--pill);text-transform:uppercase}
 .ib{width:28px;height:28px;border-radius:var(--rx);background:var(--p2);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;color:var(--mu);transition:all .14s;cursor:pointer}
 .ib:hover{color:var(--tx);background:var(--p3)}
-.av{width:28px;height:28px;border-radius:50%;background:var(--or);color:#fff;font-size:.65rem;font-weight:800;font-family:var(--dp);display:flex;align-items:center;justify-content:center}
+.av{width:28px;height:28px;border-radius:50%;background:var(--or);color:var(--haf-on-orange);font-size:.65rem;font-weight:800;font-family:var(--dp);display:flex;align-items:center;justify-content:center}
 
 /* SIDEBAR */
 .app-body{display:flex;flex:1;min-height:calc(100vh - var(--tb))}
@@ -268,7 +269,7 @@ body.tile-focus #inline-flow>.calc-box{flex:1;display:flex;flex-direction:column
 .ni:hover{background:var(--ln);color:var(--tx)}
 .ni.on{background:var(--or-d);color:var(--haf-orange-ink);font-weight:700}
 .ni-ic{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.nb{margin-left:auto;background:var(--or);color:#fff;font-size:.56rem;font-weight:800;padding:.06rem .36rem;border-radius:var(--pill)}
+.nb{margin-left:auto;background:var(--or);color:var(--haf-on-orange);font-size:.56rem;font-weight:800;padding:.06rem .36rem;border-radius:var(--pill)}
 .sdiv{border:none;border-top:1px solid var(--ln);margin:.4rem .85rem}
 .sb-bot{margin-top:auto;padding:.35rem}
 /* ── DASHBOARD V1 SHELL (Brent's override document, 14 Aug 2026) ──
@@ -1016,7 +1017,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 #dash-map .leaflet-container{background:var(--p3, #e9e5dd)}
 .leaflet-container{background:#0a1a2b}
 .cap-role{border:none;background:transparent;color:var(--mu);font-weight:800;font-size:.74rem;padding:.32rem .8rem;border-radius:18px;cursor:pointer;transition:all .14s;white-space:nowrap}
-.cap-role.on{background:var(--or);color:#fff}
+.cap-role.on{background:var(--or);color:var(--haf-on-orange)}
 .cap-back{position:absolute;top:10px;left:10px;z-index:1000;background:rgba(14,17,19,.86);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:18px;padding:.34rem .7rem;font-size:.7rem;font-weight:700;cursor:pointer;display:none;align-items:center;gap:.3rem;backdrop-filter:blur(4px)}
 /* Region overview card that floats over the map on hover — the map reads as an overview at a glance */
 .cap-tip{background:rgba(14,17,19,.92)!important;border:1px solid rgba(255,255,255,.16)!important;border-radius:12px!important;box-shadow:0 6px 22px rgba(0,0,0,.45)!important;padding:0!important;color:#fff!important;backdrop-filter:blur(6px)}
@@ -1192,7 +1193,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .dmsw{display:inline-flex;align-items:center;gap:0;background:var(--p2);border:1px solid var(--lns);border-radius:var(--pill);padding:2px}
 .dmsw-b{font-family:var(--fn);font-size:.62rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mu);background:none;border:0;border-radius:var(--pill);padding:.22rem .62rem;cursor:pointer;transition:background .14s,color .14s;white-space:nowrap}
 .dmsw-b:hover{color:var(--tx)}
-.dmsw-b.on{background:var(--or);color:#fff}
+.dmsw-b.on{background:var(--or);color:var(--haf-on-orange)}
 #dash-basic-focus{display:none;background:var(--p);border:1.5px solid var(--or-g);border-radius:var(--r);padding:1rem 1.1rem;margin-bottom:.9rem}
 .dbf-k{font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--haf-orange-ink);margin-bottom:.35rem}
 .dbf-route{font-size:1.12rem;font-weight:800;color:var(--tx);line-height:1.25;margin-bottom:.15rem}
@@ -2392,7 +2393,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         </div>
 
         <!-- Direct invites preview (driver-relevant) -->
-        <div class="xfeed-hdr" id="dash-feed-hdr" data-aud="network">Direct invites <span style="background:var(--or);color:#fff;padding:.1rem .5rem;border-radius:4px;font-size:.58rem;margin-left:.25rem">2</span></div>
+        <div class="xfeed-hdr" id="dash-feed-hdr" data-aud="network">Direct invites <span style="background:var(--or);color:var(--haf-on-orange);padding:.1rem .5rem;border-radius:4px;font-size:.58rem;margin-left:.25rem">2</span></div>
 
         <div class="xc xc-invite" data-aud="network">
           <div class="xc-head">
@@ -2486,7 +2487,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         </div>
 
         <!-- Direct invites -->
-        <div class="xfeed-hdr">Direct invites <span style="background:var(--or);color:#fff;padding:.1rem .5rem;border-radius:4px;font-size:.58rem;margin-left:.25rem">2</span></div>
+        <div class="xfeed-hdr">Direct invites <span style="background:var(--or);color:var(--haf-on-orange);padding:.1rem .5rem;border-radius:4px;font-size:.58rem;margin-left:.25rem">2</span></div>
 
         <div class="xc xc-invite" id="xc-HAF-2858">
           <div class="xc-head">
@@ -2708,7 +2709,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <div style="font-weight:700;font-size:.84rem">Show me in the freight forwarder directory</div>
               <div style="font-size:.72rem;color:var(--mu);margin-top:.12rem">Freight forwarders can contact and book you directly</div>
             </div>
-            <button id="dir-tog" onclick="dirToggle()" style="padding:.32rem .75rem;border-radius:var(--pill);font-size:.72rem;font-weight:800;background:var(--gn);color:#fff;border:none;cursor:pointer;transition:background .15s;white-space:nowrap">● Listed</button>
+            <button id="dir-tog" onclick="dirToggle()" style="padding:.32rem .75rem;border-radius:var(--pill);font-size:.72rem;font-weight:800;background:#46704e;color:#fff;border:none;cursor:pointer;transition:background .15s;white-space:nowrap">● Listed</button>
           </div>
           <div class="fr" style="margin:0 0 .65rem">
             <div class="fg"><label class="fl">Contact via WhatsApp</label><input class="fi2" id="dir-wa" placeholder="07xxx xxxxxx" type="tel"></div>
@@ -3357,11 +3358,11 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <div class="pl-f">Card or CleverPay prepayment before release to the network</div>
               <div class="pl-f">Job status, allocation, delivery updates and POD history</div>
               <div class="pl-f">Fair job matching &mdash; the best-placed driver wins the load, whatever you pay us</div>
-              <div class="pl-f" style="opacity:.45">Groupage <span style="opacity:.55;font-size:.9em">coming soon</span></div>
-              <div class="pl-f" style="opacity:.45">Post up to 10 loads a day</div>
-              <div class="pl-f" style="opacity:.45">Saved clients, addresses and load templates</div>
-              <div class="pl-f" style="opacity:.45">Searchable history, reporting and exports</div>
-              <div class="pl-f" style="opacity:.45">Team roles, client sub-accounts and JAKO AI</div>
+              <div class="pl-f">Groupage <span style="opacity:.55;font-size:.9em">coming soon</span></div>
+              <div class="pl-f">Post up to 10 loads a day</div>
+              <div class="pl-f">Saved clients, addresses and load templates</div>
+              <div class="pl-f">Searchable history, reporting and exports</div>
+              <div class="pl-f">Team roles, client sub-accounts and JAKO AI</div>
             </div>
             <button class="btn btn-gh btn-sm btn-wide">Current plan</button>
           </div>
@@ -3381,7 +3382,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <div class="pl-f">Client load-management dashboard</div>
               <div class="pl-f">Searchable history, reporting and exports</div>
               <div class="pl-f">Priority account support</div>
-              <div class="pl-f" style="opacity:.45">Team roles, client sub-accounts and JAKO AI</div>
+              <div class="pl-f">Team roles, client sub-accounts and JAKO AI</div>
             </div>
             <button class="btn btn-or btn-sm btn-wide">Upgrade to Plus</button>
           </div>
@@ -3399,7 +3400,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <div class="pl-f">Custom branded booking experience for your own clients</div>
               <div class="pl-f">Dedicated account support</div>
               <div class="pl-f">JAKO AI for freight operations, insight and a weekly exception report</div>
-              <div class="pl-f" style="opacity:.45">Bulk posting and import tools <span style="opacity:.55;font-size:.9em">coming soon</span></div>
+              <div class="pl-f">Bulk posting and import tools <span style="opacity:.55;font-size:.9em">coming soon</span></div>
             </div>
             <button class="btn btn-gh btn-sm btn-wide">Upgrade to Pro</button>
           </div>
@@ -3411,7 +3412,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
             <div style="font-family:var(--dp);font-weight:900;font-size:1rem;color:#fff;margin-bottom:.3rem">Network Profit Share</div>
             <div style="font-size:.73rem;color:#888;line-height:1.5;max-width:480px">A separate membership above the plans. Founders Members earn a share of the HAF KNECT network revenue — not just per-job pooling, a direct cut of the platform's growth. Apply-only. Limited seats.</div>
           </div>
-          <button class="btn btn-sm" style="background:var(--or);color:#fff;white-space:nowrap;flex-shrink:0">Apply for membership →</button>
+          <button class="btn btn-sm" style="background:var(--or);color:var(--haf-on-orange);white-space:nowrap;flex-shrink:0">Apply for membership →</button>
         </div>
       </div>
 
@@ -7668,7 +7669,7 @@ function mbRender(){
     } else if(nchk){
       n+='<div class="cr"><span class="ck">Your status</span><span class="cv"><span class="chip cb">Not a network member</span></span></div>'+
          '<div style="font-size:.74rem;color:var(--mu);line-height:1.6;padding:.55rem 0 0">Network members are the ones who pay for the wider HAF KNECT network. It is a one-off purchase that sits on top of whichever plan you are on, and it opens the member section above. Your plan is unaffected either way, and nothing you have built up is lost.</div>'+
-         '<div style="padding:.7rem 0 0"><a class="btn btn-sm" style="background:var(--or);color:#fff;text-decoration:none" href="https://join.usehaf.co.uk/" target="_blank" rel="noopener">Become a Network Member &#8594;</a></div>';
+         '<div style="padding:.7rem 0 0"><a class="btn btn-sm" style="background:var(--or);color:var(--haf-on-orange);text-decoration:none" href="https://join.usehaf.co.uk/" target="_blank" rel="noopener">Become a Network Member &#8594;</a></div>';
     } else {
       n+='<div class="cr"><span class="ck">We could not read the network register just now, so this is not saying either way. Reload the page and it will come back.</span></div>';
     }
