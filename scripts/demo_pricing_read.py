@@ -61,6 +61,19 @@ def engine_version():
     return m.group(1)
 
 
+def on_date(iso):
+    """2026-09-07 -> 7 September 2026. Nobody reads a date backwards out loud."""
+    if not iso:
+        raise ReadFailed("the live matrix does not say when it came into force")
+    m = re.match(r"^(\d{4})-(\d{2})-(\d{2})", str(iso))
+    if not m:
+        return str(iso)
+    months = ("January", "February", "March", "April", "May", "June", "July",
+              "August", "September", "October", "November", "December")
+    y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3))
+    return "%d %s %d" % (d, months[mo - 1], y)
+
+
 def money(n):
     """£5 not £5.00, £12.50 stays £12.50."""
     f = float(n)
@@ -99,7 +112,7 @@ def read():
 
     return {
         "version": v_live,
-        "effective_from": live.get("effectiveFrom") or cfg.get("effectiveFrom"),
+        "effective_from": on_date(live.get("effectiveFrom") or cfg.get("effectiveFrom")),
         "vat_pct": cfg["vatPct"],
         # name + the smallest this vehicle is ever charged at. baseRate is the
         # ladder between vehicles and is shown as a multiple of a small van,
