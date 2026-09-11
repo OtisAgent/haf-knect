@@ -1,5 +1,7 @@
 import { chromium } from 'playwright';
-const URL='https://mobile-bottom-nav.knect-demo.pages.dev/';
+/* Point LIVE_URL at whichever surface is being proved. The default stays the
+   preview so a bare run can never be mistaken for a production check. */
+const URL=process.env.LIVE_URL||'https://mobile-bottom-nav.knect-demo.pages.dev/';
 const b=await chromium.launch();
 const sizes=[{n:'phone',w:390,h:844},{n:'phone-sideways',w:844,h:390},{n:'desktop',w:1280,h:900}];
 for(const s of sizes){
@@ -7,8 +9,11 @@ for(const s of sizes){
   const errs=[];p.on('pageerror',e=>errs.push(e.message.slice(0,90)));
   await p.goto(URL,{waitUntil:'networkidle'}); await p.waitForTimeout(1200);
   await p.evaluate(()=>{const h=[...document.querySelectorAll('button,a')].filter(x=>/log ?in/i.test(x.innerText)).find(x=>x.offsetParent!==null);if(h)h.click();});
-  await p.waitForTimeout(1200);
-  await p.fill('#l-user','BF009393'); await p.fill('#l-pass','4821');
+  /* Wait for the field itself rather than a fixed pause. On the live site the
+     landing settles more slowly than on the preview, and a timed wait turned a
+     slow page into "the login box does not exist". */
+  await p.waitForSelector('#l-user',{state:'visible',timeout:20000});
+  await p.fill('#l-user','TEST0001'); await p.fill('#l-pass','8421');
   await p.evaluate(()=>doLogin()); await p.waitForTimeout(7000);
   const bar=await p.evaluate(()=>{const el=document.getElementById('haf-tabbar');const r=el&&el.getBoundingClientRect();
     return {h:r?Math.round(r.height):0,w:r?Math.round(r.width):0,pos:el?getComputedStyle(el).position:null,
