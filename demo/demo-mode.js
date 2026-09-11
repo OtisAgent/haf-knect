@@ -134,6 +134,53 @@
     wrap.querySelector('.go').focus();
   }
 
+  /* ── 3. Carry the journey on ──────────────────────────────────────────
+     The booking already exists — the app wrote it when the order was placed,
+     exactly as it does on live. What a real payment would change is the
+     payment condition, so that is the only thing settled here, by the demo's
+     own endpoint. Then the viewer is taken to the booking, because "and then
+     what happened" is the whole reason Brent is pointing a camera at it.
+
+     If anything goes wrong we SAY so on screen rather than reloading into a
+     page that looks like nothing happened. A silent failure in front of an
+     audience is worse than an honest line of text. */
+  function tell(message) {
+    var n = document.createElement('div');
+    n.setAttribute('style',
+      'position:fixed;left:50%;bottom:46px;transform:translateX(-50%);z-index:99999;' +
+      'background:#111;color:#fff;font:500 13px/1.5 system-ui,sans-serif;padding:10px 16px;' +
+      'border-radius:9px;max-width:90vw;text-align:center;box-shadow:0 8px 26px rgba(0,0,0,.35)');
+    n.textContent = message;
+    document.body.appendChild(n);
+    setTimeout(function () { if (n.parentNode) n.parentNode.removeChild(n); }, 6000);
+  }
+
+  function settle(a) {
+    /* HAF PAY's page is /pay/<reference>; the reference is the last piece. */
+    var href = a.getAttribute('href') || '';
+    var ref = (href.match(/HAFPAY-[A-Z2-9]{8}/i) || [])[0];
+    var next = a.getAttribute('data-demo-next') ||
+               (document.getElementById('fq-track') || {}).href || null;
+
+    if (!ref) { tell('This demo could not read a payment reference from that button.'); return; }
+
+    fetch('/api/demo/settle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payment_reference: ref })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || !d.ok) {
+          tell('The demo could not settle that booking: ' + ((d && d.error) || 'no answer'));
+          return;
+        }
+        tell('Booking ' + d.job_ref + ' is now recorded as paid. No money moved.');
+        if (next) setTimeout(function () { location.href = next; }, 1400);
+      })
+      .catch(function (e) { tell('The demo could not reach its own booking system: ' + e.message); });
+  }
+
   /* One delegated listener, captured before the app sees the click, so it works
      on every pay link the app renders today and every one it renders later. */
   document.addEventListener('click', function (e) {
@@ -144,18 +191,7 @@
     e.preventDefault();
     e.stopPropagation();
 
-    explain(amountNear(a), function () {
-      /* Carry the journey on. The booking is already in the demo database —
-         it was written by the app itself, the same way it is on live. What
-         the real payment would have changed is the payment condition, and
-         that is what DEMO_SETTLE is for. Wired to the demo database's own
-         settle call; see demo-settle.js. */
-      if (window.HAF_DEMO_SETTLE) {
-        window.HAF_DEMO_SETTLE(a);
-      } else {
-        location.reload();
-      }
-    });
+    explain(amountNear(a), function () { settle(a); });
   }, true);
 
   if (document.readyState === 'loading') {

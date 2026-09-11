@@ -63,7 +63,27 @@ cp -R ../brand/.      brand/
 cp ../job/index.html  job/index.html
 cp ../track/index.html track/index.html
 
-echo "copied: app $(wc -c < index.html) bytes, 6 engine files, brand, job, track"
+# ── 2b. the SERVER half ────────────────────────────────────────────────
+# Found by walking the built demo on 11 Sep: sign-in worked and the Order
+# button was dead, every /api call answering 405. KNECT is two halves. The page
+# reads the driving database directly with the anon key, but ordering, pricing
+# and payments go through Pages Functions, which hold the service keys the
+# browser must never see. Copying only the page ships half a product.
+#
+# Pages builds this project with root_dir = demo, so it looks for functions in
+# demo/functions — the repo-root ones are not deployed here. They are copied in
+# rather than symlinked because a symlink out of the build root does not
+# survive the upload.
+cp -R ../functions functions
+cp -R ../shared    shared
+
+# The one endpoint the live product must never have: it settles a payment
+# without a payment. It lives here, in the demo directory, and is grafted into
+# the copied server half — so no deploy of the real app can carry it.
+mkdir -p functions/api/demo
+cp settle-function.js functions/api/demo/settle.js
+
+echo "copied: app $(wc -c < index.html) bytes, 6 engine files, brand, job, track, server half"
 
 # ── 3. Point the whole app at the demo database ────────────────────────
 # The entire app reaches its database through exactly two constants. Matching
@@ -73,28 +93,63 @@ echo "copied: app $(wc -c < index.html) bytes, 6 engine files, brand, job, track
 sed -i "s#const PLNA_URL='[^']*'#const PLNA_URL='${DEMO_DB_URL}'#" index.html
 sed -i "s#const PLNA_KEY='[^']*'#const PLNA_KEY='${DEMO_DB_KEY}'#" index.html
 
+# The server half holds its OWN copy of those two, and this one matters more
+# than the page's: it is what the worker checks a sign-in against. Left alone,
+# a demo account would be tested against the LIVE account list, be found not to
+# exist, and every order on camera would be refused — while the live database
+# quietly answered questions from a public demo.
+sed -i "s#^export const PLNA_URL = '[^']*';#export const PLNA_URL = '${DEMO_DB_URL}';#" shared/payments-core.js
+sed -i "s#^export const PLNA_KEY = '[^']*';#export const PLNA_KEY = '${DEMO_DB_KEY}';#" shared/payments-core.js
+
 # ── 4. Prove it, then refuse if it did not take ────────────────────────
 # "The sed ran" and "the live database is gone" are two different sentences.
-if grep -q "$LIVE_REF" index.html admin/*.js brand/* job/index.html track/index.html 2>/dev/null; then
+if grep -rq "$LIVE_REF" index.html admin brand job track functions shared 2>/dev/null; then
   echo "REFUSING TO SHIP: a live database reference survived the swap:"
-  grep -l "$LIVE_REF" index.html admin/*.js brand/* job/index.html track/index.html 2>/dev/null
+  grep -rl "$LIVE_REF" index.html admin brand job track functions shared 2>/dev/null
   exit 1
 fi
 if ! grep -q "const PLNA_URL='${DEMO_DB_URL}'" index.html; then
   echo "REFUSING TO SHIP: the demo database URL is not in the built page."
   exit 1
 fi
-echo "verified: 0 live database references, demo database is wired in"
+if ! grep -q "export const PLNA_URL = '${DEMO_DB_URL}';" shared/payments-core.js; then
+  echo "REFUSING TO SHIP: the server half is not pointed at the demo database."
+  exit 1
+fi
+echo "verified: 0 live database references, demo database is wired into both halves"
 
 # ── 5. Demo mode: the banner and the payment explainer ─────────────────
 # Injected as a separate file rather than patched into the app, on purpose.
 # Anything that edits app internals by position breaks the next time the live
 # app changes — and the whole point of this build is that the live app changes.
-sed -i 's#</body>#<script src="/demo-mode.js"></script></body>#' index.html
-if ! grep -q 'demo-mode.js' index.html; then
-  echo "REFUSING TO SHIP: demo mode did not attach."
+#
+# THE LAST </body>, NOT EVERY </body>. This was a real fault, caught by
+# walking the built page in a browser on 11 Sep.
+#
+# The app contains TWO of them: the document's own, and one inside a
+# JavaScript template literal that builds a printable window with
+# w.document.write(`<html>…</body></html>`). `sed s#…#…#` substitutes once
+# PER LINE, so it hit both — and the copy inside the template literal closed
+# the surrounding <script> early. The page threw "Unexpected end of input"
+# and the remaining JavaScript rendered on screen as text.
+#
+# So: replace the LAST occurrence only, and then insist that exactly one
+# attachment exists. A grep for "is it there" would have passed on the
+# broken build — it was there twice, and that was the bug.
+python3 - <<'PY'
+src = open('index.html', encoding='utf-8').read()
+i = src.rfind('</body>')
+if i < 0:
+    raise SystemExit('REFUSING TO SHIP: no </body> to attach demo mode to.')
+src = src[:i] + '<script src="/demo-mode.js"></script>' + src[i:]
+open('index.html', 'w', encoding='utf-8').write(src)
+PY
+n=$(grep -c 'demo-mode.js' index.html || true)
+if [ "$n" != "1" ]; then
+  echo "REFUSING TO SHIP: demo mode attached $n times, expected exactly 1."
   exit 1
 fi
+echo "demo mode attached once, at the document's own </body>"
 
 # ── 6. Say what it is, everywhere a person might look ──────────────────
 sed -i 's#<title>[^<]*</title>#<title>HAF KNECT DEMO — a safe copy, not the live network</title>#' index.html
