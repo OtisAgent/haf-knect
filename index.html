@@ -2124,9 +2124,16 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <div class="slbl">Step 7 of 7 &#8212; Your details</div>
               <p style="font-size:.77rem;color:var(--mu);margin-bottom:.85rem;line-height:1.6">No account needed. We will send you delivery updates by text or WhatsApp.</p>
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Full name</label><input class="oi" id="fq-name" placeholder="Your name" autocomplete="name"></div>
-              <div class="of" style="margin-bottom:.48rem"><label class="ol">Email</label><input class="oi" id="fq-email" placeholder="your@email.co.uk" type="email" autocomplete="email"></div>
+              <div class="of" style="margin-bottom:.48rem"><label class="ol">Email</label><input class="oi" id="fq-email" placeholder="your@email.co.uk" type="email" autocomplete="email" onblur="fqQuoteLog()"></div>
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Mobile</label><input class="oi" id="fq-mobile" placeholder="07xxx xxxxxx" type="tel" autocomplete="tel"></div>
               <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.73rem;font-weight:600;color:var(--mu)"><input type="checkbox" id="fq-wa" checked style="accent-color:var(--haf-orange-ink)"> Send updates via WhatsApp</label>
+              <!-- ── THE MARKETING TICK ───────────────────────────────────────
+                   Unticked, always, on every visit. It asks for ONE thing and
+                   says so plainly: nobody has to tick it to get their quote,
+                   and it does not ride along with the delivery updates above.
+                   Those are two different agreements and one tick cannot
+                   honestly buy both. The words are stored with the answer. -->
+              <label style="display:flex;align-items:flex-start;gap:.5rem;cursor:pointer;font-size:.73rem;font-weight:600;color:var(--mu);margin-top:.45rem"><input type="checkbox" id="fq-mkt" style="accent-color:var(--haf-orange-ink);margin-top:.2rem"><span>Email me HAF delivery offers, rates and news. Separate from your quote &#8212; unsubscribe in one click, any time.</span></label>
               <div class="fstep-err" id="fq-err-7"></div>
               <div class="fnav"><button class="btn btn-gh btn-sm" onclick="fqStep(6)">&#8592; Back</button><button class="btn btn-or btn-sm" onclick="fqBookV()">Confirm and book &#8594;</button></div>
             </div>
@@ -2244,8 +2251,11 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
             <div class="fstep" id="hp-5">
               <div class="slbl">Step 5 of 5 &#8212; Your details</div>
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Full name</label><input class="oi" id="hp-name" placeholder="Your name" autocomplete="name"></div>
-              <div class="of" style="margin-bottom:.48rem"><label class="ol">Email</label><input class="oi" id="hp-email" placeholder="your@email.co.uk" type="email" autocomplete="email"></div>
+              <div class="of" style="margin-bottom:.48rem"><label class="ol">Email</label><input class="oi" id="hp-email" placeholder="your@email.co.uk" type="email" autocomplete="email" onblur="hpQuoteLog()"></div>
               <div class="of"><label class="ol">Mobile</label><input class="oi" id="hp-mobile" placeholder="07xxx xxxxxx" type="tel" autocomplete="tel"></div>
+              <!-- Same tick, same words, same rule as the Fast Quote form: one
+                   agreement per box, unticked every time, wording stored. -->
+              <label style="display:flex;align-items:flex-start;gap:.5rem;cursor:pointer;font-size:.73rem;font-weight:600;color:var(--mu);margin-top:.45rem"><input type="checkbox" id="hp-mkt" style="accent-color:var(--haf-orange-ink);margin-top:.2rem"><span>Email me HAF delivery offers, rates and news. Separate from your quote &#8212; unsubscribe in one click, any time.</span></label>
               <div class="fstep-err" id="hp-err-5"></div>
               <button class="btn btn-or btn-wide" onclick="hpBookV()" style="margin-top:.85rem">Confirm and book &#8594;</button>
               <button class="btn btn-gh btn-wide" onclick="hpStep(4)" style="margin-top:.4rem">&#8592; Back</button>
@@ -4513,6 +4523,52 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         </div>
       </div>
 
+      <!-- ══ QUOTE LEDGER — Master account only ═════════════════════════════
+           Brent, 11 Sep: "so we can see what quotes have been started but not
+           gone all the way through ... build out a CRM ledger for the basic
+           information and allow me to click in and see whats been requested".
+
+           Every row here is a real person who asked HAF for a price. The
+           counts above them include the ones who never gave a name, because
+           "how many guided quote requests" is a different question from "how
+           many leads" and answering only the second one hides the funnel.
+
+           NOTHING ON THIS SCREEN IS INVENTED. When a source is empty it says
+           so; there is no sample row anywhere on it. -->
+      <div class="tp" id="pane-quotes">
+        <h1 class="pt">Quote Ledger</h1>
+        <p class="ps">Everyone who has asked HAF for a price, and how far they got. Master account only.</p>
+        <div id="ql-src" class="ov-src">Reading the quote log…</div>
+        <div class="kg" id="ql-kpis"></div>
+        <div class="card">
+          <div class="ct">Quote requests
+            <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">newest first · click a row to see what was asked for</span>
+          </div>
+          <div class="fm-rooms" style="margin-top:.2rem">
+            <button class="fm-room on" id="ql-f-all"      onclick="qlFilter('all',this)">Everything</button>
+            <button class="fm-room"    id="ql-f-stalled"  onclick="qlFilter('stalled',this)">Started, never finished</button>
+            <button class="fm-room"    id="ql-f-booked"   onclick="qlFilter('booked',this)">Went on to book</button>
+            <button class="fm-room"    id="ql-f-opted_in" onclick="qlFilter('opted_in',this)">Happy to be emailed</button>
+          </div>
+          <div class="aa-count" id="ql-count"></div>
+          <div class="aa-wrap"><div id="ql-list"><div class="aa-empty">reading the quote log…</div></div></div>
+          <div style="margin-top:.7rem;display:flex;gap:.45rem;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-gh btn-xs" onclick="qlLoad(true)">Refresh</button>
+            <span style="font-size:.72rem;color:var(--mu)">"Started, never finished" means no booking and nothing has moved for a day — someone still filling a form in is not on that list.</span>
+          </div>
+        </div>
+
+        <!-- Click in. Drawn only when a row is opened; never a stub sitting
+             there implying a record is loaded when none is. -->
+        <div class="card" id="ql-one" style="display:none">
+          <div class="ct">What they asked for
+            <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem" id="ql-one-ref"></span>
+          </div>
+          <div id="ql-one-body"></div>
+          <div style="margin-top:.8rem"><button class="btn btn-gh btn-xs" onclick="qlClose()">Close</button></div>
+        </div>
+      </div>
+
       <!-- ══ PAYMENTS & PAYOUTS — Super Admin only ══════════════════════════
            Brief section 8. One line per movement of money, from the customer
            paying to the driver being paid. Every row is a real record; when a
@@ -5850,6 +5906,10 @@ async function calcLivePrice(){
   _lpLast={miles:miles,mins:r.mins,from:fr,to:to};
   paintLadder(!!(selWtKey&&selSzKey),allocateVehicle({weight:selWtKey,size:selSzKey,reqs:{}}));
   offerToContinue(lo,hi);
+  /* A guide price has appeared on a stranger's screen. That is a guided quote
+     request whether or not they ever tell us who they are, so it is counted —
+     the route, the van and the price, and nothing about the person. */
+  try{qrView({from:fr,to:to,van:selVanKey,source:'knect_price_calculator'});}catch(_){}
 }
 
 /* ══ THE OFFER, AFTER THE PRICE ═══════════════════════════════════════════
@@ -7442,6 +7502,98 @@ function fqOrderPayload(){
     whatsapp_updates:!!(document.getElementById('fq-wa')||{}).checked
   };
 }
+/* ══ THE QUOTE LOG ══════════════════════════════════════════════════════════
+   Brent, 11 Sep: "we could be missing leads as people are entering and I don't
+   know how many guided quote requests".
+
+   Every price worked out on this page is now remembered. Two kinds, on purpose:
+
+     qrView()     a price appeared and nobody is named. No personal data at all
+                  — not even an IP. It answers "how many" and nothing else.
+     qrCapture()  somebody typed their details in, so there is a lead, and the
+                  marketing question has an answer recorded beside the exact
+                  words they were shown.
+
+   Both are FIRE AND FORGET. A quote log that can break a customer's booking is
+   worse than no quote log, so nothing here is awaited by the order path and
+   every failure is swallowed. The server re-prices anyway: nothing this page
+   sends becomes the price on the record.
+
+   The demo carries its own door (#pd-gate) and must never write a real lead. */
+function qrIsDemo(){return !!document.getElementById('pd-gate');}
+function qrSession(){
+  try{
+    var k=sessionStorage.getItem('haf-quote-session');
+    if(!k){k=(Math.random().toString(36)+Math.random().toString(36)).replace(/[^a-z0-9]/g,'').slice(0,24);
+           sessionStorage.setItem('haf-quote-session',k);}
+    return k;
+  }catch(e){return '';}
+}
+function qrPost(path,body){
+  if(qrIsDemo())return Promise.resolve(null);
+  try{
+    return fetch('/api/quote/'+path,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(Object.assign({page:location.pathname},body))})
+      .then(function(r){return r.json();}).catch(function(){return null;});
+  }catch(e){return Promise.resolve(null);}
+}
+function qrView(o){
+  qrPost('view',{collect_postcode:o.from,deliver_postcode:o.to,
+                 vehicle_code:o.van,job_type_code:o.job||'sday',
+                 source:o.source||'knect_price_calculator',session:qrSession()});
+}
+/* One capture per person per form state — a blur event fires every time a
+   field is touched, and a lead logged eleven times is a ledger nobody trusts.
+   The server collapses repeats too; this just stops the noise leaving. */
+var QR_SENT={};
+function qrCapture(o){
+  var email=String(o.email||'').trim().toLowerCase();
+  if(!/^[^@\s]+@[^@\s.]+\.[^@\s]{2,}$/.test(email))return;
+  var key=email+'|'+(o.stage||'')+'|'+(o.from||'')+'|'+(o.to||'');
+  if(QR_SENT[key])return; QR_SENT[key]=1;
+  qrPost('start',{email:email,name:o.name||'',phone:o.phone||'',
+                  collect_postcode:o.from,deliver_postcode:o.to,
+                  vehicle_code:o.van,job_type_code:o.job||'sday',
+                  detail:o.detail||'',stage:o.stage||'details',
+                  furthest_step:o.step||null,step_label:o.stepLabel||'',
+                  when:o.when||'',source:o.source||'knect_quote_form',
+                  marketing_opt_in:o.optIn===true});
+}
+/* The tick box is unticked, every time, on every form. Never remembered, never
+   pre-filled from a previous visit: a tick the person did not make this time is
+   not consent, however sure we are that they meant it. */
+function qrOptIn(id){var e=document.getElementById(id);return !!(e&&e.checked);}
+
+/* Fast Quote, step 7. Fired the moment a usable email has been typed — NOT on
+   the booking button. Someone who fills their details in and then closes the
+   tab is precisely the lead Brent said we were losing, and a capture that only
+   runs on "Confirm and book" would miss every one of them. */
+function fqQuoteLog(){
+  try{
+    qrCapture({email:_v('fq-email'), name:_v('fq-name'), phone:_v('fq-mobile'),
+               from:_pcOf('fq-from'), to:_pcOf('fq-to'),
+               van:(typeof fqData==='object'&&fqData.van)||null,
+               job:(typeof fqData==='object'&&fqData.urg)||'sday',
+               detail:[_v('fq-goods'),_v('fq-notes')].filter(Boolean).join(' — '),
+               when:_v('fq-cdate'), stage:'details', step:7,
+               stepLabel:'Your details', source:'knect_fast_quote',
+               optIn:qrOptIn('fq-mkt')});
+  }catch(e){}
+}
+/* "Help me pick", step 5. This flow does not place a real order — it ends on
+   the demo door — but somebody who types their email into it has still asked
+   HAF for a price, so they belong in the ledger like anybody else. */
+function hpQuoteLog(){
+  try{
+    qrCapture({email:_v('hp-email'), name:_v('hp-name'), phone:_v('hp-mobile'),
+               from:_pcOf('hp-from'), to:_pcOf('hp-to'),
+               van:(typeof recommendVan==='function'
+                    ? recommendVan(hpData.weight,hpData.size) : null)||null,
+               job:'sday', stage:'details', step:5, stepLabel:'Your details',
+               source:'knect_help_me_pick', optIn:qrOptIn('hp-mkt')});
+  }catch(e){}
+}
+
 async function fqBook(){
   /* The public demo carries its own door (#pd-gate) and must never place a real
      order or take a real payment. Asking the page what it IS beats a build flag
@@ -7481,6 +7633,16 @@ async function fqBook(){
   }
   fqPaintBooked(d);
   fqStep('done');
+  /* They went all the way through. Marking it here is what lets the ledger tell
+     "started and stopped" from "started and booked" without guessing. */
+  try{
+    qrCapture({email:_v('fq-email'), name:_v('fq-name'), phone:_v('fq-mobile'),
+               from:_pcOf('fq-from'), to:_pcOf('fq-to'),
+               van:fqData.van, job:fqData.urg||'sday',
+               detail:[_v('fq-goods'),_v('fq-notes')].filter(Boolean).join(' — '),
+               stage:'booked', step:7, stepLabel:'Booked',
+               source:'knect_fast_quote', optIn:qrOptIn('fq-mkt')});
+  }catch(_){}
 }
 function fqPaintBooked(d){
   const gbp=p=>'£'+(p/100).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -7728,6 +7890,7 @@ const ADMIN_NAV=[
   {id:'admin',l:'Network Overview',s:'Overview',ico:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
   {id:'accounts',l:'Network Directory',s:'Overview',ico:'<path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M4 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'levels',l:'Levels &amp; Allowances',s:'Overview',ico:'<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>'},
+  {id:'quotes',l:'Quote Ledger',s:'Overview',ico:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>'},
   {id:'money',l:'Payments &amp; Payouts',s:'Overview',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'fbadmin',l:'Feedback Control',s:'Overview',ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {id:'pools',l:'Network Pools',s:'Overview',ico:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>'},
@@ -10974,6 +11137,7 @@ function switchTab(id){
   if(id==='pane-accounts')setTimeout(()=>{if(window.aaBoot)aaBoot();},60);
   if(id==='pane-levels')setTimeout(()=>{if(window.lvBoot)lvBoot();},60);
   if(id==='pane-money')setTimeout(()=>{if(window.moLoad)moLoad();},60);
+  if(id==='pane-quotes')setTimeout(()=>{if(window.qlLoad)qlLoad();},60);
   if(id==='pane-billing')setTimeout(()=>{if(window.pyLoad)pyLoad();},60);
   if(id==='pane-fbadmin')setTimeout(()=>{if(window.faLoad)faLoad();},60);
   if(id==='pane-livejob')setTimeout(hafRenderLive,60);
@@ -11043,6 +11207,162 @@ async function _api(path,extra){
     body:JSON.stringify(Object.assign({},c,extra||{}))});
   return await r.json().catch(()=>({ok:false,error:'the server did not answer properly'}));
 }
+
+/* ══ QUOTE LEDGER ═══════════════════════════════════════════════════════════
+   Brent, 11 Sep 2026. The list of everyone who asked HAF for a price, what they
+   asked for, and how far they got before they stopped.
+
+   Two rules this screen keeps, the same two the payments screen keeps:
+   1. NOTHING IS INVENTED. Every line is a row that exists.
+   2. IF IT CANNOT BE READ, IT SAYS SO — a page still saying "loading" is a page
+      pretending to work. A refusal is reported as a refusal.                  */
+var QL_FILTER='all', QL_ROWS=[];
+
+function qlMoney(p){
+  if(p===null||p===undefined||p==='')return '—';
+  var n=Number(p); if(!isFinite(n))return '—';
+  return '£'+n.toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function qlWhen(ts){
+  if(!ts)return '—';
+  try{
+    var d=new Date(ts), mins=Math.round((Date.now()-d.getTime())/60000);
+    if(mins<1)return 'just now';
+    if(mins<60)return mins+' min ago';
+    if(mins<1440)return Math.round(mins/60)+'h ago';
+    return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  }catch(e){return '—';}
+}
+/* How far they got, said as a sentence rather than a code. "priced" on its own
+   tells nobody anything; "saw the price, stopped there" tells Brent whether it
+   is worth a phone call. */
+var QL_STAGE={
+  started  :['Only started',          'They opened the form and gave us their details.'],
+  priced   :['Saw the price',         'They got as far as the guide price and stopped there.'],
+  details  :['Gave full details',     'Everything the driver would need, but no booking.'],
+  booked   :['Booked',                'They went through and placed the job.'],
+  abandoned:['Left it',               'They closed the form part way through.']
+};
+
+function qlFilter(f,btn){
+  QL_FILTER=f;
+  ['all','stalled','booked','opted_in'].forEach(function(k){
+    var e=document.getElementById('ql-f-'+k); if(e)e.className='fm-room'+(k===f?' on':'');
+  });
+  qlLoad(true);
+}
+function qlClose(){var e=document.getElementById('ql-one');if(e)e.style.display='none';}
+
+async function qlLoad(force){
+  var src=document.getElementById('ql-src'),
+      list=document.getElementById('ql-list'),
+      kpis=document.getElementById('ql-kpis'),
+      cnt =document.getElementById('ql-count');
+  if(!src||!list)return;
+  src.className='ov-src'; src.innerHTML='<span class="dot"></span>Reading the quote log…';
+  try{
+    var r=await _api('quote/ledger',{filter:QL_FILTER,limit:150});
+    if(!r||!r.ok){
+      src.className='ov-src bad';
+      src.innerHTML='<span class="dot"></span>'+_esc((r&&r.error)||'the quote log could not be read');
+      list.innerHTML='<div class="aa-empty">Not readable from this login.</div>';
+      kpis.innerHTML=''; return;
+    }
+    var t=r.totals||{};
+    kpis.innerHTML=[
+      ['Prices worked out', t.price_views||0,  '', 'every guide price on the site, named or not'],
+      ['Gave us a name',    t.named_requests||0,'', 'a real lead with contact details'],
+      ['Never finished',    t.stalled||0,      (t.stalled?'bad':''), 'no booking, nothing moved for a day'],
+      ['Went on to book',   t.booked||0,       'good', 'the quote turned into a job'],
+      ['Happy to be emailed',t.opted_in||0,    '', 'ticked the marketing box'],
+      ['Last 7 days',       (t.price_views_last_7_days||0)+' / '+(t.named_last_7_days||0), '', 'prices worked out / names given']
+    ].map(function(k){
+      return '<div class="kc"><div class="kc-l">'+k[0]+'</div><div class="kc-v'+(k[2]?' '+k[2]:'')+'">'+
+             k[1]+'</div><div class="kc-d" style="color:var(--mu)">'+k[3]+'</div></div>';
+    }).join('');
+
+    QL_ROWS=r.rows||[];
+    cnt.textContent=QL_ROWS.length+(QL_ROWS.length===1?' request':' requests')+
+                    (QL_FILTER==='all'?'':' in this view');
+    if(!QL_ROWS.length){
+      list.innerHTML='<div class="aa-empty">'+
+        (t.price_views
+          ? 'Nobody has left their details yet. '+t.price_views+' guide price'+(t.price_views===1?' has':'s have')+' been worked out anonymously.'
+          : 'Nothing yet — no guide price has been worked out on the site since the log was switched on.')+
+        '</div>';
+    }else{
+      list.innerHTML=QL_ROWS.map(function(q,i){
+        var st=QL_STAGE[q.stage]||[q.stage||'Unknown',''];
+        return '<div class="cr" style="cursor:pointer" onclick="qlOpen('+i+')">'+
+          '<span class="ck">'+_esc(q.contact_name||q.email||'No name given')+
+            '<span style="display:block;font-weight:400;color:var(--mu);font-size:.72rem">'+
+            _esc((q.collection_postcode||'?')+' → '+(q.delivery_postcode||'?'))+' · '+qlWhen(q.created_at)+'</span></span>'+
+          '<span class="cv">'+qlMoney(q.guide_price)+
+            '<span style="display:block;font-weight:400;font-size:.72rem;color:var(--mu)">'+
+            _esc(st[0])+(q.stalled?' · <span style="color:var(--rd)">never finished</span>':'')+
+            (q.marketing_opt_in?' · <span style="color:var(--gr,var(--mu))">happy to be emailed</span>':'')+
+            '</span></span></div>';
+      }).join('');
+    }
+    src.className='ov-src';
+    src.innerHTML='<span class="dot"></span>Read from the live quote log just now.';
+  }catch(e){
+    src.className='ov-src bad';
+    src.innerHTML='<span class="dot"></span>Could not reach the quote log. Nothing above is a made-up number.';
+    list.innerHTML='<div class="aa-empty">Could not be read.</div>';
+  }
+}
+
+/* Click in. Asks the server again rather than drawing from the list row: the
+   detail includes every guide price worked out on the request and the exact
+   marketing wording the person was shown, and neither belongs in a list. */
+async function qlOpen(i){
+  var q=QL_ROWS[i]; if(!q)return;
+  var box=document.getElementById('ql-one'),
+      body=document.getElementById('ql-one-body'),
+      ref=document.getElementById('ql-one-ref');
+  box.style.display=''; ref.textContent=q.quote_reference||'';
+  body.innerHTML='<div class="aa-empty">reading the request…</div>';
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+  var r=await _api('quote/ledger',{enquiry_id:q.enquiry_id});
+  if(!r||!r.ok){body.innerHTML='<div class="aa-empty">'+_esc((r&&r.error)||'could not be read')+'</div>';return;}
+  var d=r.request||{}, st=QL_STAGE[d.stage]||[d.stage||'Unknown',''];
+  var rows=[
+    ['Who',           _esc(d.contact_name||'No name given')],
+    ['Email',         _esc(d.email||'—')],
+    ['Phone',         _esc(d.phone||'—')],
+    ['Collecting from',_esc(d.collection_postcode||'—')],
+    ['Delivering to', _esc(d.delivery_postcode||'—')],
+    ['Distance',      d.distance_miles?_esc(d.distance_miles)+' miles':'—'],
+    ['Vehicle',       _esc(d.vehicle_type||'not chosen')],
+    ['Service',       _esc(d.service_level||'not chosen')],
+    ['Guide price',   qlMoney(d.guide_price)+' <span style="font-weight:400;color:var(--mu);font-size:.72rem">ex VAT</span>'],
+    ['What they said',_esc(d.detail||'nothing written')],
+    ['Came in from',  _esc(d.source||'—')],
+    ['How far they got', _esc(st[0])+'<span style="display:block;font-weight:400;color:var(--mu);font-size:.72rem">'+_esc(st[1])+'</span>'],
+    ['Last touched',  qlWhen(d.updated_at)],
+    ['Booked',        d.booked_job_ref?_esc(d.booked_job_ref):'not booked']
+  ];
+  /* The consent evidence, in full. This is the panel that answers "why is this
+     person on our mailing list" — so it shows the sentence itself, not a tick. */
+  var c=(r.consent||[])[0];
+  rows.push(['Marketing',
+    d.marketing_opt_in
+      ? 'Yes, they ticked the box'+
+        (c&&c.wording?'<span style="display:block;font-weight:400;color:var(--mu);font-size:.72rem">Shown: “'+_esc(c.wording)+'”</span>':'')+
+        (c?'<span style="display:block;font-weight:400;color:var(--mu);font-size:.72rem">Recorded '+qlWhen(c.recorded_at)+' · '+_esc(c.wording_version||'')+'</span>':'')
+      : 'No — they were asked and did not tick it. Do not add them to any list.']);
+  var qs=(r.quotes||[]);
+  if(qs.length>1){
+    rows.push(['Prices worked out', qs.length+' on this request'+
+      '<span style="display:block;font-weight:400;color:var(--mu);font-size:.72rem">'+
+      qs.map(function(x){return qlMoney(x.price_customer);}).join(' · ')+'</span>']);
+  }
+  body.innerHTML=rows.map(function(x){
+    return '<div class="cr"><span class="ck">'+x[0]+'</span><span class="cv">'+x[1]+'</span></div>';
+  }).join('');
+}
+window.qlLoad=qlLoad; window.qlOpen=qlOpen; window.qlFilter=qlFilter; window.qlClose=qlClose;
 
 /* ── PAYMENTS ─────────────────────────────────────────────────────────────
    Brent, 9 Sep 2026: "on the HAF KNECT Dashboard on the side bar ... a payments
