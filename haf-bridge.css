@@ -119,9 +119,9 @@ body { font-family: var(--haf-font); }
 .tlogo-t span, .llogo-t span { color: var(--haf-orange-ink); }
 
 /* ---- anything sitting on the orange ------------------------------------ */
-/* The page used its near-black on orange, which reads as a fourth colour and
-   fails contrast. White, per the brand sheet. */
-.vbadge, .btn-primary, .btn.primary { color: #ffffff; }
+/* White on the orange fill is 2.4:1 and fails. HAF Grey is 4.96:1 and is what
+   the brand sheet names for this job, so use the token, not a literal. */
+.vbadge, .btn-primary, .btn.primary { color: var(--haf-on-orange); }
 
 /* ---- the switch -------------------------------------------------------- */
 .theme-btn, [data-haf-theme-toggle] {
