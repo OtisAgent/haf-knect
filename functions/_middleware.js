@@ -22,7 +22,20 @@
  * live site — 93 bytes naming the repository and what it is for. Nothing
  * dangerous, and nothing a visitor has any use for either. Exact match, not a
  * prefix: it must not shadow a real route. */
-const REFUSE = ["/.decisions/", "/.tests/"];
+/* 11 Sep: the same mistake a third time, and this one had teeth. Ninety files
+ * at the repo root begin with an underscore — test harnesses, probes, one-off
+ * scripts — and Cloudflare Pages publishes every one of them. Eight of those
+ * carry a working username and PIN for a live account as plain text, so
+ * https://knect.usehaf.co.uk/_bar_live_proof.mjs answered 200 with a login in
+ * it. The underscore is this repo's convention for "beside the site, not part
+ * of it"; nothing the site serves asks for a /_ path (checked), and the Pages
+ * runtime never serves its own _worker.js, _headers, _redirects or
+ * _routes.json as assets. So the prefix is the rule, and it is one more string
+ * compare on a path we are already inspecting.
+ *
+ * The credentials themselves are being taken out of those files separately.
+ * This is the door; that is the key. Both. */
+const REFUSE = ["/.decisions/", "/.tests/", "/_"];
 const REFUSE_EXACT = ["/README.md", "/readme.md"];
 
 export async function onRequest(context) {

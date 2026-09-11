@@ -1,6 +1,12 @@
 import { chromium } from 'playwright';
 /* Point LIVE_URL at whichever surface is being proved. The default stays the
    preview so a bare run can never be mistaken for a production check. */
+/* The sign-in this walk uses is passed IN, never written down here. Pages
+   publishes root files whose name begins with an underscore, so a PIN typed
+   into this file is a PIN on the open web. Run it as:
+     NAV_USER=<account> NAV_PIN=<pin> node <this file> */
+const USER = process.env.NAV_USER, PIN = process.env.NAV_PIN;
+if (!USER || !PIN) { console.error('Set NAV_USER and NAV_PIN — this harness carries no credentials.'); process.exit(2); }
 const URL=process.env.LIVE_URL||'https://mobile-bottom-nav.knect-demo.pages.dev/';
 const b=await chromium.launch();
 const sizes=[{n:'phone',w:390,h:844},{n:'phone-sideways',w:844,h:390},{n:'desktop',w:1280,h:900}];
@@ -13,7 +19,7 @@ for(const s of sizes){
      landing settles more slowly than on the preview, and a timed wait turned a
      slow page into "the login box does not exist". */
   await p.waitForSelector('#l-user',{state:'visible',timeout:20000});
-  await p.fill('#l-user','TEST0001'); await p.fill('#l-pass','8421');
+  await p.fill('#l-user',USER); await p.fill('#l-pass',PIN);
   await p.evaluate(()=>doLogin()); await p.waitForTimeout(7000);
   const bar=await p.evaluate(()=>{const el=document.getElementById('haf-tabbar');const r=el&&el.getBoundingClientRect();
     return {h:r?Math.round(r.height):0,w:r?Math.round(r.width):0,pos:el?getComputedStyle(el).position:null,

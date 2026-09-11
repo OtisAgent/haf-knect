@@ -2,6 +2,12 @@
    KNECT's fourth position must land on plna.usehaf.co.uk WITH a bar, and
    PLNA's fourth must come back to knect.usehaf.co.uk. Nothing seeded. */
 import { chromium } from 'playwright';
+/* The sign-in this walk uses is passed IN, never written down here. Pages
+   publishes root files whose name begins with an underscore, so a PIN typed
+   into this file is a PIN on the open web. Run it as:
+     NAV_USER=<account> NAV_PIN=<pin> node <this file> */
+const USER = process.env.NAV_USER, PIN = process.env.NAV_PIN;
+if (!USER || !PIN) { console.error('Set NAV_USER and NAV_PIN — this harness carries no credentials.'); process.exit(2); }
 const b=await chromium.launch();
 const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
 const p=await ctx.newPage();
@@ -16,7 +22,7 @@ for(let i=0;i<10;i++){
   if(await p.evaluate(()=>{const e=document.getElementById('l-user');return !!e&&e.offsetParent!==null})) break;
 }
 await p.waitForSelector('#l-user',{state:'visible',timeout:20000});
-await p.fill('#l-user','TEST0001'); await p.fill('#l-pass','8421');
+await p.fill('#l-user',USER); await p.fill('#l-pass',PIN);
 await p.evaluate(()=>doLogin()); await p.waitForTimeout(7000);
 const labels=await p.evaluate(()=>[...document.querySelectorAll('#haf-tabbar .tbi')].map(x=>x.innerText.trim()));
 console.log('KNECT bar:',labels.join(' | '));
