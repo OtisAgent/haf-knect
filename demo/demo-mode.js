@@ -79,12 +79,32 @@
      about the number the viewer can actually see rather than an invented one.
      If we cannot find it we say nothing about the amount — a made-up figure in
      a demo becomes a figure somebody quotes back at you. */
+  function money(t) {
+    var m = (t || '').match(/£\s?[\d,]+(?:\.\d{2})?/);
+    if (!m) return null;
+    var v = m[0].replace(/\s/g, '');
+    /* £0.00 is not an amount, it is a box that has not been filled in yet.
+       Reading one out loud on a live stream is worse than saying nothing. */
+    return /^£0(\.00)?$/.test(v) ? null : v;
+  }
+
   function amountNear(el) {
     var hop = el, depth = 0;
     while (hop && depth < 5) {
-      var m = (hop.textContent || '').match(/£\s?[\d,]+(?:\.\d{2})?/);
-      if (m) return m[0].replace(/\s/g, '');
+      var m = money(hop.textContent);
+      if (m) return m;
       hop = hop.parentElement; depth++;
+    }
+    /* Nothing near the button. Ask the app itself: the order screen puts the
+       held amount in fq-dep-amt and the full price in fq-pr-tot, and those are
+       the same two figures the customer has been looking at. Walking up from
+       the link alone found £0.00 in testing, which is exactly the wrong number
+       to put in a panel explaining what would have been taken. */
+    var ids = ['fq-dep-amt', 'fq-pr-tot'];
+    for (var i = 0; i < ids.length; i++) {
+      var node = document.getElementById(ids[i]);
+      var v = node && money(node.textContent);
+      if (v) return v;
     }
     return null;
   }
