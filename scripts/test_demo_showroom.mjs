@@ -8,9 +8,13 @@
  * says it read out of the database — not against themselves.
  */
 import { chromium } from 'playwright';
+import { execFileSync } from 'child_process';
 
 const BASE = process.argv[2] || 'http://127.0.0.1:8899';
-const EMAIL = process.argv[3] || 'otis-showroom-local@usehaf.co.uk';
+/* Unique per run, and always otis-…@usehaf.co.uk: the cleanup at the end refuses
+   to delete anything that is not shaped like one of my own test addresses. */
+const EMAIL = process.argv[3]
+  || 'otis-showroom-' + process.hrtime.bigint().toString(36) + '@usehaf.co.uk';
 
 /* what the live allowance book held when this was written; the build reads it
    fresh every time, so a mismatch here means the book changed and the page
@@ -148,6 +152,139 @@ const run = async () => {
   ok('unlimited is the word used, not a big number',
      posts[2] === 'Unlimited' && !posts.includes('999'));
 
+  // ── HAF's own side of the job ───────────────────────────────────────────
+  /* Brent, 11 Sep: "Yes, add all of them & the pooling is TBC" — what HAF earns
+     on a job, the fee floor, and the pools.
+     These checks deliberately do NOT compare the page to itself. admin/
+     pricing-matrix-v3.js is the engine a real customer quote loads; it is read
+     here, on this machine, and the figures on the LIVE page have to match it to
+     the penny. A page that quietly drifted off the engine fails here. */
+  let ENG = null;
+  try {
+    ENG = JSON.parse(execFileSync('node',
+      [new URL('quote_grid.mjs', import.meta.url).pathname],
+      { encoding: 'utf8', maxBuffer: 1 << 26 }));
+    ok('the live pricing engine can be read to check the page against',
+       ENG && ENG.haf && ENG.haf.cells && Object.keys(ENG.haf.cells).length > 0,
+       ENG ? Object.keys(ENG.haf.cells).length + ' jobs priced, matrix ' + ENG.version : 'no read');
+  } catch (e) {
+    ok('the live pricing engine can be read to check the page against', false,
+       String(e.stderr || e).slice(0, 180));
+  }
+
+  ok("HAF's own side is on the page", await page.isVisible('#own'));
+
+  /* Read the three columns off the screen the way a person reads them: out of the
+     rendered cells, not out of the data the page was shipped with. */
+  const ownFigs = () => page.evaluate(() => {
+    const money = t => {
+      const m = String(t || '').replace(/,/g, '').match(/£\s*([\d.]+)/);
+      return m ? parseFloat(m[1]) : null;
+    };
+    const pct = t => {
+      const m = String(t || '').match(/([\d.]+)%/);
+      return m ? parseFloat(m[1]) : null;
+    };
+    const txt = id => (document.getElementById(id) || {}).textContent || '';
+    /* The amount and the share sit in one cell with NOTHING between them —
+       "£23.44" then "23.81% of what the customer pays". Read whole-cell text and
+       £23.44 runs straight into 23.81 as one number, which is how the first
+       version of this check failed a page that was right. So take the amount from
+       the cell's own text node and the share from the small print beside it. */
+    const out = {};
+    for (const L of ['FREE', 'PLUS', 'PRO']) {
+      const cell = document.getElementById('own-keep-' + L);
+      const amountOnly = cell
+        ? Array.from(cell.childNodes)
+            .filter(n => n.nodeType === 3).map(n => n.nodeValue).join(' ')
+        : '';
+      const small = cell ? (cell.querySelector('.sub') || {}).textContent || '' : '';
+      out[L] = {
+        price: money(txt('own-price-' + L)),
+        pay: money(txt('own-pay-' + L)),
+        keep: money(amountOnly),
+        share: pct(small),
+        floored: /lifted to the floor/i.test(small),
+      };
+    }
+    return out;
+  });
+
+  const p2 = n => Math.round(n * 100) / 100;
+  const LV = ['FREE', 'PLUS', 'PRO'];
+  const reconcile = (figs, key, label) => {
+    if (!ENG) return;
+    const C = ENG.cells[key], H = ENG.haf.cells[key];
+    if (!C || !H) { ok('the engine knows the job ' + label, false, key); return; }
+    const wrong = [];
+    LV.forEach((lv, i) => {
+      const f = figs[lv];
+      if (f.price !== p2(C[i])) wrong.push(lv + ' customer price ' + f.price + ' vs engine ' + p2(C[i]));
+      if (f.pay !== p2(H[1])) wrong.push(lv + ' driver pay ' + f.pay + ' vs engine ' + p2(H[1]));
+      if (f.keep !== p2(H[0][i])) wrong.push(lv + ' HAF keeps ' + f.keep + ' vs engine ' + p2(H[0][i]));
+      if (Math.abs(f.keep + f.pay - f.price) > 0.02) wrong.push(lv + ' the three figures do not add up');
+      if (Math.abs(f.share - p2((f.keep / f.price) * 100)) > 0.03) wrong.push(lv + ' the share is not the share');
+      if (f.floored !== Boolean(H[2][i])) wrong.push(lv + ' the floor note disagrees with the engine');
+    });
+    ok("HAF's own figures match the live engine on " + label, wrong.length === 0,
+       wrong.length ? wrong.join('; ')
+                    : LV.map(lv => lv + ' keeps £' + figs[lv].keep.toFixed(2)).join(', '));
+  };
+
+  const opening = await ownFigs();
+  reconcile(opening, 'LWB_VAN|STD_SAMEDAY|50', 'the job it opens on');
+  ok('the driver is paid the same whatever the account level',
+     opening.FREE.pay !== null && opening.FREE.pay === opening.PLUS.pay
+       && opening.PLUS.pay === opening.PRO.pay,
+     LV.map(lv => '£' + opening[lv].pay).join(' / '));
+  ok('the whole of the discount comes out of what HAF keeps',
+     opening.FREE.keep > opening.PLUS.keep && opening.PLUS.keep > opening.PRO.keep,
+     LV.map(lv => lv + ' £' + opening[lv].keep).join(' > '));
+
+  /* The page says "change the job and these move with it", so change it. */
+  await page.selectOption('#pk-veh', 'LUTON');
+  await page.selectOption('#pk-job', 'URGENT');
+  await page.selectOption('#pk-mi', '150');
+  await page.waitForFunction(
+    was => {
+      const e = document.getElementById('own-keep-FREE');
+      return e && e.textContent.indexOf(was) === -1;
+    },
+    '£' + opening.FREE.keep.toFixed(2), { timeout: 15000 }).catch(() => {});
+  const moved = await ownFigs();
+  ok("HAF's own figures move when the job on screen changes",
+     moved.FREE.keep !== opening.FREE.keep,
+     'opened £' + opening.FREE.keep + ', after picking a 150-mile urgent Luton £' + moved.FREE.keep);
+  reconcile(moved, 'LUTON|URGENT|150', 'a different job picked on screen');
+
+  // ── the floor, the ceiling, and how often the floor bites ──────────────
+  const band = norm(await page.textContent('#own .band'));
+  if (ENG) {
+    ok('the fee floor on the page is the engine’s floor',
+       band.includes(ENG.haf.floor + '%'), band.slice(0, 140));
+    ok('the ceiling on the page is the engine’s ceiling',
+       band.includes(ENG.haf.ceiling + '%'), band.slice(0, 140));
+    const hits = Object.values(ENG.haf.cells).filter(c => c[2].some(Boolean)).length;
+    ok('the count of jobs lifted to the floor is the engine’s count',
+       new RegExp('(^|\\D)' + hits + '(\\D|$)').test(band), 'engine says ' + hits);
+  }
+
+  // ── the pooling, which is not settled ──────────────────────────────────
+  const pools = norm(await page.textContent('#own .pools'));
+  const ownText = norm(await page.textContent('#own'));
+  if (ENG) {
+    const missing = ENG.haf.pools.destinations.filter(d => !pools.includes(d));
+    ok('every pool in the live matrix is named on the page', missing.length === 0,
+       missing.length ? 'missing: ' + missing.join(', ')
+                      : ENG.haf.pools.destinations.length + ' named');
+  }
+  ok('no share is put against any pool', !/[%£]|\bper cent\b/i.test(pools), pools);
+  ok('the pooling is marked to be confirmed', /to be confirmed/i.test(ownText));
+  ok('and the page says in words that the split is not settled',
+     /not settled yet/i.test(ownText));
+  ok('the page says these are HAF’s figures, not a customer’s',
+     /HAF’s figures, not a|HAF's figures, not a/i.test(ownText));
+
   // ── the wording rule ───────────────────────────────────────────────────
   const body = norm(await page.textContent('body')).toLowerCase();
   const found = BANNED.filter(w => body.includes(w));
@@ -199,6 +336,22 @@ const run = async () => {
      jsErrors.length ? jsErrors[0] : 'clean console');
 
   await browser.close();
+
+  /* ── take my own sign-up back out ────────────────────────────────────────
+     This walk went in through the real front door, so the address it used is
+     indistinguishable from a real lead: the nightly sync would put it in front of
+     Brent as a warm contact and email it an access code. It is removed here and
+     the removal is a CHECK, so a cleanup that silently failed fails the run. */
+  try {
+    const out = execFileSync('python3',
+      [new URL('demo_lead_remove.py', import.meta.url).pathname, EMAIL],
+      { encoding: 'utf8' }).trim();
+    ok('the walk took its own sign-up back out of the list', /^DELETE \d+$/.test(out), out);
+  } catch (e) {
+    ok('the walk took its own sign-up back out of the list', false,
+       'cleanup failed — remove ' + EMAIL + ' by hand: ' + String(e.stderr || e).slice(0, 160));
+  }
+
   console.log(`\n${pass} passed, ${fail} failed\n`);
   process.exit(fail ? 1 : 0);
 };
