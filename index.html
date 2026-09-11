@@ -5765,9 +5765,149 @@ async function addrPick(el,s){
   addrSet(el,r);
   if(typeof el._addrAfter==='function')el._addrAfter(r);
 }
-function addrAttach(el,after){
+/* ══ THE DOORS AT A POSTCODE ══════════════════════════════════════════════
+   Brent, 11 Sep 2026: "a drop down address bar when someone places the
+   postcode — offer an address or manual, then auto populate the fields with
+   the right address, and allow the user to edit and manually input."
+
+   Three sources, in this order, because the first one is ours and the only one
+   that gets better every time somebody uses HAF:
+
+     1. the HAF address book — every door the network has ever been to. Free,
+        instant, and it is the reason this feature improves on its own.
+     2. OpenStreetMap, through the distance gateway. Free, strong on business
+        and industrial premises, patchy on housing estates.
+     3. a paid Royal Mail list — coded and dormant in the gateway, one key away.
+
+   When all three have nothing the answer is still useful: the street and town
+   of the postcode itself go in the box, so the customer types a house number
+   and nothing else. A postcode we cannot place at all is left completely
+   alone — the field then behaves exactly as it did before today.          */
+const ADDR_DB='https://ggkpqqrtxtlafdkxcaqg.supabase.co';
+const ADDR_DB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdna3BxcXJ0eHRsYWZka3hjYXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTM2NjAsImV4cCI6MjA5Nzc2OTY2MH0.hB70KOYZu4dshwhsrxF_dFyBn0n72gStWTwxYGsLdgY';
+const _addrDoorC={};
+const _addrNorm=s=>(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+const addrTidyPc=s=>{const t=(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  return t.length>=5&&t.length<=7?t.slice(0,-3)+' '+t.slice(-3):'';};
+
+function _addrDb(fn,body){
+  return fetch(ADDR_DB+'/rest/v1/rpc/'+fn,{method:'POST',
+    headers:{'apikey':ADDR_DB_KEY,'Authorization':'Bearer '+ADDR_DB_KEY,
+             'Content-Type':'application/json'},body:JSON.stringify(body)});
+}
+/* the doors HAF already knows at this postcode */
+async function addrBookAt(pc){
+  try{const r=await _addrDb('haf_addresses_at',{p_postcode:pc});
+    if(!r.ok)return[];const d=await r.json();return Array.isArray(d)?d:[];}
+  catch(e){return[];}
+}
+/* record a door. Fire and forget: the book is bookkeeping and must never be
+   able to hold up, or break, the thing the customer is actually doing. */
+function addrRemember(pc,line1,street,town,source){
+  const p=addrTidyPc(pc);if(!p||!line1)return;
+  try{_addrDb('haf_address_seen',{p_postcode:p,p_line1:line1,
+    p_street:street||null,p_town:town||null,p_source:source||'typed'}).catch(()=>{});}
+  catch(e){}
+}
+async function addrDoors(pc){
+  const key=addrTidyPc(pc);if(!key)return null;
+  if(_addrDoorC[key]!==undefined)return _addrDoorC[key];
+  let gw=null;
+  const book=await Promise.all([
+    addrBookAt(key),
+    (async()=>{try{const r=await fetch(ADDR_GW+'addresses?postcode='+encodeURIComponent(key));
+      if(r.ok){const d=await r.json();if(d&&d.ok)gw=d;}}catch(e){}})()
+  ]).then(a=>a[0]);
+  /* a postcode neither source can place is not a postcode we will guess at */
+  if(!gw&&!book.length)return null;
+  const seen={},doors=[];
+  book.forEach(b=>{const k=_addrNorm(b.line1);if(!k||seen[k])return;seen[k]=1;
+    doors.push({line:b.line1,label:b.line1,street:b.street||'',town:b.town||'',known:true});});
+  if(gw&&Array.isArray(gw.addresses))gw.addresses.forEach(a=>{
+    const k=_addrNorm(a.line||a.label);if(!k||seen[k])return;seen[k]=1;
+    doors.push({line:a.line||a.label,label:a.label||a.line,
+                street:a.street||(gw.street||''),town:gw.town||'',known:false});});
+  const out={pc:key,street:(gw&&gw.street)||(book[0]&&book[0].street)||'',
+    town:(gw&&gw.town)||(book[0]&&book[0].town)||'',doors:doors};
+  _addrDoorC[key]=out;
+  return out;
+}
+/* the one address string every HAF form wants: door, town, postcode */
+function addrCompose(line,town,pc){
+  return [line,town,pc].filter(x=>x&&String(x).trim()).join(', ');
+}
+/* a door was chosen: fill the box, keep the postcode we already know, and tell
+   the form. Everything stays a plain editable input — nothing is locked. */
+function addrFillDoor(el,d,ctx){
+  el.value=addrCompose(d.line,d.town||ctx.town,ctx.pc);
+  addrCloseList();
+  addrSet(el,{pc:ctx.pc,label:el.value,precise:addrHasNumber(d.line)});
+  addrRemember(ctx.pc,d.line,d.street||ctx.street,d.town||ctx.town,d.known?'picked':'picked-map');
+  el.dataset.addrManual='';
+  if(typeof el._addrAfter==='function')el._addrAfter({pc:ctx.pc,label:el.value,precise:addrHasNumber(d.line)});
+  addrHint(el,'');
+}
+/* "I'll type it myself": the street, town and postcode are already right, so
+   the only thing left to type is the number, and the caret is waiting there. */
+function addrFillManual(el,ctx){
+  const tail=addrCompose(ctx.street,ctx.town,ctx.pc);
+  el.value=tail;
+  addrCloseList();
+  addrSet(el,{pc:ctx.pc,label:el.value,precise:false});
+  el.dataset.addrManual='1';
+  el.focus();
+  try{el.setSelectionRange(0,0);}catch(e){}
+  addrHint(el,ctx.street?'Type your house or building number at the start, then edit anything that is not right.'
+                        :'Type the rest of the address in front of the postcode.');
+  if(typeof el._addrAfter==='function')el._addrAfter({pc:ctx.pc,label:el.value,precise:false});
+}
+function addrHint(el,msg){
+  let h=el._addrHintEl;
+  if(!msg){if(h)h.remove();el._addrHintEl=null;return;}
+  if(!h){h=document.createElement('div');h.className='addr-hint';el._addrHintEl=h;
+    if(el.parentNode)el.parentNode.insertBefore(h,el.nextSibling);}
+  h.textContent=msg;
+}
+/* the dropdown of doors, always with a manual way out at the bottom */
+function addrOpenDoors(el,ctx){
+  addrCloseList();
+  const r=el.getBoundingClientRect();
+  const b=document.createElement('div');
+  b.className='addr-list';
+  b.style.left=r.left+'px';b.style.top=(r.bottom+4)+'px';b.style.width=Math.max(r.width,240)+'px';
+  const head=document.createElement('div');
+  head.className='addr-head';
+  head.textContent=ctx.doors.length
+    ?(ctx.doors.length+' address'+(ctx.doors.length===1?'':'es')+' at '+ctx.pc)
+    :('No addresses listed at '+ctx.pc);
+  b.appendChild(head);
+  ctx.doors.slice(0,40).forEach(d=>{
+    const row=document.createElement('div');
+    row.className='addr-item';
+    const m=document.createElement('span');m.className='addr-m';m.textContent=d.label||d.line;
+    const c=document.createElement('span');c.className='addr-s';
+    c.textContent=[d.town||ctx.town,ctx.pc].filter(Boolean).join(', ')+(d.known?'  ·  used before':'');
+    row.appendChild(m);row.appendChild(c);
+    row.addEventListener('mousedown',ev=>{ev.preventDefault();addrFillDoor(el,d,ctx);});
+    b.appendChild(row);
+  });
+  const man=document.createElement('div');
+  man.className='addr-item addr-manual';
+  const mm=document.createElement('span');mm.className='addr-m';
+  mm.textContent=ctx.doors.length?'My address is not listed — type it myself':'Type the address myself';
+  const ms=document.createElement('span');ms.className='addr-s';
+  ms.textContent=ctx.street?(ctx.street+', '+(ctx.town||'')+' — just add your number'):'We will fill in the postcode';
+  man.appendChild(mm);man.appendChild(ms);
+  man.addEventListener('mousedown',ev=>{ev.preventDefault();addrFillManual(el,ctx);});
+  b.appendChild(man);
+  document.body.appendChild(b);
+  _addrBox=b;_addrFor=el;_addrIdx=-1;
+}
+
+function addrAttach(el,after,opts){
   if(!el||el._addrOn)return;
   el._addrOn=true;el._addrAfter=after;
+  el._addrDoors=!!(opts&&opts.doors);
   el.removeAttribute('maxlength');            /* "S9 1AA" fits in 8, a street does not */
   el.setAttribute('autocomplete','off');
   /* only relabel the postcode-only boxes; fields that already ask for a full
@@ -5775,8 +5915,19 @@ function addrAttach(el,after){
   if(/^e\.g\./i.test(el.getAttribute('placeholder')||''))el.setAttribute('placeholder','Postcode or street, e.g. S9 1AA');
   el.addEventListener('input',()=>{
     addrClear(el);
+    addrHint(el,'');
     const v=(el.value||'').trim();
     clearTimeout(_addrTimer);
+    /* a full postcode in a box that asks for an address: offer the doors */
+    if(el._addrDoors&&ADDR_FULL.test(v)){
+      const seq=++_addrSeq;
+      _addrTimer=setTimeout(async()=>{
+        const ctx=await addrDoors(v);
+        if(seq!==_addrSeq||document.activeElement!==el||!ctx)return;
+        addrOpenDoors(el,ctx);
+      },300);
+      return;
+    }
     if(v.length<3||addrIsPostcode(v)){addrCloseList();return;}
     const seq=++_addrSeq;
     _addrTimer=setTimeout(async()=>{
@@ -5786,6 +5937,21 @@ function addrAttach(el,after){
     },260);
   });
   el.addEventListener('blur',()=>{setTimeout(()=>{if(_addrFor===el)addrCloseList();},130);});
+}
+
+/* Every address a person actually commits to goes into the book, whether they
+   picked it, edited it or typed the whole thing. Called by the forms at the
+   moment of submit — never on a keystroke, so a half-typed line never lands. */
+async function addrKeep(el,source){
+  if(!el)return;
+  const v=(el.value||'').trim();
+  if(!v||!addrHasNumber(v))return;          /* no door number, not a door */
+  const pc=addrTidyPc(el.dataset.pc||'')||addrTidyPc((v.match(/[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\s*$/i)||[''])[0]);
+  if(!pc)return;
+  const parts=v.split(',').map(s=>s.trim()).filter(Boolean);
+  const line1=parts[0];
+  const town=parts.length>2?parts[parts.length-2]:'';
+  addrRemember(pc,line1,'',town,source||'typed');
 }
 /* On the input itself the app's own Enter handlers were registered first, so
    the list is driven from the document in the capture phase where it can get
@@ -5814,7 +5980,12 @@ window.addEventListener('resize',()=>{if(_addrBox)addrCloseList();});
    +'.addr-item:hover,.addr-item.on{background:var(--p3,#f4f4f4)}'
    +'.addr-m{display:block;font-size:.83rem;font-weight:700;color:var(--tx,#111)}'
    +'.addr-s{display:block;font-size:.72rem;color:var(--mu,#777);margin-top:.08rem}'
-   +'.addr-busy{opacity:.65}';
+   +'.addr-busy{opacity:.65}'
+   +'.addr-head{padding:.42rem .7rem;font-size:.68rem;letter-spacing:.04em;text-transform:uppercase;'
+   +'font-weight:800;color:var(--mu,#777);background:var(--p3,#f6f6f6);border-bottom:1px solid var(--ln,#e6e6e6)}'
+   +'.addr-manual{background:var(--p3,#fafafa)}'
+   +'.addr-manual .addr-m{color:var(--or,#f18e00)}'
+   +'.addr-hint{font-size:.72rem;line-height:1.35;color:var(--mu,#777);margin:.25rem 0 .1rem}';
   document.head.appendChild(s);
 })();
 
@@ -6149,8 +6320,11 @@ document.getElementById('pc-to').addEventListener('keydown',e=>{if(e.key==='Ente
   addrAttach(G('pc-from'),()=>calcLivePrice());
   addrAttach(G('pc-to'),()=>calcLivePrice());
   /* the two quote journeys and the posting screen */
-  ['fq-from','fq-to','fq-caddr','fq-daddr','hp-from','hp-to','post-caddr','post-daddr','db-from','db-to']
-    .forEach(id=>addrAttach(G(id)));
+  ['fq-from','fq-to','hp-from','hp-to'].forEach(id=>addrAttach(G(id)));
+  /* the boxes that send a driver to a door get the postcode dropdown: type a
+     full postcode and the addresses at it are offered, with a manual way out */
+  ['fq-caddr','fq-daddr','post-caddr','post-daddr','db-from','db-to']
+    .forEach(id=>addrAttach(G(id),null,{doors:true}));
 })();
 
 function toggleTrack(){
@@ -7540,6 +7714,10 @@ function fqShowPriceV(){
   if(_justPc(_v('fq-daddr'))){fErr('fq-err-5','That is the postcode, not the address — please give the delivery street and building number so the driver reaches the door.');return;}
   if(!addrHasNumber(_v('fq-caddr'))){fErr('fq-err-5','Add the house or building number to the collection address so the driver can find the door.');return;}
   if(!addrHasNumber(_v('fq-daddr'))){fErr('fq-err-5','Add the house or building number to the delivery address so the driver can find the door.');return;}
+  /* both ends are real doors now: the address book keeps them, so the next
+     person to type either postcode is offered them instead of typing */
+  addrKeep(document.getElementById('fq-caddr'),'quote');
+  addrKeep(document.getElementById('fq-daddr'),'quote');
   /* A coded end is a promise to text somebody. Without a mobile there is
      nobody to text, and the driver arrives to a code nobody can produce. */
   if(hoffMode('c')==='coded'&&!_v('fq-cphone')){fErr('fq-err-5','A coded release needs a mobile number for the collection contact — that is where the code is sent.');hoffPaint();return;}
