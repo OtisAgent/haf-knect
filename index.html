@@ -1568,6 +1568,74 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 .pj-row-v{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere}
 .pj-miss{font-size:.75rem;color:var(--tx);background:var(--am-d);border:1px solid rgba(185,133,48,.28);border-radius:var(--rx);padding:.55rem .65rem;line-height:1.55;margin-bottom:.7rem}
 @media(max-width:480px){.pj-row{flex-direction:column;gap:.05rem}.pj-row-l{max-width:none;flex:none}}
+
+/* ── CALENDAR ───────────────────────────────────────────────────────────────
+   The month grid is the one piece with a real sizing rule behind it.
+
+   A day cell is a SQUARE ON A PHONE only. The grid is seven columns wide
+   whatever the screen, so on a phone a column is ~48px and a square is a
+   comfortable thumb target; on a desktop a column is ~150px and a square makes
+   the cell 150px TALL, six rows of which push the end of the month below the
+   fold. Above 900px the cell therefore keeps its width and takes its height
+   from the viewport instead, and the grid stops growing at 1080px so a wide
+   monitor gets a readable month rather than a sprawling one.
+
+   Brent, 11 Sep, on the same fault in PLNA: "make the calendar smaller on the
+   desktop, the squares are huge for the days... a calendar viewing across the
+   whole month on the screen." Measured, not eyeballed: _monthfit_knect.mjs. */
+.kncal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:.7rem}
+.kncal-nav{display:flex;gap:.35rem;flex-shrink:0}
+.kncal-bar{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem}
+.kncal-views{display:flex;gap:.25rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--pill);padding:.2rem}
+.kncal-v{border:0;background:none;border-radius:var(--pill);padding:.3rem .8rem;font-size:.72rem;font-weight:700;color:var(--mu);cursor:pointer;transition:all .12s;min-height:32px}
+.kncal-v:hover{color:var(--tx)}
+.kncal-v.on{background:var(--p);color:var(--or);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.kncal-period{font-size:.78rem;font-weight:700;color:var(--tx)}
+.kncal-note{font-size:.76rem;color:var(--mu);line-height:1.6;padding:.9rem 0}
+.kncal-day-h{font-size:.68rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin:.8rem 0 .35rem}
+.kncal-day-h:first-child{margin-top:0}
+
+/* week — seven day columns on a desktop, stacked days on a phone */
+.kncal-week{display:grid;grid-template-columns:1fr;gap:.5rem}
+@media(min-width:900px){.kncal-week{grid-template-columns:repeat(7,1fr);gap:.4rem;align-items:start}}
+.kncal-wcol{min-width:0}
+.kncal-wcol-h{font-size:.66rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;padding:.25rem 0;border-bottom:1px solid var(--ln);margin-bottom:.4rem}
+.kncal-wcol-h.today{color:var(--or)}
+
+/* month */
+.kncal-month{display:grid;grid-template-columns:repeat(7,1fr);gap:.25rem}
+.kncal-mhead{text-align:center;font-size:.62rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;padding:.3rem 0}
+.kncal-cell{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.22rem;font-size:.82rem;font-weight:600;cursor:pointer;border:1px solid var(--ln);background:none;color:var(--mu);min-width:0;padding:.2rem}
+.kncal-cell:hover{border-color:var(--or)}
+.kncal-cell.out{opacity:.35;cursor:default}
+.kncal-cell.out:hover{border-color:var(--ln)}
+.kncal-cell.today{border-color:var(--or);color:var(--or)}
+.kncal-cell.has{color:var(--tx);background:var(--p2)}
+.kncal-cell.sel{outline:2px solid var(--or);outline-offset:-2px}
+.kncal-dots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;max-width:100%}
+.kncal-dot{width:5px;height:5px;border-radius:50%;background:var(--or);flex:0 0 auto}
+.kncal-more{font-size:.55rem;font-weight:800;color:var(--mu)}
+@media(min-width:900px){
+  .kncal-month{max-width:1080px;gap:.3rem}
+  .kncal-cell{aspect-ratio:auto;height:clamp(50px,8vh,84px);gap:.18rem;font-size:.8rem;border-radius:9px}
+  .kncal-mhead{padding:.2rem 0}
+}
+.kncal-sel-head{font-size:.7rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin:.9rem 0 .4rem}
+
+/* the job drawer — a sheet from the bottom on a phone, a centred card above it */
+.kncal-drawer{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.45);align-items:flex-end;justify-content:center}
+.kncal-drawer.on{display:flex}
+.kncal-dr-sheet{position:relative;background:var(--p);border:1px solid var(--ln);border-radius:var(--r) var(--r) 0 0;padding:1.1rem 1rem 1.4rem;width:100%;max-width:520px;max-height:86vh;overflow:auto}
+.kncal-dr-x{position:absolute;top:.5rem;right:.6rem;border:0;background:none;font-size:1.5rem;line-height:1;color:var(--mu);cursor:pointer;min-width:44px;min-height:44px}
+.kncal-dr-h{font-size:1rem;font-weight:800;color:var(--tx);margin-bottom:.7rem;padding-right:2rem}
+.kncal-dr-row{display:flex;justify-content:space-between;gap:.8rem;font-size:.78rem;padding:.42rem 0;border-bottom:1px solid var(--ln)}
+.kncal-dr-row span{color:var(--mu)}
+.kncal-dr-row strong{color:var(--tx);text-align:right;overflow-wrap:anywhere}
+.kncal-dr-test{margin-top:.7rem;font-size:.72rem;font-weight:700;color:var(--mu)}
+@media(min-width:700px){
+  .kncal-drawer{align-items:center}
+  .kncal-dr-sheet{border-radius:var(--r);max-height:80vh}
+}
 /* ══════════════ HAF MOBILE BOTTOM NAVIGATION ══════════════════════════════
    Brent's directive, 10 Sep 2026: on a phone the sidebar is a desktop menu
    squeezed onto glass. This is the thumb-first replacement — five positions,
@@ -3544,6 +3612,39 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
            the real address to make the delivery happen, so it is shown in full here -->
       <div class="tp" id="pane-livejob" data-exact="1">
         <div id="lj-body"></div>
+      </div>
+
+      <!-- CALENDAR — the customer's half of the one calendar. It reads
+           public.haf_calendar, the same function the driver's planner reads, and
+           draws every job with the shared HAF job card, so the two views of the
+           same job can never disagree.
+
+           Month sizing, Brent 11 Sep: on a phone a day cell is a square because
+           a square is a thumb-sized target; on a desktop a square makes the cell
+           as tall as it is wide and pushes the end of the month below the fold.
+           So the square is a PHONE rule only — see #kncal-month in the sheet. -->
+      <div class="tp" id="pane-calendar" data-exact="1">
+        <div class="kncal-head">
+          <div>
+            <h1 class="pt" style="margin-bottom:.2rem">Calendar</h1>
+            <p class="ps" id="kncal-sub" style="margin:0">Your jobs by day. Tap one to open it.</p>
+          </div>
+          <div class="kncal-nav">
+            <button class="btn btn-gh btn-sm" onclick="knCalStep(-1)" aria-label="Previous">&#8592;</button>
+            <button class="btn btn-gh btn-sm" onclick="knCalToday()">Today</button>
+            <button class="btn btn-gh btn-sm" onclick="knCalStep(1)" aria-label="Next">&#8594;</button>
+          </div>
+        </div>
+        <div class="kncal-bar">
+          <div class="kncal-views" role="tablist">
+            <button class="kncal-v on" data-v="day"    onclick="knCalView('day')">Today</button>
+            <button class="kncal-v"    data-v="week"   onclick="knCalView('week')">Week</button>
+            <button class="kncal-v"    data-v="month"  onclick="knCalView('month')">Month</button>
+            <button class="kncal-v"    data-v="agenda" onclick="knCalView('agenda')">Agenda</button>
+          </div>
+          <div class="kncal-period" id="kncal-period"></div>
+        </div>
+        <div id="kncal-body"><div class="kncal-note">Loading your calendar&hellip;</div></div>
       </div>
 
       <!-- FREIGHT: Network Map -->
@@ -9591,6 +9692,9 @@ const HAF_NAV_V1=[
     /* ONE posting row for everybody (Brent, 14 Aug: they are the same thing).
        It carries need:'post', which every account has — the tier decides the
        daily allowance, never whether the row is there. */
+    /* Everybody has a calendar: it shows the jobs you already have, whether you
+       posted them or you are driving them, so it carries no need: gate. */
+    {id:'calendar', l:'Calendar'},
     {id:'b-book',   l:'Post a Job',            need:'post'},
     {id:'b-del',    l:'My Posted Jobs',        need:'post'},
     {id:'f-loads',  l:'Active Loads',          need:'freight'},
@@ -11154,6 +11258,7 @@ function switchTab(id){
   if(id==='pane-billing')setTimeout(()=>{if(window.pyLoad)pyLoad();},60);
   if(id==='pane-fbadmin')setTimeout(()=>{if(window.faLoad)faLoad();},60);
   if(id==='pane-livejob')setTimeout(hafRenderLive,60);
+  if(id==='pane-calendar')setTimeout(()=>{if(window.knCalBoot)knCalBoot();},60);
   if(id==='pane-d-jobs')setTimeout(hafJobsPaint,40);
   if(id==='pane-fl-manage')setTimeout(flRenderOverview,40);
   if(id==='pane-membership')setTimeout(mbRender,40);
@@ -16115,6 +16220,211 @@ window.pxSave=async function(){
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
+})();
+</script>
+<script>
+/* ── KNECT CALENDAR ─────────────────────────────────────────────────────────
+   The customer's half of the one calendar. It holds no job logic of its own:
+   every row comes from public.haf_calendar (the same read the driver's planner
+   calls, which decides what this account may see and which money figure it is
+   shown), and every job is drawn by the shared HAF job card above.
+
+   Four views, in the order a person actually needs them: Today, Week, Month,
+   Agenda. Month is a picker — a cell says how busy the day is and opens it —
+   because seven columns of full cards is unreadable at any screen size.
+
+   It never invents a time. A job whose window was never filled in is shown
+   under "No time yet" rather than dropped onto an hour it does not have. */
+(function(){
+  'use strict';
+  var S={view:'day',anchor:null,sel:null,range:null,jobs:[],busy:false,err:null};
+  var DOW=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  /* Days are compared as local YYYY-MM-DD strings. toISOString() is UTC, which
+     in British Summer Time puts anything before 01:00 on the previous day. */
+  function key(d){var m=d.getMonth()+1,y=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(y<10?'0':'')+y;}
+  function fromKey(k){var p=String(k).split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
+  function shift(d,n){var x=new Date(d.getTime());x.setDate(x.getDate()+n);return x;}
+  function monday(d){var x=new Date(d.getTime());var w=(x.getDay()+6)%7;x.setDate(x.getDate()-w);return x;}
+  function today(){var n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate());}
+  function esc(s){return String(s==null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
+  function longDay(d){return DOW[(d.getDay()+6)%7]+' '+d.getDate()+' '+MON[d.getMonth()].slice(0,3);}
+
+  function span(){
+    var a=S.anchor||today();
+    if(S.view==='day')   return [a,a];
+    if(S.view==='week')  {var m=monday(a);return [m,shift(m,6)];}
+    if(S.view==='agenda')return [a,shift(a,29)];
+    var f=new Date(a.getFullYear(),a.getMonth(),1);
+    var l=new Date(a.getFullYear(),a.getMonth()+1,0);
+    return [monday(f),shift(monday(f),41)>l?shift(monday(f),41):l];
+  }
+
+  async function load(){
+    var sp=span(),from=key(sp[0]),to=key(sp[1]);
+    if(S.range&&S.range[0]===from&&S.range[1]===to)return;   /* already held */
+    var cred=window.hafPlnaCred?hafPlnaCred():null;
+    if(!cred){S.err='signin';S.jobs=[];S.range=[from,to];return;}
+    S.busy=true;S.err=null;
+    try{
+      var r=await fetch(PLNA_URL+'/rest/v1/rpc/haf_calendar',{method:'POST',
+        headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+        body:JSON.stringify({p_username:cred.p_username,p_hash:cred.p_hash,p_relay:cred.p_relay,p_from:from,p_to:to})});
+      if(!r.ok)throw new Error('rpc '+r.status);
+      var d=await r.json();
+      if(d&&d.error){S.err=d.error;S.jobs=[];}
+      else S.jobs=(d&&d.jobs)||[];
+    }catch(e){S.err='down';S.jobs=[];}
+    S.busy=false;S.range=[from,to];
+  }
+
+  function byDay(){
+    var m={};
+    S.jobs.forEach(function(j){var k=j.day||'none';(m[k]=m[k]||[]).push(j);});
+    return m;
+  }
+
+  function period(){
+    var a=S.anchor||today(),sp=span();
+    if(S.view==='day')   return longDay(a)+' '+a.getFullYear();
+    if(S.view==='month') return MON[a.getMonth()]+' '+a.getFullYear();
+    if(S.view==='agenda')return 'Next 30 days';
+    return longDay(sp[0])+' – '+longDay(sp[1]);
+  }
+
+  function drawDay(map){
+    var k=key(S.anchor||today());
+    return window.HAFJobCard?HAFJobCard.renderDay(map[k]||[],{emptyText:'Nothing booked for this day.'}):'';
+  }
+
+  function drawWeek(map){
+    var m=monday(S.anchor||today()),tk=key(today()),out=[];
+    for(var i=0;i<7;i++){
+      var d=shift(m,i),k=key(d);
+      out.push('<div class="kncal-wcol"><div class="kncal-wcol-h'+(k===tk?' today':'')+'">'+esc(longDay(d))+'</div>'+
+        (window.HAFJobCard?HAFJobCard.renderDay(map[k]||[],{emptyText:'—'}):'')+'</div>');
+    }
+    return '<div class="kncal-week">'+out.join('')+'</div>';
+  }
+
+  function drawMonth(map){
+    var a=S.anchor||today(),tk=key(today());
+    var first=new Date(a.getFullYear(),a.getMonth(),1),start=monday(first),cells=[];
+    for(var i=0;i<7;i++)cells.push('<div class="kncal-mhead">'+DOW[i].charAt(0)+'</div>');
+    for(var n=0;n<42;n++){
+      var d=shift(start,n),k=key(d),js=map[k]||[],out=d.getMonth()!==a.getMonth();
+      var dots=js.slice(0,3).map(function(){return '<span class="kncal-dot"></span>';}).join('');
+      if(js.length>3)dots+='<span class="kncal-more">+'+(js.length-3)+'</span>';
+      cells.push('<button type="button" class="kncal-cell'+(out?' out':'')+(k===tk?' today':'')+
+        (js.length?' has':'')+(k===S.sel?' sel':'')+'" data-k="'+k+'"'+(out?' tabindex="-1"':'')+
+        ' aria-label="'+esc(longDay(d)+', '+(js.length?js.length+' job'+(js.length===1?'':'s'):'nothing booked'))+'">'+
+        '<span>'+d.getDate()+'</span><span class="kncal-dots">'+dots+'</span></button>');
+    }
+    var sel=S.sel?('<div class="kncal-sel-head">'+esc(longDay(fromKey(S.sel)))+'</div>'+
+      (window.HAFJobCard?HAFJobCard.renderDay(map[S.sel]||[],{emptyText:'Nothing booked for this day.'}):'')):'';
+    return '<div class="kncal-month">'+cells.join('')+'</div>'+sel;
+  }
+
+  function drawAgenda(map){
+    var a=S.anchor||today(),out=[];
+    for(var n=0;n<30;n++){
+      var d=shift(a,n),k=key(d),js=map[k]||[];
+      if(!js.length)continue;
+      out.push('<div class="kncal-day-h">'+esc(longDay(d))+'</div>'+
+        (window.HAFJobCard?HAFJobCard.renderDay(js,{emptyText:'—'}):''));
+    }
+    return out.length?out.join(''):'<div class="kncal-note">Nothing booked in the next 30 days.</div>';
+  }
+
+  function paint(){
+    var body=document.getElementById('kncal-body'),per=document.getElementById('kncal-period');
+    if(!body)return;
+    if(per)per.textContent=period();
+    if(window.HAFJobCard)HAFJobCard.mount(body);
+    if(S.busy){body.innerHTML='<div class="kncal-note">Loading your calendar&hellip;</div>';return;}
+    if(S.err==='signin'){body.innerHTML='<div class="kncal-note">Sign in to see your calendar.</div>';return;}
+    if(S.err==='auth'){body.innerHTML='<div class="kncal-note">Your session has expired. Sign in again to see your calendar.</div>';return;}
+    if(S.err){body.innerHTML='<div class="kncal-note">Your calendar could not be reached just now. HAF has been told. Try again in a moment.</div>';return;}
+    var map=byDay();
+    body.innerHTML = S.view==='day'?drawDay(map):S.view==='week'?drawWeek(map):
+                     S.view==='month'?drawMonth(map):drawAgenda(map);
+  }
+
+  /* Level 3, the action: the drawer. It shows only what the calendar read has
+     already handed us — full postcodes, van, miles, the one money figure this
+     account is entitled to — and never fetches a contact or an address. */
+  function openJob(j){
+    var d=document.getElementById('kncal-drawer');
+    if(!d){
+      d=document.createElement('div');d.id='kncal-drawer';d.className='kncal-drawer';
+      d.innerHTML='<div class="kncal-dr-sheet" role="dialog" aria-modal="true" aria-label="Job">'+
+        '<button type="button" class="kncal-dr-x" aria-label="Close">&#215;</button>'+
+        '<div id="kncal-dr-body"></div></div>';
+      document.body.appendChild(d);
+      d.addEventListener('click',function(e){
+        if(e.target===d||(e.target.classList&&e.target.classList.contains('kncal-dr-x')))d.classList.remove('on');
+      });
+    }
+    var rows=[
+      ['Reference', j.ref||'—'],
+      ['Collect',   j.from_pc_full||j.from_pc||'—'],
+      ['Deliver',   j.to_pc_full||j.to_pc||'—'],
+      ['When',      (window.HAFJobCard?HAFJobCard.timeLabel(j):'')||'Time still to confirm'],
+      ['Stage',     window.HAFJobCard?HAFJobCard.stageWord(j.stage):(j.stage||'—')],
+      ['Van',       j.vehicle||'—'],
+      ['Distance',  j.miles!=null?(j.miles+' miles'):'—'],
+      [j.role==='driver'?'Your pay':'Your price', (window.HAFJobCard?HAFJobCard.money(j):'')||'Not set yet']
+    ];
+    document.getElementById('kncal-dr-body').innerHTML=
+      '<div class="kncal-dr-h">'+esc(j.from_pc||'??')+' → '+esc(j.to_pc||'??')+'</div>'+
+      rows.map(function(r){return '<div class="kncal-dr-row"><span>'+esc(r[0])+'</span><strong>'+esc(r[1])+'</strong></div>';}).join('')+
+      (j.is_test?'<div class="kncal-dr-test">Test job — not real work.</div>':'');
+    d.classList.add('on');
+  }
+
+  async function refresh(){paint();await load();paint();}
+
+  function setView(v){
+    S.view=v;S.sel=null;S.range=null;
+    document.querySelectorAll('#pane-calendar .kncal-v').forEach(function(b){
+      b.classList.toggle('on',b.getAttribute('data-v')===v);});
+    refresh();
+  }
+  function step(n){
+    var a=S.anchor||today();
+    S.anchor = S.view==='month' ? new Date(a.getFullYear(),a.getMonth()+n,1)
+             : S.view==='week'  ? shift(a,7*n)
+             : S.view==='agenda'? shift(a,30*n)
+             : shift(a,n);
+    S.sel=null;S.range=null;refresh();
+  }
+  function goToday(){S.anchor=today();S.sel=null;S.range=null;refresh();}
+
+  function boot(){
+    if(!S.anchor)S.anchor=today();
+    var body=document.getElementById('kncal-body');
+    if(body&&!body.__knBound){
+      body.__knBound=true;
+      /* one handler for the whole pane: a month cell opens that day, a job card
+         opens that job */
+      body.addEventListener('click',function(e){
+        var cell=e.target.closest?e.target.closest('.kncal-cell'):null;
+        if(cell&&!cell.classList.contains('out')){S.sel=cell.getAttribute('data-k');paint();return;}
+      });
+      if(window.HAFJobCard)HAFJobCard.onOpen(body,function(id){
+        var j=S.jobs.filter(function(x){return String(x.id)===String(id);})[0];
+        if(j)openJob(j);
+      });
+    }
+    refresh();
+  }
+
+  window.knCalBoot=boot;
+  window.knCalView=setView;
+  window.knCalStep=step;
+  window.knCalToday=goToday;
+  window.knCalState=function(){return S;};
 })();
 </script>
 <script>
