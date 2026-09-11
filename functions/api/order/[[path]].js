@@ -258,6 +258,14 @@ async function place(request, env) {
   await coreInsert(env, 'job_order', {
     job_ref: jobRef,
     account_ref: account.id,
+    /* The signed-in account that raised this, on the row itself rather than only
+       buried in quote_detail. account_ref is the throwaway join_signup minted
+       just above, so it is new every single order — it can never carry a
+       commercial arrangement. The username is the one name that follows a
+       customer from one order to the next, and it is what an account's payment
+       terms are held against. Null is normal: a one-off customer is not signed
+       in and has nothing to be held against. */
+    haf_username: postedBy,
     customer_name: name, customer_email: email, customer_phone: phone,
     company: String(b.company || '').trim() || null,
     collect_postcode: collect, collect_address: String(b.collect_address || '').trim() || null,
@@ -306,11 +314,28 @@ async function place(request, env) {
     track_token: token
   });
 
+  /* ── DOES THIS ACCOUNT PAY UPFRONT, OR ON CREDIT? ──────────────────────────
+     Asked once, here, before the deposit is written. An account HAF has put on
+     credit terms has an agreed limit; if this deposit fits inside what is left
+     of it, the deposit is raised as already settled and the job goes to the
+     board without anybody being asked for a card.
+
+     Deliberately fail-closed: if the question cannot be reached, the answer is
+     nothing available, which is the ordinary pay-upfront journey. A payments
+     lookup being slow must never quietly hand out credit nobody granted. */
+  let onCredit = false;
+  if (postedBy) {
+    const room = await coreRpc(env, 'credit_available_for',
+      { p_username: postedBy, p_account_ref: null }).catch(() => 0);
+    onCredit = Number(room) >= Number(q.deposit_pence);
+  }
+
   /* The holding deposit. Not the whole price: it holds the job while the
      network is asked, and it comes straight back if nobody takes it. */
   const deposit = await coreInsert(env, 'job_payment', {
     job_ref: jobRef,
     account_ref: account.id,
+    haf_username: postedBy,
     account_type: 'customer',
     customer_email: email,
     customer_name: name,
@@ -320,13 +345,19 @@ async function place(request, env) {
     plan_name: `Holding deposit — ${jobRef}`,
     // Where HAF PAY sends them once the card has gone through.
     next_url: jobPage(request, token),
-    status: 'awaiting_payment'
+    /* on_credit is a settled state to everything downstream: the pipeline moves
+       the order to the board on 'paid' or 'on_credit' alike, and the clearance
+       gate reads it as cleared. It is not money received, and it is never
+       counted as revenue — it is HAF carrying the job on an agreed limit. */
+    method: onCredit ? 'credit_terms' : null,
+    status: onCredit ? 'on_credit' : 'awaiting_payment'
   });
   await coreUpdate(env, 'job_order', `job_ref=eq.${jobRef}`, { deposit_reference: deposit.payment_reference });
   await logEvent(env, {
     job_ref: jobRef, payment_reference: deposit.payment_reference, event: 'order_placed',
     detail: { total_pence: q.total_pence, deposit_pence: q.deposit_pence, miles: q.miles,
-              vehicle: q.vehicle_code, direct_username: directUser, source: 'knect_order_screen' },
+              vehicle: q.vehicle_code, direct_username: directUser, source: 'knect_order_screen',
+              on_credit: onCredit },
     actor: 'customer'
   });
 
@@ -338,7 +369,11 @@ async function place(request, env) {
     balance_pence: q.balance_pence,
     direct_username: directUser,
     first_refusal_minutes: FIRST_REFUSAL_MINUTES,
-    pay_url: `${payBase(env)}/pay/${deposit.payment_reference}`,
+    /* An account on credit terms is not sent to a card page, because there is
+       nothing for them to pay. A link that charges somebody who has already
+       been told the job is on their account is worse than no link at all. */
+    on_credit: onCredit,
+    pay_url: onCredit ? null : `${payBase(env)}/pay/${deposit.payment_reference}`,
     track_url: jobPage(request, token)
   });
 }

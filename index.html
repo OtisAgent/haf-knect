@@ -4344,10 +4344,14 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
              been checked has no Approve button at all, because the only thing
              that can open that door is the team portal. -->
         <div class="card" id="ov-access-card">
-          <div class="ct">Who can drive on the network
-            <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">PLNA access, and what opened it</span>
+          <div class="ct">Accounts, access and payment terms
+            <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">who can drive, and who may post before they pay</span>
           </div>
           <div id="ov-access-sum" class="ov-src" style="margin:0 0 12px">Reading the access record…</div>
+          <!-- A job that never reached the board is the quietest failure HAF has:
+               the customer thinks they ordered, and no driver ever sees it. It is
+               named here, above the list, rather than left to be noticed. -->
+          <div id="ov-held-line" style="display:none;margin:0 0 12px"></div>
           <div id="ov-access-tools" style="display:none;margin-bottom:10px">
             <input id="ov-access-q" placeholder="Find a username or name…"
                    style="max-width:320px;width:100%;padding:.5rem .75rem;border-radius:var(--rx);
@@ -7663,21 +7667,30 @@ function fqPaintBooked(d){
   if(dep){
     dep.style.display='';
     document.getElementById('fq-dep-amt').textContent=gbp(d.deposit_pence);
-    document.getElementById('fq-dep-note').textContent=
-      'This is the full price for the job. It is held now and taken only once a driver has '
-      +'accepted it. If nobody on the network takes the job, the hold is released and you are '
-      +'charged nothing. There is no balance to pay later.';
+    document.getElementById('fq-dep-note').textContent=d.on_credit
+      /* An account HAF has put on credit terms is not asked for a card. Say
+         so plainly on the same line that would otherwise ask for money, or a
+         missing Pay button reads as something having gone wrong. */
+      ?'This is the full price for the job. Your account is on credit terms with HAF, so there '
+       +'is nothing to pay now — the job goes to the network straight away and this amount goes '
+       +'on your account.'
+      :'This is the full price for the job. It is held now and taken only once a driver has '
+       +'accepted it. If nobody on the network takes the job, the hold is released and you are '
+       +'charged nothing. There is no balance to pay later.';
   }
   const pay=document.getElementById('fq-pay');
   if(pay&&d.pay_url){pay.href=d.pay_url;pay.style.display='';}
   const trk=document.getElementById('fq-track');
   if(trk&&d.track_url){trk.href=d.track_url;trk.style.display='';}
   const mins=d.first_refusal_minutes||HAF_FIRST_REFUSAL_MINS;
+  const goes=(d.direct_username
+    ? 'to '+d.direct_username+' first. They have '+mins+' minutes, then it opens to the whole HAF network.'
+    : 'out to the HAF network.');
   document.getElementById('fq-done-msg').textContent=
-    'Your order is placed and we have emailed you a copy. Pay the holding deposit and your job goes '
-    +(d.direct_username
-        ? 'to '+d.direct_username+' first — they have '+mins+' minutes, then it opens to the whole HAF network.'
-        : 'out to the HAF network.')
+    'Your order is placed and we have emailed you a copy. '
+    +(d.on_credit
+        ? 'Nothing to pay — it is on your account. Your job goes '+goes
+        : 'Pay the holding deposit and your job goes '+goes)
     +' Save your reference above.';
 }
 
@@ -11700,6 +11713,25 @@ window.connLoad=connLoad;
    script, or by hand. The owner override is the one other way in, and it is
    labelled as an override everywhere it appears, never as a check.  */
 let _accCache=[];
+/* An account's payment setting, keyed by username. Empty means pay upfront,
+   which is the default and almost everybody — so this map stays small and one
+   request fills it for the whole list rather than one request per row. */
+let _credCache={};
+
+function _credOf(u){ return _credCache[String(u||'').toUpperCase()]||null; }
+
+function _credChip(a){
+  const c=_credOf(a.username);
+  if(!c||!c.limit_pence) return '<span class="chip" style="color:var(--mu)">Pay upfront</span>';
+  return '<span class="chip cg">On credit '+_pyM(c.limit_pence)+'</span>';
+}
+function _credLine(a){
+  const c=_credOf(a.username);
+  if(!c||!c.limit_pence) return '';
+  return '<div style="color:var(--mu);font-size:.78rem;margin-top:2px">'+
+    'Credit '+_pyM(c.limit_pence)+' &middot; '+_pyM(c.used_pence)+' on jobs now &middot; '+
+    _pyM(c.available_pence)+' left'+(c.set_by?' &middot; set by '+_esc(c.set_by):'')+'</div>';
+}
 
 function _accChip(a){
   if(!a.plna) return '<span class="chip cr">No PLNA</span>';
@@ -11741,6 +11773,7 @@ function accessRender(){
           (_TYPE_LBL[a.account_type]||_esc(a.account_type||'Account'))+
           ' &middot; HAF KNECT open &middot; '+_accWhy(a)+
         '</div>'+
+        _credLine(a)+
       '</span>'+
       '<span class="cv" style="white-space:nowrap">'+_accChip(a)+
         (a.plna
@@ -11748,11 +11781,88 @@ function accessRender(){
           : (a.can_approve
               ? ' <button class="btn btn-gh btn-xs" data-acc-on="'+_esc(a.username)+'">Approve</button>'
               : ' <span style="color:var(--mu);font-size:.74rem">Needs a Clever check</span>'))+
+        '<div style="margin-top:4px">'+_credChip(a)+
+          ' <button class="btn btn-gh btn-xs" data-cred="'+_esc(a.username)+'">Payment terms</button></div>'+
       '</span>'+
     '</div>').join('');
 
   el.querySelectorAll('[data-acc-off]').forEach(b=>b.onclick=()=>accessSet(b.getAttribute('data-acc-off'),false));
   el.querySelectorAll('[data-acc-on]').forEach(b=>b.onclick=()=>accessSet(b.getAttribute('data-acc-on'),true));
+  el.querySelectorAll('[data-cred]').forEach(b=>b.onclick=()=>creditAsk(b.getAttribute('data-cred')));
+}
+
+/* ── PUT AN ACCOUNT ON CREDIT, OR BACK ON PAY UPFRONT ────────────────────────
+   Brent, 11 Sep 2026: the owner needs to set the credit situation per account,
+   for the case where somebody posts a job and it never shows because nothing
+   has been paid.
+
+   Zero is a real answer here and the way back: it means pay upfront, and the
+   next job that account raises waits for its deposit again. Work already
+   riding on the limit is never torn up by lowering it — the limit governs the
+   NEXT job, not the ones already on the board. That is said out loud below,
+   because "I reduced their limit" must not silently pull live jobs. */
+async function creditAsk(username){
+  const c=_credOf(username)||{limit_pence:0,used_pence:0};
+  const now=(c.limit_pence/100);
+  const typed=prompt(
+    'Payment terms for '+username+'\n\n'+
+    'How much credit may this account have, in pounds?\n'+
+    '0 means pay upfront: their jobs wait for the deposit before they reach the network.\n\n'+
+    (c.used_pence?'They have '+_pyM(c.used_pence)+' riding on their limit right now. '+
+      'Lowering it does not pull those jobs back.\n\n':''),
+    String(now));
+  if(typed===null)return;
+  const pounds=Number(String(typed).replace(/[^0-9.]/g,''));
+  if(!isFinite(pounds)||pounds<0){alert('That is not an amount I can set.');return}
+
+  const note=(prompt('Why? (kept on the record against this account)','')||'').trim();
+  if(!confirm(pounds>0
+      ? 'Put '+username+' on credit terms up to £'+pounds.toLocaleString('en-GB')+'?\n\n'+
+        'Their jobs will go to the network without a deposit being paid, up to that amount.'
+      : 'Put '+username+' back on pay upfront?\n\n'+
+        'Their next job waits for its deposit before it reaches the network.'))return;
+
+  try{
+    const r=await _api('payments/credit/set',{target:username,limit_pounds:pounds,note:note});
+    if(!r||!r.ok){alert((r&&r.error)||'That did not save. Nothing was altered.');return}
+    alert(pounds>0
+      ? username+' is on credit terms up to £'+pounds.toLocaleString('en-GB')+'.'
+      : username+' is back on pay upfront.');
+    await creditLoad();
+    accessRender();
+  }catch(e){ alert('Could not change the payment terms just now. Nothing was altered.'); }
+}
+
+/* One request for the whole list. A failure here must never blank the access
+   list beside it, so it leaves the map empty and every row simply reads as pay
+   upfront, which is what an account with no terms actually is. */
+async function creditLoad(){
+  try{
+    const r=await _api('payments/credit/all',{});
+    _credCache={};
+    if(r&&r.ok)for(const row of (r.rows||[]))_credCache[row.username]=row;
+    heldRender(r&&r.ok?r:null);
+  }catch(e){ _credCache={}; heldRender(null); }
+}
+
+/* Jobs that never reached the board. Named, not counted: "3 held" tells nobody
+   who to ring. Hidden entirely when there are none, because an empty warning
+   panel teaches people to stop reading warning panels. */
+function heldRender(r){
+  const el=document.getElementById('ov-held-line');
+  if(!el)return;
+  if(!r||!r.held_count){el.style.display='none';el.innerHTML='';return}
+  const rows=(r.held||[]).slice(0,8).map(h=>
+    '<div style="margin-top:4px">&bull; <strong>'+_esc(h.job_ref)+'</strong> &middot; '+
+    _esc(h.who||'no name on the order')+' &middot; '+_esc(h.route)+' &middot; '+
+    _pyM(h.deposit_pence)+' unpaid</div>').join('');
+  el.style.display='';
+  el.className='ov-src bad';
+  el.innerHTML='<span class="dot"></span><span><strong>'+r.held_count+'</strong> job'+
+    (r.held_count===1?' is':'s are')+' not on the network &mdash; waiting on payment, '+
+    _pyM(r.held_pence)+' in total. No driver can see '+(r.held_count===1?'it':'them')+'.'+
+    rows+(r.held_count>8?'<div style="margin-top:4px">&hellip; and '+(r.held_count-8)+' more</div>':'')+
+    '</span>';
 }
 
 async function accessLoad(){
@@ -11776,6 +11886,7 @@ async function accessLoad(){
       (c.test_rows?' '+c.test_rows+' test account'+(c.test_rows===1?'':'s')+' included and marked.':'')+
       '</span>';
     document.getElementById('ov-access-tools').style.display='';
+    await creditLoad();
     accessRender();
   }catch(e){
     sum.className='ov-src bad';
