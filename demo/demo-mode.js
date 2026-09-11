@@ -103,7 +103,14 @@
     var ids = ['fq-dep-amt', 'fq-pr-tot'];
     for (var i = 0; i < ids.length; i++) {
       var node = document.getElementById(ids[i]);
-      var v = node && node.offsetParent && money(node.textContent);
+      /* Deliberately NOT gated on the element being visible. It ships holding
+         the literal text £0.00 and is only ever overwritten by the app's own
+         paint, which runs immediately before the pay button appears — so the
+         zero guard above already refuses the unfilled case, and a stale figure
+         from an earlier order cannot outlive the repaint that precedes the
+         next button. Requiring visibility only made the number unreadable
+         when the panel was mid-transition. */
+      var v = node && money(node.textContent);
       if (v) return v;
     }
     var hop = el, depth = 0;
