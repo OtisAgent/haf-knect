@@ -968,7 +968,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 
 /* Money-flow card: customer -> HAF -> driver, in that order, always. */
 .dc-flow{display:flex;align-items:stretch;gap:.4rem;flex-wrap:wrap;margin:.15rem 0 .3rem}
-.dc-fl{flex:1 1 130px;background:var(--pl);border:1px solid var(--lns);border-radius:10px;padding:.6rem .65rem}
+.dc-fl{flex:1 1 130px;background:var(--p2);border:1px solid var(--lns);border-radius:10px;padding:.6rem .65rem}
 .dc-fl-l{font-size:.63rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mu);margin-bottom:.25rem}
 .dc-fl-v{font-family:var(--dp);font-weight:900;font-size:1.15rem;letter-spacing:-.03em}
 .dc-fl-d{font-size:.64rem;color:var(--mu);margin-top:.2rem;line-height:1.4}
@@ -11051,9 +11051,9 @@ window.pxSave=async function(){
 #pd-gate input:focus{border-color:var(--or)}
 #pd-gate .pd-err{color:#e0685f;font-size:.76rem;margin-top:.55rem;display:none}
 #pd-gate .pd-alt{margin-top:1rem;text-align:center;font-size:.74rem;color:var(--mu)}
-#pd-gate .pd-alt a{color:var(--or);cursor:pointer;font-weight:700}
+#pd-gate .pd-alt a{color:var(--haf-orange-ink);cursor:pointer;font-weight:700}
 #pd-code{font-family:var(--dp);font-weight:900;font-size:2rem;letter-spacing:.28em;
-  color:var(--or);text-align:center;margin:.5rem 0 .2rem}
+  color:var(--haf-orange-ink);text-align:center;margin:.5rem 0 .2rem}
 #pd-gate .pd-foot{margin-top:1.1rem;font-size:.66rem;color:var(--mu);text-align:center;line-height:1.6}
 </style>
 <div id="pd-gate">
@@ -11061,7 +11061,7 @@ window.pxSave=async function(){
     <div style="display:flex;align-items:center;gap:.5rem">
       <div style="width:34px;height:34px;background:var(--or);border-radius:9px;display:flex;
         align-items:center;justify-content:center;font-family:var(--dp);font-weight:900;color:#0e1113">K</div>
-      <div style="font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em">HAF <span style="color:var(--or)">KNECT</span></div>
+      <div style="font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.04em">HAF <span style="color:var(--haf-orange-ink)">KNECT</span></div>
     </div>
 
     <div id="pd-step-email">
@@ -11266,7 +11266,7 @@ window.pxSave=async function(){
   border-radius:9px;padding:.5rem .6rem;font-size:.79rem;font-weight:600;width:100%;text-align:left;
   color:var(--tx);font-family:inherit;cursor:pointer;transition:border-color .12s,transform .12s}
 .pd-mi:hover{border-color:var(--or);transform:translateY(-1px)}
-.pd-mi .pd-go{margin-left:auto;color:var(--or);font-weight:800;opacity:0;transition:opacity .12s}
+.pd-mi .pd-go{margin-left:auto;color:var(--haf-orange-ink);font-weight:800;opacity:0;transition:opacity .12s}
 .pd-mi:hover .pd-go{opacity:1}
 .pd-mi svg{flex:0 0 auto;opacity:.75}
 
@@ -11279,7 +11279,7 @@ window.pxSave=async function(){
 #pd-seatbar .pd-sb-s{font-size:.7rem;color:var(--mu)}
 #pd-seatbar button{margin-left:auto}
 .pd-seat-back{display:flex;align-items:center;gap:.4rem;background:var(--or-d);border:1px solid var(--or-g);
-  color:var(--or);border-radius:9px;padding:.5rem .6rem;font-size:.76rem;font-weight:800;cursor:pointer;
+  color:var(--haf-orange-ink);border-radius:9px;padding:.5rem .6rem;font-size:.76rem;font-weight:800;cursor:pointer;
   margin:0 0 .5rem;width:100%;font-family:inherit;text-align:left}
 .pd-grp{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
   color:var(--mu);margin:.85rem 0 .1rem}
@@ -11349,7 +11349,7 @@ window.pxSave=async function(){
     h+='<div class="dc-note" style="margin-top:.2rem">This is the real menu the app builds for a '
       + roleDef.l.toLowerCase() + ' account &mdash; not a list kept here, but the app\'s own answer, '
       + 'asked fresh every time you change the buttons above. '
-      + '<b style="color:var(--or)">Click any tab to open that screen</b> and look around; '
+      + '<b style="color:var(--haf-orange-ink)">Click any tab to open that screen</b> and look around; '
       + 'you can come back here from any of them.</div>';
 
     /* The two states of a driving account, side by side, because the whole

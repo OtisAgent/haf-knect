@@ -38,6 +38,10 @@
   /* ---- brand constants: identical in both themes ---- */
   --haf-orange:        #f18e00;
   --haf-orange-hover:  #d97d00;
+  /* orange used as TEXT — the fill tone only reaches 2.2:1 on cream */
+  --haf-orange-ink:    #8f5400;
+  /* the ink that sits ON the orange fill: white is 2.4:1, HAF Grey 5.0:1 */
+  --haf-on-orange:     #2f373e;
   --haf-grey:          #2f373e;
 
   /* ---- day (default) ---- */
@@ -47,8 +51,8 @@
   /* a third step down, for the app screens that stack panel on panel */
   --haf-surface-3:     #e9e5dd;
   --haf-ink:           #2f373e;
-  --haf-ink-muted:     #6f777d;
-  --haf-ink-faint:     #98a0a6;
+  --haf-ink-muted:     #5f686f;
+  --haf-ink-faint:     #676f76;
   --haf-line:          rgba(47, 55, 62, .14);
   --haf-line-strong:   rgba(47, 55, 62, .22);
   --haf-line-xstrong:  rgba(47, 55, 62, .30);
@@ -56,13 +60,13 @@
   --haf-bar:           rgba(244, 241, 235, .92);
 
   /* status — held to the same warmth as the brand, not stock web colours */
-  --haf-positive:      #4f7f58;
-  --haf-caution:       #b98530;
-  --haf-negative:      #b4483f;
+  --haf-positive:      #46704e;
+  --haf-caution:       #8a6320;
+  --haf-negative:      #a63f36;
   /* the tinted panel each status sits in — same hue, 12% over the surface */
-  --haf-positive-wash: rgba(79, 127, 88, .12);
-  --haf-caution-wash:  rgba(185, 133, 48, .12);
-  --haf-negative-wash: rgba(180, 72, 63, .12);
+  --haf-positive-wash: rgba(70, 112, 78, .12);
+  --haf-caution-wash:  rgba(138, 99, 32, .12);
+  --haf-negative-wash: rgba(166, 63, 54, .12);
 
   /* logo layers, consumed by the SVG marks */
   --haf-badge-fill:    #2f373e;
@@ -93,11 +97,15 @@
   --haf-surface-3:     #262b30;
   --haf-ink:           #f4f1eb;
   --haf-ink-muted:     #a9b0b4;
-  --haf-ink-faint:     #6b747b;
+  --haf-ink-faint:     #8a9298;
   --haf-line:          rgba(244, 241, 235, .14);
   --haf-line-strong:   rgba(244, 241, 235, .24);
   --haf-line-xstrong:  rgba(244, 241, 235, .32);
   --haf-bar:           rgba(14, 17, 19, .92);
+  /* at night the relationship flips: orange lifts to read on near-black,
+     and the fill is light enough that the ink on it goes dark. */
+  --haf-orange-ink:    #f9a63a;
+  --haf-on-orange:     #2f373e;
 
   --haf-positive:      #6fa87a;
   --haf-caution:       #d8a34d;
@@ -146,8 +154,8 @@ h1, h2, h3, h4, .haf-display {
   letter-spacing: 0;
 }
 
-a { color: var(--haf-orange); }
-a:hover { color: var(--haf-orange-hover); }
+a { color: var(--haf-orange-ink); }
+a:hover { color: var(--haf-orange); }
 
 /* ---- the logo ---------------------------------------------------------- */
 /* The marks are SVGs whose letterforms use currentColor, so they take the ink
@@ -178,7 +186,7 @@ a:hover { color: var(--haf-orange-hover); }
 /* ---- primary action ---------------------------------------------------- */
 .haf-btn {
   background: var(--haf-orange);
-  color: #ffffff;
+  color: var(--haf-on-orange);
   font-family: var(--haf-font-display);
   font-weight: var(--haf-weight-display);
   border: 0;

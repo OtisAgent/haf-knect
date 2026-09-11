@@ -1544,7 +1544,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 .pj-open-w{display:flex;flex-direction:column;gap:.1rem;min-width:0}
 .pj-open-t{font-family:var(--dp);font-weight:800;font-size:.84rem;letter-spacing:-.02em}
 .pj-open-s{font-size:.72rem;color:var(--mu);line-height:1.4}
-.pj-open-x{margin-left:auto;color:var(--or);font-weight:800}
+.pj-open-x{margin-left:auto;color:var(--haf-orange-ink);font-weight:800}
 .pj-ask{margin-top:.5rem;padding:.6rem .7rem;border:1px dashed var(--ln);border-radius:var(--rs);
   display:flex;flex-direction:column;gap:.5rem;background:var(--p2)}
 .pj-ask-t{font-size:.72rem;color:var(--mu);line-height:1.5}
@@ -1622,7 +1622,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
     opacity:1;height:auto;transition:opacity .16s}
   /* The active tab expands and shows its label. Everything else stays a symbol,
      which is what keeps the bar quiet. */
-  .tbi.on{color:var(--or)}
+  .tbi.on{color:var(--haf-orange-ink)}
   .tbi.on .tbi-ic{transform:translateY(-1px)}
   .tbi.on .tbi-l{opacity:1;height:auto}
   .tbi:active .tbi-ic{transform:scale(.9)}
@@ -1703,8 +1703,8 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 .tbs-row .tbs-tick:before{content:'';position:absolute;left:6px;top:7px;width:4px;height:4px;
   border-radius:50%;background:var(--su)}
 .tbs-row.on .tbs-tick:before{background:var(--or)}
-.tbs-row.on{background:var(--or-d);color:var(--or);font-weight:800}
-.tbs-row.on .ni-ic{color:var(--or)}
+.tbs-row.on{background:var(--or-d);color:var(--haf-orange-ink);font-weight:800}
+.tbs-row.on .ni-ic{color:var(--haf-orange-ink)}
 .tbs-row .tbs-ext{margin-left:auto;font-size:.6rem;font-weight:700;color:var(--su)}
 /* A locked section keeps its honest sentence here, exactly as the sidebar
    shows it — the phone must not quietly hide what the desktop explains. */
@@ -1718,7 +1718,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
   font-family:var(--fn);min-height:76px;
   -webkit-tap-highlight-color:transparent}
 .tba-c:active{background:var(--p2)}
-.tba-c .ni-ic{width:19px;height:19px;color:var(--or)}
+.tba-c .ni-ic{width:19px;height:19px;color:var(--haf-orange-ink)}
 .tba-c b{font-size:.8rem;font-weight:800;line-height:1.2}
 .tba-c span{font-size:.65rem;color:var(--mu);font-weight:600;line-height:1.35}
 .tbs-foot{padding:.5rem .4rem .2rem}
@@ -11155,7 +11155,7 @@ async function pyLoad(){
   secs.innerHTML=live.length
     ?live.map(s=>
       '<div class="card" style="margin-top:.5rem"><div class="ct">'+_esc(s.l)+
-        '<span style="float:right;color:var(--or);font-weight:700">'+_pyM(s.total_pence)+'</span></div>'+
+        '<span style="float:right;color:var(--haf-orange-ink);font-weight:700">'+_pyM(s.total_pence)+'</span></div>'+
       '<div style="font-size:.72rem;color:var(--mu);line-height:1.5;margin:-.15rem 0 .5rem">'+_esc(s.why)+'</div>'+
       s.lines.map(_pyRow).join('')+'</div>').join('')
     :'<div class="card"><div class="ct">Nothing outstanding</div>'+
