@@ -3,34 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>HAF KNECT Demo — a showroom, not the live network</title>
-<meta name="description" content="A showroom for HAF KNECT. See what the network does, what your account opens, and what your level changes — before you join.">
+<title>HAF Demo Centre — KNECT, PLNA and Clever in one walkthrough</title>
+<meta name="description" content="The HAF Demo Centre: how KNECT works, the dashboard as a poster, PLNA as a driver, how Clever clears somebody to drive, and what each account level allows.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="brand/haf-badge-compact.svg">
 <link rel="stylesheet" href="brand/haf-brand.css">
 <script src="brand/haf-theme.js"></script>
 <style>
-/* ═══════════════════════════════════════════════════════════════════════════
-   THE SHOWROOM — its own page, on purpose.
-
-   Brent, 11 Sep, choosing between keeping the copy and starting again:
-   "Build a new lightweight showroom."
-
-   The thing this replaces was the live KNECT app with a door bolted on — one
-   file, 798KB, rebuilt from index.html on every change. It drifted anyway: by
-   10 Sep it was missing the handover cards, the fuller load card and the
-   PLNA panel. A second copy of a live product is a promise that goes stale.
-
-   So this page keeps NOTHING of the app. It explains the network in plain
-   words, shows one clearly-labelled example job, and teaches the one rule a
-   visitor has to understand before they join: an account opens the whole
-   product, the Clever checks open the driving, and the level only changes how
-   much you can do.
-
-   The only figures on this page are read out of the live allowance book by
-   scripts/build_demo_showroom.py at build time and stamped with the date they
-   were read. Nothing here is typed from memory.
-   ═══════════════════════════════════════════════════════════════════════════ */
 
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -43,14 +22,12 @@ h1,h2,h3{font-family:var(--haf-font-display);font-weight:700;letter-spacing:-.02
 p{margin:0}
 .wrap{width:100%;max-width:1000px;margin:0 auto;padding:0 1.15rem}
 
-/* ── the permanent demo label ────────────────────────────────────────────── */
 .demochip{display:inline-flex;align-items:center;gap:.38rem;background:var(--haf-caution-wash);
   color:var(--haf-caution);border:1px solid var(--haf-caution);border-radius:var(--haf-pill);
   padding:.2rem .56rem;font-size:.64rem;font-weight:700;letter-spacing:.1em;
   text-transform:uppercase;white-space:nowrap}
 .demochip svg{flex:0 0 auto}
 
-/* ── the door ────────────────────────────────────────────────────────────── */
 #door{position:fixed;inset:0;z-index:60;background:var(--haf-bg);display:flex;
   align-items:center;justify-content:center;padding:1.3rem;overflow:auto}
 #door .box{width:100%;max-width:452px}
@@ -82,7 +59,6 @@ input:focus{border-color:var(--haf-orange)}
 #door .foot{margin-top:1.05rem;font-size:.68rem;color:var(--haf-ink-faint);
   text-align:center;line-height:1.6}
 
-/* ── the showroom shell ──────────────────────────────────────────────────── */
 #show{display:none}
 #show.on{display:block}
 header{position:sticky;top:0;z-index:30;background:var(--haf-bar);
@@ -115,7 +91,6 @@ h3{font-size:1.02rem}
 .tile h3{margin-bottom:.42rem}
 .tile p{font-size:.85rem;color:var(--haf-ink-muted)}
 
-/* ── the example job card ────────────────────────────────────────────────── */
 .jobwrap{margin-top:1.7rem;max-width:560px}
 .job{background:var(--haf-surface-2);border:1px solid var(--haf-line-strong);
   border-radius:var(--haf-radius-sm);overflow:hidden;box-shadow:var(--haf-shadow-soft)}
@@ -141,7 +116,6 @@ h3{font-size:1.02rem}
   border-radius:0 10px 10px 0;padding:.8rem .95rem;margin-top:.95rem;
   font-size:.82rem;color:var(--haf-ink-muted);max-width:560px}
 
-/* ── the two doors ───────────────────────────────────────────────────────── */
 .doors{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.85rem;margin-top:1.7rem}
 .dcard{background:var(--haf-surface);border:1px solid var(--haf-line);
   border-radius:var(--haf-radius-sm);padding:1.25rem;border-top:3px solid var(--haf-line-strong)}
@@ -160,7 +134,6 @@ ul.ticks li svg{flex:0 0 auto;margin-top:.32rem}
   border-radius:var(--haf-radius-sm);padding:1.05rem 1.15rem;margin-top:1.25rem;
   font-size:.92rem;font-weight:600;max-width:72ch}
 
-/* ── the levels table ───────────────────────────────────────────────────── */
 .tblwrap{margin-top:1.7rem;overflow-x:auto;-webkit-overflow-scrolling:touch;
   border:1px solid var(--haf-line);border-radius:var(--haf-radius-sm);
   background:var(--haf-surface-2)}
@@ -179,7 +152,46 @@ td.num{font-weight:600;font-variant-numeric:tabular-nums}
 .no{color:var(--haf-ink-faint)}
 .yes{color:var(--haf-positive);font-weight:700}
 
-/* ── joining ─────────────────────────────────────────────────────────────── */
+nav.jump{position:sticky;top:58px;z-index:29;background:var(--haf-bar);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--haf-line);
+  overflow-x:auto;-webkit-overflow-scrolling:touch}
+nav.jump .row{display:flex;gap:.3rem;padding:.45rem 0;min-width:max-content}
+nav.jump a{font-size:.76rem;font-weight:600;color:var(--haf-ink-muted);cursor:pointer;
+  border-radius:var(--haf-pill);padding:.36rem .74rem;white-space:nowrap}
+nav.jump a:hover,nav.jump a.on{background:var(--haf-surface-3);color:var(--haf-orange)}
+
+.seat{display:inline-flex;align-items:center;gap:.4rem;background:var(--haf-surface-3);
+  border:1px solid var(--haf-line-strong);border-radius:var(--haf-pill);
+  padding:.22rem .62rem;font-size:.66rem;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--haf-ink-muted);margin-bottom:.75rem}
+
+ol.walk{list-style:none;margin:1.6rem 0 0;padding:0;counter-reset:w;max-width:760px}
+ol.walk li{display:grid;grid-template-columns:28px 1fr;gap:.8rem;padding:.66rem 0;
+  border-bottom:1px solid var(--haf-line)}
+ol.walk li:last-child{border-bottom:0}
+ol.walk li::before{counter-increment:w;content:counter(w,decimal-leading-zero);
+  font-family:var(--haf-font-display);font-weight:700;font-size:.73rem;
+  color:var(--haf-orange);padding-top:.22rem}
+.walk .scr{font-size:.93rem;font-weight:700}
+.walk .where{font-size:.6rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--haf-ink-faint);margin-left:.5rem;white-space:nowrap}
+.walk .say{font-size:.85rem;color:var(--haf-ink-muted);margin-top:.1rem}
+.walk .gate{color:var(--haf-caution);font-weight:700}
+
+.signin{display:flex;flex-wrap:wrap;gap:.75rem .95rem;align-items:center;margin-top:1.45rem;
+  background:var(--haf-surface-2);border:1px solid var(--haf-line-strong);
+  border-radius:var(--haf-radius-sm);padding:.95rem 1.1rem}
+.signin .t{font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--haf-ink-muted);display:block;margin-bottom:.1rem}
+.signin .cred{font-family:var(--haf-font-display);font-weight:700;font-size:1rem;
+  letter-spacing:.05em;color:var(--haf-ink)}
+.signin .push{margin-left:auto}
+@media(max-width:560px){.signin .push{margin-left:0;width:100%}.signin .btn{width:100%}}
+
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:1.2rem}
+.chip{background:var(--haf-surface);border:1px solid var(--haf-line);
+  border-radius:var(--haf-pill);padding:.3rem .72rem;font-size:.8rem;font-weight:600}
+
 .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:.85rem;margin-top:1.7rem}
 .cta{margin-top:1.8rem;display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
 .cta .btn{font-size:.92rem;padding:.82rem 1.35rem}
@@ -189,14 +201,6 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
 </head>
 <body>
 
-<!-- ══ THE DOOR ═══════════════════════════════════════════════════════════
-     One email in, one code out. The code is issued and checked by the
-     database, never by this page, so nothing here can be edited to walk past
-     it — and the list of addresses cannot be read back with the key this page
-     carries. Both were proved against the live database on 10 Sep.
-     The two calls are the same two the old demo used, so every sign-up still
-     lands in the locked table, the HAF KNECT Demo Centre audience in Mailchimp
-     and the Resend list, exactly as before. -->
 <div id="door">
   <div class="box">
     <img class="lock" src="brand/haf-lockup.svg" alt="HAF">
@@ -246,8 +250,6 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
   </div>
 </div>
 
-
-<!-- ══ THE SHOWROOM ══════════════════════════════════════════════════════ -->
 <div id="show">
 
 <header>
@@ -259,18 +261,31 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
   </div>
 </header>
 
+<nav class="jump">
+  <div class="wrap row">
+    <a onclick="jump('how')">How it works</a>
+    <a onclick="jump('post')">Posting work</a>
+    <a onclick="jump('drive')">Driving work</a>
+    <a onclick="jump('checked')">Getting checked</a>
+    <a onclick="jump('levels')">What each level gets</a>
+    <a onclick="jump('join')">Joining</a>
+  </div>
+</nav>
+
 <section class="hero">
   <div class="wrap">
     <div class="kicker">HAF KNECT</div>
     <h1>Work gets posted. Checked drivers take it.</h1>
     <p class="lede">HAF KNECT is the network where a job is posted once and the drivers
-      who are cleared to do it can see it. This page is a showroom: it explains the
-      product and shows one example job. It is not the live network, and nothing on
-      it is real work.</p>
+      who are cleared to do it can see it. This is the Demo Centre: it walks the product
+      from three seats — the person posting the work, the driver doing it, and somebody
+      getting cleared to drive — and ends with what each account level allows. Every
+      screen named on this page is read out of the live product each time the page is
+      built. It is not the live network, and nothing on it is real work.</p>
   </div>
 </section>
 
-<section>
+<section id="how">
   <div class="wrap">
     <div class="kicker">How it works</div>
     <h2>Three moves, start to finish.</h2>
@@ -297,17 +312,6 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
   </div>
 </section>
 
-<!-- ── the example job ─────────────────────────────────────────────────────
-     Brent, 11 Sep: "Show the sample card, clearly marked an example."
-
-     So there is exactly one, it is written into this page as plain HTML, and it
-     never touches the network. The old demo's mistake was the other way round:
-     sample data drawn by the app's own code reads as a real delivery happening
-     right now. A card that says EXAMPLE across the top cannot.
-
-     It deliberately carries no price. What a driver is paid is worked out by
-     the pricing engine when a real job is posted, and a made-up figure in a
-     showroom becomes a number people quote back at you. -->
 <section>
   <div class="wrap">
     <div class="kicker">What a job looks like</div>
@@ -358,11 +362,95 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
   </div>
 </section>
 
-<!-- ── the two doors ───────────────────────────────────────────────────────
-     This is the rule the whole showroom exists to teach, and it is the rule the
-     product already enforces as of 10 Sep: signing up opens the account, and
-     only a named Clever release opens the driving. A demo that blurs the two
-     sells something the product then refuses to hand over. -->
+<section id="post">
+  <div class="wrap">
+    <div class="kicker">Posting work</div>
+    <span class="seat">The dashboard, as a poster sees it</span>
+    <h2>You have work. This is where it goes.</h2>
+    <p class="lede">Every screen below is open to any HAF account from the day it is
+      opened, free one included. Nothing here waits on documents, a payment or a level.
+      Walk down it in order and you have shown the whole posting side of the product.</p>
+
+    <ol class="walk"><li><div><div class="scr">Home<span class="where">Home</span></div><div class="say">What is running right now, what needs you today, and how much of your day's allowance is left.</div></div></li><li><div><div class="scr">Post a Job<span class="where">Freight &amp; Jobs</span></div><div class="say">One screen for the whole job: both ends, the load, the vehicle and when it has to be there.</div></div></li><li><div><div class="scr">My Posted Jobs<span class="where">Freight &amp; Jobs</span></div><div class="say">Every job you have posted and where each one has got to, newest first.</div></div></li><li><div><div class="scr">Active Job<span class="where">Freight &amp; Jobs</span></div><div class="say">The job that is happening now, with the driver's progress on a map.</div></div></li><li><div><div class="scr">Calendar<span class="where">Freight &amp; Jobs</span></div><div class="say">Today, the week, the month. Your work on a grid instead of in a list.</div></div></li><li><div><div class="scr">Saved Addresses<span class="where">Freight &amp; Jobs</span></div><div class="say">The places you collect from and deliver to, typed once and reused after that.</div></div></li><li><div><div class="scr">Payments &amp; Invoices<span class="where">Payments</span></div><div class="say">The deposit, the invoice, and what is still outstanding on each job.</div></div></li><li><div><div class="scr">Usage &amp; Activity<span class="where">Account &amp; Plan</span></div><div class="say">How much of your level you have used this month, and what you used it on.</div></div></li><li><div><div class="scr">What my account includes<span class="where">Account &amp; Plan</span></div><div class="say">A plain list of what this account can do, so nobody has to guess.</div></div></li><li><div><div class="scr">My Plan &amp; Billing<span class="where">Account &amp; Plan</span></div><div class="say">Your level, what it costs and when it renews.</div></div></li><li><div><div class="scr">Team Members<span class="where">Account &amp; Plan</span></div><div class="say">Logins for your own people, so the work does not sit in one person's inbox.</div></div></li><li><div><div class="scr">HAF KNECT Community<span class="where">Feedback &amp; Help</span></div><div class="say">Where members talk to each other and to us.</div></div></li><li><div><div class="scr">Help &amp; contact HAF<span class="where">Feedback &amp; Help</span></div><div class="say">Raise a ticket from any screen and a person answers it.</div></div></li><li><div><div class="scr">Settings<span class="where">Settings</span></div><div class="say">Your details, your PIN, and how you want to be contacted.</div></div></li></ol>
+
+    <div class="signin">
+      <div><span class="t">Demo account</span><span class="cred">DEMO1004</span></div>
+      <div><span class="t">PIN</span><span class="cred">1004</span></div>
+      <div><span class="t">Who it is</span><span class="cred">A business that posts work</span></div>
+      <div class="push"><a class="btn btn-or" href="https://knect-demo-centre.pages.dev/" target="_blank" rel="noopener">Open the live demo dashboard</a></div>
+    </div>
+    <div class="note"><strong>That is a real, clickable KNECT</strong> running on its own
+      separate database, so anything you do on camera with it cannot reach a real
+      customer, a real driver or a real payment. It is wiped and rebuilt every night.</div>
+  </div>
+</section>
+
+<section id="drive">
+  <div class="wrap">
+    <div class="kicker">Driving work</div>
+    <span class="seat">PLNA, as a driver sees it</span>
+    <h2>You drive. This is your day.</h2>
+    <p class="lede">A driver gets two things. Inside KNECT they get the work: the board,
+      the offers, the job they are on and what they have earned. PLNA is the app they
+      actually run the day from. Both open only once Clever has released them by name.</p>
+
+    <h3 style="margin-top:2rem">In KNECT, once you are released</h3>
+    <ol class="walk"><li><div><div class="scr">My Status<span class="where">Freight &amp; Jobs</span></div><div class="say">Available or not. One switch that decides whether work is offered to you at all. <span class="gate">needs the Clever release</span></div></div></li><li><div><div class="scr">Available Network Jobs<span class="where">Freight &amp; Jobs</span></div><div class="say">The board: the jobs you are cleared for and close enough to take. <span class="gate">needs the Clever release</span></div></div></li><li><div><div class="scr">Job Offers<span class="where">Freight &amp; Jobs</span></div><div class="say">Work sent straight to you by name, rather than put out to everybody. <span class="gate">needs the Clever release</span></div></div></li><li><div><div class="scr">Active Job<span class="where">Freight &amp; Jobs</span></div><div class="say">The job you are on, with the collection code and the proof you have to capture at both ends.</div></div></li><li><div><div class="scr">Backload<span class="where">Freight &amp; Jobs</span></div><div class="say">The run home. Work going back the way you are already going. <span class="gate">needs the Clever release</span></div></div></li><li><div><div class="scr">Earnings<span class="where">Payouts</span></div><div class="say">What the completed work came to, and what is still to be paid. <span class="gate">needs the Clever release</span></div></div></li><li><div><div class="scr">Driver Compliance<span class="where">PLNA</span></div><div class="say">Your documents, what is still missing, and what expires when. <span class="gate">needs the Clever release</span></div></div></li><li><div><div class="scr">Open my PLNA<span class="where">PLNA</span></div><div class="say">The door through to the driving app itself. <span class="gate">needs the Clever release</span></div></div></li></ol>
+
+    <h3 style="margin-top:2.4rem">PLNA, the driving app itself</h3>
+    <p class="lede" style="margin-top:.5rem">These are the screens along the bottom of
+      PLNA, in the order they appear on a driver's phone.</p>
+    <div class="chips"><span class="chip">Home</span><span class="chip">Today</span><span class="chip">Bookings</span><span class="chip">Exchange</span><span class="chip">Live job</span><span class="chip">Compliance</span><span class="chip">Calendar</span><span class="chip">Budget &amp; Profit</span><span class="chip">Payouts</span><span class="chip">Settings</span><span class="chip">Ask JACK</span></div>
+    <ol class="walk"><li><div><div class="scr">Home</div><div class="say">Your day at a glance: the next job, your status, and anything that has to be done before you set off.</div></div></li><li><div><div class="scr">Today</div><div class="say">The day's run in order, with the stops laid out and the route worked out for you.</div></div></li><li><div><div class="scr">Bookings</div><div class="say">Work customers have booked with you directly, and the quotes still waiting on a reply.</div></div></li><li><div><div class="scr">Exchange</div><div class="say">The network board inside PLNA: work you can take, and work you can hand on.</div></div></li><li><div><div class="scr">Live job</div><div class="say">The job in progress, the map, the collection code, and the proof at both ends.</div></div></li><li><div><div class="scr">Compliance</div><div class="say">Your documents and your van, with the reminders before anything expires.</div></div></li><li><div><div class="scr">Calendar</div><div class="say">What you have already committed to, including time you have blocked out.</div></div></li><li><div><div class="scr">Budget &amp; Profit</div><div class="say">What the work earned, against what it cost you to do it.</div></div></li><li><div><div class="scr">Payouts</div><div class="say">What you are owed and what has already been paid.</div></div></li><li><div><div class="scr">Settings</div><div class="say">Your PIN, how you want to be paid and invoiced, and how customers reach you.</div></div></li><li><div><div class="scr">Ask JACK</div><div class="say">The driver's own assistant, for the questions that come up mid-run.</div></div></li></ol>
+
+    <div class="signin">
+      <div><span class="t">Demo account</span><span class="cred">DEMO1001</span></div>
+      <div><span class="t">PIN</span><span class="cred">1001</span></div>
+      <div><span class="t">Who it is</span><span class="cred">A driver Clever has released</span></div>
+      <div class="push"><a class="btn btn-or" href="https://knect-demo-centre.pages.dev/" target="_blank" rel="noopener">Open the demo as a driver</a></div>
+    </div>
+    <div class="note"><strong>The KNECT half of this is clickable on the demo database.</strong>
+      PLNA itself has no separate demo yet, so the screens above are the real ones listed
+      rather than a copy you can click. Showing PLNA live means signing in as a real
+      driver, which puts a real person's day on screen — so it is listed here instead,
+      and a demo PLNA is the next thing to build if you want to click through it on a call.</div>
+  </div>
+</section>
+
+<section id="checked">
+  <div class="wrap">
+    <div class="kicker">Getting checked</div>
+    <span class="seat">Clever, as a new driver sees it</span>
+    <h2>How somebody gets cleared to drive.</h2>
+    <p class="lede">Clever is the check, not the shop. Nobody pays it and nobody joins
+      through it: a person opens their HAF account first, then Clever decides whether
+      they are let near other people's work. These are its four stages, in order.</p>
+
+    <ol class="walk"><li><div><div class="scr">Account</div><div class="say">They open a HAF account first, at join.usehaf.co.uk. Name, email, mobile, date of birth, company if there is one, and a PIN. No payment and no documents at this point.</div></div></li><li><div><div class="scr">Documents</div><div class="say">They sign in to Clever and send what proves who they are and that the van is legal.</div></div></li><li><div><div class="scr">Review</div><div class="say">The HAF team checks the documents against the person and the vehicle. This is the part that protects everybody already on the network.</div></div></li><li><div><div class="scr">Access</div><div class="say">Clever releases them by name, and only then does the driving side open. Until that moment the account still works perfectly well for posting work.</div></div></li></ol>
+
+    <h3 style="margin-top:2.2rem">The four kinds of person it asks about</h3>
+    <div class="chips"><span class="chip">Owner Driver</span><span class="chip">Fleet / Courier Company</span><span class="chip">Find a Courier</span><span class="chip">Business Account</span></div>
+
+    <h3 style="margin-top:2.2rem">What the sign-up form actually asks for</h3>
+    <p class="lede" style="margin-top:.5rem">Read off the live join page, so what you
+      promise on camera is what the person then meets.</p>
+    <div class="chips"><span class="chip">How many drivers are you activating?</span><span class="chip">First name</span><span class="chip">Last name</span><span class="chip">Email address</span><span class="chip">Mobile number</span><span class="chip">Date of birth</span><span class="chip">Year of birth</span><span class="chip">Company name</span><span class="chip">Company number</span><span class="chip">Your role at the company</span><span class="chip">Offer code</span><span class="chip">Your PIN</span><span class="chip">Type it again</span></div>
+
+    <div class="signin">
+      <div><span class="t">Show the sign-up</span><span class="cred">join.usehaf.co.uk</span></div>
+      <div><span class="t">Then the check</span><span class="cred">clever.usehaf.co.uk</span></div>
+      <div class="push">
+        <a class="btn btn-or" href="https://join.usehaf.co.uk/" target="_blank" rel="noopener">Open the real sign-up</a>
+        <a class="btn btn-gh" href="https://clever.usehaf.co.uk/" target="_blank" rel="noopener">Open Clever</a>
+      </div>
+    </div>
+    <div class="note"><strong>Those two are the real thing, not a demo.</strong> Filling the
+      sign-up in on camera creates a real HAF account and a real application. If you want to
+      demonstrate it end to end, use your own test address and say so on the call — the
+      account and its application can be wiped afterwards on request.</div>
+  </div>
+</section>
+
 <section>
   <div class="wrap">
     <div class="kicker">The part people get wrong</div>
@@ -402,17 +490,7 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
   </div>
 </section>
 
-<!-- ── what a level changes ────────────────────────────────────────────────
-     Brent's own rule, 10 Sep: an account level limits how much you can do,
-     never what you can see. So this section is headed "how much" and there is
-     no "upgrade to unlock" anywhere on the page — that wording would teach the
-     opposite of the live product.
-
-     Every figure below is read out of the allowance book in the network
-     database by scripts/build_demo_showroom.py. The four rows are the four the
-     network actually counts; the other thirteen allowances in the book are not
-     enforced by anything yet, so they are not shown as if they were. -->
-<section>
+<section id="levels">
   <div class="wrap">
     <div class="kicker">Levels</div>
     <h2>Every level sees the whole product.</h2>
@@ -431,7 +509,7 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
   </div>
 </section>
 
-<section>
+<section id="join">
   <div class="wrap">
     <div class="kicker">Joining</div>
     <h2>Three steps, and the first one is free.</h2>
@@ -439,8 +517,7 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
       <div class="tile">
         <div class="n">01</div>
         <h3>Open an account</h3>
-        <!-- the fields this lists are the fields the live join page actually asks for.
-             Understating them is a small broken promise the moment somebody gets there. -->
+        
         <p>Your name, email, mobile and date of birth, your company if you have one, and a
           PIN. No payment and no documents to find.</p>
       </div>
@@ -470,20 +547,9 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
   <div class="stamp">Allowances read from the live network on 11 September 2026.</div>
 </footer>
 
-</div><!-- /#show -->
+</div>
 
 <script>
-/* ── the door ──────────────────────────────────────────────────────────────
-   Exactly the two database calls the old demo used, so the lead pipeline
-   behind it is untouched: knect_demo_request_code issues or returns a code and
-   records the address, knect_demo_check_code is the only thing that opens the
-   page. The code is checked on every arrival, including when it is restored
-   from this browser, so a revoked code stops working.
-
-   p_source is the hostname the visitor is actually on. On demo.usehaf.co.uk
-   that is what it has always been. On a preview build it is the preview
-   hostname, and the nightly lead sync skips anything that is not the real
-   front door, so my own test sign-ups never reach Mailchimp or Resend. */
 (function(){
   var URL_='https://ggkpqqrtxtlafdkxcaqg.supabase.co/rest/v1/rpc/',
       KEY_='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdna3BxcXJ0eHRsYWZka3hjYXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTM2NjAsImV4cCI6MjA5Nzc2OTY2MH0.hB70KOYZu4dshwhsrxF_dFyBn0n72gStWTwxYGsLdgY',
@@ -548,6 +614,29 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
     });
   };
 
+  window.jump=function(id){
+    var el=document.getElementById(id); if(!el)return;
+    var head=58+44; /* the header and the bar itself both stay on screen */
+    var y=el.getBoundingClientRect().top+window.pageYOffset-head;
+    try{window.scrollTo({top:y,behavior:'smooth'})}catch(e){window.scrollTo(0,y)}
+    mark(id);
+  };
+  function mark(id){
+    var as=document.querySelectorAll('nav.jump a');
+    for(var i=0;i<as.length;i++){
+      var on=(as[i].getAttribute('onclick')||'').indexOf("'"+id+"'")>=0;
+      as[i].className=on?'on':'';
+    }
+  }
+  window.addEventListener('scroll',function(){
+    var ids=['how','post','drive','checked','levels','join'],best=null;
+    for(var i=0;i<ids.length;i++){
+      var e=document.getElementById(ids[i]); if(!e)continue;
+      if(e.getBoundingClientRect().top-140<=0)best=ids[i];
+    }
+    if(best)mark(best);
+  },{passive:true});
+
   window.doorEnter=function(){
     document.getElementById('door').style.display='none';
     document.getElementById('show').classList.add('on');
@@ -555,9 +644,6 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
   };
 
   function start(){
-    /* A code can arrive in the address itself, so Brent can open the showroom in
-       front of an audience in one click. It is still checked by the database, and
-       it is wiped out of the address bar the moment it is used. */
     var fromLink=null;
     try{
       var m=(location.search||'').match(/[?&]code=([A-Za-z0-9]{4,12})(&|$)/);

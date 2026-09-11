@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>HAF KNECT Demo — a showroom, not the live network</title>
-<meta name="description" content="A showroom for HAF KNECT. See what the network does, what your account opens, and what your level changes — before you join.">
+<title>HAF Demo Centre — KNECT, PLNA and Clever in one walkthrough</title>
+<meta name="description" content="The HAF Demo Centre: how KNECT works, the dashboard as a poster, PLNA as a driver, how Clever clears somebody to drive, and what each account level allows.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="brand/haf-badge-compact.svg">
 <link rel="stylesheet" href="brand/haf-brand.css">
@@ -179,6 +179,57 @@ td.num{font-weight:600;font-variant-numeric:tabular-nums}
 .no{color:var(--haf-ink-faint)}
 .yes{color:var(--haf-positive);font-weight:700}
 
+/* ── the jump bar and the three guided walks ──────────────────────────────
+   Brent, 11 Sep: "create the demo centre for me to showcase how the HAF KNECT
+   works in the simpliest format... the features of how to use the PLNA as a
+   driver and the dashboard as a poster... show the clever as a demo account".
+
+   Three walks, one per seat: the poster, the driver, and the person signing up.
+   Every screen name in them is READ OUT OF THE LIVE APPS at build time — the
+   KNECT sidebar, the PLNA bar and the Clever stepper — so a screen that gets
+   renamed or removed cannot survive in here as a promise. That is what makes
+   this a showcase rather than a second copy: it lists the product, it does not
+   reimplement it. */
+nav.jump{position:sticky;top:58px;z-index:29;background:var(--haf-bar);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--haf-line);
+  overflow-x:auto;-webkit-overflow-scrolling:touch}
+nav.jump .row{display:flex;gap:.3rem;padding:.45rem 0;min-width:max-content}
+nav.jump a{font-size:.76rem;font-weight:600;color:var(--haf-ink-muted);cursor:pointer;
+  border-radius:var(--haf-pill);padding:.36rem .74rem;white-space:nowrap}
+nav.jump a:hover,nav.jump a.on{background:var(--haf-surface-3);color:var(--haf-orange)}
+
+.seat{display:inline-flex;align-items:center;gap:.4rem;background:var(--haf-surface-3);
+  border:1px solid var(--haf-line-strong);border-radius:var(--haf-pill);
+  padding:.22rem .62rem;font-size:.66rem;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--haf-ink-muted);margin-bottom:.75rem}
+
+ol.walk{list-style:none;margin:1.6rem 0 0;padding:0;counter-reset:w;max-width:760px}
+ol.walk li{display:grid;grid-template-columns:28px 1fr;gap:.8rem;padding:.66rem 0;
+  border-bottom:1px solid var(--haf-line)}
+ol.walk li:last-child{border-bottom:0}
+ol.walk li::before{counter-increment:w;content:counter(w,decimal-leading-zero);
+  font-family:var(--haf-font-display);font-weight:700;font-size:.73rem;
+  color:var(--haf-orange);padding-top:.22rem}
+.walk .scr{font-size:.93rem;font-weight:700}
+.walk .where{font-size:.6rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--haf-ink-faint);margin-left:.5rem;white-space:nowrap}
+.walk .say{font-size:.85rem;color:var(--haf-ink-muted);margin-top:.1rem}
+.walk .gate{color:var(--haf-caution);font-weight:700}
+
+.signin{display:flex;flex-wrap:wrap;gap:.75rem .95rem;align-items:center;margin-top:1.45rem;
+  background:var(--haf-surface-2);border:1px solid var(--haf-line-strong);
+  border-radius:var(--haf-radius-sm);padding:.95rem 1.1rem}
+.signin .t{font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--haf-ink-muted);display:block;margin-bottom:.1rem}
+.signin .cred{font-family:var(--haf-font-display);font-weight:700;font-size:1rem;
+  letter-spacing:.05em;color:var(--haf-ink)}
+.signin .push{margin-left:auto}
+@media(max-width:560px){.signin .push{margin-left:0;width:100%}.signin .btn{width:100%}}
+
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:1.2rem}
+.chip{background:var(--haf-surface);border:1px solid var(--haf-line);
+  border-radius:var(--haf-pill);padding:.3rem .72rem;font-size:.8rem;font-weight:600}
+
 /* ── joining ─────────────────────────────────────────────────────────────── */
 .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:.85rem;margin-top:1.7rem}
 .cta{margin-top:1.8rem;display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
@@ -259,18 +310,34 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
   </div>
 </header>
 
+<!-- The running order for a live walkthrough, in the order Brent would present
+     it: what it is, then the poster's seat, then the driver's seat, then how a
+     person gets cleared, then what a level changes. -->
+<nav class="jump">
+  <div class="wrap row">
+    <a onclick="jump('how')">How it works</a>
+    <a onclick="jump('post')">Posting work</a>
+    <a onclick="jump('drive')">Driving work</a>
+    <a onclick="jump('checked')">Getting checked</a>
+    <a onclick="jump('levels')">What each level gets</a>
+    <a onclick="jump('join')">Joining</a>
+  </div>
+</nav>
+
 <section class="hero">
   <div class="wrap">
     <div class="kicker">HAF KNECT</div>
     <h1>Work gets posted. Checked drivers take it.</h1>
     <p class="lede">HAF KNECT is the network where a job is posted once and the drivers
-      who are cleared to do it can see it. This page is a showroom: it explains the
-      product and shows one example job. It is not the live network, and nothing on
-      it is real work.</p>
+      who are cleared to do it can see it. This is the Demo Centre: it walks the product
+      from three seats — the person posting the work, the driver doing it, and somebody
+      getting cleared to drive — and ends with what each account level allows. Every
+      screen named on this page is read out of the live product each time the page is
+      built. It is not the live network, and nothing on it is real work.</p>
   </div>
 </section>
 
-<section>
+<section id="how">
   <div class="wrap">
     <div class="kicker">How it works</div>
     <h2>Three moves, start to finish.</h2>
@@ -358,6 +425,111 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
   </div>
 </section>
 
+<!-- ══ POSTING WORK — THE DASHBOARD ═══════════════════════════════════════
+     The screens listed here are the poster's screens in the LIVE KNECT sidebar,
+     read out of it at build time. A screen that does not need the driving
+     permission is a screen any account holds from day one, which is the whole
+     point being demonstrated. -->
+<section id="post">
+  <div class="wrap">
+    <div class="kicker">Posting work</div>
+    <span class="seat">The dashboard, as a poster sees it</span>
+    <h2>You have work. This is where it goes.</h2>
+    <p class="lede">Every screen below is open to any HAF account from the day it is
+      opened, free one included. Nothing here waits on documents, a payment or a level.
+      Walk down it in order and you have shown the whole posting side of the product.</p>
+
+    <ol class="walk"><!--POSTER_WALK--></ol>
+
+    <div class="signin">
+      <div><span class="t">Demo account</span><span class="cred">DEMO1004</span></div>
+      <div><span class="t">PIN</span><span class="cred">1004</span></div>
+      <div><span class="t">Who it is</span><span class="cred">A business that posts work</span></div>
+      <div class="push"><a class="btn btn-or" href="https://knect-demo-centre.pages.dev/" target="_blank" rel="noopener">Open the live demo dashboard</a></div>
+    </div>
+    <div class="note"><strong>That is a real, clickable KNECT</strong> running on its own
+      separate database, so anything you do on camera with it cannot reach a real
+      customer, a real driver or a real payment. It is wiped and rebuilt every night.</div>
+  </div>
+</section>
+
+<!-- ══ DRIVING WORK — PLNA ════════════════════════════════════════════════
+     Two halves, deliberately. The driver's screens inside KNECT are read out of
+     the live sidebar; the PLNA screens are read out of the live PLNA bar. Both
+     are listed rather than rebuilt, so neither can quietly go stale here.
+
+     The honest line at the end matters: PLNA has no separate demo instance, so
+     the driving app itself is shown on a real driver's login or not at all. -->
+<section id="drive">
+  <div class="wrap">
+    <div class="kicker">Driving work</div>
+    <span class="seat">PLNA, as a driver sees it</span>
+    <h2>You drive. This is your day.</h2>
+    <p class="lede">A driver gets two things. Inside KNECT they get the work: the board,
+      the offers, the job they are on and what they have earned. PLNA is the app they
+      actually run the day from. Both open only once Clever has released them by name.</p>
+
+    <h3 style="margin-top:2rem">In KNECT, once you are released</h3>
+    <ol class="walk"><!--DRIVER_WALK--></ol>
+
+    <h3 style="margin-top:2.4rem">PLNA, the driving app itself</h3>
+    <p class="lede" style="margin-top:.5rem">These are the screens along the bottom of
+      PLNA, in the order they appear on a driver's phone.</p>
+    <div class="chips"><!--PLNA_CHIPS--></div>
+    <ol class="walk"><!--PLNA_WALK--></ol>
+
+    <div class="signin">
+      <div><span class="t">Demo account</span><span class="cred">DEMO1001</span></div>
+      <div><span class="t">PIN</span><span class="cred">1001</span></div>
+      <div><span class="t">Who it is</span><span class="cred">A driver Clever has released</span></div>
+      <div class="push"><a class="btn btn-or" href="https://knect-demo-centre.pages.dev/" target="_blank" rel="noopener">Open the demo as a driver</a></div>
+    </div>
+    <div class="note"><strong>The KNECT half of this is clickable on the demo database.</strong>
+      PLNA itself has no separate demo yet, so the screens above are the real ones listed
+      rather than a copy you can click. Showing PLNA live means signing in as a real
+      driver, which puts a real person's day on screen — so it is listed here instead,
+      and a demo PLNA is the next thing to build if you want to click through it on a call.</div>
+  </div>
+</section>
+
+<!-- ══ GETTING CHECKED — CLEVER ═══════════════════════════════════════════
+     The four stages are read off the live Clever page's own stepper at build
+     time, so this section cannot describe a journey Clever no longer runs. The
+     account types are the four the live page offers. -->
+<section id="checked">
+  <div class="wrap">
+    <div class="kicker">Getting checked</div>
+    <span class="seat">Clever, as a new driver sees it</span>
+    <h2>How somebody gets cleared to drive.</h2>
+    <p class="lede">Clever is the check, not the shop. Nobody pays it and nobody joins
+      through it: a person opens their HAF account first, then Clever decides whether
+      they are let near other people's work. These are its four stages, in order.</p>
+
+    <ol class="walk"><!--CLEVER_WALK--></ol>
+
+    <h3 style="margin-top:2.2rem">The four kinds of person it asks about</h3>
+    <div class="chips"><!--CLEVER_TYPES--></div>
+
+    <h3 style="margin-top:2.2rem">What the sign-up form actually asks for</h3>
+    <p class="lede" style="margin-top:.5rem">Read off the live join page, so what you
+      promise on camera is what the person then meets.</p>
+    <div class="chips"><!--JOIN_FIELDS--></div>
+
+    <div class="signin">
+      <div><span class="t">Show the sign-up</span><span class="cred">join.usehaf.co.uk</span></div>
+      <div><span class="t">Then the check</span><span class="cred">clever.usehaf.co.uk</span></div>
+      <div class="push">
+        <a class="btn btn-or" href="https://join.usehaf.co.uk/" target="_blank" rel="noopener">Open the real sign-up</a>
+        <a class="btn btn-gh" href="https://clever.usehaf.co.uk/" target="_blank" rel="noopener">Open Clever</a>
+      </div>
+    </div>
+    <div class="note"><strong>Those two are the real thing, not a demo.</strong> Filling the
+      sign-up in on camera creates a real HAF account and a real application. If you want to
+      demonstrate it end to end, use your own test address and say so on the call — the
+      account and its application can be wiped afterwards on request.</div>
+  </div>
+</section>
+
 <!-- ── the two doors ───────────────────────────────────────────────────────
      This is the rule the whole showroom exists to teach, and it is the rule the
      product already enforces as of 10 Sep: signing up opens the account, and
@@ -412,7 +584,7 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
      database by scripts/build_demo_showroom.py. The four rows are the four the
      network actually counts; the other thirteen allowances in the book are not
      enforced by anything yet, so they are not shown as if they were. -->
-<section>
+<section id="levels">
   <div class="wrap">
     <div class="kicker">Levels</div>
     <h2>Every level sees the whole product.</h2>
@@ -431,7 +603,7 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
   </div>
 </section>
 
-<section>
+<section id="join">
   <div class="wrap">
     <div class="kicker">Joining</div>
     <h2>Three steps, and the first one is free.</h2>
@@ -547,6 +719,33 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
       err('code-err','We could not reach the network just then. Try once more in a moment.');
     });
   };
+
+  /* The jump bar. A live walkthrough is a sequence, so the bar both moves the
+     page and says where you are — on a screen share the audience can see which
+     part of the product is being shown. */
+  window.jump=function(id){
+    var el=document.getElementById(id); if(!el)return;
+    var head=58+44; /* the header and the bar itself both stay on screen */
+    var y=el.getBoundingClientRect().top+window.pageYOffset-head;
+    try{window.scrollTo({top:y,behavior:'smooth'})}catch(e){window.scrollTo(0,y)}
+    mark(id);
+  };
+  function mark(id){
+    var as=document.querySelectorAll('nav.jump a');
+    for(var i=0;i<as.length;i++){
+      var on=(as[i].getAttribute('onclick')||'').indexOf("'"+id+"'")>=0;
+      as[i].className=on?'on':'';
+    }
+  }
+  /* and it keeps up if they scroll by hand instead of clicking */
+  window.addEventListener('scroll',function(){
+    var ids=['how','post','drive','checked','levels','join'],best=null;
+    for(var i=0;i<ids.length;i++){
+      var e=document.getElementById(ids[i]); if(!e)continue;
+      if(e.getBoundingClientRect().top-140<=0)best=ids[i];
+    }
+    if(best)mark(best);
+  },{passive:true});
 
   window.doorEnter=function(){
     document.getElementById('door').style.display='none';
