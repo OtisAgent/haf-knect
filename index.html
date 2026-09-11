@@ -2799,9 +2799,9 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
           </div>
           <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
             <div class="xch-nums" id="dash-xch-nums">
-              <div class="xch-num"><div class="xch-nv" id="dash-earn">£142</div><div class="xch-nl">Today</div></div>
-              <div class="xch-num neu"><div class="xch-nv" id="dash-jobs-done">3</div><div class="xch-nl">Jobs done</div></div>
-              <div class="xch-num neu"><div class="xch-nv" id="dash-miles">84 mi</div><div class="xch-nl">Miles</div></div>
+              <div class="xch-num"><div class="xch-nv" id="dash-earn">&#8212;</div><div class="xch-nl">Today</div></div>
+              <div class="xch-num neu"><div class="xch-nv" id="dash-jobs-done">&#8212;</div><div class="xch-nl">Jobs done</div></div>
+              <div class="xch-num neu"><div class="xch-nv" id="dash-miles">&#8212;</div><div class="xch-nl">Miles</div></div>
             </div>
             <div class="avail-pill" id="dash-pill" onclick="toggleXchAvail()">
               <div class="ap-dot"></div><span class="ap-lbl">Online</span>
@@ -2820,36 +2820,11 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
              rrRender() from the run this driver already has on this page. -->
         <div id="dash-return" data-aud="network"></div>
 
-        <!-- Network ticker -->
-        <div data-mode-only="advanced" data-aud="network" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.45rem .75rem;background:var(--p2);border:1px solid var(--ln);border-radius:var(--rx);margin-bottom:.75rem;font-size:.68rem;color:var(--mu)">
-          <span style="display:flex;align-items:center;gap:.3rem"><span style="width:7px;height:7px;border-radius:50%;background:var(--gn, #4f7f58);display:inline-block;animation:pulse-dot 1.6s ease-in-out infinite"></span><strong style="color:var(--tx)">83</strong> drivers online</span>
-          <span style="color:var(--ln)">·</span>
-          <span><strong style="color:var(--tx)">12</strong> open jobs</span>
-          <span style="color:var(--ln)">·</span>
-          <span><strong style="color:var(--tx)">4</strong> en route</span>
-          <span style="color:var(--ln)">·</span>
-          <span>Rate <strong style="color:var(--haf-orange-ink)">£1.80–£2.40/mi</strong></span>
-          <span style="color:var(--ln)">·</span>
-          <span style="color:var(--gn, #4f7f58);font-weight:700">Manchester ★ HIGH DEMAND</span>
-          <span style="margin-left:auto;color:var(--mu)">9% network fee</span>
-        </div>
 
-        <!-- Areas across the network — simple tiles; expand into the full map on its own page -->
-        <div class="card" data-mode-only="advanced" data-aud="network" style="margin-bottom:.85rem">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem">
-            <div><div class="ct" style="margin:0">Areas across the network</div><div style="font-size:.72rem;color:var(--mu)">Tap an area for detail — or open the full map.</div></div>
-            <button class="btn btn-or btn-sm" onclick="dashFullMap()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5z"/><path d="M9 4v13"/><path d="M15 6.5v13"/></svg> Expand to full map</button>
-          </div>
-          <div id="dash-areas" class="cap-listgrid"></div>
-        </div>
 
-        <!-- Network stat cards -->
-        <div class="kg" data-mode-only="advanced" data-aud="network" style="margin-bottom:.9rem">
-          <div class="kc"><div class="kc-l">Drivers live</div><div class="kc-v or">83</div><div class="kc-d">on network now</div></div>
-          <div class="kc"><div class="kc-l">Open jobs</div><div class="kc-v co">12</div><div class="kc-d">ready to grab</div></div>
-          <div class="kc"><div class="kc-l">Your invites</div><div class="kc-v gn">2</div><div class="kc-d">direct to you</div></div>
-          <div class="kc"><div class="kc-l">Avg rate</div><div class="kc-v">£1.80–£2.40</div><div class="kc-d">per mile · van/LWB</div></div>
-        </div>
+
+
+
 
         <!-- Role-specific quick actions -->
         <div id="dash-quick-actions" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
@@ -2910,7 +2885,6 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
              sidebar, so this row stands down there rather than repeating itself -->
         <div data-mode-only="advanced" data-aud="network" style="text-align:center;margin-top:.85rem">
           <button onclick="switchTab('pane-d-invites')" class="btn btn-gh btn-sm" style="margin-right:.5rem">View all exchange jobs →</button>
-          <button onclick="switchTab('pane-f-cap')" class="btn btn-gh btn-sm">Full network map →</button>
         </div>
       </div>
 
@@ -3147,15 +3121,9 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 
       <!-- DRIVER: Earnings -->
       <div class="tp" id="pane-d-earn">
-        <h1 class="pt">Earnings</h1><p class="ps">Your pay, payment schedule and HAF KNECT plan.</p>
-        <div class="kg"><div class="kc"><div class="kc-l">This week</div><div class="kc-v or">£642</div><div class="kc-d pos">+18% vs last week</div></div><div class="kc"><div class="kc-l">Pending</div><div class="kc-v am">£284</div><div class="kc-d">due Friday</div></div><div class="kc"><div class="kc-l">This month</div><div class="kc-v">£2,180</div></div><div class="kc"><div class="kc-l">Jobs done</div><div class="kc-v gn">28</div></div></div>
-        <div class="g2">
-          <div class="card"><div class="ct">Recent jobs</div><table class="dt"><thead><tr><th>Ref</th><th>Route</th><th>Date</th><th>Pay</th><th>Status</th></tr></thead><tbody><tr><td>HAF-2848</td><td>M1 → LS1</td><td>Today</td><td style="color:var(--gn);font-weight:700">£87</td><td><span class="chip cg">Paid</span></td></tr><tr><td>HAF-2840</td><td>S1 → NG1</td><td>7 Jul</td><td style="color:var(--gn);font-weight:700">£54</td><td><span class="chip cg">Paid</span></td></tr><tr><td>HAF-2831</td><td>B1 → CV1</td><td>5 Jul</td><td style="color:var(--haf-orange-ink);font-weight:700">£112</td><td><span class="chip ca">Pending</span></td></tr><tr><td>HAF-2820</td><td>WA1 → M1</td><td>4 Jul</td><td style="color:var(--haf-orange-ink);font-weight:700">£38</td><td><span class="chip ca">Pending</span></td></tr></tbody></table></div>
-          <div>
-            <div class="card" style="margin-bottom:.75rem"><div class="ct">Next payment</div><div class="cr"><span class="ck">Amount</span><span class="cv" style="font-size:1.2rem;font-weight:900;color:var(--gn)">£284.00</span></div><div class="cr"><span class="ck">Payment date</span><span class="cv">Friday 13 Jul</span></div><div class="cr"><span class="ck">Via</span><span class="cv">CleverPay</span></div><div class="cr"><span class="ck">Jobs included</span><span class="cv">HAF-2820, HAF-2831</span></div></div>
-            <div class="card"><div class="ct">HAF KNECT plan</div><div class="cr"><span class="ck">Tier</span><span class="cv"><span class="chip co" data-haf-tier="PLUS">HAF KNECT Plus</span></span></div><div class="cr"><span class="ck">Job matching</span><span class="cv"><span class="chip cg">Fair &mdash; never by what you pay</span></span></div><div class="cr"><span class="ck">Relay pool</span><span class="cv"><span class="chip cg">Eligible</span></span></div><div class="cr"><span class="ck">Zone rewards</span><span class="cv"><span class="chip cg">Earning</span></span></div></div>
-          </div>
-        </div>
+        <h1 class="pt">Earnings</h1><p class="ps">Your pay and payment schedule.</p>
+        <div class="seed-none" id="earn-none">No earnings yet. Your pay, the jobs it covers and the date it lands appear here once you have completed work through HAF.</div>
+        <div class="card" style="max-width:560px;margin-top:.85rem"><div class="ct">How you are paid</div><div class="cr"><span class="ck">Paid via</span><span class="cv">CleverPay</span></div><div class="cr"><span class="ck">Job matching</span><span class="cv"><span class="chip cg">Fair &mdash; never by what you pay</span></span></div><div class="cr"><span class="ck">Your plan</span><span class="cv" id="earn-plan">&#8212;</span></div></div>
       </div>
 
       <!-- DRIVER: Compliance -->
@@ -3345,7 +3313,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
       <!-- BUSINESS: Usage -->
       <div class="tp" id="pane-b-usage">
         <h1 class="pt">Usage &amp; Activity</h1><p class="ps">Your monthly shipping activity — Business Account is free, no tiers.</p>
-        <div class="kg"><div class="kc"><div class="kc-l">Deliveries this month</div><div class="kc-v or">38</div><div class="kc-d pos">+12% vs last month</div></div><div class="kc"><div class="kc-l">Spend this month</div><div class="kc-v">£4,820</div></div><div class="kc"><div class="kc-l">On-time rate</div><div class="kc-v gn">97%</div></div><div class="kc"><div class="kc-l">Account type</div><div class="kc-v" style="font-size:1rem">Free</div></div></div>
+        <div class="seed-none">Your delivery and spend figures appear here once this account has work through the network.</div>
         <div class="card"><div class="ct">Account summary</div><div class="cr"><span class="ck">Plan</span><span class="cv"><span class="chip cb">Business Account — Free</span></span></div><div class="cr"><span class="ck">Goods type</span><span class="cv">Your own stock and products only</span></div><div class="cr"><span class="ck">Job matching</span><span class="cv"><span class="chip cg">Fair matching — never decided by what you pay</span></span></div></div>
         <!-- The fleet rows and the backload panel that used to sit here were
              removed on 14 Aug: running vans is a FLEET account, and a fleet
@@ -3769,10 +3737,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
           <button class="btn btn-or btn-sm">Filter</button>
         </div>
         <div class="kg" style="margin-bottom:.85rem">
-          <div class="kc"><div class="kc-l">Listed drivers</div><div class="kc-v or">47</div><div class="kc-d">in directory</div></div>
-          <div class="kc"><div class="kc-l">Available now</div><div class="kc-v gn">23</div></div>
-          <div class="kc"><div class="kc-l">Matching LWB</div><div class="kc-v">18</div></div>
-          <div class="kc"><div class="kc-l">Your direct bookings</div><div class="kc-v">3</div><div class="kc-d">this month</div></div>
+          <div class="seed-none" style="grid-column:1/-1">Directory figures appear here once drivers list themselves.</div>
         </div>
         <!-- Driver cards -->
         <div class="xc" style="margin-bottom:.65rem">
@@ -7738,12 +7703,13 @@ function _hafPing(u,surface,fn){
 window.hafGo=hafGo;window.buildNavV1=buildNavV1;window.switchTab=switchTab;window.hafAccess=hafAccess;window.hafPerms=hafPerms;
 const DRIVER_NAV=[
   {id:'d-home',l:'Dashboard',s:'KNECT',ico:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
-  {id:'d-invites',l:'Exchange',s:'KNECT Jobs',badge:'2',ico:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>'},
+  /* No badge. The "2" that used to sit here was typed in, so every driver was
+     told they had two invites waiting before anything had been counted. */
+  {id:'d-invites',l:'Exchange',s:'KNECT Jobs',ico:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>'},
   {id:'livejob',l:'Live Job',s:'KNECT Jobs',ico:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'},
   {id:'d-jobs',l:'Open Jobs',s:'KNECT Jobs',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'d-status',l:'My Status',s:'KNECT Jobs',ico:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
   {id:'d-empty',l:'Backload',s:'KNECT Jobs',ico:'<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.54"/>'},
-  {id:'f-cap',l:'Network Map',s:'KNECT Jobs',ico:'<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>'},
   /* Brent, 14 Aug: "every account can post". A driver is an account, so these
      two sit here for the same reason they sit on every other nav — and for one
      more: a driver who was posting work while waiting on their Clever checks
@@ -7768,7 +7734,6 @@ const ADMIN_NAV=[
   {id:'pricing',l:'Pricing Engine',s:'Overview',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/><circle cx="12" cy="12" r="10"/>'},
   {id:'b-book',l:'Post a Job',s:'Freight Tools',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'f-loads',l:'Active Loads',s:'Freight Tools',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
-  {id:'f-cap',l:'Network Map',s:'Freight Tools',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:'f-cover',l:'Coverage Board',s:'Freight Tools',ico:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'},
   {id:'f-lanes',l:'Lane Pricing',s:'Freight Tools',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
   {id:'billing',l:'Payments',s:'Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
@@ -7791,7 +7756,6 @@ const BUSINESS_NAV=[
   {id:'b-book',l:'Post a Job',s:'Send Goods',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'livejob',l:'Live Job',s:'Send Goods',ico:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'},
   {id:'b-del',l:'My Deliveries',s:'Send Goods',ico:'<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'},
-  {id:'f-cap',l:'Network Map',s:'Send Goods',ico:'<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>'},
   /* My Fleet and My Drivers used to sit here. They are fleet screens — running
      vans and the people in them — and Brent, 14 Aug: a business account "just
      wants access to send". A business that also runs vans registers a fleet
@@ -7809,7 +7773,6 @@ const FREIGHT_NAV=[
   {id:'b-book',l:'Post a Job',s:'Freight',ico:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'},
   {id:'f-loads',l:'Active Loads',s:'Freight',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'livejob',l:'Live Job',s:'Freight',ico:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'},
-  {id:'f-cap',l:'Network Map',s:'Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:'f-cover',l:'Coverage Board',s:'Freight',ico:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'},
   {id:'f-dir',l:'Driver Directory',s:'Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   {id:'f-lanes',l:'Lane Pricing',s:'Freight',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
@@ -7825,7 +7788,6 @@ const PERSONAL_NAV=[
   {id:'f-loads',l:'My Active Loads',s:'My Freight',ico:'<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
   {id:'livejob',l:'Live Job',s:'My Freight',ico:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'},
   {id:'f-dir',l:'Driver Directory',s:'My Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
-  {id:'f-cap',l:'Network Map',s:'My Freight',ico:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:'f-account',l:'Account &amp; Pooling',s:'My Account',ico:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
   {id:'billing',l:'Payments',s:'My Account',ico:'<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
   {id:'support',l:'Support',s:'My Account',ico:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
@@ -9461,7 +9423,6 @@ const HAF_NAV_V1=[
     {id:'livejob',  l:'Active Job'},
     {id:'d-empty',  l:'Backload',              need:'drive'},
     {id:'d-status', l:'My Status',             need:'drive'},
-    {id:'f-cap',    l:'Network Map',           need:'network'},
     {id:'f-cover',  l:'Coverage Board',        need:'freight'},
     {id:'f-dir',    l:'Driver Directory',      need:'freight'},
     {id:'f-lanes',  l:'Lane Pricing',          need:'freight'},
@@ -10168,10 +10129,13 @@ function flRenderOverview(){
     if(acc)band=acc.maxDrivers?('Up to '+acc.maxDrivers+' on your plan'):'Unlimited on your plan';
   }catch(e){band='—';}
   el.innerHTML=
-    '<div class="kc"><div class="kc-l">Drivers on your account</div><div class="kc-v or">3</div><div class="kc-d">'+band+'</div></div>'+
-    '<div class="kc"><div class="kc-l">Out today</div><div class="kc-v">2</div></div>'+
-    '<div class="kc"><div class="kc-l">Jobs allocated today</div><div class="kc-v gn">2</div></div>'+
-    '<div class="kc"><div class="kc-l">Waiting to allocate</div><div class="kc-v">1</div></div>';
+    /* The four counts under here were typed into this file. Nothing counted a
+       driver, an allocation or a van going out, so each tile shows a dash until
+       a real count feeds it — a plan band is a fact, a headcount is not. */
+    '<div class="kc"><div class="kc-l">Drivers on your account</div><div class="kc-v or">&#8212;</div><div class="kc-d">'+band+'</div></div>'+
+    '<div class="kc"><div class="kc-l">Out today</div><div class="kc-v">&#8212;</div></div>'+
+    '<div class="kc"><div class="kc-l">Jobs allocated today</div><div class="kc-v gn">&#8212;</div></div>'+
+    '<div class="kc"><div class="kc-l">Waiting to allocate</div><div class="kc-v">&#8212;</div></div>';
 }
 
 /* ── ACCOUNT & MEMBERSHIP (document §13) ───────────────────────────────────
@@ -13824,19 +13788,16 @@ function _buildDashActions(role){
       {l:'Exchange jobs',t:'pane-d-invites',style:'btn-or'},
       {l:'Open jobs',t:'pane-d-jobs',style:'btn-gh'},
       {l:'My earnings',t:'pane-d-earn',style:'btn-gh'},
-      {l:'Full network map',t:'pane-f-cap',style:'btn-gh'},
     ],
     'freight-pro':[
       {l:'Post a job',t:'pane-b-book',style:'btn-or'},
       {l:'Active loads',t:'pane-f-loads',style:'btn-gh'},
       {l:'Driver directory',t:'pane-f-dir',style:'btn-gh'},
-      {l:'Full network map',t:'pane-f-cap',style:'btn-gh'},
     ],
     business:[
       {l:'Post a job',t:'pane-b-book',style:'btn-or'},
       {l:'My deliveries',t:'pane-b-del',style:'btn-gh'},
       {l:'Saved addresses',t:'pane-b-saved',style:'btn-gh'},
-      {l:'Full network map',t:'pane-f-cap',style:'btn-gh'},
     ],
     /* A courier company's first four moves: look at the fleet, hand work out,
        go and win more. Never "my earnings" — that is one driver's number, and
@@ -13845,7 +13806,6 @@ function _buildDashActions(role){
       {l:'Fleet overview',t:'pane-fl-manage',style:'btn-or'},
       {l:'Drivers',t:'pane-b-drivers',style:'btn-gh'},
       {l:'Find work',t:'pane-d-jobs',style:'btn-gh'},
-      {l:'Full network map',t:'pane-f-cap',style:'btn-gh'},
     ],
   };
   let actions=maps[role]||maps.driver;
