@@ -429,8 +429,48 @@ async function creditAll(request, env) {
      not exist. That is the failure this whole screen is for, so it is counted
      and named here rather than left to be noticed. */
   const held = await coreSelect(env, 'job_order',
-    'select=job_ref,customer_name,customer_email,haf_username,deposit_pence,created_at,collect_postcode,deliver_postcode'
+    'select=job_ref,customer_name,customer_email,customer_phone,haf_username,deposit_pence,created_at,'
+    + 'order_email_at,deposit_reference,goods,collect_postcode,deliver_postcode'
     + '&status=eq.new&order=created_at.desc&limit=100').catch(() => []);
+
+  /* ── AND HOW FAR EACH OF THEM ACTUALLY GOT ─────────────────────────────────
+     Brent, 11 Sep: "anyone that goes all the way but doesnt make the holding
+     deposit I want to know where they got to".
+
+     Four rungs, three of which we already stamp. The third and the bounce come
+     off the event log, in ONE request for the whole list — a request per row
+     would be a hundred round trips to draw one panel.
+
+       card_page_opened      HAF PAY writes it the moment a Stripe checkout is
+                             raised, so it means they pressed pay, not looked
+       deposit_email_bounced written by the nightly sweep when HAF's mail to
+                             that address has been permanently refused
+
+     The bounce matters more than it looks: without it, somebody who never
+     received the link is indistinguishable on this screen from somebody who
+     read it and decided not to pay, and those two need opposite actions. */
+  const refs = held.map(h => h.deposit_reference).filter(Boolean);
+  const events = refs.length
+    ? await coreSelect(env, 'payment_event',
+        'select=payment_reference,event,created_at'
+        + `&payment_reference=in.(${refs.map(r => `"${r}"`).join(',')})`
+        + '&event=in.(card_page_opened,deposit_email_bounced)&limit=1000').catch(() => [])
+    : [];
+
+  const firstAt = {};
+  for (const e of events) {
+    const k = `${e.payment_reference}|${e.event}`;
+    if (!firstAt[k] || e.created_at < firstAt[k]) firstAt[k] = e.created_at;
+  }
+
+  /* The furthest rung with a time on it. Same ladder the customer's own
+     tracking page climbs, so staff and customer never read different stories. */
+  const gotTo = (h) => {
+    const card = firstAt[`${h.deposit_reference}|card_page_opened`];
+    if (card) return { step: 'reached the card form', at: card, rung: 3 };
+    if (h.order_email_at) return { step: 'was sent the deposit link', at: h.order_email_at, rung: 2 };
+    return { step: 'filled the order in', at: h.created_at, rung: 1 };
+  };
 
   return json({
     ok: true,
@@ -440,13 +480,24 @@ async function creditAll(request, env) {
     rows,
     held_count: held.length,
     held_pence: held.reduce((a, h) => a + Number(h.deposit_pence || 0), 0),
-    held: held.map(h => ({
-      job_ref: h.job_ref,
-      who: h.customer_name || h.haf_username || h.customer_email,
-      username: h.haf_username || null,
-      route: `${h.collect_postcode} to ${h.deliver_postcode}`,
-      deposit_pence: Number(h.deposit_pence || 0),
-      placed_at: h.created_at
-    }))
+    held: held.map(h => {
+      const got = gotTo(h);
+      return {
+        job_ref: h.job_ref,
+        who: h.customer_name || h.haf_username || h.customer_email,
+        username: h.haf_username || null,
+        email: h.customer_email || null,
+        phone: h.customer_phone || null,
+        goods: h.goods || null,
+        route: `${h.collect_postcode} to ${h.deliver_postcode}`,
+        deposit_pence: Number(h.deposit_pence || 0),
+        placed_at: h.created_at,
+        got_to: got.step,
+        got_to_at: got.at,
+        got_to_rung: got.rung,
+        reached_the_card: got.rung === 3,
+        email_bounced_at: firstAt[`${h.deposit_reference}|deposit_email_bounced`] || null
+      };
+    })
   });
 }

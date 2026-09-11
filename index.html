@@ -4565,6 +4565,10 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
           <div id="ov-access-list"></div>
         </div>
 
+        <!-- The line above counts them. This names them and says how far each
+             one got, because a count tells nobody who to ring. -->
+        <div class="card" id="ov-stopped" style="display:none"></div>
+
         <div class="g2">
           <div class="card"><div class="ct">Accounts by type</div><div id="ov-types"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
           <div class="card"><div class="ct">Accounts by status</div><div id="ov-status"><div class="cr"><span class="ck">Loading</span><span class="cv">reading the network…</span></div></div></div>
@@ -12368,6 +12372,93 @@ function heldRender(r){
     _pyM(r.held_pence)+' in total. No driver can see '+(r.held_count===1?'it':'them')+'.'+
     rows+(r.held_count>8?'<div style="margin-top:4px">&hellip; and '+(r.held_count-8)+' more</div>':'')+
     '</span>';
+  stoppedRender(r);
+}
+
+/* ══ STOPPED AT THE DEPOSIT ═══════════════════════════════════════════════════
+   Brent, 11 Sep: "anyone that goes all the way but doesnt make the holding
+   deposit I want to know where they got to".
+
+   The line above says how many and how much. This says WHO, and how far each of
+   them got, because those are the two questions that lead to an action and a
+   count never does.
+
+   Three things are deliberate.
+
+   NAMED, WITH A WAY TO REACH THEM. A row you cannot act on is decoration, so
+   every row carries the email and phone the customer gave us.
+
+   THE RUNG, NOT THE STATUS. "Unpaid" is the same word for somebody who never
+   received our email and somebody who typed a card in and changed their mind.
+   The first needs a working address, the second needs a phone call. So the row
+   says the furthest thing they actually did.
+
+   A BOUNCE IS SHOWN AS OURS, NOT THEIRS. If HAF's mail to that address has been
+   permanently refused, the row says so in those words. Reading "ignored us"
+   over somebody who never got the link is how a real customer gets written off.
+
+   Test rows are labelled rather than hidden. Hiding them would make this screen
+   disagree with the one below it, and a number that cannot be reconciled with
+   the list beside it is worse than a number with a caveat on it. */
+const OUR_TEST_MAIL=/@(usehaf\.co\.uk|example\.(com|org|net))$/i;
+const BRENT_TEST_MAIL='brentford93@hotmail.com';
+
+function _stoppedWho(h){
+  const e=String(h.email||'').trim().toLowerCase();
+  if(OUR_TEST_MAIL.test(e)) return 'test';
+  if(e===BRENT_TEST_MAIL) return 'brent';
+  return 'real';
+}
+
+function stoppedRender(r){
+  const el=document.getElementById('ov-stopped');
+  if(!el)return;
+  const all=(r&&r.held)||[];
+  if(!all.length){el.style.display='none';el.innerHTML='';return}
+
+  const real=all.filter(h=>_stoppedWho(h)==='real');
+  const mine=all.filter(h=>_stoppedWho(h)==='test');
+  const brent=all.filter(h=>_stoppedWho(h)==='brent');
+  const owed=real.reduce((a,h)=>a+Number(h.deposit_pence||0),0);
+  const atCard=real.filter(h=>h.reached_the_card).length;
+  const bounced=real.filter(h=>h.email_bounced_at).length;
+
+  const row=(h)=>{
+    const who=_stoppedWho(h);
+    const tag=who==='real'?'':
+      '<span class="chip" style="color:var(--mu);margin-left:6px">'+
+      (who==='brent'?'your test address':'our test row')+'</span>';
+    const step=h.email_bounced_at
+      ? '<span class="cr" style="font-weight:700">our email to them bounced</span> &middot; they never got the link'
+      : _esc(h.got_to||'filled the order in');
+    return '<div class="cr" style="display:block;padding:.55rem 0">'+
+      '<div><strong>'+_esc(h.who||'no name on the order')+'</strong>'+tag+
+        '<span style="float:right">'+_pyM(h.deposit_pence)+'</span></div>'+
+      '<div style="font-size:.8rem;margin-top:2px">Got to: '+step+
+        (h.got_to_at?' <span style="color:var(--mu)">&middot; '+_esc(_ago(h.got_to_at))+'</span>':'')+'</div>'+
+      '<div style="font-size:.78rem;color:var(--mu);margin-top:2px">'+
+        _esc(h.job_ref)+' &middot; '+_esc(h.route)+
+        (h.goods?' &middot; '+_esc(String(h.goods).slice(0,48)):'')+'</div>'+
+      '<div style="font-size:.78rem;color:var(--mu);margin-top:2px">'+
+        _esc(h.email||'no email')+(h.phone?' &middot; '+_esc(h.phone):'')+'</div>'+
+      '</div>';
+  };
+
+  const note=[];
+  if(mine.length) note.push(mine.length+' of our own test rows');
+  if(brent.length) note.push(brent.length+' on your test address');
+
+  el.style.display='';
+  el.innerHTML=
+    '<h3 style="margin:0 0 .2rem">Stopped at the deposit</h3>'+
+    '<p class="ps" style="margin:0 0 .6rem">They filled the whole order in and never paid the holding deposit. '+
+      '<strong>'+real.length+'</strong> real customer'+(real.length===1?'':'s')+', '+
+      _pyM(owed)+' never collected'+(note.length?' &middot; '+note.join(', ')+', labelled below':'')+'.</p>'+
+    (real.length
+      ? '<p class="ps" style="margin:0 0 .6rem">'+atCard+' of them reached the card form and still did not pay'+
+        (bounced?'. '+bounced+' never received our email at all':'')+'.</p>'
+      : '')+
+    real.map(row).join('')+brent.map(row).join('')+mine.map(row).join('');
 }
 
 async function accessLoad(){
