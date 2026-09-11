@@ -3524,7 +3524,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         <!-- Insurance note -->
         <div style="border:1.5px solid var(--am-d);border-radius:var(--rx);padding:.8rem 1rem;background:var(--am-d);font-size:.76rem;display:flex;align-items:flex-start;gap:.6rem">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--am)" stroke-width="2" style="flex-shrink:0;margin-top:.1rem"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <div><strong style="color:var(--am)">Gap insurance — pending.</strong> HAF is working with an insurance provider to cover goods-in-transit gaps on network jobs. Every driver on the network is Clever Checked and insured — but check your own goods-in-transit cover in the meantime.</div>
+          <div><strong style="color:var(--tx)">Gap insurance — pending.</strong> HAF is working with an insurance provider to cover goods-in-transit gaps on network jobs. Every driver on the network is Clever Checked and insured — but check your own goods-in-transit cover in the meantime.</div>
         </div>
       </div>
 
@@ -12433,7 +12433,7 @@ window.ovLoad=ovLoad;window.aaBoot=aaBoot;window.aaLoad=aaLoad;window.aaDebounce
    The sidebar tracker + this page are the spine every account orbits.
    Adding a field, a role or a job = editing config below — never a redesign. */
 window.HAF_ROLE=window.HAF_ROLE||'driver';
-const HAF_STATUS={draft:['Scheduled','#8a97a0'],awaiting:['Awaiting driver','var(--or, #f18e00)'],assigned:['Driver assigned','var(--mu, #6f777d)'],collection:['En route to collection','var(--am, #b98530)'],transit:['In transit','var(--or, #f18e00)'],delivered:['Delivered','var(--gn, #4f7f58)'],delayed:['Delayed','var(--rd, #b4483f)'],closed:['Closed','#5b6b74']};
+const HAF_STATUS={draft:['Scheduled','var(--su)'],awaiting:['Awaiting driver','var(--haf-orange-ink)'],assigned:['Driver assigned','var(--mu, #6f777d)'],collection:['En route to collection','var(--am, #b98530)'],transit:['In transit','var(--haf-orange-ink)'],delivered:['Delivered','var(--gn, #4f7f58)'],delayed:['Delayed','var(--rd, #b4483f)'],closed:['Closed','#5b6b74']};
 const HAF_STEPS=['Job posted','Driver assigned','En route to collection','Collected','In transit','Out for delivery','Delivered','Proof confirmed'];
 /* shared records — every field lives here once; role config decides what shows */
 const HAF_JOBS=[
