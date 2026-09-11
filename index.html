@@ -1631,12 +1631,40 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 .kncal-day-h{font-size:.68rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin:.8rem 0 .35rem}
 .kncal-day-h:first-child{margin-top:0}
 
-/* week — seven day columns on a desktop, stacked days on a phone */
-.kncal-week{display:grid;grid-template-columns:1fr;gap:.5rem}
-@media(min-width:900px){.kncal-week{grid-template-columns:repeat(7,1fr);gap:.4rem;align-items:start}}
+/* week — seven day columns on a desktop, stacked days on a phone.
+
+   MEASURED 11 Sep on the live site: a desktop column is 163px. That is the
+   whole design constraint of this view and the card is now told about it (see
+   .hafjc-day), so a column holds a card at its GLANCE size — time, route,
+   status and the test flag — and the rest is one tap away in the drawer.
+
+   Three things this block fixes, all visible in Brent's screenshot:
+   · the seven columns did not read as columns, because nothing separated them
+   · the grid ended 316px down an 800px screen, a thin band above dead space
+   · every empty day drew a fat centred em-dash at its own height           */
+.kncal-week{display:grid;grid-template-columns:1fr;gap:.55rem}
 .kncal-wcol{min-width:0}
-.kncal-wcol-h{font-size:.66rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;padding:.25rem 0;border-bottom:1px solid var(--ln);margin-bottom:.4rem}
+.kncal-wcol-h{font-size:.66rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;padding:.25rem 0 .3rem;border-bottom:1px solid var(--ln);margin-bottom:.45rem}
 .kncal-wcol-h.today{color:var(--or)}
+@media(min-width:900px){
+  .kncal-week{grid-template-columns:repeat(7,1fr);gap:0;align-items:stretch;
+    min-height:clamp(240px,58vh,620px);border:1px solid var(--ln);border-radius:var(--rs);
+    background:var(--p);overflow:hidden}
+  /* the rule between two days belongs to the grid, not to a card inside it */
+  .kncal-wcol{padding:.5rem .45rem .7rem;border-left:1px solid var(--ln)}
+  .kncal-wcol:first-child{border-left:0}
+  .kncal-wcol-h{font-size:.62rem;letter-spacing:.05em;padding:.1rem 0 .35rem;margin-bottom:.5rem}
+  /* the panel behind the grid already frames the week; a card inside it sits
+     on the page colour so it reads as a thing ON a day, not as the day */
+  .kncal-week .hafjc{background:var(--p2)}
+  .kncal-week .hafjc:hover{background:var(--p)}
+}
+/* a phone stacks the seven days, so an empty one should cost a line, not a
+   block — five tall dashes is a scroll through nothing */
+@media(max-width:899px){
+  .kncal-wcol-h{margin-bottom:.3rem}
+  .kncal-week .hafjc-empty{padding:.45rem .2rem;font-size:.72rem;text-align:left;opacity:.7}
+}
 
 /* month */
 .kncal-month{display:grid;grid-template-columns:repeat(7,1fr);gap:.25rem}
@@ -3698,7 +3726,12 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         </div>
         <div class="kncal-bar">
           <div class="kncal-views" role="tablist">
-            <button class="kncal-v on" data-v="day"    onclick="knCalView('day')">Today</button>
+            <!-- "Day", not "Today". There is already a Today button two inches
+                 away that jumps the date, and two controls with the same word
+                 doing different things is a guess a person should not have to
+                 make. This one is a VIEW, and after you page back a week it is
+                 not showing today at all. -->
+            <button class="kncal-v on" data-v="day"    onclick="knCalView('day')">Day</button>
             <button class="kncal-v"    data-v="week"   onclick="knCalView('week')">Week</button>
             <button class="kncal-v"    data-v="month"  onclick="knCalView('month')">Month</button>
             <button class="kncal-v"    data-v="agenda" onclick="knCalView('agenda')">Agenda</button>
@@ -16390,8 +16423,10 @@ window.pxSave=async function(){
     var m=monday(S.anchor||today()),tk=key(today()),out=[];
     for(var i=0;i<7;i++){
       var d=shift(m,i),k=key(d);
+      /* dense: a 163px column, not a full-width day list. And a day with no
+         work says so in words — an em-dash is a typographer's shrug. */
       out.push('<div class="kncal-wcol"><div class="kncal-wcol-h'+(k===tk?' today':'')+'">'+esc(longDay(d))+'</div>'+
-        (window.HAFJobCard?HAFJobCard.renderDay(map[k]||[],{emptyText:'—'}):'')+'</div>');
+        (window.HAFJobCard?HAFJobCard.renderDay(map[k]||[],{emptyText:'No jobs',dense:true}):'')+'</div>');
     }
     return '<div class="kncal-week">'+out.join('')+'</div>';
   }
@@ -16647,7 +16682,22 @@ window.pxSave=async function(){
      * The status colours are the card's own on both sites, on purpose. A job
      * that is on the road must look the same to the customer and the driver.
      */
+    /* ---- what a card measures itself against ----
+     * MEASURED 11 Sep, live: in the KNECT week view a day column is 163px, but
+     * every container query below was resolving against .hafjc-scope, which the
+     * host puts on the WHOLE calendar body — 1180px. So a 163px card was being
+     * told it had 1180px of room and drew its full detail: "Needs a driver"
+     * came out one word per line and the mileage split its number from its unit
+     * ("41" above "mi"). That is the fault in Brent's screenshot.
+     *
+     * The day list therefore carries the containment itself. A day is the
+     * narrowest box a card is ever put in, so measuring it is measuring the
+     * card, whether that day is a full-width list or one of seven columns. The
+     * host scope keeps container-type too, as the fallback for any host that
+     * still renders a card outside a day list.
+     */
     '.hafjc-scope{container-type:inline-size;}',
+    '.hafjc-day{container-type:inline-size;display:flex;flex-direction:column;gap:.4rem;min-width:0;}',
 
     /* ---- the card ---- */
     '.hafjc{position:relative;display:flex;align-items:stretch;gap:.7rem;width:100%;',
@@ -16657,7 +16707,12 @@ window.pxSave=async function(){
     'font:inherit;transition:border-color .13s,background .13s,transform .13s;}',
     '.hafjc:hover{border-color:var(--jc-line-strong,rgba(255,255,255,.16));background:var(--jc-panel-2,#1b1e24);}',
     '.hafjc:active{transform:scale(.995);}',
-    '.hafjc:focus-visible{outline:2px solid var(--jc-orange,#f18e00);outline-offset:2px;}',
+    /* INSET. An outset ring is drawn outside the card's own box, so a selected
+     * card in a 163px week column grew past its column and shunted the row it
+     * was in — visible in the screenshot as the Thursday card sitting a couple
+     * of pixels proud of the Friday ones. Inset, a selection can never move the
+     * grid it is selected in. */
+    '.hafjc:focus-visible{outline:2px solid var(--jc-orange,#f18e00);outline-offset:-2px;}',
 
     /* status belongs to the JOB, never to the customer (brief s7) */
     '.hafjc-bar{flex:0 0 4px;border-radius:3px;background:var(--jc-muted,#9aa1ab);align-self:stretch;}',
@@ -16671,37 +16726,84 @@ window.pxSave=async function(){
     '.hafjc[data-stage="cancelled"] .hafjc-main{opacity:.55;text-decoration:line-through;}',
     '.hafjc[data-stage="delivered"]{opacity:.82;}',
 
-    '.hafjc-main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:.16rem;justify-content:center;}',
-    '.hafjc-line1{display:flex;align-items:baseline;gap:.5rem;min-width:0;}',
-    '.hafjc-time{font-weight:800;font-size:.86rem;letter-spacing:-.02em;white-space:nowrap;}',
-    '.hafjc-time.is-unplaced{color:var(--jc-amber,#e0a53a);font-weight:700;font-size:.78rem;}',
-    '.hafjc-route{font-size:.86rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
-    '.hafjc-arrow{color:var(--jc-muted,#9aa1ab);padding:0 .18rem;}',
-    '.hafjc-line2{display:flex;align-items:center;gap:.45rem;font-size:.72rem;color:var(--jc-muted,#9aa1ab);min-width:0;}',
+    /* ---- three type sizes, and only three ----
+     *   .82rem  the glance      time, route, money
+     *   .72rem  the detail      status, miles, reference
+     *   .62rem  the chips       van, test
+     * It used to be six (.86 .9 .78 .72 .63 .6), with the mileage inheriting a
+     * fourth size inside a single card. Six sizes in a 163px box is why the
+     * card read as noise rather than a card.
+     */
+    '.hafjc-main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:.2rem;justify-content:center;}',
+    '.hafjc-line1{display:flex;align-items:baseline;gap:.45rem;min-width:0;}',
+    '.hafjc-time{font-weight:800;font-size:.82rem;letter-spacing:-.02em;white-space:nowrap;flex:0 0 auto;}',
+    /* A job with no window keeps the glance size. Shrinking it made a fourth
+     * type size AND made that card 3px shorter than the one beside it; the
+     * amber already says everything the smaller size was trying to say. */
+    '.hafjc-time.is-unplaced{color:var(--jc-amber,#e0a53a);font-weight:700;}',
+    '.hafjc-tshort{display:none;}',
+    '.hafjc-tlong{display:inline;}',
+    '.hafjc-route{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}',
+    '.hafjc-arrow{color:var(--jc-muted,#9aa1ab);padding:0 .16rem;}',
+    /* nowrap all the way down. A status is two or three short words and must
+     * never be stacked one word per line; when the line runs out of room it is
+     * the REFERENCE that gives way, because the reference is the one thing on
+     * the card a person is not reading at a glance. */
+    '.hafjc-line2{display:flex;align-items:center;flex-wrap:nowrap;gap:.35rem;font-size:.72rem;',
+    'line-height:1.35;color:var(--jc-muted,#9aa1ab);min-width:0;}',
     '.hafjc-sep{opacity:.45;}',
-    '.hafjc-stage{font-weight:600;}',
-    '.hafjc-ref{font-variant-numeric:tabular-nums;opacity:.75;overflow:hidden;text-overflow:ellipsis;}',
+    '.hafjc-stage{font-weight:600;white-space:nowrap;flex:0 0 auto;}',
+    '.hafjc-miles{white-space:nowrap;flex:0 0 auto;font-variant-numeric:tabular-nums;}',
+    '.hafjc-ref{font-variant-numeric:tabular-nums;opacity:.75;white-space:nowrap;',
+    'overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;min-width:0;}',
 
-    '.hafjc-right{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:.15rem;}',
-    '.hafjc-money{font-weight:800;font-size:.9rem;letter-spacing:-.02em;color:var(--jc-orange-text,#ffa726);white-space:nowrap;}',
-    '.hafjc-van{font-size:.63rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--jc-muted,#9aa1ab);',
+    '.hafjc-right{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:.22rem;}',
+    '.hafjc-money{font-weight:800;font-size:.82rem;letter-spacing:-.02em;color:var(--jc-orange-text,#ffa726);white-space:nowrap;}',
+    '.hafjc-van{font-size:.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--jc-muted,#9aa1ab);',
     'border:1px solid var(--jc-line-strong,rgba(255,255,255,.16));border-radius:999px;padding:.1rem .42rem;white-space:nowrap;}',
-    '.hafjc-test{font-size:.6rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#000;',
-    'background:var(--jc-amber,#e0a53a);border-radius:999px;padding:.08rem .4rem;white-space:nowrap;}',
-    '.hafjc-chips{display:flex;align-items:center;gap:.28rem;}',
+    '.hafjc-test{font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#000;',
+    'background:var(--jc-amber,#e0a53a);border-radius:999px;padding:.1rem .42rem;white-space:nowrap;}',
+    '.hafjc-chips{display:flex;align-items:center;flex-wrap:nowrap;gap:.28rem;}',
 
-    /* ---- level 2 appears only when the card has room for it ---- */
+    /* ---- level 2 appears only when the card has room for it ----
+     * Three honest widths, now that the query measures the real box:
+     *   under 200px   GLANCE. Time, route, status, and the test flag. A week
+     *                 column on a desktop lands here. Everything else is one
+     *                 tap away in the drawer, which is the brief's own order.
+     *   200 - 339px   + miles and the van.
+     *   340px and up  + the reference and the money.
+     * The TEST flag survives the narrowest card on purpose: a person must never
+     * read a test row as real work, however little room the card has.
+     */
     '.hafjc-l2{display:none;}',
-    '@container (min-width:230px){.hafjc-l2{display:inline;}}',
+    '.hafjc-l2-wide{display:none;}',
+    '@container (min-width:200px){.hafjc-l2{display:inline;}}',
     '@container (min-width:340px){.hafjc-l2-wide{display:inline;}}',
-    '@container (max-width:339px){.hafjc-l2-wide{display:none;}}',
-    '@container (max-width:229px){.hafjc-right{display:none;}.hafjc{padding:.5rem .55rem;min-height:48px;}}',
+    /* Under 200px the card STACKS. Side by side, a 155px week column gave the
+     * time 62px, the flag 38px and left the route 12px — which drew "S35→M17"
+     * as "S", and sat the flag on top of "Time to confirm". A route clipped to
+     * one letter is the "Time to c" fault again, and the route is level ONE:
+     * it is half of what the glance is for. So the time, the route and the
+     * status each get the card's full width, one under the other, and the flag
+     * is pinned to the corner where it overlaps none of them. */
+    '@container (max-width:199px){',
+    '.hafjc{padding:.5rem .5rem .55rem .45rem;gap:.45rem;min-height:52px;}',
+    '.hafjc-money,.hafjc-van{display:none;}',
+    '.hafjc-right{position:absolute;top:.42rem;right:.42rem;flex-direction:row;gap:.2rem;}',
+    '.hafjc-line1{flex-direction:column;align-items:stretch;gap:.05rem;}',
+    '.hafjc-time{padding-right:2.9rem;}',                 /* clear the flag, and only the time does */
+    '.hafjc-tshort{display:inline;}',                     /* the short sentence, not a cut one */
+    '.hafjc-tlong{display:none;}',
+    '}',
 
     /* ---- phone: bigger tap target, nothing hidden that matters ---- */
+    /* The whole scale steps up together on a phone. Money used to step up
+     * further than the time next to it, which put a fourth size on a card that
+     * is meant to have three. */
     '@media (max-width:640px){',
     '.hafjc{min-height:64px;padding:.7rem .75rem .7rem .65rem;border-radius:14px;}',
-    '.hafjc-time,.hafjc-route{font-size:.9rem;}',
-    '.hafjc-money{font-size:.95rem;}',
+    '.hafjc-time,.hafjc-route,.hafjc-money{font-size:.9rem;}',
+    '.hafjc-line2{font-size:.74rem;}',
     '}',
 
     /* ---- a month cell holds a bare pill, not a card ---- */
@@ -16714,9 +16816,16 @@ window.pxSave=async function(){
     '.hafjc.is-pill .hafjc-time.is-unplaced{font-size:.62rem;opacity:.7;}',
 
     /* ---- the strip for jobs with no readable time ---- */
-    '.hafjc-unplaced-head{display:flex;align-items:center;gap:.4rem;margin:.9rem 0 .45rem;',
-    'font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--jc-amber,#e0a53a);}',
-    '.hafjc-empty{padding:1.6rem 1rem;text-align:center;color:var(--jc-muted,#9aa1ab);font-size:.82rem;}'
+    '.hafjc-unplaced-head{display:flex;align-items:center;gap:.4rem;margin:.5rem 0 .1rem;',
+    'font-size:.62rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--jc-amber,#e0a53a);}',
+
+    /* A day with nothing in it is a fact, not a gap. It gets the same box as a
+     * day with work so the seven columns of a week line up along one top edge
+     * — five em-dashes floating at five different heights read as broken UI. */
+    '.hafjc-empty{padding:1.6rem 1rem;text-align:center;color:var(--jc-muted,#9aa1ab);font-size:.82rem;}',
+    '.hafjc-day.is-dense{gap:.3rem;}',
+    '.hafjc-day.is-dense .hafjc-empty{padding:.7rem .3rem;font-size:.7rem;opacity:.75;}',
+    '.hafjc-day.is-dense .hafjc-unplaced-head{margin:.35rem 0 0;font-size:.58rem;}'
   ].join('');
 
   var STAGE_WORD = {
@@ -16784,7 +16893,13 @@ window.pxSave=async function(){
     if (t) {
       bits.push('<span class="hafjc-time">' + esc(t) + '</span>');
     } else if (variant !== 'pill') {
-      bits.push('<span class="hafjc-time is-unplaced">Time to confirm</span>');
+      // "Time to confirm" is 95px of words in a 92px gap, so on a week column it
+      // ran under the TEST flag. Clipping it to "Time to co…" would be the
+      // "Time to c" fault again, so the narrow card gets a SHORTER sentence
+      // rather than a cut one. The aria-label above still says it in full.
+      bits.push('<span class="hafjc-time is-unplaced">' +
+        '<span class="hafjc-tshort">Time TBC</span>' +
+        '<span class="hafjc-tlong">Time to confirm</span></span>');
     } else {
       // A month cell is barely wider than a word. "Time to confirm" clipped to
       // "Time to c" tells nobody anything, so a pill with no time shows the
@@ -16798,10 +16913,13 @@ window.pxSave=async function(){
       bits.push('<span class="hafjc-line2">');
       bits.push('<span class="hafjc-stage">' + esc(STAGE_WORD[stage] || stage) + '</span>');
       if (job.miles != null && job.miles !== '') {
-        bits.push('<span class="hafjc-l2"><span class="hafjc-sep">·</span> ' + esc(Math.round(job.miles)) + ' mi</span>');
+        // One unbreakable token. "41" on one line and "mi" on the next was the
+        // most visible defect on Brent's screenshot.
+        bits.push('<span class="hafjc-l2 hafjc-miles"><span class="hafjc-sep">·</span>&nbsp;' +
+          esc(Math.round(job.miles)) + '&nbsp;mi</span>');
       }
       if (job.ref) {
-        bits.push('<span class="hafjc-l2-wide hafjc-ref"><span class="hafjc-sep">·</span> ' + esc(job.ref) + '</span>');
+        bits.push('<span class="hafjc-l2-wide hafjc-ref"><span class="hafjc-sep">·</span>&nbsp;' + esc(job.ref) + '</span>');
       }
       bits.push('</span>');
       bits.push('</span>');
@@ -16835,8 +16953,16 @@ window.pxSave=async function(){
       return String(a.starts_at || '').localeCompare(String(b.starts_at || ''));
     });
 
+    /* Every day is wrapped, empty or not. The wrapper is what the container
+     * queries measure (see .hafjc-day above), so a day that skips it is a day
+     * whose cards size themselves against the wrong box — which is the exact
+     * fault this wrapper was added to end. opts.dense is for a narrow column:
+     * same card, tighter gap. */
+    var cls = 'hafjc-day' + (opts.dense ? ' is-dense' : '');
+
     if (!placed.length && !unplaced.length) {
-      return '<div class="hafjc-empty">' + esc(opts.emptyText || 'Nothing booked for this day.') + '</div>';
+      return '<div class="' + cls + '"><div class="hafjc-empty">' +
+        esc(opts.emptyText || 'Nothing booked for this day.') + '</div></div>';
     }
 
     var out = placed.map(function (j) { return render(j); });
@@ -16844,7 +16970,7 @@ window.pxSave=async function(){
       out.push('<div class="hafjc-unplaced-head">No time yet · ' + unplaced.length + '</div>');
       out = out.concat(unplaced.map(function (j) { return render(j); }));
     }
-    return out.join('');
+    return '<div class="' + cls + '">' + out.join('') + '</div>';
   }
 
   /* Inject the stylesheet once, and mark the scope so the container queries
@@ -16872,7 +16998,7 @@ window.pxSave=async function(){
   }
 
   root.HAFJobCard = {
-    version: '1.0.0',
+    version: '1.1.0',
     css: CSS,
     render: render,
     renderDay: renderDay,
