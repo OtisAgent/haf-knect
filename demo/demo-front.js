@@ -173,10 +173,23 @@
     document.body.appendChild(a);
   }
 
+  /* NOT ON THE FRONT STEP. The first thing a visitor meets is the email door
+     that hands out an access code, and those rows are HAF's enquiries — it has
+     been the deliberate shape of this page since 14 Aug. A "try it" button
+     sitting beside it is a way past it, and every person who takes it is an
+     enquiry HAF never gets. So the way in appears once they are inside the
+     tour, which is also when it starts being the right offer: they have seen
+     what the product does and now they want to drive it. */
+  function inside() {
+    var app = document.getElementById('app');
+    return !!(app && app.classList.contains('open'));
+  }
+
   function paint() {
     css();
-    intoPanes();
     intoLogin();
+    if (!inside()) return;
+    intoPanes();
     float_();
   }
 
