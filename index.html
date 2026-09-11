@@ -1660,7 +1660,16 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
   .kncal-cell{aspect-ratio:auto;height:clamp(50px,8vh,84px);gap:.18rem;font-size:.8rem;border-radius:9px}
   .kncal-mhead{padding:.2rem 0}
 }
-.kncal-sel-head{font-size:.7rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin:.9rem 0 .4rem}
+/* the month's jobs, in order, under the grid — matches PLNA. (The old
+   selected-day header went with the block it styled: the picked day is now
+   highlighted inside this list, so there is nothing left to draw above it.) */
+.kncal-mlist{max-width:1080px;margin-inline:auto;margin-top:1rem}
+.kncal-mday{display:flex;align-items:baseline;justify-content:space-between;gap:.8rem;font-size:.68rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;padding:.3rem 0 .35rem;border-top:1px solid var(--ln);margin-top:.8rem}
+.kncal-mday:first-child{margin-top:0;border-top:0}
+.kncal-mday span{font-size:.66rem;font-weight:700;letter-spacing:0;text-transform:none;color:var(--mu);white-space:nowrap}
+.kncal-mday.today{color:var(--or)}
+.kncal-mday.sel{color:var(--tx)}
+.kncal-mday.sel span{color:var(--tx)}
 
 /* the job drawer — a sheet from the bottom on a phone, a centred card above it */
 .kncal-drawer{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.45);align-items:flex-end;justify-content:center}
@@ -16397,9 +16406,24 @@ window.pxSave=async function(){
         ' aria-label="'+esc(longDay(d)+', '+(js.length?js.length+' job'+(js.length===1?'':'s'):'nothing booked'))+'">'+
         '<span>'+d.getDate()+'</span><span class="kncal-dots">'+dots+'</span></button>');
     }
-    var sel=S.sel?('<div class="kncal-sel-head">'+esc(longDay(fromKey(S.sel)))+'</div>'+
-      (window.HAFJobCard?HAFJobCard.renderDay(map[S.sel]||[],{emptyText:'Nothing booked for this day.'}):'')):'';
-    return '<div class="kncal-month">'+cells.join('')+'</div>'+sel;
+    /* The grid alone says only THAT a day is busy. Everything in the month, in
+       order, underneath it — the way PLNA's month reads — so a month is legible
+       without tapping thirty days. A picked day is highlighted in this one
+       list, never drawn a second time above it. */
+    var list='',any=false;
+    for(var q=0;q<42;q++){
+      var dd=shift(start,q);
+      if(dd.getMonth()!==a.getMonth())continue;
+      var kk=key(dd),js2=map[kk]||[],picked=(kk===S.sel);
+      if(!js2.length&&!picked)continue;
+      if(js2.length)any=true;
+      list+='<div class="kncal-mday'+(kk===tk?' today':'')+(picked?' sel':'')+'" data-day="'+kk+'">'+
+        esc(kk===tk?'Today, '+longDay(dd):longDay(dd))+
+        '<span>'+(js2.length?js2.length+(js2.length===1?' job':' jobs'):'nothing booked')+'</span></div>'+
+        (js2.length&&window.HAFJobCard?HAFJobCard.renderDay(js2,{emptyText:'—'}):'');
+    }
+    if(!any&&!S.sel)list='<div class="kncal-note">Nothing booked this month.</div>';
+    return '<div class="kncal-month">'+cells.join('')+'</div><div class="kncal-mlist">'+list+'</div>';
   }
 
   function drawAgenda(map){
@@ -16425,6 +16449,12 @@ window.pxSave=async function(){
     var map=byDay();
     body.innerHTML = S.view==='day'?drawDay(map):S.view==='week'?drawWeek(map):
                      S.view==='month'?drawMonth(map):drawAgenda(map);
+    /* a day picked on the grid can sit below the fold in a long month list —
+       bring it to the reader rather than making them hunt for it */
+    if(S.view==='month'&&S.sel){
+      var tgt=body.querySelector('.kncal-mday.sel');
+      if(tgt&&tgt.scrollIntoView)tgt.scrollIntoView({block:'nearest'});
+    }
   }
 
   /* Level 3, the action: the drawer. It shows only what the calendar read has
