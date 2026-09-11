@@ -6392,13 +6392,11 @@ function pjHTML(s) {
     + '<span class="pj-open-w"><span class="pj-open-t">Got the job in an email? Paste it in</span>'
     + '<span class="pj-open-s">We read it and fill this form in for you &#8212; no retyping</span></span>'
     + '<span class="pj-open-x">&#8594;</span></button>'
-    + '<div class="pj-ask"><span class="pj-ask-t"><strong>Waiting on the details?</strong> '
-    + 'Copy the short list of what a driver needs, email it to whoever wants the delivery, '
-    + 'then paste their reply straight back in above.</span>'
-    + '<span class="pj-ask-r">'
-    + '<button class="btn btn-or btn-sm" type="button" id="pj-cp-' + s + '" onclick="pjCopy(\'' + s + '\')">Copy what we need</button>'
-    + '<button class="btn btn-gh btn-sm" type="button" onclick="pjSee(\'' + s + '\')">See it first</button>'
-    + '</span><pre class="pj-ask-p" id="pj-ask-p-' + s + '" style="display:none"></pre></div>'
+    /* The "waiting on the details" strip is drawn ONCE, and it belongs after
+       the paste box, not before it: its own wording says to paste the reply
+       "back in above". Shipping a second copy here on 11 Sep also minted a
+       second #pj-cp-<slot> and #pj-ask-p-<slot>, so getElementById answered
+       with the upper one and the lower card's buttons drove the wrong panel. */
     + '<div class="pj-body" id="pj-body-' + s + '" style="display:none">'
     + '<div class="pj-h">Paste the job in</div>'
     + '<p class="pj-p">The whole email, a WhatsApp message, or a note to yourself &#8212; however it was sent to you. '
