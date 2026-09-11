@@ -72,6 +72,7 @@ console.log('\nPOSTING WORK — every screen is a live KNECT screen');
     scr: n.querySelector('.scr').childNodes[0].textContent.trim(),
     where: n.querySelector('.where').textContent.trim(),
     say: n.querySelector('.say').textContent.trim(),
+    gate: (n.querySelector('.gate') || {}).textContent || '',
   })));
   ok(rows.length >= 10, rows.length + ' screens on the poster walk');
   const strangers = rows.filter(r => !labels.has(r.scr)).map(r => r.scr);
@@ -80,7 +81,7 @@ console.log('\nPOSTING WORK — every screen is a live KNECT screen');
   ok(rows.every(r => r.say.length > 25), 'every screen says what it is for');
   ok(rows.every(r => LIVE.knect_sections.some(s => s.l === r.where)),
     'each one names the live section it sits in');
-  const gated = rows.filter(r => /Clever release/.test(r.say));
+  const gated = rows.filter(r => /Clever release/.test(r.gate));
   ok(gated.length === 0, 'nothing on the poster walk is gated — that is the point of it'
     + (gated.length ? ' (got ' + gated.map(g => g.scr).join(', ') + ')' : ''));
 }
@@ -90,12 +91,13 @@ console.log('\nDRIVING WORK — KNECT half');
   const rows = await pg.$$eval('#drive ol.walk:first-of-type li', ns => ns.map(n => ({
     scr: n.querySelector('.scr').childNodes[0].textContent.trim(),
     say: n.querySelector('.say').textContent.trim(),
+    gate: (n.querySelector('.gate') || {}).textContent || '',
   })));
   ok(rows.length >= 6, rows.length + ' screens on the driver walk');
   const strangers = rows.filter(r => !labels.has(r.scr)).map(r => r.scr);
   ok(strangers.length === 0, 'no screen named that the live app does not have'
     + (strangers.length ? ': ' + strangers.join(', ') : ''));
-  const gated = rows.filter(r => /Clever release/.test(r.say)).length;
+  const gated = rows.filter(r => /Clever release/.test(r.gate)).length;
   ok(gated >= 5, gated + ' of them are marked as needing the Clever release');
 }
 

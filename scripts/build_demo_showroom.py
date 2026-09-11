@@ -207,10 +207,10 @@ def walk_rows(pairs, tabs):
     for tab_id, say in pairs:
         t = tabs[tab_id]
         where = t["section"]
-        gated = ' <span class="gate">needs the Clever release</span>' if (
+        gated = '<div class="gate">Needs the Clever release</div>' if (
             t["need"] == "drive" or t["section_need"] in ("plna", "compliance")) else ""
         out.append('<li><div><div class="scr">%s<span class="where">%s</span></div>'
-                   '<div class="say">%s%s</div></div></li>'
+                   '<div class="say">%s</div>%s</div></li>'
                    % (esc(t["label"]), esc(where), esc(say), gated))
     return "".join(out)
 
