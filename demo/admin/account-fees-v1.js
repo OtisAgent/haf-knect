@@ -51,15 +51,6 @@
         monthlyGbp: 100,
         annualGbp: 1000,
         paymentRunFeeGbp: 0,
-
-        sourceConflict: {
-          field: "paymentRunFeeGbp",
-          documented: 0,
-          documentedSource: "internal pricing reference",
-          conflictsWith: "the CleverPay no-waiver fee rule",
-          askedOf: "OWNER",
-          status: "OPEN"
-        },
         maxDrivers: 1
       },
 
@@ -418,12 +409,7 @@
              "driver's AI is set by their own PLNA tier.",
       ALL: "CleverPay only charges when an invoice is generated. No work, no " +
            "invoice, no charge."
-    },
-
-    openDecisions: [
-      "PLNA_PRO payment-run fee — £0 documented, conflicts with the no-waiver " +
-      "rule locked 2026-07-29 (see PLNA_PRO.sourceConflict)"
-    ]
+    }
   };
 
   function round2(n) { return Math.round((n + Number.EPSILON) * 100) / 100; }

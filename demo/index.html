@@ -5742,8 +5742,19 @@ function openDemoGate(){
 }
 
 /* ── LOGIN (real — PLNA driver accounts via Supabase) ── */
-const PLNA_URL='https://ggkpqqrtxtlafdkxcaqg.supabase.co';
-const PLNA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdna3BxcXJ0eHRsYWZka3hjYXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTM2NjAsImV4cCI6MjA5Nzc2OTY2MH0.hB70KOYZu4dshwhsrxF_dFyBn0n72gStWTwxYGsLdgY';
+/* THE LEAD DOOR — deliberately the LIVE database, and deliberately named.
+   The email box on this page hands out an access code and records a real
+   person's interest. Those rows are HAF's enquiries: they feed the
+   Mailchimp and Resend audiences. The demo database is emptied every night
+   at 04:10, so an enquiry written there is an enquiry thrown away. This is
+   the ONE thing on this public page that should reach live, so it says so
+   by name rather than inheriting whatever PLNA_URL happens to be. */
+const HAF_LEADS_URL='https://ggkpqqrtxtlafdkxcaqg.supabase.co';
+const HAF_LEADS_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdna3BxcXJ0eHRsYWZka3hjYXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTM2NjAsImV4cCI6MjA5Nzc2OTY2MH0.hB70KOYZu4dshwhsrxF_dFyBn0n72gStWTwxYGsLdgY';
+/* Everything else on this page reaches the DEMO database. There is a real
+   username-and-PIN box below, on a page anybody can open. */
+const PLNA_URL='https://vvjpvqmuehijjhugejap.supabase.co';
+const PLNA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2anB2cW11ZWhpampodWdlamFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMTgxNjgsImV4cCI6MjEwNDY5NDE2OH0.Fygw6gUDHDm_lwm3XV0kGZOne7OiV2pcKb6X1FfAVaU';
 const PLNA_HOME='https://plna.usehaf.co.uk';
 function openLogin(){document.getElementById('login-ov').classList.add('open')}
 function closeLogin(){document.getElementById('login-ov').classList.remove('open')}
@@ -11114,7 +11125,7 @@ window.pxSave=async function(){
    can be edited to walk past it. The email list itself is not readable with
    the key this page holds — that was proved before this file shipped. */
 (function(){
-  var URL_=PLNA_URL+'/rest/v1/rpc/', K=PLNA_KEY, KEY='haf_demo_code';
+  var URL_=HAF_LEADS_URL+'/rest/v1/rpc/', K=HAF_LEADS_KEY, KEY='haf_demo_code';
 
   /* The four sections the public demo keeps, captured ONCE before anything is
      trimmed, so opening the door twice cannot shrink the menu twice. */
@@ -11550,5 +11561,6 @@ window.pxSave=async function(){
 })();
 </script>
 
+<script src="demo-front.js?v=1"></script>
 </body>
 </html>
