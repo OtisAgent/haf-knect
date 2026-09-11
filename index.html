@@ -4543,6 +4543,13 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
             <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:.78rem">who can drive, and who may post before they pay</span>
           </div>
           <div id="ov-access-sum" class="ov-src" style="margin:0 0 12px">Reading the access record…</div>
+          <!-- What CleverPay charges, and what it is owed. The amounts are SET in
+               the CleverPay portal; this screen cannot reach that database and
+               never could, so the half-hourly account sync mirrors them across.
+               One number, set in one place, shown in two. Hidden entirely until
+               the mirror has something to say — an empty money panel is how
+               people learn to stop reading money panels. -->
+          <div id="ov-clever-fee" style="display:none;margin:0 0 12px"></div>
           <!-- A job that never reached the board is the quietest failure HAF has:
                the customer thinks they ordered, and no driver ever sees it. It is
                named here, above the list, rather than left to be noticed. -->
@@ -12009,6 +12016,7 @@ function accessRender(){
           : (a.can_approve
               ? ' <button class="btn btn-gh btn-xs" data-acc-on="'+_esc(a.username)+'">Approve</button>'
               : ' <span style="color:var(--mu);font-size:.74rem">Needs a Clever check</span>'))+
+        _feeLine(a.username)+
         '<div style="margin-top:4px">'+_credChip(a)+
           ' <button class="btn btn-gh btn-xs" data-cred="'+_esc(a.username)+'">Payment terms</button></div>'+
       '</span>'+
@@ -12017,6 +12025,97 @@ function accessRender(){
   el.querySelectorAll('[data-acc-off]').forEach(b=>b.onclick=()=>accessSet(b.getAttribute('data-acc-off'),false));
   el.querySelectorAll('[data-acc-on]').forEach(b=>b.onclick=()=>accessSet(b.getAttribute('data-acc-on'),true));
   el.querySelectorAll('[data-cred]').forEach(b=>b.onclick=()=>creditAsk(b.getAttribute('data-cred')));
+}
+
+/* ── WHAT CLEVERPAY CHARGES, AND WHAT IT IS OWED ─────────────────────────────
+   Brent's rule, 29 July: "CleverPay only charge a fee when it's an invoice to
+   be generated — no work, no invoice, no charge." The amount is set by account
+   type, and it is the CleverPay team's number, never a HAF pricing lever.
+
+   Those four amounts are set in the CleverPay portal and live in the CleverPay
+   database. This page has no route to that database — it never has — so the
+   same half-hourly sync that mirrors every account mirrors the fee with it,
+   and haf_clever_fee_view reads the mirror. That is why the line below says
+   when it was last refreshed: a money figure with no time against it is one
+   somebody will act on after it stopped being true.
+
+   NOT SET IS NOT ZERO. A type nobody has priced is excluded from the total,
+   and the total says how many were excluded. A figure that quietly leaves a
+   third of the list out is worse than no figure at all. */
+let _feeCache=null;
+
+async function cleverFeeLoad(){
+  const el=document.getElementById('ov-clever-fee');
+  if(!el)return;
+  try{
+    const {denied,rows}=await _netRpc('haf_clever_fee_view');
+    if(denied||!rows.length){el.style.display='none';return}
+    _feeCache=rows[0];
+    cleverFeeRender();
+  }catch(e){
+    /* the fee is an addition to this card, never its point — a failure here
+       leaves the access list beside it exactly as it was */
+    el.style.display='none';
+  }
+}
+
+const _feeBasis={per_invoice:'per invoice',per_driver_per_invoice:'per driver, per invoice'};
+const _feeName={driver:'Driver',fleet:'Fleet',freight:'Freight',business:'Business'};
+
+function cleverFeeRender(){
+  const el=document.getElementById('ov-clever-fee'),d=_feeCache;
+  if(!el||!d){return}
+  const sched=d.schedule||[],t=d.totals||{};
+  const priced=sched.filter(s=>s.fee_ex_vat_pence!==null&&s.fee_ex_vat_pence!==undefined);
+
+  /* Nothing priced and nothing owed is not a panel, it is a sentence. */
+  if(!priced.length&&!t.due_pence){
+    el.style.display='';
+    el.className='ov-src';
+    el.innerHTML='<span class="dot"></span><span>No CleverPay fee has been set for any account type yet. '+
+      'Set them in the CleverPay portal, under Invoices &amp; payments, and they appear here.</span>';
+    return;
+  }
+
+  const chips=sched.map(s=>{
+    const amt=(s.fee_ex_vat_pence===null||s.fee_ex_vat_pence===undefined)
+      ? '<span style="color:var(--mu)">Not set</span>'
+      : '<b>'+_pyM(s.fee_ex_vat_pence)+'</b>'+(s.vat_applies?' +VAT':'');
+    return '<span class="ck" style="display:inline-block;margin:0 14px 4px 0">'+
+      _esc(_feeName[s.account_type]||s.account_type)+': '+amt+
+      '<span style="color:var(--mu);font-size:.78rem"> &middot; '+
+      _esc(_feeBasis[s.basis]||s.basis||'')+'</span></span>';
+  }).join('');
+
+  const left=(t.unpriced||0)
+    ? ' <span style="color:var(--mu)">'+t.unpriced+' account'+(t.unpriced===1?' is':'s are')+
+      ' on a type with no fee set, so they are not in that total.</span>'
+    : '';
+
+  el.style.display='';
+  el.className='ov-src';
+  el.innerHTML='<span class="dot"></span><span>'+
+    '<strong>'+_pyM(t.due_pence||0)+'</strong> owed to CleverPay across '+
+    (t.priced||0)+' account'+((t.priced||0)===1?'':'s')+' for '+
+    (t.invoices||0)+' invoice'+((t.invoices||0)===1?'':'s')+'.'+left+
+    '<div style="margin-top:6px">'+chips+'</div>'+
+    '<div style="color:var(--mu);font-size:.78rem;margin-top:4px">'+
+      'No work, no invoice, no charge. Amounts are set in the CleverPay portal'+
+      (d.synced_at?' &middot; last changed '+new Date(d.synced_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'')+
+    '</div></span>';
+}
+
+/* The fee this one account owes, for the row it belongs to. Says the workings
+   rather than a bare number — a fee nobody can check is a fee somebody will
+   dispute. Silent when there is nothing owed, which is most rows. */
+function _feeLine(username){
+  const a=((_feeCache||{}).accounts||[]).find(x=>x.username===username);
+  if(!a||!a.due_pence)return '';
+  const bits=[_pyM(a.each_pence),a.invoices+' invoice'+(a.invoices===1?'':'s')];
+  if(a.drivers>1)bits.push(a.drivers+' drivers');
+  return '<div style="color:var(--mu);font-size:.78rem;margin-top:2px">'+
+    'CleverPay fee <b style="color:var(--tx)">'+_pyM(a.due_pence)+'</b> &middot; '+
+    _esc(bits.join(' × '))+(a.vat_applies?' + VAT':' (no VAT)')+'</div>';
 }
 
 /* ── PUT AN ACCOUNT ON CREDIT, OR BACK ON PAY UPFRONT ────────────────────────
@@ -12115,6 +12214,9 @@ async function accessLoad(){
       '</span>';
     document.getElementById('ov-access-tools').style.display='';
     await creditLoad();
+    /* the fee mirror is an addition to this card, so it is awaited but never
+       allowed to stop the list beside it from drawing */
+    await cleverFeeLoad();
     accessRender();
   }catch(e){
     sum.className='ov-src bad';
