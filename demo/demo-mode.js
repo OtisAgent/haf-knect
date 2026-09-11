@@ -88,23 +88,29 @@
     return /^£0(\.00)?$/.test(v) ? null : v;
   }
 
+  /* WHICH number this panel is allowed to say.
+     The sentence is "X would be collected at this point", so X is the amount
+     HELD — fq-dep-amt — and nothing else. Both of the other candidates were
+     tried and both were wrong on a real order of £97.50: walking up from the
+     button lands in the price card and reads the ex-VAT subtotal, £81.25, and
+     an empty page reads £0.00. Two plausible numbers, neither of them the one
+     the customer would have paid, on a screen being recorded.
+
+     So: the app's own held amount first, the full total second, and only then
+     whatever sits near the button. If none of them is a real figure the panel
+     names no number at all. */
   function amountNear(el) {
+    var ids = ['fq-dep-amt', 'fq-pr-tot'];
+    for (var i = 0; i < ids.length; i++) {
+      var node = document.getElementById(ids[i]);
+      var v = node && node.offsetParent && money(node.textContent);
+      if (v) return v;
+    }
     var hop = el, depth = 0;
     while (hop && depth < 5) {
       var m = money(hop.textContent);
       if (m) return m;
       hop = hop.parentElement; depth++;
-    }
-    /* Nothing near the button. Ask the app itself: the order screen puts the
-       held amount in fq-dep-amt and the full price in fq-pr-tot, and those are
-       the same two figures the customer has been looking at. Walking up from
-       the link alone found £0.00 in testing, which is exactly the wrong number
-       to put in a panel explaining what would have been taken. */
-    var ids = ['fq-dep-amt', 'fq-pr-tot'];
-    for (var i = 0; i < ids.length; i++) {
-      var node = document.getElementById(ids[i]);
-      var v = node && money(node.textContent);
-      if (v) return v;
     }
     return null;
   }
