@@ -157,27 +157,38 @@ console.log('\nTHE LOGINS THE PAGE HANDS OUT ACTUALLY WORK');
   ok(creds.includes('DEMO1004') && creds.includes('DEMO1001'),
     'both demo logins are printed on the page (' + creds.join(', ') + ')');
 
-  for (const [user, pin, who] of [['DEMO1004', '1004', 'the poster'], ['DEMO1001', '1001', 'the driver']]) {
+  /* A cold demo app can take longer than one wait to answer, and a check that
+     fails on the network rather than on the product teaches nobody anything —
+     so this gets two goes before it calls the login broken. */
+  async function signsIn(user, pin) {
     const ctx = await br.newContext({ viewport: { width: 1280, height: 900 } });
     const p = await ctx.newPage();
     try {
       await p.goto(DEMO_APP + '/', { waitUntil: 'domcontentloaded' });
-      await p.waitForTimeout(2500);
+      await p.waitForSelector('#nav-login', { timeout: 20000 });
       await p.click('#nav-login');
-      await p.waitForTimeout(900);
+      await p.waitForSelector('#l-user', { state: 'visible', timeout: 10000 });
       await p.evaluate(([u, k]) => {
         document.getElementById('l-user').value = u;
         document.getElementById('l-pass').value = k;
         [...document.querySelectorAll('button')].filter(e => e.offsetParent)
           .find(e => /^sign in/i.test(e.textContent.trim())).click();
       }, [user, pin]);
-      await p.waitForTimeout(7000);
-      const inAs = await p.evaluate(() => localStorage.getItem('knect-user'));
-      ok(inAs === user, user + ' signs in on the demo database, as ' + who);
+      await p.waitForFunction(u => localStorage.getItem('knect-user') === u,
+        user, { timeout: 25000 }).catch(() => {});
+      return await p.evaluate(() => localStorage.getItem('knect-user'));
     } catch (e) {
-      ok(false, user + ' sign-in threw: ' + String(e).slice(0, 90));
+      return 'threw: ' + String(e).slice(0, 70);
+    } finally {
+      await ctx.close();
     }
-    await ctx.close();
+  }
+
+  for (const [user, pin, who] of [['DEMO1004', '1004', 'the poster'], ['DEMO1001', '1001', 'the driver']]) {
+    let got = await signsIn(user, pin);
+    if (got !== user) got = await signsIn(user, pin);
+    ok(got === user, user + ' signs in on the demo database, as ' + who
+      + (got === user ? '' : ' (got ' + got + ')'));
   }
 }
 
