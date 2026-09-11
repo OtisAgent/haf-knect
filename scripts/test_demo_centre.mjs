@@ -55,7 +55,7 @@ console.log('\nTHE RUNNING ORDER');
     text: n.textContent.trim(),
     id: (n.getAttribute('onclick') || '').replace(/[^']*'([^']+)'.*/, '$1'),
   })));
-  ok(jumps.length === 6, 'six places to jump to (' + jumps.length + ')');
+  ok(jumps.length === 7, 'seven places to jump to (' + jumps.length + ')');
   for (const j of jumps) {
     const there = await pg.$('#' + j.id);
     ok(!!there, '"' + j.text + '" goes to a section that exists');
@@ -126,18 +126,115 @@ console.log('\nGETTING CHECKED — Clever');
     'it warns that the sign-up is real and says to use a test address');
 }
 
-console.log('\nWHAT EACH LEVEL GETS');
+console.log('\nCOMPARING THE ACCOUNTS');
 {
   const heads = await pg.$$eval('#levels thead th', ns => ns.map(n => n.textContent.trim()));
   ok(heads.length === 4, 'one column per level plus the limit name (' + heads.length + ')');
   const body = await pg.$$eval('#levels tbody tr', ns => ns.map(r =>
     [...r.querySelectorAll('td')].map(d => d.textContent.trim())));
-  ok(body.length === 4, 'the four limits the network actually counts (' + body.length + ')');
-  const flat = body.flat().join(' ');
-  ok(/Unlimited/.test(flat), 'unlimited is written as Unlimited, never as a number people quote');
-  ok(!/999/.test(flat), 'no 999 anywhere');
+  ok(body.length === 5, 'the four limits the network counts, plus the price (' + body.length + ')');
+  const limits = body.slice(0, 4).flat().join(' ');
+  ok(/Unlimited/.test(limits), 'unlimited is written as Unlimited, never as a number people quote');
+  ok(!/999/.test(limits), 'no 999 anywhere');
   const txt = await pg.textContent('#levels');
   ok(/every level sees the whole product/i.test(txt), 'it states the rule: every level sees the whole product');
+
+  /* A comparison table's empty cells read as features being withheld, so the
+     sameness has to be said out loud before the table. */
+  const sameText = await pg.textContent('.same').catch(() => '');
+  ok(/same on every level, including free/i.test(sameText),
+    'it says outright what every level gets, free included');
+  const sameChips = await pg.$$eval('.same .chip', ns => ns.map(n => n.textContent.trim()));
+  const screensChip = sameChips.find(c => /dashboard screens/.test(c));
+  const posterCount = (await pg.$$('#post ol.walk li')).length;
+  ok(screensChip === 'All ' + posterCount + ' dashboard screens',
+    'the screen count is the live count, not a brochure number (' + screensChip + ')');
+}
+
+console.log('\nTHE PRICING ENGINE BEHIND THE COMPARISON');
+{
+  /* TRUTH = the live engine, run again right now, independently of the build.
+     If the page and this disagree by a penny, the page is wrong. */
+  const ENGINE = JSON.parse(execFileSync('node', [ROOT + 'scripts/quote_grid.mjs'],
+    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, cwd: ROOT }));
+  const MATRIX = JSON.parse(execFileSync('python3', [ROOT + 'scripts/demo_pricing_read.py'],
+    { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }));
+
+  const shown = await pg.textContent('#levels .note');
+  ok(shown.includes(MATRIX.version),
+    'the comparison names the matrix the network is quoting with (' + MATRIX.version + ')');
+  const pnote = await pg.textContent('#pricing .note');
+  ok(pnote.includes(MATRIX.effective_from),
+    'and the date it came into force (' + MATRIX.effective_from + ')');
+
+  /* The picker offers exactly what the live matrix prices — no more, no fewer. */
+  const vehOpts = await pg.$$eval('#pk-veh option', ns => ns.map(n => n.textContent.trim()));
+  same(vehOpts, MATRIX.vehicles.map(v => v.name), 'every vehicle the network prices is on the picker');
+  const jobOpts = await pg.$$eval('#pk-job option', ns => ns.map(n => n.textContent.trim()));
+  same(jobOpts, MATRIX.job_types.map(j => j.name), 'every live service level is on the picker');
+  const miOpts = await pg.$$eval('#pk-mi option', ns => ns.map(n => n.value));
+  same(miOpts.map(Number), ENGINE.miles, 'the distances match the ones that were priced');
+
+  /* Four jobs, picked to be different shapes: the default, a short local one,
+     the biggest van on the most urgent service, and a long cheap one. */
+  const jobs = [
+    ['LWB_VAN', 'STD_SAMEDAY', '50'],
+    ['SMALL_VAN', 'FLEX_SAMEDAY', '5'],
+    ['LUTON_TAIL', 'URGENT', '150'],
+    ['MWB_VAN', 'TIMED', '200'],
+  ];
+  for (const [v, j, m] of jobs) {
+    await pg.selectOption('#pk-veh', v);
+    await pg.selectOption('#pk-job', j);
+    await pg.selectOption('#pk-mi', m);
+    const truth = ENGINE.cells[v + '|' + j + '|' + m];
+    const cells = await pg.$$eval('tr.pricerow td.price',
+      ns => ns.map(n => n.firstChild.textContent.trim()));
+    const want = [0, 1, 2].map(i => '£' + truth[i].toFixed(2));
+    same(cells, want, v + ' / ' + j + ' / ' + m + 'mi is the engine\'s own price');
+    const asc = truth[0] >= truth[1] && truth[1] >= truth[2];
+    ok(asc, '  and a higher account level never costs more on the same job');
+    const why = (await pg.textContent('#pk-why')).trim();
+    ok(truth[3] ? /smallest charge/i.test(why) : /distance|vehicle|service/i.test(why),
+      '  it says why: ' + why.slice(0, 74));
+  }
+
+  /* The ladders the engine prices on, against the live matrix. */
+  const vLadder = await pg.$$eval('#pricing .mcard:nth-of-type(1) tbody tr',
+    ns => ns.map(r => [...r.querySelectorAll('td')].map(d => d.textContent.trim())));
+  same(vLadder.map(r => [r[0], r[2]]),
+    MATRIX.vehicles.map(v => [v.name, '£' + (v.min % 1 ? v.min.toFixed(2) : String(v.min))]),
+    'the vehicle ladder and its smallest charges are the live ones');
+  const sLadder = await pg.$$eval('#pricing .mcard:nth-of-type(2) tbody tr',
+    ns => ns.map(r => r.querySelector('td').textContent.trim()));
+  same(sLadder, MATRIX.job_types.map(j => j.name), 'the service ladder is the live one');
+
+  const extras = await pg.textContent('#pricing .mcard:nth-of-type(3)');
+  ok(extras.includes(MATRIX.extras.stop + ' each'), 'the extra-stop fee is the live one');
+  ok(extras.includes(MATRIX.extras.waiting + ' an hour'), 'the waiting rate is the live one');
+  ok(extras.includes(MATRIX.extras.cap_pct + '%'), 'the cap on all of it is the live one');
+
+  const hard = await pg.textContent('#pricing .hard');
+  ok(hard.includes(String(MATRIX.local.band_miles)) && hard.includes(String(MATRIX.local.max_off_pct)),
+    'short local work is explained with the live figures');
+  ok(hard.includes(String(MATRIX.fuel.cap_pct)), 'the fuel cap is the live one');
+}
+
+console.log('\nWHAT HAF EARNS IS NOT ON A PUBLIC PAGE');
+{
+  /* The engine's answer carries HAF's side of a job in the same object as the
+     customer's. Checked here on the finished page as well as in the build,
+     because this is the one that cannot be undone once it is out. */
+  const src = await pg.content();
+  const banned = ['marginPct', 'floorPct', 'hafMargin', 'networkFee', 'feeFloor',
+    'feeCeiling', 'minRetained', 'driverPay', 'carrierTransportValue',
+    'relayStorage', 'freightPool', 'driverPool', 'pctOfMargin', 'feeBasis',
+    'funded by HAF', 'HAF margin'];
+  const found = banned.filter(w => new RegExp(w.replace(/ /g, '\\s+'), 'i').test(src));
+  ok(found.length === 0, 'none of HAF\'s own commercials reached the page'
+    + (found.length ? ': ' + found.join(', ') : ''));
+  ok(!/pricing-matrix-v3|HAFPricingMatrix/.test(src),
+    'the engine file itself is not shipped to the public page');
 }
 
 console.log('\nNOTHING THAT TEACHES THE WRONG PRODUCT');

@@ -152,6 +152,49 @@ td.num{font-weight:600;font-variant-numeric:tabular-nums}
 .no{color:var(--haf-ink-faint)}
 .yes{color:var(--haf-positive);font-weight:700}
 
+.same{margin-top:1.5rem;background:var(--haf-surface);border:1px solid var(--haf-line);
+  border-left:3px solid var(--haf-positive);border-radius:0 10px 10px 0;padding:.85rem 1rem}
+.same .t{font-size:.63rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--haf-positive)}
+.same .chips{margin-top:.6rem;gap:.4rem}
+.same .chip{font-size:.76rem;padding:.24rem .62rem}
+
+tbody tr.pricerow td{background:var(--haf-surface-3);border-top:1px solid var(--haf-line-strong);
+  padding-top:.85rem;padding-bottom:.85rem}
+tbody tr.pricerow td:first-child{font-weight:700}
+tbody tr.pricerow td .sub{display:block;font-size:.7rem;font-weight:600;
+  color:var(--haf-ink-muted);margin-top:.1rem}
+td.price{font-family:var(--haf-font-display);font-weight:700;font-size:1.08rem;
+  font-variant-numeric:tabular-nums;color:var(--haf-ink)}
+td.price.best{color:var(--haf-positive)}
+td.price .off{display:block;font-family:var(--haf-font);font-size:.7rem;font-weight:600;
+  color:var(--haf-positive);margin-top:.12rem}
+
+.picker{display:flex;flex-wrap:wrap;gap:.75rem .9rem;align-items:flex-end;margin-top:1rem;
+  background:var(--haf-surface-2);border:1px solid var(--haf-line-strong);
+  border-radius:var(--haf-radius-sm);padding:.95rem 1.1rem}
+.picker .f{display:flex;flex-direction:column;gap:.28rem;min-width:140px;flex:1 1 150px}
+.picker label{font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--haf-ink-muted)}
+.picker select{font:inherit;font-size:.87rem;font-weight:600;color:var(--haf-ink);
+  background:var(--haf-surface);border:1px solid var(--haf-line-strong);
+  border-radius:var(--haf-radius-sm);padding:.5rem .6rem;cursor:pointer;width:100%}
+.picker select:focus{outline:2px solid var(--haf-orange);outline-offset:1px}
+.pk-why{flex:1 1 100%;font-size:.79rem;color:var(--haf-ink-muted)}
+
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(272px,1fr));gap:.85rem;
+  margin-top:1.7rem;align-items:start}
+.mcard{background:var(--haf-surface);border:1px solid var(--haf-line);
+  border-radius:var(--haf-radius-sm);padding:1.15rem}
+.mcard h3{margin-bottom:.42rem}
+.mcard p{font-size:.84rem;color:var(--haf-ink-muted)}
+.mcard .tblwrap{margin-top:1rem}
+.tblwrap.tight table{min-width:0}
+.tblwrap.tight th,.tblwrap.tight td{padding:.46rem .6rem;font-size:.81rem}
+.mcard ul.ticks{margin-top:.95rem}
+.mcard ul.ticks li{font-size:.83rem}
+.mcard ul.ticks b{font-weight:700}
+
 nav.jump{position:sticky;top:58px;z-index:29;background:var(--haf-bar);
   backdrop-filter:blur(14px);border-bottom:1px solid var(--haf-line);
   overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -270,7 +313,8 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
     <a onclick="jump('post')">Posting work</a>
     <a onclick="jump('drive')">Driving work</a>
     <a onclick="jump('checked')">Getting checked</a>
-    <a onclick="jump('levels')">What each level gets</a>
+    <a onclick="jump('levels')">Compare the accounts</a>
+    <a onclick="jump('pricing')">What a job costs</a>
     <a onclick="jump('join')">Joining</a>
   </div>
 </nav>
@@ -495,20 +539,101 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
 
 <section id="levels">
   <div class="wrap">
-    <div class="kicker">Levels</div>
+    <div class="kicker">Compare the accounts</div>
     <h2>Every level sees the whole product.</h2>
-    <p class="lede">What a level changes is how much you can do with it — not which
-      screens you get. Nothing is hidden behind a paywall; the limits are on volume.</p>
+    <p class="lede">What a level changes is how much you can do with it, and what a job
+      costs you — not which screens you get. Nothing is hidden behind a paywall.</p>
+
+    
+    <div class="same">
+      <div class="t">The same on every level, including free</div>
+      <div class="chips"><span class="chip">All 14 dashboard screens</span><span class="chip">Post work to the network</span><span class="chip">The live board</span><span class="chip">Track a job on the map</span><span class="chip">Deposits, invoices and receipts</span><span class="chip">Saved addresses</span><span class="chip">The calendar</span><span class="chip">Raise a ticket and get a person</span></div>
+    </div>
 
     <div class="tblwrap">
       <table>
         <thead><tr><th>Limit</th><th class="lvl">Free<span class="price">Free</span></th><th class="lvl">Plus<span class="price">£25 a month</span></th><th class="lvl">Pro<span class="price">£100 a month</span></th></tr></thead>
-        <tbody><tr><td>Jobs you can post a day</td><td class="num">5</td><td class="num">25</td><td class="num unl">Unlimited</td></tr><tr><td>Jobs running at once</td><td class="num">5</td><td class="num">25</td><td class="num unl">Unlimited</td></tr><tr><td>Team logins</td><td class="num">1</td><td class="num">3</td><td class="num">10</td></tr><tr><td>Send straight to a driver you pick</td><td class="no">Not on this level</td><td class="yes">Yes</td><td class="yes">Yes</td></tr></tbody>
+        <tbody><tr><td>Jobs you can post a day</td><td class="num">5</td><td class="num">25</td><td class="num unl">Unlimited</td></tr><tr><td>Jobs running at once</td><td class="num">5</td><td class="num">25</td><td class="num unl">Unlimited</td></tr><tr><td>Team logins</td><td class="num">1</td><td class="num">3</td><td class="num">10</td></tr><tr><td>Send straight to a driver you pick</td><td class="no">Not on this level</td><td class="yes">Yes</td><td class="yes">Yes</td></tr><tr class="pricerow"><td>What this job costs<span class="sub">The same job, the same driver</span></td><td class="price" id="pk-FREE">£98.44<span class="off" style="color:var(--haf-ink-faint)">£118.13 with VAT</span></td><td class="price" id="pk-PLUS">£95.45<span class="off">£2.99 less a job</span></td><td class="price best" id="pk-PRO">£92.65<span class="off">£5.79 less a job</span></td></tr></tbody>
       </table>
     </div>
-    <div class="note">These four are the limits the network counts today. Read out of the
-      live allowance book on 11 September 2026, so this table says what the product does
-      rather than what a brochure hoped it would.</div>
+
+    
+    <div class="picker">
+      <div class="f">
+        <label for="pk-veh">Vehicle</label>
+        <select id="pk-veh" onchange="repriceDemo()"><option value="SMALL_VAN">Small Van</option><option value="SWB_VAN">SWB</option><option value="MWB_VAN">MWB</option><option value="LWB_VAN" selected>LWB</option><option value="XLWB_VAN">XLWB</option><option value="LUTON">Luton — Box</option><option value="LUTON_CURTAIN">Luton — Curtain Side</option><option value="LUTON_TAIL">Luton — Tail Lift</option></select>
+      </div>
+      <div class="f">
+        <label for="pk-job">Service</label>
+        <select id="pk-job" onchange="repriceDemo()"><option value="FLEX_SAMEDAY">Scheduled / Flexible / Co-load</option><option value="STD_SAMEDAY" selected>Same-Day</option><option value="TIMED">Timed Delivery</option><option value="URGENT">Urgent / Time-Critical</option></select>
+      </div>
+      <div class="f">
+        <label for="pk-mi">Distance</label>
+        <select id="pk-mi" onchange="repriceDemo()"><option value="5">5 miles</option><option value="10">10 miles</option><option value="20">20 miles</option><option value="30">30 miles</option><option value="50" selected>50 miles</option><option value="75">75 miles</option><option value="100">100 miles</option><option value="150">150 miles</option><option value="200">200 miles</option></select>
+      </div>
+      <div class="pk-why" id="pk-why"></div>
+    </div>
+
+    <div class="note">The four limits are read out of the live allowance book on
+      11 September 2026. The prices in the bottom row are not worked out by this page: the
+      live pricing engine, MATRIX-V8, priced every one of these jobs when the
+      page was built, and the build stops if the network has moved to a newer matrix.
+      Prices exclude VAT at 20%.</div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <div class="kicker">What a job costs</div>
+    <h2>One matrix, and it is the same one the network quotes with.</h2>
+    <p class="lede">A price is not a haggle and it is not a guess. Four things set it:
+      the vehicle, how fast the job has to happen, how far it goes, and how hard it is
+      to load. Everything else on this page is a consequence of those four.</p>
+
+    <div class="mgrid">
+      <div class="mcard">
+        <h3>The vehicle</h3>
+        <p>Each size has a rate and a smallest charge, so a short job in a big van is
+          never priced as if it were a small one.</p>
+        <div class="tblwrap tight">
+          <table>
+            <thead><tr><th>Vehicle</th><th>Rate</th><th>Smallest charge</th></tr></thead>
+            <tbody><tr><td>Small Van</td><td class="num">base</td><td class="num">£50</td></tr><tr><td>SWB</td><td class="num">1.25×</td><td class="num">£55</td></tr><tr><td>MWB</td><td class="num">1.25×</td><td class="num">£60</td></tr><tr><td>LWB</td><td class="num">1.5×</td><td class="num">£65</td></tr><tr><td>XLWB</td><td class="num">1.5×</td><td class="num">£70</td></tr><tr><td>Luton — Box</td><td class="num">1.75×</td><td class="num">£75</td></tr><tr><td>Luton — Curtain Side</td><td class="num">1.75×</td><td class="num">£75</td></tr><tr><td>Luton — Tail Lift</td><td class="num">1.75×</td><td class="num">£80</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="mcard">
+        <h3>How fast it has to happen</h3>
+        <p>The service level the job is posted at. Most work sits on the first three;
+          only genuinely time-critical work carries a premium.</p>
+        <div class="tblwrap tight">
+          <table>
+            <thead><tr><th>Service</th><th>Premium</th></tr></thead>
+            <tbody><tr><td>Scheduled / Flexible / Co-load</td><td class="no">no premium</td></tr><tr><td>Same-Day</td><td class="no">no premium</td></tr><tr><td>Timed Delivery</td><td class="no">no premium</td></tr><tr><td>Urgent / Time-Critical</td><td class="num">+10%</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="mcard">
+        <h3>What else moves it</h3>
+        <p>Named, capped and on the quote before anyone agrees to anything. No
+          surprise on the invoice.</p>
+        <ul class="ticks"><li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--haf-orange)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg><span>Every extra stop — <b>£5 each</b></span></li><li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--haf-orange)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg><span>Waiting beyond the time allowed — <b>£15 an hour</b></span></li><li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--haf-orange)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg><span>A heavy load for the van — <b>up to 12% more</b></span></li><li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--haf-orange)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg><span>Anything other than kerbside — <b>up to 8% more</b></span></li><li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--haf-orange)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg><span>All of those together — <b>capped at 40% more</b></span></li></ul>
+      </div>
+    </div>
+
+    <div class="hard">Short local work is charged less than the smallest charge would
+      suggest: under 15 miles a job comes down by up to
+      30%, easing back to the full minimum by 25 miles.
+      Fuel is the one thing that can move a rate after the fact, it only moves when
+      pump prices run more than 8% over the market average, and it can
+      never add more than 10%.</div>
+
+    <div class="note">Read out of the live pricing matrix on 11 September 2026:
+      MATRIX-V8, in force since 2026-09-07. Rates shown exclude VAT
+      at 20%. This is the customer's half of the matrix — what HAF earns on
+      a job is the business's own and is not published here.</div>
   </div>
 </section>
 
@@ -552,6 +677,7 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
 
 </div>
 
+<script>window.HAF_DEMO_PRICES={"version":"MATRIX-V8","vatPct":20,"miles":[5,10,20,30,50,75,100,150,200],"vehicles":[{"code":"SMALL_VAN","name":"Small Van"},{"code":"SWB_VAN","name":"SWB"},{"code":"MWB_VAN","name":"MWB"},{"code":"LWB_VAN","name":"LWB"},{"code":"XLWB_VAN","name":"XLWB"},{"code":"LUTON","name":"Luton \u2014 Box"},{"code":"LUTON_CURTAIN","name":"Luton \u2014 Curtain Side"},{"code":"LUTON_TAIL","name":"Luton \u2014 Tail Lift"}],"jobTypes":[{"code":"FLEX_SAMEDAY","name":"Scheduled / Flexible / Co-load"},{"code":"STD_SAMEDAY","name":"Same-Day"},{"code":"TIMED","name":"Timed Delivery"},{"code":"URGENT","name":"Urgent / Time-Critical"}],"cells":{"SMALL_VAN|FLEX_SAMEDAY|5":[45.84,44.45,43.15,1],"SMALL_VAN|FLEX_SAMEDAY|10":[47.91,46.46,45.1,1],"SMALL_VAN|FLEX_SAMEDAY|20":[56.25,54.55,52.95,1],"SMALL_VAN|FLEX_SAMEDAY|30":[62.5,60.61,58.83,1],"SMALL_VAN|FLEX_SAMEDAY|50":[65.63,63.64,61.76,0],"SMALL_VAN|FLEX_SAMEDAY|75":[98.44,95.45,92.65,0],"SMALL_VAN|FLEX_SAMEDAY|100":[131.25,127.27,123.53,0],"SMALL_VAN|FLEX_SAMEDAY|150":[196.88,190.91,185.29,0],"SMALL_VAN|FLEX_SAMEDAY|200":[262.5,254.55,247.06,0],"SMALL_VAN|STD_SAMEDAY|5":[45.84,44.45,43.15,1],"SMALL_VAN|STD_SAMEDAY|10":[47.91,46.46,45.1,1],"SMALL_VAN|STD_SAMEDAY|20":[56.25,54.55,52.95,1],"SMALL_VAN|STD_SAMEDAY|30":[62.5,60.61,58.83,1],"SMALL_VAN|STD_SAMEDAY|50":[65.63,63.64,61.76,0],"SMALL_VAN|STD_SAMEDAY|75":[98.44,95.45,92.65,0],"SMALL_VAN|STD_SAMEDAY|100":[131.25,127.27,123.53,0],"SMALL_VAN|STD_SAMEDAY|150":[196.88,190.91,185.29,0],"SMALL_VAN|STD_SAMEDAY|200":[262.5,254.55,247.06,0],"SMALL_VAN|TIMED|5":[48.89,47.32,45.84,1],"SMALL_VAN|TIMED|10":[51.11,49.46,47.91,1],"SMALL_VAN|TIMED|20":[60,58.06,56.25,1],"SMALL_VAN|TIMED|30":[66.67,64.52,62.5,1],"SMALL_VAN|TIMED|50":[70,67.74,65.63,0],"SMALL_VAN|TIMED|75":[105,101.61,98.44,0],"SMALL_VAN|TIMED|100":[140,135.48,131.25,0],"SMALL_VAN|TIMED|150":[210,203.23,196.88,0],"SMALL_VAN|TIMED|200":[280,270.97,262.5,0],"SMALL_VAN|URGENT|5":[52.39,50.58,48.89,1],"SMALL_VAN|URGENT|10":[54.76,52.87,51.11,1],"SMALL_VAN|URGENT|20":[64.29,62.07,60,1],"SMALL_VAN|URGENT|30":[71.43,68.97,66.67,1],"SMALL_VAN|URGENT|50":[82.5,79.66,77,0],"SMALL_VAN|URGENT|75":[123.76,119.49,115.51,0],"SMALL_VAN|URGENT|100":[165,159.31,154,0],"SMALL_VAN|URGENT|150":[247.5,238.97,231,0],"SMALL_VAN|URGENT|200":[330,318.62,308,0],"SWB_VAN|FLEX_SAMEDAY|5":[50.41,48.88,47.45,1],"SWB_VAN|FLEX_SAMEDAY|10":[52.71,51.12,49.62,1],"SWB_VAN|FLEX_SAMEDAY|20":[61.88,60,58.24,1],"SWB_VAN|FLEX_SAMEDAY|30":[68.75,66.67,64.71,1],"SWB_VAN|FLEX_SAMEDAY|50":[82.04,79.55,77.21,0],"SWB_VAN|FLEX_SAMEDAY|75":[123.05,119.32,115.81,0],"SWB_VAN|FLEX_SAMEDAY|100":[164.06,159.09,154.41,0],"SWB_VAN|FLEX_SAMEDAY|150":[246.1,238.64,231.62,0],"SWB_VAN|FLEX_SAMEDAY|200":[328.13,318.18,308.82,0],"SWB_VAN|STD_SAMEDAY|5":[50.41,48.88,47.45,1],"SWB_VAN|STD_SAMEDAY|10":[52.71,51.12,49.62,1],"SWB_VAN|STD_SAMEDAY|20":[61.88,60,58.24,1],"SWB_VAN|STD_SAMEDAY|30":[68.75,66.67,64.71,1],"SWB_VAN|STD_SAMEDAY|50":[82.04,79.55,77.21,0],"SWB_VAN|STD_SAMEDAY|75":[123.05,119.32,115.81,0],"SWB_VAN|STD_SAMEDAY|100":[164.06,159.09,154.41,0],"SWB_VAN|STD_SAMEDAY|150":[246.1,238.64,231.62,0],"SWB_VAN|STD_SAMEDAY|200":[328.13,318.18,308.82,0],"SWB_VAN|TIMED|5":[53.77,52.04,50.41,1],"SWB_VAN|TIMED|10":[56.23,54.41,52.71,1],"SWB_VAN|TIMED|20":[66,63.87,61.88,1],"SWB_VAN|TIMED|30":[73.33,70.97,68.75,1],"SWB_VAN|TIMED|50":[87.51,84.68,82.04,0],"SWB_VAN|TIMED|75":[131.25,127.02,123.05,0],"SWB_VAN|TIMED|100":[175,169.35,164.06,0],"SWB_VAN|TIMED|150":[262.51,254.04,246.1,0],"SWB_VAN|TIMED|200":[350,338.71,328.13,0],"SWB_VAN|URGENT|5":[57.61,55.63,53.77,1],"SWB_VAN|URGENT|10":[60.24,58.17,56.23,1],"SWB_VAN|URGENT|20":[70.71,68.28,66,1],"SWB_VAN|URGENT|30":[78.57,75.86,73.33,1],"SWB_VAN|URGENT|50":[103.13,99.57,96.25,0],"SWB_VAN|URGENT|75":[154.69,149.35,144.37,0],"SWB_VAN|URGENT|100":[206.26,199.14,192.51,0],"SWB_VAN|URGENT|150":[309.37,298.7,288.75,0],"SWB_VAN|URGENT|200":[412.5,398.28,385,0],"MWB_VAN|FLEX_SAMEDAY|5":[55,53.33,51.77,1],"MWB_VAN|FLEX_SAMEDAY|10":[57.5,55.76,54.12,1],"MWB_VAN|FLEX_SAMEDAY|20":[67.5,65.45,63.53,1],"MWB_VAN|FLEX_SAMEDAY|30":[75,72.73,70.59,1],"MWB_VAN|FLEX_SAMEDAY|50":[82.04,79.55,77.21,0],"MWB_VAN|FLEX_SAMEDAY|75":[123.05,119.32,115.81,0],"MWB_VAN|FLEX_SAMEDAY|100":[164.06,159.09,154.41,0],"MWB_VAN|FLEX_SAMEDAY|150":[246.1,238.64,231.62,0],"MWB_VAN|FLEX_SAMEDAY|200":[328.13,318.18,308.82,0],"MWB_VAN|STD_SAMEDAY|5":[55,53.33,51.77,1],"MWB_VAN|STD_SAMEDAY|10":[57.5,55.76,54.12,1],"MWB_VAN|STD_SAMEDAY|20":[67.5,65.45,63.53,1],"MWB_VAN|STD_SAMEDAY|30":[75,72.73,70.59,1],"MWB_VAN|STD_SAMEDAY|50":[82.04,79.55,77.21,0],"MWB_VAN|STD_SAMEDAY|75":[123.05,119.32,115.81,0],"MWB_VAN|STD_SAMEDAY|100":[164.06,159.09,154.41,0],"MWB_VAN|STD_SAMEDAY|150":[246.1,238.64,231.62,0],"MWB_VAN|STD_SAMEDAY|200":[328.13,318.18,308.82,0],"MWB_VAN|TIMED|5":[58.67,56.77,55,1],"MWB_VAN|TIMED|10":[61.33,59.35,57.5,1],"MWB_VAN|TIMED|20":[72,69.68,67.5,1],"MWB_VAN|TIMED|30":[80,77.42,75,1],"MWB_VAN|TIMED|50":[87.51,84.68,82.04,0],"MWB_VAN|TIMED|75":[131.25,127.02,123.05,0],"MWB_VAN|TIMED|100":[175,169.35,164.06,0],"MWB_VAN|TIMED|150":[262.51,254.04,246.1,0],"MWB_VAN|TIMED|200":[350,338.71,328.13,0],"MWB_VAN|URGENT|5":[62.86,60.69,58.67,1],"MWB_VAN|URGENT|10":[65.71,63.45,61.33,1],"MWB_VAN|URGENT|20":[77.14,74.48,72,1],"MWB_VAN|URGENT|30":[85.71,82.76,80,1],"MWB_VAN|URGENT|50":[103.13,99.57,96.25,0],"MWB_VAN|URGENT|75":[154.69,149.35,144.37,0],"MWB_VAN|URGENT|100":[206.26,199.14,192.51,0],"MWB_VAN|URGENT|150":[309.37,298.7,288.75,0],"MWB_VAN|URGENT|200":[412.5,398.28,385,0],"LWB_VAN|FLEX_SAMEDAY|5":[59.59,57.78,56.09,1],"LWB_VAN|FLEX_SAMEDAY|10":[62.29,60.4,58.63,1],"LWB_VAN|FLEX_SAMEDAY|20":[73.13,70.91,68.83,1],"LWB_VAN|FLEX_SAMEDAY|30":[81.25,78.79,76.48,1],"LWB_VAN|FLEX_SAMEDAY|50":[98.44,95.45,92.65,0],"LWB_VAN|FLEX_SAMEDAY|75":[147.66,143.19,138.98,0],"LWB_VAN|FLEX_SAMEDAY|100":[196.88,190.91,185.29,0],"LWB_VAN|FLEX_SAMEDAY|150":[295.31,286.36,277.94,0],"LWB_VAN|FLEX_SAMEDAY|200":[393.75,381.82,370.59,0],"LWB_VAN|STD_SAMEDAY|5":[59.59,57.78,56.09,1],"LWB_VAN|STD_SAMEDAY|10":[62.29,60.4,58.63,1],"LWB_VAN|STD_SAMEDAY|20":[73.13,70.91,68.83,1],"LWB_VAN|STD_SAMEDAY|30":[81.25,78.79,76.48,1],"LWB_VAN|STD_SAMEDAY|50":[98.44,95.45,92.65,0],"LWB_VAN|STD_SAMEDAY|75":[147.66,143.19,138.98,0],"LWB_VAN|STD_SAMEDAY|100":[196.88,190.91,185.29,0],"LWB_VAN|STD_SAMEDAY|150":[295.31,286.36,277.94,0],"LWB_VAN|STD_SAMEDAY|200":[393.75,381.82,370.59,0],"LWB_VAN|TIMED|5":[63.56,61.51,59.59,1],"LWB_VAN|TIMED|10":[66.44,64.3,62.29,1],"LWB_VAN|TIMED|20":[78,75.48,73.13,1],"LWB_VAN|TIMED|30":[86.67,83.87,81.25,1],"LWB_VAN|TIMED|50":[105,101.61,98.44,0],"LWB_VAN|TIMED|75":[157.51,152.43,147.66,0],"LWB_VAN|TIMED|100":[210,203.23,196.88,0],"LWB_VAN|TIMED|150":[315,304.84,295.31,0],"LWB_VAN|TIMED|200":[420,406.45,393.75,0],"LWB_VAN|URGENT|5":[68.1,65.75,63.56,1],"LWB_VAN|URGENT|10":[71.19,68.73,66.44,1],"LWB_VAN|URGENT|20":[83.57,80.69,78,1],"LWB_VAN|URGENT|30":[92.86,89.66,86.67,1],"LWB_VAN|URGENT|50":[123.76,119.49,115.51,0],"LWB_VAN|URGENT|75":[185.63,179.23,173.25,0],"LWB_VAN|URGENT|100":[247.5,238.97,231,0],"LWB_VAN|URGENT|150":[371.26,358.46,346.51,0],"LWB_VAN|URGENT|200":[495,477.93,462,0],"XLWB_VAN|FLEX_SAMEDAY|5":[64.16,62.22,60.39,1],"XLWB_VAN|FLEX_SAMEDAY|10":[67.09,65.05,63.15,1],"XLWB_VAN|FLEX_SAMEDAY|20":[78.75,76.36,74.12,1],"XLWB_VAN|FLEX_SAMEDAY|30":[87.5,84.85,82.36,1],"XLWB_VAN|FLEX_SAMEDAY|50":[98.44,95.45,92.65,0],"XLWB_VAN|FLEX_SAMEDAY|75":[147.66,143.19,138.98,0],"XLWB_VAN|FLEX_SAMEDAY|100":[196.88,190.91,185.29,0],"XLWB_VAN|FLEX_SAMEDAY|150":[295.31,286.36,277.94,0],"XLWB_VAN|FLEX_SAMEDAY|200":[393.75,381.82,370.59,0],"XLWB_VAN|STD_SAMEDAY|5":[64.16,62.22,60.39,1],"XLWB_VAN|STD_SAMEDAY|10":[67.09,65.05,63.15,1],"XLWB_VAN|STD_SAMEDAY|20":[78.75,76.36,74.12,1],"XLWB_VAN|STD_SAMEDAY|30":[87.5,84.85,82.36,1],"XLWB_VAN|STD_SAMEDAY|50":[98.44,95.45,92.65,0],"XLWB_VAN|STD_SAMEDAY|75":[147.66,143.19,138.98,0],"XLWB_VAN|STD_SAMEDAY|100":[196.88,190.91,185.29,0],"XLWB_VAN|STD_SAMEDAY|150":[295.31,286.36,277.94,0],"XLWB_VAN|STD_SAMEDAY|200":[393.75,381.82,370.59,0],"XLWB_VAN|TIMED|5":[68.44,66.23,64.16,1],"XLWB_VAN|TIMED|10":[71.56,69.25,67.09,1],"XLWB_VAN|TIMED|20":[84,81.29,78.75,1],"XLWB_VAN|TIMED|30":[93.33,90.32,87.5,1],"XLWB_VAN|TIMED|50":[105,101.61,98.44,0],"XLWB_VAN|TIMED|75":[157.51,152.43,147.66,0],"XLWB_VAN|TIMED|100":[210,203.23,196.88,0],"XLWB_VAN|TIMED|150":[315,304.84,295.31,0],"XLWB_VAN|TIMED|200":[420,406.45,393.75,0],"XLWB_VAN|URGENT|5":[73.33,70.8,68.44,1],"XLWB_VAN|URGENT|10":[76.67,74.03,71.56,1],"XLWB_VAN|URGENT|20":[90,86.9,84,1],"XLWB_VAN|URGENT|30":[100,96.55,93.33,1],"XLWB_VAN|URGENT|50":[123.76,119.49,115.51,0],"XLWB_VAN|URGENT|75":[185.63,179.23,173.25,0],"XLWB_VAN|URGENT|100":[247.5,238.97,231,0],"XLWB_VAN|URGENT|150":[371.26,358.46,346.51,0],"XLWB_VAN|URGENT|200":[495,477.93,462,0],"LUTON|FLEX_SAMEDAY|5":[68.75,66.67,64.71,1],"LUTON|FLEX_SAMEDAY|10":[71.88,69.7,67.65,1],"LUTON|FLEX_SAMEDAY|20":[84.38,81.82,79.42,1],"LUTON|FLEX_SAMEDAY|30":[93.75,90.91,88.24,1],"LUTON|FLEX_SAMEDAY|50":[114.85,111.37,108.09,0],"LUTON|FLEX_SAMEDAY|75":[172.26,167.04,162.13,0],"LUTON|FLEX_SAMEDAY|100":[229.69,222.73,216.18,0],"LUTON|FLEX_SAMEDAY|150":[344.54,334.1,324.27,0],"LUTON|FLEX_SAMEDAY|200":[459.38,445.45,432.35,0],"LUTON|STD_SAMEDAY|5":[68.75,66.67,64.71,1],"LUTON|STD_SAMEDAY|10":[71.88,69.7,67.65,1],"LUTON|STD_SAMEDAY|20":[84.38,81.82,79.42,1],"LUTON|STD_SAMEDAY|30":[93.75,90.91,88.24,1],"LUTON|STD_SAMEDAY|50":[114.85,111.37,108.09,0],"LUTON|STD_SAMEDAY|75":[172.26,167.04,162.13,0],"LUTON|STD_SAMEDAY|100":[229.69,222.73,216.18,0],"LUTON|STD_SAMEDAY|150":[344.54,334.1,324.27,0],"LUTON|STD_SAMEDAY|200":[459.38,445.45,432.35,0],"LUTON|TIMED|5":[73.33,70.97,68.75,1],"LUTON|TIMED|10":[76.67,74.19,71.88,1],"LUTON|TIMED|20":[90,87.1,84.38,1],"LUTON|TIMED|30":[100,96.77,93.75,1],"LUTON|TIMED|50":[122.51,118.55,114.85,0],"LUTON|TIMED|75":[183.75,177.82,172.26,0],"LUTON|TIMED|100":[245,237.1,229.69,0],"LUTON|TIMED|150":[367.51,355.65,344.54,0],"LUTON|TIMED|200":[490,474.19,459.38,0],"LUTON|URGENT|5":[78.57,75.86,73.33,1],"LUTON|URGENT|10":[82.14,79.31,76.67,1],"LUTON|URGENT|20":[96.43,93.1,90,1],"LUTON|URGENT|30":[107.14,103.45,100,1],"LUTON|URGENT|50":[144.37,139.39,134.75,0],"LUTON|URGENT|75":[216.56,209.09,202.12,0],"LUTON|URGENT|100":[288.76,278.8,269.51,0],"LUTON|URGENT|150":[433.13,418.19,404.25,0],"LUTON|URGENT|200":[577.5,557.59,539,0],"LUTON_CURTAIN|FLEX_SAMEDAY|5":[68.75,66.67,64.71,1],"LUTON_CURTAIN|FLEX_SAMEDAY|10":[71.88,69.7,67.65,1],"LUTON_CURTAIN|FLEX_SAMEDAY|20":[84.38,81.82,79.42,1],"LUTON_CURTAIN|FLEX_SAMEDAY|30":[93.75,90.91,88.24,1],"LUTON_CURTAIN|FLEX_SAMEDAY|50":[114.85,111.37,108.09,0],"LUTON_CURTAIN|FLEX_SAMEDAY|75":[172.26,167.04,162.13,0],"LUTON_CURTAIN|FLEX_SAMEDAY|100":[229.69,222.73,216.18,0],"LUTON_CURTAIN|FLEX_SAMEDAY|150":[344.54,334.1,324.27,0],"LUTON_CURTAIN|FLEX_SAMEDAY|200":[459.38,445.45,432.35,0],"LUTON_CURTAIN|STD_SAMEDAY|5":[68.75,66.67,64.71,1],"LUTON_CURTAIN|STD_SAMEDAY|10":[71.88,69.7,67.65,1],"LUTON_CURTAIN|STD_SAMEDAY|20":[84.38,81.82,79.42,1],"LUTON_CURTAIN|STD_SAMEDAY|30":[93.75,90.91,88.24,1],"LUTON_CURTAIN|STD_SAMEDAY|50":[114.85,111.37,108.09,0],"LUTON_CURTAIN|STD_SAMEDAY|75":[172.26,167.04,162.13,0],"LUTON_CURTAIN|STD_SAMEDAY|100":[229.69,222.73,216.18,0],"LUTON_CURTAIN|STD_SAMEDAY|150":[344.54,334.1,324.27,0],"LUTON_CURTAIN|STD_SAMEDAY|200":[459.38,445.45,432.35,0],"LUTON_CURTAIN|TIMED|5":[73.33,70.97,68.75,1],"LUTON_CURTAIN|TIMED|10":[76.67,74.19,71.88,1],"LUTON_CURTAIN|TIMED|20":[90,87.1,84.38,1],"LUTON_CURTAIN|TIMED|30":[100,96.77,93.75,1],"LUTON_CURTAIN|TIMED|50":[122.51,118.55,114.85,0],"LUTON_CURTAIN|TIMED|75":[183.75,177.82,172.26,0],"LUTON_CURTAIN|TIMED|100":[245,237.1,229.69,0],"LUTON_CURTAIN|TIMED|150":[367.51,355.65,344.54,0],"LUTON_CURTAIN|TIMED|200":[490,474.19,459.38,0],"LUTON_CURTAIN|URGENT|5":[78.57,75.86,73.33,1],"LUTON_CURTAIN|URGENT|10":[82.14,79.31,76.67,1],"LUTON_CURTAIN|URGENT|20":[96.43,93.1,90,1],"LUTON_CURTAIN|URGENT|30":[107.14,103.45,100,1],"LUTON_CURTAIN|URGENT|50":[144.37,139.39,134.75,0],"LUTON_CURTAIN|URGENT|75":[216.56,209.09,202.12,0],"LUTON_CURTAIN|URGENT|100":[288.76,278.8,269.51,0],"LUTON_CURTAIN|URGENT|150":[433.13,418.19,404.25,0],"LUTON_CURTAIN|URGENT|200":[577.5,557.59,539,0],"LUTON_TAIL|FLEX_SAMEDAY|5":[73.34,71.12,69.03,1],"LUTON_TAIL|FLEX_SAMEDAY|10":[76.66,74.34,72.16,1],"LUTON_TAIL|FLEX_SAMEDAY|20":[90,87.27,84.71,1],"LUTON_TAIL|FLEX_SAMEDAY|30":[100,96.97,94.12,1],"LUTON_TAIL|FLEX_SAMEDAY|50":[114.85,111.37,108.09,0],"LUTON_TAIL|FLEX_SAMEDAY|75":[172.26,167.04,162.13,0],"LUTON_TAIL|FLEX_SAMEDAY|100":[229.69,222.73,216.18,0],"LUTON_TAIL|FLEX_SAMEDAY|150":[344.54,334.1,324.27,0],"LUTON_TAIL|FLEX_SAMEDAY|200":[459.38,445.45,432.35,0],"LUTON_TAIL|STD_SAMEDAY|5":[73.34,71.12,69.03,1],"LUTON_TAIL|STD_SAMEDAY|10":[76.66,74.34,72.16,1],"LUTON_TAIL|STD_SAMEDAY|20":[90,87.27,84.71,1],"LUTON_TAIL|STD_SAMEDAY|30":[100,96.97,94.12,1],"LUTON_TAIL|STD_SAMEDAY|50":[114.85,111.37,108.09,0],"LUTON_TAIL|STD_SAMEDAY|75":[172.26,167.04,162.13,0],"LUTON_TAIL|STD_SAMEDAY|100":[229.69,222.73,216.18,0],"LUTON_TAIL|STD_SAMEDAY|150":[344.54,334.1,324.27,0],"LUTON_TAIL|STD_SAMEDAY|200":[459.38,445.45,432.35,0],"LUTON_TAIL|TIMED|5":[78.23,75.7,73.34,1],"LUTON_TAIL|TIMED|10":[81.77,79.14,76.66,1],"LUTON_TAIL|TIMED|20":[96,92.9,90,1],"LUTON_TAIL|TIMED|30":[106.67,103.23,100,1],"LUTON_TAIL|TIMED|50":[122.51,118.55,114.85,0],"LUTON_TAIL|TIMED|75":[183.75,177.82,172.26,0],"LUTON_TAIL|TIMED|100":[245,237.1,229.69,0],"LUTON_TAIL|TIMED|150":[367.51,355.65,344.54,0],"LUTON_TAIL|TIMED|200":[490,474.19,459.38,0],"LUTON_TAIL|URGENT|5":[83.81,80.92,78.23,1],"LUTON_TAIL|URGENT|10":[87.61,84.59,81.77,1],"LUTON_TAIL|URGENT|20":[102.86,99.31,96,1],"LUTON_TAIL|URGENT|30":[114.29,110.34,106.67,1],"LUTON_TAIL|URGENT|50":[144.37,139.39,134.75,0],"LUTON_TAIL|URGENT|75":[216.56,209.09,202.12,0],"LUTON_TAIL|URGENT|100":[288.76,278.8,269.51,0],"LUTON_TAIL|URGENT|150":[433.13,418.19,404.25,0],"LUTON_TAIL|URGENT|200":[577.5,557.59,539,0]},"levels":["FREE","PLUS","PRO"]};</script>
 <script>
 (function(){
   var URL_='https://ggkpqqrtxtlafdkxcaqg.supabase.co/rest/v1/rpc/',
@@ -632,13 +758,48 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
     }
   }
   window.addEventListener('scroll',function(){
-    var ids=['how','post','drive','checked','levels','join'],best=null;
+    var ids=['how','post','drive','checked','levels','pricing','join'],best=null;
     for(var i=0;i<ids.length;i++){
       var e=document.getElementById(ids[i]); if(!e)continue;
       if(e.getBoundingClientRect().top-140<=0)best=ids[i];
     }
     if(best)mark(best);
   },{passive:true});
+
+  window.repriceDemo=function(){
+    var P=window.HAF_DEMO_PRICES; if(!P)return;
+    var v=document.getElementById('pk-veh'), j=document.getElementById('pk-job'),
+        m=document.getElementById('pk-mi');
+    if(!v||!j||!m)return;
+    var cell=P.cells[v.value+'|'+j.value+'|'+m.value];
+    var levels=P.levels, why=document.getElementById('pk-why');
+    if(!cell){
+      for(var i=0;i<levels.length;i++){
+        var miss=document.getElementById('pk-'+levels[i]);
+        if(miss)miss.innerHTML='<span class="off">not priced</span>';
+      }
+      if(why)why.textContent='That combination is not on this demo. Pick another distance.';
+      return;
+    }
+    var vat=1+P.vatPct/100, full=cell[0];
+    for(var k=0;k<levels.length;k++){
+      var td=document.getElementById('pk-'+levels[k]); if(!td)continue;
+      var ex=cell[k], inc=Math.round(ex*vat*100)/100;
+      var save=Math.round((full-ex)*100)/100;
+      td.innerHTML='£'+ex.toFixed(2)
+        +(save>0?'<span class="off">£'+save.toFixed(2)+' less a job</span>'
+                :'<span class="off" style="color:var(--haf-ink-faint)">£'+inc.toFixed(2)+' with VAT</span>');
+      td.className='price'+(k===levels.length-1?' best':'');
+    }
+    if(why){
+      var label=v.options[v.selectedIndex].text+', '+j.options[j.selectedIndex].text
+               +', '+m.options[m.selectedIndex].text;
+      why.textContent=cell[3]
+        ? label+'. This one is on the smallest charge for the vehicle, so the distance is '
+          +'not what is setting the price.'
+        : label+'. Priced on the distance, the vehicle and the service level.';
+    }
+  };
 
   window.doorEnter=function(){
     document.getElementById('door').style.display='none';
@@ -647,6 +808,7 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
   };
 
   function start(){
+    window.repriceDemo();
     var fromLink=null;
     try{
       var m=(location.search||'').match(/[?&]code=([A-Za-z0-9]{4,12})(&|$)/);

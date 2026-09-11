@@ -60,6 +60,40 @@ ENV = ROOT.parent / "haf-driver-app" / ".env.local"
 
 sys.path.insert(0, str(ROOT / "scripts"))
 import demo_live_read as live  # noqa: E402  (same folder, read the live product)
+import demo_pricing_read as pricing  # noqa: E402  (the live pricing matrix)
+
+# ── the example job the comparison opens on ──────────────────────────────────
+# A 50-mile same-day LWB run: the most ordinary job on the network, far enough
+# out that the smallest charge is not what is setting the price, so the gap
+# between the three account levels is the real gap rather than a rounding.
+OPENS_ON = ("LWB_VAN", "STD_SAMEDAY", 50)
+
+# ── what a level does NOT change ─────────────────────────────────────────────
+# Stated before the table because a comparison table's blank cells read as
+# features being withheld. The screen count is not typed here: it is the number
+# of poster screens read off the live sidebar this build.
+SAME_ON_EVERY_LEVEL = [
+    "Post work to the network",
+    "The live board",
+    "Track a job on the map",
+    "Deposits, invoices and receipts",
+    "Saved addresses",
+    "The calendar",
+    "Raise a ticket and get a person",
+]
+
+# ── what may never reach a public page ───────────────────────────────────────
+# The pricing matrix holds HAF's own commercials next to the customer's rates:
+# what each job type earns, the fee floor and ceiling, the pool splits, what the
+# driver is paid. A public page is a one-way door, so the build refuses to ship
+# if any of it appears — by name or by the phrasing it travels under. Brent can
+# have any of it added on his word; it will not arrive by accident.
+NEVER_PUBLISH = [
+    "marginPct", "floorPct", "hafMargin", "networkFee", "feeFloor", "feeCeiling",
+    "minRetained", "driverPay", "carrierTransportValue", "relayStorage",
+    "freightPool", "driverPool", "affiliate", "pctOfMargin", "feeBasis",
+    "funded by HAF", "HAF margin", "what HAF keeps",
+]
 
 # ── the three guided walks ───────────────────────────────────────────────────
 # Brent, 11 Sep: "the features of how to use the PLNA as a driver and the
@@ -233,6 +267,93 @@ def chips(items):
     return "".join('<span class="chip">%s</span>' % esc(i) for i in items)
 
 
+def quote_grid():
+    """Run the LIVE pricing engine over every job on the picker.
+
+    Not a reimplementation and not a lookup table typed by hand: this shells out
+    to the engine file the customer quote itself loads, and the prices that come
+    back are what go on the page. If node is missing or the engine throws, the
+    build fails — a demo with no prices is better than a demo with invented ones.
+    """
+    p = subprocess.run(["node", str(ROOT / "scripts" / "quote_grid.mjs")],
+                       capture_output=True, text=True, cwd=str(ROOT))
+    if p.returncode != 0:
+        raise ReadFailed("the pricing engine would not price the examples: %s"
+                         % (p.stderr.strip() or p.stdout.strip()))
+    try:
+        g = json.loads(p.stdout)
+    except Exception as e:
+        raise ReadFailed("the pricing engine's answer was not readable — %s" % e)
+    if not g.get("cells"):
+        raise ReadFailed("the pricing engine priced nothing")
+    return g
+
+
+def miles_label(m):
+    return "%d miles" % m
+
+
+def options(pairs, chosen):
+    return "".join('<option value="%s"%s>%s</option>'
+                   % (esc(v), " selected" if v == chosen else "", esc(l))
+                   for v, l in pairs)
+
+
+def price_row(grid, levels):
+    """The one row in the comparison that is not a limit — the job's price.
+
+    Filled in here as well as by the picker, so the table reads correctly with
+    JavaScript switched off and never shows a row of dashes on a screen share.
+    """
+    key = "%s|%s|%d" % OPENS_ON
+    cell = grid["cells"].get(key)
+    if not cell:
+        raise ReadFailed("the engine did not price the example job (%s)" % key)
+    full = cell[0]
+    tds = []
+    for i, _ in enumerate(levels):
+        ex = cell[i]
+        save = round(full - ex, 2)
+        inc = round(ex * (1 + grid["vatPct"] / 100.0), 2)
+        extra = ('<span class="off">£%.2f less a job</span>' % save if save > 0 else
+                 '<span class="off" style="color:var(--haf-ink-faint)">£%.2f with VAT</span>' % inc)
+        tds.append('<td class="price%s" id="pk-%s">£%.2f%s</td>'
+                   % (" best" if i == len(levels) - 1 else "", levels[i], ex, extra))
+    return ('<tr class="pricerow"><td>What this job costs'
+            '<span class="sub">The same job, the same driver</span></td>%s</tr>'
+            % "".join(tds))
+
+
+def ladders(pm):
+    """The vehicle and service ladders, and the named extras — all read live."""
+    veh = "".join(
+        "<tr><td>%s</td><td class=\"num\">%s</td><td class=\"num\">£%s</td></tr>"
+        % (esc(v["name"]),
+           "base" if float(v["rate"]) == 1 else "%g×" % float(v["rate"]),
+           ("%g" % float(v["min"])))
+        for v in pm["vehicles"])
+    svc = "".join(
+        "<tr><td>%s</td><td class=\"%s\">%s</td></tr>"
+        % (esc(j["name"]),
+           "num" if j["premium_pct"] else "no",
+           ("+%d%%" % j["premium_pct"]) if j["premium_pct"] else "no premium")
+        for j in pm["job_types"])
+    e = pm["extras"]
+    items = [
+        ("Every extra stop", "%s each" % e["stop"]),
+        ("Waiting beyond the time allowed", "%s an hour" % e["waiting"]),
+        ("A heavy load for the van", "up to %d%% more" % e["weight_max_pct"]),
+        ("Anything other than kerbside", "up to %d%% more" % e["handling_max_pct"]),
+        ("All of those together", "capped at %d%% more" % e["cap_pct"]),
+    ]
+    tick = ('<svg width="13" height="13" viewBox="0 0 24 24" fill="none" '
+            'stroke="var(--haf-orange)" stroke-width="2.6" stroke-linecap="round" '
+            'stroke-linejoin="round"><path d="M5 12h14"/></svg>')
+    extras = "".join("<li>%s<span>%s — <b>%s</b></span></li>" % (tick, esc(a), esc(b))
+                     for a, b in items)
+    return veh, svc, extras
+
+
 def main() -> int:
     if not SRC.exists():
         print("cannot find %s" % SRC, file=sys.stderr)
@@ -262,7 +383,38 @@ def main() -> int:
         driver_html = walk_rows(DRIVER_WALK, tabs)
         plna_html = keyed_rows(plna, PLNA_WALK, "the live PLNA bar")
         clever_html = keyed_rows(stages, CLEVER_WALK, "Clever's stepper")
-    except live.ReadFailed as e:
+
+        # ── the pricing matrix, read live, and the engine run over it ─────────
+        pm = pricing.read()
+        grid = quote_grid()
+        if grid["version"] != pm["version"]:
+            raise ReadFailed(
+                "the engine priced these examples with %s but the live network is "
+                "quoting %s" % (grid["version"], pm["version"]))
+        if grid["vatPct"] != pm["vat_pct"]:
+            raise ReadFailed("the engine charges VAT at %s%%, the live matrix says %s%%"
+                             % (grid["vatPct"], pm["vat_pct"]))
+        # Every vehicle and service level the live matrix offers has to be on the
+        # picker. A vehicle the network prices but the demo cannot show is the
+        # same staleness by a quieter route.
+        live_veh = {v["name"] for v in pm["vehicles"]}
+        grid_veh = {v["name"] for v in grid["vehicles"]}
+        if live_veh != grid_veh:
+            raise ReadFailed("the live matrix prices %s, the picker offers %s"
+                             % (sorted(live_veh), sorted(grid_veh)))
+        live_svc = {j["name"] for j in pm["job_types"]}
+        grid_svc = {j["name"] for j in grid["jobTypes"]}
+        if live_svc != grid_svc:
+            raise ReadFailed("the live matrix offers services %s, the picker offers %s"
+                             % (sorted(live_svc), sorted(grid_svc)))
+
+        veh_ladder, svc_ladder, extras_list = ladders(pm)
+        grid_out = dict(grid, levels=LEVELS)
+        pk_veh = options([(v["code"], v["name"]) for v in grid["vehicles"]], OPENS_ON[0])
+        pk_job = options([(j["code"], j["name"]) for j in grid["jobTypes"]], OPENS_ON[1])
+        pk_mi = options([(str(m), miles_label(m)) for m in grid["miles"]], str(OPENS_ON[2]))
+        price_html = price_row(grid, LEVELS)
+    except (live.ReadFailed, pricing.ReadFailed) as e:
         print("REFUSING TO BUILD: %s" % e, file=sys.stderr)
         print("The demo would describe a product that is no longer there.", file=sys.stderr)
         return 1
@@ -292,6 +444,25 @@ def main() -> int:
                          ("<!--CLEVER_WALK-->", clever_html),
                          ("<!--CLEVER_TYPES-->", chips(types)),
                          ("<!--JOIN_FIELDS-->", chips(fields)),
+                         ("<!--SAME_CHIPS-->", chips(
+                             ["All %d dashboard screens" % len(POSTER_WALK)]
+                             + SAME_ON_EVERY_LEVEL)),
+                         ("<!--PRICE_ROW-->", price_html),
+                         ("<!--PK_VEHICLES-->", pk_veh),
+                         ("<!--PK_JOBS-->", pk_job),
+                         ("<!--PK_MILES-->", pk_mi),
+                         ("<!--QUOTE_GRID-->", json.dumps(grid_out, separators=(",", ":"))),
+                         ("<!--MATRIX_VERSION-->", esc(pm["version"])),
+                         ("<!--MATRIX_FROM-->", esc(pm["effective_from"])),
+                         ("<!--VAT_PCT-->", "%g" % pm["vat_pct"]),
+                         ("<!--VEHICLE_LADDER-->", veh_ladder),
+                         ("<!--SERVICE_LADDER-->", svc_ladder),
+                         ("<!--EXTRAS_LIST-->", extras_list),
+                         ("<!--LOCAL_BAND-->", "%g" % pm["local"]["band_miles"]),
+                         ("<!--LOCAL_OFF-->", "%g" % pm["local"]["max_off_pct"]),
+                         ("<!--LOCAL_FULL-->", "%g" % pm["local"]["full_from_miles"]),
+                         ("<!--FUEL_TRIGGER-->", "%g" % pm["fuel"]["trigger_pct"]),
+                         ("<!--FUEL_CAP-->", "%g" % pm["fuel"]["cap_pct"]),
                          ("<!--READ_ON-->", on)):
         if token not in html:
             print("placeholder %s is missing from the source" % token, file=sys.stderr)
@@ -312,6 +483,19 @@ def main() -> int:
               % html[max(0, leak.start() - 60):leak.start() + 60], file=sys.stderr)
         return 1
 
+    # ── the business's own commercials are not a customer's ───────────────────
+    # Checked on the finished page, not on the source, because the prices are
+    # injected from the engine and the engine's answer carries HAF's side of the
+    # job in the same object as the customer's.
+    for word in NEVER_PUBLISH:
+        hit = re.search(re.escape(word), html, re.I)
+        if hit:
+            print("REFUSING TO BUILD: %r reached the page near %r. That is HAF's own "
+                  "commercials on a public address — a one-way door."
+                  % (word, html[max(0, hit.start() - 70):hit.start() + 70]),
+                  file=sys.stderr)
+            return 1
+
     OUT_DIR.mkdir(exist_ok=True)
     OUT.write_text(html, encoding="utf8")
 
@@ -329,6 +513,16 @@ def main() -> int:
     print("  Clever  %d stages: %s" % (len(stages), " → ".join(stages)))
     print("  Clever  %d account types: %s" % (len(types), ", ".join(types)))
     print("  Join    %d fields on the real sign-up form" % len(fields))
+    print("  Pricing %s, in force since %s — the live network and this build agree"
+          % (pm["version"], pm["effective_from"]))
+    print("  Pricing %d example jobs priced by the real engine (%d vehicles x %d "
+          "services x %d distances), each at %d account levels"
+          % (len(grid["cells"]), len(grid["vehicles"]), len(grid["jobTypes"]),
+             len(grid["miles"]), len(LEVELS)))
+    opens = grid["cells"]["%s|%s|%d" % OPENS_ON]
+    print("  Pricing opens on %s / %s / %d miles: %s"
+          % (OPENS_ON[0], OPENS_ON[1], OPENS_ON[2],
+             ", ".join("%s £%.2f" % (L, opens[i]) for i, L in enumerate(LEVELS))))
     print("levels read from the live book on %s:" % on)
     for L in LEVELS:
         a = b[L]["allowances"]

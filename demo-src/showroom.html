@@ -179,6 +179,54 @@ td.num{font-weight:600;font-variant-numeric:tabular-nums}
 .no{color:var(--haf-ink-faint)}
 .yes{color:var(--haf-positive);font-weight:700}
 
+/* ── the account comparison, and the engine behind it ──────────────────────
+   The price row is the bridge: it is the only row in the table that is not a
+   limit, and it is the row the picker underneath drives. Weighted heavier than
+   the limit rows on purpose — on a call it is the row people look at. */
+.same{margin-top:1.5rem;background:var(--haf-surface);border:1px solid var(--haf-line);
+  border-left:3px solid var(--haf-positive);border-radius:0 10px 10px 0;padding:.85rem 1rem}
+.same .t{font-size:.63rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--haf-positive)}
+.same .chips{margin-top:.6rem;gap:.4rem}
+.same .chip{font-size:.76rem;padding:.24rem .62rem}
+
+tbody tr.pricerow td{background:var(--haf-surface-3);border-top:1px solid var(--haf-line-strong);
+  padding-top:.85rem;padding-bottom:.85rem}
+tbody tr.pricerow td:first-child{font-weight:700}
+tbody tr.pricerow td .sub{display:block;font-size:.7rem;font-weight:600;
+  color:var(--haf-ink-muted);margin-top:.1rem}
+td.price{font-family:var(--haf-font-display);font-weight:700;font-size:1.08rem;
+  font-variant-numeric:tabular-nums;color:var(--haf-ink)}
+td.price.best{color:var(--haf-positive)}
+td.price .off{display:block;font-family:var(--haf-font);font-size:.7rem;font-weight:600;
+  color:var(--haf-positive);margin-top:.12rem}
+
+.picker{display:flex;flex-wrap:wrap;gap:.75rem .9rem;align-items:flex-end;margin-top:1rem;
+  background:var(--haf-surface-2);border:1px solid var(--haf-line-strong);
+  border-radius:var(--haf-radius-sm);padding:.95rem 1.1rem}
+.picker .f{display:flex;flex-direction:column;gap:.28rem;min-width:140px;flex:1 1 150px}
+.picker label{font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--haf-ink-muted)}
+.picker select{font:inherit;font-size:.87rem;font-weight:600;color:var(--haf-ink);
+  background:var(--haf-surface);border:1px solid var(--haf-line-strong);
+  border-radius:var(--haf-radius-sm);padding:.5rem .6rem;cursor:pointer;width:100%}
+.picker select:focus{outline:2px solid var(--haf-orange);outline-offset:1px}
+.pk-why{flex:1 1 100%;font-size:.79rem;color:var(--haf-ink-muted)}
+
+/* ── the pricing matrix ───────────────────────────────────────────────────── */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(272px,1fr));gap:.85rem;
+  margin-top:1.7rem;align-items:start}
+.mcard{background:var(--haf-surface);border:1px solid var(--haf-line);
+  border-radius:var(--haf-radius-sm);padding:1.15rem}
+.mcard h3{margin-bottom:.42rem}
+.mcard p{font-size:.84rem;color:var(--haf-ink-muted)}
+.mcard .tblwrap{margin-top:1rem}
+.tblwrap.tight table{min-width:0}
+.tblwrap.tight th,.tblwrap.tight td{padding:.46rem .6rem;font-size:.81rem}
+.mcard ul.ticks{margin-top:.95rem}
+.mcard ul.ticks li{font-size:.83rem}
+.mcard ul.ticks b{font-weight:700}
+
 /* ── the jump bar and the three guided walks ──────────────────────────────
    Brent, 11 Sep: "create the demo centre for me to showcase how the HAF KNECT
    works in the simpliest format... the features of how to use the PLNA as a
@@ -322,7 +370,8 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
     <a onclick="jump('post')">Posting work</a>
     <a onclick="jump('drive')">Driving work</a>
     <a onclick="jump('checked')">Getting checked</a>
-    <a onclick="jump('levels')">What each level gets</a>
+    <a onclick="jump('levels')">Compare the accounts</a>
+    <a onclick="jump('pricing')">What a job costs</a>
     <a onclick="jump('join')">Joining</a>
   </div>
 </nav>
@@ -589,20 +638,118 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
      enforced by anything yet, so they are not shown as if they were. -->
 <section id="levels">
   <div class="wrap">
-    <div class="kicker">Levels</div>
+    <div class="kicker">Compare the accounts</div>
     <h2>Every level sees the whole product.</h2>
-    <p class="lede">What a level changes is how much you can do with it — not which
-      screens you get. Nothing is hidden behind a paywall; the limits are on volume.</p>
+    <p class="lede">What a level changes is how much you can do with it, and what a job
+      costs you — not which screens you get. Nothing is hidden behind a paywall.</p>
+
+    <!-- The thing that goes wrong on a comparison table is that the reader assumes
+         the blank cells are features they are being denied. So the sameness is
+         stated BEFORE the table, and the count comes off the live app, not a
+         brochure: it is the number of poster screens the build just read. -->
+    <div class="same">
+      <div class="t">The same on every level, including free</div>
+      <div class="chips"><!--SAME_CHIPS--></div>
+    </div>
 
     <div class="tblwrap">
       <table>
         <thead><tr><!--LEVEL_HEADS--></tr></thead>
-        <tbody><!--LEVEL_ROWS--></tbody>
+        <tbody><!--LEVEL_ROWS--><!--PRICE_ROW--></tbody>
       </table>
     </div>
-    <div class="note">These four are the limits the network counts today. Read out of the
-      live allowance book on <!--READ_ON-->, so this table says what the product does
-      rather than what a brochure hoped it would.</div>
+
+    <!-- ── the pricing engine, behind the comparison ───────────────────────────
+         Brent, 11 Sep: "put the pricing engine behind it the new pricing matrix".
+         This picker drives the last row of the table above. Change the job and
+         all three prices move, which is the clearest way to show what an account
+         level is actually worth on a call: same job, same driver, three prices.
+         Every price came out of the live engine at build time — see the note
+         under the section and scripts/quote_grid.mjs. -->
+    <div class="picker">
+      <div class="f">
+        <label for="pk-veh">Vehicle</label>
+        <select id="pk-veh" onchange="repriceDemo()"><!--PK_VEHICLES--></select>
+      </div>
+      <div class="f">
+        <label for="pk-job">Service</label>
+        <select id="pk-job" onchange="repriceDemo()"><!--PK_JOBS--></select>
+      </div>
+      <div class="f">
+        <label for="pk-mi">Distance</label>
+        <select id="pk-mi" onchange="repriceDemo()"><!--PK_MILES--></select>
+      </div>
+      <div class="pk-why" id="pk-why"></div>
+    </div>
+
+    <div class="note">The four limits are read out of the live allowance book on
+      <!--READ_ON-->. The prices in the bottom row are not worked out by this page: the
+      live pricing engine, <!--MATRIX_VERSION-->, priced every one of these jobs when the
+      page was built, and the build stops if the network has moved to a newer matrix.
+      Prices exclude VAT at <!--VAT_PCT-->%.</div>
+  </div>
+</section>
+
+<!-- ══ THE PRICING MATRIX ═══════════════════════════════════════════════════
+     What the engine prices ON. The ladders below are read out of the live
+     matrix every build, so a rate change on the network changes this page.
+
+     What is deliberately NOT here: what HAF earns on a job, the fee floor and
+     ceiling, and the pool splits. They are in the same matrix and they are the
+     business's own commercials, not a customer's. A public page is a one-way
+     door — once it is out, it is out. Brent can have them added on his word.  -->
+<section id="pricing">
+  <div class="wrap">
+    <div class="kicker">What a job costs</div>
+    <h2>One matrix, and it is the same one the network quotes with.</h2>
+    <p class="lede">A price is not a haggle and it is not a guess. Four things set it:
+      the vehicle, how fast the job has to happen, how far it goes, and how hard it is
+      to load. Everything else on this page is a consequence of those four.</p>
+
+    <div class="mgrid">
+      <div class="mcard">
+        <h3>The vehicle</h3>
+        <p>Each size has a rate and a smallest charge, so a short job in a big van is
+          never priced as if it were a small one.</p>
+        <div class="tblwrap tight">
+          <table>
+            <thead><tr><th>Vehicle</th><th>Rate</th><th>Smallest charge</th></tr></thead>
+            <tbody><!--VEHICLE_LADDER--></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="mcard">
+        <h3>How fast it has to happen</h3>
+        <p>The service level the job is posted at. Most work sits on the first three;
+          only genuinely time-critical work carries a premium.</p>
+        <div class="tblwrap tight">
+          <table>
+            <thead><tr><th>Service</th><th>Premium</th></tr></thead>
+            <tbody><!--SERVICE_LADDER--></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="mcard">
+        <h3>What else moves it</h3>
+        <p>Named, capped and on the quote before anyone agrees to anything. No
+          surprise on the invoice.</p>
+        <ul class="ticks"><!--EXTRAS_LIST--></ul>
+      </div>
+    </div>
+
+    <div class="hard">Short local work is charged less than the smallest charge would
+      suggest: under <!--LOCAL_BAND--> miles a job comes down by up to
+      <!--LOCAL_OFF-->%, easing back to the full minimum by <!--LOCAL_FULL--> miles.
+      Fuel is the one thing that can move a rate after the fact, it only moves when
+      pump prices run more than <!--FUEL_TRIGGER-->% over the market average, and it can
+      never add more than <!--FUEL_CAP-->%.</div>
+
+    <div class="note">Read out of the live pricing matrix on <!--READ_ON-->:
+      <!--MATRIX_VERSION-->, in force since <!--MATRIX_FROM-->. Rates shown exclude VAT
+      at <!--VAT_PCT-->%. This is the customer's half of the matrix — what HAF earns on
+      a job is the business's own and is not published here.</div>
   </div>
 </section>
 
@@ -647,6 +794,9 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
 
 </div><!-- /#show -->
 
+<!-- The prices the live engine gave when this page was built. Data only: no
+     engine, no rates, nothing about what HAF earns. See scripts/quote_grid.mjs. -->
+<script>window.HAF_DEMO_PRICES=<!--QUOTE_GRID-->;</script>
 <script>
 /* ── the door ──────────────────────────────────────────────────────────────
    Exactly the two database calls the old demo used, so the lead pipeline
@@ -742,13 +892,57 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
   }
   /* and it keeps up if they scroll by hand instead of clicking */
   window.addEventListener('scroll',function(){
-    var ids=['how','post','drive','checked','levels','join'],best=null;
+    var ids=['how','post','drive','checked','levels','pricing','join'],best=null;
     for(var i=0;i<ids.length;i++){
       var e=document.getElementById(ids[i]); if(!e)continue;
       if(e.getBoundingClientRect().top-140<=0)best=ids[i];
     }
     if(best)mark(best);
   },{passive:true});
+
+  /* ── the pricing engine behind the comparison ─────────────────────────────
+     This page does no pricing arithmetic, on purpose. HAF_DEMO_PRICES holds
+     the answers the real engine gave when the page was built — every vehicle,
+     every live service level, every distance on the picker, each priced once
+     per account level. Picking a job looks up an answer; it does not work one
+     out. That is why the figures on a screen share are the product's figures.
+
+     The one sum done here is VAT, and the build refuses to ship unless the
+     engine agreed with it to the penny on all 288 jobs. */
+  window.repriceDemo=function(){
+    var P=window.HAF_DEMO_PRICES; if(!P)return;
+    var v=document.getElementById('pk-veh'), j=document.getElementById('pk-job'),
+        m=document.getElementById('pk-mi');
+    if(!v||!j||!m)return;
+    var cell=P.cells[v.value+'|'+j.value+'|'+m.value];
+    var levels=P.levels, why=document.getElementById('pk-why');
+    if(!cell){
+      for(var i=0;i<levels.length;i++){
+        var miss=document.getElementById('pk-'+levels[i]);
+        if(miss)miss.innerHTML='<span class="off">not priced</span>';
+      }
+      if(why)why.textContent='That combination is not on this demo. Pick another distance.';
+      return;
+    }
+    var vat=1+P.vatPct/100, full=cell[0];
+    for(var k=0;k<levels.length;k++){
+      var td=document.getElementById('pk-'+levels[k]); if(!td)continue;
+      var ex=cell[k], inc=Math.round(ex*vat*100)/100;
+      var save=Math.round((full-ex)*100)/100;
+      td.innerHTML='£'+ex.toFixed(2)
+        +(save>0?'<span class="off">£'+save.toFixed(2)+' less a job</span>'
+                :'<span class="off" style="color:var(--haf-ink-faint)">£'+inc.toFixed(2)+' with VAT</span>');
+      td.className='price'+(k===levels.length-1?' best':'');
+    }
+    if(why){
+      var label=v.options[v.selectedIndex].text+', '+j.options[j.selectedIndex].text
+               +', '+m.options[m.selectedIndex].text;
+      why.textContent=cell[3]
+        ? label+'. This one is on the smallest charge for the vehicle, so the distance is '
+          +'not what is setting the price.'
+        : label+'. Priced on the distance, the vehicle and the service level.';
+    }
+  };
 
   window.doorEnter=function(){
     document.getElementById('door').style.display='none';
@@ -757,6 +951,7 @@ footer .stamp{margin-top:.5rem;font-size:.72rem}
   };
 
   function start(){
+    window.repriceDemo();
     /* A code can arrive in the address itself, so Brent can open the showroom in
        front of an audience in one click. It is still checked by the database, and
        it is wiped out of the address bar the moment it is used. */
