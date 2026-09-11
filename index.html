@@ -1763,7 +1763,10 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 
   /* Small phones: take the letter-spacing out before taking the size out. */
   @media(max-width:359px){
-    .tbi-l{font-size:.68rem;letter-spacing:0}
+    /* measured at 320px: .68rem came out at 10.2px, under the 10.5px floor the
+       rest of the bar now holds. The letter-spacing is already gone here, so
+       the width is bought back from the padding instead. */
+    .tbi-l{font-size:.72rem;letter-spacing:0}
     .tbi{padding:0 1px}
   }
 
