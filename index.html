@@ -14048,8 +14048,10 @@ function hafInitLjMap(j){
  ljTogo=L.polyline([[j.driverPos.lat,j.driverPos.lng],[j.to.lat,j.to.lng]],{color:j.colour,weight:5,opacity:.38,dashArray:'2,9'}).addTo(ljMap);
  const line=L.polyline([[j.from.lat,j.from.lng],[j.driverPos.lat,j.driverPos.lng],[j.to.lat,j.to.lng]],{opacity:0}).addTo(ljMap);
  ljDotIcon=(fill,sz)=>L.divIcon({className:'',html:`<div style="width:${sz||14}px;height:${sz||14}px;border-radius:50%;background:${fill};border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.5)"></div>`,iconSize:[sz||14,sz||14],iconAnchor:[(sz||14)/2,(sz||14)/2]});
- L.marker([j.from.lat,j.from.lng],{icon:ljDotIcon(j.colour)}).addTo(ljMap).bindPopup('Collection · '+j.from.name);
- L.marker([j.to.lat,j.to.lng],{icon:ljDotIcon('var(--gn, #4f7f58)')}).addTo(ljMap).bindPopup('Delivery · '+j.to.name);
+ /* The lettered C and D, from haf-shared/job-map.js — the same two pins the driver
+    sees on PLNA and the customer sees on the tracking page. */
+ L.marker([j.from.lat,j.from.lng],{icon:HAFJobMap.collectPin(),zIndexOffset:300}).addTo(ljMap).bindPopup('C · Collection · '+j.from.name);
+ L.marker([j.to.lat,j.to.lng],{icon:HAFJobMap.deliverPin(),zIndexOffset:300}).addTo(ljMap).bindPopup('D · Delivery · '+j.to.name);
  ljDriverMarker=L.marker([j.driverPos.lat,j.driverPos.lng],{icon:ljDotIcon('#fff'),zIndexOffset:500}).addTo(ljMap).bindPopup('Driver · '+j.driverName+' ('+j.progress+'%)');
  try{ljMap.fitBounds(line.getBounds(),{padding:[40,40]});}catch(e){}
  setTimeout(()=>{try{ljMap.invalidateSize();}catch(e){}},80);
@@ -17011,6 +17013,292 @@ window.pxSave=async function(){
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);
   else start();
 })();
+</script>
+<script>
+/* HAFJM:START — stamped from haf-shared/job-map.js. Do not edit here. */
+/* HAF JOB MAP — the C pin, the D pin, and the small map that sits on a job card.
+ *
+ * SOURCE OF TRUTH. Do not edit the stamped copies inside plna-cf/dashboard.html,
+ * plna-cf/track.html or knect-consign/index.html by hand — they are written by
+ * scripts/haf_stamp_job_map.py between the HAFJM markers, exactly like the job
+ * card is written by scripts/haf_stamp_job_card.py. Editing a stamped copy gets
+ * overwritten on the next stamp, and in the meantime the driver, the customer
+ * and the network are looking at three different maps of the same lorry, which
+ * is the one thing this file exists to prevent.
+ *
+ * Brent, 13 Sep: "add a C pin for collection & a D pin for delivery ... so
+ * people can see where the location is on the map of the job card ... the jobs
+ * the PLNA's can get on the exchange can you allow them to see current location
+ * and a map of the job card not the whole network. Just the job card."
+ *
+ * So: ONE job per map. There is no mode of this file that draws a second job,
+ * a network, or anybody else's van. It is given at most three points and it
+ * plots those three points.
+ *
+ * WHAT A PIN IS ALLOWED TO MEAN
+ * A pin is read as a doorstep. On the exchange the doorstep is not released yet
+ * — plna_exchange_board returns collect_address and deliver_address as NULL on
+ * purpose and cuts the delivery postcode back to its district — so a card that
+ * has not been taken passes the DISTRICT, is marked approximate, and says so
+ * under the map. A pin that looks exact when it is a three-mile circle is a lie
+ * told in a shape, and it would send someone to the wrong street.
+ */
+(function (root) {
+  'use strict';
+
+  /* Two ends and a van. Fills are the ones already on the live maps so the pins
+   * do not become a fourth colour language; the INK is chosen per fill for
+   * contrast, because white on HAF orange is 2.2:1 and a letter nobody can read
+   * is not a label. Black on this orange is 8.4:1, white on this green 5.4:1. */
+  var COLOURS = {
+    collect: { fill: '#f08a1e', ink: '#151719' },
+    deliver: { fill: '#1f7a44', ink: '#ffffff' },
+    you:     { fill: '#151719', ink: '#ffffff' }
+  };
+
+  var CSS = [
+    '.hafjm{position:relative;width:100%;height:150px;border-radius:10px;overflow:hidden;',
+    'border:1px solid var(--jm-line,rgba(127,127,127,.28));background:#e8eef2;}',
+    '.hafjm .leaflet-container{background:#e8eef2;font:inherit;}',
+    '@media(min-width:760px){.hafjm{height:190px;}}',
+    /* A map that has not resolved says so in words, in the box, rather than
+     * showing empty grey tiles that read as a broken page. */
+    '.hafjm-wait{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;',
+    'text-align:center;padding:.6rem;font-size:.78rem;line-height:1.45;color:#41525e;',
+    'background:#e8eef2;z-index:500;}',
+    '.hafjm-note{margin-top:.35rem;font-size:.74rem;line-height:1.45;color:var(--jm-muted,#8b949e);}',
+    '.hafjm-key{display:flex;flex-wrap:wrap;gap:.3rem .7rem;margin-top:.3rem;',
+    'font-size:.72rem;color:var(--jm-muted,#8b949e);}',
+    '.hafjm-key span{display:inline-flex;align-items:center;gap:.28rem;white-space:nowrap;}',
+    '.hafjm-key i{width:14px;height:14px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);',
+    'display:inline-block;border:1.5px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4);flex:none;}',
+    /* the key has to show the driver the shape it actually draws, not a third teardrop */
+    '.hafjm-key i.is-round{border-radius:50%;transform:none;width:12px;height:12px;}'
+  ].join('');
+
+  function mount() {
+    if (document.getElementById('hafjm-css')) return;
+    var s = document.createElement('style');
+    s.id = 'hafjm-css';
+    s.textContent = CSS;
+    document.head.appendChild(s);
+  }
+
+  /* A teardrop with a letter in it. The letter is counter-rotated so it stays
+   * upright inside a marker whose whole point is that it is tilted. */
+  function pin(letter, kind, size) {
+    if (typeof L === 'undefined') return null;
+    var c = COLOURS[kind] || COLOURS.collect;
+    var s = size || 26;
+    var f = Math.round(s * 0.46);
+    return L.divIcon({
+      className: '',
+      iconSize: [s, s],
+      iconAnchor: [s / 2, s],
+      popupAnchor: [0, -(s - 2)],
+      html: '<div style="width:' + s + 'px;height:' + s + 'px;border-radius:50% 50% 50% 0;' +
+        'transform:rotate(-45deg);background:' + c.fill + ';border:2px solid #fff;' +
+        'box-shadow:0 2px 6px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center">' +
+        '<span style="transform:rotate(45deg);color:' + c.ink + ';font:800 ' + f +
+        'px/1 system-ui,-apple-system,sans-serif;letter-spacing:0">' + letter + '</span></div>'
+    });
+  }
+
+  function collectPin(size) { return pin('C', 'collect', size); }
+  function deliverPin(size) { return pin('D', 'deliver', size); }
+
+  /* The driver is a RING, not a third teardrop, and it sits under the letters.
+   * MEASURED 13 Sep: a driver based in S9 looking at a job collecting in S9 is
+   * two pins on one point — and the teardrop version, drawn on top, covered the
+   * C completely. The card then showed a delivery and nothing else, which is the
+   * opposite of what it is for. Smaller, round, and behind: you can always see
+   * both, and the two things are never confused for each other either. */
+  function youPin(size) {
+    if (typeof L === 'undefined') return null;
+    var s = size || 18;
+    return L.divIcon({
+      className: '',
+      iconSize: [s, s],
+      iconAnchor: [s / 2, s / 2],
+      popupAnchor: [0, -(s / 2)],
+      html: '<div style="width:' + s + 'px;height:' + s + 'px;border-radius:50%;' +
+        'background:' + COLOURS.you.fill + ';border:3px solid #fff;' +
+        'box-shadow:0 1px 5px rgba(0,0,0,.45)"></div>'
+    });
+  }
+
+  function keyRow(hasYou, youWord) {
+    var out = '<div class="hafjm-key">' +
+      '<span><i style="background:' + COLOURS.collect.fill + '"></i>C collection</span>' +
+      '<span><i style="background:' + COLOURS.deliver.fill + '"></i>D delivery</span>';
+    if (hasYou) out += '<span><i class="is-round" style="background:' + COLOURS.you.fill + '"></i>' +
+      (youWord || 'You') + '</span>';
+    return out + '</div>';
+  }
+
+  /* ── TURNING WORDS INTO POINTS ──────────────────────────────────────────────
+   * One shared cache, because a board of twelve jobs is usually four distinct
+   * districts. Districts do not move, so the answer is also kept in
+   * localStorage for a week — a driver on mobile data should not re-fetch S35
+   * every time the board refreshes. A failure is cached as a failure for the
+   * session only, so a gateway blip does not become a permanently blank map.
+   */
+  var MEM = {};
+  var STORE_KEY = 'hafjm.geo.v1';
+  var STORE_TTL = 7 * 24 * 3600 * 1000;
+  var store = null;
+
+  function readStore() {
+    if (store) return store;
+    try { store = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); }
+    catch (e) { store = {}; }
+    return store;
+  }
+  function writeStore(q, v) {
+    try {
+      var s = readStore();
+      s[q] = { lat: v.lat, lng: v.lng, t: Date.now() };
+      localStorage.setItem(STORE_KEY, JSON.stringify(s));
+    } catch (e) { /* a full or blocked store is not a reason to fail a map */ }
+  }
+
+  var GATEWAY = 'https://haf-distance.pages.dev';
+  function gateway(url) { if (url) GATEWAY = url; return GATEWAY; }
+
+  function geocode(q) {
+    q = String(q == null ? '' : q).trim();
+    if (!q) return Promise.resolve(null);
+    if (MEM[q] !== undefined) return Promise.resolve(MEM[q]);
+    var cached = readStore()[q];
+    if (cached && (Date.now() - cached.t) < STORE_TTL) {
+      MEM[q] = { lat: cached.lat, lng: cached.lng };
+      return Promise.resolve(MEM[q]);
+    }
+    var p = fetch(GATEWAY + '/geocode?q=' + encodeURIComponent(q))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.ok || d.lat == null || d.lng == null) { MEM[q] = null; return null; }
+        var v = { lat: d.lat, lng: d.lng };
+        MEM[q] = v; writeStore(q, v);
+        return v;
+      })
+      .catch(function () { MEM[q] = null; return null; });
+    MEM[q] = p;              /* de-duplicate concurrent asks for the same district */
+    return p.then(function (v) { MEM[q] = v; return v; });
+  }
+
+  /* ── ONE JOB, ONE MAP ───────────────────────────────────────────────────────
+   * opts: { collect, deliver, you, youLabel, approximate, key, onNote }
+   * Every value is a string we can geocode (a district, a postcode, an address)
+   * or a {lat,lng}. Anything missing is simply not drawn — a map with one end on
+   * it is more use than no map, and an invented second end is worse than both.
+   */
+  var LIVE = [];
+
+  function point(v) {
+    if (!v) return Promise.resolve(null);
+    if (typeof v === 'object' && v.lat != null && v.lng != null) {
+      return Promise.resolve({ lat: Number(v.lat), lng: Number(v.lng) });
+    }
+    return geocode(v);
+  }
+
+  function draw(el, opts) {
+    opts = opts || {};
+    if (!el || typeof L === 'undefined') return null;
+    mount();
+    if (el.__hafjm) { try { el.__hafjm.remove(); } catch (e) {} el.__hafjm = null; }
+    el.classList.add('hafjm');
+    el.innerHTML = '<div class="hafjm-wait">Finding this job on the map…</div>';
+
+    var map = L.map(el, {
+      zoomControl: false, scrollWheelZoom: false, dragging: true,
+      attributionControl: false, keyboard: false
+    }).setView([53.5, -1.9], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+    el.__hafjm = map;
+    LIVE.push({ el: el, map: map });
+
+    Promise.all([point(opts.collect), point(opts.deliver), point(opts.you)])
+      .then(function (r) {
+        if (el.__hafjm !== map) return;          /* the board redrew under us */
+        var A = r[0], B = r[1], Y = r[2], pts = [];
+        var wait = el.querySelector('.hafjm-wait');
+
+        if (A) { L.marker([A.lat, A.lng], { icon: collectPin(), zIndexOffset: 300 })
+                   .addTo(map).bindPopup('C · Collection'); pts.push([A.lat, A.lng]); }
+        if (B) { L.marker([B.lat, B.lng], { icon: deliverPin(), zIndexOffset: 300 })
+                   .addTo(map).bindPopup('D · Delivery'); pts.push([B.lat, B.lng]); }
+        if (A && B) {
+          L.polyline([[A.lat, A.lng], [B.lat, B.lng]],
+            { color: '#f08a1e', weight: 3, opacity: .5, dashArray: '3,8' }).addTo(map);
+        }
+        if (Y) { L.marker([Y.lat, Y.lng], { icon: youPin(), zIndexOffset: 100 })
+                   .addTo(map).bindPopup(opts.youLabel || 'Where you are'); pts.push([Y.lat, Y.lng]); }
+
+        if (!pts.length) {
+          if (wait) wait.textContent = 'We could not place this job on a map yet.';
+          return;
+        }
+        if (wait) wait.remove();
+        try {
+          if (pts.length > 1) map.fitBounds(L.latLngBounds(pts), { padding: [30, 30], maxZoom: 12 });
+          else map.setView(pts[0], 10);
+        } catch (e) {}
+        setTimeout(function () { try { map.invalidateSize(); } catch (e) {} }, 60);
+        if (typeof opts.onNote === 'function') opts.onNote({ collect: A, deliver: B, you: Y });
+      });
+    return map;
+  }
+
+  /* Build the map only when the card is actually on screen. A board of twenty
+   * jobs must not open twenty tile connections while a driver is reading the
+   * first one. Falls back to drawing immediately where there is no observer. */
+  function lazy(el, opts) {
+    if (!el) return;
+    if (typeof IntersectionObserver === 'undefined') return draw(el, opts);
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        draw(el, opts);
+      });
+    }, { rootMargin: '120px' });
+    io.observe(el);
+  }
+
+  /* A board that re-renders replaces its nodes wholesale, and a Leaflet map on a
+   * detached node keeps its tile handlers and its timers forever. Called once
+   * per redraw, this lets the dead ones go. */
+  function sweep() {
+    LIVE = LIVE.filter(function (rec) {
+      if (document.body.contains(rec.el)) return true;
+      try { rec.map.remove(); } catch (e) {}
+      return false;
+    });
+  }
+
+  root.HAFJobMap = {
+    version: '1.0.0',
+    css: CSS,
+    colours: COLOURS,
+    mount: mount,
+    pin: pin,
+    collectPin: collectPin,
+    deliverPin: deliverPin,
+    youPin: youPin,
+    keyRow: keyRow,
+    gateway: gateway,
+    geocode: geocode,
+    draw: draw,
+    lazy: lazy,
+    sweep: sweep
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* host palette map — see scripts/haf_stamp_job_map.py */
+(function(){var s=document.createElement('style');s.id='hafjm-host';s.textContent=':root{--jm-line:var(--ln);--jm-muted:var(--mu);}';document.head.appendChild(s);})();
+/* HAFJM:END */
 </script>
 <script>
 /* HAFJC:START — stamped from haf-shared/job-card.js. Do not edit here. */
