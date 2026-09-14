@@ -3457,6 +3457,23 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
           </label>
         </div>
         <div class="fr" style="max-width:580px;margin:0"><button class="btn btn-gh btn-sm" id="post-draft" data-lock="1">Save draft</button><button class="btn btn-or btn-sm" id="post-submit" data-label-open="Post to network &#8594;">Post to network &#8594;</button></div>
+        <!-- THE OTHER WAY A JOB EXISTS.
+             Brent, 14 Sep 2026: "I want it on the driver app and within the HAF
+             KNECT either way and both." Posting puts a job in front of the
+             network and raises a deposit. Not every job wants that: some are
+             already yours, taken by phone or email, and you are driving them
+             yourself. That job belongs on your own board, not on the exchange,
+             and until now KNECT had no way to say so.
+             Same form the driver app uses — one set of rules for reading a
+             pasted email, one postcode gate, one place a booking is born. -->
+        <div class="card" style="max-width:580px;margin-top:.85rem">
+          <div class="ct">Already your job?</div>
+          <p style="font-size:.76rem;color:var(--mu);margin:.15rem 0 .7rem;line-height:1.55">
+            A booking a customer gave you directly, that you are doing yourself. Put it straight
+            onto your own board instead of onto the network. Nothing is posted, no deposit is
+            raised, and it never counts against your plan.</p>
+          <button class="btn btn-gh btn-sm" id="post-mine">Add it as my own booking &#8594;</button>
+        </div>
         <!-- Available drivers -->
         <div class="card" style="max-width:580px;margin-top:.85rem">
           <div class="ct">Network options right now</div>
@@ -7271,6 +7288,32 @@ function hafOrderJourney(){
 (function wirePostAJob(){
   const b=document.getElementById('post-submit');
   if(b)b.addEventListener('click',hafOrderJourney);
+})();
+
+/* ══ THE SAME JOB, KEPT ═════════════════════════════════════════════════════
+   Brent, 14 Sep 2026: the entry has to be on the driver app AND inside KNECT,
+   "either way and both".
+
+   PLNA is a different site, so a KNECT session does not sign anyone in over
+   there. `_hafHandPlna` already hands the session across in the URL fragment,
+   which no browser sends to a server — the sso page spends it and wipes it out
+   of history. All that was missing was telling it where to land, which is what
+   `next` does.
+
+   No credential to hand across means no shortcut, not a dead end: they get the
+   PLNA sign-in and the same page after it. */
+(function wireAddMyOwnBooking(){
+  const b=document.getElementById('post-mine');
+  if(!b)return;
+  b.addEventListener('click',function(){
+    const dest='/book?mine=1';
+    let url='https://plna.usehaf.co.uk'+dest;
+    try{
+      const handed=(typeof _hafHandPlna==='function')?_hafHandPlna('https://plna.usehaf.co.uk'):null;
+      if(handed&&/\/sso\.html#/.test(handed)) url=handed+'&next='+encodeURIComponent(dest);
+    }catch(e){}
+    window.open(url,'_blank','noopener');
+  });
 })();
 /* Closing throws the whole consignment away and puts the customer back on the
    calculator. Past the first stage they have typed real work into it, so ask
