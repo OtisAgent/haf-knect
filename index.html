@@ -10159,7 +10159,15 @@ function hafPerms(acc){
        owner driver is one person with a van and has no team to run. Whether the
        person looking at it may actually add or remove anybody is decided by the
        database, not here — this only decides whether the screen exists. */
-    team      :t==='fleet'||t==='business'||t==='freight_forwarder'
+    /* 14 Sep, Brent: "we also need to add for normal accounts and business
+       accounts so they can add drivers and fleet operators" — and, on whether a
+       team costs anything, "It's free, they can just do more things on the plus
+       and pro version." So the screen exists on EVERY account, whatever its
+       type. An owner driver who takes somebody on this month does not have to
+       change what kind of account they are first, which is what the old test
+       forced. Whether the person looking at it may actually add or remove
+       anybody is still the database's answer, never this line's. */
+    team      :true
   };
 }
 /* A section the account has not got: is it worth showing locked, or is it
@@ -11434,7 +11442,12 @@ function tmPaint(members){
       +'<div class="of" style="margin-bottom:.55rem"><label class="ol">Last name</label><input class="oi" id="tm-ln" autocomplete="off"></div>'
       +'<div class="of" style="margin-bottom:.55rem"><label class="ol">Email address</label><input class="oi" id="tm-em" type="email" autocomplete="off"></div>'
       +'<div class="of" style="margin-bottom:.55rem"><label class="ol">Their own mobile number</label><input class="oi" id="tm-ph" type="tel" autocomplete="off"></div>'
-      +'<div class="cr"><label class="ck" style="cursor:pointer"><input type="checkbox" id="tm-dr" onchange="tmShape()" style="margin-right:.5rem">This person will drive</label></div>'
+      /* The two roles, NAMED. This was an unlabelled tick box, so somebody
+         became office staff by accident and nobody could see it had happened —
+         a fleet operator can hand out work, which is not a thing to acquire by
+         leaving a box alone. Same two words as the driver app. */
+      +'<div class="cr"><label class="ck" style="cursor:pointer"><input type="checkbox" id="tm-dr" onchange="tmShape()" style="margin-right:.5rem"><b>This person will drive</b></label></div>'
+      +'<div class="cr"><span class="ck" style="opacity:.75">Ticked, they are a <b>driver</b> — they can be handed jobs once HAF has released them. Left unticked, they are a <b>fleet operator</b>: they book work and hand jobs out, and do not drive.</span></div>'
       +'<div class="of hidden" id="tm-dbBox" style="margin-bottom:.55rem"><label class="ol">Date of birth</label><input class="oi" id="tm-db" type="date">'
       +'<span class="ck" style="display:block;margin-top:.3rem;opacity:.75">A driver gives a full date of birth — the licence check needs one.</span></div>'
       /* Brent, 10 Sep 2026: one username rule for everybody, so a colleague who
