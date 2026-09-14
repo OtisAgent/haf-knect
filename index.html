@@ -11377,6 +11377,33 @@ async function hafJobsClaim(id,btn){
    The master login is the account that was opened at join.usehaf.co.uk. It is
    listed here as the owner rather than being a separate thing to remember. */
 const TM_INVITE_BASE='https://join.usehaf.co.uk/team.html';
+
+/* ── THE TEAM FUNCTIONS ARE ASKED ON THEIR OWN ───────────────────────────────
+   Found on the live walk, 14 Sep, and it had been true since this screen went
+   live: every call it made came back 404 and the screen said "we could not read
+   your team just then" to everybody, on every account that had it.
+
+   TWO reasons, either one enough on its own.
+
+   1. The general helper adds p_cp to every call. The team functions take the
+      three credential fields and nothing else, and PostgREST matches a function
+      by the EXACT set of parameters it is given — so an extra one is not
+      ignored, it means "no such function".
+   2. They return a single JSON object, not a set of rows, and the general
+      helper keeps only arrays. Even answered, the reply arrived empty.
+
+   So the team asks for itself, in one place, and the callers below read the
+   object they were actually sent. */
+async function _teamRpc(name,extra){
+  const u=(localStorage.getItem('knect-user')||'').toUpperCase();
+  if(!u||!_hafCred)return null;
+  const r=await fetch(PLNA_URL+'/rest/v1/rpc/'+name,{method:'POST',
+    headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify(Object.assign({p_username:u,p_hash:_hafCred.hash,
+                                       p_relay:_hafCred.relay},extra||{}))});
+  if(!r.ok)throw new Error('rpc '+r.status);
+  return await r.json();
+}
 let _tmCompany=null,_tmAdmin=false,_tmName='';
 
 function _tmRoleChip(m){
@@ -11399,10 +11426,8 @@ async function tmLoad(){
     /* The account holder appears on their own team the first time they open
        this screen, so "who can get into this account" has one answer from the
        very first look rather than an empty list plus a footnote. */
-    await _netRpc('haf_team_seed_owner',{});
-    const r=await _netRpc('haf_team_list',{});
-    const d=r.rows&&r.rows.length?r.rows[0]:r.rows;
-    const data=(d&&d.members)?d:(r.rows||{});
+    await _teamRpc('haf_team_seed_owner',{});
+    const data=await _teamRpc('haf_team_list',{});
     if(!data||!data.members){box.innerHTML=_tmErr('We could not read your team just then.');return;}
     _tmCompany=data.company;_tmAdmin=data.am_admin===true;
     const own=data.members.filter(m=>m.role==='owner')[0];
@@ -11538,7 +11563,7 @@ async function tmAdd(){
   const drives=document.getElementById('tm-dr').checked;
   btn.disabled=true;
   try{
-    const r=await _netRpc('haf_team_add',{
+    const d=await _teamRpc('haf_team_add',{
       p_first:document.getElementById('tm-fn').value.trim(),
       p_last:document.getElementById('tm-ln').value.trim(),
       p_email:document.getElementById('tm-em').value.trim()||null,
@@ -11553,7 +11578,6 @@ async function tmAdd(){
         return /^\d{4}$/.test(y)?+y:null;
       })(),
       p_drives:drives});
-    const d=r.rows&&r.rows.length?r.rows[0]:r.rows;
     if(!d||!d.ok){_tmSay(msg,TM_SAYS[d&&d.error]||'We could not add them just then. Nothing has changed.');btn.disabled=false;return;}
     /* The link is shown once, here, and the owner passes it on. It is the only
        thing that can turn that account into a login, so it is never emailed
@@ -11569,8 +11593,7 @@ async function tmAdd(){
 
 async function tmReinvite(user){
   try{
-    const r=await _netRpc('haf_team_reinvite',{p_member:user});
-    const d=r.rows&&r.rows.length?r.rows[0]:r.rows;
+    const d=await _teamRpc('haf_team_reinvite',{p_member:user});
     if(!d||!d.ok){alert(TM_SAYS[d&&d.error]||'We could not make a new invite link just then.');return;}
     window.prompt('Send '+user+' this link. It lasts 14 days.',
                   TM_INVITE_BASE+'?t='+encodeURIComponent(d.invite_token));
@@ -11580,8 +11603,7 @@ async function tmReinvite(user){
 async function tmRemove(user,name){
   if(!window.confirm('Remove '+name+' ('+user+') from this account? They will be signed out and will not be able to sign in again.'))return;
   try{
-    const r=await _netRpc('haf_team_remove',{p_member:user});
-    const d=r.rows&&r.rows.length?r.rows[0]:r.rows;
+    const d=await _teamRpc('haf_team_remove',{p_member:user});
     if(!d||!d.ok){alert(TM_SAYS[d&&d.error]||'We could not remove them just then.');return;}
     tmLoad();
   }catch(e){alert('We could not remove them just then.');}
