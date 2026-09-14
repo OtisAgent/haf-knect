@@ -11422,6 +11422,10 @@ function tmPaint(members){
       +'<span class="ck" style="flex:1;min-width:190px"><b>'+_esc(m.name)+'</b><br>'
       +'<span style="font-family:ui-monospace,monospace;letter-spacing:.04em">'+_esc(m.username)+'</span>'
       +'<br><span style="opacity:.75">'+_esc(_tmState(m))+'</span></span>'
+      /* Brent's rule of 14 Sep: anything that is a test says TEST wherever a
+         person can see it. Decided by the database off the account that added
+         them, so this badge cannot be talked out of appearing. */
+      +(m.is_test?'<span class="ck" style="font-weight:700">TEST</span>':'')
       +_tmRoleChip(m);
     /* Only an admin is offered the buttons, and only for somebody who is not
        themselves. The database refuses the rest regardless — this just stops
