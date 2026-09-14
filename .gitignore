@@ -1,1 +1,6 @@
 uxshots/
+
+# Working files that live beside the site but are not part of it — test
+# harnesses, probes, one-off scripts. Nothing KNECT serves starts with an
+# underscore, so the prefix is the rule.
+_*
