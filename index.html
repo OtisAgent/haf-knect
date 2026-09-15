@@ -8690,9 +8690,18 @@ function hafAddSection(acc){
    exactly the kind of green tick that gets believed and is not true. */
 function hafBuildLadder(acc){
   const t=acc.type,drives=!!acc.drives,rel=!!acc.released;
-  /* A type only exists because a business route was chosen at some point. A
-     brand new simplified account has not chosen one yet, and lands on rung 2. */
-  const isBiz = (t==='business'||t==='fleet'||t==='freight_forwarder'||t==='driver');
+  /* 15 Sep 2026, and this line has to be exactly right now the front door has
+     changed. Everybody who joins lands as a plain HAF KNECT account — Brent:
+     "keep them just a normal general HAF KNECT Account -> if they want to be a
+     business account they would need to confirm and send the details then it
+     gets verified and confirmed". So a bare account has told us NOTHING about
+     a business yet, and rung two is where they are, not something behind them.
+     Only a route that actually carried business details — a fleet, a freight
+     forwarder, an owner driver — has finished it, or an account carrying a
+     confirmed business on its record once that step exists. Reading it off the
+     type alone would tick rung two for every single person on the day they
+     join, which is the green tick that gets believed and is not true. */
+  const isBiz = (t==='fleet'||t==='freight_forwarder'||t==='driver'||acc.business_confirmed===true);
   const rungs=[
     {n:1,h:'Your HAF account',s:'Done when you join',
      p:'Sign in, post a job, track it, your calendar and your saved addresses.',
