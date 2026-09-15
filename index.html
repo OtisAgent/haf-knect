@@ -11767,7 +11767,8 @@ function _hafLoadBlock(c,extra){
   if(c.packages) counts.push(c.packages+(c.packages==1?' package':' packages'));
   if(counts.length)   figs.push([counts.join(' + '),'Load']);
   else if(extra.load) figs.push([String(extra.load),'Load']);
-  if(c.weight_kg)     figs.push([c.weight_kg+' kg','Weight']);
+  const kg=Number(c.weight_kg);
+  if(kg)              figs.push([(Math.round(kg*10)/10)+' kg','Weight']);
   if(extra.vehicle)   figs.push([String(extra.vehicle),'Vehicle']);
 
   /* 2. The detail, labelled, so a value is never read as its own heading. */
@@ -11807,12 +11808,20 @@ function _hafLoadBlock(c,extra){
    has, so My Posted Jobs reads like the board instead of like a form. The van
    code is turned into words from the same VAN table the quote is priced from;
    an unknown code prints nothing rather than "lutontl". */
+/* The van in words. NOT VAN[code].n — that is the PRICING table, and it holds
+   the trade abbreviations (LWB, SWB, XLWB) because that is what the rate card is
+   written in. A tile that says "LWB" while the driving app says "Long wheelbase"
+   is a member and a driver reading two names for one van, which is the drift
+   this whole block exists to stop. Word for word the same as KIT_VAN_NAMES in
+   plna-ship/dashboard.html — change both. An unknown code prints nothing. */
+function _hafVanWords(code){
+  return ({small:'Small van',swb:'Short wheelbase',mwb:'Medium wheelbase',
+    lwb:'Long wheelbase',xlwb:'Extra long wheelbase',luton:'Luton \u2014 box',
+    lutonc:'Luton \u2014 curtain side',lutontl:'Luton \u2014 tail lift'})[code]||'';
+}
 function _hafLoadFromBooking(b){
   b=b||{};
-  /* VAN is a top-level `const`, so it is NOT on `window` — guarding with
-     window.VAN would have been silently false on every tile and the van
-     name would simply never have drawn. Caught by the harness, not by eye. */
-  const van=(typeof VAN!=='undefined'&&VAN[b.vehicle]&&VAN[b.vehicle].n)||'';
+  const van=_hafVanWords(b.vehicle);
   return _hafLoadBlock({weight_kg:b.weight_kg},{
     load:b.load_count, vehicle:van, goods:b.goods, handling:b.handling});
 }
