@@ -1361,6 +1361,28 @@ textarea.fi2{resize:vertical;min-height:70px}
 .sb-af-l:hover{border-color:var(--or-g)}
 .sb-af-l b{font-weight:800}
 .sb-af-l span{font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--haf-orange-ink);white-space:nowrap}
+
+/* ── THE HAF HUB LAUNCH PASS (sidebar, every account) ───────────────────────
+   Brent, 15 Sep: the launch pass belongs in the sidebar of every HAF KNECT
+   account. It is the third card down there, and deliberately the quietest of
+   the three: the PLNA card and the share-and-earn card are about this person's
+   own money, and this one must not shout over them. Same frame, same spacing,
+   no orange fill until the button. */
+.sb-hub{margin:.5rem .6rem .3rem;border:1.5px solid var(--ln);border-radius:var(--r);background:var(--p2);padding:.6rem .65rem;display:none}
+.sb-hub-ttl{display:flex;align-items:center;gap:.35rem;font-size:.62rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--haf-orange-ink);margin-bottom:.3rem}
+.sb-hub-ttl svg{width:12px;height:12px;flex:0 0 auto;fill:none;stroke:var(--or);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sb-hub-say{font-size:.66rem;line-height:1.55;color:var(--mu);margin-bottom:.45rem}
+.sb-hub-in{width:100%;box-sizing:border-box;font:inherit;font-size:.66rem;color:var(--tx);background:var(--p);border:1px solid var(--ln);border-radius:var(--rx);padding:.36rem .45rem;margin-bottom:.35rem}
+.sb-hub-in:focus{outline:none;border-color:var(--or-g)}
+.sb-hub-in::placeholder{color:var(--su)}
+.sb-hub-go{display:flex;align-items:center;justify-content:center;gap:.3rem;width:100%;font:inherit;font-size:.64rem;font-weight:800;letter-spacing:.02em;color:var(--haf-orange-ink);background:var(--or-d);border:1px solid var(--or-g);border-radius:var(--rx);padding:.38rem .45rem;cursor:pointer;text-align:center}
+.sb-hub-go:hover{border-color:var(--haf-orange-ink)}
+.sb-hub-go[disabled]{opacity:.6;cursor:default}
+.sb-hub-in[disabled]{opacity:.6}
+.sb-hub-note{font-size:.58rem;line-height:1.5;color:var(--su);margin-top:.35rem}
+.sb-hub-err{font-size:.6rem;line-height:1.5;color:var(--haf-orange-ink);margin-top:.3rem}
+.sb-hub-yes{display:flex;align-items:center;gap:.3rem;font-size:.62rem;font-weight:800;color:var(--gn);margin-bottom:.35rem}
+.sb-hub-yes svg{width:11px;height:11px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .lj-wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:.9rem;align-items:start}
 .lj-mapwrap{position:relative;border:1.5px solid var(--ln);border-radius:var(--r);overflow:hidden}
 #lj-map{height:430px;width:100%;background:var(--p3, #e9e5dd)}
@@ -2934,6 +2956,19 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
            lifecycle. Hidden until a driving account's own PLNA record has
            actually answered. -->
       <div class="sb-pl" id="sb-pl"></div>
+      <!-- THE HAF HUB launch pass. The same lifecycle as the two cards
+           above it and for the same reason: buildNavV1 rewrites nav-list on
+           every redraw, so a card that owns its own state has to stand outside
+           it. Unlike those two it is shown to EVERY account — driver, fleet,
+           business, freight — because the community is the one thing every
+           account type has in common. Empty until hafHubPaint has actually
+           read whether this person has already taken their pass.
+
+           It sits ABOVE nav-list, not below it. Below, on a 1440-wide
+           laptop with a driver's full menu, the card landed off the bottom
+           of a scrolling sidebar — my own walk could not even click it. A
+           launch pass nobody scrolls to is a launch pass nobody takes. -->
+      <div class="sb-hub" id="sb-hub"></div>
       <div id="nav-list"></div>
       <!-- Share & earn. The same lifecycle as the PLNA card above, and the
            mirror of it: that one is shown to accounts that drive, this one to
@@ -10616,6 +10651,13 @@ function buildNavV1(acc,keepOpen){
   hafPlnaPaint(true);
   /* and its mirror for everybody who does not drive — see hafAffPaint */
   hafAffPaint(true);
+  /* THE HAF HUB launch pass. Unlike the two cards above it, this one has no
+     audience test at all: driver, fleet, business, freight, every account gets
+     it, because the community is the one thing they all share. Wired here AND
+     in buildNav (the demo/master builder) — those are two different functions
+     that draw the same sidebar, and a card added to only one of them is a card
+     half the screens never show. */
+  hafHubPaint(true);
   /* keep the highlight on whatever pane is showing */
   const cur=document.getElementById('ni-'+(ct||'').replace('pane-',''));
   if(cur)cur.classList.add('on');
@@ -11071,6 +11113,10 @@ function buildNav(tabs,role,acc){
   if(afCard&&!acc){afCard.style.display='none';afCard.innerHTML='';}
   if(plCard&&!acc){plCard.style.display='none';plCard.innerHTML='';}
   else {hafPlnaPaint(true);hafAffPaint(true);}
+  /* The HUB card belongs to every account, so it stands outside the demo and
+     master branch above rather than inside it: a showroom visitor is shown the
+     community too, and hafHubPaint decides on its own what it can record. */
+  hafHubPaint(true);
   /* Demo and master screens are not somebody's account, so they get no bottom
      bar and keep the hamburger — the alternative is a phone menu built from
      whichever real account happened to be looked at last. */
@@ -14468,6 +14514,132 @@ async function hafAffPaint(force){
       '<b>Copy my link</b><span>Copy</span></button>'+
     '</div>'+
     '<div class="sb-pl-need"><em>'+_esc(share)+'</em></div>'+note;
+}
+
+/* ── THE HAF HUB LAUNCH PASS ────────────────────────────────────────────────
+   What this is, said plainly, because the honest version matters here:
+   LaunchPass has no API we can read — it is a dashboard, and the join itself
+   happens on their page and then inside Discord. So what this card knows, and
+   all it claims, is that this member gave us an address and was handed through
+   to the HUB door. The row is written BEFORE the tab opens, so a blocked popup
+   or a shut laptop cannot lose the fact that they asked.
+
+   It is shown to every signed-in account. A demo or master screen has no real
+   credential behind it, so the record politely refuses — and the door still
+   opens, because a showroom visitor being shown a broken button is worse than
+   a row we did not get. */
+const HAF_HUB_URL='https://launchpass.com/the-haf-hub/free';
+let _hubAt=0,_hubBusy=false,_hubSeq=0;
+
+function hafHubPaint(force){
+  const el=document.getElementById('sb-hub'); if(!el)return;
+  /* Nobody signed in has no sidebar to put this in. */
+  const u=(localStorage.getItem('knect-user')||'').toUpperCase();
+  if(!u){el.style.display='none';el.innerHTML='';return;}
+  el.style.display='block';
+  if(!force&&el.innerHTML&&Date.now()-_hubAt<30000)return;
+  if(_hubBusy)return;
+  /* An account already painted stays painted while we re-check, so switching
+     screens never blanks the card back to a loading line. */
+  if(!el.innerHTML)el.innerHTML=hafHubShell('<div class="sb-hub-say">Checking your pass…</div>');
+
+  const cred=hafPlnaCred();
+  if(!cred){hafHubOffer(el,'',false);return;}
+  _hubBusy=true;
+  const seq=++_hubSeq, forUser=u;
+  fetch(PLNA_URL+'/rest/v1/rpc/haf_hub_pass_status',{method:'POST',
+    headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({p_username:cred.p_username,p_hash:cred.p_hash,p_relay:cred.p_relay})})
+    .then(r=>r.ok?r.json():null).catch(()=>null)
+    .then(d=>{
+      _hubBusy=false;
+      /* Same race guard as the cards above: a master flicking between previewed
+         accounts must never land one person's pass in another one's sidebar. */
+      if(seq!==_hubSeq||(localStorage.getItem('knect-user')||'').toUpperCase()!==forUser)return;
+      _hubAt=Date.now();
+      if(d&&d.ok===true&&d.joined===true)hafHubDone(el,d.email||'');
+      else hafHubOffer(el,(d&&d.email)||'',true);
+    });
+}
+
+/* The head of the card, identical in both states, so nothing jumps when a
+   member presses the button. */
+function hafHubShell(inner){
+  return '<div class="sb-hub-ttl">'+
+    '<svg viewBox="0 0 24 24"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M12 22V12"/><path d="M3 7l9 5 9-5"/></svg>'+
+    'THE HAF HUB</div>'+inner;
+}
+
+function hafHubOffer(el,email,live){
+  el.innerHTML=hafHubShell(
+    '<div class="sb-hub-say">Your launch pass to the network’s community on Discord — work talk, '+
+    'first look at what we build next, and member deals.</div>'+
+    '<input class="sb-hub-in" id="sb-hub-em" type="email" autocomplete="email" '+
+      'placeholder="Your email address" value="'+_esc(email||'')+'" '+
+      'onkeydown="if(event.key===\'Enter\'){event.preventDefault();hafHubGo();}">'+
+    '<button type="button" class="sb-hub-go" id="sb-hub-btn" onclick="hafHubGo()">'+
+      'Get my launch pass →</button>'+
+    '<div class="sb-hub-note" id="sb-hub-note">'+
+      (live?'Free. We’ll use this address to keep you posted on the network.'
+           :'Opens the HUB sign-up page in a new tab.')+'</div>');
+}
+
+function hafHubDone(el,email){
+  el.innerHTML=hafHubShell(
+    '<div class="sb-hub-yes">'+
+      '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>You’re in</div>'+
+    '<div class="sb-hub-say">Your launch pass is open'+
+      (email?' under <b>'+_esc(email)+'</b>':'')+'.</div>'+
+    '<button type="button" class="sb-hub-go" onclick="window.open(HAF_HUB_URL,\'_blank\',\'noopener\')">'+
+      'Open THE HAF HUB →</button>');
+}
+
+/* The press. Record first, open second, and never let the recording stop the
+   door — the member asked to join a community, not to wait on our database. */
+function hafHubGo(){
+  const el=document.getElementById('sb-hub'); if(!el)return;
+  const box=document.getElementById('sb-hub-em');
+  const btn=document.getElementById('sb-hub-btn');
+  const note=document.getElementById('sb-hub-note');
+  const email=box?String(box.value||'').trim():'';
+  /* One check, and it is the one a person can act on. An address that is
+     obviously not an address gets said so here rather than silently dropped by
+     the database. Empty is allowed: somebody who will not give an address still
+     gets to join. */
+  if(email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+    if(note){note.className='sb-hub-err';note.textContent='That address doesn’t look right — check it and try again.';}
+    if(box)box.focus();
+    return;
+  }
+  if(btn){btn.disabled=true;btn.textContent='One moment…';}
+  if(box)box.disabled=true;
+
+  /* Opened here, synchronously inside the click, because a browser blocks a
+     window opened later from a promise. The record follows it. */
+  const tab=window.open(HAF_HUB_URL,'_blank','noopener');
+
+  const cred=hafPlnaCred();
+  const done=ok=>{
+    _hubAt=0;
+    if(ok)hafHubDone(el,email);
+    else{
+      /* We could not write the row. Say that, and say what is still true: the
+         HUB page is open in the other tab and they can carry on. */
+      if(btn){btn.disabled=false;btn.textContent='Get my launch pass →';}
+      if(box)box.disabled=false;
+      const n=document.getElementById('sb-hub-note');
+      if(n){n.className='sb-hub-err';
+            n.textContent=tab?'The HUB is open in the other tab. We couldn’t save your address — try the button again in a moment.'
+                             :'We couldn’t open the HUB just now. Try again in a moment.';}
+    }
+  };
+  if(!cred){done(false);return;}
+  fetch(PLNA_URL+'/rest/v1/rpc/haf_hub_pass_go',{method:'POST',
+    headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({p_username:cred.p_username,p_hash:cred.p_hash,
+                         p_relay:cred.p_relay,p_email:email||null})})
+    .then(r=>r.ok?r.json():null).catch(()=>null)
+    .then(d=>done(!!(d&&d.ok===true)));
 }
 
 /* A driver leaves this tab open all day. Coming back to it is the moment the
