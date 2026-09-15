@@ -11279,12 +11279,50 @@ async function hafJobsPaint(){
       '<div class="xc-route">'+route+'</div>'+
       stats+
       '<div class="xc-dist" id="knd-'+_esc(j.id)+'">Working out how far this is from you…</div>'+
+      /* 15 Sep: the whole job map was already loaded into this page and NOTHING
+         on a job card ever called it, so a KNECT member opened a job and read
+         text while the very same job on the driver app carried a map. Areas,
+         not doorsteps — the addresses are released when the job is taken. */
+      '<div class="hafjm" id="knm-'+_esc(j.id)+'"></div>'+
+      '<div class="hafjm-note" id="knmn-'+_esc(j.id)+'"></div>'+
+      (window.HAFJobMap?HAFJobMap.keyRow(false):'')+
       legs+chips+notes+
       '<div class="xc-foot"><div class="xc-meta">'+who+'</div>'+
       '<div class="xc-btns">'+action+'</div></div></div>';
   }).join('');
   /* Road distances arrive after the board is readable. Nobody waits on a map to see work. */
   _hafJobsDistances(jobs);
+  _hafJobsMaps(jobs);
+}
+
+/* THIS job on a map, and nothing else on it — the same file the driver app draws
+   from, so the member and the driver are never looking at two different pictures
+   of one lorry. A district, never a full postcode: a pin is read as a doorstep,
+   and this board has not released the doorstep yet. */
+function _hafOutward(pc){
+  const s=String(pc||'').toUpperCase().replace(/\s+/g,'');
+  if(s.length<4)return s;              /* already a district, or nothing useful */
+  return s.slice(0,s.length-3);
+}
+function _hafJobsMaps(jobs){
+  if(typeof window.HAFJobMap==='undefined')return;
+  /* The stylesheet before the observer: an .hafjm with no height yet is a box a
+     browser can call "on screen" at zero pixels. */
+  HAFJobMap.mount();
+  HAFJobMap.sweep();
+  (jobs||[]).forEach(function(j){
+    const el=document.getElementById('knm-'+j.id); if(!el)return;
+    const c=_hafOutward(j.from_postcode), d=_hafOutward(j.to_postcode);
+    if(!c&&!d){ el.style.display='none';
+      const n0=document.getElementById('knmn-'+j.id); if(n0)n0.style.display='none';
+      return; }
+    HAFJobMap.lazy(el,{collect:c,deliver:d,approximate:true});
+    const note=document.getElementById('knmn-'+j.id);
+    /* Only promise written addresses on a card that is actually carrying them. */
+    if(note)note.textContent=(j.collect_address||j.deliver_address)
+      ? 'Collection area to delivery area. The addresses are written out below.'
+      : 'Areas only — the exact addresses come through when you take the job.';
+  });
 }
 
 /* Only what the consignment actually records. A missing figure prints nothing rather
@@ -17332,10 +17370,30 @@ window.pxSave=async function(){
         var A = r[0], B = r[1], Y = r[2], pts = [];
         var wait = el.querySelector('.hafjm-wait');
 
+        /* AN AREA IS DRAWN AS AN AREA. `approximate` used to be documented in
+         * the options and read by nothing, so the only thing telling anyone
+         * these pins were a district was a sentence underneath — and a sentence
+         * loses to a picture every time. A district is roughly a mile and a
+         * half across, so it gets a soft 1.5km halo: at tile size you can see
+         * at a glance that the answer is "round here", not "this door". */
+        var HALO_M = 1500;
+        function halo(p, c) {
+          try {
+            L.circle([p.lat, p.lng], { radius: HALO_M, color: c, weight: 1,
+              opacity: .45, fillColor: c, fillOpacity: .12, interactive: false }).addTo(map);
+          } catch (e) { /* a halo is decoration; never let it cost us the pin */ }
+        }
+        if (opts.approximate) {
+          if (A) halo(A, COLOURS.collect.fill);
+          if (B) halo(B, COLOURS.deliver.fill);
+        }
+
+        var cWord = opts.approximate ? 'C · Collection area' : 'C · Collection';
+        var dWord = opts.approximate ? 'D · Delivery area'   : 'D · Delivery';
         if (A) { L.marker([A.lat, A.lng], { icon: collectPin(), zIndexOffset: 300 })
-                   .addTo(map).bindPopup('C · Collection'); pts.push([A.lat, A.lng]); }
+                   .addTo(map).bindPopup(cWord); pts.push([A.lat, A.lng]); }
         if (B) { L.marker([B.lat, B.lng], { icon: deliverPin(), zIndexOffset: 300 })
-                   .addTo(map).bindPopup('D · Delivery'); pts.push([B.lat, B.lng]); }
+                   .addTo(map).bindPopup(dWord); pts.push([B.lat, B.lng]); }
         if (A && B) {
           L.polyline([[A.lat, A.lng], [B.lat, B.lng]],
             { color: '#f08a1e', weight: 3, opacity: .5, dashArray: '3,8' }).addTo(map);
