@@ -591,6 +591,47 @@ textarea.fi2{resize:vertical;min-height:70px}
 .ni-add .ni-ic{stroke:var(--or)}
 .ni-out{width:11px;height:11px;margin-left:auto;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.7}
 .sb-plna b{display:block;color:var(--haf-orange-ink);font-weight:800;margin-top:.15rem}
+/* UPGRADE - account types, above the plans. Brent, 15 Sep: the "what type of
+   account am I?" question moves off the join page and lives here, where the
+   person can already see what they are choosing between. */
+.upg-h2{font-family:var(--dp);font-weight:900;font-size:1rem;letter-spacing:-.02em;margin:1.6rem 0 .3rem}
+.upg-now{background:var(--p);border:1.5px solid var(--lns);border-radius:var(--r);padding:1.1rem 1.2rem;margin-bottom:.9rem}
+.upg-now .k{font-size:.6rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);margin-bottom:.3rem}
+.upg-now .v{font-family:var(--dp);font-weight:900;font-size:1.05rem;color:var(--tx)}
+.upg-now .d{font-size:.74rem;color:var(--mu);line-height:1.55;margin-top:.35rem}
+.upg-rule{font-size:.72rem;color:var(--mu);line-height:1.55;background:var(--or-d);border:1px solid var(--or-g);border-radius:var(--rs);padding:.75rem .9rem;margin-bottom:.9rem}
+.upg-rule b{color:var(--haf-orange-ink)}
+.upg-types{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.75rem}
+.upg-t{background:var(--p);border:1.5px solid var(--lns);border-radius:var(--r);padding:1.1rem 1.2rem;display:flex;flex-direction:column;gap:.45rem;min-width:0}
+.upg-t h4{font-family:var(--dp);font-weight:800;font-size:.9rem;letter-spacing:-.01em}
+.upg-t p{font-size:.73rem;color:var(--mu);line-height:1.55;flex:1}
+.upg-t .btn{margin-top:.3rem}
+.upg-t.done{border-color:rgba(45,171,96,.35)}
+.upg-t .yes{font-size:.7rem;font-weight:700;color:var(--gn)}
+/* BUILD YOUR HAF ACCOUNT - the rungs. A rung not yet reached is dimmed rather
+   than hidden, because the whole point is seeing where this goes next. */
+.bld{display:flex;flex-direction:column;gap:.5rem;margin:.6rem 0 .2rem}
+.bld-row{display:flex;gap:.8rem;background:var(--p);border:1.5px solid var(--lns);
+  border-radius:var(--r);padding:.95rem 1.1rem;min-width:0;opacity:.72}
+.bld-row.done{opacity:1;border-color:rgba(45,171,96,.38)}
+.bld-row.next{opacity:1;border-color:var(--or)}
+.bld-n{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--p2);
+  border:1.5px solid var(--lns);display:flex;align-items:center;justify-content:center;
+  font-family:var(--dp);font-weight:900;font-size:.72rem;color:var(--mu)}
+.bld-row.done .bld-n{background:rgba(45,171,96,.14);border-color:rgba(45,171,96,.38);color:var(--gn)}
+.bld-row.next .bld-n{background:var(--or-d);border-color:var(--or-g);color:var(--haf-orange-ink)}
+.bld-b{min-width:0}
+.bld-b h4{font-family:var(--dp);font-weight:800;font-size:.88rem;letter-spacing:-.01em;
+  display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+.bld-pill{font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--mu);background:var(--p2);border:1px solid var(--lns);border-radius:var(--pill);padding:.1rem .48rem}
+.bld-row.done .bld-pill{color:var(--gn);border-color:rgba(45,171,96,.38)}
+.bld-row.next .bld-pill{color:var(--haf-orange-ink);border-color:var(--or-g);background:var(--or-d)}
+.bld-s{font-size:.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mu);margin-top:.18rem}
+.bld-b p{font-size:.73rem;color:var(--mu);line-height:1.55;margin:.35rem 0 0}
+.bld-lab{font-size:.7rem;color:var(--mu);margin-top:.4rem}
+.bld-lab b{color:var(--tx);font-weight:800}
+@media(max-width:560px){.upg-types{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:560px){.fr{grid-template-columns:1fr}}
 
 /* STATUS PANELS */
@@ -4079,9 +4120,22 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         <div id="fdir-direct-bookings"></div>
       </div>
 
-      <!-- FREIGHT: Upgrade (plans & tiers) -->
+      <!-- Upgrade - account types FIRST, then the plans -->
       <div class="tp" id="pane-f-plans">
-        <h1 class="pt">Upgrade</h1><p class="ps">All accounts that post for clients can post loads for any client. Your tier sets your network fee, profit pooling, and tools — upgrade any time.</p>
+        <h1 class="pt">Upgrade</h1><p class="ps">What kind of account you have, and what you pay for it. Both are changed here, and neither is decided before you have seen the platform.</p>
+        <!-- Brent, 15 Sep 2026: the account type choice moves off the join page
+             and lands here. Drawn by hafRenderUpgradeTypes() from the signed-in
+             account, so it can never offer a route the account already has. -->
+        <!-- Brent, 15 Sep 2026: "let us put them into categories as they
+             complete certain parts of the network." The rungs ARE the
+             categories, and each one says what the account then reads as, so
+             nobody has to guess which category they are in. Drawn from the
+             signed-in account by hafRenderBuildLadder(). -->
+        <h2 class="upg-h2">Build your HAF account</h2>
+        <div id="upg-ladder"></div>
+        <div id="upg-types"></div>
+        <h2 class="upg-h2">Your plan</h2>
+        <p class="ps">All accounts that post for clients can post loads for any client. Your tier sets your network fee, profit pooling, and tools — upgrade any time.</p>
         <div class="plg" style="grid-template-columns:repeat(auto-fit,minmax(195px,1fr))">
           <div class="plc">
             <div class="pl-n">HAF KNECT Free</div>
@@ -8597,6 +8651,156 @@ function hafAddSection(acc){
             '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'));
 }
 
+/* ── UPGRADE: WHAT KIND OF ACCOUNT THIS IS ───────────────────────
+   Brent, 15 Sep 2026: "when people are joining they're asking me what type of
+   account - let's put the account types within the upgrade section on the
+   sidebar for sure."
+
+   That question used to be asked on the join page, before anybody had seen a
+   single screen, which is exactly why they were asking him instead of
+   answering it. Now the account is opened first and the question is asked
+   here, where the answer is visible.
+
+   The one rule underneath all three routes comes from Brent's architecture
+   note: paid delivery work always has a registered business legally behind it.
+   For a fleet driver that is their fleet, verified once. For an owner driver
+   it is their own business. So the routes say so in plain words rather than
+   letting somebody get three screens in before finding out.
+
+   It claims nothing. Every route is drawn from the signed-in account, so an
+   account that already drives is never offered "become a driver" again. */
+/* ── BUILD YOUR HAF ACCOUNT: THE RUNGS ───────────────────────────────────
+   Brent, 15 Sep 2026: "let us put them into categories as they complete
+   certain parts of the network."
+
+   What a person can see used to be decided by what they typed on the join
+   form before they had seen a single screen. This is the other way round: the
+   account opens first, and each rung they finish inside decides what opens
+   next AND what the account then reads as. The category is the consequence of
+   the work, not a box ticked by a stranger at the door.
+
+   It reads ONLY the signed-in account record - type, drives, released - which
+   is the same record the sidebar draws from, so the ladder and the padlocks
+   can never tell one person two different stories.
+
+   What this record does NOT carry is the Companies House answer, so no rung
+   here claims a company has been checked on the register. Rung two says what
+   the person told us; rung three is the one that says a human at HAF proved
+   it. Saying "confirmed" off a field that only holds what somebody typed is
+   exactly the kind of green tick that gets believed and is not true. */
+function hafBuildLadder(acc){
+  const t=acc.type,drives=!!acc.drives,rel=!!acc.released;
+  /* A type only exists because a business route was chosen at some point. A
+     brand new simplified account has not chosen one yet, and lands on rung 2. */
+  const isBiz = (t==='business'||t==='fleet'||t==='freight_forwarder'||t==='driver');
+  const rungs=[
+    {n:1,h:'Your HAF account',s:'Done when you join',
+     p:'Sign in, post a job, track it, your calendar and your saved addresses.',
+     lab:'HAF KNECT account',done:true},
+    {n:2,h:'Tell us your business',s:'Sole trader or limited company',
+     p:'One answer, given inside, not at the door. A limited company gives its '+
+       'company number and keeps its registered name. A sole trader has no register '+
+       'to check, so everything stays in their own name.',
+     lab:'Business account',done:isBiz},
+    {n:3,h:'Your checks with Clever',s:'Owner or director, and the register',
+     p:'Your identity documents go through the Clever check, and a limited company '+
+       'is checked against the Companies House register. This is the rung that turns '+
+       'what you told us into something proved.',
+     lab:'Verified business',done:rel,
+     pill:(drives&&!rel)?'With Clever now':null},
+    {n:4,h:'Add your team',s:'Colleagues get their own sign-in',
+     p:'Free on every account. Each colleague gets their own login and sets their own '+
+       'PIN, so nobody shares yours.',
+     lab:'Team enabled',done:false,pill:'Open now',open:true},
+    {n:5,h:'Add driving',s:'Licence, vehicle and insurance',
+     p:'Opens the driving screens and your compliance list. This is where an owner '+
+       'driver’s own documents go.',
+     lab:'Owner driver',done:drives},
+    {n:6,h:'Register a fleet',s:'Vans and drivers under one business',
+     p:'Your company is verified once and every driver you add is covered by it.',
+     lab:'Fleet operator',done:t==='fleet'},
+    {n:7,h:'Released by HAF',s:'A person here releases you',
+     p:'Network work becomes visible and takeable. This rung is not automatic and '+
+       'nothing on this page skips it.',
+     lab:'Released',done:rel}
+  ];
+  /* "You are here" is the first rung still outstanding. Rung 4 is always open
+     and never blocks, so it is never the one a person is waiting on. */
+  const next=rungs.filter(r=>!r.done&&!r.open).map(r=>r.n)[0]||0;
+  return '<p class="ps">You already have everything on rung one. Each rung you finish '+
+    'opens more of the network, and tells us what kind of account this is — so nothing '+
+    'has to be decided before you have seen it.</p><div class="bld">'+
+    rungs.map(r=>{
+      const cls=r.done?'done':(r.n===next?'next':'');
+      const pill=r.pill||(r.done?'Done':(r.n===next?'You are here':'Opens later'));
+      return '<div class="bld-row'+(cls?' '+cls:'')+'"><div class="bld-n">'+r.n+'</div>'+
+        '<div class="bld-b"><h4>'+r.h+' <span class="bld-pill">'+pill+'</span></h4>'+
+        '<div class="bld-s">'+r.s+'</div><p>'+r.p+'</p>'+
+        '<div class="bld-lab">Account reads as: <b>'+r.lab+'</b></div></div></div>';
+    }).join('')+'</div>';
+}
+
+function hafUpgradeTypes(acc){
+  const t=acc.type,drives=acc.drives,released=acc.released;
+  const card=(cls,title,body,btn,kind)=>
+    '<div class="upg-t'+(cls?' '+cls:'')+'"><h4>'+title+'</h4><p>'+body+'</p>'+
+    (btn?'<button class="btn btn-or btn-sm btn-wide" onclick="hafCleverAdd(\''+kind+'\')">'+btn+'</button>'
+        :'<div class="yes">Already on your account</div>')+'</div>';
+
+  let out='<div class="upg-now"><div class="k">Your account today</div>'+
+    '<div class="v">'+_esc(acc.account_name||'HAF KNECT')+'</div>'+
+    '<div class="d">Every HAF account can post work and track it. What you add below decides '+
+    'what else opens up, and nothing you have already built up is lost by changing it.</div></div>';
+
+  out+='<div class="upg-rule">Before you pick: <b>paid delivery work always has a registered '+
+       'business behind it.</b> If you drive for a fleet, that is your fleet\'s business and they '+
+       'add you to it. If you drive for yourself, it is your own \u2014 a limited company or a sole '+
+       'trader. Nobody takes paid work without one.</div>';
+
+  out+='<div class="upg-types">';
+
+  /* Owner driver. Offered to anybody not already set up to drive. */
+  out+=(released&&t==='driver')
+    ? card('done','Owner driver',
+        'You are set up to drive and take paid network work on your own account.','','')
+    : card('','Owner driver',
+        'Drive and take paid work yourself. You are both the business and the driver, so both '+
+        'are checked: your own business first, then your licence, vehicle and insurance.',
+        (drives&&t==='driver')?'Finish your checks':'Become an owner driver','driver');
+
+  /* Fleet. Same rule, one verification for the whole company. */
+  out+=(released&&t==='fleet')
+    ? card('done','Courier company or fleet',
+        'Your company is verified. Add your drivers from the Fleet section and each one inherits it.','','')
+    : card('','Courier company or fleet',
+        'Run vans and drivers. Your company is verified once, then every driver you add is covered '+
+        'by it and only has to pass their own licence, vehicle and insurance.',
+        (drives&&t==='fleet')?'Finish your checks':'Register a fleet','fleet');
+
+  /* The third route from the architecture note: somebody who drives for
+     somebody else. There is nothing for them to apply for, and saying so is
+     the whole point - it stops them starting an application they cannot
+     finish, which is the dead end this screen exists to remove. */
+  out+='<div class="upg-t"><h4>I drive for a fleet</h4>'+
+       '<p>Nothing to apply for here. Ask whoever runs your fleet to add you from their Fleet '+
+       'section. You keep this account and this sign-in, and their verified company covers the '+
+       'business side for you.</p><div class="yes">No application needed</div></div>';
+
+  out+='</div>';
+  return out;
+}
+function hafRenderUpgradeTypes(acc){
+  if(!acc)return;
+  /* One call site draws both halves of this screen, so the rungs and the routes
+     are always read off the same account in the same pass. If either throws it
+     empties its own box rather than taking the Upgrade screen down with it. */
+  const lad=document.getElementById('upg-ladder');
+  if(lad){try{lad.innerHTML=hafBuildLadder(acc);}catch(e){lad.innerHTML='';}}
+  const el=document.getElementById('upg-types');
+  if(!el)return;
+  try{el.innerHTML=hafUpgradeTypes(acc);}catch(e){el.innerHTML='';}
+}
+
 /* ══ SEEDED RUNS BELONG TO THE DEMO, NOT TO A REAL ACCOUNT ════════════════
    Brent, 14 Aug: "clear the whole account on the main one i actually use —
    only have test runs on the demo centre."
@@ -10148,7 +10352,15 @@ const HAF_NAV_V1=[
     {id:'team',      l:'Team Members',          need:'team'},
     {id:'b-usage',   l:'Usage &amp; Activity', need:'post'},
     {id:'f-account', l:'Account Controls',     need:'freight'},
-    {id:'f-plans',   l:'Upgrade',              need:'freight'},
+    /* Brent, 15 Sep 2026: "when people are joining they're asking me what type
+       of account - let's put the account types within the upgrade section on
+       the sidebar for sure."
+
+       So this row lost its need:'freight' gate. It is no longer a freight
+       pricing page: it is where a person decides what KIND of account they
+       have, which is the decision the join page used to force out of them
+       before they had seen anything. Every account reaches it. */
+    {id:'f-plans',   l:'Upgrade'},
    ]},
 
   {g:'ACCOUNT', id:'help', l:'Feedback &amp; Help', ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
@@ -10308,6 +10520,10 @@ window.hafNavModel=hafNavModel;
 function buildNavV1(acc,keepOpen){
   if(!acc)return;
   window._hafAccView=acc;
+  /* The Upgrade screen is drawn from the same account record as the sidebar, in
+     the same pass, so the two can never tell a person different things about
+     what their account already is. */
+  hafRenderUpgradeTypes(acc);
   /* Same rule as the home screen, and for the same reason: the wording on a job
      card is written for the account's own side of the job. An override adds the
      driving screens; it does not turn a sending account into a driver. */
