@@ -15690,10 +15690,25 @@ function capFilter(){
       if(relay){m.addTo(capMap);}else{try{capMap.removeLayer(m);}catch(e){}}
     });
   }
-  /* Customer guide band per loaded mile — driver base rate + the network fee, rounded to a band */
-  const RATES={van:'£0.95–£1.05',swb:'£1.05–£1.20',mwb:'£1.20–£1.30',lwb:'£1.30–£1.45',xlwb:'£1.40–£1.55',luton:'£1.55–£1.70',lutonc:'£1.55–£1.70',lutontl:'£1.65–£1.85'};
+  /* Customer guide band per loaded mile, DERIVED, not typed.
+     The constant that was here said in its own comment how to build it -
+     "driver base rate + the network fee" - and then held typed values that
+     did not satisfy that description: every band understated, and on swb,
+     lwb, luton and lutonc the WHOLE band sat below the driver's own base
+     rate per mile. Derived the way the engine derives it, from the same
+     tables, so the board and the quote cannot disagree. No vehicle chosen,
+     or either table missing, leaves a dash: read it live or do not show it. */
   const rateEl=document.getElementById('cap-rate-lbl');
-  if(rateEl)rateEl.textContent=(RATES[_capVeh]||'£1.30–£1.45')+'/mi';
+  if(rateEl){
+    const v=(typeof VAN!=='undefined')&&VAN[_capVeh==='van'?'small':_capVeh];
+    const fees=(typeof URG!=='undefined')
+      ?Object.keys(URG).map(k=>URG[k].fee).filter(n=>typeof n==='number'):[];
+    if(v&&typeof v.drv==='number'&&fees.length){
+      const g=f=>v.drv/(1-f);
+      rateEl.textContent='£'+g(Math.min.apply(null,fees)).toFixed(2)
+                        +'–£'+g(Math.max.apply(null,fees)).toFixed(2)+'/mi';
+    }else{ rateEl.textContent='—'; }
+  }
 }
 /* Job type / demand / coverage filters — grey out regions that don't match, on both the map and the side panels */
 function _capFV(id){const e=document.getElementById(id);return e?e.value:'all';}
