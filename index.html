@@ -11311,10 +11311,15 @@ async function hafJobsPaint(){
    from, so the member and the driver are never looking at two different pictures
    of one lorry. A district, never a full postcode: a pin is read as a doorstep,
    and this board has not released the doorstep yet. */
+/* 15 Sep: this used to cut the last three characters off ANYTHING four or more
+   characters long. The board already hands this screen a district — haf_outward
+   runs in the SQL — so a four-character district was cut a SECOND time and
+   "LS10" was asked for as "L". The pin simply never drew, silently, and only on
+   four-character districts (LS10, BS16, NE12, CV34 …), which is why it survived
+   every walk on S9, M1 and B15. Cut only what is actually a full postcode. */
 function _hafOutward(pc){
   const s=String(pc||'').toUpperCase().replace(/\s+/g,'');
-  if(s.length<4)return s;              /* already a district, or nothing useful */
-  return s.slice(0,s.length-3);
+  return /^[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}$/.test(s) ? s.slice(0,s.length-3) : s;
 }
 function _hafJobsMaps(jobs){
   if(typeof window.HAFJobMap==='undefined')return;
