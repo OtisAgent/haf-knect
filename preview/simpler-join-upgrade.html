@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>HAF KNECT · Simpler joining preview</title>
+  <style>
+    :root{--ink:#111;--muted:#6d6d6d;--line:#dedede;--orange:#ff6a00;--paper:#f6f5f2;--card:#fff}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 Arial,sans-serif}
+    button{font:inherit}.shell{min-height:100vh;display:grid;grid-template-columns:250px 1fr}
+    aside{background:#111;color:#fff;padding:24px 16px;display:flex;flex-direction:column;gap:24px}
+    .brand{font-size:22px;font-weight:900;letter-spacing:-.04em}.brand span{color:var(--orange)}
+    nav{display:grid;gap:7px}.nav{padding:11px 12px;border-radius:10px;color:#aaa}.nav.active{background:#282828;color:#fff}.nav small{display:block;color:#777}
+    .preview{margin-top:auto;color:#bbb;font-size:12px;border:1px solid #333;border-radius:10px;padding:10px}
+    main{padding:38px clamp(18px,5vw,70px);max-width:1250px;width:100%}h1{font-size:34px;margin:0}.lead{color:var(--muted);margin:4px 0 26px}
+    .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:0 8px 25px #00000008}
+    h2{margin:0 0 4px;font-size:21px}.intro{color:var(--muted);max-width:700px;margin:0 0 22px}
+    .routes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.route{border:1px solid var(--line);border-radius:14px;padding:19px;display:flex;flex-direction:column;min-height:230px}
+    .icon{width:42px;height:42px;border-radius:12px;background:#fff1e7;color:#b44800;display:grid;place-items:center;font-weight:900;margin-bottom:16px}
+    h3{margin:0;font-size:18px}.route p{color:var(--muted);font-size:14px;flex:1}.btn{border:0;border-radius:9px;padding:11px 12px;font-weight:800;cursor:pointer}
+    .primary{background:var(--orange);color:#111}.secondary{background:#eee;color:#111}
+    .note{margin-top:16px;color:var(--muted);font-size:13px}.plans{margin-top:28px;filter:grayscale(.2);opacity:.65}.plan-row{display:flex;gap:12px}.plan{flex:1;border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}
+    .toast{position:fixed;right:20px;bottom:20px;max-width:360px;background:#111;color:#fff;padding:14px 16px;border-radius:11px;display:none}
+    @media(max-width:760px){.shell{display:block}aside{padding:14px 16px;position:sticky;top:0;z-index:2}.brand{font-size:19px}nav,.preview{display:none}main{padding:24px 14px 90px}h1{font-size:29px}.panel{padding:17px}.routes{grid-template-columns:1fr}.route{min-height:0}.plan-row{display:grid}.plans{display:none}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">HAF <span>KNECT</span></div>
+      <nav>
+        <div class="nav">Overview</div><div class="nav">Post a job</div><div class="nav">Calendar</div>
+        <div class="nav">Team members</div><div class="nav">Fleet</div>
+        <div class="nav active">Upgrade <small>Account type and plans</small></div>
+      </nav>
+      <div class="preview">Private design preview. No account or live system is changed.</div>
+    </aside>
+    <main>
+      <h1>Upgrade</h1>
+      <p class="lead">Start with one HAF KNECT account, then add what you need when you are ready.</p>
+      <section class="panel">
+        <h2>What would you like to add?</h2>
+        <p class="intro">You do not need to decide this when you join. Choose a route here whenever it becomes useful. Your HAF login stays the same.</p>
+        <div class="routes">
+          <article class="route">
+            <div class="icon">1</div><h3>Owner driver</h3>
+            <p>Confirm your business, then add your identity, driving and vehicle documents. Each completed step unlocks more of HAF PLNA and the network.</p>
+            <button class="btn primary" data-route="Owner driver">Add owner driver</button>
+          </article>
+          <article class="route">
+            <div class="icon">2</div><h3>Fleet or delivery company</h3>
+            <p>Confirm the company once, then add team members, drivers and vehicles as the operation grows.</p>
+            <button class="btn primary" data-route="Fleet or delivery company">Register my company</button>
+          </article>
+          <article class="route">
+            <div class="icon">3</div><h3>I drive for a fleet</h3>
+            <p>Your fleet adds you to its team. You use your own HAF login to complete the personal checks the fleet needs.</p>
+            <button class="btn secondary" data-route="Fleet driver">See how fleet access works</button>
+          </article>
+        </div>
+        <div class="note">Nothing changes until you choose a route. You can keep posting and using your HAF KNECT account on Free.</div>
+      </section>
+      <section class="plans" aria-label="Plans preview">
+        <h2>Choose your plan</h2><p class="intro">Every account starts on Free. Upgrade only when you need higher limits or more tools.</p>
+        <div class="plan-row"><div class="plan"><strong>Free</strong><br>Start using HAF KNECT</div><div class="plan"><strong>Plus</strong><br>Higher limits and more tools</div><div class="plan"><strong>Pro</strong><br>For larger operations</div></div>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
+    document.querySelectorAll('[data-route]').forEach(function(button){
+      button.addEventListener('click',function(){
+        var toast=document.getElementById('toast');
+        toast.textContent=button.dataset.route+' selected. In the finished journey this opens the matching checks without creating another login.';
+        toast.style.display='block';setTimeout(function(){toast.style.display='none'},4500);
+      });
+    });
+  </script>
+</body>
+</html>
