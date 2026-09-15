@@ -696,9 +696,30 @@ textarea.fi2{resize:vertical;min-height:70px}
   border:1px solid color-mix(in srgb, var(--xb-c, var(--mu)) 34%, transparent)}
 .xc-viewers{font-size:.63rem;color:var(--mu);display:flex;align-items:center;gap:.22rem}
 .xc-route{font-family:var(--dp);font-weight:900;font-size:1.05rem;letter-spacing:-.025em;margin-bottom:.55rem;line-height:1.2}
-.xc-sr{display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg);border:1px solid var(--ln);border-radius:6px;overflow:hidden;margin-bottom:.5rem}
-.xcs{padding:.38rem .4rem;text-align:center;border-right:1px solid var(--ln)}.xcs:last-child{border-right:none}
-.xcs-v{font-weight:800;font-size:.88rem;white-space:nowrap}.xcs-k{font-size:.73rem;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;margin-top:.1rem}
+/* 15 Sep — Brent, with a screenshot of this card on a phone: "the whole page
+   looks way out ... can you make it fit different devices dynamically".
+   Measured on the live board at 320, 360 and 390: EIGHTEEN elements sat past
+   the right-hand edge, and the two that matter most were completely off the
+   screen — how far the run is, and what it PAYS. Because the row carries
+   overflow:hidden the page never grew a sideways scrollbar, so nothing looked
+   broken; the driver pay was simply invisible on every phone, with no way to
+   reach it. A quiet fault is worse than a loud one.
+   Two causes, both of them here:
+     · four `1fr` columns, and 1fr means minmax(AUTO,1fr) — a long value pushes
+       its column wider than its share instead of sharing what room there is;
+     · .xcs-v was white-space:nowrap, so "By 16:00 Mon 14 Sep" set a 138px floor
+       and four of those cannot fit 360px however the columns are written.
+   Now: two columns on a phone, four from 560px up, every column minmax(0,1fr)
+   so nothing can force the row wider than the card, and the value may wrap.
+   The dividers are a 1px gap over the row's own background, which draws the
+   right lines at two columns AND at four — the old :last-child border left a
+   stray edge the moment the row wrapped. */
+.xc-sr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;
+  background:var(--ln);border:1px solid var(--ln);border-radius:6px;
+  overflow:hidden;margin-bottom:.5rem}
+@media(min-width:560px){.xc-sr{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.xcs{padding:.42rem .45rem;text-align:center;min-width:0;background:var(--bg)}
+.xcs-v{font-weight:800;font-size:.88rem;line-height:1.3;overflow-wrap:anywhere}.xcs-k{font-size:.73rem;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;margin-top:.1rem}
 .xcs.rate .xcs-v{color:var(--gn);font-size:1rem}
 .xc-goods{font-size:.77rem;color:var(--mu);padding:.34rem .55rem;background:var(--bg);border:1px solid var(--ln);border-radius:5px;margin-bottom:.55rem}
 .xc-pref{font-size:.68rem;color:var(--gn);font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.28rem}
@@ -776,9 +797,9 @@ textarea.fi2{resize:vertical;min-height:70px}
 /* The van row is a fixed grid, not a wrapping flex line: every vehicle gets the
    same width whatever the fleet list is, so a long name can never squash the
    others or leave one stranded across a whole row on its own. */
-#van-pills{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+#van-pills{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem}
 #van-pills .vp{flex:none;min-width:0;border-radius:var(--rx);padding:.5rem .55rem}
-@media(max-width:700px){#van-pills{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){#van-pills{grid-template-columns:repeat(2,minmax(0,1fr))}}
 /* ── VEHICLE CARDS ──
    Brent's reference (speedyfreight.com/vehicles): every vehicle states its load
    space, its pallets and its max weight, in the same order, with a drawn icon on
@@ -816,7 +837,7 @@ textarea.fi2{resize:vertical;min-height:70px}
    to collect. Everything here is built from the existing tokens — no new
    colours, no new fonts, the same tiles as the front calculator. */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
-.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem}
 @media(max-width:520px){.g3{grid-template-columns:1fr 1fr}}
 .sub-q{font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--mu);text-transform:uppercase;margin:.9rem 0 .4rem}
 .sub-q .opt-tag{font-weight:500;letter-spacing:0;text-transform:none;color:var(--su);margin-left:.3rem}
@@ -866,7 +887,7 @@ textarea.fi2{resize:vertical;min-height:70px}
    still one click away for anyone who wants a particular Luton body.
    One grid, one row height, one baseline — every rung lines up whatever its
    label length, because a ladder that jitters reads as a guess. */
-.vlad{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-bottom:.55rem}
+.vlad{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.4rem;margin-bottom:.55rem}
 .vrung{position:relative;display:flex;flex-direction:column;align-items:stretch;text-align:left;gap:.12rem;
   background:var(--p);border:1.5px solid var(--ln);border-radius:var(--rx);padding:.95rem .6rem .6rem;
   font:inherit;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s}
@@ -885,7 +906,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .vlad-x{font-size:.72rem;color:var(--mu);line-height:1.5;margin:-.15rem 0 .6rem}
 .vlad-x strong{color:var(--tx);font-weight:800}
 @media(max-width:560px){
-  .vlad{grid-template-columns:repeat(2,1fr)}
+  .vlad{grid-template-columns:repeat(2,minmax(0,1fr))}
   .vrung{padding:.9rem .65rem .6rem}
 }
 .veh-open{background:none;border:none;padding:0;font:inherit;font-size:.76rem;font-weight:700;color:var(--haf-orange-ink);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
@@ -1039,7 +1060,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .lp-info{font-size:.72rem;color:var(--mu);margin-top:.18rem}
 
 /* ── PATH TILES ───────────────────────────────────────────── */
-.path-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem}
+.path-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.85rem}
 @media(max-width:680px){.path-tiles{grid-template-columns:1fr}}
 .ptile{background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:1.1rem 1.15rem 1rem;cursor:pointer;transition:all .17s;box-shadow:var(--sd)}
 .ptile:hover{border-color:var(--haf-orange-ink);transform:translateY(-2px);box-shadow:var(--sd-h)}
@@ -1304,7 +1325,7 @@ textarea.fi2{resize:vertical;min-height:70px}
 .lj-compose input{flex:1;min-width:0;padding:.5rem .6rem;border:1.5px solid var(--ln);border-radius:var(--pill);background:var(--bg);color:var(--tx);font-size:.78rem}
 @media(max-width:820px){.lj-wrap{grid-template-columns:1fr}#lj-map{height:300px}.lj-fields{grid-template-columns:1fr 1fr}}
 /* peace-of-mind status header */
-.lj-head{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.85rem;background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:.6rem .75rem}
+.lj-head{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem;margin-bottom:.85rem;background:var(--p);border:1.5px solid var(--ln);border-radius:var(--r);padding:.6rem .75rem}
 .lj-head-i{min-width:0}
 .lj-head-l{font-size:.57rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--mu)}
 .lj-head-v{font-size:1rem;font-weight:800;color:var(--tx);margin-top:.1rem;line-height:1.1}
@@ -1523,7 +1544,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 .hvf-compact .xc{padding:.6rem .7rem;margin-bottom:.45rem}
 .hvf-compact .xc-route{font-size:.86rem;margin-bottom:.35rem}
 .hvf-compact .xc-goods,.hvf-compact .xc-pref,.hvf-compact .xc-viewers{display:none!important}
-.hvf-compact .xc-sr{grid-template-columns:repeat(2,1fr);margin-bottom:.35rem}
+.hvf-compact .xc-sr{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:.35rem}
 .hvf-compact .cap-sec{padding:.5rem .6rem}
 .hvf-compact .cap-sec-towns{display:none!important}
 
@@ -1534,7 +1555,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 .hvf-list .xc-route{font-size:.8rem;margin-bottom:0;grid-column:1;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hvf-list .xc-sr{grid-column:2;grid-row:1 / span 2;margin-bottom:0;
-  border:0;background:transparent;grid-template-columns:repeat(4,1fr)}
+  border:0;background:transparent;gap:0;grid-template-columns:repeat(4,minmax(0,1fr))}
 .hvf-list .xc-goods,.hvf-list .xc-pref,.hvf-list .xc-viewers,
 .hvf-list .xc-foot{display:none!important}
 .hvf-list .cap-sec{padding:.45rem .6rem}
@@ -1565,7 +1586,12 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
   .hvf-list .xc{display:block}
   .hvf-list .xc-head{margin-bottom:.4rem}
   .hvf-list .xc-route{white-space:normal}
-  .hvf-list .xc-sr{margin-bottom:.4rem;border:1px solid var(--ln);background:var(--bg)}
+  /* list format goes back to plain cards on a phone, so its four-across stat
+     row has to come back to two as well — otherwise this rule re-creates the
+     exact overflow the row above was rewritten to cure. The background is the
+     DIVIDER colour now, not the cell colour: the cells paint their own. */
+  .hvf-list .xc-sr{margin-bottom:.4rem;border:1px solid var(--ln);background:var(--ln);
+    gap:1px;grid-template-columns:repeat(2,minmax(0,1fr))}
   .hv-bar{padding:.35rem .4rem}
   .hv-bar-lbl{display:none}
 }
@@ -1649,7 +1675,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 .kncal-wcol-h{font-size:.66rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;padding:.25rem 0 .3rem;border-bottom:1px solid var(--ln);margin-bottom:.45rem}
 .kncal-wcol-h.today{color:var(--or)}
 @media(min-width:900px){
-  .kncal-week{grid-template-columns:repeat(7,1fr);gap:0;align-items:stretch;
+  .kncal-week{grid-template-columns:repeat(7,minmax(0,1fr));gap:0;align-items:stretch;
     min-height:clamp(240px,58vh,620px);border:1px solid var(--ln);border-radius:var(--rs);
     background:var(--p);overflow:hidden}
   /* the rule between two days belongs to the grid, not to a card inside it */
@@ -1669,7 +1695,7 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
 }
 
 /* month */
-.kncal-month{display:grid;grid-template-columns:repeat(7,1fr);gap:.25rem}
+.kncal-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.25rem}
 .kncal-mhead{text-align:center;font-size:.62rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;padding:.3rem 0}
 .kncal-cell{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.22rem;font-size:.82rem;font-weight:600;cursor:pointer;border:1px solid var(--ln);background:none;color:var(--mu);min-width:0;padding:.2rem}
 .kncal-cell:hover{border-color:var(--or)}
