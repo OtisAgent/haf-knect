@@ -3487,7 +3487,16 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
       </div>
       <!-- BUSINESS: Deliveries -->
       <div class="tp" id="pane-b-del">
-        <h1 class="pt">My Deliveries</h1><p class="ps">All shipments booked through your business account.</p>
+        <h1 class="pt">My Posted Jobs</h1><p class="ps">Every job you have put on HAF, whoever ends up driving it.</p>
+        <!-- 15 Sep 2026, Brent: "can you make sure that's on every type of account".
+             The job-tile map only ever existed on the DRIVING board (pane-d-jobs),
+             which needs `drive` — so a business or a freight forwarder who does not
+             drive had no map anywhere in KNECT, on any screen. This pane is the one
+             every account type has (need:'post' is true for all of them), so the
+             account's own real jobs are drawn here, as tiles, with the same C-to-D
+             area map the driver sees. The seeded table below stays for the Demo
+             Centre; the run-visibility layer already hides it from a real account. -->
+        <div id="bd-live"></div>
         <div class="card"><table class="dt"><thead><tr><th>Ref</th><th>Route</th><th>Your Ref</th><th>Date</th><th>Status</th></tr></thead><tbody>
           <tr><td>HAF-2847</td><td>Manchester → Leeds</td><td>PO-1041</td><td>5 Jul</td><td><span class="chip cg">Delivered</span></td></tr>
           <tr><td>HAF-2831</td><td>Birmingham → Nottingham</td><td>PO-1038</td><td>8 Jul</td><td><span class="chip cb">In transit</span></td></tr>
@@ -11342,6 +11351,103 @@ function _hafJobsMaps(jobs){
   });
 }
 
+/* ── MY POSTED JOBS — the one job screen EVERY account type has ─────────────
+   Brent, 15 Sep: "can you make sure that's on every type of account".
+
+   Until now the only KNECT screen that drew a job map was the driving board,
+   and that board is gated on `drive`. So a business account or a freight
+   forwarder who does not drive could not see a map anywhere in KNECT — not
+   because the map was broken for them, but because the only screen carrying
+   one was not their screen. This pane is: hafPerms().post is true for every
+   account type, so putting the real tiles here covers driver, fleet, business
+   and freight in one place rather than four copies that drift apart.
+
+   The rows are the account's OWN jobs, read with the credential that opened
+   this session — the same plna_my_bookings the sidebar already counts from, so
+   the number in the corner and the list on this screen can never disagree.
+
+   Areas, not doorsteps, exactly as Brent reversed it on 14 Sep for TILES: the
+   full addresses are written out under the map where they are read, and the
+   coordinates we hold are deliberately not passed in. A test job says TEST. */
+let _bdBusy=false,_bdSeq=0;
+async function hafPostedPaint(){
+  const box=document.getElementById('bd-live'); if(!box)return;
+  const cred=hafPlnaCred();
+  if(!cred){box.innerHTML='';return}
+  if(_bdBusy)return; _bdBusy=true;
+  const seq=++_bdSeq, forUser=cred.p_username;
+  if(!box.innerHTML)box.innerHTML='<div class="aa-empty">Reading your jobs…</div>';
+  let rows=null;
+  try{
+    const r=await fetch(PLNA_URL+'/rest/v1/rpc/plna_my_bookings',{method:'POST',
+      headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify(cred)});
+    if(r.ok){const d=await r.json(); if(Array.isArray(d))rows=d;}
+  }catch(e){}
+  _bdBusy=false;
+  /* the screen moved on, or somebody else signed in, while we were asking */
+  if(seq!==_bdSeq||(localStorage.getItem('knect-user')||'').toUpperCase()!==forUser)return;
+  if(!rows){
+    box.innerHTML='<div class="aa-empty">We couldn’t read your jobs just now. '+
+                  'Nothing has changed — try again in a moment.</div>';
+    return;
+  }
+  const live=rows.filter(b=>!b.removed_at);
+  if(!live.length){
+    box.innerHTML='<div class="aa-empty">No jobs posted yet. Anything you post, '+
+                  'or type in yourself, shows here with its route on a map.</div>';
+    return;
+  }
+  box.innerHTML=live.map(b=>{
+    const ref=_esc(b.ref||b.id);
+    const route=_esc((b.from_postcode||'—')+' → '+(b.to_postcode||'—'));
+    const st=String(b.status||'pending');
+    const stWord=st==='new'?'new request':st;
+    const testy=b.is_test?'<span class="xb tst">TEST</span>':'';
+    const testLine=b.is_test
+      ? '<div class="xc-test">TEST RUN — a practice job, not real work.</div>':'';
+    const when=b.preferred_date?_esc(String(b.preferred_date).slice(0,10)):'To agree';
+    const who=[(b.company_name||''),((b.customer_first||'')+' '+(b.customer_last||'')).trim()]
+      .filter(Boolean).map(_esc).join(' · ');
+    const leg=(k,w)=>'<div class="xc-leg"><div class="k">'+_esc(k)+'</div>'+
+      '<div class="w">'+_esc(w||'No street address given yet')+'</div></div>';
+    return '<div class="xc">'+
+      '<div class="xc-head"><div class="xc-badges">'+testy+
+        '<span class="xb-ref">'+ref+'</span>'+
+        '<span class="chip">'+_esc(stWord)+'</span></div></div>'+
+      '<div class="xc-route">'+route+'</div>'+
+      testLine+
+      '<div class="hafjm" id="bdm-'+_esc(b.id)+'"></div>'+
+      '<div class="hafjm-note" id="bdmn-'+_esc(b.id)+'"></div>'+
+      (window.HAFJobMap?HAFJobMap.keyRow(false):'')+
+      '<div class="xc-legs">'+leg('Collection',b.from_address||b.from_postcode)+
+                              leg('Delivery',  b.to_address||b.to_postcode)+'</div>'+
+      '<div class="xc-foot"><div class="xc-meta">'+(who||'&nbsp;')+'</div>'+
+      '<div class="xc-meta">Collect '+when+'</div></div></div>';
+  }).join('');
+  _hafPostedMaps(live);
+}
+/* The same filler as the board's, on the same shared file. The coordinates the
+   booking holds (collect_lat/lng) are NOT passed: they are the doorstep, and a
+   tile shows the area. That omission is the feature. */
+function _hafPostedMaps(rows){
+  if(typeof window.HAFJobMap==='undefined')return;
+  HAFJobMap.mount();
+  HAFJobMap.sweep();
+  (rows||[]).forEach(function(b){
+    const el=document.getElementById('bdm-'+b.id); if(!el)return;
+    const c=_hafOutward(b.from_postcode), d=_hafOutward(b.to_postcode);
+    const note=document.getElementById('bdmn-'+b.id);
+    if(!c&&!d){ el.style.display='none'; if(note)note.style.display='none'; return; }
+    HAFJobMap.lazy(el,{collect:c,deliver:d,approximate:true});
+    /* Only promise written addresses on a tile actually carrying them. */
+    if(note)note.textContent=(b.from_address||b.to_address)
+      ? 'Collection area to delivery area. The full addresses are written out below.'
+      : 'Collection area to delivery area. No street addresses have been given yet.';
+  });
+}
+window.hafPostedPaint=hafPostedPaint;
+
 /* Only what the consignment actually records. A missing figure prints nothing rather
    than a confident zero. */
 function _hafLoadBits(c){
@@ -11734,6 +11840,8 @@ function switchTab(id){
   if(id==='pane-livejob')setTimeout(hafRenderLive,60);
   if(id==='pane-calendar')setTimeout(()=>{if(window.knCalBoot)knCalBoot();},60);
   if(id==='pane-d-jobs')setTimeout(hafJobsPaint,40);
+  /* the one job screen every account type has — see hafPostedPaint */
+  if(id==='pane-b-del')setTimeout(hafPostedPaint,40);
   if(id==='pane-fl-manage')setTimeout(flRenderOverview,40);
   if(id==='pane-membership')setTimeout(mbRender,40);
   if(id==='pane-myplan')setTimeout(()=>{if(window.mpLoad)mpLoad();},40);
