@@ -684,6 +684,8 @@ textarea.fi2{resize:vertical;min-height:70px}
 .xb.sdy{background:rgba(241,142,0,.13);color:var(--am)}
 .xb.flx{background:var(--ln);color:var(--mu)}
 .xb.pref{background:rgba(45,171,96,.12);color:var(--gn)}
+.xb.tst{background:var(--mu);color:var(--bg)}
+.xc-test{font-size:.76rem;font-weight:700;color:var(--mu);margin:-.2rem 0 .5rem}
 .xb-ref{font-size:.76rem;color:var(--mu);font-weight:600}
 /* The same one-variable tint, for the status chips that are not badges. They
    were written as `${colour}22` — string-pasting an alpha suffix onto the end
@@ -11244,8 +11246,17 @@ async function hafJobsPaint(){
           {weekday:'short',day:'numeric',month:'short'})
       : 'Flexible';
     const ref=_esc(j.booking_ref||'');
-    const first=j.is_direct
-      ? '<span class="xb pref">★ Yours first</span>' : '';
+    /* 15 Sep: this card showed a TEST RUN with no badge on it at all, while the
+       identical job on the driving site was plainly marked. Brent's rule of
+       today: anything that is a test must say TEST wherever a person can see
+       it. The board already sends is_test and the sentence to print; the card
+       simply threw both away. Test badge FIRST, so it is the first thing read. */
+    const testy=j.is_test
+      ? '<span class="xb tst">TEST</span>' : '';
+    const first=testy+(j.is_direct
+      ? '<span class="xb pref">★ Yours first</span>' : '');
+    const testLine=j.is_test
+      ? '<div class="xc-test">'+_esc(j.is_test_says||'TEST RUN — not real work.')+'</div>' : '';
     const who=j.customer_first?('Customer: '+_esc(j.customer_first)):'';
     const notes=j.notes?('<div class="xc-goods">'+_esc(j.notes)+'</div>'):'';
     const action=canClaim
@@ -11277,6 +11288,7 @@ async function hafJobsPaint(){
       '<div class="xc-head"><div class="xc-badges">'+first+
         '<span class="xb-ref">'+ref+'</span></div></div>'+
       '<div class="xc-route">'+route+'</div>'+
+      testLine+
       stats+
       '<div class="xc-dist" id="knd-'+_esc(j.id)+'">Working out how far this is from you…</div>'+
       /* 15 Sep: the whole job map was already loaded into this page and NOTHING
