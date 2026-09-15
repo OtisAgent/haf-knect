@@ -775,8 +775,40 @@ textarea.fi2{resize:vertical;min-height:70px}
 .xc-leg .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--mu)}
 .xc-leg .w{font-size:.78rem;line-height:1.45}
 .xc-leg .n{font-size:.72rem;color:var(--mu);line-height:1.45;margin-top:.1rem}
-.xc-chips{display:flex;flex-wrap:wrap;gap:.25rem;margin-bottom:.55rem}
-.xc-chips span{font-size:.74rem;padding:.16rem .5rem;border-radius:999px;background:var(--bg);border:1px solid var(--ln);color:var(--mu)}
+.hafload{--hlok:#1d6b3f;--hlokb:rgba(47,158,95,.13);
+  --hlno:#9d3f37;--hlnob:rgba(180,72,63,.11);
+  --hlnd:#8a5300;--hlndb:rgba(241,142,0,.14);
+  margin:.55rem 0;padding:.65rem .75rem;border-radius:12px;
+  border:1px solid var(--ln,rgba(128,128,128,.18));
+  background:var(--bg,transparent)}
+[data-theme=dark] .hafload,[data-theme=night] .hafload{
+  --hlok:#6ecf97;--hlokb:rgba(110,207,151,.13);
+  --hlno:#e69a91;--hlnob:rgba(230,154,145,.12);
+  --hlnd:#ffb347;--hlndb:rgba(255,179,71,.13)}
+.hafload-h{font-size:.56rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--mu,#7a8288);margin-bottom:.5rem}
+.hafload-figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(6rem,1fr));
+  gap:.45rem .7rem;margin-bottom:.55rem}
+.hafload-fig{min-width:0}
+.hafload-fig b{display:block;font-weight:800;line-height:1.2;
+  font-size:clamp(.88rem,.8rem + .45vw,1.08rem);
+  color:var(--tx,inherit);overflow-wrap:anywhere}
+.hafload-fig i{display:block;font-style:normal;font-size:.55rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--mu,#7a8288);margin-top:.1rem}
+.hafload-rows{display:grid;gap:.28rem}
+.hafload-row{display:flex;gap:.55rem;align-items:baseline;line-height:1.45}
+.hafload-row .k{flex:0 0 4.3rem;font-size:.55rem;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--mu,#7a8288)}
+.hafload-row .v{flex:1 1 auto;min-width:0;font-size:.72rem;
+  color:var(--tx,inherit);overflow-wrap:anywhere}
+.hafload-hand{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.55rem}
+.hafload-hand span{display:inline-flex;align-items:center;gap:.3rem;min-width:0;
+  font-size:.63rem;font-weight:700;padding:.2rem .5rem;border-radius:999px}
+.hafload-hand span::before{content:'';width:6px;height:6px;border-radius:50%;flex:0 0 auto;
+  background:currentColor}
+.hafload-hand .ok{background:var(--hlokb);color:var(--hlok)}
+.hafload-hand .no{background:var(--hlnob);color:var(--hlno)}
+.hafload-hand .nd{background:var(--hlndb);color:var(--hlnd)}
 .xc-dist{font-size:.72rem;color:var(--mu);line-height:1.5;margin-bottom:.5rem}
 .xc-dist b{color:var(--tx,inherit);font-weight:700}
 .xc-cd{font-size:.65rem;font-weight:700;color:var(--rd);display:flex;align-items:center;gap:.2rem}
@@ -11539,11 +11571,7 @@ async function hafJobsPaint(){
       +leg('Collection', j.collect_address||j.from_postcode, j.collect_note)
       +leg('Delivery',   j.deliver_address||j.to_postcode,   j.deliver_note)
       +'</div>';
-    const bits=_hafLoadBits(j.consignment);
-    if(j.job_type)      bits.unshift(String(j.job_type));
-    if(j.vehicle_label) bits.unshift(String(j.vehicle_label));
-    const chips=bits.length
-      ? '<div class="xc-chips">'+bits.map(b=>'<span>'+_esc(b)+'</span>').join('')+'</div>' : '';
+    const chips=_hafLoadBlock(j.consignment,{vehicle:j.vehicle_label,service:j.job_type});
     return '<div class="xc">'+
       '<div class="xc-head"><div class="xc-badges">'+first+
         '<span class="xb-ref">'+ref+'</span></div></div>'+
@@ -11673,6 +11701,12 @@ async function hafPostedPaint(){
       (window.HAFJobMap?HAFJobMap.keyRow(false):'')+
       '<div class="xc-legs">'+leg('Collection',b.from_address||b.from_postcode)+
                               leg('Delivery',  b.to_address||b.to_postcode)+'</div>'+
+      /* 15 Sep: this tile has never said what is in the van, on any account
+         type - a business or freight account could read its own job and not
+         see the load it had booked. Fed from the booking's own fields, so a
+         job with nothing written down still draws nothing rather than a box
+         of blanks. */
+      _hafLoadFromBooking(b)+
       '<div class="xc-foot"><div class="xc-meta">'+(who||'&nbsp;')+'</div>'+
       '<div class="xc-meta">Collect '+when+'</div></div></div>';
   }).join('');
@@ -11699,25 +11733,88 @@ function _hafPostedMaps(rows){
 }
 window.hafPostedPaint=hafPostedPaint;
 
-/* Only what the consignment actually records. A missing figure prints nothing rather
-   than a confident zero. */
-function _hafLoadBits(c){
-  if(!c||typeof c!=='object')return[];
-  const mm=v=>v>=1000?(Math.round(v/10)/100)+' m':Math.round(v/10)+' cm';
-  const out=[];
-  if(c.pallets)         out.push(c.pallets+(c.pallets==1?' pallet':' pallets'));
-  if(c.boxes)           out.push(c.boxes+(c.boxes==1?' box':' boxes'));
-  if(c.packages)        out.push(c.packages+(c.packages==1?' package':' packages'));
-  if(c.weight_kg)       out.push(c.weight_kg+' kg');
-  if(c.packaging)       out.push(String(c.packaging));
-  if(c.longest_item_mm) out.push('Longest '+mm(c.longest_item_mm));
-  if(c.height_mm)       out.push('Tallest '+mm(c.height_mm));
-  if(c.width_mm)        out.push('Widest '+mm(c.width_mm));
-  if(c.forklift_collect===true)  out.push('Forklift at collection');
-  if(c.forklift_deliver===true)  out.push('Forklift at delivery');
-  if(c.forklift_deliver===false) out.push('No forklift at delivery');
-  if(c.tail_lift===true)         out.push('Tail lift needed');
-  return out;
+/* ── WHAT'S IN THE VAN ────────────────────────────────────────────────────────
+   Brent, 15 Sep: "the tiles where it shows what's in the van -> fix it", then
+   "yes, looks perfect -> now add this to the site where needed."
+
+   It was one flat row of identical pills - nine facts of six different kinds at
+   the same size and colour, wrapping over four ragged lines - so the two a
+   driver actually decides on (how much of it there is, and whether anything is
+   there to lift it) were the hardest two to find.
+
+   Same fields, ranked: the figures somebody decides on first and biggest, the
+   detail underneath in labelled rows so a value is never read as its own
+   heading, and the handling answered in colour - green there is a forklift at
+   that end, red it is your back. A missing figure still prints nothing rather
+   than a confident zero, and nothing here is invented.
+
+   The one thing it says that the pills did not is "No forklift at collection":
+   silence about the collection end read as "fine", and it is not the same
+   answer. Sized in fractions of the card, so it fits whatever it is opened on.
+
+   Kept character-for-character identical to exLoadBlock in
+   plna-ship/dashboard.html - only the six colour defaults in the stylesheet
+   differ, because the two apps default to opposite themes. Change both. */
+function _hafLoadBlock(c,extra){
+  c=(c&&typeof c==='object')?c:{}; extra=extra||{};
+  const mm=v=>{v=Number(v); if(!v||isNaN(v))return '';
+    return v>=1000?(Math.round(v/10)/100)+' m':Math.round(v/10)+' cm';};
+
+  /* 1. The figures somebody decides on, biggest type on the block. */
+  const figs=[], counts=[];
+  if(c.pallets)  counts.push(c.pallets+(c.pallets==1?' pallet':' pallets'));
+  if(c.boxes)    counts.push(c.boxes+(c.boxes==1?' box':' boxes'));
+  if(c.packages) counts.push(c.packages+(c.packages==1?' package':' packages'));
+  if(counts.length)   figs.push([counts.join(' + '),'Load']);
+  else if(extra.load) figs.push([String(extra.load),'Load']);
+  if(c.weight_kg)     figs.push([c.weight_kg+' kg','Weight']);
+  if(extra.vehicle)   figs.push([String(extra.vehicle),'Vehicle']);
+
+  /* 2. The detail, labelled, so a value is never read as its own heading. */
+  const rows=[], size=[];
+  if(extra.service) rows.push(['Service',String(extra.service)]);
+  if(extra.goods)   rows.push(['Goods',String(extra.goods)]);
+  if(c.packaging)   rows.push(['Packaging',String(c.packaging)]);
+  if(c.longest_item_mm) size.push('Longest '+mm(c.longest_item_mm));
+  if(c.height_mm)       size.push('Tallest '+mm(c.height_mm));
+  if(c.width_mm)        size.push('Widest '+mm(c.width_mm));
+  if(size.length)    rows.push(['Size',size.join(' \u00b7 ')]);
+  if(extra.handling) rows.push(['Handling',String(extra.handling)]);
+
+  /* 3. Is there anything at each end to lift it. Green helps you, red is your back. */
+  const hand=[];
+  if(c.forklift_collect===true)  hand.push(['ok','Forklift at collection']);
+  if(c.forklift_collect===false) hand.push(['no','No forklift at collection']);
+  if(c.forklift_deliver===true)  hand.push(['ok','Forklift at delivery']);
+  if(c.forklift_deliver===false) hand.push(['no','No forklift at delivery']);
+  if(c.tail_lift===true)         hand.push(['nd','Tail lift needed']);
+
+  if(!figs.length&&!rows.length&&!hand.length)return '';
+  let h='<div class="hafload"><div class="hafload-h">What\u2019s in the van</div>';
+  if(figs.length)h+='<div class="hafload-figs">'+figs.map(f=>
+    '<div class="hafload-fig"><b>'+_esc(f[0])+'</b><i>'+_esc(f[1])+'</i></div>').join('')+'</div>';
+  if(rows.length)h+='<div class="hafload-rows">'+rows.map(r=>
+    '<div class="hafload-row"><span class="k">'+_esc(r[0])+'</span><span class="v">'+
+    _esc(r[1])+'</span></div>').join('')+'</div>';
+  if(hand.length)h+='<div class="hafload-hand">'+hand.map(x=>
+    '<span class="'+x[0]+'">'+_esc(x[1])+'</span>').join('')+'</div>';
+  return h+'</div>';
+}
+
+/* A booking the account typed in itself does not carry a consignment record -
+   it holds what the customer wrote: a count, a weight, a description, a
+   handling note and a van code. Same block, fed from what a booking actually
+   has, so My Posted Jobs reads like the board instead of like a form. The van
+   code is turned into words from the same VAN table the quote is priced from;
+   an unknown code prints nothing rather than "lutontl". */
+function _hafLoadFromBooking(b){
+  b=b||{};
+  /* VAN is a top-level `const`, so it is NOT on `window` — guarding with
+     window.VAN would have been silently false on every tile and the van
+     name would simply never have drawn. Caught by the harness, not by eye. */
+  const van=(typeof VAN!=='undefined'&&VAN[b.vehicle]&&VAN[b.vehicle].n)||'';
+  return _hafLoadBlock({weight_kg:b.weight_kg},{
+    load:b.load_count, vehicle:van, goods:b.goods, handling:b.handling});
 }
 
 /* Brent, 8 Sep: three distances, not one. How far to get to it, how far the job is (the
