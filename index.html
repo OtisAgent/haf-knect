@@ -631,6 +631,27 @@ textarea.fi2{resize:vertical;min-height:70px}
 .bld-b p{font-size:.73rem;color:var(--mu);line-height:1.55;margin:.35rem 0 0}
 .bld-lab{font-size:.7rem;color:var(--mu);margin-top:.4rem}
 .bld-lab b{color:var(--tx);font-weight:800}
+/* CONFIRM YOUR BUSINESS — rung two, made real. Borrows the card and field
+   styles already on this page rather than inventing a second look. */
+.biz{background:var(--p);border:1.5px solid var(--lns);border-radius:var(--r);
+     padding:1.1rem 1.2rem;margin:.6rem 0 .9rem}
+.biz.ok{border-color:rgba(45,171,96,.38)}
+.biz.wait{border-color:var(--or-g)}
+.biz h3{font-family:var(--dp);font-weight:900;font-size:.95rem;letter-spacing:-.01em;margin:0 0 .25rem}
+.biz>p{font-size:.74rem;color:var(--mu);line-height:1.55;margin:0 0 .75rem}
+.biz-pick{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.7rem}
+.biz-pick button{flex:1 1 150px;background:var(--p2);border:1.5px solid var(--lns);
+  border-radius:var(--rx);padding:.6rem .7rem;text-align:left;cursor:pointer;color:var(--tx);font:inherit}
+.biz-pick button.on{border-color:var(--or);background:var(--or-d)}
+.biz-pick b{display:block;font-size:.8rem;font-weight:800}
+.biz-pick span{display:block;font-size:.68rem;color:var(--mu);margin-top:.12rem;line-height:1.45}
+.biz-note{font-size:.72rem;line-height:1.55;border-radius:var(--rs);padding:.7rem .85rem;margin-bottom:.7rem}
+.biz-note.gn{background:var(--gn-d);border:1px solid rgba(45,171,96,.22)}
+.biz-note.am{background:var(--am-d);border:1px solid rgba(185,133,48,.22)}
+.biz-note.rd{background:var(--rd-d);border:1px solid rgba(180,72,63,.22)}
+.biz-what{font-size:.72rem;color:var(--mu);line-height:1.6;margin-top:.6rem;
+  padding-top:.6rem;border-top:1px solid var(--ln)}
+.biz-what b{color:var(--tx)}
 @media(max-width:560px){.upg-types{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:560px){.fr{grid-template-columns:1fr}}
 
@@ -2406,6 +2427,13 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Full name</label><input class="oi" id="fq-name" placeholder="Your name" autocomplete="name"></div>
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Email</label><input class="oi" id="fq-email" placeholder="your@email.co.uk" type="email" autocomplete="email" onblur="fqQuoteLog()"></div>
               <div class="of" style="margin-bottom:.48rem"><label class="ol">Mobile</label><input class="oi" id="fq-mobile" placeholder="07xxx xxxxxx" type="tel" autocomplete="tel"></div>
+              <!-- ── WHOSE NAME DOES THIS GO IN? ─────────────────────────────
+                   Brent, 15 Sep 2026: a job and an invoice in a BUSINESS name
+                   wait until that business is confirmed. Only drawn for someone
+                   signed in — a one-off customer has no business to choose and
+                   must not be shown a question with one possible answer.
+                   Filled by fqBillOptions() from the signed-in account. -->
+              <div id="fq-bill" hidden style="margin:.15rem 0 .55rem"></div>
               <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.73rem;font-weight:600;color:var(--mu)"><input type="checkbox" id="fq-wa" checked style="accent-color:var(--haf-orange-ink)"> Send updates via WhatsApp</label>
               <!-- ── THE MARKETING TICK ───────────────────────────────────────
                    Unticked, always, on every visit. It asks for ONE thing and
@@ -4200,6 +4228,12 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
              signed-in account by hafRenderBuildLadder(). -->
         <h2 class="upg-h2">Build your HAF account</h2>
         <div id="upg-ladder"></div>
+        <!-- Brent, 15 Sep 2026: "if they want to post an order and get an
+             invoice via a business they need to complete the information to
+             confirm it's them for security and fraud reasons." Rung two used to
+             be a description of a step that did not exist anywhere. This is the
+             step. Drawn by hafRenderBusiness() from the signed-in account. -->
+        <div id="upg-biz"></div>
         <div id="upg-types"></div>
         <h2 class="upg-h2">Your plan</h2>
         <p class="ps">All accounts that post for clients can post loads for any client. Your tier sets your network fee, profit pooling, and tools — upgrade any time.</p>
@@ -7514,6 +7548,11 @@ const fqData={};
 function fqStep(n){
   document.querySelectorAll('#if-fast .fstep').forEach(s=>s.classList.remove('on'));
   const el=document.getElementById('fq-'+n);if(el)el.classList.add('on');
+  /* Step 7 is where the details are given, so it is where "whose name does this
+     go in" belongs. Drawn on arrival rather than once at start-up: somebody can
+     confirm their business in another tab, and this way they find the option
+     open when they get here instead of stale. */
+  if(String(n)==='7'){try{fqBillOptions();}catch(e){}}
 }
 function fqSel(el,key,val){
   const g=el.closest('.ogrid');
@@ -8057,6 +8096,97 @@ function _pcOf(id){
   if(addrIsPostcode(v))return _pcTidy(v);
   return (el.dataset.pcFor===v && el.dataset.pc) ? _pcTidy(el.dataset.pc) : v;
 }
+/* ══ WHOSE NAME THE JOB AND THE INVOICE GO IN ════════════════════════════════
+   Brent, 15 Sep 2026: "if they want to post an order and get an invoice via a
+   business they need to complete the information to confirm it's them for
+   security and fraud reasons."
+
+   Two honest states and no third:
+     · business confirmed  — offered, and they choose.
+     · not confirmed       — shown, closed, with the one step that opens it.
+
+   Deliberately SHOWN rather than hidden. A business customer who cannot see the
+   option assumes HAF cannot invoice a business at all and goes elsewhere; one
+   who sees it locked, with a reason and a step, does the step. And the wording
+   never implies the check is a judgement on them — it is the same check for
+   everybody, which is the whole reason it is worth anything.
+
+   Nothing here is trusted. The server reads the confirmed business off the
+   ACCOUNT and refuses a business order without one, so this is the courtesy
+   half — the customer finds out before they press, not after.               */
+let _fqBill='personal';
+
+function fqBillOptions(){
+  const box=document.getElementById('fq-bill');
+  if(!box)return;
+  const acc=window._hafAccView||_hafAcct||null;
+  /* Not signed in: there is no business to put it in, and asking would be a
+     question with one answer. */
+  if(!acc||!acc.haf_username){box.hidden=true;box.innerHTML='';_fqBill='personal';return;}
+
+  const ok   = acc.business_confirmed===true;
+  const name = String(acc.business_name||'').trim();
+  const sent = String(acc.business_status||'')==='sent';
+  box.hidden=false;
+
+  const row=(v,title,sub,on,dis)=>
+    '<label style="display:flex;align-items:flex-start;gap:.5rem;padding:.55rem .65rem;'+
+    'border:1.5px solid '+(on?'var(--or)':'var(--ln)')+';border-radius:10px;'+
+    'background:'+(on?'var(--or-d)':'var(--p2)')+';margin-bottom:.35rem;'+
+    (dis?'opacity:.72;cursor:default':'cursor:pointer')+'">'+
+    '<input type="radio" name="fq-bill-r" value="'+v+'"'+(on?' checked':'')+
+      (dis?' disabled':'')+' onchange="fqBillPick(\''+v+'\')" '+
+      'style="accent-color:var(--haf-orange-ink);margin-top:.15rem">'+
+    '<span><b style="display:block;font-size:.78rem;font-weight:800">'+title+'</b>'+
+    '<span style="display:block;font-size:.68rem;color:var(--mu);line-height:1.5;margin-top:.1rem">'+
+    sub+'</span></span></label>';
+
+  let h='<div style="font-size:.66rem;font-weight:800;letter-spacing:.06em;'+
+        'text-transform:uppercase;color:var(--mu);margin-bottom:.3rem">'+
+        'Who is this order for?</div>';
+  h+=row('personal','Me, in my own name',
+         'The job and the invoice carry your name.',_fqBill==='personal',false);
+  if(ok&&name){
+    h+=row('business','My business — '+_esc(name),
+           'The job and the invoice carry your business name.',_fqBill==='business',false);
+  }else{
+    h+=row('business','My business',
+      (sent?'We have your business details and are still confirming them. Until that '+
+            'is done the invoice goes in your own name.'
+          :'Confirm your business first — it is one short step in Upgrade, under '+
+            'Build your HAF account. A limited company is usually confirmed on the spot.')+
+      ' <a href="#" onclick="fqGoConfirmBusiness();return false" '+
+      'style="color:var(--haf-orange-ink);font-weight:700">'+
+      (sent?'Check it now':'Confirm my business')+' →</a>',
+      false,true);
+  }
+  box.innerHTML=h;
+}
+
+function fqBillPick(v){ _fqBill=(v==='business')?'business':'personal'; }
+
+/* Straight to the step that opens it, rather than "go and find it". Closing the
+   order flow first, because leaving a half-filled consignment open behind an
+   Upgrade screen is how somebody loses their typing. */
+function fqGoConfirmBusiness(){
+  try{
+    const f=document.getElementById('inline-flow');
+    if(f)f.style.display='none';
+    document.body.classList.remove('tile-focus');
+  }catch(e){}
+  try{
+    if(!document.getElementById('app').classList.contains('open')){
+      enterKnectApp((localStorage.getItem('knect-user')||'').toUpperCase(),
+                    window._hafAccView||_hafAcct);
+    }
+    switchTab('pane-f-plans');
+    setTimeout(function(){
+      const el=document.getElementById('upg-biz');
+      if(el&&el.scrollIntoView)el.scrollIntoView({behavior:'smooth',block:'center'});
+    },160);
+  }catch(e){}
+}
+
 function fqOrderPayload(){
   const cons=fqData.consignment||null;
   /* If they typed a street or a town, that text is the best description of the
@@ -8088,6 +8218,11 @@ function fqOrderPayload(){
     vehicle_code:fqData.van, job_type_code:fqData.urg,
     direct_username:fqData.direct||null,
     consignment:cons,
+    /* Which name this job and its invoice go in. The server does NOT take the
+       business name from here — it reads the confirmed one off the account and
+       refuses the whole order if there is not one. All this says is which of
+       the two the customer asked for. */
+    bill_to:_fqBill==='business'?'business':'personal',
     whatsapp_updates:!!(document.getElementById('fq-wa')||{}).checked
   };
 }
@@ -8208,6 +8343,27 @@ async function fqBook(){
     const r=await fetch('/api/order/place',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify(fqOrderPayload())});
     d=await r.json();
+    /* ── ASKED FOR A BUSINESS INVOICE WITHOUT A CONFIRMED BUSINESS ──────────
+       Handled here rather than falling into the catch below for two reasons.
+       Nothing was written — the gate runs before the order and the deposit — so
+       the kept quote is still good and must not be thrown away. And this is the
+       one refusal with a step that fixes it, so it gets the step rather than a
+       sentence. Their typing stays exactly where it is. */
+    if(r.status===409&&d&&d.needs_business){
+      btns.forEach(b=>{b.disabled=false;b.textContent='Confirm and book →';});
+      const el=document.getElementById('fq-err-7');
+      if(el){
+        el.innerHTML=_esc(d.error||'')+
+          ' <a href="#" onclick="fqGoConfirmBusiness();return false" '+
+          'style="color:var(--haf-orange-ink);font-weight:700;white-space:nowrap">'+
+          (d.business_status==='sent'?'Check it now':'Confirm my business')+' →</a>'+
+          ' &nbsp;<a href="#" onclick="fqBillPick(\'personal\');fqBillOptions();fqBookV();return false" '+
+          'style="color:var(--haf-orange-ink);font-weight:700;white-space:nowrap">'+
+          'or book in my own name →</a>';
+        el.style.display='';
+      }
+      return;
+    }
     /* Whatever happened next, today's figures are no longer the ones we hold —
        so the kept answer goes, and the next form asks fresh. Done on the way
        through the failure path too: a request that errored may still have
@@ -8773,11 +8929,16 @@ function hafBuildLadder(acc){
     {n:1,h:'Your HAF account',s:'Done when you join',
      p:'Sign in, post a job, track it, your calendar and your saved addresses.',
      lab:'HAF KNECT account',done:true},
-    {n:2,h:'Tell us your business',s:'Sole trader or limited company',
-     p:'One answer, given inside, not at the door. A limited company gives its '+
-       'company number and keeps its registered name. A sole trader has no register '+
-       'to check, so everything stays in their own name.',
-     lab:'Business account',done:isBiz},
+    {n:2,h:'Confirm your business',s:'Sole trader or limited company',
+     p:'One answer, given inside, not at the door — and it is what lets a job and '+
+       'its invoice go in your business name. A limited company gives its company '+
+       'number and we check it against the Companies House register, usually on the '+
+       'spot. A sole trader has no register to check, so a person at HAF confirms it. '+
+       'The step is just below.',
+     lab:'Business account',done:isBiz,
+     /* 'sent' is a real, visible state and not a quiet nothing: somebody who has
+        done their part must be able to see that we have it. */
+     pill:(!isBiz&&acc.business_status==='sent')?'With us now':null},
     {n:3,h:'Your checks with Clever',s:'Owner or director, and the register',
      p:'Your identity documents go through the Clever check, and a limited company '+
        'is checked against the Companies House register. This is the rung that turns '+
@@ -8814,6 +8975,172 @@ function hafBuildLadder(acc){
         '<div class="bld-s">'+r.s+'</div><p>'+r.p+'</p>'+
         '<div class="bld-lab">Account reads as: <b>'+r.lab+'</b></div></div></div>';
     }).join('')+'</div>';
+}
+
+/* ══ CONFIRM YOUR BUSINESS ═══════════════════════════════════════════════════
+   Brent, 15 Sep 2026: "Offer the creation of the HAF KNECT Account but if they
+   want to post an order and get an invoice via a business they need to complete
+   the information to confirm it's them for security and fraud reasons."
+
+   Rung two on the ladder above has described this step since 15 Sep. It did not
+   exist. `acc.business_confirmed` was read there and written NOWHERE, so the
+   rung could never tick however much a person did. This is the step itself.
+
+   What it will NOT do, and both matter:
+     · It does not gate the dashboard, or posting, or paying, or anything else.
+       A plain HAF KNECT account is a whole account. The ONE thing that waits on
+       this is a job and an invoice in a BUSINESS name.
+     · It does not decide anything here. The browser sends what was typed; the
+       server checks the register and writes the answer. A screen that could
+       confirm itself would be worth nothing against the fraud it exists to
+       stop.                                                                  */
+let _bizKind=null, _bizBusy=false;
+
+function hafBusinessPanel(acc){
+  const st   = String(acc.business_status||'none');
+  const name = acc.business_name||'';
+  const kind = acc.business_kind||'';
+
+  if(st==='confirmed'){
+    return '<div class="biz ok"><h3>Your business is confirmed</h3>'+
+      '<p><b>'+_esc(name)+'</b>'+(kind==='limited'
+        ? ' — checked against the Companies House register.'
+        : ' — confirmed by HAF.')+'</p>'+
+      '<div class="biz-note gn">Jobs and invoices can go in your business name. '+
+      'Choose it at the order screen when you book.</div>'+
+      '<div class="biz-what">Changing a confirmed business changes who is liable for '+
+      'the money, so it goes through HAF rather than a text box. Message us and we '+
+      'will sort it.</div></div>';
+  }
+
+  if(st==='sent'){
+    return '<div class="biz wait"><h3>We are confirming your business</h3>'+
+      '<p>You told us about <b>'+_esc(name)+'</b>. '+(kind==='sole_trader'
+        ? 'A sole trader has no public register to be checked against, so somebody '+
+          'at HAF confirms this one by hand. It is usually the same working day.'
+        : 'We are finishing the check against the Companies House register.')+'</p>'+
+      '<div class="biz-note am">Nothing is on hold in the meantime. You can post '+
+      'jobs and pay for them as normal — they go in your own name until the '+
+      'business is confirmed.</div>'+
+      (kind==='limited'
+        ? '<button class="btn btn-gh btn-sm" onclick="hafBizRetry()">Check again now</button>'
+        : '')+'</div>';
+  }
+
+  const why = st==='refused'
+    ? '<div class="biz-note rd"><b>We could not confirm that.</b> '+
+      _esc(acc.business_refused_note||'The details did not check out.')+
+      ' Check what you entered and send it again, or tell us you are a sole trader '+
+      'and trade in your own name.</div>'
+    : '';
+
+  return '<div class="biz"><h3>Confirm your business</h3>'+
+    '<p>Only needed if you want a job and its invoice to go in a business name. '+
+    'Ordering in your own name needs none of this. We ask because an invoice says '+
+    'who owes the money, so we have to know the business really is yours.</p>'+
+    why+
+    '<div class="biz-pick">'+
+      '<button type="button" id="biz-k-sole" onclick="hafBizKind(\'sole_trader\')">'+
+        '<b>Sole trader</b><span>You trade in your own name. No register to check, '+
+        'so a person at HAF confirms it.</span></button>'+
+      '<button type="button" id="biz-k-ltd" onclick="hafBizKind(\'limited\')">'+
+        '<b>Limited company</b><span>Checked against the Companies House register — '+
+        'usually confirmed on the spot.</span></button>'+
+    '</div>'+
+    '<div id="biz-form" hidden>'+
+      '<div class="fg" style="margin-bottom:.55rem"><label class="fl" id="biz-name-l">Business name</label>'+
+        '<input class="fi2" id="biz-name" placeholder="As it appears on your paperwork"></div>'+
+      '<div class="fg" id="biz-no-wrap" hidden style="margin-bottom:.55rem">'+
+        '<label class="fl">Company number</label>'+
+        '<input class="fi2" id="biz-no" placeholder="e.g. 12345678" maxlength="10" autocomplete="off"></div>'+
+      '<div class="fg" style="margin-bottom:.7rem"><label class="fl">Trading address<span style="color:var(--mu);font-weight:400"> — optional</span></label>'+
+        '<input class="fi2" id="biz-addr" placeholder="Where the business operates from"></div>'+
+      '<div id="biz-err" class="biz-note rd" hidden></div>'+
+      '<button class="btn btn-or btn-sm btn-wide" id="biz-go" onclick="hafBizSend()">Send for confirmation</button>'+
+    '</div>'+
+    '<div class="biz-what">Confirming this opens <b>jobs and invoices in your '+
+    'business name</b>, and ticks rung two above. It does not change your plan, '+
+    'your price, or anything you can already do.</div></div>';
+}
+
+function hafBizKind(k){
+  _bizKind=k;
+  const sole=document.getElementById('biz-k-sole'), ltd=document.getElementById('biz-k-ltd');
+  if(sole)sole.classList.toggle('on',k==='sole_trader');
+  if(ltd)ltd.classList.toggle('on',k==='limited');
+  const form=document.getElementById('biz-form'); if(form)form.hidden=false;
+  const noWrap=document.getElementById('biz-no-wrap'); if(noWrap)noWrap.hidden=(k!=='limited');
+  /* The label earns its keep: a sole trader is asked for what they TRADE as,
+     which is often not the name on their passport, and a limited company is
+     asked for the registered name so the register lookup has a fair chance. */
+  const lab=document.getElementById('biz-name-l');
+  if(lab)lab.textContent=(k==='limited')?'Registered company name':'Name you trade under';
+}
+
+function _bizErr(msg){
+  const e=document.getElementById('biz-err');
+  if(!e)return;
+  if(!msg){e.hidden=true;e.innerHTML='';return;}
+  e.hidden=false;e.innerHTML=_esc(msg);
+}
+
+async function hafBizSend(){
+  if(_bizBusy)return;
+  if(!_bizKind){_bizErr('Choose sole trader or limited company first.');return;}
+  const name=(document.getElementById('biz-name')||{}).value||'';
+  const no=(document.getElementById('biz-no')||{}).value||'';
+  const addr=(document.getElementById('biz-addr')||{}).value||'';
+  if(!name.trim()){_bizErr('Give the name the business trades under.');return;}
+  if(_bizKind==='limited'&&!no.trim()){
+    _bizErr('Give your company number — it is eight characters, on your certificate '+
+            'of incorporation and on the Companies House register.');return;}
+  _bizErr('');
+  const btn=document.getElementById('biz-go'), was=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent=(_bizKind==='limited')?'Checking the register…':'Sending…';}
+  _bizBusy=true;
+  let d=null;
+  try{
+    d=await _api('business/claim',{kind:_bizKind,name:name,number:no,address:addr});
+  }catch(e){ d=null; }
+  _bizBusy=false;
+  if(btn){btn.disabled=false;btn.textContent=was;}
+  if(!d){_bizErr('We could not reach our records just now. Nothing has been lost — please try again.');return;}
+  if(d.ok!==true&&!d.business){_bizErr(d.error||'We could not save that just now.');return;}
+  /* The account in this browser must move with the answer, or the ladder above
+     and the order screen keep reading yesterday's account. The server sends the
+     new state back with every answer for exactly this. */
+  hafBizApply(d.business, d.error);
+}
+
+/* Fold the server's answer onto the signed-in account and redraw everything
+   that reads it, in one pass — the ladder, this panel and the routes. */
+function hafBizApply(biz, err){
+  if(!biz)return;
+  const acc=window._hafAccView||_hafAcct||{};
+  acc.business_status      = biz.status||'none';
+  acc.business_kind        = biz.kind||null;
+  acc.business_name        = biz.name||null;
+  acc.business_number      = biz.number||null;
+  acc.business_confirmed   = biz.confirmed===true;
+  acc.business_refused_note= err||biz.why||null;
+  if(_hafAcct)Object.assign(_hafAcct,acc);
+  hafRenderUpgradeTypes(acc);
+}
+
+/* The register was unreachable a minute ago. Send the same claim again rather
+   than making somebody retype what we already hold. */
+async function hafBizRetry(){
+  const acc=window._hafAccView||_hafAcct||{};
+  if(acc.business_kind!=='limited')return;
+  const d=await _api('business/claim',{kind:'limited',name:acc.business_name||'',
+                                       number:acc.business_number||''}).catch(()=>null);
+  if(d&&d.business)hafBizApply(d.business,d.error);
+}
+
+function hafRenderBusiness(acc){
+  const el=document.getElementById('upg-biz');
+  if(!el)return;
+  try{el.innerHTML=hafBusinessPanel(acc);}catch(e){el.innerHTML='';}
 }
 
 function hafUpgradeTypes(acc){
@@ -8872,6 +9199,10 @@ function hafRenderUpgradeTypes(acc){
      empties its own box rather than taking the Upgrade screen down with it. */
   const lad=document.getElementById('upg-ladder');
   if(lad){try{lad.innerHTML=hafBuildLadder(acc);}catch(e){lad.innerHTML='';}}
+  /* The confirm-your-business step sits between the two, drawn from the same
+     account in the same pass, so rung two and the step that finishes it can
+     never tell a person different things. */
+  hafRenderBusiness(acc);
   const el=document.getElementById('upg-types');
   if(!el)return;
   try{el.innerHTML=hafUpgradeTypes(acc);}catch(e){el.innerHTML='';}

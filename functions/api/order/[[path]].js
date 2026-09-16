@@ -214,6 +214,59 @@ async function place(request, env) {
     ? String(asking.haf_username).toUpperCase()
     : null;
 
+  /* ── IN WHOSE NAME? ───────────────────────────────────────────────────────
+     Brent, 15 Sep 2026: "if they want to post an order and get an invoice via a
+     business they need to complete the information to confirm it's them for
+     security and fraud reasons."
+
+     A name on an invoice is a claim about who is liable for the money. Until
+     now this line read `String(b.company || '')` — a free-text box straight off
+     the browser, written onto the order and onto the paperwork with nothing
+     checked. Anybody could have put any company in the country on a HAF invoice
+     in the time it takes to type it.
+
+     So the business name is no longer taken from the request at all. It is read
+     off the ACCOUNT, and only if that account's business has been confirmed —
+     which for a limited company means the number was checked against the public
+     register, and for a sole trader means somebody at HAF said so.
+
+     Three deliberate properties:
+       · A personal order is unaffected. Ordering in your own name needs no
+         business, no check and no account, exactly as it did yesterday.
+       · Asking for a business invoice without a confirmed business is a clear
+         refusal with the one step that fixes it — never a silent downgrade to a
+         personal invoice, because a person who asked to be billed as a company
+         and quietly was not would find out at their year end.
+       · `asking` came from knect_auth, which is the same call the sign-in
+         screen makes. The browser cannot put business_confirmed in it. */
+  const wantsBusiness = b.bill_to === 'business';
+  const bizConfirmed = Boolean(asking && asking.business_confirmed === true);
+  const bizName = (asking && String(asking.business_name || '').trim()) || '';
+
+  if (wantsBusiness && !(bizConfirmed && bizName)) {
+    return json({
+      ok: false,
+      needs_business: true,
+      business_status: (asking && asking.business_status) || 'none',
+      error: !postedBy
+        ? 'To have the job and the invoice in a business name, sign in to the '
+          + 'HAF account that business belongs to. You can order in your own '
+          + 'name right now without signing in.'
+        : (asking && asking.business_status) === 'sent'
+          ? 'We have your business details and are still confirming them. Until '
+            + 'that is done the job and the invoice go in your own name — or '
+            + 'wait, and we will email you the moment it is confirmed.'
+          : 'Before a job and an invoice can go in a business name, we need the '
+            + 'business details confirmed — it is how we know the business is '
+            + 'yours. It is one short step in Upgrade, under Build your HAF '
+            + 'account, and a limited company is usually confirmed on the spot.'
+    }, 409);
+  }
+
+  /* What actually goes on the order and the paperwork: the confirmed name, or
+     nothing at all. Never the typed one. */
+  const companyOnOrder = wantsBusiness ? bizName : null;
+
   /* ── AND MAY THEY? ────────────────────────────────────────────────────────
      Deliberately AFTER the duplicate check above: a second press, a back button
      or a retried request must never cost a second slot. And deliberately BEFORE
@@ -249,7 +302,7 @@ async function place(request, env) {
     last_name: name.split(/\s+/).slice(1).join(' ') || '—',
     email,
     phone,
-    company: String(b.company || '').trim() || null,
+    company: companyOnOrder,
     status: 'joined'
   });
 
@@ -267,7 +320,7 @@ async function place(request, env) {
        in and has nothing to be held against. */
     haf_username: postedBy,
     customer_name: name, customer_email: email, customer_phone: phone,
-    company: String(b.company || '').trim() || null,
+    company: companyOnOrder,
     collect_postcode: collect, collect_address: String(b.collect_address || '').trim() || null,
     deliver_postcode: deliver, deliver_address: String(b.deliver_address || '').trim() || null,
     collect_on: b.collect_on || null,
