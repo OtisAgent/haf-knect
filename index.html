@@ -9109,15 +9109,21 @@ async function hafBizSend(){
   /* The account in this browser must move with the answer, or the ladder above
      and the order screen keep reading yesterday's account. The server sends the
      new state back with every answer for exactly this. */
-  hafBizApply(d.business, d.error);
+  hafBizApply(d.business, d.error, d.status);
 }
 
 /* Fold the server's answer onto the signed-in account and redraw everything
    that reads it, in one pass — the ladder, this panel and the routes. */
-function hafBizApply(biz, err){
+function hafBizApply(biz, err, told){
   if(!biz)return;
   const acc=window._hafAccView||_hafAcct||{};
-  acc.business_status      = biz.status||'none';
+  /* `told` is the answer the SERVER gave this person, and it wins over the
+     stored row where the two differ. They can differ for one honest reason: the
+     register said no, and our own write of that refusal did not land. Showing
+     the row then would put "we are confirming your business" on the screen
+     immediately under "we could not find that company number", which is worse
+     than either sentence on its own. */
+  acc.business_status      = told||biz.status||'none';
   acc.business_kind        = biz.kind||null;
   acc.business_name        = biz.name||null;
   acc.business_number      = biz.number||null;
@@ -9134,7 +9140,7 @@ async function hafBizRetry(){
   if(acc.business_kind!=='limited')return;
   const d=await _api('business/claim',{kind:'limited',name:acc.business_name||'',
                                        number:acc.business_number||''}).catch(()=>null);
-  if(d&&d.business)hafBizApply(d.business,d.error);
+  if(d&&d.business)hafBizApply(d.business,d.error,d.status);
 }
 
 function hafRenderBusiness(acc){
