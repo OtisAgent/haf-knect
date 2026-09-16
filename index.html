@@ -1383,6 +1383,31 @@ textarea.fi2{resize:vertical;min-height:70px}
 .sb-hub-err{font-size:.6rem;line-height:1.5;color:var(--haf-orange-ink);margin-top:.3rem}
 .sb-hub-yes{display:flex;align-items:center;gap:.3rem;font-size:.62rem;font-weight:800;color:var(--gn);margin-bottom:.35rem}
 .sb-hub-yes svg{width:11px;height:11px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── THE HAF HUB SCREEN ─────────────────────────────────────────────────────
+   The breakdown a member reads before they join anything. It borrows the
+   page's own card and title classes deliberately — this is a HAF screen, not
+   a landing page bolted on — and adds only what the tile grid needs. */
+.hub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.6rem;margin-top:.15rem}
+.hub-t{border:1px solid var(--ln);border-radius:var(--rx);background:var(--p);padding:.7rem .75rem}
+.hub-t-h{display:flex;align-items:center;gap:.45rem;font-size:.78rem;font-weight:800;color:var(--tx);margin-bottom:.25rem}
+.hub-t-h svg{width:15px;height:15px;flex:0 0 auto;fill:none;stroke:var(--or);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hub-t-s{font-size:.72rem;line-height:1.55;color:var(--mu)}
+.hub-step{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem 0}
+.hub-step-n{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--or-d);border:1px solid var(--or-g);color:var(--haf-orange-ink);font-size:.66rem;font-weight:800;display:flex;align-items:center;justify-content:center}
+.hub-step-t{font-size:.76rem;line-height:1.55;color:var(--mu)}
+.hub-step-t b{color:var(--tx)}
+.hub-join{max-width:520px}
+.hub-in{width:100%;box-sizing:border-box;font:inherit;font-size:.82rem;color:var(--tx);background:var(--p);border:1px solid var(--ln);border-radius:var(--rx);padding:.6rem .7rem;margin-bottom:.5rem}
+.hub-in:focus{outline:none;border-color:var(--or-g)}
+.hub-in::placeholder{color:var(--su)}
+.hub-go{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;width:100%;font:inherit;font-size:.82rem;font-weight:800;color:#fff;background:var(--or);border:0;border-radius:var(--rx);padding:.72rem .8rem;cursor:pointer}
+.hub-go:active{filter:brightness(.92)}
+.hub-go[disabled]{opacity:.6;cursor:default}
+.hub-note{font-size:.7rem;line-height:1.6;color:var(--su);margin-top:.5rem}
+.hub-err{font-size:.72rem;line-height:1.6;color:var(--haf-orange-ink);margin-top:.5rem}
+.hub-yes{display:flex;align-items:center;gap:.4rem;font-size:.85rem;font-weight:800;color:var(--gn);margin-bottom:.4rem}
+.hub-yes svg{width:14px;height:14px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .lj-wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:.9rem;align-items:start}
 .lj-mapwrap{position:relative;border:1.5px solid var(--ln);border-radius:var(--r);overflow:hidden}
 #lj-map{height:430px;width:100%;background:var(--p3, #e9e5dd)}
@@ -4406,6 +4431,71 @@ body.hv-blur-all .hv-tile:not(.hv-show) > :not(.hv-eye){
         .an-strip-t{font-weight:800;font-size:.86rem;line-height:1.35}
         .an-strip-m{font-size:.72rem;color:var(--mu);margin-top:.15rem}
       </style>
+      <!-- THE HAF HUB — the screen the sidebar card leads to. Every area named
+           below is a category that actually exists on the HUB Discord; if one
+           is ever closed or renamed, this copy is what has to change with it.
+           The join block is drawn by hafHubPanePaint, because what it says
+           depends on whether this member has already taken their pass. -->
+      <div class="tp" id="pane-hub">
+        <h1 class="pt">THE HAF HUB</h1>
+        <p class="ps">The network's own community, on Discord. Everyone HAF works with in one place &#8212; drivers, fleets, the businesses sending the work, and us. It is <strong>free with every HAF account</strong>, and your launch pass is what opens it.</p>
+
+        <div class="card">
+          <div class="ct">What it is</div>
+          <div class="hub-t-s">HAF KNECT and HAF PLNA are where the work happens. THE HAF HUB is where the people behind it talk &#8212; what is moving today, what we are building next, and what is worth knowing if you do this for a living. It runs on Discord, which is free to use and works on your phone as well as a laptop.</div>
+        </div>
+
+        <div class="card">
+          <div class="ct">What's inside</div>
+          <div class="hub-grid">
+            <div class="hub-t">
+              <div class="hub-t-h"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.1A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4A8.4 8.4 0 0 1 21 11.5z"/></svg>Chat and daily deliveries</div>
+              <div class="hub-t-s">The main room, and the place members put the day's work up as it happens.</div>
+            </div>
+            <div class="hub-t">
+              <div class="hub-t-h"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Announcements and roadmap</div>
+              <div class="hub-t-s">What has just changed on the network and what is coming, straight from the HAF team.</div>
+            </div>
+            <div class="hub-t">
+              <div class="hub-t-h"><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14"/><path d="M4 19h16"/><path d="M8 7h8M8 11h8"/></svg>Guides</div>
+              <div class="hub-t-s">How to get the most out of HAF KNECT, HAF PLNA and your account, written plainly.</div>
+            </div>
+            <div class="hub-t">
+              <div class="hub-t-h"><svg viewBox="0 0 24 24"><path d="M3 16V8l7-4 7 4v8l-7 4z"/><path d="M10 12l7-4M10 12v8M10 12L3 8"/></svg>HAF KNECT rooms</div>
+              <div class="hub-t-s">The network's own side: KNECT itself, freight forwarding, and HAF ID.</div>
+            </div>
+            <div class="hub-t">
+              <div class="hub-t-h"><svg viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M6 6L5 3H2"/></svg>The HAF Shop</div>
+              <div class="hub-t-s">Kit and member deals on the things you actually use in the van.</div>
+            </div>
+            <div class="hub-t">
+              <div class="hub-t-h"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/></svg>Business circle</div>
+              <div class="hub-t-s">Operators talking to operators &#8212; work, growth and the business side of it.</div>
+            </div>
+            <div class="hub-t">
+              <div class="hub-t-h"><svg viewBox="0 0 24 24"><path d="M20.8 5.6a5 5 0 0 0-7-.4l-1.8 1.7-1.8-1.7a5 5 0 1 0-6.8 7.3l8.6 8.2 8.6-8.2a5 5 0 0 0 .2-6.9z"/></svg>Health and fitness</div>
+              <div class="hub-t-s">The other side of long days: food, sport and getting out of the seat.</div>
+            </div>
+            <div class="hub-t">
+              <div class="hub-t-h"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>Ideas and feedback</div>
+              <div class="hub-t-s">Tell us what to build. KNECT ideas and HUB ideas each have their own board, and we read every one.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ct">How joining works</div>
+          <div class="hub-step"><div class="hub-step-n">1</div><div class="hub-step-t">Leave your email below. <b>We use it to keep you posted on the network</b>, nothing else.</div></div>
+          <div class="hub-step"><div class="hub-step-n">2</div><div class="hub-step-t">Press the button. It opens <b>our sign-up page on LaunchPass</b> in a new tab &#8212; that is the door onto the HUB.</div></div>
+          <div class="hub-step"><div class="hub-step-n">3</div><div class="hub-step-t">Sign up there and <b>Discord opens with you already in</b>. Free, and you can leave whenever you like.</div></div>
+        </div>
+
+        <div class="card hub-join" id="hub-join">
+          <div class="ct">Join the community</div>
+          <div class="hub-t-s">One moment&#8230;</div>
+        </div>
+      </div>
+
       <div class="tp" id="pane-forum">
         <h1 class="pt">HAF KNECT Community</h1>
         <!-- This line said "everyone can post, reply and vote" until 10 Sep. It
@@ -12247,6 +12337,7 @@ function switchTab(id){
   if(id==='pane-b-del')setTimeout(hafPostedPaint,40);
   if(id==='pane-fl-manage')setTimeout(flRenderOverview,40);
   if(id==='pane-membership')setTimeout(mbRender,40);
+  if(id==='pane-hub')setTimeout(()=>{try{hafHubPanePaint();}catch(e){}},40);
   if(id==='pane-myplan')setTimeout(()=>{if(window.mpLoad)mpLoad();},40);
   if(id==='pane-team')setTimeout(tmLoad,40);
   if(id==='pane-settings')setTimeout(setRender,40);
@@ -14570,19 +14661,24 @@ function hafHubShell(inner){
     'THE HAF HUB</div>'+inner;
 }
 
+/* The card is a door to the screen now, not the whole journey. Brent, 16 Sep:
+   nobody should be handed out to Discord before they have been told what they
+   are joining. So the email box and the join button moved onto pane-hub, and
+   what is left here is one line and one way in. `live` is kept in the note: an
+   account we cannot record against still gets to look, it just gets told the
+   plainer version. */
 function hafHubOffer(el,email,live){
   el.innerHTML=hafHubShell(
-    '<div class="sb-hub-say">Your launch pass to the network’s community on Discord — work talk, '+
+    '<div class="sb-hub-say">The network’s own community on Discord — work talk, '+
     'first look at what we build next, and member deals.</div>'+
-    '<input class="sb-hub-in" id="sb-hub-em" type="email" autocomplete="email" '+
-      'placeholder="Your email address" value="'+_esc(email||'')+'" '+
-      'onkeydown="if(event.key===\'Enter\'){event.preventDefault();hafHubGo();}">'+
-    '<button type="button" class="sb-hub-go" id="sb-hub-btn" onclick="hafHubGo()">'+
-      'Get my launch pass →</button>'+
+    '<button type="button" class="sb-hub-go" id="sb-hub-btn" onclick="hafHubOpen()">'+
+      'See what’s inside →</button>'+
     '<div class="sb-hub-note" id="sb-hub-note">'+
-      (live?'Free. We’ll use this address to keep you posted on the network.'
-           :'Opens the HUB sign-up page in a new tab.')+'</div>');
+      (live?'Free with your account.':'Opens THE HAF HUB.')+'</div>');
 }
+
+/* One way in, from the card and from anywhere else that ever wants it. */
+function hafHubOpen(){try{switchTab('pane-hub');}catch(e){}}
 
 function hafHubDone(el,email){
   el.innerHTML=hafHubShell(
@@ -14596,18 +14692,21 @@ function hafHubDone(el,email){
 
 /* The press. Record first, open second, and never let the recording stop the
    door — the member asked to join a community, not to wait on our database. */
+/* The press, now made on the HUB screen. Record first, open second, and never
+   let the recording stop the door — the member asked to join a community, not
+   to wait on our database. */
 function hafHubGo(){
-  const el=document.getElementById('sb-hub'); if(!el)return;
-  const box=document.getElementById('sb-hub-em');
-  const btn=document.getElementById('sb-hub-btn');
-  const note=document.getElementById('sb-hub-note');
+  const host=document.getElementById('hub-join'); if(!host)return;
+  const box=document.getElementById('hub-em');
+  const btn=document.getElementById('hub-btn');
+  const note=document.getElementById('hub-note');
   const email=box?String(box.value||'').trim():'';
   /* One check, and it is the one a person can act on. An address that is
      obviously not an address gets said so here rather than silently dropped by
      the database. Empty is allowed: somebody who will not give an address still
      gets to join. */
   if(email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
-    if(note){note.className='sb-hub-err';note.textContent='That address doesn’t look right — check it and try again.';}
+    if(note){note.className='hub-err';note.textContent='That address doesn’t look right — check it and try again.';}
     if(box)box.focus();
     return;
   }
@@ -14620,17 +14719,19 @@ function hafHubGo(){
 
   const cred=hafPlnaCred();
   const done=ok=>{
+    /* Both places that say "you're in" are now stale — the screen under the
+       button and the card in the sidebar behind it. */
     _hubAt=0;
-    if(ok)hafHubDone(el,email);
+    if(ok){hafHubJoined(host,email);try{hafHubPaint(true);}catch(e){}}
     else{
       /* We could not write the row. Say that, and say what is still true: the
          HUB page is open in the other tab and they can carry on. */
-      if(btn){btn.disabled=false;btn.textContent='Get my launch pass →';}
+      if(btn){btn.disabled=false;btn.textContent='Join the community →';}
       if(box)box.disabled=false;
-      const n=document.getElementById('sb-hub-note');
-      if(n){n.className='sb-hub-err';
-            n.textContent=tab?'The HUB is open in the other tab. We couldn’t save your address — try the button again in a moment.'
-                             :'We couldn’t open the HUB just now. Try again in a moment.';}
+      const n=document.getElementById('hub-note');
+      if(n){n.className='hub-err';
+            n.textContent=tab?'THE HAF HUB is open in the other tab. We couldn’t save your address — try the button again in a moment.'
+                             :'We couldn’t open THE HAF HUB just now. Try again in a moment.';}
     }
   };
   if(!cred){done(false);return;}
@@ -14640,6 +14741,63 @@ function hafHubGo(){
                          p_relay:cred.p_relay,p_email:email||null})})
     .then(r=>r.ok?r.json():null).catch(()=>null)
     .then(d=>done(!!(d&&d.ok===true)));
+}
+
+/* ── THE JOIN BLOCK ON THE SCREEN ───────────────────────────────────────────
+   Drawn on entry and after a press. It is the only part of the screen that
+   changes per member: everything above it is the same breakdown for everyone.
+
+   It draws the form FIRST and upgrades to "you're in" when the answer lands,
+   rather than opening on a spinner. If the network is slow or the status call
+   fails outright, a member still has a working button in front of them — the
+   worst case is somebody already in being offered the door a second time,
+   which costs them one press and costs us a duplicate row we ignore. */
+let _hubPaneSeq=0;
+
+function hafHubPanePaint(){
+  const host=document.getElementById('hub-join'); if(!host)return;
+  const cred=hafPlnaCred();
+  const email0=(host.getAttribute('data-em')||'');
+  hafHubJoinForm(host,email0);
+  if(!cred)return;
+  const seq=++_hubPaneSeq;
+  const forUser=(localStorage.getItem('knect-user')||'').toUpperCase();
+  fetch(PLNA_URL+'/rest/v1/rpc/haf_hub_pass_status',{method:'POST',
+    headers:{'apikey':PLNA_KEY,'Authorization':'Bearer '+PLNA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({p_username:cred.p_username,p_hash:cred.p_hash,p_relay:cred.p_relay})})
+    .then(r=>r.ok?r.json():null).catch(()=>null)
+    .then(d=>{
+      /* Same race guard as the sidebar card: a master flicking between
+         previewed accounts must never land one person's pass on another's
+         screen. */
+      if(seq!==_hubPaneSeq||(localStorage.getItem('knect-user')||'').toUpperCase()!==forUser)return;
+      if(!d||d.ok!==true)return;
+      host.setAttribute('data-em',d.email||'');
+      if(d.joined===true)hafHubJoined(host,d.email||'');
+      else if(d.email)hafHubJoinForm(host,d.email);
+    });
+}
+
+function hafHubJoinForm(host,email){
+  host.innerHTML='<div class="ct">Join the community</div>'+
+    '<input class="hub-in" id="hub-em" type="email" autocomplete="email" '+
+      'placeholder="Your email address" value="'+_esc(email||'')+'" '+
+      'onkeydown="if(event.key===\'Enter\'){event.preventDefault();hafHubGo();}">'+
+    '<button type="button" class="hub-go" id="hub-btn" onclick="hafHubGo()">'+
+      'Join the community →</button>'+
+    '<div class="hub-note" id="hub-note">Free. Opens our sign-up page in a new tab, '+
+      'and we’ll use your address to keep you posted on the network.</div>';
+}
+
+function hafHubJoined(host,email){
+  host.innerHTML='<div class="ct">Join the community</div>'+
+    '<div class="hub-yes">'+
+      '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>You’re in</div>'+
+    '<div class="hub-t-s" style="margin-bottom:.6rem">Your launch pass is open'+
+      (email?' under <b>'+_esc(email)+'</b>':'')+'. '+
+      'If Discord did not open, the button below takes you back to it.</div>'+
+    '<button type="button" class="hub-go" onclick="window.open(HAF_HUB_URL,\'_blank\',\'noopener\')">'+
+      'Open THE HAF HUB →</button>';
 }
 
 /* A driver leaves this tab open all day. Coming back to it is the moment the
