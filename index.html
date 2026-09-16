@@ -8119,14 +8119,32 @@ let _fqBill='personal';
 function fqBillOptions(){
   const box=document.getElementById('fq-bill');
   if(!box)return;
-  const acc=window._hafAccView||_hafAcct||null;
-  /* Not signed in: there is no business to put it in, and asking would be a
-     question with one answer. */
-  if(!acc||!acc.haf_username){box.hidden=true;box.innerHTML='';_fqBill='personal';return;}
+  /* WHO IS SIGNED IN is answered by the credential this browser holds, not by
+     any account object lying around. _apiCred() is the same thing the order
+     payload sends, so the question "will this order carry an account" is being
+     asked of the thing that actually answers it. Getting this from a derived
+     view is what broke the first time. */
+  const cred=(typeof _apiCred==='function'&&_apiCred())||null;
+  if(!cred||!cred.username){box.hidden=true;box.innerHTML='';_fqBill='personal';return;}
 
-  const ok   = acc.business_confirmed===true;
-  const name = String(acc.business_name||'').trim();
-  const sent = String(acc.business_status||'')==='sent';
+  const acc=window._hafAccView||_hafAcct||{};
+  fqBillPaint(box,acc.business_confirmed===true,
+              String(acc.business_name||'').trim(),
+              String(acc.business_status||'')==='sent');
+
+  /* Then ask the server, because this is a money question and the page may have
+     been open a while. Somebody can confirm their business in another tab, and
+     they should find the option OPEN when they get here, not stale. A failure
+     to reach us leaves the first paint exactly as it is — never opens it. */
+  _api('business/state',{}).then(function(d){
+    const b=d&&d.business; if(!b)return;
+    fqBillPaint(box,b.confirmed===true,String(b.name||'').trim(),b.status==='sent');
+  }).catch(function(){});
+}
+
+function fqBillPaint(box,ok,name,sent){
+  /* A choice that was open must not silently close under somebody mid-order. */
+  if(_fqBill==='business'&&!(ok&&name))_fqBill='personal';
   box.hidden=false;
 
   const row=(v,title,sub,on,dis)=>
@@ -8799,7 +8817,33 @@ function hafAccess(acct){
         company_verified:(acct&&acct.company_verified)})
     : {product:'HAF KNECT',full:'HAF KNECT',does:'Account',tags:[]};
   return {type:type,drives:drives,released:released,posts:true,name:String(nm||'').trim(),
-          label:lbl,account_name:lbl.full,product:lbl.product};
+          label:lbl,account_name:lbl.full,product:lbl.product,
+          /* ── THE BUSINESS, CARRIED THROUGH ─────────────────────────────────
+             16 Sep 2026, found by walking it rather than by reading it. This
+             function returns a DERIVED view, and it is what every screen is
+             handed — the sidebar, the Upgrade ladder, the order door. The eight
+             keys above were all of it. So the business fields the database now
+             sends arrived here and were dropped on the floor.
+
+             It passed a test anyway, which is the part worth remembering: a
+             missing business_status reads as 'none', and 'none' draws the
+             "confirm your business" form, which is exactly what an unconfirmed
+             account should see. The screen looked right for the wrong reason,
+             and a genuinely CONFIRMED account would have been asked to confirm
+             itself again on every single reload.
+
+             The username comes too. The order door has to know whether anybody
+             is signed in at all, and had been asking this object for a name it
+             never carried. */
+          haf_username:(acct&&acct.haf_username)||null,
+          business_status:(acct&&acct.business_status)||'none',
+          business_kind:(acct&&acct.business_kind)||null,
+          business_name:(acct&&acct.business_name)||null,
+          business_number:(acct&&acct.business_number)||null,
+          business_refused_note:(acct&&acct.business_refused_note)||null,
+          /* Never inferred, for the same reason `released` is never inferred: a
+             missing field must read as NO on a door that guards money. */
+          business_confirmed:!!(acct&&acct.business_confirmed===true)};
 }
 
 /* What a person DOES, kept for the sentences that are about driving. The name
